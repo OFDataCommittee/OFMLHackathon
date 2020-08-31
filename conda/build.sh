@@ -1,0 +1,30 @@
+#!/bin/bash
+
+EXTRA_CMAKE_ARGS=""
+if [[ `uname` == 'Darwin' ]];
+then
+    EXTRA_CMAKE_ARGS="-DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}"
+else
+    export CXXFLAGS="-pthread ${CXXFLAGS}"
+fi
+export EXTRA_CMAKE_ARGS
+
+export _CXX_FLAGS="${CXXFLAGS}"
+export _LDFLAGS="${CXX_LDFLAGS} -Wl,-rpath,${PREFIX}/lib -L${PREFIX}/lib"
+
+
+
+cmake  \
+    -DCMAKE_INSTALL_PREFIX=${PREFIX} \
+    -DCMAKE_PREFIX_PATH=${PREFIX} \
+    \
+    -DCMAKE_CXX_LINK_FLAGS="${_LDFLAGS}" \
+    -DCMAKE_EXE_LINKER_FLAGS="${_LDFLAGS}" \
+    -DCMAKE_CXX_FLAGS="${_CXX_FLAGS}" \
+    -DCMAKE_CXX_FLAGS_RELEASE="${_CXX_FLAGS_RELEASE}" \
+    -DCMAKE_CXX_FLAGS_DEBUG="${_CXX_FLAGS}" \
+    -DBUILD_DOCS=OFF\
+
+make -j${CPU_COUNT}
+
+make install
