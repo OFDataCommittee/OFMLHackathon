@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package SILCProtobuf;
+
+message RepeatedStringMeta {
+  string id = 1;
+  repeated string data = 2;
+}
+
+message RepeatedDoubleMeta {
+  string id = 1;
+  repeated double data = 2 [packed=true];;
+}
+
+message RepeatedFloatMeta {
+  string id = 1;
+  repeated float data = 2 [packed=true];;
+}
+
+message RepeatedSInt64Meta {
+  string id = 1;
+  repeated sint64 data = 2 [packed=true];;
+}
+
+message RepeatedUInt64Meta {
+  string id = 1;
+  repeated uint64 data = 2 [packed=true];;
+}
+
+message RepeatedSInt32Meta {
+  string id = 1;
+  repeated sint32 data = 2 [packed=true];;
+}
+
+message RepeatedUInt32Meta {
+  string id = 1;
+  repeated uint32 data = 2 [packed=true];
+}
+
+message MetaData {
+  repeated RepeatedStringMeta repeated_string_meta = 1;
+  repeated RepeatedDoubleMeta repeated_double_meta = 2;
+  repeated RepeatedFloatMeta repeated_float_meta = 3;
+  repeated RepeatedSInt64Meta repeated_sint64_meta = 4;
+  repeated RepeatedUInt64Meta repeated_uint64_meta = 5;
+  repeated RepeatedSInt32Meta repeated_sint32_meta= 6;
+  repeated RepeatedUInt32Meta repeated_uint32_meta = 7;
+}

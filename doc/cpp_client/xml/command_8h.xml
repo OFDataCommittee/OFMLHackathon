@@ -1,0 +1,161 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.18">
+  <compounddef id="command_8h" kind="file" language="C++">
+    <compoundname>command.h</compoundname>
+    <includes local="yes">stdlib.h</includes>
+    <includes local="no">string</includes>
+    <includes local="no">vector</includes>
+    <includes local="no">cstring</includes>
+    <includes local="no">queue</includes>
+    <includes local="no">forward_list</includes>
+    <includes local="no">iostream</includes>
+    <includes local="yes">command.tcc</includes>
+    <includedby refid="dataset_8h" local="yes">/Users/mellis/silc/include/dataset.h</includedby>
+    <includedby refid="client_8h" local="yes">/Users/mellis/silc/include/client.h</includedby>
+    <includedby refid="commandlist_8h" local="yes">/Users/mellis/silc/include/commandlist.h</includedby>
+    <incdepgraph>
+      <node id="6">
+        <label>queue</label>
+      </node>
+      <node id="2">
+        <label>stdlib.h</label>
+      </node>
+      <node id="9">
+        <label>command.tcc</label>
+      </node>
+      <node id="3">
+        <label>string</label>
+      </node>
+      <node id="1">
+        <label>/Users/mellis/silc/include/command.h</label>
+        <link refid="command_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+      </node>
+      <node id="4">
+        <label>vector</label>
+      </node>
+      <node id="8">
+        <label>iostream</label>
+      </node>
+      <node id="7">
+        <label>forward_list</label>
+      </node>
+      <node id="5">
+        <label>cstring</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="2">
+        <label>/Users/mellis/silc/include/dataset.h</label>
+        <link refid="dataset_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="5">
+        <label>/Users/mellis/silc/include/c_dataset.h</label>
+        <link refid="c__dataset_8h"/>
+      </node>
+      <node id="4">
+        <label>/Users/mellis/silc/include/c_client.h</label>
+        <link refid="c__client_8h"/>
+      </node>
+      <node id="3">
+        <label>/Users/mellis/silc/include/client.h</label>
+        <link refid="client_8h"/>
+        <childnode refid="4" relation="include">
+        </childnode>
+      </node>
+      <node id="6">
+        <label>/Users/mellis/silc/include/commandlist.h</label>
+        <link refid="commandlist_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>/Users/mellis/silc/include/command.h</label>
+        <link refid="command_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="classCommand" prot="public">Command</innerclass>
+    <briefdescription>
+<para>The <ref refid="classCommand" kindref="compound">Command</ref> class for constructing data transfer commands. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>SMARTSIM_COMMAND_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>SMARTSIM_COMMAND_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;stdlib.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;string&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;vector&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cstring&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;queue&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;forward_list&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;iostream&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCommand" kindref="compound">Command</ref>;</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight></codeline>
+<codeline lineno="16" refid="classCommand" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCommand" kindref="compound">Command</ref></highlight></codeline>
+<codeline lineno="17"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">private</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::vector&lt;std::string_view&gt;<sp/>_fields;</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::vector&lt;char*&gt;<sp/>_local_fields;</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/>std::vector&lt;std::string_view&gt;::iterator<sp/>iterator;</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/>std::vector&lt;std::string_view&gt;::const_iterator<sp/>const_iterator;</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight></codeline>
+<codeline lineno="29" refid="classCommand_1a18df2d81039392daeb0b78c346a70537" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="classCommand_1a18df2d81039392daeb0b78c346a70537" kindref="member">Command</ref>();</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight></codeline>
+<codeline lineno="32" refid="classCommand_1ab552bb3a07fdd1acbfd8ea76e69b2278" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="classCommand_1ab552bb3a07fdd1acbfd8ea76e69b2278" kindref="member">~Command</ref>();</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight></codeline>
+<codeline lineno="35" refid="classCommand_1a3f4dfd339444794e9a6d7e6b0913b57e" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classCommand_1a3f4dfd339444794e9a6d7e6b0913b57e" kindref="member">add_field</ref>(std::string<sp/>field);</highlight></codeline>
+<codeline lineno="37" refid="classCommand_1a76213f73e065d029cde79dfe8337e33f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classCommand_1a76213f73e065d029cde79dfe8337e33f" kindref="member">add_field</ref>(</highlight><highlight class="keywordtype">char</highlight><highlight class="normal">*<sp/>field);</highlight></codeline>
+<codeline lineno="39" refid="classCommand_1a49e9a3eb2272894632a8d4c48f3fede6" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classCommand_1a49e9a3eb2272894632a8d4c48f3fede6" kindref="member">add_field_ptr</ref>(</highlight><highlight class="keywordtype">char</highlight><highlight class="normal">*<sp/>field,<sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/>field_size);</highlight></codeline>
+<codeline lineno="41" refid="classCommand_1affd78aea2993533d21b0ce5e59e0b355" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classCommand_1affd78aea2993533d21b0ce5e59e0b355" kindref="member">add_field_ptr</ref>(std::string_view<sp/>field);</highlight></codeline>
+<codeline lineno="43" refid="classCommand_1aabff750e14a9e693aa6ec7ffa3943e91" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classCommand_1aabff750e14a9e693aa6ec7ffa3943e91" kindref="member">add_fields</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::vector&lt;std::string&gt;&amp;<sp/>fields);</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">template</highlight><highlight class="normal"><sp/>&lt;</highlight><highlight class="keyword">class</highlight><highlight class="normal"><sp/>T&gt;</highlight></codeline>
+<codeline lineno="46" refid="classCommand_1a72c222d9cd18a3b2def8d5889b8450d1" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classCommand_1a72c222d9cd18a3b2def8d5889b8450d1" kindref="member">add_fields</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::vector&lt;T&gt;&amp;<sp/>fields);</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"></highlight></codeline>
+<codeline lineno="49" refid="classCommand_1a0d430c5848d944d8b95c9c5816ef2ac1" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::string<sp/><ref refid="classCommand_1a0d430c5848d944d8b95c9c5816ef2ac1" kindref="member">first_field</ref>();</highlight></codeline>
+<codeline lineno="51" refid="classCommand_1a7dc78af0176e5340eac86868965e9de7" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::string<sp/><ref refid="classCommand_1a7dc78af0176e5340eac86868965e9de7" kindref="member">to_string</ref>();</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"></highlight></codeline>
+<codeline lineno="54" refid="classCommand_1a4b0cd3b232d742fc4a422dbd4dbdd23c" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>iterator<sp/><ref refid="classCommand_1a4b0cd3b232d742fc4a422dbd4dbdd23c" kindref="member">begin</ref>();</highlight></codeline>
+<codeline lineno="56" refid="classCommand_1a15976428e140e306e706b3f46f57381c" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>const_iterator<sp/><ref refid="classCommand_1a15976428e140e306e706b3f46f57381c" kindref="member">cbegin</ref>();</highlight></codeline>
+<codeline lineno="58" refid="classCommand_1aa81641405bdee809406ced0fdec7308e" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>iterator<sp/><ref refid="classCommand_1aa81641405bdee809406ced0fdec7308e" kindref="member">end</ref>();</highlight></codeline>
+<codeline lineno="60" refid="classCommand_1a97b3639912a62ed20d6869c73f20a2ef" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>const_iterator<sp/><ref refid="classCommand_1a97b3639912a62ed20d6869c73f20a2ef" kindref="member">cend</ref>();</highlight></codeline>
+<codeline lineno="61"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"></highlight></codeline>
+<codeline lineno="63"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;command.tcc&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="64"><highlight class="normal"></highlight></codeline>
+<codeline lineno="65"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/>//SMARTSIM_COMMAND_H</highlight></codeline>
+    </programlisting>
+    <location file="/Users/mellis/silc/include/command.h"/>
+  </compounddef>
+</doxygen>

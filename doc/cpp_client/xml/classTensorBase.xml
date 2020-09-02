@@ -1,0 +1,415 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.18">
+  <compounddef id="classTensorBase" kind="class" language="C++" prot="public" abstract="yes">
+    <compoundname>TensorBase</compoundname>
+    <derivedcompoundref refid="classTensor" prot="public" virt="non-virtual">Tensor&lt; T &gt;</derivedcompoundref>
+      <sectiondef kind="protected-attrib">
+      <memberdef kind="variable" id="classTensorBase_1a86239d1ed89d0b585b3711b5dc16cdcf" prot="protected" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string TensorBase::_name</definition>
+        <argsstring></argsstring>
+        <name>_name</name>
+        <briefdescription>
+<para><ref refid="classTensor" kindref="compound">Tensor</ref> name. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="108" column="21" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="108" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classTensorBase_1a13ce4bdeb769d135afecdc7cf81c0ccc" prot="protected" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string TensorBase::_type</definition>
+        <argsstring></argsstring>
+        <name>_type</name>
+        <briefdescription>
+<para><ref refid="classTensor" kindref="compound">Tensor</ref> type. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="111" column="21" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="111" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classTensorBase_1a4fe7f1ce098593a2093503322e68cfca" prot="protected" static="no" mutable="no">
+        <type>std::vector&lt; int &gt;</type>
+        <definition>std::vector&lt;int&gt; TensorBase::_dims</definition>
+        <argsstring></argsstring>
+        <name>_dims</name>
+        <briefdescription>
+<para><ref refid="classTensor" kindref="compound">Tensor</ref> dims. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="114" column="21" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="114" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classTensorBase_1a7f9101d5f81e1916fead19a649d9361f" prot="protected" static="no" mutable="no">
+        <type>void *</type>
+        <definition>void* TensorBase::_data</definition>
+        <argsstring></argsstring>
+        <name>_data</name>
+        <briefdescription>
+<para>Pointer to the data memory space. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="117" column="14" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="117" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classTensorBase_1ad31849c6a01547bd17b824cdaeeb0aa4" prot="protected" static="no" mutable="no">
+        <type>char *</type>
+        <definition>char* TensorBase::_data_buf</definition>
+        <argsstring></argsstring>
+        <name>_data_buf</name>
+        <briefdescription>
+<para>The data buffer. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="120" column="14" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="120" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classTensorBase_1ae0305960bb830007f1714ccc6c8fa08e" prot="protected" static="no" mutable="no">
+        <type>unsigned long long</type>
+        <definition>unsigned long long TensorBase::_buf_size</definition>
+        <argsstring></argsstring>
+        <name>_buf_size</name>
+        <briefdescription>
+<para>The length of the data buff in bytes. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="123" column="28" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="123" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classTensorBase_1a851fc0164d11d1f5b557f36822f0bed2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>TensorBase::TensorBase</definition>
+        <argsstring>(const std::string &amp;name, const std::string &amp;type, void *data, const std::vector&lt; int &gt; &amp;dims)</argsstring>
+        <name>TensorBase</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>name</declname>
+          <briefdescription><para>The name used to reference the tensor </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>type</declname>
+          <briefdescription><para>The data type of the tensor </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>data</declname>
+          <briefdescription><para>A c_ptr to the data of the tensor </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::vector&lt; int &gt; &amp;</type>
+          <declname>dims</declname>
+          <briefdescription><para>The dimensions of the data </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para><ref refid="classTensorBase" kindref="compound">TensorBase</ref> constructor using tensor data pointer. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="62" column="9"/>
+      </memberdef>
+      <memberdef kind="function" id="classTensorBase_1a4ff5c8f5ca1c1c7cdca7f5eeef0f96bc" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>TensorBase::TensorBase</definition>
+        <argsstring>(const std::string &amp;name, const std::string &amp;type, const std::vector&lt; int &gt; &amp;dims, const std::string_view &amp;data_buf)</argsstring>
+        <name>TensorBase</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>name</declname>
+          <briefdescription><para>The name used to reference the tensor </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>type</declname>
+          <briefdescription><para>The data type of the tensor </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::vector&lt; int &gt; &amp;</type>
+          <declname>dims</declname>
+          <briefdescription><para>The dimensions of the data </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string_view &amp;</type>
+          <declname>data_buf</declname>
+          <briefdescription><para>The data buffer </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para><ref refid="classTensorBase" kindref="compound">TensorBase</ref> constructor using data bufffer without tensor data pointer. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="69" column="9"/>
+      </memberdef>
+      <memberdef kind="function" id="classTensorBase_1a2863e3ec51eae563a4481015ca7ad8fd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>TensorBase::TensorBase</definition>
+        <argsstring>(const TensorBase &amp;tb)</argsstring>
+        <name>TensorBase</name>
+        <param>
+          <type>const <ref refid="classTensorBase" kindref="compound">TensorBase</ref> &amp;</type>
+          <declname>tb</declname>
+        </param>
+        <briefdescription>
+<para>Copy contrustor for Tensorbase. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="76" column="9"/>
+      </memberdef>
+      <memberdef kind="function" id="classTensorBase_1aa8f244c776c5bd5591b1b68ff5a862eb" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classTensorBase" kindref="compound">TensorBase</ref> &amp;</type>
+        <definition>TensorBase&amp; TensorBase::operator=</definition>
+        <argsstring>(const TensorBase &amp;tb)</argsstring>
+        <name>operator=</name>
+        <param>
+          <type>const <ref refid="classTensorBase" kindref="compound">TensorBase</ref> &amp;</type>
+          <declname>tb</declname>
+        </param>
+        <briefdescription>
+<para>Copy assignment operator for <ref refid="classTensorBase" kindref="compound">TensorBase</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="79" column="21"/>
+      </memberdef>
+      <memberdef kind="function" id="classTensorBase_1a5bde72607795d571d31cfe56b0b24814" prot="public" static="no" const="no" explicit="no" inline="no" virt="virtual">
+        <type></type>
+        <definition>virtual TensorBase::~TensorBase</definition>
+        <argsstring>()</argsstring>
+        <name>~TensorBase</name>
+        <briefdescription>
+<para><ref refid="classTensorBase" kindref="compound">TensorBase</ref> destructor. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="81" column="17"/>
+      </memberdef>
+      <memberdef kind="function" id="classTensorBase_1ad92833eaa24003cf7f128aea38fb9b08" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::string</type>
+        <definition>std::string TensorBase::get_tensor_name</definition>
+        <argsstring>()</argsstring>
+        <name>get_tensor_name</name>
+        <briefdescription>
+<para>Retrive the tensor name. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="84" column="21"/>
+      </memberdef>
+      <memberdef kind="function" id="classTensorBase_1a8afce1eb11ba39db0a101a69cab3ee4d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::string</type>
+        <definition>std::string TensorBase::get_tensor_type</definition>
+        <argsstring>()</argsstring>
+        <name>get_tensor_type</name>
+        <briefdescription>
+<para>Retreive the tensor type. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="87" column="21"/>
+      </memberdef>
+      <memberdef kind="function" id="classTensorBase_1a4cfa95487e081775c820678b4740a9f5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::vector&lt; int &gt;</type>
+        <definition>std::vector&lt;int&gt; TensorBase::get_tensor_dims</definition>
+        <argsstring>()</argsstring>
+        <name>get_tensor_dims</name>
+        <briefdescription>
+<para>Retrieve the tensor dims. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="90" column="21"/>
+      </memberdef>
+      <memberdef kind="function" id="classTensorBase_1afa93bf11b1aef571ddab18c62891d608" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::string_view</type>
+        <definition>std::string_view TensorBase::get_data_buf</definition>
+        <argsstring>()</argsstring>
+        <name>get_data_buf</name>
+        <briefdescription>
+<para>Get the tensor data as a buffer. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="93" column="26"/>
+      </memberdef>
+      <memberdef kind="function" id="classTensorBase_1aa1bb88089ea434e08b0dd08d4f399abf" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>void *</type>
+        <definition>virtual void* TensorBase::get_data</definition>
+        <argsstring>()=0</argsstring>
+        <name>get_data</name>
+        <reimplementedby refid="classTensor_1a0811ae5d60eb66e07fbbb053c1a6fef4">get_data</reimplementedby>
+        <briefdescription>
+<para>Get pointer to tensor memory space. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="96" column="22"/>
+      </memberdef>
+      <memberdef kind="function" id="classTensorBase_1aa118cb5e0260e4a46aa291db56f68cce" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>void</type>
+        <definition>virtual void TensorBase::fill_data_from_buf</definition>
+        <argsstring>(void *data, std::vector&lt; int &gt; dims, const std::string &amp;type)=0</argsstring>
+        <name>fill_data_from_buf</name>
+        <reimplementedby refid="classTensor_1aa16fe1bab7a46d46ec7a7f08ff045fb7">fill_data_from_buf</reimplementedby>
+        <param>
+          <type>void *</type>
+          <declname>data</declname>
+          <briefdescription><para>Pointer to the allocated memory space </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>std::vector&lt; int &gt;</type>
+          <declname>dims</declname>
+          <briefdescription><para>The dimensions of the memory space </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>type</declname>
+          <briefdescription><para>The datatype of the allocated memory space </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Fill a user provided memory space with values from tensor buffer. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="99" column="22"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="protected-func">
+      <memberdef kind="function" id="classTensorBase_1a87682414f7fdf0d8727af945cd3de6b6" prot="protected" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>void</type>
+        <definition>virtual void TensorBase::_generate_data_buf</definition>
+        <argsstring>()=0</argsstring>
+        <name>_generate_data_buf</name>
+        <reimplementedby refid="classTensor_1acf98c050c11d0efd368ea41c78ae7d6d">_generate_data_buf</reimplementedby>
+        <briefdescription>
+<para>Function to generate the data buffer from the data. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="126" column="22"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-func">
+      <memberdef kind="function" id="classTensorBase_1a6b37de6da082b995d36332afb1e64fe7" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void TensorBase::_check_constructor_input</definition>
+        <argsstring>(const std::string &amp;name, const std::string &amp;type, std::vector&lt; int &gt; dims)</argsstring>
+        <name>_check_constructor_input</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>name</declname>
+          <briefdescription><para>The name used to reference the tensor </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>type</declname>
+          <briefdescription><para>The data type of the tensor </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>std::vector&lt; int &gt;</type>
+          <declname>dims</declname>
+          <briefdescription><para>The dimensions of the data </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Function to copy tensor data into this tensor data. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Function to check for errors in constructor inputs </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="137" column="14"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="1">
+        <label>TensorBase</label>
+        <link refid="classTensorBase"/>
+      </node>
+      <node id="2">
+        <label>Tensor&lt; T &gt;</label>
+        <link refid="classTensor"/>
+        <childnode refid="1" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <location file="/Users/mellis/silc/include/tensorbase.h" line="58" column="1" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="58" bodyend="142"/>
+    <listofallmembers>
+      <member refid="classTensorBase_1ae0305960bb830007f1714ccc6c8fa08e" prot="protected" virt="non-virtual"><scope>TensorBase</scope><name>_buf_size</name></member>
+      <member refid="classTensorBase_1a6b37de6da082b995d36332afb1e64fe7" prot="private" virt="non-virtual"><scope>TensorBase</scope><name>_check_constructor_input</name></member>
+      <member refid="classTensorBase_1a7f9101d5f81e1916fead19a649d9361f" prot="protected" virt="non-virtual"><scope>TensorBase</scope><name>_data</name></member>
+      <member refid="classTensorBase_1ad31849c6a01547bd17b824cdaeeb0aa4" prot="protected" virt="non-virtual"><scope>TensorBase</scope><name>_data_buf</name></member>
+      <member refid="classTensorBase_1a4fe7f1ce098593a2093503322e68cfca" prot="protected" virt="non-virtual"><scope>TensorBase</scope><name>_dims</name></member>
+      <member refid="classTensorBase_1a87682414f7fdf0d8727af945cd3de6b6" prot="protected" virt="pure-virtual"><scope>TensorBase</scope><name>_generate_data_buf</name></member>
+      <member refid="classTensorBase_1a86239d1ed89d0b585b3711b5dc16cdcf" prot="protected" virt="non-virtual"><scope>TensorBase</scope><name>_name</name></member>
+      <member refid="classTensorBase_1a13ce4bdeb769d135afecdc7cf81c0ccc" prot="protected" virt="non-virtual"><scope>TensorBase</scope><name>_type</name></member>
+      <member refid="classTensorBase_1aa118cb5e0260e4a46aa291db56f68cce" prot="public" virt="pure-virtual"><scope>TensorBase</scope><name>fill_data_from_buf</name></member>
+      <member refid="classTensorBase_1aa1bb88089ea434e08b0dd08d4f399abf" prot="public" virt="pure-virtual"><scope>TensorBase</scope><name>get_data</name></member>
+      <member refid="classTensorBase_1afa93bf11b1aef571ddab18c62891d608" prot="public" virt="non-virtual"><scope>TensorBase</scope><name>get_data_buf</name></member>
+      <member refid="classTensorBase_1a4cfa95487e081775c820678b4740a9f5" prot="public" virt="non-virtual"><scope>TensorBase</scope><name>get_tensor_dims</name></member>
+      <member refid="classTensorBase_1ad92833eaa24003cf7f128aea38fb9b08" prot="public" virt="non-virtual"><scope>TensorBase</scope><name>get_tensor_name</name></member>
+      <member refid="classTensorBase_1a8afce1eb11ba39db0a101a69cab3ee4d" prot="public" virt="non-virtual"><scope>TensorBase</scope><name>get_tensor_type</name></member>
+      <member refid="classTensorBase_1aa8f244c776c5bd5591b1b68ff5a862eb" prot="public" virt="non-virtual"><scope>TensorBase</scope><name>operator=</name></member>
+      <member refid="classTensorBase_1a851fc0164d11d1f5b557f36822f0bed2" prot="public" virt="non-virtual"><scope>TensorBase</scope><name>TensorBase</name></member>
+      <member refid="classTensorBase_1a4ff5c8f5ca1c1c7cdca7f5eeef0f96bc" prot="public" virt="non-virtual"><scope>TensorBase</scope><name>TensorBase</name></member>
+      <member refid="classTensorBase_1a2863e3ec51eae563a4481015ca7ad8fd" prot="public" virt="non-virtual"><scope>TensorBase</scope><name>TensorBase</name></member>
+      <member refid="classTensorBase_1a5bde72607795d571d31cfe56b0b24814" prot="public" virt="virtual"><scope>TensorBase</scope><name>~TensorBase</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

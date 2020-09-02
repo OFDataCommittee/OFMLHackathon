@@ -34,12 +34,33 @@ T*** allocate_3D_array(int dim_1, int dim_2, int dim_3)
 }
 
 template <typename T>
+T**** allocate_4D_array(int dim_1, int dim_2,
+                        int dim_3, int dim_4)
+{
+  /* This function allocates a 4D array and returns
+  a pointer to that 4D array.  This is not coded
+  recursively to avoid propagating bugs.
+  */
+  T**** array = (T****)malloc(dim_1*sizeof(T***));
+  for(int i=0; i<dim_1; i++) {
+    array[i] = (T***)malloc(dim_2*sizeof(T**));
+    for(int j=0; j<dim_2; j++) {
+      array[i][j] = (T**)malloc(dim_3*sizeof(T*));
+      for(int k=0; k<dim_4; k++) {
+        array[i][j][k] = (T*)malloc(dim_4 * sizeof(T));
+      }
+    }
+  }
+  return array;
+}
+
+template <typename T>
 void free_1D_array(T* array)
 {
   /* This function frees memory associated with
      pointer.
   */
-  delete array;
+  free(array);
 }
 
 template <typename T>
@@ -49,8 +70,8 @@ void free_2D_array(T** array, int dim_1)
       allocated 2D array.
   */
   for(int i=0; i<dim_1; i++)
-    delete[] array[i];
-  delete[] array;
+       free(array[i]);
+  free(array);
 }
 
 template <typename T>
@@ -61,6 +82,16 @@ void free_3D_array(T*** array, int dim_1, int dim_2)
   */
   for(int i=0; i<dim_1; i++)
     free_2D_array(array[i], dim_2);
+  free(array);
+}
+
+template <typename T>
+void free_4D_array(T**** array, int dim_1,
+                   int dim_2, int dim_3)
+{
+  for(int i=0; i<dim_1; i++)
+    free_3D_array(array[i], dim_2, dim_3);
+  return;
 }
 
 template <typename T, typename U>
@@ -91,8 +122,8 @@ bool is_equal_2D_array(T** a, U** b, int dim_1, int dim_2)
 template <typename T, typename U>
 bool is_equal_3D_array(T*** a, U*** b, int dim_1, int dim_2, int dim_3)
 {
-  /* This funciton compares two 3D arrays to
-     check if they are indentical.
+  /* This function compares two 3D arrays to
+     check if they are identical.
   */
   for(int i=0; i<dim_1; i++)
     for(int j=0; j<dim_2; j++)
@@ -108,10 +139,11 @@ void set_1D_array_floating_point_values(T* a, int dim_1)
   /* This function fills a 1D array with random
      floating point values.
   */
-  std::default_random_engine generator;
+  std::default_random_engine generator(rand());
   std::uniform_real_distribution<T> distribution;
   for(int i=0; i<dim_1; i++)
-    a[i] = distribution(generator);
+    //a[i] = distribution(generator);
+    a[i] = 2.0*rand()/RAND_MAX - 1.0;
 }
 
 template <typename T>
@@ -122,10 +154,6 @@ void set_2D_array_floating_point_values(T** a, int dim_1, int dim_2)
   */
   for(int i = 0; i < dim_1; i++) {
     set_1D_array_floating_point_values<T>(a[i], dim_2);
-    T* offset_array = a[i];
-    for(int j = 0; j < dim_2; j++) {
-      offset_array[j] += i;
-    }
   }
 }
 
@@ -135,18 +163,20 @@ void set_3D_array_floating_point_values(T*** a, int dim_1, int dim_2, int dim_3)
   /* This function fills a 3D array with random floating
      point values.
   */
-  for(int i = 0; i < dim_3; i++)
+  for(int i = 0; i < dim_1; i++)
     set_2D_array_floating_point_values<T>(a[i], dim_2, dim_3);
 }
 
 template <typename T>
 void set_1D_array_integral_values(T* a, int dim_1)
 {
-  /* This funciton fills a 1D array with random
+  /* This function fills a 1D array with random
      integral values.
   */
-  std::default_random_engine generator;
-  std::uniform_int_distribution<T> distribution;
+  std::default_random_engine generator(rand());
+  T t_min = std::numeric_limits<T>::min();
+  T t_max = std::numeric_limits<T>::max();
+  std::uniform_int_distribution<T> distribution(t_min, t_max);
   for(int i=0; i<dim_1; i++)
     a[i] = distribution(generator);
 }
@@ -159,10 +189,6 @@ void set_2D_array_integral_values(T** a, int dim_1, int dim_2)
   */
   for(int i = 0; i < dim_1; i++) {
     set_1D_array_integral_values<T>(a[i], dim_2);
-    T* offset_array = a[i];
-    for(int j = 0; j < dim_2; j++) {
-      a[j] += i;
-    }
   }
 
 }

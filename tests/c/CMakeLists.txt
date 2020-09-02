@@ -4,7 +4,8 @@ set(CMAKE_BUILD_TYPE Release)
 
 cmake_minimum_required(VERSION 3.10)
 
-SET(CMAKE_CXX_STANDARD 11)
+SET(CMAKE_CXX_STANDARD 17)
+SET(C_STANDARD 11)
 
 #TODO put in output warnings
 # Determine where the hiredis library is based on if an environment variable
@@ -44,8 +45,8 @@ find_package(MPI)
 
 include_directories(SYSTEM
     ${MPI_INCLUDE_PATH}
-    ../../../clients/
-    ../../../utils/protobuf/
+    ../../include
+    ../../utils/protobuf
     /usr/local/include
     ${HIREDIS_INCLUDE_PATH}
     ${REDISPP_INCLUDE_PATH}
@@ -53,84 +54,27 @@ include_directories(SYSTEM
 )
 
 set(CLIENT_LIBRARIES ${REDISPP_LIB} ${HIREDIS_LIB} ${PROTOBUF_LIB})
-set(CLIENT_SRC ../../../clients/c_client.cc ../../../clients/client.cc ../../../utils/protobuf/smartsim_protobuf.pb.cc)
+set(CLIENT_SRC
+	../../../src/c/c_client.cpp
+	../../../src/c/c_dataset.cpp
+	../../../src/cpp/client.cpp
+	 ../../../src/cpp/dataset.cpp
+	 ../../../src/cpp/command.cpp
+	 ../../../src/cpp/commandlist.cpp
+	 ../../../src/cpp/metadata.cpp
+	 ../../../src/cpp/tensorbase.cpp
+	 ../../../src/cpp/tensorpack.cpp
+	 ../../../src/cpp/dbnode.cpp
+	 ../../../src/cpp/commandreply.cpp
+	 ../../utils/protobuf/silc.pb.cc)
 
-add_executable(client_test_scalar_put_get
-	client_test_scalar_put_get.c
+
+add_executable(client_test_put_get_1D
+	client_test_put_get_1D.c
 	${CLIENT_SRC}
 )
 
-target_link_libraries(client_test_scalar_put_get
-	MPI::MPI_C
-	${CLIENT_LIBRARIES}
-)
-
-add_executable(client_test_array_1d_put_get
-	client_test_array_1d_put_get.c
-	${CLIENT_SRC}
-)
-
-target_link_libraries(client_test_array_1d_put_get
-	MPI::MPI_C
-	${CLIENT_LIBRARIES}
-)
-
-add_executable(client_test_array_2d_put_get
-	client_test_array_2d_put_get.c
-	${CLIENT_SRC}
-)
-
-target_link_libraries(client_test_array_2d_put_get
-	MPI::MPI_C
-	${CLIENT_LIBRARIES}
-)
-
-add_executable(client_test_poll_key_and_check
-	client_test_poll_key_and_check_scalar.c
-	${CLIENT_SRC}
-)
-
-target_link_libraries(client_test_poll_key_and_check
-	MPI::MPI_C
-	${CLIENT_LIBRARIES}
-)
-
-add_executable(client_test_exact_key_scalar_put_get
-	client_test_exact_key_scalar_put_get.c
-	${CLIENT_SRC}
-)
-
-target_link_libraries(client_test_exact_key_scalar_put_get
-	MPI::MPI_C
-	${CLIENT_LIBRARIES}
-)
-
-add_executable(client_test_exact_key_array_1d_put_get
-	client_test_exact_key_array_1d_put_get.c
-	${CLIENT_SRC}
-)
-
-target_link_libraries(client_test_exact_key_array_1d_put_get
-	MPI::MPI_C
-	${CLIENT_LIBRARIES}
-)
-
-add_executable(client_test_exact_key_array_2d_put_get
-	client_test_exact_key_array_2d_put_get.c
-	${CLIENT_SRC}
-)
-
-target_link_libraries(client_test_exact_key_array_2d_put_get
-	MPI::MPI_C
-	${CLIENT_LIBRARIES}
-)
-
-add_executable(client_test_poll_exact_key_and_check
-	client_test_poll_key_and_check_scalar.c
-	${CLIENT_SRC}
-)
-
-target_link_libraries(client_test_poll_exact_key_and_check
+target_link_libraries(client_test_put_get_1D
 	MPI::MPI_C
 	${CLIENT_LIBRARIES}
 )

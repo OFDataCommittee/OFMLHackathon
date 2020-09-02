@@ -1,0 +1,502 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.18">
+  <compounddef id="tensorbase_8h" kind="file" language="C++">
+    <compoundname>tensorbase.h</compoundname>
+    <includes local="yes">stdlib.h</includes>
+    <includes local="no">vector</includes>
+    <includes local="no">unordered_set</includes>
+    <includes local="no">unordered_map</includes>
+    <includes local="no">string</includes>
+    <includes local="no">cstring</includes>
+    <includedby refid="tensor_8h" local="yes">/Users/mellis/silc/include/tensor.h</includedby>
+    <includedby refid="tensorpack_8h" local="yes">/Users/mellis/silc/include/tensorpack.h</includedby>
+    <includedby refid="client_8h" local="yes">/Users/mellis/silc/include/client.h</includedby>
+    <incdepgraph>
+      <node id="2">
+        <label>stdlib.h</label>
+      </node>
+      <node id="6">
+        <label>string</label>
+      </node>
+      <node id="1">
+        <label>/Users/mellis/silc/include/tensorbase.h</label>
+        <link refid="tensorbase_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+      </node>
+      <node id="4">
+        <label>unordered_set</label>
+      </node>
+      <node id="3">
+        <label>vector</label>
+      </node>
+      <node id="5">
+        <label>unordered_map</label>
+      </node>
+      <node id="7">
+        <label>cstring</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="3">
+        <label>/Users/mellis/silc/include/dataset.h</label>
+        <link refid="dataset_8h"/>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+      </node>
+      <node id="6">
+        <label>/Users/mellis/silc/include/c_dataset.h</label>
+        <link refid="c__dataset_8h"/>
+      </node>
+      <node id="5">
+        <label>/Users/mellis/silc/include/c_client.h</label>
+        <link refid="c__client_8h"/>
+      </node>
+      <node id="1">
+        <label>/Users/mellis/silc/include/tensorbase.h</label>
+        <link refid="tensorbase_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+      </node>
+      <node id="4">
+        <label>/Users/mellis/silc/include/client.h</label>
+        <link refid="client_8h"/>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="7">
+        <label>/Users/mellis/silc/include/tensorpack.h</label>
+        <link refid="tensorpack_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>/Users/mellis/silc/include/tensor.h</label>
+        <link refid="tensor_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="classTensorBase" prot="public">TensorBase</innerclass>
+      <sectiondef kind="var">
+      <memberdef kind="variable" id="tensorbase_8h_1a02c816f9c04c1fec1eb0975ebdcb620d" prot="public" static="yes" mutable="no">
+        <type>std::string</type>
+        <definition>std::string DATATYPE_TENSOR_STR_FLOAT</definition>
+        <argsstring></argsstring>
+        <name>DATATYPE_TENSOR_STR_FLOAT</name>
+        <initializer>= &quot;FLOAT&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="12" column="20" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="12" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="tensorbase_8h_1a9596f4ea05e33a1c787dc5eef2e38545" prot="public" static="yes" mutable="no">
+        <type>std::string</type>
+        <definition>std::string DATATYPE_TENSOR_STR_DOUBLE</definition>
+        <argsstring></argsstring>
+        <name>DATATYPE_TENSOR_STR_DOUBLE</name>
+        <initializer>= &quot;DOUBLE&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="13" column="20" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="13" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="tensorbase_8h_1a959aff842ef002fcc5132755bdf268b4" prot="public" static="yes" mutable="no">
+        <type>std::string</type>
+        <definition>std::string DATATYPE_TENSOR_STR_INT8</definition>
+        <argsstring></argsstring>
+        <name>DATATYPE_TENSOR_STR_INT8</name>
+        <initializer>= &quot;INT8&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="14" column="20" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="14" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="tensorbase_8h_1a3e231e2dfb8ddd87363f930b979790ec" prot="public" static="yes" mutable="no">
+        <type>std::string</type>
+        <definition>std::string DATATYPE_TENSOR_STR_INT16</definition>
+        <argsstring></argsstring>
+        <name>DATATYPE_TENSOR_STR_INT16</name>
+        <initializer>= &quot;INT16&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="15" column="20" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="15" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="tensorbase_8h_1aa3a48150028808655f0a8f8201e55558" prot="public" static="yes" mutable="no">
+        <type>std::string</type>
+        <definition>std::string DATATYPE_TENSOR_STR_INT32</definition>
+        <argsstring></argsstring>
+        <name>DATATYPE_TENSOR_STR_INT32</name>
+        <initializer>= &quot;INT32&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="16" column="20" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="16" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="tensorbase_8h_1a998e042d82be7aed80fb589a3b436975" prot="public" static="yes" mutable="no">
+        <type>std::string</type>
+        <definition>std::string DATATYPE_TENSOR_STR_INT64</definition>
+        <argsstring></argsstring>
+        <name>DATATYPE_TENSOR_STR_INT64</name>
+        <initializer>= &quot;INT64&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="17" column="20" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="17" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="tensorbase_8h_1a5b9d50a7cda86776d183e2926576b64d" prot="public" static="yes" mutable="no">
+        <type>std::string</type>
+        <definition>std::string DATATYPE_TENSOR_STR_UINT8</definition>
+        <argsstring></argsstring>
+        <name>DATATYPE_TENSOR_STR_UINT8</name>
+        <initializer>= &quot;UINT8&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="18" column="20" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="18" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="tensorbase_8h_1a95e6e8d858fc544eed2df635c4a0a8a7" prot="public" static="yes" mutable="no">
+        <type>std::string</type>
+        <definition>std::string DATATYPE_TENSOR_STR_UINT16</definition>
+        <argsstring></argsstring>
+        <name>DATATYPE_TENSOR_STR_UINT16</name>
+        <initializer>= &quot;UINT16&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="19" column="20" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="19" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="tensorbase_8h_1adacee0c5608935666ff2ace0eaeedf54" prot="public" static="yes" mutable="no">
+        <type>const std::unordered_set&lt; std::string &gt;</type>
+        <definition>const std::unordered_set&lt;std::string&gt; TENSOR_DATATYPES</definition>
+        <argsstring></argsstring>
+        <name>TENSOR_DATATYPES</name>
+        <initializer>{
+    DATATYPE_TENSOR_STR_FLOAT,
+    DATATYPE_TENSOR_STR_DOUBLE,
+    DATATYPE_TENSOR_STR_INT8,
+    DATATYPE_TENSOR_STR_INT16,
+    DATATYPE_TENSOR_STR_INT32,
+    DATATYPE_TENSOR_STR_INT64,
+    DATATYPE_TENSOR_STR_UINT8,
+    DATATYPE_TENSOR_STR_UINT16
+}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="21" column="33" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="21" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="tensorbase_8h_1abb1d41421f101145ffcde814e3c287ca" prot="public" static="yes" mutable="no">
+        <type>const int</type>
+        <definition>const int DOUBLE_TENSOR_TYPE</definition>
+        <argsstring></argsstring>
+        <name>DOUBLE_TENSOR_TYPE</name>
+        <initializer>= 1</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="34" column="18" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="34" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="tensorbase_8h_1a6cc8b56382611c9c3ebcb2441f8a5a89" prot="public" static="yes" mutable="no">
+        <type>const int</type>
+        <definition>const int FLOAT_TENSOR_TYPE</definition>
+        <argsstring></argsstring>
+        <name>FLOAT_TENSOR_TYPE</name>
+        <initializer>= 2</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="35" column="18" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="35" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="tensorbase_8h_1acdfb90375b0cb742105d11efe8f0bac9" prot="public" static="yes" mutable="no">
+        <type>const int</type>
+        <definition>const int INT64_TENSOR_TYPE</definition>
+        <argsstring></argsstring>
+        <name>INT64_TENSOR_TYPE</name>
+        <initializer>= 3</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="36" column="18" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="36" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="tensorbase_8h_1aa20454ef84f4a0cf075d4230614938d2" prot="public" static="yes" mutable="no">
+        <type>const int</type>
+        <definition>const int INT32_TENSOR_TYPE</definition>
+        <argsstring></argsstring>
+        <name>INT32_TENSOR_TYPE</name>
+        <initializer>= 4</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="37" column="18" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="37" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="tensorbase_8h_1a8eaeac0b1e04188fc113df45065b35a8" prot="public" static="yes" mutable="no">
+        <type>const int</type>
+        <definition>const int INT16_TENSOR_TYPE</definition>
+        <argsstring></argsstring>
+        <name>INT16_TENSOR_TYPE</name>
+        <initializer>= 5</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="38" column="18" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="38" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="tensorbase_8h_1a26257fb9046a1c9e87063cd8ccf8ad55" prot="public" static="yes" mutable="no">
+        <type>const int</type>
+        <definition>const int INT8_TENSOR_TYPE</definition>
+        <argsstring></argsstring>
+        <name>INT8_TENSOR_TYPE</name>
+        <initializer>= 6</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="39" column="18" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="39" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="tensorbase_8h_1ad3215c1d13f26837a885e36f1c7dfb08" prot="public" static="yes" mutable="no">
+        <type>const int</type>
+        <definition>const int UINT16_TENSOR_TYPE</definition>
+        <argsstring></argsstring>
+        <name>UINT16_TENSOR_TYPE</name>
+        <initializer>= 7</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="40" column="18" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="40" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="tensorbase_8h_1a9957843bc3793ae0d24a3478f78b1bd1" prot="public" static="yes" mutable="no">
+        <type>const int</type>
+        <definition>const int UINT8_TENSOR_TYPE</definition>
+        <argsstring></argsstring>
+        <name>UINT8_TENSOR_TYPE</name>
+        <initializer>= 8</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="41" column="18" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="41" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="tensorbase_8h_1a1a83401a60e14e4418486629d84850cc" prot="public" static="yes" mutable="no">
+        <type>const std::unordered_map&lt; std::string, int &gt;</type>
+        <definition>const std::unordered_map&lt;std::string, int&gt; TENSOR_TYPE_MAP</definition>
+        <argsstring></argsstring>
+        <name>TENSOR_TYPE_MAP</name>
+        <initializer>{
+        {DATATYPE_TENSOR_STR_DOUBLE, DOUBLE_TENSOR_TYPE},
+        {DATATYPE_TENSOR_STR_FLOAT, FLOAT_TENSOR_TYPE},
+        {DATATYPE_TENSOR_STR_INT64, INT64_TENSOR_TYPE},
+        {DATATYPE_TENSOR_STR_INT32, INT32_TENSOR_TYPE},
+        {DATATYPE_TENSOR_STR_INT16, INT16_TENSOR_TYPE},
+        {DATATYPE_TENSOR_STR_INT8, INT8_TENSOR_TYPE},
+        {DATATYPE_TENSOR_STR_UINT16, UINT16_TENSOR_TYPE},
+        {DATATYPE_TENSOR_STR_UINT8, UINT8_TENSOR_TYPE} }</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/tensorbase.h" line="44" column="5" bodyfile="/Users/mellis/silc/include/tensorbase.h" bodystart="44" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>The <ref refid="classTensorBase" kindref="compound">TensorBase</ref> class giving access to common <ref refid="classTensor" kindref="compound">Tensor</ref> methods and attributes. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>SMARTSIM_TENSORBASE_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>SMARTSIM_TENSORBASE_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;stdlib.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;vector&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;unordered_set&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;unordered_map&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;string&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cstring&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Numeric<sp/>data<sp/>type<sp/>of<sp/>tensor<sp/>elements<sp/>that<sp/>are<sp/>allowed</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>std::string<sp/>DATATYPE_TENSOR_STR_FLOAT<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;FLOAT&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>std::string<sp/>DATATYPE_TENSOR_STR_DOUBLE<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;DOUBLE&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>std::string<sp/>DATATYPE_TENSOR_STR_INT8<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;INT8&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>std::string<sp/>DATATYPE_TENSOR_STR_INT16<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;INT16&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>std::string<sp/>DATATYPE_TENSOR_STR_INT32<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;INT32&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>std::string<sp/>DATATYPE_TENSOR_STR_INT64<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;INT64&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>std::string<sp/>DATATYPE_TENSOR_STR_UINT8<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;UINT8&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>std::string<sp/>DATATYPE_TENSOR_STR_UINT16<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;UINT16&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::unordered_set&lt;std::string&gt;<sp/>TENSOR_DATATYPES<sp/>{</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/><sp/><sp/>DATATYPE_TENSOR_STR_FLOAT,</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/><sp/><sp/>DATATYPE_TENSOR_STR_DOUBLE,</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/><sp/><sp/>DATATYPE_TENSOR_STR_INT8,</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/><sp/><sp/>DATATYPE_TENSOR_STR_INT16,</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/><sp/><sp/>DATATYPE_TENSOR_STR_INT32,</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/><sp/><sp/>DATATYPE_TENSOR_STR_INT64,</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/>DATATYPE_TENSOR_STR_UINT8,</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/>DATATYPE_TENSOR_STR_UINT16</highlight></codeline>
+<codeline lineno="30"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight><highlight class="comment">//An<sp/>unordered_map<sp/>of<sp/>std::string<sp/>type<sp/>(key)<sp/>and<sp/>value</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight><highlight class="comment">//integer<sp/>that<sp/>to<sp/>cut<sp/>down<sp/>on<sp/>strcmp<sp/>throughout<sp/>the<sp/>code</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>DOUBLE_TENSOR_TYPE<sp/>=<sp/>1;</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>FLOAT_TENSOR_TYPE<sp/>=<sp/>2;</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>INT64_TENSOR_TYPE<sp/>=<sp/>3;</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>INT32_TENSOR_TYPE<sp/>=<sp/>4;</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>INT16_TENSOR_TYPE<sp/>=<sp/>5;</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>INT8_TENSOR_TYPE<sp/>=<sp/>6;</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>UINT16_TENSOR_TYPE<sp/>=<sp/>7;</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>UINT8_TENSOR_TYPE<sp/>=<sp/>8;</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::unordered_map&lt;std::string,<sp/>int&gt;</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/><sp/><sp/>TENSOR_TYPE_MAP{</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{DATATYPE_TENSOR_STR_DOUBLE,<sp/>DOUBLE_TENSOR_TYPE},</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{DATATYPE_TENSOR_STR_FLOAT,<sp/>FLOAT_TENSOR_TYPE},</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{DATATYPE_TENSOR_STR_INT64,<sp/>INT64_TENSOR_TYPE},</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{DATATYPE_TENSOR_STR_INT32,<sp/>INT32_TENSOR_TYPE},</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{DATATYPE_TENSOR_STR_INT16,<sp/>INT16_TENSOR_TYPE},</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{DATATYPE_TENSOR_STR_INT8,<sp/>INT8_TENSOR_TYPE},</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{DATATYPE_TENSOR_STR_UINT16,<sp/>UINT16_TENSOR_TYPE},</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{DATATYPE_TENSOR_STR_UINT8,<sp/>UINT8_TENSOR_TYPE}<sp/>};</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"></highlight></codeline>
+<codeline lineno="56"><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classTensorBase" kindref="compound">TensorBase</ref>;</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"></highlight></codeline>
+<codeline lineno="58" refid="classTensorBase" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classTensorBase" kindref="compound">TensorBase</ref>{</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"></highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="62" refid="classTensorBase_1a851fc0164d11d1f5b557f36822f0bed2" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="classTensorBase_1a851fc0164d11d1f5b557f36822f0bed2" kindref="member">TensorBase</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::string&amp;<sp/>name<sp/>,</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::string&amp;<sp/>type<sp/>,</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal">*<sp/>data<sp/>,</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::vector&lt;int&gt;&amp;<sp/>dims<sp/></highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>);</highlight></codeline>
+<codeline lineno="67"><highlight class="normal"></highlight></codeline>
+<codeline lineno="69" refid="classTensorBase_1a4ff5c8f5ca1c1c7cdca7f5eeef0f96bc" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="classTensorBase_1a4ff5c8f5ca1c1c7cdca7f5eeef0f96bc" kindref="member">TensorBase</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::string&amp;<sp/>name<sp/>,</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::string&amp;<sp/>type<sp/>,</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::vector&lt;int&gt;&amp;<sp/>dims<sp/>,</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::string_view&amp;<sp/>data_buf<sp/></highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>);</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"></highlight></codeline>
+<codeline lineno="76" refid="classTensorBase_1a2863e3ec51eae563a4481015ca7ad8fd" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="classTensorBase_1a2863e3ec51eae563a4481015ca7ad8fd" kindref="member">TensorBase</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="classTensorBase" kindref="compound">TensorBase</ref>&amp;<sp/>tb);</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"></highlight></codeline>
+<codeline lineno="79" refid="classTensorBase_1aa8f244c776c5bd5591b1b68ff5a862eb" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="classTensorBase" kindref="compound">TensorBase</ref>&amp;<sp/><sp/><ref refid="classTensorBase_1aa8f244c776c5bd5591b1b68ff5a862eb" kindref="member">operator=</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="classTensorBase" kindref="compound">TensorBase</ref>&amp;<sp/>tb);</highlight></codeline>
+<codeline lineno="81" refid="classTensorBase_1a5bde72607795d571d31cfe56b0b24814" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">virtual</highlight><highlight class="normal"><sp/><ref refid="classTensorBase_1a5bde72607795d571d31cfe56b0b24814" kindref="member">~TensorBase</ref>();</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"></highlight></codeline>
+<codeline lineno="84" refid="classTensorBase_1ad92833eaa24003cf7f128aea38fb9b08" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::string<sp/><ref refid="classTensorBase_1ad92833eaa24003cf7f128aea38fb9b08" kindref="member">get_tensor_name</ref>();</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"></highlight></codeline>
+<codeline lineno="87" refid="classTensorBase_1a8afce1eb11ba39db0a101a69cab3ee4d" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::string<sp/><ref refid="classTensorBase_1a8afce1eb11ba39db0a101a69cab3ee4d" kindref="member">get_tensor_type</ref>();</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"></highlight></codeline>
+<codeline lineno="90" refid="classTensorBase_1a4cfa95487e081775c820678b4740a9f5" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::vector&lt;int&gt;<sp/><ref refid="classTensorBase_1a4cfa95487e081775c820678b4740a9f5" kindref="member">get_tensor_dims</ref>();</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"></highlight></codeline>
+<codeline lineno="93" refid="classTensorBase_1afa93bf11b1aef571ddab18c62891d608" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::string_view<sp/><ref refid="classTensorBase_1afa93bf11b1aef571ddab18c62891d608" kindref="member">get_data_buf</ref>();</highlight></codeline>
+<codeline lineno="94"><highlight class="normal"></highlight></codeline>
+<codeline lineno="96" refid="classTensorBase_1aa1bb88089ea434e08b0dd08d4f399abf" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">virtual</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal">*<sp/><ref refid="classTensorBase_1aa1bb88089ea434e08b0dd08d4f399abf" kindref="member">get_data</ref>()<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"></highlight></codeline>
+<codeline lineno="99" refid="classTensorBase_1aa118cb5e0260e4a46aa291db56f68cce" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">virtual</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classTensorBase_1aa118cb5e0260e4a46aa291db56f68cce" kindref="member">fill_data_from_buf</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">*<sp/>data<sp/>,</highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::vector&lt;int&gt;<sp/>dims<sp/>,</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::string&amp;<sp/>type<sp/></highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="103"><highlight class="normal"></highlight></codeline>
+<codeline lineno="104"><highlight class="normal"></highlight></codeline>
+<codeline lineno="105"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">protected</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"></highlight></codeline>
+<codeline lineno="108" refid="classTensorBase_1a86239d1ed89d0b585b3711b5dc16cdcf" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::string<sp/><ref refid="classTensorBase_1a86239d1ed89d0b585b3711b5dc16cdcf" kindref="member">_name</ref>;</highlight></codeline>
+<codeline lineno="109"><highlight class="normal"></highlight></codeline>
+<codeline lineno="111" refid="classTensorBase_1a13ce4bdeb769d135afecdc7cf81c0ccc" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::string<sp/><ref refid="classTensorBase_1a13ce4bdeb769d135afecdc7cf81c0ccc" kindref="member">_type</ref>;</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"></highlight></codeline>
+<codeline lineno="114" refid="classTensorBase_1a4fe7f1ce098593a2093503322e68cfca" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::vector&lt;int&gt;<sp/><ref refid="classTensorBase_1a4fe7f1ce098593a2093503322e68cfca" kindref="member">_dims</ref>;</highlight></codeline>
+<codeline lineno="115"><highlight class="normal"></highlight></codeline>
+<codeline lineno="117" refid="classTensorBase_1a7f9101d5f81e1916fead19a649d9361f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal">*<sp/><ref refid="classTensorBase_1a7f9101d5f81e1916fead19a649d9361f" kindref="member">_data</ref>;</highlight></codeline>
+<codeline lineno="118"><highlight class="normal"></highlight></codeline>
+<codeline lineno="120" refid="classTensorBase_1ad31849c6a01547bd17b824cdaeeb0aa4" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal">*<sp/><ref refid="classTensorBase_1ad31849c6a01547bd17b824cdaeeb0aa4" kindref="member">_data_buf</ref>;</highlight></codeline>
+<codeline lineno="121"><highlight class="normal"></highlight></codeline>
+<codeline lineno="123" refid="classTensorBase_1ae0305960bb830007f1714ccc6c8fa08e" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/><ref refid="classTensorBase_1ae0305960bb830007f1714ccc6c8fa08e" kindref="member">_buf_size</ref>;</highlight></codeline>
+<codeline lineno="124"><highlight class="normal"></highlight></codeline>
+<codeline lineno="126" refid="classTensorBase_1a87682414f7fdf0d8727af945cd3de6b6" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">virtual</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classTensorBase_1a87682414f7fdf0d8727af945cd3de6b6" kindref="member">_generate_data_buf</ref>()<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="127"><highlight class="normal"></highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//TODO<sp/>implement<sp/>this</highlight></codeline>
+<codeline lineno="130"><highlight class="comment"></highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//virtual<sp/>void<sp/>_copy_data(void*<sp/>data<sp/>/*!&lt;<sp/>A<sp/>c_ptr<sp/>to<sp/>the<sp/>data<sp/>to<sp/>copy*/,</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="131"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::vector&lt;int&gt;<sp/>dims<sp/>/*!<sp/>The<sp/>dimensions<sp/>of<sp/>the<sp/>data<sp/>to<sp/>copy*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)<sp/>=<sp/>0;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="133"><highlight class="normal"></highlight></codeline>
+<codeline lineno="134"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">private</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="135"><highlight class="normal"></highlight></codeline>
+<codeline lineno="137"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>_check_constructor_input(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::string&amp;<sp/>name<sp/>,</highlight></codeline>
+<codeline lineno="138"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::string&amp;<sp/>type<sp/>,</highlight></codeline>
+<codeline lineno="139"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::vector&lt;int&gt;<sp/>dims<sp/></highlight></codeline>
+<codeline lineno="140"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>);</highlight></codeline>
+<codeline lineno="141"><highlight class="normal"></highlight></codeline>
+<codeline lineno="142"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="143"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/>//SMARTSIM_TENSORBASE_H</highlight></codeline>
+    </programlisting>
+    <location file="/Users/mellis/silc/include/tensorbase.h"/>
+  </compounddef>
+</doxygen>

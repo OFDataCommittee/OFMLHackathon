@@ -1,0 +1,1395 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.18">
+  <compounddef id="classSmartSimClient" kind="class" language="C++" prot="public">
+    <compoundname>SmartSimClient</compoundname>
+      <sectiondef kind="protected-attrib">
+      <memberdef kind="variable" id="classSmartSimClient_1ae7499b624db0e43d547ba4cae43830b2" prot="protected" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool SmartSimClient::_fortran_array</definition>
+        <argsstring></argsstring>
+        <name>_fortran_array</name>
+        <briefdescription>
+<para>Should this client treat tensors as fortran arrays. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="164" column="8" bodyfile="/Users/mellis/silc/include/client.h" bodystart="164" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classSmartSimClient_1a4380d970451c9c6120624c5521bc74c4" prot="protected" static="no" mutable="no">
+        <type>std::vector&lt; <ref refid="classDBNode" kindref="compound">DBNode</ref> &gt;</type>
+        <definition>std::vector&lt;DBNode&gt; SmartSimClient::_db_nodes</definition>
+        <argsstring></argsstring>
+        <name>_db_nodes</name>
+        <briefdescription>
+<para>Array of database nodes. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="167" column="15" bodyfile="/Users/mellis/silc/include/client.h" bodystart="167" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classSmartSimClient_1a9d178504bd6828b25a61c79165bad734" prot="protected" static="no" mutable="no">
+        <type>unsigned</type>
+        <definition>unsigned SmartSimClient::_n_db_nodes</definition>
+        <argsstring></argsstring>
+        <name>_n_db_nodes</name>
+        <briefdescription>
+<para>Number of database nodes. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="170" column="12" bodyfile="/Users/mellis/silc/include/client.h" bodystart="170" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classSmartSimClient_1a40c2c6a1bc1c9146cdf42238401d7919" prot="private" static="no" mutable="no">
+        <type>sw::redis::RedisCluster *</type>
+        <definition>sw::redis::RedisCluster* SmartSimClient::redis_cluster</definition>
+        <argsstring></argsstring>
+        <name>redis_cluster</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="270" column="27" bodyfile="/Users/mellis/silc/include/client.h" bodystart="270" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classSmartSimClient_1abb125d19f69031ef9efe3ebc61bbe5d4" prot="private" static="no" mutable="no">
+        <type>sw::redis::Redis *</type>
+        <definition>sw::redis::Redis* SmartSimClient::redis</definition>
+        <argsstring></argsstring>
+        <name>redis</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="271" column="20" bodyfile="/Users/mellis/silc/include/client.h" bodystart="271" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classSmartSimClient_1ac91d1d46e026dbe4115fd5685061632d" prot="private" static="no" mutable="no">
+        <type><ref refid="classMemoryList" kindref="compound">MemoryList</ref>&lt; char &gt;</type>
+        <definition>MemoryList&lt;char&gt; SmartSimClient::_model_queries</definition>
+        <argsstring></argsstring>
+        <name>_model_queries</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="273" column="14" bodyfile="/Users/mellis/silc/include/client.h" bodystart="273" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classSmartSimClient_1ab0d9deb3b256a60b2c52f389fdf0b870" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string SmartSimClient::_put_key_prefix</definition>
+        <argsstring></argsstring>
+        <name>_put_key_prefix</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="275" column="15" bodyfile="/Users/mellis/silc/include/client.h" bodystart="275" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classSmartSimClient_1a1d40be5d51a5adce0bd48286ccd5c894" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string SmartSimClient::_get_key_prefix</definition>
+        <argsstring></argsstring>
+        <name>_get_key_prefix</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="276" column="15" bodyfile="/Users/mellis/silc/include/client.h" bodystart="276" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classSmartSimClient_1a6de1083430b887eedea53fa6f49af54d" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; std::string &gt;</type>
+        <definition>std::vector&lt;std::string&gt; SmartSimClient::_get_key_prefixes</definition>
+        <argsstring></argsstring>
+        <name>_get_key_prefixes</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="277" column="15" bodyfile="/Users/mellis/silc/include/client.h" bodystart="277" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classSmartSimClient_1a96cc3de420c6746f0580e15eeacb4d39" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>SmartSimClient::SmartSimClient</definition>
+        <argsstring>(bool cluster, bool fortran_array=false)</argsstring>
+        <name>SmartSimClient</name>
+        <param>
+          <type>bool</type>
+          <declname>cluster</declname>
+          <briefdescription><para>Flag to indicate if a database cluster is being used </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>fortran_array</declname>
+          <defval>false</defval>
+          <briefdescription><para>Flag to indicate if fortran arrays are being used </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>SmartSim client constructor. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="33" column="3"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a37129c480c67f0b4aa3d4d2e50c93d51" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>SmartSimClient::~SmartSimClient</definition>
+        <argsstring>()</argsstring>
+        <name>~SmartSimClient</name>
+        <briefdescription>
+<para>SmartSim client destructor. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="39" column="3"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a0321346ff5c38015b2dc5fab4b5ef65c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::put_dataset</definition>
+        <argsstring>(DataSet &amp;dataset)</argsstring>
+        <name>put_dataset</name>
+        <param>
+          <type><ref refid="classDataSet" kindref="compound">DataSet</ref> &amp;</type>
+          <declname>dataset</declname>
+          <briefdescription><para>The <ref refid="classDataSet" kindref="compound">DataSet</ref> object to send </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Put a <ref refid="classDataSet" kindref="compound">DataSet</ref> object into the database. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="42" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a12b14e4c9ee07895a14f143f6a3b3a9e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classDataSet" kindref="compound">DataSet</ref></type>
+        <definition>DataSet SmartSimClient::get_dataset</definition>
+        <argsstring>(const std::string &amp;name)</argsstring>
+        <name>get_dataset</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>name</declname>
+          <briefdescription><para>The name of the dataset object to fetch </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Get a <ref refid="classDataSet" kindref="compound">DataSet</ref> object from the database. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="46" column="11"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1addde9185b0ad2f8010e28af66b839b35" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::rename_dataset</definition>
+        <argsstring>(const std::string &amp;name, const std::string &amp;new_name)</argsstring>
+        <name>rename_dataset</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>name</declname>
+          <briefdescription><para>The name of the dataset object </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>new_name</declname>
+          <briefdescription><para>The name of the dataset object </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Move a <ref refid="classDataSet" kindref="compound">DataSet</ref> to a new key. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="50" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a3e1a0b3c5b5604957ce0cf040bd0e293" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::copy_dataset</definition>
+        <argsstring>(const std::string &amp;src_name, const std::string &amp;dest_name)</argsstring>
+        <name>copy_dataset</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>src_name</declname>
+          <briefdescription><para>The source name of the dataset object </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>dest_name</declname>
+          <briefdescription><para>The destination name of the dataset object </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Copy a <ref refid="classDataSet" kindref="compound">DataSet</ref> to a new key. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="54" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a6e38673ee929d5f9a6b524b15a6d823c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::delete_dataset</definition>
+        <argsstring>(const std::string &amp;name)</argsstring>
+        <name>delete_dataset</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>name</declname>
+          <briefdescription><para>The name of the dataset object </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Delete a <ref refid="classDataSet" kindref="compound">DataSet</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="59" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a373f7057fda4438ccc30dd3d9c311ab9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::put_tensor</definition>
+        <argsstring>(const std::string &amp;key, const std::string &amp;type, void *data, const std::vector&lt; int &gt; &amp;dims)</argsstring>
+        <name>put_tensor</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+          <briefdescription><para>The key to use to place the tensor </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>type</declname>
+          <briefdescription><para>The data type of the tensor </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>data</declname>
+          <briefdescription><para>A c ptr to the beginning of the data </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::vector&lt; int &gt; &amp;</type>
+          <declname>dims</declname>
+          <briefdescription><para>The dimensions of the tensor </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Put a tensor into the database. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="63" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a0bd2b2c0ae6154ccb321ba2652114b89" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::get_tensor</definition>
+        <argsstring>(const std::string &amp;key, const std::string &amp;type, void *result, const std::vector&lt; int &gt; &amp;dims)</argsstring>
+        <name>get_tensor</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+          <briefdescription><para>The key to use to fetch the tensor </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>type</declname>
+          <briefdescription><para>The data type of the tensor </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>result</declname>
+          <briefdescription><para>A c ptr to the beginning of the result array to fill </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::vector&lt; int &gt; &amp;</type>
+          <declname>dims</declname>
+          <briefdescription><para>The dimensions of the provided array which should match the tensor </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Get a tensor from the database and fill the provided memory space (result) that is layed out as defined by dims. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="70" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a08ee7a91e1764c99f46b94f148274ad7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::rename_tensor</definition>
+        <argsstring>(const std::string &amp;key, const std::string &amp;new_key)</argsstring>
+        <name>rename_tensor</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+          <briefdescription><para>The original tensor key </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>new_key</declname>
+          <briefdescription><para>The new tensor key </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Move a tensor to a new key. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="77" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1ad711d6f17f457703b8278126e9fb0cfd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::delete_tensor</definition>
+        <argsstring>(const std::string &amp;key)</argsstring>
+        <name>delete_tensor</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+          <briefdescription><para>The key of tensor to delete </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Delete a tensor. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="81" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1ab42f6ace636d0c114fafbf31f0bb9b7b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::copy_tensor</definition>
+        <argsstring>(const std::string &amp;src_key, const std::string &amp;dest_key)</argsstring>
+        <name>copy_tensor</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>src_key</declname>
+          <briefdescription><para>The source tensor key </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>dest_key</declname>
+          <briefdescription><para>The destination tensor key </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>This method will copy a tensor to the destination key. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="84" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a18d742ede41d78609a0351ca1620fcb5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::set_model_from_file</definition>
+        <argsstring>(const std::string &amp;key, const std::string &amp;model_file, const std::string &amp;backend, const std::string &amp;device, int batch_size=0, int min_batch_size=0, const std::string &amp;tag=&quot;&quot;, const std::vector&lt; std::string &gt; &amp;inputs=std::vector&lt; std::string &gt;(), const std::vector&lt; std::string &gt; &amp;outputs=std::vector&lt; std::string &gt;())</argsstring>
+        <name>set_model_from_file</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+          <briefdescription><para>The key to use to place the model </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>model_file</declname>
+          <briefdescription><para>The file storing the model </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>backend</declname>
+          <briefdescription><para>The name of the backend (TF, TFLITE, TORCH, ONNX) </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>device</declname>
+          <briefdescription><para>The name of the device (CPU, GPU, GPU:0, GPU:1...) </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>batch_size</declname>
+          <defval>0</defval>
+          <briefdescription><para>The batch size for model execution </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>min_batch_size</declname>
+          <defval>0</defval>
+          <briefdescription><para>The minimum batch size for model execution </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>tag</declname>
+          <defval>&quot;&quot;</defval>
+          <briefdescription><para>A tag to attach to the model for information purposes </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::vector&lt; std::string &gt; &amp;</type>
+          <declname>inputs</declname>
+          <defval>std::vector&lt; std::string &gt;()</defval>
+          <briefdescription><para>One or more names of model input nodes (TF models) </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::vector&lt; std::string &gt; &amp;</type>
+          <declname>outputs</declname>
+          <defval>std::vector&lt; std::string &gt;()</defval>
+          <briefdescription><para>One or more names of model output nodes (TF models) </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Set a model (from file) in the database for future execution. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="89" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a7781cbd60a297a926f3fd53efee1c87c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::set_model</definition>
+        <argsstring>(const std::string &amp;key, const std::string_view &amp;model, const std::string &amp;backend, const std::string &amp;device, int batch_size=0, int min_batch_size=0, const std::string &amp;tag=&quot;&quot;, const std::vector&lt; std::string &gt; &amp;inputs=std::vector&lt; std::string &gt;(), const std::vector&lt; std::string &gt; &amp;outputs=std::vector&lt; std::string &gt;())</argsstring>
+        <name>set_model</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+          <briefdescription><para>The key to use to place the model </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string_view &amp;</type>
+          <declname>model</declname>
+          <briefdescription><para>The model as a continuous buffer string_view </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>backend</declname>
+          <briefdescription><para>The name of the backend (TF, TFLITE, TORCH, ONNX) </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>device</declname>
+          <briefdescription><para>The name of the device (CPU, GPU, GPU:0, GPU:1...) </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>batch_size</declname>
+          <defval>0</defval>
+          <briefdescription><para>The batch size for model execution </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>min_batch_size</declname>
+          <defval>0</defval>
+          <briefdescription><para>The minimum batch size for model execution </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>tag</declname>
+          <defval>&quot;&quot;</defval>
+          <briefdescription><para>A tag to attach to the model for information purposes </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::vector&lt; std::string &gt; &amp;</type>
+          <declname>inputs</declname>
+          <defval>std::vector&lt; std::string &gt;()</defval>
+          <briefdescription><para>One or more names of model input nodes (TF models) </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::vector&lt; std::string &gt; &amp;</type>
+          <declname>outputs</declname>
+          <defval>std::vector&lt; std::string &gt;()</defval>
+          <briefdescription><para>One or more names of model output nodes (TF models) </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Set a model (from buffer) in the database for future execution. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="103" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a753b75d6edba2243c0b3bb63e6b80599" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::string_view</type>
+        <definition>std::string_view SmartSimClient::get_model</definition>
+        <argsstring>(const std::string &amp;key)</argsstring>
+        <name>get_model</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+          <briefdescription><para>The key to use to retrieve the model </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Get a model in the database. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="117" column="20"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a9e4f423e5b92d8cb539ebf0d0c37ec84" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::set_script_from_file</definition>
+        <argsstring>(const std::string &amp;key, const std::string &amp;device, const std::string &amp;script_file)</argsstring>
+        <name>set_script_from_file</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+          <briefdescription><para>The key to use to place the script </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>device</declname>
+          <briefdescription><para>The device to run the script </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>script_file</declname>
+          <briefdescription><para>The name of the script file </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Set a script (from file) in the database for future execution. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="121" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1acd62c0cd1d612bc21f534faaf622f36e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::set_script</definition>
+        <argsstring>(const std::string &amp;key, const std::string &amp;device, const std::string_view &amp;script)</argsstring>
+        <name>set_script</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+          <briefdescription><para>The key to use to place the script </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>device</declname>
+          <briefdescription><para>The device to run the script </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string_view &amp;</type>
+          <declname>script</declname>
+          <briefdescription><para>The name of the script file </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Set a script (from buffer) in the database for future execution. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="127" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1aae09f10d894547aa8eb577dcdbaa920d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::string_view</type>
+        <definition>std::string_view SmartSimClient::get_script</definition>
+        <argsstring>(const std::string &amp;key)</argsstring>
+        <name>get_script</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+          <briefdescription><para>The key to use to retrieve the script </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Get the script from the database. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="133" column="20"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a854618332651175b95bca95a02f0a36f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::run_model</definition>
+        <argsstring>(const std::string &amp;key, std::vector&lt; std::string &gt; inputs, std::vector&lt; std::string &gt; outputs)</argsstring>
+        <name>run_model</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+          <briefdescription><para>The key of the model to run </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>std::vector&lt; std::string &gt;</type>
+          <declname>inputs</declname>
+          <briefdescription><para>The keys of the input tensors </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>std::vector&lt; std::string &gt;</type>
+          <declname>outputs</declname>
+          <briefdescription><para>The keys of the output tensors </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Run a model in the database. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="137" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1ab41454f65e0e55f298e8d1b9ecf28391" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::run_script</definition>
+        <argsstring>(const std::string &amp;key, const std::string &amp;function, std::vector&lt; std::string &gt; inputs, std::vector&lt; std::string &gt; outputs)</argsstring>
+        <name>run_script</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+          <briefdescription><para>The key of the script to run </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>function</declname>
+          <briefdescription><para>The name of the function to run in the script </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>std::vector&lt; std::string &gt;</type>
+          <declname>inputs</declname>
+          <briefdescription><para>The keys of the input tensors </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>std::vector&lt; std::string &gt;</type>
+          <declname>outputs</declname>
+          <briefdescription><para>The keys of the output tensors </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Run a script in the database. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="143" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a0cc30c713a5d880b940da5e289673324" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool SmartSimClient::key_exists</definition>
+        <argsstring>(const std::string &amp;key)</argsstring>
+        <name>key_exists</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+          <briefdescription><para>The key to check </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Check if a key exists. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="150" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a0da8bf934289415c05d98dd7f6c575db" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool SmartSimClient::poll_key</definition>
+        <argsstring>(const std::string &amp;key, int poll_frequency_ms, int num_tries)</argsstring>
+        <name>poll_key</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+          <briefdescription><para>The key to check </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>poll_frequency_ms</declname>
+          <briefdescription><para>The frequency of polls </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>num_tries</declname>
+          <briefdescription><para>The total number of tries </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Poll database until key exists or number of tries is exceeded. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="154" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1af0c6609a7757388e411bd32f4057a363" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::set_data_source</definition>
+        <argsstring>(std::string source_id)</argsstring>
+        <name>set_data_source</name>
+        <param>
+          <type>std::string</type>
+          <declname>source_id</declname>
+          <briefdescription><para>The prefix for retrieval commands </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Set the data source (i.e. key prefix for get functions) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="159" column="8"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="protected-func">
+      <memberdef kind="function" id="classSmartSimClient_1aaa7c0cccf53e7e9c3bb85882a153c189" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::string</type>
+        <definition>std::string SmartSimClient::_get_ssdb</definition>
+        <argsstring>()</argsstring>
+        <name>_get_ssdb</name>
+        <briefdescription>
+<para>Retrieve environment variable SSDB. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="173" column="15"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a8641632e59234842a4853a90d866e0d6" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::_populate_db_node_data</definition>
+        <argsstring>(bool cluster)</argsstring>
+        <name>_populate_db_node_data</name>
+        <param>
+          <type>bool</type>
+          <declname>cluster</declname>
+        </param>
+        <briefdescription>
+<para>Populate hash slot and db node information. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="176" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1ade20757f631b2e1359ded44bfe4f6f26" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::_parse_reply_for_slots</definition>
+        <argsstring>(CommandReply &amp;reply)</argsstring>
+        <name>_parse_reply_for_slots</name>
+        <param>
+          <type><ref refid="classCommandReply" kindref="compound">CommandReply</ref> &amp;</type>
+          <declname>reply</declname>
+        </param>
+        <briefdescription>
+<para>Parse the <ref refid="classCommandReply" kindref="compound">CommandReply</ref> for cluster slot information. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="179" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a2f1bad2f4ead19765ecaeb894285d1ac" prot="protected" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::_set_model</definition>
+        <argsstring>(const std::string &amp;key, std::string_view model, const std::string &amp;backend, const std::string &amp;device, int batch_size=0, int min_batch_size=0, const std::string &amp;tag=&quot;&quot;, const std::vector&lt; std::string &gt; &amp;inputs=std::vector&lt; std::string &gt;(), const std::vector&lt; std::string &gt; &amp;outputs=std::vector&lt; std::string &gt;())</argsstring>
+        <name>_set_model</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+          <briefdescription><para>The key to use to place the mdoel </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>std::string_view</type>
+          <declname>model</declname>
+          <briefdescription><para>The model content </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>backend</declname>
+          <briefdescription><para>The name of the backend (TF, TFLITE, TORCH, ONNX) </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>device</declname>
+          <briefdescription><para>The name of the device (CPU, GPU, GPU:0, GPU:1...) </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>batch_size</declname>
+          <defval>0</defval>
+          <briefdescription><para>The batch size for model execution </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>min_batch_size</declname>
+          <defval>0</defval>
+          <briefdescription><para>The minimum batch size for model execution </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>tag</declname>
+          <defval>&quot;&quot;</defval>
+          <briefdescription><para>A tag to attach to the model for information purposes </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::vector&lt; std::string &gt; &amp;</type>
+          <declname>inputs</declname>
+          <defval>std::vector&lt; std::string &gt;()</defval>
+          <briefdescription><para>One or more names of model input nodes (TF models) </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::vector&lt; std::string &gt; &amp;</type>
+          <declname>outputs</declname>
+          <defval>std::vector&lt; std::string &gt;()</defval>
+          <briefdescription><para>One or more names of model output nodes (TF models) </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="182" column="15"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a04543f430efbad767651d9a80dc25c30" prot="protected" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::_set_script</definition>
+        <argsstring>(const std::string &amp;key, const std::string &amp;device, std::string_view script)</argsstring>
+        <name>_set_script</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+          <briefdescription><para>The key to use to place the script </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>device</declname>
+          <briefdescription><para>The device to run the script </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>std::string_view</type>
+          <declname>script</declname>
+          <briefdescription><para>The script content </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="196" column="15"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a973e8a051aeef3d38b08987a0104ca31" prot="protected" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::_copy_key</definition>
+        <argsstring>(const std::string &amp;src_key, const std::string &amp;dest_key)</argsstring>
+        <name>_copy_key</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>src_key</declname>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>dest_key</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="202" column="15"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1aa3f089b9320e17098bdf285e10820927" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classCommandReply" kindref="compound">CommandReply</ref></type>
+        <definition>CommandReply SmartSimClient::_execute_command</definition>
+        <argsstring>(Command &amp;cmd, std::string prefix=&quot;&quot;)</argsstring>
+        <name>_execute_command</name>
+        <param>
+          <type><ref refid="classCommand" kindref="compound">Command</ref> &amp;</type>
+          <declname>cmd</declname>
+          <briefdescription><para>The command to execute </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>prefix</declname>
+          <defval>&quot;&quot;</defval>
+          <briefdescription><para>Prefix to specifically address cluster node </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Execute a database command. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="206" column="16"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a2075a0696e2584f13dbacfd4dad03c45" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::_execute_commands</definition>
+        <argsstring>(CommandList &amp;cmds, std::string prefix=&quot;&quot;)</argsstring>
+        <name>_execute_commands</name>
+        <param>
+          <type><ref refid="classCommandList" kindref="compound">CommandList</ref> &amp;</type>
+          <declname>cmds</declname>
+          <briefdescription><para>The list of commands to execute </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>prefix</declname>
+          <defval>&quot;&quot;</defval>
+          <briefdescription><para>The option server to process commands </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="210" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a31bca2fcc6dc1fa0e883f392341669c1" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::vector&lt; int &gt;</type>
+        <definition>std::vector&lt;int&gt; SmartSimClient::_get_tensor_dims</definition>
+        <argsstring>(CommandReply &amp;reply)</argsstring>
+        <name>_get_tensor_dims</name>
+        <param>
+          <type><ref refid="classCommandReply" kindref="compound">CommandReply</ref> &amp;</type>
+          <declname>reply</declname>
+          <briefdescription><para>The database reply </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Parse tensor dimensions from a database reply. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="215" column="15"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1afa36a42bf263ddbb928f84f206305450" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::string_view</type>
+        <definition>std::string_view SmartSimClient::_get_tensor_data_blob</definition>
+        <argsstring>(CommandReply &amp;reply)</argsstring>
+        <name>_get_tensor_data_blob</name>
+        <param>
+          <type><ref refid="classCommandReply" kindref="compound">CommandReply</ref> &amp;</type>
+          <declname>reply</declname>
+          <briefdescription><para>The database reply </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Retrieve a string_view of data buffer string from the database reply. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="219" column="20"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a898a7ce0cc853afe2b95a71970bf4601" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::string</type>
+        <definition>std::string SmartSimClient::_get_tensor_data_type</definition>
+        <argsstring>(CommandReply &amp;reply)</argsstring>
+        <name>_get_tensor_data_type</name>
+        <param>
+          <type><ref refid="classCommandReply" kindref="compound">CommandReply</ref> &amp;</type>
+          <declname>reply</declname>
+          <briefdescription><para>The database reply </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Get tensor data type from the database reply. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="223" column="15"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a8711dd51d9e7e52c3dbb5f1d850c7598" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>char *</type>
+        <definition>char* SmartSimClient::_get_crc16_prefix</definition>
+        <argsstring>(uint64_t hash_slot)</argsstring>
+        <name>_get_crc16_prefix</name>
+        <param>
+          <type>uint64_t</type>
+          <declname>hash_slot</declname>
+          <briefdescription><para>The hash slot </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Get a prefix for a model or script based on the hash slot. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="227" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a90213959387fd972a586067259a62f63" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint64_t</type>
+        <definition>uint64_t SmartSimClient::_crc16_inverse</definition>
+        <argsstring>(uint64_t remainder)</argsstring>
+        <name>_crc16_inverse</name>
+        <param>
+          <type>uint64_t</type>
+          <declname>remainder</declname>
+          <briefdescription><para>The remainder of the CRC16 calculation </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Perform an inverse CRC16 calculation. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="231" column="12"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a23a8a685520ba875881b3e267a7285b4" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classDBNode" kindref="compound">DBNode</ref> *</type>
+        <definition>DBNode* SmartSimClient::_get_model_script_db</definition>
+        <argsstring>(const std::string &amp;name, std::vector&lt; std::string &gt; &amp;inputs, std::vector&lt; std::string &gt; &amp;outputs)</argsstring>
+        <name>_get_model_script_db</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>name</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; std::string &gt; &amp;</type>
+          <declname>inputs</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; std::string &gt; &amp;</type>
+          <declname>outputs</declname>
+        </param>
+        <briefdescription>
+<para>Retrieve the optimum model prefix for the set of inputs. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="235" column="10"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a94ccff811a616b77cdd4765a39a00f90" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool SmartSimClient::_has_hash_tag</definition>
+        <argsstring>(const std::string &amp;key)</argsstring>
+        <name>_has_hash_tag</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+        </param>
+        <briefdescription>
+<para>Determine if the key has a hash tag (&quot;{&quot; and &quot;}&quot;) in it. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="241" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a4423df5d1509a17de2c35b605adf2729" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t SmartSimClient::_get_hash_slot</definition>
+        <argsstring>(const std::string &amp;key)</argsstring>
+        <name>_get_hash_slot</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+        </param>
+        <briefdescription>
+<para>Get the hash slot of a key. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="244" column="12"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1aa8b8105c0aaf7510be859c7bff7fa4d1" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::string</type>
+        <definition>std::string SmartSimClient::_get_hash_tag</definition>
+        <argsstring>(const std::string &amp;key)</argsstring>
+        <name>_get_hash_tag</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+        </param>
+        <briefdescription>
+<para>Return the hash key set by the hash tag. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="247" column="15"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1af546adf5c25999e4b01fde0839858178" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t SmartSimClient::_get_dbnode_index</definition>
+        <argsstring>(uint16_t hash_slot, unsigned lhs, unsigned rhs)</argsstring>
+        <name>_get_dbnode_index</name>
+        <param>
+          <type>uint16_t</type>
+          <declname>hash_slot</declname>
+        </param>
+        <param>
+          <type>unsigned</type>
+          <declname>lhs</declname>
+        </param>
+        <param>
+          <type>unsigned</type>
+          <declname>rhs</declname>
+        </param>
+        <briefdescription>
+<para>Get <ref refid="classDBNode" kindref="compound">DBNode</ref> (by index) that is responsible for the hash slot. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="250" column="12"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a6a7a34da9b0c96a5e1dc74d51a9298ae" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::_set_prefixes_from_env</definition>
+        <argsstring>()</argsstring>
+        <name>_set_prefixes_from_env</name>
+        <briefdescription>
+<para>Set the prefixes for put and get for C++ client. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="255" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a99463ce30f5a2d7dca91aa7683a38dbc" prot="protected" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>std::string</type>
+        <definition>std::string SmartSimClient::_put_prefix</definition>
+        <argsstring>()</argsstring>
+        <name>_put_prefix</name>
+        <briefdescription>
+<para>Return the put prefix. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="258" column="22"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1a9200b35d7d46128f006d159ba9821620" prot="protected" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>std::string</type>
+        <definition>std::string SmartSimClient::_get_prefix</definition>
+        <argsstring>()</argsstring>
+        <name>_get_prefix</name>
+        <briefdescription>
+<para>Return the get prefix. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="261" column="22"/>
+      </memberdef>
+      <memberdef kind="function" id="classSmartSimClient_1ada75740a3b51e13c9b0d4a5fedd258ee" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SmartSimClient::__run_model_dagrun</definition>
+        <argsstring>(const std::string &amp;key, std::vector&lt; std::string &gt; inputs, std::vector&lt; std::string &gt; outputs)</argsstring>
+        <name>__run_model_dagrun</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+          <briefdescription><para>The key of the model to run </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>std::vector&lt; std::string &gt;</type>
+          <declname>inputs</declname>
+          <briefdescription><para>The keys of the input tensors </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>std::vector&lt; std::string &gt;</type>
+          <declname>outputs</declname>
+          <briefdescription><para>The keys of the output tensors </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Run a model in the database that uses dagrun instead of modelrun. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/client.h" line="264" column="8"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/Users/mellis/silc/include/client.h" line="29" column="1" bodyfile="/Users/mellis/silc/include/client.h" bodystart="30" bodyend="278"/>
+    <listofallmembers>
+      <member refid="classSmartSimClient_1ada75740a3b51e13c9b0d4a5fedd258ee" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>__run_model_dagrun</name></member>
+      <member refid="classSmartSimClient_1a973e8a051aeef3d38b08987a0104ca31" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_copy_key</name></member>
+      <member refid="classSmartSimClient_1a90213959387fd972a586067259a62f63" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_crc16_inverse</name></member>
+      <member refid="classSmartSimClient_1a4380d970451c9c6120624c5521bc74c4" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_db_nodes</name></member>
+      <member refid="classSmartSimClient_1aa3f089b9320e17098bdf285e10820927" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_execute_command</name></member>
+      <member refid="classSmartSimClient_1a2075a0696e2584f13dbacfd4dad03c45" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_execute_commands</name></member>
+      <member refid="classSmartSimClient_1ae7499b624db0e43d547ba4cae43830b2" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_fortran_array</name></member>
+      <member refid="classSmartSimClient_1a8711dd51d9e7e52c3dbb5f1d850c7598" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_get_crc16_prefix</name></member>
+      <member refid="classSmartSimClient_1af546adf5c25999e4b01fde0839858178" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_get_dbnode_index</name></member>
+      <member refid="classSmartSimClient_1a4423df5d1509a17de2c35b605adf2729" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_get_hash_slot</name></member>
+      <member refid="classSmartSimClient_1aa8b8105c0aaf7510be859c7bff7fa4d1" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_get_hash_tag</name></member>
+      <member refid="classSmartSimClient_1a1d40be5d51a5adce0bd48286ccd5c894" prot="private" virt="non-virtual"><scope>SmartSimClient</scope><name>_get_key_prefix</name></member>
+      <member refid="classSmartSimClient_1a6de1083430b887eedea53fa6f49af54d" prot="private" virt="non-virtual"><scope>SmartSimClient</scope><name>_get_key_prefixes</name></member>
+      <member refid="classSmartSimClient_1a23a8a685520ba875881b3e267a7285b4" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_get_model_script_db</name></member>
+      <member refid="classSmartSimClient_1a9200b35d7d46128f006d159ba9821620" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_get_prefix</name></member>
+      <member refid="classSmartSimClient_1aaa7c0cccf53e7e9c3bb85882a153c189" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_get_ssdb</name></member>
+      <member refid="classSmartSimClient_1afa36a42bf263ddbb928f84f206305450" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_get_tensor_data_blob</name></member>
+      <member refid="classSmartSimClient_1a898a7ce0cc853afe2b95a71970bf4601" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_get_tensor_data_type</name></member>
+      <member refid="classSmartSimClient_1a31bca2fcc6dc1fa0e883f392341669c1" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_get_tensor_dims</name></member>
+      <member refid="classSmartSimClient_1a94ccff811a616b77cdd4765a39a00f90" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_has_hash_tag</name></member>
+      <member refid="classSmartSimClient_1ac91d1d46e026dbe4115fd5685061632d" prot="private" virt="non-virtual"><scope>SmartSimClient</scope><name>_model_queries</name></member>
+      <member refid="classSmartSimClient_1a9d178504bd6828b25a61c79165bad734" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_n_db_nodes</name></member>
+      <member refid="classSmartSimClient_1ade20757f631b2e1359ded44bfe4f6f26" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_parse_reply_for_slots</name></member>
+      <member refid="classSmartSimClient_1a8641632e59234842a4853a90d866e0d6" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_populate_db_node_data</name></member>
+      <member refid="classSmartSimClient_1ab0d9deb3b256a60b2c52f389fdf0b870" prot="private" virt="non-virtual"><scope>SmartSimClient</scope><name>_put_key_prefix</name></member>
+      <member refid="classSmartSimClient_1a99463ce30f5a2d7dca91aa7683a38dbc" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_put_prefix</name></member>
+      <member refid="classSmartSimClient_1a2f1bad2f4ead19765ecaeb894285d1ac" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_set_model</name></member>
+      <member refid="classSmartSimClient_1a6a7a34da9b0c96a5e1dc74d51a9298ae" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_set_prefixes_from_env</name></member>
+      <member refid="classSmartSimClient_1a04543f430efbad767651d9a80dc25c30" prot="protected" virt="non-virtual"><scope>SmartSimClient</scope><name>_set_script</name></member>
+      <member refid="classSmartSimClient_1a3e1a0b3c5b5604957ce0cf040bd0e293" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>copy_dataset</name></member>
+      <member refid="classSmartSimClient_1ab42f6ace636d0c114fafbf31f0bb9b7b" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>copy_tensor</name></member>
+      <member refid="classSmartSimClient_1a6e38673ee929d5f9a6b524b15a6d823c" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>delete_dataset</name></member>
+      <member refid="classSmartSimClient_1ad711d6f17f457703b8278126e9fb0cfd" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>delete_tensor</name></member>
+      <member refid="classSmartSimClient_1a12b14e4c9ee07895a14f143f6a3b3a9e" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>get_dataset</name></member>
+      <member refid="classSmartSimClient_1a753b75d6edba2243c0b3bb63e6b80599" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>get_model</name></member>
+      <member refid="classSmartSimClient_1aae09f10d894547aa8eb577dcdbaa920d" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>get_script</name></member>
+      <member refid="classSmartSimClient_1a0bd2b2c0ae6154ccb321ba2652114b89" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>get_tensor</name></member>
+      <member refid="classSmartSimClient_1a0cc30c713a5d880b940da5e289673324" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>key_exists</name></member>
+      <member refid="classSmartSimClient_1a0da8bf934289415c05d98dd7f6c575db" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>poll_key</name></member>
+      <member refid="classSmartSimClient_1a0321346ff5c38015b2dc5fab4b5ef65c" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>put_dataset</name></member>
+      <member refid="classSmartSimClient_1a373f7057fda4438ccc30dd3d9c311ab9" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>put_tensor</name></member>
+      <member refid="classSmartSimClient_1abb125d19f69031ef9efe3ebc61bbe5d4" prot="private" virt="non-virtual"><scope>SmartSimClient</scope><name>redis</name></member>
+      <member refid="classSmartSimClient_1a40c2c6a1bc1c9146cdf42238401d7919" prot="private" virt="non-virtual"><scope>SmartSimClient</scope><name>redis_cluster</name></member>
+      <member refid="classSmartSimClient_1addde9185b0ad2f8010e28af66b839b35" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>rename_dataset</name></member>
+      <member refid="classSmartSimClient_1a08ee7a91e1764c99f46b94f148274ad7" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>rename_tensor</name></member>
+      <member refid="classSmartSimClient_1a854618332651175b95bca95a02f0a36f" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>run_model</name></member>
+      <member refid="classSmartSimClient_1ab41454f65e0e55f298e8d1b9ecf28391" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>run_script</name></member>
+      <member refid="classSmartSimClient_1af0c6609a7757388e411bd32f4057a363" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>set_data_source</name></member>
+      <member refid="classSmartSimClient_1a7781cbd60a297a926f3fd53efee1c87c" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>set_model</name></member>
+      <member refid="classSmartSimClient_1a18d742ede41d78609a0351ca1620fcb5" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>set_model_from_file</name></member>
+      <member refid="classSmartSimClient_1acd62c0cd1d612bc21f534faaf622f36e" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>set_script</name></member>
+      <member refid="classSmartSimClient_1a9e4f423e5b92d8cb539ebf0d0c37ec84" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>set_script_from_file</name></member>
+      <member refid="classSmartSimClient_1a96cc3de420c6746f0580e15eeacb4d39" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>SmartSimClient</name></member>
+      <member refid="classSmartSimClient_1a37129c480c67f0b4aa3d4d2e50c93d51" prot="public" virt="non-virtual"><scope>SmartSimClient</scope><name>~SmartSimClient</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

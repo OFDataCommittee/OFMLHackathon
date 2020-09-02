@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.18">
+  <compounddef id="dir_d44c64559bbebec7f509842c48db8b23" kind="dir">
+    <compoundname>/Users/mellis/silc/include</compoundname>
+    <innerfile refid="c__client_8h">c_client.h</innerfile>
+    <innerfile refid="c__dataset_8h">c_dataset.h</innerfile>
+    <innerfile refid="client_8h">client.h</innerfile>
+    <innerfile refid="command_8h">command.h</innerfile>
+    <innerfile refid="commandlist_8h">commandlist.h</innerfile>
+    <innerfile refid="commandreply_8h">commandreply.h</innerfile>
+    <innerfile refid="crc16_8h">crc16.h</innerfile>
+    <innerfile refid="dataset_8h">dataset.h</innerfile>
+    <innerfile refid="dbnode_8h">dbnode.h</innerfile>
+    <innerfile refid="memorylist_8h">memorylist.h</innerfile>
+    <innerfile refid="metadata_8h">metadata.h</innerfile>
+    <innerfile refid="tensor_8h">tensor.h</innerfile>
+    <innerfile refid="tensorbase_8h">tensorbase.h</innerfile>
+    <innerfile refid="tensorpack_8h">tensorpack.h</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/Users/mellis/silc/include/"/>
+  </compounddef>
+</doxygen>
