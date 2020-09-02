@@ -40,10 +40,21 @@ include_directories(SYSTEM
 )
 
 set(CLIENT_LIBRARIES ${REDISPP_LIB} ${HIREDIS_LIB})
-set(CLIENT_SRC ../../../src/cpp/client.cpp)
+set(CLIENT_SRC ../../../src/cpp/client.cpp ../../../src/cpp/dataset.cpp ../../../src/cpp/tensor.cpp ../../../src/cpp/command.cpp)
 
 
 # Build executables
+
+add_executable(client_test_dataset
+	client_test_dataset.cpp
+	${CLIENT_SRC}
+)
+target_link_libraries(client_test_dataset
+	MPI::MPI_CXX
+	${CLIENT_LIBRARIES}
+)
+
+
 add_executable(client_test_binary
 	client_test_binary.cpp
 	${CLIENT_SRC}
