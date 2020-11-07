@@ -1,0 +1,576 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.18">
+  <compounddef id="classMetaData" kind="class" language="C++" prot="public">
+    <compoundname>MetaData</compoundname>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classMetaData_1a1d2d552292c6f1dd9753a50bce837d56" prot="private" static="no" mutable="no">
+        <type>spb::MetaData</type>
+        <definition>spb::MetaData MetaData::_pb_metadata_msg</definition>
+        <argsstring></argsstring>
+        <name>_pb_metadata_msg</name>
+        <briefdescription>
+<para>The protobuf message holding all metadata. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="95" column="23" bodyfile="/Users/mellis/silc/include/metadata.h" bodystart="95" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMetaData_1a3c133639d04253c09bef3d7c81ae014b" prot="private" static="no" mutable="no">
+        <type>std::unordered_map&lt; std::string, gpb::Message * &gt;</type>
+        <definition>std::unordered_map&lt;std::string, gpb::Message*&gt; MetaData::_meta_msg_map</definition>
+        <argsstring></argsstring>
+        <name>_meta_msg_map</name>
+        <briefdescription>
+<para>Maps meta data field name to the protobuf metadata message. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="98" column="28" bodyfile="/Users/mellis/silc/include/metadata.h" bodystart="98" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMetaData_1a8160cbaf2a9aa12b9fe991eb732c4348" prot="private" static="no" mutable="no">
+        <type><ref refid="classMemoryList" kindref="compound">MemoryList</ref>&lt; char * &gt;</type>
+        <definition>MemoryList&lt;char*&gt; MetaData::_char_array_mem_mgr</definition>
+        <argsstring></argsstring>
+        <name>_char_array_mem_mgr</name>
+        <briefdescription>
+<para><ref refid="classMemoryList" kindref="compound">MemoryList</ref> objects for each metadata type for managing memalloc. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="101" column="19" bodyfile="/Users/mellis/silc/include/metadata.h" bodystart="101" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMetaData_1a5d1ed6347da91b5750b0ffc5ab5ceeb8" prot="private" static="no" mutable="no">
+        <type><ref refid="classMemoryList" kindref="compound">MemoryList</ref>&lt; char &gt;</type>
+        <definition>MemoryList&lt;char&gt; MetaData::_char_mem_mgr</definition>
+        <argsstring></argsstring>
+        <name>_char_mem_mgr</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="102" column="20" bodyfile="/Users/mellis/silc/include/metadata.h" bodystart="102" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMetaData_1aa7a815bac441d6d350aa1bc6e3b36da8" prot="private" static="no" mutable="no">
+        <type><ref refid="classMemoryList" kindref="compound">MemoryList</ref>&lt; double &gt;</type>
+        <definition>MemoryList&lt;double&gt; MetaData::_double_mem_mgr</definition>
+        <argsstring></argsstring>
+        <name>_double_mem_mgr</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="103" column="20" bodyfile="/Users/mellis/silc/include/metadata.h" bodystart="103" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMetaData_1a192162ad43ece024eea26357c8c61725" prot="private" static="no" mutable="no">
+        <type><ref refid="classMemoryList" kindref="compound">MemoryList</ref>&lt; float &gt;</type>
+        <definition>MemoryList&lt;float&gt; MetaData::_float_mem_mgr</definition>
+        <argsstring></argsstring>
+        <name>_float_mem_mgr</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="104" column="20" bodyfile="/Users/mellis/silc/include/metadata.h" bodystart="104" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMetaData_1ac31490db51be527bc6dc4d769ff9fbf1" prot="private" static="no" mutable="no">
+        <type><ref refid="classMemoryList" kindref="compound">MemoryList</ref>&lt; int64_t &gt;</type>
+        <definition>MemoryList&lt;int64_t&gt; MetaData::_int64_mem_mgr</definition>
+        <argsstring></argsstring>
+        <name>_int64_mem_mgr</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="105" column="20" bodyfile="/Users/mellis/silc/include/metadata.h" bodystart="105" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMetaData_1aa3ce829475ff0f101988bbf22f1579c5" prot="private" static="no" mutable="no">
+        <type><ref refid="classMemoryList" kindref="compound">MemoryList</ref>&lt; uint64_t &gt;</type>
+        <definition>MemoryList&lt;uint64_t&gt; MetaData::_uint64_mem_mgr</definition>
+        <argsstring></argsstring>
+        <name>_uint64_mem_mgr</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="106" column="20" bodyfile="/Users/mellis/silc/include/metadata.h" bodystart="106" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMetaData_1ab4bc1d62e091789952aa86cf4e8d68c5" prot="private" static="no" mutable="no">
+        <type><ref refid="classMemoryList" kindref="compound">MemoryList</ref>&lt; int32_t &gt;</type>
+        <definition>MemoryList&lt;int32_t&gt; MetaData::_int32_mem_mgr</definition>
+        <argsstring></argsstring>
+        <name>_int32_mem_mgr</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="107" column="20" bodyfile="/Users/mellis/silc/include/metadata.h" bodystart="107" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMetaData_1a5dfa091bd1167b8cf5fdb70fee308e1b" prot="private" static="no" mutable="no">
+        <type><ref refid="classMemoryList" kindref="compound">MemoryList</ref>&lt; uint32_t &gt;</type>
+        <definition>MemoryList&lt;uint32_t&gt; MetaData::_uint32_mem_mgr</definition>
+        <argsstring></argsstring>
+        <name>_uint32_mem_mgr</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="108" column="20" bodyfile="/Users/mellis/silc/include/metadata.h" bodystart="108" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classMetaData_1a45bfcfd39915d1d3b3fb7215cdb5f210" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string MetaData::_buf</definition>
+        <argsstring></argsstring>
+        <name>_buf</name>
+        <briefdescription>
+<para>The metadata buffer. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="111" column="21" bodyfile="/Users/mellis/silc/include/metadata.h" bodystart="111" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classMetaData_1a09624859fbfe017f451e6cd0c2f4f421" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>MetaData::MetaData</definition>
+        <argsstring>()</argsstring>
+        <name>MetaData</name>
+        <briefdescription>
+<para><ref refid="classMetaData" kindref="compound">MetaData</ref> constructor. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="63" column="9"/>
+      </memberdef>
+      <memberdef kind="function" id="classMetaData_1aae91a1ae4c829098b2e687d6d48cf29b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>MetaData::MetaData</definition>
+        <argsstring>(MetaData &amp;&amp;metadata)</argsstring>
+        <name>MetaData</name>
+        <param>
+          <type><ref refid="classMetaData" kindref="compound">MetaData</ref> &amp;&amp;</type>
+          <declname>metadata</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="classMetaData" kindref="compound">MetaData</ref> move constructor. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="66" column="9"/>
+      </memberdef>
+      <memberdef kind="function" id="classMetaData_1a3b8970bdc1904864ef564a0a1324121a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classMetaData" kindref="compound">MetaData</ref> &amp;</type>
+        <definition>MetaData&amp; MetaData::operator=</definition>
+        <argsstring>(MetaData &amp;&amp;metadata)</argsstring>
+        <name>operator=</name>
+        <param>
+          <type><ref refid="classMetaData" kindref="compound">MetaData</ref> &amp;&amp;</type>
+          <declname>metadata</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="classMetaData" kindref="compound">MetaData</ref> move assignment operator. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="69" column="18"/>
+      </memberdef>
+      <memberdef kind="function" id="classMetaData_1a7db9d9b9ba38f0d96ae6a986457779df" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void MetaData::fill_from_buffer</definition>
+        <argsstring>(const char *buf, unsigned long long buf_size)</argsstring>
+        <name>fill_from_buffer</name>
+        <param>
+          <type>const char *</type>
+          <declname>buf</declname>
+          <briefdescription><para>The buffer used to fill the metadata object </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>unsigned long long</type>
+          <declname>buf_size</declname>
+          <briefdescription><para>The length of the buffer </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Reconstruct metadata from buffer. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="72" column="14"/>
+      </memberdef>
+      <memberdef kind="function" id="classMetaData_1aa1d961da0733a41a6e16462a5ee56355" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void MetaData::add_value</definition>
+        <argsstring>(const std::string &amp;field_name, const std::string &amp;type, const void *value)</argsstring>
+        <name>add_value</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>field_name</declname>
+          <briefdescription><para>The name of the metadata field </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>type</declname>
+          <briefdescription><para>The data type of the field </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const void *</type>
+          <declname>value</declname>
+          <briefdescription><para>The value of the metadata field </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Add a value to a metadata field. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="77" column="14"/>
+      </memberdef>
+      <memberdef kind="function" id="classMetaData_1aa50b695013b195c86195da563327f7de" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void MetaData::get_values</definition>
+        <argsstring>(const std::string &amp;name, const std::string &amp;type, void *&amp;data, int &amp;length)</argsstring>
+        <name>get_values</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>name</declname>
+          <briefdescription><para>The name of the metadata field </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>type</declname>
+          <briefdescription><para>The data type of the field </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>void *&amp;</type>
+          <declname>data</declname>
+          <briefdescription><para>The pointer that will be pointed to the metadata </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>int &amp;</type>
+          <declname>length</declname>
+          <briefdescription><para>An integer that will be set to the number of values in the metadata field </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Get metadata values from field. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="83" column="14"/>
+      </memberdef>
+      <memberdef kind="function" id="classMetaData_1a3e073f4b2e981037ce5bd4fe166821e9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::string_view</type>
+        <definition>std::string_view MetaData::get_metadata_buf</definition>
+        <argsstring>()</argsstring>
+        <name>get_metadata_buf</name>
+        <briefdescription>
+<para>Get the metadata fields as a buffer. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="90" column="26"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-func">
+      <memberdef kind="function" id="classMetaData_1aed300b9298a63c0dbd21b1d656b3b407" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void MetaData::_unpack_metadata</definition>
+        <argsstring>(const std::string &amp;field_name)</argsstring>
+        <name>_unpack_metadata</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>field_name</declname>
+          <briefdescription><para>The name of the metadata field </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Unpacks the meta data repeated field in the top level message and puts message pointers into _meta_msg_map </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="115" column="14"/>
+      </memberdef>
+      <memberdef kind="function" id="classMetaData_1aecb35e260c436f4c2866bf18da3190cd" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void MetaData::_create_message</definition>
+        <argsstring>(const std::string &amp;field_name, const std::string &amp;type)</argsstring>
+        <name>_create_message</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>field_name</declname>
+          <briefdescription><para>The name of the metadata field </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>type</declname>
+          <briefdescription><para>The data type of the field </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Create a metadata message for the field and type. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="119" column="14"/>
+      </memberdef>
+      <memberdef kind="function" id="classMetaData_1a196184a8c6a1d801672fdfc9af4d0554" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename PB</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void MetaData::_create_message_by_type</definition>
+        <argsstring>(const std::string &amp;field_name, const std::string &amp;container_name)</argsstring>
+        <name>_create_message_by_type</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>field_name</declname>
+          <briefdescription><para>The name of the metadata field </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>container_name</declname>
+          <briefdescription><para>The name of the top level message container </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Templated function for creating metadata field. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="125" column="14"/>
+      </memberdef>
+      <memberdef kind="function" id="classMetaData_1a54cda8263c0d06ffa7c0095e01dac666" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void MetaData::_set_string_in_message</definition>
+        <argsstring>(gpb::Message *msg, const std::string &amp;field_name, std::string value)</argsstring>
+        <name>_set_string_in_message</name>
+        <param>
+          <type>gpb::Message *</type>
+          <declname>msg</declname>
+          <briefdescription><para>Protobuf message containing the string field </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>field_name</declname>
+          <briefdescription><para>The name of the metadata field </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>value</declname>
+          <briefdescription><para>The field value </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Set a string value to a string field (non-repeated field) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="131" column="14"/>
+      </memberdef>
+      <memberdef kind="function" id="classMetaData_1a9656eccc134b024bd89fa796b4682aed" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void MetaData::_get_string_field_values</definition>
+        <argsstring>(gpb::Message *msg, void *&amp;data, int &amp;length)</argsstring>
+        <name>_get_string_field_values</name>
+        <param>
+          <type>gpb::Message *</type>
+          <declname>msg</declname>
+          <briefdescription><para>Protobuf message containing the string field </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>void *&amp;</type>
+          <declname>data</declname>
+          <briefdescription><para>The pointer that will be pointed to the metadata </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>int &amp;</type>
+          <declname>length</declname>
+          <briefdescription><para>An integer that will be set to the number of values in the metadata field </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Get an array of string metadata values. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="137" column="14"/>
+      </memberdef>
+      <memberdef kind="function" id="classMetaData_1acb8926efa89ae8a736be686209b80147" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void MetaData::_get_numeric_field_values</definition>
+        <argsstring>(gpb::Message *msg, void *&amp;data, int &amp;n_values, MemoryList&lt; T &gt; &amp;mem_list)</argsstring>
+        <name>_get_numeric_field_values</name>
+        <param>
+          <type>gpb::Message *</type>
+          <declname>msg</declname>
+          <briefdescription><para>Protobuf message containing the string field </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>void *&amp;</type>
+          <declname>data</declname>
+          <briefdescription><para>The pointer that will be pointed to the metadata </para>
+</briefdescription>
+        </param>
+        <param>
+          <type>int &amp;</type>
+          <declname>n_values</declname>
+          <briefdescription><para>An integer that will be set to the number of values in the metadata field </para>
+</briefdescription>
+        </param>
+        <param>
+          <type><ref refid="classMemoryList" kindref="compound">MemoryList</ref>&lt; T &gt; &amp;</type>
+          <declname>mem_list</declname>
+          <briefdescription><para>Memory manager for the metadata heap allocations </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Get non-string numeric field values. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="144" column="14"/>
+      </memberdef>
+      <memberdef kind="function" id="classMetaData_1af8225ced31a63b8c82ac5ef008d4fe2f" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool MetaData::_field_exists</definition>
+        <argsstring>(const std::string &amp;field_name)</argsstring>
+        <name>_field_exists</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>field_name</declname>
+          <briefdescription><para>The name of the metadata field </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Check if a metadata field already exists by the name. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="151" column="14"/>
+      </memberdef>
+      <memberdef kind="function" id="classMetaData_1a7c12908e3cd8889a4f78dcf958ab5f1a" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int MetaData::_get_type_integer</definition>
+        <argsstring>(const std::string &amp;type)</argsstring>
+        <name>_get_type_integer</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>type</declname>
+          <briefdescription><para>The data type of the metadata field </para>
+</briefdescription>
+        </param>
+        <briefdescription>
+<para>Gets the type integer. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/metadata.h" line="155" column="13"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/Users/mellis/silc/include/metadata.h" line="58" column="1" bodyfile="/Users/mellis/silc/include/metadata.h" bodystart="59" bodyend="157"/>
+    <listofallmembers>
+      <member refid="classMetaData_1a45bfcfd39915d1d3b3fb7215cdb5f210" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_buf</name></member>
+      <member refid="classMetaData_1a8160cbaf2a9aa12b9fe991eb732c4348" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_char_array_mem_mgr</name></member>
+      <member refid="classMetaData_1a5d1ed6347da91b5750b0ffc5ab5ceeb8" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_char_mem_mgr</name></member>
+      <member refid="classMetaData_1aecb35e260c436f4c2866bf18da3190cd" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_create_message</name></member>
+      <member refid="classMetaData_1a196184a8c6a1d801672fdfc9af4d0554" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_create_message_by_type</name></member>
+      <member refid="classMetaData_1aa7a815bac441d6d350aa1bc6e3b36da8" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_double_mem_mgr</name></member>
+      <member refid="classMetaData_1af8225ced31a63b8c82ac5ef008d4fe2f" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_field_exists</name></member>
+      <member refid="classMetaData_1a192162ad43ece024eea26357c8c61725" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_float_mem_mgr</name></member>
+      <member refid="classMetaData_1acb8926efa89ae8a736be686209b80147" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_get_numeric_field_values</name></member>
+      <member refid="classMetaData_1a9656eccc134b024bd89fa796b4682aed" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_get_string_field_values</name></member>
+      <member refid="classMetaData_1a7c12908e3cd8889a4f78dcf958ab5f1a" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_get_type_integer</name></member>
+      <member refid="classMetaData_1ab4bc1d62e091789952aa86cf4e8d68c5" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_int32_mem_mgr</name></member>
+      <member refid="classMetaData_1ac31490db51be527bc6dc4d769ff9fbf1" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_int64_mem_mgr</name></member>
+      <member refid="classMetaData_1a3c133639d04253c09bef3d7c81ae014b" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_meta_msg_map</name></member>
+      <member refid="classMetaData_1a1d2d552292c6f1dd9753a50bce837d56" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_pb_metadata_msg</name></member>
+      <member refid="classMetaData_1a54cda8263c0d06ffa7c0095e01dac666" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_set_string_in_message</name></member>
+      <member refid="classMetaData_1a5dfa091bd1167b8cf5fdb70fee308e1b" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_uint32_mem_mgr</name></member>
+      <member refid="classMetaData_1aa3ce829475ff0f101988bbf22f1579c5" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_uint64_mem_mgr</name></member>
+      <member refid="classMetaData_1aed300b9298a63c0dbd21b1d656b3b407" prot="private" virt="non-virtual"><scope>MetaData</scope><name>_unpack_metadata</name></member>
+      <member refid="classMetaData_1aa1d961da0733a41a6e16462a5ee56355" prot="public" virt="non-virtual"><scope>MetaData</scope><name>add_value</name></member>
+      <member refid="classMetaData_1a7db9d9b9ba38f0d96ae6a986457779df" prot="public" virt="non-virtual"><scope>MetaData</scope><name>fill_from_buffer</name></member>
+      <member refid="classMetaData_1a3e073f4b2e981037ce5bd4fe166821e9" prot="public" virt="non-virtual"><scope>MetaData</scope><name>get_metadata_buf</name></member>
+      <member refid="classMetaData_1aa50b695013b195c86195da563327f7de" prot="public" virt="non-virtual"><scope>MetaData</scope><name>get_values</name></member>
+      <member refid="classMetaData_1a09624859fbfe017f451e6cd0c2f4f421" prot="public" virt="non-virtual"><scope>MetaData</scope><name>MetaData</name></member>
+      <member refid="classMetaData_1aae91a1ae4c829098b2e687d6d48cf29b" prot="public" virt="non-virtual"><scope>MetaData</scope><name>MetaData</name></member>
+      <member refid="classMetaData_1a3b8970bdc1904864ef564a0a1324121a" prot="public" virt="non-virtual"><scope>MetaData</scope><name>operator=</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

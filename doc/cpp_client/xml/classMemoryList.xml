@@ -1,0 +1,221 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.18">
+  <compounddef id="classMemoryList" kind="class" language="C++" prot="public">
+    <compoundname>MemoryList</compoundname>
+    <templateparamlist>
+      <param>
+        <type>class T</type>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classMemoryList_1ab71f7b2865a14f48d2dc6ac24df7b8cb" prot="private" static="no" mutable="no">
+        <type>std::forward_list&lt; std::pair&lt; bytesize, T * &gt; &gt;</type>
+        <definition>std::forward_list&lt;std::pair&lt;bytesize, T*&gt; &gt; MemoryList&lt; T &gt;::_inventory</definition>
+        <argsstring></argsstring>
+        <name>_inventory</name>
+        <briefdescription>
+<para>Forward list to track allocation sizes and locations in memory. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/memorylist.h" line="47" column="23" bodyfile="/Users/mellis/silc/include/memorylist.h" bodystart="47" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classMemoryList_1ac247f9312eda3b24e1957ff41012b60e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>MemoryList&lt; T &gt;::MemoryList</definition>
+        <argsstring>()</argsstring>
+        <name>MemoryList</name>
+        <briefdescription>
+<para><ref refid="classMemoryList" kindref="compound">MemoryList</ref> default constructor. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/memorylist.h" line="15" column="5"/>
+      </memberdef>
+      <memberdef kind="function" id="classMemoryList_1a1c79bb6b3aa9936efe091873763746bf" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>MemoryList&lt; T &gt;::MemoryList</definition>
+        <argsstring>(MemoryList &amp;&amp;memlist)</argsstring>
+        <name>MemoryList</name>
+        <param>
+          <type><ref refid="classMemoryList" kindref="compound">MemoryList</ref> &amp;&amp;</type>
+          <declname>memlist</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="classMemoryList" kindref="compound">MemoryList</ref> move constructor. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/memorylist.h" line="18" column="5"/>
+      </memberdef>
+      <memberdef kind="function" id="classMemoryList_1a52684651bcff903bb87600086b3ef5b6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>MemoryList&lt; T &gt;::MemoryList</definition>
+        <argsstring>(const MemoryList &amp;memlist)</argsstring>
+        <name>MemoryList</name>
+        <param>
+          <type>const <ref refid="classMemoryList" kindref="compound">MemoryList</ref> &amp;</type>
+          <declname>memlist</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="classMemoryList" kindref="compound">MemoryList</ref> copy constructor. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/memorylist.h" line="21" column="5"/>
+      </memberdef>
+      <memberdef kind="function" id="classMemoryList_1a819fe3b247d22381dce30bfa40af0f0f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classMemoryList" kindref="compound">MemoryList</ref>&lt; T &gt; &amp;</type>
+        <definition>MemoryList&lt;T&gt;&amp; MemoryList&lt; T &gt;::operator=</definition>
+        <argsstring>(const MemoryList&lt; T &gt; &amp;memlist)</argsstring>
+        <name>operator=</name>
+        <param>
+          <type>const <ref refid="classMemoryList" kindref="compound">MemoryList</ref>&lt; T &gt; &amp;</type>
+          <declname>memlist</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="classMemoryList" kindref="compound">MemoryList</ref> copy assignment operator. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/memorylist.h" line="24" column="16"/>
+      </memberdef>
+      <memberdef kind="function" id="classMemoryList_1a9fbb840acf3fd664323d8a69209df361" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classMemoryList" kindref="compound">MemoryList</ref>&lt; T &gt; &amp;</type>
+        <definition>MemoryList&lt;T&gt;&amp; MemoryList&lt; T &gt;::operator=</definition>
+        <argsstring>(MemoryList&lt; T &gt; &amp;&amp;memlist)</argsstring>
+        <name>operator=</name>
+        <param>
+          <type><ref refid="classMemoryList" kindref="compound">MemoryList</ref>&lt; T &gt; &amp;&amp;</type>
+          <declname>memlist</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="classMemoryList" kindref="compound">MemoryList</ref> move assignment operator. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/memorylist.h" line="27" column="16"/>
+      </memberdef>
+      <memberdef kind="function" id="classMemoryList_1ada6ed14b3508bb8220a5370564459a2b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>MemoryList&lt; T &gt;::~MemoryList</definition>
+        <argsstring>()</argsstring>
+        <name>~MemoryList</name>
+        <briefdescription>
+<para><ref refid="classMemoryList" kindref="compound">MemoryList</ref> destructor. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/memorylist.h" line="30" column="5"/>
+      </memberdef>
+      <memberdef kind="function" id="classMemoryList_1a47aa4f2ba63c242d5cd2324ac0263570" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void MemoryList&lt; T &gt;::add_allocation</definition>
+        <argsstring>(bytesize bytes, T *ptr)</argsstring>
+        <name>add_allocation</name>
+        <param>
+          <type>bytesize</type>
+          <declname>bytes</declname>
+        </param>
+        <param>
+          <type>T *</type>
+          <declname>ptr</declname>
+        </param>
+        <briefdescription>
+<para>Add a malloc memory allocation performed external to <ref refid="classMemoryList" kindref="compound">MemoryList</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/memorylist.h" line="33" column="10"/>
+      </memberdef>
+      <memberdef kind="function" id="classMemoryList_1a53cd0140e96c1cc6aa5fd73878e0d20d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>T *</type>
+        <definition>T* MemoryList&lt; T &gt;::allocate_bytes</definition>
+        <argsstring>(bytesize bytes)</argsstring>
+        <name>allocate_bytes</name>
+        <param>
+          <type>bytesize</type>
+          <declname>bytes</declname>
+        </param>
+        <briefdescription>
+<para>Perform a malloc based on total bytes and store in the inventory. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/memorylist.h" line="36" column="7"/>
+      </memberdef>
+      <memberdef kind="function" id="classMemoryList_1a5950dcda07445800a3a3bc81e4db56d3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>T *</type>
+        <definition>T* MemoryList&lt; T &gt;::allocate</definition>
+        <argsstring>(unsigned long long n_values)</argsstring>
+        <name>allocate</name>
+        <param>
+          <type>unsigned long long</type>
+          <declname>n_values</declname>
+        </param>
+        <briefdescription>
+<para>Perform a malloc based on number of values and store in the inventory. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/memorylist.h" line="39" column="7"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-func">
+      <memberdef kind="function" id="classMemoryList_1af1c9158535f830ffca40ec52a18a47d1" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void MemoryList&lt; T &gt;::_free_inventory</definition>
+        <argsstring>()</argsstring>
+        <name>_free_inventory</name>
+        <briefdescription>
+<para>Free allocated memory in inventory and empty the inventory object. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/memorylist.h" line="44" column="10"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/Users/mellis/silc/include/memorylist.h" line="10" column="1" bodyfile="/Users/mellis/silc/include/memorylist.h" bodystart="10" bodyend="49"/>
+    <listofallmembers>
+      <member refid="classMemoryList_1af1c9158535f830ffca40ec52a18a47d1" prot="private" virt="non-virtual"><scope>MemoryList</scope><name>_free_inventory</name></member>
+      <member refid="classMemoryList_1ab71f7b2865a14f48d2dc6ac24df7b8cb" prot="private" virt="non-virtual"><scope>MemoryList</scope><name>_inventory</name></member>
+      <member refid="classMemoryList_1a47aa4f2ba63c242d5cd2324ac0263570" prot="public" virt="non-virtual"><scope>MemoryList</scope><name>add_allocation</name></member>
+      <member refid="classMemoryList_1a5950dcda07445800a3a3bc81e4db56d3" prot="public" virt="non-virtual"><scope>MemoryList</scope><name>allocate</name></member>
+      <member refid="classMemoryList_1a53cd0140e96c1cc6aa5fd73878e0d20d" prot="public" virt="non-virtual"><scope>MemoryList</scope><name>allocate_bytes</name></member>
+      <member refid="classMemoryList_1ac247f9312eda3b24e1957ff41012b60e" prot="public" virt="non-virtual"><scope>MemoryList</scope><name>MemoryList</name></member>
+      <member refid="classMemoryList_1a1c79bb6b3aa9936efe091873763746bf" prot="public" virt="non-virtual"><scope>MemoryList</scope><name>MemoryList</name></member>
+      <member refid="classMemoryList_1a52684651bcff903bb87600086b3ef5b6" prot="public" virt="non-virtual"><scope>MemoryList</scope><name>MemoryList</name></member>
+      <member refid="classMemoryList_1a819fe3b247d22381dce30bfa40af0f0f" prot="public" virt="non-virtual"><scope>MemoryList</scope><name>operator=</name></member>
+      <member refid="classMemoryList_1a9fbb840acf3fd664323d8a69209df361" prot="public" virt="non-virtual"><scope>MemoryList</scope><name>operator=</name></member>
+      <member refid="classMemoryList_1ada6ed14b3508bb8220a5370564459a2b" prot="public" virt="non-virtual"><scope>MemoryList</scope><name>~MemoryList</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

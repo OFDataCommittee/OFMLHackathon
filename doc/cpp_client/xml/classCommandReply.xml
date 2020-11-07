@@ -1,0 +1,387 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.18">
+  <compounddef id="classCommandReply" kind="class" language="C++" prot="public">
+    <compoundname>CommandReply</compoundname>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classCommandReply_1a3520532d59cacaa9a4c5dbca606f2da1" prot="private" static="no" mutable="no">
+        <type>RedisReplyUPtr</type>
+        <definition>RedisReplyUPtr CommandReply::_uptr_reply</definition>
+        <argsstring></argsstring>
+        <name>_uptr_reply</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="78" column="24" bodyfile="/Users/mellis/silc/include/commandreply.h" bodystart="78" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classCommandReply_1a3b7968d51d400a5bf87eafe0dd1f670c" prot="private" static="no" mutable="no">
+        <type>redisReply *</type>
+        <definition>redisReply* CommandReply::_reply</definition>
+        <argsstring></argsstring>
+        <name>_reply</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="79" column="20" bodyfile="/Users/mellis/silc/include/commandreply.h" bodystart="79" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classCommandReply_1a809fb1630ef3ce6ebb3c6f5a18233e1f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>CommandReply::CommandReply</definition>
+        <argsstring>()</argsstring>
+        <name>CommandReply</name>
+        <briefdescription>
+<para><ref refid="classCommandReply" kindref="compound">CommandReply</ref> default constructor. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="19" column="9"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1aa5a2fc73107c56ed309f7d09ae9ec432" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>CommandReply::~CommandReply</definition>
+        <argsstring>()</argsstring>
+        <name>~CommandReply</name>
+        <briefdescription>
+<para><ref refid="classCommand" kindref="compound">Command</ref> reply destructor. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="22" column="9"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1a934b1b01ee82ed51fd1a489ddbf9f9b5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>CommandReply::CommandReply</definition>
+        <argsstring>(RedisReplyUPtr &amp;&amp;reply)</argsstring>
+        <name>CommandReply</name>
+        <param>
+          <type>RedisReplyUPtr &amp;&amp;</type>
+          <declname>reply</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="25" column="9"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1a6b969afd9bca5ea8da7eb2b2b47e5e01" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>CommandReply::CommandReply</definition>
+        <argsstring>(redisReply *&amp;&amp;reply)</argsstring>
+        <name>CommandReply</name>
+        <param>
+          <type>redisReply *&amp;&amp;</type>
+          <declname>reply</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="28" column="9"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1a73a37f14693cca4ff28519a25722d7b8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>CommandReply::CommandReply</definition>
+        <argsstring>(CommandReply &amp;&amp;reply)</argsstring>
+        <name>CommandReply</name>
+        <param>
+          <type><ref refid="classCommandReply" kindref="compound">CommandReply</ref> &amp;&amp;</type>
+          <declname>reply</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="31" column="9"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1aa5c13e8ae9601eedd49efe2db41ac523" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classCommandReply" kindref="compound">CommandReply</ref> &amp;</type>
+        <definition>CommandReply&amp; CommandReply::operator=</definition>
+        <argsstring>(RedisReplyUPtr &amp;&amp;reply)</argsstring>
+        <name>operator=</name>
+        <param>
+          <type>RedisReplyUPtr &amp;&amp;</type>
+          <declname>reply</declname>
+        </param>
+        <briefdescription>
+<para>Move assignment operator with RHS as redisReply unique ptr. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="34" column="22"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1ae3e6afdb54fc14cbf53db091f8237fa4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classCommandReply" kindref="compound">CommandReply</ref> &amp;</type>
+        <definition>CommandReply&amp; CommandReply::operator=</definition>
+        <argsstring>(redisReply *&amp;&amp;reply)</argsstring>
+        <name>operator=</name>
+        <param>
+          <type>redisReply *&amp;&amp;</type>
+          <declname>reply</declname>
+        </param>
+        <briefdescription>
+<para>Move assignment operator with RHS as redisReply ptr. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="38" column="22"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1ac09fe47595ae0d632d857272b8e72de9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classCommandReply" kindref="compound">CommandReply</ref> &amp;</type>
+        <definition>CommandReply&amp; CommandReply::operator=</definition>
+        <argsstring>(CommandReply &amp;&amp;reply)</argsstring>
+        <name>operator=</name>
+        <param>
+          <type><ref refid="classCommandReply" kindref="compound">CommandReply</ref> &amp;&amp;</type>
+          <declname>reply</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="41" column="22"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1afe4080c038c67041e62ffb4242d830fc" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classCommandReply" kindref="compound">CommandReply</ref></type>
+        <definition>CommandReply CommandReply::operator[]</definition>
+        <argsstring>(int index)</argsstring>
+        <name>operator[]</name>
+        <param>
+          <type>int</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="43" column="22"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1a76430cb507cd6ee75e431e10ab0b01cd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>char *</type>
+        <definition>char* CommandReply::str</definition>
+        <argsstring>()</argsstring>
+        <name>str</name>
+        <briefdescription>
+<para>Return the reply string. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="46" column="14"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1a2c8a48962b0ba2bfb4e7a797617c416f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>long long</type>
+        <definition>long long CommandReply::integer</definition>
+        <argsstring>()</argsstring>
+        <name>integer</name>
+        <briefdescription>
+<para>Return the integer reply. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="49" column="19"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1a562781284f39e870540c4a1646ef38a5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>double</type>
+        <definition>double CommandReply::dbl</definition>
+        <argsstring>()</argsstring>
+        <name>dbl</name>
+        <briefdescription>
+<para>Return the double reply. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="52" column="16"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1aca53d1c8c699e1f51120549926b04011" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t CommandReply::str_len</definition>
+        <argsstring>()</argsstring>
+        <name>str_len</name>
+        <briefdescription>
+<para>Return the len of the string reply. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="55" column="16"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1a4db11404ee8962e64d4f9562a491f727" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t CommandReply::n_elements</definition>
+        <argsstring>()</argsstring>
+        <name>n_elements</name>
+        <briefdescription>
+<para>Return the number of elements in a reply. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="58" column="16"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1a7a15310854957068f824fc8539f923cd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int CommandReply::has_error</definition>
+        <argsstring>()</argsstring>
+        <name>has_error</name>
+        <briefdescription>
+<para>Check to see if the reply contains any errors. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="61" column="13"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1a9f46e77c1151ead1d8429ae25eb33c22" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void CommandReply::print_reply_error</definition>
+        <argsstring>()</argsstring>
+        <name>print_reply_error</name>
+        <briefdescription>
+<para>Print error reply text to std::cout. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="64" column="14"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1abf31664882cc13bb39be43f325a6ba1b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::string</type>
+        <definition>std::string CommandReply::redis_reply_type</definition>
+        <argsstring>()</argsstring>
+        <name>redis_reply_type</name>
+        <briefdescription>
+<para>Return the reply type as a string. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="67" column="21"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1a98d86688021b1c99c8c0f0d5e0a7d827" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void CommandReply::print_reply_structure</definition>
+        <argsstring>(std::string index_tracker=&quot;reply[0]&quot;)</argsstring>
+        <name>print_reply_structure</name>
+        <param>
+          <type>std::string</type>
+          <declname>index_tracker</declname>
+          <defval>&quot;reply[0]&quot;</defval>
+        </param>
+        <briefdescription>
+<para>Print the type of each element in the reply. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="70" column="14"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-func">
+      <memberdef kind="function" id="classCommandReply_1abd861f7ccc10972bbf3ea924980dfeaa" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>CommandReply::CommandReply</definition>
+        <argsstring>(redisReply *reply)</argsstring>
+        <name>CommandReply</name>
+        <param>
+          <type>redisReply *</type>
+          <declname>reply</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="classCommandReply" kindref="compound">CommandReply</ref> constructor from redisReply. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="76" column="9"/>
+      </memberdef>
+      <memberdef kind="function" id="classCommandReply_1aa6e479d4446296396b576596aa15f05a" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void CommandReply::_print_nested_reply_structure</definition>
+        <argsstring>(redisReply *reply, std::string index_tracker)</argsstring>
+        <name>_print_nested_reply_structure</name>
+        <param>
+          <type>redisReply *</type>
+          <declname>reply</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>index_tracker</declname>
+        </param>
+        <briefdescription>
+<para>Helper function to print nested reply structures. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/mellis/silc/include/commandreply.h" line="82" column="14"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/Users/mellis/silc/include/commandreply.h" line="15" column="1" bodyfile="/Users/mellis/silc/include/commandreply.h" bodystart="15" bodyend="84"/>
+    <listofallmembers>
+      <member refid="classCommandReply_1aa6e479d4446296396b576596aa15f05a" prot="private" virt="non-virtual"><scope>CommandReply</scope><name>_print_nested_reply_structure</name></member>
+      <member refid="classCommandReply_1a3b7968d51d400a5bf87eafe0dd1f670c" prot="private" virt="non-virtual"><scope>CommandReply</scope><name>_reply</name></member>
+      <member refid="classCommandReply_1a3520532d59cacaa9a4c5dbca606f2da1" prot="private" virt="non-virtual"><scope>CommandReply</scope><name>_uptr_reply</name></member>
+      <member refid="classCommandReply_1a809fb1630ef3ce6ebb3c6f5a18233e1f" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>CommandReply</name></member>
+      <member refid="classCommandReply_1a934b1b01ee82ed51fd1a489ddbf9f9b5" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>CommandReply</name></member>
+      <member refid="classCommandReply_1a6b969afd9bca5ea8da7eb2b2b47e5e01" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>CommandReply</name></member>
+      <member refid="classCommandReply_1a73a37f14693cca4ff28519a25722d7b8" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>CommandReply</name></member>
+      <member refid="classCommandReply_1abd861f7ccc10972bbf3ea924980dfeaa" prot="private" virt="non-virtual"><scope>CommandReply</scope><name>CommandReply</name></member>
+      <member refid="classCommandReply_1a562781284f39e870540c4a1646ef38a5" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>dbl</name></member>
+      <member refid="classCommandReply_1a7a15310854957068f824fc8539f923cd" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>has_error</name></member>
+      <member refid="classCommandReply_1a2c8a48962b0ba2bfb4e7a797617c416f" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>integer</name></member>
+      <member refid="classCommandReply_1a4db11404ee8962e64d4f9562a491f727" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>n_elements</name></member>
+      <member refid="classCommandReply_1aa5c13e8ae9601eedd49efe2db41ac523" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>operator=</name></member>
+      <member refid="classCommandReply_1ae3e6afdb54fc14cbf53db091f8237fa4" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>operator=</name></member>
+      <member refid="classCommandReply_1ac09fe47595ae0d632d857272b8e72de9" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>operator=</name></member>
+      <member refid="classCommandReply_1afe4080c038c67041e62ffb4242d830fc" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>operator[]</name></member>
+      <member refid="classCommandReply_1a9f46e77c1151ead1d8429ae25eb33c22" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>print_reply_error</name></member>
+      <member refid="classCommandReply_1a98d86688021b1c99c8c0f0d5e0a7d827" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>print_reply_structure</name></member>
+      <member refid="classCommandReply_1abf31664882cc13bb39be43f325a6ba1b" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>redis_reply_type</name></member>
+      <member refid="classCommandReply_1a76430cb507cd6ee75e431e10ab0b01cd" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>str</name></member>
+      <member refid="classCommandReply_1aca53d1c8c699e1f51120549926b04011" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>str_len</name></member>
+      <member refid="classCommandReply_1aa5a2fc73107c56ed309f7d09ae9ec432" prot="public" virt="non-virtual"><scope>CommandReply</scope><name>~CommandReply</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

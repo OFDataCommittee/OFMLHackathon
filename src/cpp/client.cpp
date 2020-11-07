@@ -2,382 +2,1128 @@
 
 SmartSimClient::SmartSimClient(bool cluster, bool fortran_array)
 {
+  /* SmartSimClient constructor
+  */
   this->_fortran_array = fortran_array;
-  if (cluster)
-  {
-    redis_cluster = new sw::redis::RedisCluster(_get_ssdb());
-    redis = 0;
-  }
-  else
-  {
-    redis_cluster = 0;
-    redis = new sw::redis::Redis(_get_ssdb());
-  }
-  return;
-}
 
-SmartSimClient::~SmartSimClient() {}
+  int n_connection_trials = 10;
 
-std::string SmartSimClient::_get_ssdb()
-{
-  char *host_and_port = getenv("SSDB");
+  while(n_connection_trials > 0) {
+    if(cluster) {
+      try {
+        redis_cluster = new sw::redis::RedisCluster(_get_ssdb());
+        n_connection_trials = -1;
+        redis = 0;
+      }
+      catch (sw::redis::TimeoutError &e) {
+        std::cout << "WARNING: Caught redis TimeoutError: " << e.what() << std::endl;
+        std::cout << "WARNING: TimeoutError occurred with initial client connection.";
+        std::cout << "WARNING: "<< n_connection_trials << " more trials will be made.";
+        n_connection_trials--;
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+      }
 
-  if (host_and_port == NULL)
-    throw std::runtime_error("The environment variable SSDB must be set to use the client.");
-
-  std::string ssdb("tcp://");
-  ssdb.append(host_and_port);
-  return ssdb;
-}
-
-
-void SmartSimClient::run_script(std::string_view key, std::vector<std::string_view> inputs, std::vector<std::string_view> outputs)
-{
-  //This function will run a RedisAI model.  However, we can only do one input and one output,
-  //which we need to fix.  We should look into how the python object clients convert it to
-  //c code.
-
-  std::unique_ptr<redisReply, sw::redis::ReplyDeleter> reply;
-  std::vector<std::string_view> cmd_args;
-  cmd_args.push_back("AI.SCRIPTRUN");
-  cmd_args.push_back(key);
-
-  cmd_args.push_back("INPUTS");
-  for (int i = 0; i < inputs.size(); i++)
-    cmd_args.push_back(inputs[i]);
-
-  cmd_args.push_back("OUTPUTS");
-  for (int i = 0; i < outputs.size(); i++)
-    cmd_args.push_back(outputs[i]);
-
-  reply = redis->command(cmd_args.begin(), cmd_args.end());
-}
-
-void SmartSimClient::run_model(std::string_view key, std::vector<std::string_view> inputs, std::vector<std::string_view> outputs)
-{
-  //This function will run a RedisAI model.  However, we can only do one input and one output,
-  //which we need to fix.  We should look into how the python object clients convert it to
-  //c code.
-
-  std::unique_ptr<redisReply, sw::redis::ReplyDeleter> reply;
-  std::vector<std::string_view> cmd_args;
-  cmd_args.push_back("AI.MODELRUN");
-  cmd_args.push_back(key);
-
-  cmd_args.push_back("INPUTS");
-  for (int i = 0; i < inputs.size(); i++)
-    cmd_args.push_back(inputs[i]);
-
-  cmd_args.push_back("OUTPUTS");
-  for (int i = 0; i < outputs.size(); i++)
-    cmd_args.push_back(outputs[i]);
-
-  if (redis_cluster)
-    reply = redis_cluster->command(cmd_args.begin(), cmd_args.end());
-  else
-    reply = redis->command(cmd_args.begin(), cmd_args.end());
-}
-
-void SmartSimClient::set_model(std::string_view key, std::string_view backend, std::string_view device, std::string model_file)
-{
-  //This function will set a model that is saved in a file.  It is assumed it is a binary file.
-  //TODO need to examine code of optimum read to reduce time and memory
-  //We really should read into a c str if we are goign to just make a string view at the end.
-  std::ifstream fin(model_file.c_str(), std::ios::binary);
-  std::ostringstream ostream;
-  ostream << fin.rdbuf();
-
-  const std::string tmp = ostream.str();
-  const char *model_buf = tmp.c_str();
-  int model_buf_len = tmp.length();
-
-  std::vector<std::string_view> cmd_args;
-  cmd_args.push_back("AI.MODELSET");
-  cmd_args.push_back(key);
-  cmd_args.push_back(backend);
-  cmd_args.push_back(device);
-  cmd_args.push_back("BLOB");
-  cmd_args.push_back(std::string_view(model_buf, model_buf_len));
-
-  std::unique_ptr<redisReply, sw::redis::ReplyDeleter> reply;
-  if (redis_cluster)
-    reply = redis_cluster->command(cmd_args.begin(), cmd_args.end());
-  else
-    reply = redis->command(cmd_args.begin(), cmd_args.end());
-}
-
-void SmartSimClient::set_script(std::string_view key, std::string_view device, std::string script_file)
-{
-  //This function will set a script that is saved in a file.  It is assumed it is a ascii file.
-  //TODO need to examine code of optimum read to reduce time and memory
-  //We really should read into a c str if we are goinng to just make a string view at the end.
-  std::ifstream fin(script_file.c_str());
-  std::ostringstream ostream;
-  ostream << fin.rdbuf();
-
-  const std::string tmp = ostream.str();
-  const char *script_buf = tmp.c_str();
-  int script_buf_len = tmp.length();
-
-  std::vector<std::string_view> cmd_args;
-  cmd_args.push_back("AI.SCRIPTSET");
-  cmd_args.push_back(key);
-  cmd_args.push_back(device);
-  cmd_args.push_back("SOURCE");
-  cmd_args.push_back(std::string_view(script_buf, script_buf_len));
-
-  std::unique_ptr<redisReply, sw::redis::ReplyDeleter> reply;
-  reply = redis->command(cmd_args.begin(), cmd_args.end());
-}
-
-template <class T>
-void* SmartSimClient::_add_array_vals_to_buffer(void* data, int* dims, int n_dims,
-                                 void* buf, int buf_length)
-  {
-    //TODO we should check at some point that we don't exceed buf length
-    //TODO test in multi dimensions with each dimension having a different set of values (make sure
-    // (dimensions are independent))
-    if(n_dims > 1) {
-        T** current = (T**) data;
-        for(int i = 0; i < dims[0]; i++) {
-          buf = this->_add_array_vals_to_buffer<T>(*current, &dims[1], n_dims-1, buf, buf_length);
-          current++;
-        }
     }
     else {
-        memcpy(buf, data, sizeof(T)*dims[0]);
-        return &((T*)buf)[dims[0]];
-    }
-    return buf;
-  }
-
-void SmartSimClient::_put_rai_tensor(std::vector<std::string_view> cmd_args)
-{
-  int n_trials = 5;
-  bool success = true;
-  std::string key("<key placeholder>");
-  while (n_trials > 0)
-  {
-    try
-    {
-      if (redis_cluster)
-      {
-        redis_cluster->command(cmd_args.begin(), cmd_args.end());
+      try {
+        redis = new sw::redis::Redis(_get_ssdb());
+        n_connection_trials = -1;
       }
-      else
-      {
-        redis->command(cmd_args.begin(), cmd_args.end());
+      catch (sw::redis::TimeoutError &e) {
+        std::cout << "WARNING: Caught redis TimeoutError: " << e.what() << std::endl;
+        std::cout << "WARNING: TimeoutError occurred with initial client connection.";
+        std::cout << "WARNING: "<< n_connection_trials << " more trials will be made.";
+        n_connection_trials--;
+        std::this_thread::sleep_for(std::chrono::seconds(2));
       }
-      n_trials = -1;
+      redis_cluster = 0;
+      this->_populate_db_node_data(false);
     }
-    catch (sw::redis::IoError &e)
+  }
+
+  if(n_connection_trials==0)
+    throw std::runtime_error("A connection could not be "\
+                             "established to the redis database");
+
+  if(cluster)
+    this->_populate_db_node_data(true);
+  else
+    this->_populate_db_node_data(false);
+
+  this->_set_prefixes_from_env();
+
+  return;
+}
+
+SmartSimClient::~SmartSimClient() {
+  delete this->redis_cluster;
+  delete this->redis;
+}
+
+void SmartSimClient::put_dataset(DataSet& dataset)
+{
+  /* This function will place a DataSet into the database
+  */
+  CommandList cmds;
+  Command* cmd;
+
+  // Send the metadata message
+  cmd = cmds.add_command();
+  cmd->add_field("SET");
+  cmd->add_field(this->_put_prefix() + "{" +
+                 dataset.name + "}" + ".meta");
+  cmd->add_field_ptr(dataset.get_metadata_buf());
+
+  // Send the tensor data
+  DataSet::tensor_iterator it = dataset.tensor_begin();
+  DataSet::tensor_iterator it_end = dataset.tensor_end();
+  TensorBase* tensor = 0;
+  while(it != it_end) {
+    tensor = *it;
+    cmd = cmds.add_command();
+    cmd->add_field("AI.TENSORSET");
+    cmd->add_field(this->_put_prefix() + "{"
+                   + dataset.name + "}."
+                   + tensor->get_tensor_name());
+    cmd->add_field(tensor->get_tensor_type());
+    cmd->add_fields(tensor->get_tensor_dims());
+    cmd->add_field("BLOB");
+    cmd->add_field_ptr(tensor->get_data_buf());
+    it++;
+  }
+  this->_execute_commands(cmds);
+  return;
+}
+
+DataSet SmartSimClient::get_dataset(const std::string& name)
+{
+  /* This function will retrieve a dataset from the database
+  */
+
+  // Get the metadata message and construct DataSet
+  CommandReply reply;
+  Command cmd;
+  cmd.add_field("GET");
+  cmd.add_field(this->_get_prefix() +
+                "{" + std::string(name) +
+                "}" + ".meta");
+  reply =  this->_execute_command(cmd);
+
+  DataSet dataset = DataSet(name, reply.str(), reply.str_len());
+
+  // Loop through and add each tensor to the dataset
+  char** tensor_names;
+  int n_tensors;
+  dataset.get_meta(".tensors", "STRING", (void*&)tensor_names, n_tensors);
+
+  for(int i=0; i<n_tensors; i++) {
+    std::string t_name = this->_get_prefix() +
+                         "{" + dataset.name + "}."
+                             + tensor_names[i];
+    Command cmd;
+    cmd.add_field("AI.TENSORGET");
+    cmd.add_field(t_name);
+    cmd.add_field("META");
+    cmd.add_field("BLOB");
+    CommandReply reply;
+    reply = this->_execute_command(cmd);
+
+    std::vector<int> reply_dims = this->_get_tensor_dims(reply);
+    std::string_view blob = this->_get_tensor_data_blob(reply);
+    std::string type = this->_get_tensor_data_type(reply);
+    dataset.add_tensor_buf_only(tensor_names[i], type.c_str(),
+                                reply_dims, blob);
+  }
+  return dataset;
+}
+
+void SmartSimClient::rename_dataset(const std::string& name,
+                                    const std::string& new_name)
+{
+  /* This function will rename a dataset (all tensors
+  and metadata).
+  */
+  throw std::runtime_error("rename_dataset is incomplete");
+  return;
+}
+
+void SmartSimClient::copy_dataset(const std::string& src_name,
+                                  const std::string& dest_name)
+{
+  /* This function will copy a dataset (all tensors
+  and metadata).
+  */
+  throw std::runtime_error("copy_dataset is incomplete");
+  return;
+}
+
+void SmartSimClient::delete_dataset(const std::string& name)
+{
+  /* This function will delete a dataset (all tensors
+  and metadata).
+  */
+  throw std::runtime_error("delete_dataset is incomplete");
+  return;
+}
+
+void SmartSimClient::put_tensor(const std::string& key,
+                                const std::string& type,
+                                void* data,
+                                const std::vector<int>& dims)
+{
+  /* This function puts a tensor into the datastore
+  */
+
+  if(TENSOR_DATATYPES.count(type)<=0)
+    throw std::runtime_error("Invalid tensor type: " + \
+                             std::string(type));
+  TensorBase* tensor;
+  int data_type = TENSOR_TYPE_MAP.at(type);
+  switch(data_type) {
+    case DOUBLE_TENSOR_TYPE :
+      tensor = new Tensor<double>(key, type, data, dims);
+    break;
+    case FLOAT_TENSOR_TYPE :
+      tensor = new Tensor<float>(key, type, data, dims);
+    break;
+    case INT64_TENSOR_TYPE :
+      tensor = new Tensor<int64_t>(key, type, data, dims);
+    break;
+    case INT32_TENSOR_TYPE :
+      tensor = new Tensor<int32_t>(key, type, data, dims);
+    break;
+    case INT16_TENSOR_TYPE :
+      tensor = new Tensor<int16_t>(key, type, data, dims);
+    break;
+    case INT8_TENSOR_TYPE :
+      tensor = new Tensor<int8_t>(key, type, data, dims);
+    break;
+    case UINT16_TENSOR_TYPE :
+      tensor = new Tensor<uint16_t>(key, type, data, dims);
+    break;
+    case UINT8_TENSOR_TYPE :
+      tensor = new Tensor<uint8_t>(key, type, data, dims);
+    break;
+  }
+
+  CommandReply reply;
+  Command cmd;
+
+  cmd.add_field("AI.TENSORSET");
+  cmd.add_field(this->_put_prefix() + key);
+  cmd.add_field(type);
+  for(int i=0; i<dims.size(); i++)
+    cmd.add_field(std::to_string(dims[i]));
+  cmd.add_field("BLOB");
+  cmd.add_field_ptr(tensor->get_data_buf());
+  reply = this->_execute_command(cmd);
+
+  delete tensor;
+}
+
+void SmartSimClient::get_tensor(const std::string& key,
+                                const std::string& type,
+                                void* result,
+                                const std::vector<int>& dims)
+{
+  /* This function gets a tensor from the database and stores
+  it in the result pointer.
+  */
+  CommandReply reply;
+  Command cmd;
+
+  cmd.add_field("AI.TENSORGET");
+  cmd.add_field(this->_get_prefix() + key);
+  cmd.add_field("META");
+  cmd.add_field("BLOB");
+  reply = this->_execute_command(cmd);
+
+  std::vector<int> reply_dims = this->_get_tensor_dims(reply);
+
+  if(dims.size()!= reply_dims.size())
+    throw std::runtime_error("The dimensions of the fetched tensor "\
+                             "do not match the provided dimensions "\
+                             "of the user memory space.");
+
+  for(std::vector<int>::size_type i=0; i<reply_dims.size(); i++) {
+    if(dims[i]!=reply_dims[i]) {
+      throw std::runtime_error("The dimensions of the fetched tensor "\
+                               "do not match the provided dimensions "\
+                               "of the user memory space.");
+    }
+  }
+
+  std::string reply_type = this->_get_tensor_data_type(reply);
+  if(type.compare(reply_type)!=0)
+    throw std::runtime_error("The type of the fetched tensor "\
+                             "does not match the provided type.");
+
+  std::string_view blob = this->_get_tensor_data_blob(reply);
+
+  TensorBase* tensor;
+  int data_type = TENSOR_TYPE_MAP.at(type);
+  switch(data_type) {
+    case DOUBLE_TENSOR_TYPE :
+      tensor = new Tensor<double>(key, type, dims, blob);
+    break;
+    case FLOAT_TENSOR_TYPE :
+      tensor = new Tensor<float>(key, type, dims, blob);
+    break;
+    case INT64_TENSOR_TYPE :
+      tensor = new Tensor<int64_t>(key, type, dims, blob);
+    break;
+    case INT32_TENSOR_TYPE :
+      tensor = new Tensor<int32_t>(key, type, dims, blob);
+    break;
+    case INT16_TENSOR_TYPE :
+      tensor = new Tensor<int16_t>(key, type, dims, blob);
+    break;
+    case INT8_TENSOR_TYPE :
+      tensor = new Tensor<int8_t>(key, type, dims, blob);
+    break;
+    case UINT16_TENSOR_TYPE :
+      tensor = new Tensor<uint16_t>(key, type, dims, blob);
+    break;
+    case UINT8_TENSOR_TYPE :
+      tensor = new Tensor<uint8_t>(key, type, dims, blob);
+    break;
+  }
+  tensor->fill_data_from_buf(result, dims, type);
+  delete tensor;
+  return;
+}
+
+void SmartSimClient::rename_tensor(const std::string& key,
+                                   const std::string& new_key)
+{
+  /* This function moves a tensor from the key to the new_key.
+  If the db is a redis cluster and the two keys hash to
+  different nodes, copy and delete operations are performed,
+  otherwise a single move command is used.
+  */
+  uint16_t key_slot = 0;
+  uint16_t new_key_slot = 0;
+  if(this->redis_cluster) {
+    key_slot = this->_get_hash_slot(key);
+    new_key_slot = this->_get_hash_slot(new_key);
+  }
+
+  if(this->redis_cluster && key_slot!=new_key_slot) {
+    this->copy_tensor(key, new_key);
+    this->delete_tensor(key);
+  }
+  else {
+    CommandReply reply;
+    Command cmd;
+    cmd.add_field("MOVE");
+    cmd.add_field(key);
+    cmd.add_field(new_key);
+    reply = this->_execute_command(cmd);
+  }
+
+  return;
+}
+
+void SmartSimClient::delete_tensor(const std::string& key)
+{
+  /* This function will delete a tensor from the database
+  */
+  CommandReply reply;
+  Command cmd;
+  cmd.add_field("DEL");
+  cmd.add_field(key);
+
+  std::string hash_tag;
+  if(this->_has_hash_tag(key))
+    hash_tag = this->_get_hash_tag(key);
+
+  if(hash_tag.size()>0)
+    reply = this->_execute_command(cmd, hash_tag);
+  else
+    reply = this->_execute_command(cmd);
+  return;
+}
+
+void SmartSimClient::copy_tensor(const std::string& src_key,
+                                 const std::string& dest_key)
+{
+  /* This function copies a tensor from the src_key to the
+  dest_key.
+  */
+  this->_copy_key(src_key, dest_key);
+  return;
+}
+
+void SmartSimClient::set_model_from_file(const std::string& key,
+                                         const std::string& model_file,
+                                         const std::string& backend,
+                                         const std::string& device,
+                                         int batch_size,
+                                         int min_batch_size,
+                                         const std::string& tag,
+                                         const std::vector<std::string>& inputs,
+                                         const std::vector<std::string>& outputs)
+{
+  /*This function will set a model from the database that is saved
+  in a file.  It is assumed that the file is a binary file.
+  */
+  if(model_file.size()==0)
+    throw std::runtime_error("model_file is a required  "
+                             "parameter of set_model.");
+
+  std::ifstream fin(model_file, std::ios::binary);
+  std::ostringstream ostream;
+  ostream << fin.rdbuf();
+
+  const std::string tmp = ostream.str();
+  std::string_view model(tmp.data(), tmp.length());
+
+  this->set_model(key, model, backend, device, batch_size,
+                  min_batch_size, tag, inputs, outputs);
+  return;
+}
+
+void SmartSimClient::set_model(const std::string& key,
+                               const std::string_view& model,
+                               const std::string& backend,
+                               const std::string& device,
+                               int batch_size,
+                               int min_batch_size,
+                               const std::string& tag,
+                               const std::vector<std::string>& inputs,
+                               const std::vector<std::string>& outputs)
+{
+  /*This function will set a model from the provided buffer.
+  */
+  if(key.size()==0)
+    throw std::runtime_error("key is a required parameter "
+                             "of set_model.");
+
+  if(backend.size()==0)
+    throw std::runtime_error("backend is a required  "
+                             "parameter of set_model.");
+
+  if(backend.compare("TF")!=0) {
+    if(inputs.size() > 0)
+      throw std::runtime_error("INPUTS in the model set command "\
+                               "is only valid for TF models");
+    if(outputs.size() > 0)
+      throw std::runtime_error("OUTPUTS in the model set command "\
+                               "is only valid for TF models");
+  }
+
+  if(backend.compare("TF")!=0 && backend.compare("TFLITE")!=0 &&
+     backend.compare("TORCH")!=0 && backend.compare("ONNX")!=0) {
+      throw std::runtime_error(std::string(backend) +
+                                " is not a valid backend.");
+  }
+
+  if(device.size()==0)
+    throw std::runtime_error("device is a required  "
+                             "parameter of set_model.");
+
+  if(device.compare("CPU")!=0 &&
+     std::string(device).find("GPU")==std::string::npos) {
+       throw std::runtime_error(std::string(backend) +
+                                " is not a valid backend.");
+  }
+
+  std::string prefixed_key;
+  if(this->redis_cluster) {
+    std::vector<DBNode>::const_iterator node =
+      this->_db_nodes.cbegin();
+    std::vector<DBNode>::const_iterator end_node =
+      this->_db_nodes.cend();
+    while(node!=end_node)
     {
-      n_trials--;
-      std::cout << "WARNING: Caught redis IOError: " << e.what() << std::endl;
-      std::cout << "WARNING: Could not set key " << key << " in database. " << n_trials << " more trials will be made." << std::endl;
-    }
-  }
-  if (n_trials == 0)
-    throw std::runtime_error("Could not set " + std::string(key) + " in database due to redis IOError.");
-
-  if (!success)
-    throw std::runtime_error("Redis failed to receive key: " + std::string(key));
-
-  return;
-}
-
-
-template <class T>
-void SmartSimClient::put_tensor(std::string_view key, std::string_view type, int* dims, int n_dims, void* data)
-{
-  // Calculate the amount of memory to allocate for the data buffer
-  // TODO if the n_dims==1 we should just pass through the array without extra
-  // memory allocation
-
-  //TODO add check to return if n_dims = 0 and/or dims[0] == 0
-  //This should throw and error if anyting is 0
-  int n_bytes = 1;
-  for (int i = 0; i < n_dims; i++) {
-    n_bytes *= dims[i];
-  }
-  n_bytes *= sizeof(T);
-
-  T* buf = (T*)malloc(n_bytes);
-
-  SmartSimClient::_add_array_vals_to_buffer<T>(data, dims, n_dims, (void*)buf, n_bytes);
-
-  std::vector<std::string_view> cmd_args;
-  cmd_args.push_back("AI.TENSORSET");
-  cmd_args.push_back(key);
-  cmd_args.push_back(type);
-
-  std::vector<std::string> dim_strings;
-  for(int i = 0; i < n_dims; i++) {
-    dim_strings.push_back(std::to_string(dims[i]));
-  }
-
-  for(int i = 0; i < n_dims; i++) {
-    cmd_args.push_back(std::string_view(dim_strings[i].c_str(), dim_strings[i].length()));
-  }
-
-  cmd_args.push_back("BLOB");
-  cmd_args.push_back(std::string_view((char*)buf, n_bytes));
-
-  //std::cout<<"Cmd args:"<<std::endl;
-  //for(int i = 0; i < cmd_args.size(); i++)
-  //  std::cout<<cmd_args[i]<<std::endl;
-
-  this->_put_rai_tensor(cmd_args);
-
-  delete[] buf;
-
-  return;
-}
-
-void SmartSimClient::_get_tensor_dims(std::unique_ptr<redisReply, sw::redis::ReplyDeleter>& reply,
-                                      int** dims, int& n_dims)
-{
-  //This function will fill dims and set n_dims to the number of dimensions that are in the
-  //tensor get reply
-
-  //We are going to assume right now that the meta data reply is always in the same order
-  //and we are going to just index into the base reply.
-
-  if(reply->elements < 6)
-    throw std::runtime_error("The message does not have the correct number of fields");
-
-  redisReply* r = reply->element[3];
-
-  n_dims = r->elements;
-  (*dims) = new int[n_dims];
-
-  for(int i = 0; i < r->elements; i++)
-  {
-    redisReply* r_dim = r->element[i];
-    (*dims)[i] = r_dim->integer;
-  }
-
-  return;
-}
-
-void SmartSimClient::_get_tensor_data_blob(std::unique_ptr<redisReply, sw::redis::ReplyDeleter>& reply,
-                                           void** blob)
-{
-  //This function will fill dims and set n_dims to the number of dimensions that are in the
-  //tensor get reply
-
-  //We are going to assume right now that the meta data reply is always in the same order
-  //and we are going to just index into the base reply.
-
-  if(reply->elements < 6)
-    throw std::runtime_error("The message does not have the correct number of fields");
-
-  redisReply* r = reply->element[5];
-
-  (*blob) = malloc(r->len);
-  memcpy(*blob, r->str, r->len);
-
-  return;
-}
-
-template <class T>
-void SmartSimClient::_reformat_data_blob(void* value, int* dims, int n_dims, int& buf_position, void* buf)
-{
-  if(n_dims > 1) {
-    T** current = (T**) value;
-    for(int i = 0; i < dims[0]; i++) {
-      this->_reformat_data_blob<T>(*current, &dims[1], n_dims-1, buf_position, buf);
-      current++;
+      prefixed_key = "{" + node->prefix +
+                     "}." + std::string(key);
+      this->_set_model(prefixed_key, model, backend,
+                       device, batch_size, min_batch_size,
+                       tag, inputs, outputs);
+      node++;
     }
   }
   else {
-    T* buf_to_copy = &(((T*)buf)[buf_position]);
-    memcpy(value, buf_to_copy, dims[0]*sizeof(T));
-    buf_position += dims[0];
+    prefixed_key = std::string(key);
+    this->_set_model(prefixed_key, model, backend,
+                     device, batch_size, min_batch_size,
+                     tag, inputs, outputs);
   }
   return;
 }
 
-
-template <typename T>
-void SmartSimClient::get_tensor(std::string_view key, void* result)
+std::string_view SmartSimClient::get_model(const std::string& key)
 {
-
-  int n_trials = 5;
-  //Make sure no memory leaks
-  std::unique_ptr<redisReply, sw::redis::ReplyDeleter> reply;
-
-  while(n_trials > 0) {
-    try {
-      if(redis_cluster)
-        reply = redis_cluster->command("AI.TENSORGET", key, "META", "BLOB");
-      else
-        reply = redis->command("AI.TENSORGET", key, "META", "BLOB");
-      n_trials = -1;
-    }
-    catch (sw::redis::IoError& e) {
-      n_trials--;
-      std::cout<<"WARNING: Caught redis IOError: "<<e.what()<<std::endl;
-      std::cout<<"WARNING: Could not get key "<<key<<" from database. "<<n_trials<<" more trials will be made."<<std::endl;
-    }
-  }
-  if(n_trials == 0)
-    throw std::runtime_error("Could not retreive "+std::string(key)+" from database due to redis IOError.");
-
-  //This is a quick object inspection of the object.  Note that for
-  //   messages we should check the type and not just print out strings.
-  //   There is int, double, and string types possible in the message.
-  //Need check for if the reply is valid.
-  /*
-  std::cout<<"The get key is "<<key<<std::endl;
-  std::cout<<"The base reply string length is: "<<reply->len<<std::endl;
-  std::cout<<"The base type is "<<reply->type<<std::endl;
-  if(reply->str)
-    std::cout<<"The base reply string is: "<<reply->str<<std::endl;
-  for(int i = 0; i < reply->elements; i++) {
-      std::cout<<"*** Looking at sub element "<<i<<std::endl;
-      redisReply* r = reply->element[i];
-      std::cout<<"The sub element type is "<<r->type<<std::endl;
-      std::cout<<"The sub reply string length is: "<<r->len<<std::endl;
-      if(r->str)
-        std::cout<<"The sub reply string is: "<<r->str<<std::endl;
-      if(r->elements > 0) {
-        for(int i = 0; i < r->elements; i++) {
-          std::cout<<"*** *** Looking at subsub element "<<i<<std::endl;
-          std::cout<<"subsub element type is "<<r->type<<std::endl;
-          redisReply* rr = r->element[i];
-          std::cout<<"The subsub reply string length is: "<<rr->len<<std::endl;
-          if(rr->str)
-            std::cout<<"The subsub reply string is: "<<rr->str<<std::endl;
-        }
-      }
-
-  }
+  /* This function returns the model via the char* model
+  variable and the length reference variable.  Note that
+  the char* model pointer can contain null characters and
+  should be used only in conjunction with the length
+  variable.
   */
-/* For now we are only interested in the BLOB and will return the blob message without
-  checking size or dimensions (assuming 1D for for).  We will return a raw pointer to that address.
+  std::string prefixed_str;
+  if(this->redis_cluster) {
+    prefixed_str = "{" + this->_db_nodes[0].prefix +
+                   "}." + std::string(key);
+  }
+  else {
+    prefixed_str = std::string(key);
+  }
 
-*/
-  void* binary_data = 0;
-  int* dims = 0;
-  int n_dims = 0;
-  int pos = 0;
-  this->_get_tensor_dims(reply, &dims, n_dims);
-  this->_get_tensor_data_blob(reply, &binary_data);
-  this->_reformat_data_blob<T>(result, dims, n_dims, pos, binary_data);
+  Command cmd;
+  CommandReply reply;
+  cmd.add_field("AI.MODELGET");
+  cmd.add_field(prefixed_str);
+  cmd.add_field("BLOB");
+  reply = this->_execute_command(cmd);
 
-  delete[] dims;
+  char* model = this->_model_queries.allocate(reply.str_len());
+  std::memcpy(model, reply.str(), reply.str_len());
+  return std::string_view(model, reply.str_len());
 }
-// These routines potentially modify keys by adding a prefix
-bool SmartSimClient::key_exists(const char* key)
+
+void SmartSimClient::set_script_from_file(const std::string& key,
+                                          const std::string& device,
+                                          const std::string& script_file)
 {
-  if(redis_cluster)
-    return redis_cluster->exists(std::string_view(key));
-  else
-    return redis->exists(std::string_view(key));
+  /*This function will set a script that is saved in a file.
+  It is assumed it is an ascii file.
+  */
+  std::ifstream fin(script_file);
+  std::ostringstream ostream;
+  ostream << fin.rdbuf();
+
+  const std::string tmp = ostream.str();
+  std::string_view script(tmp.data(), tmp.length());
+
+  this->set_script(key, device, script);
+  return;
 }
 
-bool SmartSimClient::poll_key(const char* key, int poll_frequency_ms, int num_tries)
+
+void SmartSimClient::set_script(const std::string& key,
+                                const std::string& device,
+                                const std::string_view& script)
+{
+  /*This function will set a script from the provided buffer.
+  */
+  std::string prefixed_key;
+  if(this->redis_cluster) {
+    std::vector<DBNode>::const_iterator node =
+      this->_db_nodes.cbegin();
+    std::vector<DBNode>::const_iterator end_node =
+      this->_db_nodes.cend();
+    while(node!=end_node) {
+      prefixed_key = "{" + node->prefix +
+                     "}." + std::string(key);
+      this->_set_script(prefixed_key, device, script);
+      node++;
+    }
+  }
+  else {
+    prefixed_key = std::string(key);
+    this->_set_script(prefixed_key, device, script);
+  }
+  return;
+}
+
+std::string_view SmartSimClient::get_script(const std::string& key)
+{
+  /* This function returns the script via the char* script
+  variable and the length reference variable.  Note that
+  the char* script pointer can contain null characters and
+  should be used only in conjunction with the length
+  variable.
+  */
+  Command cmd;
+  std::string prefixed_str;
+  if(this->redis_cluster) {
+    prefixed_str = "{" + this->_db_nodes[0].prefix +
+                   "}." + std::string(key);
+  }
+  else {
+    prefixed_str = std::string(key);
+  }
+
+  cmd.add_field("AI.SCRIPTGET");
+  cmd.add_field(prefixed_str);
+  cmd.add_field("SOURCE");
+  CommandReply reply;
+  reply = this->_execute_command(cmd);
+
+  char* script = this->_model_queries.allocate(reply.str_len());
+  std::memcpy(script, reply.str(), reply.str_len());
+  return std::string_view(script, reply.str_len());
+}
+
+void SmartSimClient::run_model(const std::string& key,
+                               std::vector<std::string> inputs,
+                               std::vector<std::string> outputs)
+{
+  /*This function will run a RedisAI model.
+  */
+
+  //For this version of run model, we have to copy all
+  //input and output tensors, so we will randomly select
+  //a model.  We can't use rand, because MPI would then
+  //have the same random number across all ranks.  Instead
+  //We will choose it based on the db of the firs tinput tensor.
+
+  //Update input and output tensor names for ensembling prefix
+  std::vector<std::string>::iterator prefix_it;
+  std::vector<std::string>::iterator prefix_it_end;
+
+  prefix_it = inputs.begin();
+  prefix_it_end = inputs.end();
+  while(prefix_it != prefix_it_end) {
+    *prefix_it = this->_get_prefix() + *prefix_it;
+    prefix_it++;
+  }
+
+  prefix_it = outputs.begin();
+  prefix_it_end = outputs.end();
+  while(prefix_it != prefix_it_end) {
+    *prefix_it = this->_put_prefix() + *prefix_it;
+    prefix_it++;
+  }
+
+  uint16_t hash_slot = this->_get_hash_slot(inputs[0]);
+  uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
+                                              this->_n_db_nodes);
+  DBNode* db = &(this->_db_nodes[db_index]);
+
+  //Copy all input tensors so they are in the same hash slot
+  //as the model
+  std::unordered_map<std::string, std::string> tmp_input_map;
+  for(int i=0; i<inputs.size(); i++) {
+    std::string new_key = "{" + db->prefix + "}." +
+                          inputs[i] + ".TMP";
+    this->copy_tensor(inputs[i], new_key);
+    tmp_input_map.insert({new_key, inputs[i]});
+    inputs[i] = new_key;
+  }
+
+  //Copy all output tensors so they are in the same hash slot
+  //as the model
+  std::unordered_map<std::string, std::string> tmp_output_map;
+  for(int i=0; i<outputs.size(); i++) {
+    std::string new_key = "{" + db->prefix + "}." +
+                           outputs[i] + ".TMP";
+    tmp_output_map.insert({outputs[i], new_key});
+    outputs[i] = new_key;
+  }
+
+  std::string model_name = "{" + db->prefix +
+                           "}." + std::string(key);
+  Command cmd;
+
+  cmd.add_field("AI.MODELRUN");
+  cmd.add_field(model_name);
+  cmd.add_field("INPUTS");
+  cmd.add_fields(inputs);
+  cmd.add_field("OUTPUTS");
+  cmd.add_fields(outputs);
+  if(this->redis_cluster)
+    this->_execute_command(cmd, db->prefix);
+  else
+    this->_execute_command(cmd);
+
+
+  std::vector<std::string> keys_to_delete;
+
+  //Move temporary output to the correct location
+  std::unordered_map<std::string,std::string>::const_iterator j_it
+    = tmp_output_map.cbegin();
+  std::unordered_map<std::string,std::string>::const_iterator j_it_end
+    = tmp_output_map.cend();
+  while(j_it!=j_it_end) {
+    this->copy_tensor(j_it->second, j_it->first);
+    keys_to_delete.push_back(j_it->second);
+    j_it++;
+  }
+
+  //Delete temporary input and output tensors
+  std::unordered_map<std::string,std::string>::const_iterator i_it
+    = tmp_input_map.cbegin();
+  std::unordered_map<std::string,std::string>::const_iterator i_it_end
+    = tmp_input_map.cend();
+  while(i_it!=i_it_end) {
+    keys_to_delete.push_back(i_it->first);
+    i_it++;
+  }
+
+  CommandReply reply;
+  Command del_cmd;
+  del_cmd.add_field("DEL");
+  for(int i=0; i<keys_to_delete.size(); i++)
+    del_cmd.add_field(keys_to_delete[i]);
+  reply = this->_execute_command(del_cmd, db->prefix);
+
+  return;
+}
+
+void SmartSimClient::__run_model_dagrun(const std::string& key,
+                                        std::vector<std::string> inputs,
+                                         std::vector<std::string> outputs)
+{
+  /*This function will run a RedisAI model.  Because the RedisAI
+  AI.RUNMODEL and AI.DAGRUN commands assume that the tensors
+  and model are all on the same node.  As a result, we will
+  have to retrieve all input tensors that are not on the same
+  node as the model and set temporary
+  */
+
+  //TODO We need to make sure that no other clients are using the
+  //same keys and model because we may end up overwriting or having
+  //race conditions on who can use the model, etc.
+
+  DBNode* db = this->_get_model_script_db(key, inputs, outputs);
+
+  //Create list of input tensors that do not hash to db slots
+  std::unordered_set<std::string> remote_inputs;
+  for(int i=0; i<inputs.size(); i++) {
+    uint16_t hash_slot = this->_get_hash_slot(inputs[i]);
+    if(hash_slot < db->lower_hash_slot ||
+       hash_slot > db->upper_hash_slot)
+       remote_inputs.insert(inputs[i]);
+  }
+
+  //Retrieve tensors that do not hash to db,
+  //rename the tensors to {prefix}.tensor_name.TMP
+  //TODO we need to make sure users don't use the .TMP suffix
+  //or check that the key does not exist
+  for(int i=0; i<inputs.size(); i++) {
+    if(remote_inputs.count(inputs[i])>0) {
+      std::string new_key = "{" + db->prefix + "}." +
+                            inputs[i] + ".TMP";
+      this->copy_tensor(inputs[i], new_key);
+      remote_inputs.erase(inputs[i]);
+      remote_inputs.insert(new_key);
+      inputs[i] = new_key;
+    }
+  }
+
+  //Create a renaming scheme for output tensor
+  std::unordered_map<std::string, std::string> remote_outputs;
+  for(int i=0; i<outputs.size(); i++) {
+    uint16_t hash_slot = this->_get_hash_slot(outputs[i]);
+    if(hash_slot < db->lower_hash_slot ||
+       hash_slot > db->upper_hash_slot) {
+        std::string tmp_name = "{" + db->prefix + "}." +
+                               outputs[i] + ".TMP";
+        remote_outputs.insert({outputs[i], tmp_name});
+        outputs[i] = remote_outputs[outputs[i]];
+    }
+  }
+
+  std::string model_name = "{" + db->prefix +
+                           "}." + std::string(key);
+  Command cmd;
+
+  cmd.add_field("AI.DAGRUN");
+  cmd.add_field("LOAD");
+  cmd.add_field(std::to_string(inputs.size()));
+  cmd.add_fields(inputs);
+  cmd.add_field("PERSIST");
+  cmd.add_field(std::to_string(outputs.size()));
+  cmd.add_fields(outputs);
+  cmd.add_field("|>");
+  cmd.add_field("AI.MODELRUN");
+  cmd.add_field(model_name);
+  cmd.add_field("INPUTS");
+  cmd.add_fields(inputs);
+  cmd.add_field("OUTPUTS");
+  cmd.add_fields(outputs);
+  if(this->redis_cluster)
+    this->_execute_command(cmd, db->prefix);
+  else
+    this->_execute_command(cmd);
+
+  //Delete temporary input tensors
+  std::unordered_set<std::string>::const_iterator i_it
+    = remote_inputs.begin();
+  std::unordered_set<std::string>::const_iterator i_it_end
+    = remote_inputs.end();
+  while(i_it!=i_it_end) {
+    this->delete_tensor(*i_it);
+    i_it++;
+  }
+
+  //Move temporary output to the correct location and
+  //delete temporary output tensors
+  std::unordered_map<std::string, std::string>::const_iterator j_it
+    = remote_outputs.begin();
+  std::unordered_map<std::string, std::string>::const_iterator j_it_end
+    = remote_outputs.end();
+  while(j_it!=j_it_end) {
+    this->rename_tensor(j_it->second, j_it->first);
+    j_it++;
+  }
+
+  return;
+}
+
+void SmartSimClient::run_script(const std::string& key,
+                                const std::string& function,
+                                std::vector<std::string> inputs,
+                                std::vector<std::string> outputs)
+{
+  /*This function will run a RedisAI script.
+  */
+
+  //Update input and output tensor names for ensembling prefix
+  std::vector<std::string>::iterator prefix_it;
+  std::vector<std::string>::iterator prefix_it_end;
+
+  prefix_it = inputs.begin();
+  prefix_it_end = inputs.end();
+  while(prefix_it != prefix_it_end) {
+    *prefix_it = this->_get_prefix() + *prefix_it;
+    prefix_it++;
+  }
+
+  prefix_it = outputs.begin();
+  prefix_it_end = outputs.end();
+  while(prefix_it != prefix_it_end) {
+    *prefix_it = this->_put_prefix() + *prefix_it;
+    prefix_it++;
+  }
+
+
+  uint16_t hash_slot = this->_get_hash_slot(inputs[0]);
+  uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
+                                              this->_n_db_nodes);
+  DBNode* db = &(this->_db_nodes[db_index]);
+
+  //Copy all input tensors so they are in the same hash slot
+  //as the model
+  std::unordered_map<std::string, std::string> tmp_input_map;
+  for(int i=0; i<inputs.size(); i++) {
+    std::string new_key = "{" + db->prefix + "}." +
+                          inputs[i] + ".TMP";
+    this->copy_tensor(inputs[i], new_key);
+    tmp_input_map.insert({new_key, inputs[i]});
+    inputs[i] = new_key;
+  }
+
+  //Copy all output tensors so they are in the same hash slot
+  //as the model
+  std::unordered_map<std::string, std::string> tmp_output_map;
+  for(int i=0; i<outputs.size(); i++) {
+    std::string new_key = "{" + db->prefix + "}." +
+                           outputs[i] + ".TMP";
+    tmp_output_map.insert({outputs[i], new_key});
+    outputs[i] = new_key;
+  }
+
+  std::string script_name = "{" + db->prefix +
+                           "}." + std::string(key);
+  Command cmd;
+
+  cmd.add_field("AI.SCRIPTRUN");
+  cmd.add_field(script_name);
+  cmd.add_field(function);
+  cmd.add_field("INPUTS");
+  cmd.add_fields(inputs);
+  cmd.add_field("OUTPUTS");
+  cmd.add_fields(outputs);
+
+  if(this->redis_cluster)
+    this->_execute_command(cmd, db->prefix);
+  else
+    this->_execute_command(cmd);
+
+  std::vector<std::string> keys_to_delete;
+
+  //Move temporary output to the correct location
+  std::unordered_map<std::string,std::string>::const_iterator j_it
+    = tmp_output_map.cbegin();
+  std::unordered_map<std::string,std::string>::const_iterator j_it_end
+    = tmp_output_map.cend();
+  while(j_it!=j_it_end) {
+    this->copy_tensor(j_it->second, j_it->first);
+    keys_to_delete.push_back(j_it->second);
+    j_it++;
+  }
+
+  //Delete temporary input and output tensors
+  std::unordered_map<std::string,std::string>::const_iterator i_it
+    = tmp_input_map.cbegin();
+  std::unordered_map<std::string,std::string>::const_iterator i_it_end
+    = tmp_input_map.cend();
+  while(i_it!=i_it_end) {
+    keys_to_delete.push_back(i_it->first);
+    i_it++;
+  }
+
+  CommandReply reply;
+  Command del_cmd;
+  del_cmd.add_field("DEL");
+  for(int i=0; i<keys_to_delete.size(); i++)
+    del_cmd.add_field(keys_to_delete[i]);
+  reply = this->_execute_command(del_cmd, db->prefix);
+
+  return;
+}
+
+inline void SmartSimClient::_set_model(const std::string& model_name,
+                                       std::string_view model,
+                                       const std::string& backend,
+                                       const std::string& device,
+                                       int batch_size,
+                                       int min_batch_size,
+                                       const std::string& tag,
+                                       const std::vector<std::string>& inputs,
+                                       const std::vector<std::string>& outputs
+                                       )
+{
+  /*This function will set the provided model into the database
+  */
+  Command cmd;
+  cmd.add_field("AI.MODELSET");
+  cmd.add_field(model_name);
+  cmd.add_field(backend);
+  cmd.add_field(device);
+  if(tag.size()>0) {
+    cmd.add_field("TAG");
+    cmd.add_field(tag);
+  }
+  if(batch_size>0) {
+    cmd.add_field("BATCHSIZE");
+    cmd.add_field(std::to_string(batch_size));
+  }
+  if(min_batch_size>0) {
+    cmd.add_field("MINBATCHSIZE");
+    cmd.add_field(std::to_string(min_batch_size));
+  }
+  if(inputs.size()>0) {
+    cmd.add_field("INPUTS");
+    cmd.add_fields(inputs);
+  }
+  if(outputs.size()>0) {
+    cmd.add_field("OUTPUTS");
+    cmd.add_fields(outputs);
+  }
+  cmd.add_field("BLOB");
+  cmd.add_field_ptr(model);
+  this->_execute_command(cmd);
+  return;
+}
+
+inline void SmartSimClient::_set_script(const std::string& script_name,
+                                        const std::string& device,
+                                        std::string_view script)
+{
+  /*This function will set the provided script into the database.
+  */
+  Command cmd;
+  cmd.add_field("AI.SCRIPTSET");
+  cmd.add_field(script_name);
+  cmd.add_field(device);
+  cmd.add_field("SOURCE");
+  cmd.add_field_ptr(script);
+  this->_execute_command(cmd);
+  return;
+}
+
+inline void SmartSimClient::_copy_key(const std::string& src_key,
+                                      const std::string& dest_key)
+{
+  /* This function copies a key to a new name via DUMP
+  and RESTORE commands.
+  */
+  CommandReply dump_reply;
+  Command dump_cmd;
+  dump_cmd.add_field("DUMP");
+  dump_cmd.add_field(src_key);
+
+  std::string dump_hash_tag;
+  if(this->_has_hash_tag(src_key))
+    dump_hash_tag = this->_get_hash_tag(src_key);
+
+  if(dump_hash_tag.size()>0)
+    dump_reply = this->_execute_command(dump_cmd, dump_hash_tag);
+  else
+    dump_reply = this->_execute_command(dump_cmd);
+
+  std::string_view tensor_view =
+    std::string_view(dump_reply.str(), dump_reply.str_len());
+
+  CommandReply rest_reply;
+  Command rest_cmd;
+  rest_cmd.add_field("RESTORE");
+  rest_cmd.add_field(dest_key);
+  rest_cmd.add_field("0");
+  rest_cmd.add_field_ptr(tensor_view);
+  rest_cmd.add_field("REPLACE");
+
+  std::string rest_hash_key;
+  if(this->_has_hash_tag(dest_key))
+    rest_hash_key = this->_get_hash_tag(dest_key);
+
+  if(rest_hash_key.size()>0)
+    rest_reply = this->_execute_command(rest_cmd, rest_hash_key);
+  else
+    rest_reply = this->_execute_command(rest_cmd);
+
+  rest_reply = this->_execute_command(rest_cmd);
+  return;
+}
+
+void SmartSimClient::_populate_db_node_data(bool cluster)
+{
+  /*This function retrieves hash slot information from the cluster
+  and stores it in the client data structure.  This is currently
+  accomplished with a "CLUSTER SLOTS" command but could be
+  accomplished later with direct call of redis library
+  hash slot assignment subroutines.
+  */
+
+  CommandReply reply;
+  Command cmd;
+  if(cluster) {
+    cmd.add_field("CLUSTER");
+    cmd.add_field("SLOTS");
+    reply = this->_execute_command(cmd);
+    this->_parse_reply_for_slots(reply);
+  }
+  else {
+    this->_db_nodes = std::vector<DBNode>(1);
+    this->_db_nodes[0].lower_hash_slot = 0;
+    this->_db_nodes[0].upper_hash_slot = 16384;
+    //Get the node and port
+    std::string node_port = this->_get_ssdb();
+    std::string::size_type i = node_port.find("tcp://");
+    if (i != std::string::npos)
+      node_port.erase(i, 6);
+    i = node_port.find(":");
+    if (i == std::string::npos)
+      throw std::runtime_error("SSDB is not formatted correctly.");
+    this->_db_nodes[0].ip = node_port.substr(0, i);
+    this->_db_nodes[0].port = atoi(node_port.substr(i).c_str());
+    this->_db_nodes[0].prefix = std::string(this->_get_crc16_prefix(
+                                this->_db_nodes[0].lower_hash_slot),2);
+  }
+  return;
+}
+
+void SmartSimClient::_parse_reply_for_slots(CommandReply& reply)
+{
+  /*This function parses a CommandReply for cluster slot
+  information.
+  Each reply element of the main message, of which there should
+  be n_db_nodes, is:
+   0) (integer) min slot
+   1) (integer) max slot
+   2) 0) "ip address"
+      1) (integer) port
+      2) "name"
+  */
+
+  this->_n_db_nodes = reply.n_elements();
+  this->_db_nodes = std::vector<DBNode>(this->_n_db_nodes);
+
+  for(int i=0; i<this->_n_db_nodes; i++) {
+    this->_db_nodes[i].lower_hash_slot = reply[i][0].integer();
+    this->_db_nodes[i].upper_hash_slot = reply[i][1].integer();
+    this->_db_nodes[i].ip = std::string(reply[i][2][0].str(),
+                                        reply[i][2][0].str_len());
+    this->_db_nodes[i].port = reply[i][2][1].integer();
+    this->_db_nodes[i].name = std::string(reply[i][2][2].str(),
+                                          reply[i][2][2].str_len());
+    bool acceptable_prefix = false;
+    int n_hashes = this->_db_nodes[i].upper_hash_slot -
+                   this->_db_nodes[i].lower_hash_slot + 1;
+    int k = 0;
+    while(!acceptable_prefix && k<=n_hashes) {
+      this->_db_nodes[i].prefix = std::string(this->_get_crc16_prefix(
+                                  this->_db_nodes[i].lower_hash_slot+k),2);
+      std::string prefix = this->_db_nodes[i].prefix;
+      bool found_bracket = false;
+      for(int j=0; j<prefix.size(); j++) {
+        if(prefix[j] == '}')
+          found_bracket = true;
+      }
+      if(!found_bracket)
+        acceptable_prefix=true;
+      k++;
+    }
+    if(k>n_hashes)
+      throw std::runtime_error("A prefix could not be generated "\
+                              "for this cluster config.");
+  }
+  //Put the vector of db nodes in order based on lower hash slot
+  std::sort(this->_db_nodes.begin(), this->_db_nodes.end());
+  return;
+}
+
+std::vector<int> SmartSimClient::_get_tensor_dims(CommandReply& reply)
+{
+  /* This function will fill a vector with the dimensions of the
+  tensor.  We assume right now that the META reply is always
+  in the same order and we can index base reply elements array;
+  */
+
+  if(reply.n_elements() < 6)
+    throw std::runtime_error("The message does not have the "\
+                             "correct number of fields");
+
+  int n_dims = reply[3].n_elements();
+  std::vector<int> dims(n_dims);
+
+  for(int i = 0; i < n_dims; i++) {
+    dims[i] = reply[3][i].integer();
+  }
+
+  return dims;
+}
+
+std::string_view SmartSimClient::_get_tensor_data_blob(CommandReply& reply)
+{
+  /* Returns a string view of the data tensor blob value
+  */
+
+  //We are going to assume right now that the meta data reply
+  //is always in the same order and we are going to just
+  //index into the base reply.
+
+  if(reply.n_elements() < 6)
+    throw std::runtime_error("The message does not have the "\
+                            "correct number of fields");
+
+  return std::string_view(reply[5].str(), reply[5].str_len());
+}
+
+std::string SmartSimClient::_get_tensor_data_type(CommandReply& reply)
+{
+  /* Returns a string of the tensor type
+  */
+
+  //We are going to assume right now that the meta data reply
+  //is always in the same order and we are going to just
+  //index into the base reply.
+
+  if(reply.n_elements() < 2)
+    throw std::runtime_error("The message does not have the correct "\
+                             "number of fields");
+
+  return std::string(reply[1].str(), reply[1].str_len());
+}
+
+
+// These routines potentially modify keys by adding a prefix
+bool SmartSimClient::key_exists(const std::string& key)
+{
+  std::string_view key_view(key.c_str(), key.size());
+  if(redis_cluster)
+    return redis_cluster->exists(key_view);
+  else
+    return redis->exists(key_view);
+}
+
+bool SmartSimClient::poll_key(const std::string& key,
+                              int poll_frequency_ms,
+                              int num_tries)
 {
   bool key_exists = false;
 
@@ -397,3 +1143,339 @@ bool SmartSimClient::poll_key(const char* key, int poll_frequency_ms, int num_tr
     return false;
 }
 
+void SmartSimClient::_execute_commands(CommandList& cmds,
+                                       std::string prefix)
+{
+  /* This function executes a series of Command objects
+  contained in a CommandList
+  */
+
+  CommandList::iterator cmd = cmds.begin();
+  CommandList::iterator cmd_end = cmds.end();
+
+  while(cmd != cmd_end) {
+    this->_execute_command(**cmd, prefix);
+    cmd++;
+  }
+}
+
+CommandReply SmartSimClient::_execute_command(Command& cmd,
+                                              std::string prefix)
+{
+  /* This function executes a Command
+  */
+
+  Command::iterator cmd_fields_start = cmd.begin();
+  Command::iterator cmd_fields_end = cmd.end();
+
+  CommandReply reply;
+
+  //TODO we need to change the key and success to
+  //false when we can check the status of Reply
+  int n_trials = 100;
+  bool success = true;
+
+  while (n_trials > 0 && success)
+  {
+    try
+    {
+      if(prefix.size()>0) {
+        const std::string_view sv_prefix(prefix.c_str(), prefix.size());
+        sw::redis::Redis server = this->redis_cluster->redis(sv_prefix, false);
+        reply = server.command(cmd_fields_start, cmd_fields_end);
+      }
+      else if (this->redis_cluster) {
+        reply = redis_cluster->command(cmd_fields_start, cmd_fields_end);
+      }
+      else {
+        reply = redis->command(cmd_fields_start, cmd_fields_end);
+      }
+
+      if(reply.has_error()==0) {
+        n_trials = -1;
+      }
+      else {
+        n_trials = 0;
+      }
+    }
+    catch (sw::redis::TimeoutError &e)
+    {
+      n_trials--;
+      std::cout << "WARNING: Caught redis TimeoutError: " << e.what() << std::endl;
+      std::cout << "WARNING: Could not execute command " << cmd.first_field()
+                << " and " << n_trials << " more trials will be made."
+                << std::endl << std::flush;
+      std::this_thread::sleep_for(std::chrono::seconds(2));
+    }
+    catch (sw::redis::IoError &e)
+    {
+      n_trials--;
+      std::cout << "WARNING: Caught redis IOError: " << e.what() << std::endl;
+      std::cout << "WARNING: Could not execute command " << cmd.first_field()
+                << " and " << n_trials << " more trials will be made."
+                << std::endl << std::flush;
+    }
+    catch (...) {
+      n_trials--;
+      std::cout << "WARNING: Could not execute command " << cmd.first_field()
+                << " and " << n_trials << " more trials will be made."
+                << std::endl << std::flush;
+      std::cout << "Error command = "<<cmd.to_string()<<std::endl;
+      throw;
+    }
+  }
+  if (n_trials == 0)
+    success = false;
+
+  if (!success) {
+    if(reply.has_error()>0)
+      reply.print_reply_error();
+    throw std::runtime_error("Redis failed to execute command: " +
+                              cmd.to_string());
+  }
+
+  return reply;
+}
+
+std::string SmartSimClient::_get_ssdb()
+{
+  std::string env = std::string(getenv("SSDB"));
+
+  if (env.size()==0)
+    throw std::runtime_error("The environment variable SSDB "\
+                             "must be set to use the client.");
+
+  std::vector<std::string> hosts_ports;
+
+  size_t i_pos = 0;
+  size_t j_pos = env.find(';');
+  while(j_pos!=std::string::npos) {
+      hosts_ports.push_back("tcp://"+
+        env.substr(i_pos, j_pos-i_pos+1));
+      i_pos = j_pos + 1;
+      j_pos = env.find(";", i_pos);
+  }
+
+  std::chrono::high_resolution_clock::time_point t =
+    std::chrono::high_resolution_clock::now();
+
+  srand(std::chrono::time_point_cast<std::chrono::nanoseconds>(t).time_since_epoch().count());
+  int hp = rand()%hosts_ports.size();
+  return hosts_ports[hp];
+}
+
+uint64_t SmartSimClient::_crc16_inverse(uint64_t remainder)
+{
+  /* This function inverts the crc16 process
+  to return a message that will result in the
+  provided crc16 remainder.
+  */
+  uint64_t digit = 1;
+  uint64_t poly = 69665; //x^16 + x^12 + x^5 + 1
+
+  for(int i=0; i<16; i++) {
+    if(remainder&digit)
+      remainder = remainder^poly;
+    digit=digit<<1;
+    poly=poly<<1;
+  }
+  return remainder;
+}
+
+char* SmartSimClient::_get_crc16_prefix(uint64_t hash_slot)
+{
+    /* This takes hash slot and returns a
+    two character prefix (potentially with
+    null characters)
+    */
+    uint64_t byte_filter = 255;
+    uint64_t crc_out = this->_crc16_inverse(hash_slot);
+    crc_out = crc_out >> 16;
+    //Get the two character prefix
+    char* prefix = new char[2];
+    for(int i=1; i>=0; i--) {
+        prefix[i] = (crc_out&byte_filter);
+        crc_out = crc_out>>8;
+    }
+    return prefix;
+}
+
+DBNode* SmartSimClient::_get_model_script_db(const std::string& name,
+                                            std::vector<std::string>& inputs,
+                                            std::vector<std::string>& outputs)
+{
+  /* This function calculates the optimal model name to use
+  to run the provided inputs.  If a cluster is not being used,
+  the model name is returned, else a prefixed model name is returned.
+  */
+
+  //TODO we should randomly choose the max if there are multiple
+  //maxes
+  if(!this->redis_cluster)
+    return &(this->_db_nodes[0]);
+
+  std::vector<int> hash_slot_tally(this->_n_db_nodes, 0);
+
+  for(int i=0; i<inputs.size(); i++) {
+    uint16_t hash_slot = this->_get_hash_slot(inputs[i]);
+    uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
+                                                this->_n_db_nodes);
+    hash_slot_tally[db_index]++;
+  }
+
+  for(int i=0; i<outputs.size(); i++) {
+    uint16_t hash_slot = this->_get_hash_slot(outputs[i]);
+    uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
+                                                this->_n_db_nodes);
+    hash_slot_tally[db_index]++;
+  }
+
+  //Determine which DBNode has the most hashes
+  int max_hash = -1;
+  DBNode* db = 0;
+  for(int i=0; i<this->_n_db_nodes; i++) {
+    if(hash_slot_tally[i] > max_hash) {
+      max_hash = hash_slot_tally[i];
+      db = &(this->_db_nodes[i]);
+    }
+  }
+  return db;
+}
+
+bool SmartSimClient::_has_hash_tag(const std::string& key)
+{
+  /* This function determines if the key has a hash
+  slot.
+  */
+
+  size_t first = key.find('{');
+  size_t second = key.find('}');
+  if(first == std::string::npos ||
+     second == std::string::npos)
+    return false;
+  else if(second < first)
+    return false;
+  else
+    return true;
+}
+
+std::string SmartSimClient::_get_hash_tag(const std::string& key)
+{
+  /* This function determines if the key has a hash
+  slot.
+  */
+
+  size_t first = key.find('{');
+  size_t second = key.find('}');
+  if(first == std::string::npos ||
+     second == std::string::npos)
+    return key;
+  else if(second < first)
+    return key;
+  else
+    return key.substr(first,second-first+1);
+}
+
+uint16_t SmartSimClient::_get_dbnode_index(uint16_t hash_slot,
+                                           unsigned lhs, unsigned rhs)
+{
+  /*  This is a binomial search to determine the
+  DBNode that is responsible for the hash slot.
+  */
+  uint16_t m = (lhs + rhs)/2;
+  if(this->_db_nodes[m].lower_hash_slot<=hash_slot &&
+     this->_db_nodes[m].upper_hash_slot>=hash_slot) {
+       return m;
+     }
+  else {
+    if(this->_db_nodes[m].lower_hash_slot > hash_slot)
+      return this->_get_dbnode_index(hash_slot, lhs, m-1);
+    else
+      return this->_get_dbnode_index(hash_slot, m+1, rhs);
+  }
+}
+
+uint16_t SmartSimClient::_get_hash_slot(const std::string& key)
+{
+  /* This function returns the hash slot of the key.
+  */
+  std::string hash_key;
+  if(this->_has_hash_tag(key))
+    hash_key = this->_get_hash_tag(key);
+  else
+    hash_key = key;
+  return sw::redis::crc16(hash_key.c_str(),
+                          hash_key.size()) % 16384;
+}
+
+void SmartSimClient::_set_prefixes_from_env()
+{
+  const char* keyout_p = std::getenv("SSKEYOUT");
+  if (keyout_p)
+    this->_put_key_prefix = keyout_p;
+  else
+    this->_put_key_prefix.clear();
+
+  char* keyin_p = std::getenv("SSKEYIN");
+  if(keyin_p) {
+    char* a = &keyin_p[0];
+    char* b = a;
+    char parse_char = ';';
+    while (*b) {
+      if(*b==parse_char) {
+	if(a!=b)
+	  this->_get_key_prefixes.push_back(std::string(a, b-a));
+	a=++b;
+      }
+      else
+	b++;
+    }
+    if(a!=b)
+      this->_get_key_prefixes.push_back(std::string(a, b-a));
+  }
+
+  if (this->_get_key_prefixes.size() > 0)
+    this->set_data_source(this->_get_key_prefixes[0].c_str());
+}
+
+void SmartSimClient::set_data_source(std::string source_id)
+{
+  /* This function sets the prefix for fetching keys
+  from the database
+  */
+  bool valid_prefix = false;
+  int num_prefix = _get_key_prefixes.size();
+  int i = 0;
+  for (i=0; i<num_prefix; i++) {
+    if (this->_get_key_prefixes[i].compare(source_id)==0) {
+      valid_prefix = true;
+      break;
+    }
+  }
+
+  if (valid_prefix)
+    this->_get_key_prefix = this->_get_key_prefixes[i];
+  else
+    throw std::runtime_error("Client error: data source " +
+			     std::string(source_id) +
+			     "could not be found during client "+
+			     "initialization.");
+}
+
+inline std::string SmartSimClient::_put_prefix()
+{
+  std::string prefix;
+  if(this->_put_key_prefix.size()>0)
+    prefix =  this->_put_key_prefix + ".";
+  return prefix;
+
+}
+
+inline std::string SmartSimClient::_get_prefix()
+{
+  std::string prefix;
+  if(this->_get_key_prefix.size()>0)
+    prefix =  this->_get_key_prefix + ".";
+  return prefix;
+
+}
