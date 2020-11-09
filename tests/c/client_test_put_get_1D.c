@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <mpi.h>
 
-int put_get_1D_array_double_double(int* dims, int n_dims,
+int put_get_1D_array_double(int* dims, int n_dims,
                   char* key_suffix, int key_suffix_length)
 {
   void* client = SmartSimCClient(true);
@@ -19,14 +19,14 @@ int put_get_1D_array_double_double(int* dims, int n_dims,
   int rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  //TODO fix rank_str to work with MPI runs
-  char* prefix_str = "1D_tensor_test_rank_";
-  char* rank_str = "0";
+  if(rank > 9)
+    printf("%s", "C test does not support MPI ranks "\
+                 "greater than 9.");
 
-  if(rank > 0) {
-    printf("%s", "C test is not implemented with MPI yet.");
-    return -1;
-  }
+  char* prefix_str = "1D_tensor_test_rank_";
+  char* rank_str = malloc(2*sizeof(char));
+  rank_str[0] = rank + '0';
+  rank_str[1] = 0;
 
   size_t prefix_str_length = strlen(prefix_str);
   size_t rank_str_length = strlen(rank_str);
@@ -62,6 +62,8 @@ int put_get_1D_array_double_double(int* dims, int n_dims,
     }
   }
 
+  free(rank_str);
+  free(key);
   free(array);
   free(result);
   return 0;
@@ -78,8 +80,8 @@ int main(int argc, char* argv[]) {
   char* suffix = "_dbl_c";
   size_t suffix_length = strlen(suffix);
 
-  int result =  put_get_1D_array_double_double(dims, n_dims,
-                                      suffix, suffix_length);
+  int result =  put_get_1D_array_double(dims, n_dims,
+                                        suffix, suffix_length);
   free(dims);
   MPI_Finalize();
   printf("%s","Test passed: ");
