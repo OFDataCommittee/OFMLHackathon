@@ -224,8 +224,8 @@ protected:
                                     );
 
   //! Get a prefix for a model or script based on the hash slot
-  char* _get_crc16_prefix(uint64_t hash_slot /*!< The hash slot*/
-                          );
+  std::string _get_crc16_prefix(uint64_t hash_slot /*!< The hash slot*/
+                                );
 
   //! Perform an inverse CRC16 calculation
   uint64_t _crc16_inverse(uint64_t remainder /*!< The remainder of the CRC16 calculation*/

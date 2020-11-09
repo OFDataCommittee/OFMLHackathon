@@ -1001,8 +1001,8 @@ void SmartSimClient::_populate_db_node_data(bool cluster)
       throw std::runtime_error("SSDB is not formatted correctly.");
     this->_db_nodes[0].ip = node_port.substr(0, i);
     this->_db_nodes[0].port = atoi(node_port.substr(i).c_str());
-    this->_db_nodes[0].prefix = std::string(this->_get_crc16_prefix(
-                                this->_db_nodes[0].lower_hash_slot),2);
+    this->_db_nodes[0].prefix = this->_get_crc16_prefix(
+                                this->_db_nodes[0].lower_hash_slot);
   }
   return;
 }
@@ -1036,8 +1036,8 @@ void SmartSimClient::_parse_reply_for_slots(CommandReply& reply)
                    this->_db_nodes[i].lower_hash_slot + 1;
     int k = 0;
     while(!acceptable_prefix && k<=n_hashes) {
-      this->_db_nodes[i].prefix = std::string(this->_get_crc16_prefix(
-                                  this->_db_nodes[i].lower_hash_slot+k),2);
+      this->_db_nodes[i].prefix = this->_get_crc16_prefix(
+                                  this->_db_nodes[i].lower_hash_slot+k);
       std::string prefix = this->_db_nodes[i].prefix;
       bool found_bracket = false;
       for(int j=0; j<prefix.size(); j++) {
@@ -1284,7 +1284,7 @@ uint64_t SmartSimClient::_crc16_inverse(uint64_t remainder)
   return remainder;
 }
 
-char* SmartSimClient::_get_crc16_prefix(uint64_t hash_slot)
+std::string SmartSimClient::_get_crc16_prefix(uint64_t hash_slot)
 {
     /* This takes hash slot and returns a
     two character prefix (potentially with
@@ -1299,7 +1299,9 @@ char* SmartSimClient::_get_crc16_prefix(uint64_t hash_slot)
         prefix[i] = (crc_out&byte_filter);
         crc_out = crc_out>>8;
     }
-    return prefix;
+    std::string prefix_str = std::string(prefix, 2);
+    delete[] prefix;
+    return prefix_str;
 }
 
 DBNode* SmartSimClient::_get_model_script_db(const std::string& name,
