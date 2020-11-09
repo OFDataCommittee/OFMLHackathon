@@ -11,6 +11,17 @@ void* SmartSimCClient(bool cluster)
 }
 
 extern "C"
+void DeleteCClient(void* c_client)
+{
+  /* This function frees the memory associated
+  with the c client.
+  */
+  SmartSimClient* s = (SmartSimClient*)c_client;
+  delete s;
+  return;
+}
+
+extern "C"
 void put_dataset(void* c_client, const void* dataset)
 {
   /* Put a dataset into the database.

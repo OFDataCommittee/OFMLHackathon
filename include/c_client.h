@@ -13,6 +13,10 @@ extern "C" {
 void* SmartSimCClient(bool cluster /*!< Flag to indicate if a database cluster is being used*/
                      );
 
+//! SmartSimClient C-client destructor
+void DeleteCClient(void* c_client /*!< The c client to use for communication*/
+                   );
+
 //! Put a DataSet object into the database
 void put_dataset(void* c_client /*!< The c client to use for communication*/,
                  const void* dataset /*!< The DataSet object to send*/
