@@ -11,7 +11,7 @@ void put_get_1D_array(
         std::string type,
         std::string key_suffix="")
 {
-  SmartSimClient client(true);
+  SmartSimClient client(false);
 
   //Allocate and fill arrays
   T_send* array = (T_send*)malloc(dims[0]*sizeof(T_send));

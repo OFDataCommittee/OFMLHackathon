@@ -2,6 +2,11 @@
 Code generators
 ***************
 
+.. note::
+
+   The code generators in this directory are based on the 0.1.0-alpha release
+   of SmartSim and are considered to be deprecated.
+
 Why Generate Code?
 ==================
 

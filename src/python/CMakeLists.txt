@@ -2,39 +2,69 @@
 #-------------------------------------------------------------------------------------------------------------------
 # Setup python bindings
 #-------------------------------------------------------------------------------------------------------------------
-find_package(NUMPY 	           REQUIRED)
-find_package(pybind11 CONFIG   REQUIRED)
 
+project(silc-python)
+cmake_minimum_required(VERSION 3.10)
 
+set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ version selection")  # or 11, 14, 17, 20
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-IF(NOT DEFINED PYTHON_MODULE_INSTALL_DIR OR PYTHON_MODULE_INSTALL_DIR MATCHES "")
+add_subdirectory($ENV{PYBIND_INSTALL_PATH} $ENV{PYBIND_INSTALL_PATH}/build)
 
-    execute_process(
-      COMMAND "${PYTHON_EXECUTABLE}" -c "from __future__ import print_function; from distutils.sysconfig import get_python_lib; print(get_python_lib())"
-      OUTPUT_VARIABLE PYTHON_SITE
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-    SET(PYTHON_MODULE_INSTALL_DIR ${PYTHON_SITE})
-
+# Determine where the hiredis library is based on if an environment variable
+# is set, and if not, it can be found in the $PATH directory
+if(DEFINED ENV{HIREDIS_INSTALL_PATH})
+	   string(CONCAT HIREDIS_LIB_PATH $ENV{HIREDIS_INSTALL_PATH} "/lib")
+	   find_library(HIREDIS_LIB hiredis PATHS ${HIREDIS_LIB_PATH} NO_DEFAULT_PATH)
+	   string(CONCAT HIREDIS_INCLUDE_PATH $ENV{HIREDIS_INSTALL_PATH} "/include/")
+else()
+     	   find_library(HIREDIS_LIB hiredis PATH_SUFFIXES "/lib")
+	   find_path(HIREDIS_INCLUDE_PATH hiredis PATH_SUFFIXES "/include")
 endif()
 
-SET(PYTHON_MODULE_INSTALL_DIR ${PYTHON_MODULE_INSTALL_DIR}
-    CACHE PATH "where to install the Python package" FORCE)
+# Determine where the redis++ library is based on if an environment variable
+# is set, and if not, it can be found in the $PATH directory
+if(DEFINED ENV{REDISPP_INSTALL_PATH})
+	   string(CONCAT REDISPP_LIB_PATH $ENV{REDISPP_INSTALL_PATH} "/lib")
+	   find_library(REDISPP_LIB redis++ PATHS ${REDISPP_LIB_PATH} )
+	   string(CONCAT REDISPP_INCLUDE_PATH $ENV{REDISPP_INSTALL_PATH} "/include/")
+else()
+     	   find_library(REDISPP_LIB redis++ PATH_SUFFIXES "/lib")
+	   find_path(REDISPP_INCLUDE_PATH redis++ PATH_SUFFIXES "/include")
+endif()
 
+# Determine where the protobuf library is based on if an environment variable
+# is set, and if not, it can be found in the $PATH directory
+if(DEFINED ENV{PROTOBUF_INSTALL_PATH})
+	   string(CONCAT PROTOBUF_LIB_PATH $ENV{PROTOBUF_INSTALL_PATH} "/lib")
+	   find_library(PROTOBUF_LIB protobuf PATHS ${PROTOBUF_LIB_PATH} NO_DEFAULT_PATH)
+	   string(CONCAT PROTOBUF_INCLUDE_PATH $ENV{PROTOBUF_INSTALL_PATH} "/include/")
+else()
+     	   find_library(PROTOBUF_LIB protobuf PATH_SUFFIXES "/lib")
+	   find_path(PROTOBUF_INCLUDE_PATH protobuf PATH_SUFFIXES "/include")
+endif()
 
-# temporary python module dir
+include_directories(SYSTEM
+    ../../include
+	../../utils/protobuf
+    /usr/local/include
+    ${HIREDIS_INCLUDE_PATH}
+    ${REDISPP_INCLUDE_PATH}
+    ${PROTOBUF_INCLUDE_PATH}
+)
 
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/python/module/${PY_MOD_NAME})
+set(CLIENT_LIBRARIES ${REDISPP_LIB} ${HIREDIS_LIB} ${PROTOBUF_LIB})
+set(CLIENT_SRC
+	../../../src/cpp/client.cpp
+	 ../../../src/cpp/dataset.cpp
+	 ../../../src/cpp/command.cpp
+	 ../../../src/cpp/commandlist.cpp
+	 ../../../src/cpp/metadata.cpp
+	 ../../../src/cpp/tensorbase.cpp
+	 ../../../src/cpp/tensorpack.cpp
+	 ../../../src/cpp/dbnode.cpp
+	 ../../../src/cpp/commandreply.cpp
+     ../../../utils/protobuf/silc.pb.cc)
 
-
-add_subdirectory(src)
-
-
-file(COPY ${CMAKE_SOURCE_DIR}/python/module/${PY_MOD_NAME} DESTINATION ${CMAKE_BINARY_DIR}/python/module)
-
-
-
-
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/module/
-    DESTINATION ${PYTHON_MODULE_INSTALL_DIR})
-
-
+pybind11_add_module(silc ${CLIENT_SRC} ${CLIENT_LIBRARIES} ../bindings/bind.cpp)
+target_link_libraries(silc PUBLIC ${CLIENT_LIBRARIES})

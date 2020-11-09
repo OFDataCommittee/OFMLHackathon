@@ -141,4 +141,18 @@ else
     cd ../
 fi
 
+# Install Pybind11
+if [[ -d "./pybind" ]]; then
+    echo "PyBind11 has already been downloaded and installed"
+    export PYBIND_INCLUDE_PATH="$(pwd)/pybind/include/pybind11/"
+    export PYBIND_INSTALL_PATH="$(pwd)/pybind/"
+else
+	git clone https://github.com/pybind/pybind11.git pybind --depth=1
+    cd pybind
+    mkdir build
+    cd ..
+	echo "PyBind11 downloaded"
+fi
+
+
 cd ../
