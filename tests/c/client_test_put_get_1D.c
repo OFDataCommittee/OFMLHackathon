@@ -74,7 +74,7 @@ int put_get_1D_tensor_double(int* dims, int n_dims,
   char* type = "DOUBLE";
   size_t type_length = strlen(type);
 
-  put_get_1D_tensor(tensor, dims, n_dims, result,
+  put_get_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
                     type, type_length, key_suffix,
                     key_suffix_length);
 
@@ -104,10 +104,10 @@ int put_get_1D_tensor_float(int* dims, int n_dims,
   for(int i=0; i<dims[0]; i++)
     tensor[i] = ((float)rand())/RAND_MAX;
 
-  char* type = "DOUBLE";
+  char* type = "FLOAT";
   size_t type_length = strlen(type);
 
-  put_get_1D_tensor(tensor, dims, n_dims, result,
+  put_get_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
                     type, type_length, key_suffix,
                     key_suffix_length);
 
