@@ -11,7 +11,6 @@ SmartSimClient::SmartSimClient(bool cluster, bool fortran_array)
   while(n_connection_trials > 0) {
     if(cluster) {
       try {
-        std::cout << _get_ssdb() << std::endl;
         redis_cluster = new sw::redis::RedisCluster(_get_ssdb());
         n_connection_trials = -1;
         redis = 0;
