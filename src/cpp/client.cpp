@@ -1254,7 +1254,7 @@ std::string SmartSimClient::_get_ssdb()
         i_pos = i_pos + 1;
       }
       hosts_ports.push_back("tcp://"+
-        env.substr(i_pos, j_pos-i_pos+1));
+        env.substr(i_pos, j_pos-i_pos));
       i_pos = j_pos + 1;
       j_pos = env.find(";", i_pos);
   }
