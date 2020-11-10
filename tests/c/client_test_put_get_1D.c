@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <mpi.h>
+#include "stdint.h"
 
 void put_get_1D_tensor(void* tensor, int* dims, int n_dims,
                        void* result, char* type,
@@ -134,8 +135,11 @@ int put_get_1D_tensor_i8(int* dims, int n_dims,
   int8_t* tensor = (int8_t*)malloc(dims[0]*sizeof(int8_t));
   int8_t* result = (int8_t*)malloc(dims[0]*sizeof(int8_t));
 
-  for(int i=0; i<dims[0]; i++)
-    tensor[i] = rand()%255;
+  for(int i=0; i<dims[0]; i++) {
+    tensor[i] = rand()%INT8_MAX;
+    if(rand()%2)
+      tensor[i] *= -1;
+  }
 
   char* type = "INT8";
   size_t type_length = strlen(type);
@@ -167,8 +171,11 @@ int put_get_1D_tensor_i16(int* dims, int n_dims,
   int16_t* tensor = (int16_t*)malloc(dims[0]*sizeof(int16_t));
   int16_t* result = (int16_t*)malloc(dims[0]*sizeof(int16_t));
 
-  for(int i=0; i<dims[0]; i++)
-    tensor[i] = rand()%255;
+  for(int i=0; i<dims[0]; i++) {
+    tensor[i] = rand()%INT16_MAX;
+    if(rand()%2)
+      tensor[i] *= -1;
+  }
 
   char* type = "INT16";
   size_t type_length = strlen(type);
@@ -200,8 +207,11 @@ int put_get_1D_tensor_i32(int* dims, int n_dims,
   int32_t* tensor = (int32_t*)malloc(dims[0]*sizeof(int32_t));
   int32_t* result = (int32_t*)malloc(dims[0]*sizeof(int32_t));
 
-  for(int i=0; i<dims[0]; i++)
-    tensor[i] = rand()%255;
+  for(int i=0; i<dims[0]; i++) {
+    tensor[i] = rand()%INT32_MAX;
+    if(rand()%2)
+      tensor[i] *= -1;
+  }
 
   char* type = "INT32";
   size_t type_length = strlen(type);
@@ -233,8 +243,11 @@ int put_get_1D_tensor_i64(int* dims, int n_dims,
   int64_t* tensor = (int64_t*)malloc(dims[0]*sizeof(int64_t));
   int64_t* result = (int64_t*)malloc(dims[0]*sizeof(int64_t));
 
-  for(int i=0; i<dims[0]; i++)
-    tensor[i] = rand()%255;
+  for(int i=0; i<dims[0]; i++) {
+    tensor[i] = rand()%INT64_MAX;
+    if(rand()%2)
+      tensor[i] *= -1;
+  }
 
   char* type = "INT64";
   size_t type_length = strlen(type);
@@ -267,7 +280,7 @@ int put_get_1D_tensor_ui8(int* dims, int n_dims,
   uint8_t* result = (uint8_t*)malloc(dims[0]*sizeof(uint8_t));
 
   for(int i=0; i<dims[0]; i++)
-    tensor[i] = rand()%255;
+    tensor[i] = rand()%UINT8_MAX;
 
   char* type = "UINT8";
   size_t type_length = strlen(type);
@@ -300,7 +313,7 @@ int put_get_1D_tensor_ui16(int* dims, int n_dims,
   uint16_t* result = (uint16_t*)malloc(dims[0]*sizeof(uint16_t));
 
   for(int i=0; i<dims[0]; i++)
-    tensor[i] = rand()%255;
+    tensor[i] = rand()%UINT16_MAX;
 
   char* type = "UINT16";
   size_t type_length = strlen(type);
