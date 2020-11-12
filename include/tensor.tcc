@@ -1,5 +1,6 @@
 #ifndef SMARTSIM_TENSOR_TCC
 #define SMARTSIM_TENSOR_TCC
+#include <stdexcept>
 
 template <class T>
 Tensor<T>::Tensor(const std::string& name,

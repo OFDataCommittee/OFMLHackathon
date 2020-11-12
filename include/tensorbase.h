@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <string>
 #include <cstring>
+#include <stdexcept>
 
 // Numeric data type of tensor elements that are allowed
 static std::string DATATYPE_TENSOR_STR_FLOAT = "FLOAT";

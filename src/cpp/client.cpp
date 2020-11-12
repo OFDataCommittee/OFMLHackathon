@@ -1247,10 +1247,12 @@ std::string SmartSimClient::_get_ssdb()
                              "must be set to use the client.");
 
   std::vector<std::string> hosts_ports;
-
   size_t i_pos = 0;
   size_t j_pos = env.find(';');
   while(j_pos!=std::string::npos) {
+      if (env[i_pos] == '"') {
+        i_pos = i_pos + 1;
+      }
       hosts_ports.push_back("tcp://"+
         env.substr(i_pos, j_pos-i_pos+1));
       i_pos = j_pos + 1;
