@@ -12,7 +12,7 @@ void put_get_2D_tensor(void* tensor, int* dims, int n_dims,
                        int key_suffix_length)
 {
   /* This function is a data type agnostic put and
-  get for 1D tensors.  The result vector
+  get for 3D tensors.  The result vector
   is filled with the fetched tensor.  Accuracy
   checking is done outside of this function because
   the type is not known.
@@ -62,7 +62,7 @@ void put_get_2D_tensor(void* tensor, int* dims, int n_dims,
 int put_get_2D_tensor_double(int* dims, int n_dims,
                   char* key_suffix, int key_suffix_length)
 {
-  /* This function puts and gets a 1D tensor of double
+  /* This function puts and gets a 2D tensor of double
   values.  If the sent and received tensors do not match,
   a non-zero value is returned.
   */
@@ -108,7 +108,7 @@ int put_get_2D_tensor_float(int* dims, int n_dims,
                            char* key_suffix,
                            int key_suffix_length)
 {
-  /* This function puts and gets a 1D tensor of float
+  /* This function puts and gets a 2D tensor of float
   values.  If the sent and received tensors do not match,
   a non-zero value is returned.
   */
@@ -154,7 +154,7 @@ int put_get_2D_tensor_i8(int* dims, int n_dims,
                          char* key_suffix,
                          int key_suffix_length)
 {
-  /* This function puts and gets a 1D tensor of int8_t
+  /* This function puts and gets a 2D tensor of int8_t
   values.  If the sent and received tensors do not match,
   a non-zero value is returned.
   */
@@ -204,7 +204,7 @@ int put_get_2D_tensor_i16(int* dims, int n_dims,
                          char* key_suffix,
                          int key_suffix_length)
 {
-  /* This function puts and gets a 1D tensor of int16_t
+  /* This function puts and gets a 2D tensor of int16_t
   values.  If the sent and received tensors do not match,
   a non-zero value is returned.
   */
@@ -254,7 +254,7 @@ int put_get_2D_tensor_i32(int* dims, int n_dims,
                          char* key_suffix,
                          int key_suffix_length)
 {
-  /* This function puts and gets a 1D tensor of int32_t
+  /* This function puts and gets a 2D tensor of int32_t
   values.  If the sent and received tensors do not match,
   a non-zero value is returned.
   */
@@ -304,7 +304,7 @@ int put_get_2D_tensor_i64(int* dims, int n_dims,
                          char* key_suffix,
                          int key_suffix_length)
 {
-  /* This function puts and gets a 1D tensor of int64_t
+  /* This function puts and gets a 2D tensor of int64_t
   values.  If the sent and received tensors do not match,
   a non-zero value is returned.
   */
@@ -318,7 +318,7 @@ int put_get_2D_tensor_i64(int* dims, int n_dims,
 
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++) {
-      tensor[i][j] = rand()%INT32_MAX;
+      tensor[i][j] = rand()%INT64_MAX;
       if(rand()%2)
         tensor[i][j] *= -1;
     }
@@ -354,7 +354,7 @@ int put_get_2D_tensor_ui8(int* dims, int n_dims,
                           char* key_suffix,
                           int key_suffix_length)
 {
-  /* This function puts and gets a 1D tensor of uint8_t
+  /* This function puts and gets a 2D tensor of uint8_t
   values.  If the sent and received tensors do not match,
   a non-zero value is returned.
   */
@@ -402,7 +402,7 @@ int put_get_2D_tensor_ui16(int* dims, int n_dims,
                           char* key_suffix,
                           int key_suffix_length)
 {
-  /* This function puts and gets a 1D tensor of uint16_t
+  /* This function puts and gets a 2D tensor of uint16_t
   values.  If the sent and received tensors do not match,
   a non-zero value is returned.
   */
@@ -456,42 +456,42 @@ int main(int argc, char* argv[]) {
   int n_dims = 2;
 
   int result = 0;
-  //1D double tensor
+  //2D double tensor
   char* dbl_suffix = "_dbl_c";
   result += put_get_2D_tensor_double(dims, n_dims,
                       dbl_suffix, strlen(dbl_suffix));
 
-  //1D float tensor
+  //2D float tensor
   char* flt_suffix = "_flt_c";
   result += put_get_2D_tensor_float(dims, n_dims,
                       flt_suffix, strlen(flt_suffix));
 
-  //1D int8 tensor
+  //2D int8 tensor
   char* i8_suffix = "_i8_c";
   result += put_get_2D_tensor_i8(dims, n_dims,
                       i8_suffix, strlen(i8_suffix));
 
-  //1D int16 tensor
+  //2D int16 tensor
   char* i16_suffix = "_i16_c";
   result += put_get_2D_tensor_i16(dims, n_dims,
                       i16_suffix, strlen(i16_suffix));
 
-  //1D int32 tensor
+  //2D int32 tensor
   char* i32_suffix = "_i32_c";
   result += put_get_2D_tensor_i32(dims, n_dims,
                       i32_suffix, strlen(i32_suffix));
 
-  //1D int64 tensor
+  //2D int64 tensor
   char* i64_suffix = "_i64_c";
   result += put_get_2D_tensor_i64(dims, n_dims,
                       i64_suffix, strlen(i64_suffix));
 
-  //1D uint8 tensor
+  //2D uint8 tensor
   char* ui8_suffix = "_ui8_c";
   result += put_get_2D_tensor_ui8(dims, n_dims,
                       ui8_suffix, strlen(ui8_suffix));
 
-  //1D uint16 tensor
+  //2D uint16 tensor
   char* ui16_suffix = "_ui16_c";
   result += put_get_2D_tensor_ui16(dims, n_dims,
                       ui16_suffix, strlen(ui16_suffix));
