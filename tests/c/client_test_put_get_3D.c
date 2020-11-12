@@ -72,10 +72,10 @@ int put_get_3D_tensor_double(int* dims, int n_dims,
   for(int i=0; i<dims[0]; i++) {
     tensor[i] = (double**)malloc(dims[1]*sizeof(double*));
     result[i] = (double**)malloc(dims[1]*sizeof(double*));
-  }
-  for(int j=0; j<dims[1]; j++) {
-    tensor[i][j] = (double*)malloc(dims[2]*sizeof(double));
-    result[i][j] = (double*)malloc(dims[2]*sizeof(double));
+    for(int j=0; j<dims[1]; j++) {
+      tensor[i][j] = (double*)malloc(dims[2]*sizeof(double));
+      result[i][j] = (double*)malloc(dims[2]*sizeof(double));
+    }
   }
 
   for(int i=0; i<dims[0]; i++)
@@ -108,7 +108,7 @@ int put_get_3D_tensor_double(int* dims, int n_dims,
       free(result[i][j]);
     }
     free(tensor[i]);
-    free(result[j]);
+    free(result[i]);
   }
   free(tensor);
   free(result);
@@ -129,10 +129,10 @@ int put_get_3D_tensor_float(int* dims, int n_dims,
   for(int i=0; i<dims[0]; i++) {
     tensor[i] = (float**)malloc(dims[1]*sizeof(float*));
     result[i] = (float**)malloc(dims[1]*sizeof(float*));
-  }
-  for(int j=0; j<dims[1]; j++) {
-    tensor[i][j] = (float*)malloc(dims[2]*sizeof(float));
-    result[i][j] = (float*)malloc(dims[2]*sizeof(float));
+    for(int j=0; j<dims[1]; j++) {
+      tensor[i][j] = (float*)malloc(dims[2]*sizeof(float));
+      result[i][j] = (float*)malloc(dims[2]*sizeof(float));
+    }
   }
 
   for(int i=0; i<dims[0]; i++)
@@ -165,7 +165,7 @@ int put_get_3D_tensor_float(int* dims, int n_dims,
       free(result[i][j]);
     }
     free(tensor[i]);
-    free(result[j]);
+    free(result[i]);
   }
   free(tensor);
   free(result);
@@ -186,10 +186,10 @@ int put_get_3D_tensor_i8(int* dims, int n_dims,
   for(int i=0; i<dims[0]; i++) {
     tensor[i] = (int8_t**)malloc(dims[1]*sizeof(int8_t*));
     result[i] = (int8_t**)malloc(dims[1]*sizeof(int8_t*));
-  }
-  for(int j=0; j<dims[1]; j++) {
-    tensor[i][j] = (int8_t*)malloc(dims[2]*sizeof(int8_t));
-    result[i][j] = (int8_t*)malloc(dims[2]*sizeof(int8_t));
+    for(int j=0; j<dims[1]; j++) {
+      tensor[i][j] = (int8_t*)malloc(dims[2]*sizeof(int8_t));
+      result[i][j] = (int8_t*)malloc(dims[2]*sizeof(int8_t));
+    }
   }
 
   for(int i=0; i<dims[0]; i++) {
@@ -227,7 +227,7 @@ int put_get_3D_tensor_i8(int* dims, int n_dims,
       free(result[i][j]);
     }
     free(tensor[i]);
-    free(result[j]);
+    free(result[i]);
   }
   free(tensor);
   free(result);
@@ -248,10 +248,10 @@ int put_get_3D_tensor_i16(int* dims, int n_dims,
   for(int i=0; i<dims[0]; i++) {
     tensor[i] = (int16_t**)malloc(dims[1]*sizeof(int16_t*));
     result[i] = (int16_t**)malloc(dims[1]*sizeof(int16_t*));
-  }
-  for(int j=0; j<dims[1]; j++) {
-    tensor[i][j] = (int16_t*)malloc(dims[2]*sizeof(int16_t));
-    result[i][j] = (int16_t*)malloc(dims[2]*sizeof(int16_t));
+    for(int j=0; j<dims[1]; j++) {
+      tensor[i][j] = (int16_t*)malloc(dims[2]*sizeof(int16_t));
+      result[i][j] = (int16_t*)malloc(dims[2]*sizeof(int16_t));
+    }
   }
 
   for(int i=0; i<dims[0]; i++) {
@@ -289,7 +289,7 @@ int put_get_3D_tensor_i16(int* dims, int n_dims,
       free(result[i][j]);
     }
     free(tensor[i]);
-    free(result[j]);
+    free(result[i]);
   }
   free(tensor);
   free(result);
@@ -310,10 +310,10 @@ int put_get_3D_tensor_i32(int* dims, int n_dims,
   for(int i=0; i<dims[0]; i++) {
     tensor[i] = (int32_t**)malloc(dims[1]*sizeof(int32_t*));
     result[i] = (int32_t**)malloc(dims[1]*sizeof(int32_t*));
-  }
-  for(int j=0; j<dims[1]; j++) {
-    tensor[i][j] = (int32_t*)malloc(dims[2]*sizeof(int32_t));
-    result[i][j] = (int32_t*)malloc(dims[2]*sizeof(int32_t));
+    for(int j=0; j<dims[1]; j++) {
+      tensor[i][j] = (int32_t*)malloc(dims[2]*sizeof(int32_t));
+      result[i][j] = (int32_t*)malloc(dims[2]*sizeof(int32_t));
+    }
   }
 
   for(int i=0; i<dims[0]; i++) {
@@ -351,7 +351,7 @@ int put_get_3D_tensor_i32(int* dims, int n_dims,
       free(result[i][j]);
     }
     free(tensor[i]);
-    free(result[j]);
+    free(result[i]);
   }
   free(tensor);
   free(result);
@@ -372,10 +372,10 @@ int put_get_3D_tensor_i64(int* dims, int n_dims,
   for(int i=0; i<dims[0]; i++) {
     tensor[i] = (int64_t**)malloc(dims[1]*sizeof(int64_t*));
     result[i] = (int64_t**)malloc(dims[1]*sizeof(int64_t*));
-  }
-  for(int j=0; j<dims[1]; j++) {
-    tensor[i][j] = (int64_t*)malloc(dims[2]*sizeof(int64_t));
-    result[i][j] = (int64_t*)malloc(dims[2]*sizeof(int64_t));
+    for(int j=0; j<dims[1]; j++) {
+      tensor[i][j] = (int64_t*)malloc(dims[2]*sizeof(int64_t));
+      result[i][j] = (int64_t*)malloc(dims[2]*sizeof(int64_t));
+    }
   }
 
   for(int i=0; i<dims[0]; i++) {
@@ -413,7 +413,7 @@ int put_get_3D_tensor_i64(int* dims, int n_dims,
       free(result[i][j]);
     }
     free(tensor[i]);
-    free(result[j]);
+    free(result[i]);
   }
   free(tensor);
   free(result);
@@ -434,10 +434,10 @@ int put_get_3D_tensor_ui8(int* dims, int n_dims,
   for(int i=0; i<dims[0]; i++) {
     tensor[i] = (uint8_t**)malloc(dims[1]*sizeof(uint8_t*));
     result[i] = (uint8_t**)malloc(dims[1]*sizeof(uint8_t*));
-  }
-  for(int j=0; j<dims[1]; j++) {
-    tensor[i][j] = (uint8_t*)malloc(dims[2]*sizeof(uint8_t));
-    result[i][j] = (uint8_t*)malloc(dims[2]*sizeof(uint8_t));
+    for(int j=0; j<dims[1]; j++) {
+      tensor[i][j] = (uint8_t*)malloc(dims[2]*sizeof(uint8_t));
+      result[i][j] = (uint8_t*)malloc(dims[2]*sizeof(uint8_t));
+    }
   }
 
   for(int i=0; i<dims[0]; i++) {
@@ -475,7 +475,7 @@ int put_get_3D_tensor_ui8(int* dims, int n_dims,
       free(result[i][j]);
     }
     free(tensor[i]);
-    free(result[j]);
+    free(result[i]);
   }
   free(tensor);
   free(result);
@@ -496,10 +496,10 @@ int put_get_3D_tensor_ui16(int* dims, int n_dims,
   for(int i=0; i<dims[0]; i++) {
     tensor[i] = (uint16_t**)malloc(dims[1]*sizeof(uint16_t*));
     result[i] = (uint16_t**)malloc(dims[1]*sizeof(uint16_t*));
-  }
-  for(int j=0; j<dims[1]; j++) {
-    tensor[i][j] = (uint16_t*)malloc(dims[2]*sizeof(uint16_t));
-    result[i][j] = (uint16_t*)malloc(dims[2]*sizeof(uint16_t));
+    for(int j=0; j<dims[1]; j++) {
+      tensor[i][j] = (uint16_t*)malloc(dims[2]*sizeof(uint16_t));
+      result[i][j] = (uint16_t*)malloc(dims[2]*sizeof(uint16_t));
+    }
   }
 
   for(int i=0; i<dims[0]; i++) {
@@ -537,7 +537,7 @@ int put_get_3D_tensor_ui16(int* dims, int n_dims,
       free(result[i][j]);
     }
     free(tensor[i]);
-    free(result[j]);
+    free(result[i]);
   }
   free(tensor);
   free(result);
@@ -548,10 +548,12 @@ int main(int argc, char* argv[]) {
 
   MPI_Init(&argc, &argv);
 
-  int* dims = malloc(2*sizeof(int));
+  int n_dims = 3;
+  int* dims = malloc(n_dims*sizeof(int));
   dims[0] = 10;
   dims[1] = 26;
-  int n_dims = 2;
+  dims[2] = 3;
+
 
   int result = 0;
   //3D double tensor
