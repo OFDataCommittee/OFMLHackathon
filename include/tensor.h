@@ -18,13 +18,13 @@ class Tensor : public TensorBase
         Tensor(const std::string& name /*!< The name used to reference the tensor*/,
                const std::string& type /*!< The data type of the tensor*/,
                void* data /*!< A c_ptr to the data of the tensor*/,
-               const std::vector<int>& dims /*! The dimensions of the data*/
+               const std::vector<size_t>& dims /*! The dimensions of the data*/
         );
 
         //! Tensor constructor using data bufffer without tensor data pointer
         Tensor(const std::string& name /*!< The name used to reference the tensor*/,
                const std::string& type /*!< The data type of the tensor*/,
-               const std::vector<int>& dims /*! The dimensions of the data*/,
+               const std::vector<size_t>& dims /*! The dimensions of the data*/,
                const std::string_view& data_buf /*! The data buffer*/
         );
 
@@ -42,7 +42,7 @@ class Tensor : public TensorBase
 
         //! Fill a user provided memory space with values from tensor buffer
         virtual void fill_data_from_buf(void* data /*!< Pointer to the allocated memory space*/,
-                                        std::vector<int> dims /*!< The dimensions of the memory space*/,
+                                        std::vector<size_t> dims /*!< The dimensions of the memory space*/,
                                         const std::string& type /*!< The datatype of the allocated memory space*/
                                         );
 
@@ -55,23 +55,23 @@ class Tensor : public TensorBase
 
         //! Function to copy values from tensor into buffer
         void* _vals_to_buf(void* data /*!< The data to copy to buf tensor*/,
-                           int* dims /*!< The dimensions of data*/,
-                           int n_dims /*!< The number of dimensions in data*/,
+                           size_t* dims /*!< The dimensions of data*/,
+                           size_t n_dims /*!< The number of dimensions in data*/,
                            void* buf /*!< The buffer to hold the data*/
                            );
 
         //! Function to copy values from buffer into tensor
         void _buf_to_data(void* data /*!< The data array to copy into*/,
-                          int* dims /*!< The dimensions of data*/,
-                          int n_dims /*!< The number of dimensions in data*/,
-                          int& buf_position /*!< The current position of reading the buf*/,
+                          size_t* dims /*!< The dimensions of data*/,
+                          size_t n_dims /*!< The number of dimensions in data*/,
+                          size_t& buf_position /*!< The current position of reading the buf*/,
                           void* buf /*!< The buf to read from*/
                           );
 
         //! Allocate memory that fits the tensor data dimensions
         void _allocate_data_memory(void** data /*!< A pointer to the pointer where data should be stored*/,
-                                   int* dims /*!< An array of integer dimension values*/,
-                                   int n_dims /*!< The number of dimension left to iterate through*/
+                                   size_t* dims /*!< An array of integer dimension values*/,
+                                   size_t n_dims /*!< The number of dimension left to iterate through*/
                                    );
 
         //! Memory lists that are used to hold recursively allocated

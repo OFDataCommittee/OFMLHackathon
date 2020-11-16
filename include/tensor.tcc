@@ -6,14 +6,14 @@ template <class T>
 Tensor<T>::Tensor(const std::string& name,
                   const std::string& type,
                   void* data,
-                  const std::vector<int>& dims) :
+                  const std::vector<size_t>& dims) :
                   TensorBase(name, type, data, dims)
 {}
 
 template <class T>
 Tensor<T>::Tensor(const std::string& name,
                   const std::string& type,
-                  const std::vector<int>& dims,
+                  const std::vector<size_t>& dims,
                   const std::string_view& data_buf) :
                   TensorBase(name, type, dims, data_buf)
 {}
@@ -46,7 +46,7 @@ void* Tensor<T>::get_data()
         this->_allocate_data_memory(&(this->_data),
                                     this->_dims.data(),
                                     this->_dims.size());
-        int start_position = 0;
+        size_t start_position = 0;
         this->_buf_to_data(this->_data, this->_dims.data(),
                            this->_dims.size(), start_position,
                            this->_data_buf);
@@ -55,7 +55,8 @@ void* Tensor<T>::get_data()
 }
 
 template <class T>
-void Tensor<T>::fill_data_from_buf(void* data, std::vector<int> dims,
+void Tensor<T>::fill_data_from_buf(void* data,
+                                   std::vector<size_t> dims,
                                    const std::string& type)
 {
     /* This function will fill a supplied memory space
@@ -69,21 +70,24 @@ void Tensor<T>::fill_data_from_buf(void* data, std::vector<int> dims,
         throw std::runtime_error("The dimensions must have "\
                                  "size greater than 0.");
 
-    int n_values = 1;
-    for(int i=0; i<dims.size(); i++) {
-        if(dims[i]<=0)
+    size_t n_values = 1;
+    std::vector<size_t>::const_iterator it = dims.cbegin();
+    std::vector<size_t>::const_iterator it_end = dims.cend();
+    while(it!=it_end) {
+        if((*it)<=0)
             throw std::runtime_error("All dimensions must "\
                                      "be greater than 0.");
-        n_values*=dims[i];
+        n_values*=(*it);
+        it++;
     }
 
-    int buf_vals = this->_buf_size / sizeof(T);
+    size_t buf_vals = this->_buf_size / sizeof(T);
     if(n_values!=buf_vals)
         throw std::runtime_error("The provided dimensions do "\
                                   "not match the size of the "\
                                   "buffer");
 
-    int buf_starting_position = 0;
+    size_t buf_starting_position = 0;
     this->_buf_to_data(data, dims.data(),
                        dims.size(),
                        buf_starting_position,
@@ -104,9 +108,13 @@ void Tensor<T>::_generate_data_buf()
     just point to data and there will be absolutely no copies.
     until we get into redis itself.
     */
-    int n_bytes = 1;
-    for (int i = 0; i < this->_dims.size(); i++) {
-        n_bytes *= this->_dims[i];
+    size_t n_bytes = 1;
+
+    std::vector<size_t>::const_iterator it = this->_dims.cbegin();
+    std::vector<size_t>::const_iterator it_end = this->_dims.cend();
+    while(it!=it_end) {
+        n_bytes *= (*it);
+        it++;
     }
     n_bytes *= sizeof(T);
 
@@ -124,17 +132,18 @@ void Tensor<T>::_generate_data_buf()
 }
 
 template <class T>
-void* Tensor<T>::_vals_to_buf(void* data, int* dims, int n_dims,
-                                       void* buf)
+void* Tensor<T>::_vals_to_buf(void* data, size_t* dims,
+                              size_t n_dims, void* buf)
 {
-    /* This function will copy the tensor data values into the
-    binary buffer
+    /* This function will copy the tensor data values
+    into the binary buffer
     */
 
-    //TODO we should check at some point that we don't exceed buf length
+    //TODO we should check at some point that we don't
+    //exceed buf length
     if(n_dims > 1) {
         T** current = (T**) data;
-        for(int i = 0; i < dims[0]; i++) {
+        for(size_t i = 0; i < dims[0]; i++) {
           buf = this->_vals_to_buf(*current, &dims[1], n_dims-1, buf);
           current++;
         }
@@ -147,15 +156,16 @@ void* Tensor<T>::_vals_to_buf(void* data, int* dims, int n_dims,
 }
 
 template <class T>
-void Tensor<T>::_buf_to_data(void* data, int* dims, int n_dims,
-                             int& buf_position, void* buf)
+void Tensor<T>::_buf_to_data(void* data, size_t* dims,
+                             size_t n_dims, size_t& buf_position,
+                             void* buf)
 {
     /* This recursive function copies data from the buf into
     a formatted data array
     */
     if(n_dims > 1) {
         T** current = (T**) data;
-        for(int i = 0; i < dims[0]; i++) {
+        for(size_t i = 0; i < dims[0]; i++) {
             this->_buf_to_data(*current, &dims[1], n_dims-1,
                                buf_position, buf);
             current++;
@@ -170,14 +180,15 @@ void Tensor<T>::_buf_to_data(void* data, int* dims, int n_dims,
 }
 
 template <class T>
-void Tensor<T>::_allocate_data_memory(void** data, int* dims, int n_dims)
+void Tensor<T>::_allocate_data_memory(void** data, size_t* dims,
+                                      size_t n_dims)
 {
     /* This function recursively allocates a tensor data pointer
     */
     if(n_dims>1) {
         T** new_data = this->_ptr_mem_list.allocate(dims[0]);
         (*data) = (void*)new_data;
-        for(int i=0; i<dims[0]; i++)
+        for(size_t i=0; i<dims[0]; i++)
             this->_allocate_data_memory((void**)&(new_data[i]),
                                         &dims[1], n_dims-1);
     }

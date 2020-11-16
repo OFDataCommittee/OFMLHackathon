@@ -7,7 +7,7 @@
 template <typename T_send, typename T_recv>
 void put_get_2D_array(
 		    void (*fill_array)(T_send**, int, int),
-		    std::vector<int> dims,
+		    std::vector<size_t> dims,
         std::string type,
         std::string key_suffix="")
 {
@@ -57,9 +57,9 @@ int main(int argc, char* argv[]) {
 
   MPI_Init(&argc, &argv);
 
-  int dim1 = 10;
-  int dim2 = 5;
-  std::vector<int> dims = {dim1, dim2};
+  size_t dim1 = 10;
+  size_t dim2 = 5;
+  std::vector<size_t> dims = {dim1, dim2};
 
   put_get_2D_array<double,double>(
 				  &set_2D_array_floating_point_values<double>,

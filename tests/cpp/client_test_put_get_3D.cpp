@@ -7,7 +7,7 @@
 template <typename T_send, typename T_recv>
 void put_get_3D_array(
 		    void (*fill_array)(T_send***, int, int, int),
-		    std::vector<int> dims,
+		    std::vector<size_t> dims,
         std::string type,
         std::string key_suffix="")
 {
@@ -61,11 +61,11 @@ int main(int argc, char* argv[]) {
 
   MPI_Init(&argc, &argv);
 
-  int dim1 = 10;
-  int dim2 = 5;
-  int dim3 = 8;
+  size_t dim1 = 10;
+  size_t dim2 = 5;
+  size_t dim3 = 8;
 
-  std::vector<int> dims;
+  std::vector<size_t> dims;
   dims.push_back(dim1);
   dims.push_back(dim2);
   dims.push_back(dim3);

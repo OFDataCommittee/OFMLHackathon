@@ -113,10 +113,10 @@ DataSet SmartSimClient::get_dataset(const std::string& name)
 
   // Loop through and add each tensor to the dataset
   char** tensor_names;
-  int n_tensors;
+  size_t n_tensors;
   dataset.get_meta(".tensors", "STRING", (void*&)tensor_names, n_tensors);
 
-  for(int i=0; i<n_tensors; i++) {
+  for(size_t i=0; i<n_tensors; i++) {
     std::string t_name = this->_get_prefix() +
                          "{" + dataset.name + "}."
                              + tensor_names[i];
@@ -128,7 +128,7 @@ DataSet SmartSimClient::get_dataset(const std::string& name)
     CommandReply reply;
     reply = this->_execute_command(cmd);
 
-    std::vector<int> reply_dims = this->_get_tensor_dims(reply);
+    std::vector<size_t> reply_dims = this->_get_tensor_dims(reply);
     std::string_view blob = this->_get_tensor_data_blob(reply);
     std::string type = this->_get_tensor_data_type(reply);
     dataset.add_tensor_buf_only(tensor_names[i], type.c_str(),
@@ -169,7 +169,7 @@ void SmartSimClient::delete_dataset(const std::string& name)
 void SmartSimClient::put_tensor(const std::string& key,
                                 const std::string& type,
                                 void* data,
-                                const std::vector<int>& dims)
+                                const std::vector<size_t>& dims)
 {
   /* This function puts a tensor into the datastore
   */
@@ -212,7 +212,7 @@ void SmartSimClient::put_tensor(const std::string& key,
   cmd.add_field("AI.TENSORSET");
   cmd.add_field(this->_put_prefix() + key);
   cmd.add_field(type);
-  for(int i=0; i<dims.size(); i++)
+  for(size_t i=0; i<dims.size(); i++)
     cmd.add_field(std::to_string(dims[i]));
   cmd.add_field("BLOB");
   cmd.add_field_ptr(tensor->get_data_buf());
@@ -224,7 +224,7 @@ void SmartSimClient::put_tensor(const std::string& key,
 void SmartSimClient::get_tensor(const std::string& key,
                                 const std::string& type,
                                 void* result,
-                                const std::vector<int>& dims)
+                                const std::vector<size_t>& dims)
 {
   /* This function gets a tensor from the database and stores
   it in the result pointer.
@@ -238,14 +238,14 @@ void SmartSimClient::get_tensor(const std::string& key,
   cmd.add_field("BLOB");
   reply = this->_execute_command(cmd);
 
-  std::vector<int> reply_dims = this->_get_tensor_dims(reply);
+  std::vector<size_t> reply_dims = this->_get_tensor_dims(reply);
 
   if(dims.size()!= reply_dims.size())
     throw std::runtime_error("The dimensions of the fetched tensor "\
                              "do not match the provided dimensions "\
                              "of the user memory space.");
 
-  for(std::vector<int>::size_type i=0; i<reply_dims.size(); i++) {
+  for(std::vector<size_t>::size_type i=0; i<reply_dims.size(); i++) {
     if(dims[i]!=reply_dims[i]) {
       throw std::runtime_error("The dimensions of the fetched tensor "\
                                "do not match the provided dimensions "\
@@ -570,94 +570,50 @@ void SmartSimClient::run_model(const std::string& key,
   //We will choose it based on the db of the firs tinput tensor.
 
   //Update input and output tensor names for ensembling prefix
-  std::vector<std::string>::iterator prefix_it;
-  std::vector<std::string>::iterator prefix_it_end;
-
-  prefix_it = inputs.begin();
-  prefix_it_end = inputs.end();
-  while(prefix_it != prefix_it_end) {
-    *prefix_it = this->_get_prefix() + *prefix_it;
-    prefix_it++;
-  }
-
-  prefix_it = outputs.begin();
-  prefix_it_end = outputs.end();
-  while(prefix_it != prefix_it_end) {
-    *prefix_it = this->_put_prefix() + *prefix_it;
-    prefix_it++;
-  }
+  this->_append_with_get_prefix(inputs);
+  this->_append_with_put_prefix(outputs);
 
   uint16_t hash_slot = this->_get_hash_slot(inputs[0]);
   uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
                                               this->_n_db_nodes);
   DBNode* db = &(this->_db_nodes[db_index]);
 
-  //Copy all input tensors so they are in the same hash slot
-  //as the model
-  std::unordered_map<std::string, std::string> tmp_input_map;
-  for(int i=0; i<inputs.size(); i++) {
-    std::string new_key = "{" + db->prefix + "}." +
-                          inputs[i] + ".TMP";
-    this->copy_tensor(inputs[i], new_key);
-    tmp_input_map.insert({new_key, inputs[i]});
-    inputs[i] = new_key;
-  }
+  //Generate temporary names so that all keys go to same slot
+  std::vector<std::string> tmp_inputs =
+    _get_tmp_names(inputs, db->prefix);
+  std::vector<std::string> tmp_outputs =
+    _get_tmp_names(outputs, db->prefix);
 
-  //Copy all output tensors so they are in the same hash slot
-  //as the model
-  std::unordered_map<std::string, std::string> tmp_output_map;
-  for(int i=0; i<outputs.size(); i++) {
-    std::string new_key = "{" + db->prefix + "}." +
-                           outputs[i] + ".TMP";
-    tmp_output_map.insert({outputs[i], new_key});
-    outputs[i] = new_key;
-  }
+  //Copy all input tensors to temporary names to align hash slots
+  this->_copy_tensors(inputs, tmp_inputs);
 
   std::string model_name = "{" + db->prefix +
                            "}." + std::string(key);
-  Command cmd;
 
+  Command cmd;
   cmd.add_field("AI.MODELRUN");
   cmd.add_field(model_name);
   cmd.add_field("INPUTS");
-  cmd.add_fields(inputs);
+  cmd.add_fields(tmp_inputs);
   cmd.add_field("OUTPUTS");
-  cmd.add_fields(outputs);
+  cmd.add_fields(tmp_outputs);
   if(this->redis_cluster)
     this->_execute_command(cmd, db->prefix);
   else
     this->_execute_command(cmd);
 
 
+  this->_copy_tensors(tmp_outputs, outputs);
+
   std::vector<std::string> keys_to_delete;
+  keys_to_delete.insert(keys_to_delete.end(),
+                        tmp_outputs.begin(),
+                        tmp_outputs.end());
+  keys_to_delete.insert(keys_to_delete.end(),
+                        tmp_inputs.begin(),
+                        tmp_inputs.end());
 
-  //Move temporary output to the correct location
-  std::unordered_map<std::string,std::string>::const_iterator j_it
-    = tmp_output_map.cbegin();
-  std::unordered_map<std::string,std::string>::const_iterator j_it_end
-    = tmp_output_map.cend();
-  while(j_it!=j_it_end) {
-    this->copy_tensor(j_it->second, j_it->first);
-    keys_to_delete.push_back(j_it->second);
-    j_it++;
-  }
-
-  //Delete temporary input and output tensors
-  std::unordered_map<std::string,std::string>::const_iterator i_it
-    = tmp_input_map.cbegin();
-  std::unordered_map<std::string,std::string>::const_iterator i_it_end
-    = tmp_input_map.cend();
-  while(i_it!=i_it_end) {
-    keys_to_delete.push_back(i_it->first);
-    i_it++;
-  }
-
-  CommandReply reply;
-  Command del_cmd;
-  del_cmd.add_field("DEL");
-  for(int i=0; i<keys_to_delete.size(); i++)
-    del_cmd.add_field(keys_to_delete[i]);
-  reply = this->_execute_command(del_cmd, db->prefix);
+  this->_delete_keys(keys_to_delete, db->prefix);
 
   return;
 }
@@ -772,49 +728,22 @@ void SmartSimClient::run_script(const std::string& key,
   */
 
   //Update input and output tensor names for ensembling prefix
-  std::vector<std::string>::iterator prefix_it;
-  std::vector<std::string>::iterator prefix_it_end;
-
-  prefix_it = inputs.begin();
-  prefix_it_end = inputs.end();
-  while(prefix_it != prefix_it_end) {
-    *prefix_it = this->_get_prefix() + *prefix_it;
-    prefix_it++;
-  }
-
-  prefix_it = outputs.begin();
-  prefix_it_end = outputs.end();
-  while(prefix_it != prefix_it_end) {
-    *prefix_it = this->_put_prefix() + *prefix_it;
-    prefix_it++;
-  }
-
+  this->_append_with_get_prefix(inputs);
+  this->_append_with_put_prefix(outputs);
 
   uint16_t hash_slot = this->_get_hash_slot(inputs[0]);
   uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
                                               this->_n_db_nodes);
   DBNode* db = &(this->_db_nodes[db_index]);
 
-  //Copy all input tensors so they are in the same hash slot
-  //as the model
-  std::unordered_map<std::string, std::string> tmp_input_map;
-  for(int i=0; i<inputs.size(); i++) {
-    std::string new_key = "{" + db->prefix + "}." +
-                          inputs[i] + ".TMP";
-    this->copy_tensor(inputs[i], new_key);
-    tmp_input_map.insert({new_key, inputs[i]});
-    inputs[i] = new_key;
-  }
+  //Generate temporary names so that all keys go to same slot
+  std::vector<std::string> tmp_inputs =
+    _get_tmp_names(inputs, db->prefix);
+  std::vector<std::string> tmp_outputs =
+    _get_tmp_names(outputs, db->prefix);
 
-  //Copy all output tensors so they are in the same hash slot
-  //as the model
-  std::unordered_map<std::string, std::string> tmp_output_map;
-  for(int i=0; i<outputs.size(); i++) {
-    std::string new_key = "{" + db->prefix + "}." +
-                           outputs[i] + ".TMP";
-    tmp_output_map.insert({outputs[i], new_key});
-    outputs[i] = new_key;
-  }
+  //Copy all input tensors to temporary names to align hash slots
+  this->_copy_tensors(inputs, tmp_inputs);
 
   std::string script_name = "{" + db->prefix +
                            "}." + std::string(key);
@@ -824,45 +753,25 @@ void SmartSimClient::run_script(const std::string& key,
   cmd.add_field(script_name);
   cmd.add_field(function);
   cmd.add_field("INPUTS");
-  cmd.add_fields(inputs);
+  cmd.add_fields(tmp_inputs);
   cmd.add_field("OUTPUTS");
-  cmd.add_fields(outputs);
-
+  cmd.add_fields(tmp_outputs);
   if(this->redis_cluster)
     this->_execute_command(cmd, db->prefix);
   else
     this->_execute_command(cmd);
 
+  this->_copy_tensors(tmp_outputs, outputs);
+
   std::vector<std::string> keys_to_delete;
+  keys_to_delete.insert(keys_to_delete.end(),
+                        tmp_outputs.begin(),
+                        tmp_outputs.end());
+  keys_to_delete.insert(keys_to_delete.end(),
+                        tmp_inputs.begin(),
+                        tmp_inputs.end());
 
-  //Move temporary output to the correct location
-  std::unordered_map<std::string,std::string>::const_iterator j_it
-    = tmp_output_map.cbegin();
-  std::unordered_map<std::string,std::string>::const_iterator j_it_end
-    = tmp_output_map.cend();
-  while(j_it!=j_it_end) {
-    this->copy_tensor(j_it->second, j_it->first);
-    keys_to_delete.push_back(j_it->second);
-    j_it++;
-  }
-
-  //Delete temporary input and output tensors
-  std::unordered_map<std::string,std::string>::const_iterator i_it
-    = tmp_input_map.cbegin();
-  std::unordered_map<std::string,std::string>::const_iterator i_it_end
-    = tmp_input_map.cend();
-  while(i_it!=i_it_end) {
-    keys_to_delete.push_back(i_it->first);
-    i_it++;
-  }
-
-  CommandReply reply;
-  Command del_cmd;
-  del_cmd.add_field("DEL");
-  for(int i=0; i<keys_to_delete.size(); i++)
-    del_cmd.add_field(keys_to_delete[i]);
-  reply = this->_execute_command(del_cmd, db->prefix);
-
+  this->_delete_keys(keys_to_delete, db->prefix);
   return;
 }
 
@@ -1057,7 +966,7 @@ void SmartSimClient::_parse_reply_for_slots(CommandReply& reply)
   return;
 }
 
-std::vector<int> SmartSimClient::_get_tensor_dims(CommandReply& reply)
+std::vector<size_t> SmartSimClient::_get_tensor_dims(CommandReply& reply)
 {
   /* This function will fill a vector with the dimensions of the
   tensor.  We assume right now that the META reply is always
@@ -1068,10 +977,10 @@ std::vector<int> SmartSimClient::_get_tensor_dims(CommandReply& reply)
     throw std::runtime_error("The message does not have the "\
                              "correct number of fields");
 
-  int n_dims = reply[3].n_elements();
-  std::vector<int> dims(n_dims);
+  size_t n_dims = reply[3].n_elements();
+  std::vector<size_t> dims(n_dims);
 
-  for(int i = 0; i < n_dims; i++) {
+  for(size_t i=0; i<n_dims; i++) {
     dims[i] = reply[3][i].integer();
   }
 
@@ -1482,4 +1391,98 @@ inline std::string SmartSimClient::_get_prefix()
     prefix =  this->_get_key_prefix + ".";
   return prefix;
 
+}
+
+void SmartSimClient::_append_with_get_prefix(
+                     std::vector<std::string>& keys)
+{
+  /* This function will append each key with the
+  get prefix.
+  */
+  std::vector<std::string>::iterator prefix_it;
+  std::vector<std::string>::iterator prefix_it_end;
+  prefix_it = keys.begin();
+  prefix_it_end = keys.end();
+  while(prefix_it != prefix_it_end) {
+    *prefix_it = this->_get_prefix() + *prefix_it;
+    prefix_it++;
+  }
+  return;
+}
+
+void SmartSimClient::_append_with_put_prefix(
+                     std::vector<std::string>& keys)
+{
+  /* This function will append each key with the
+  put prefix.
+  */
+  std::vector<std::string>::iterator prefix_it;
+  std::vector<std::string>::iterator prefix_it_end;
+  prefix_it = keys.begin();
+  prefix_it_end = keys.end();
+  while(prefix_it != prefix_it_end) {
+    *prefix_it = this->_put_prefix() + *prefix_it;
+    prefix_it++;
+  }
+  return;
+}
+
+std::vector<std::string>
+SmartSimClient::_get_tmp_names(std::vector<std::string> names,
+                               std::string db_prefix)
+{
+  /* This function returns a map between the original
+  names and temporary names that are needed to make sure
+  keys hash to the same hash slot.
+  */
+  std::vector<std::string> tmp;
+  std::vector<std::string>::iterator it = names.begin();
+  std::vector<std::string>::iterator it_end = names.end();
+  while(it!=it_end) {
+    std::string new_key = "{" + db_prefix + "}." +
+                          *it + ".TMP";
+    tmp.push_back(new_key);
+    it++;
+  }
+  return tmp;
+}
+
+void SmartSimClient::_copy_tensors(std::vector<std::string> src,
+                                   std::vector<std::string> dest)
+{
+  /* This function will copy a list of tensors from
+  src to destination.
+  */
+  std::vector<std::string>::const_iterator src_it = src.cbegin();
+  std::vector<std::string>::const_iterator src_it_end = src.cend();
+
+  std::vector<std::string>::const_iterator dest_it = dest.cbegin();
+  std::vector<std::string>::const_iterator dest_it_end = dest.cend();
+
+  while(src_it!=src_it_end && dest_it!=dest_it_end)
+  {
+    this->copy_tensor(*src_it, *dest_it);
+    src_it++;
+    dest_it++;
+  }
+  return;
+}
+
+void SmartSimClient::_delete_keys(std::vector<std::string> keys,
+                                  std::string db_prefix)
+{
+  /* This function will delete a list of tensor names in a single
+  command.  This assumes they are all in the same hash slot.
+  */
+  CommandReply reply;
+  Command del_cmd;
+  del_cmd.add_field("DEL");
+  std::vector<std::string>::const_iterator it = keys.cbegin();
+  std::vector<std::string>::const_iterator it_end = keys.cend();
+  while(it!=it_end) {
+    del_cmd.add_field(*it);
+    it++;
+  }
+  reply = this->_execute_command(del_cmd, db_prefix);
+  return;
 }

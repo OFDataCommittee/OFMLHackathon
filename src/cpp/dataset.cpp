@@ -27,7 +27,7 @@ DataSet& DataSet::operator=(DataSet&& dataset)
 }
 
 DataSet::DataSet(const std::string& name, char* buf,
-                 unsigned long long buf_size)
+                 size_t buf_size)
 {
     this->name = name;
     this->_metadata.fill_from_buffer(buf, buf_size);
@@ -35,7 +35,7 @@ DataSet::DataSet(const std::string& name, char* buf,
 
 void DataSet::add_tensor(const std::string& name,
                          const std::string& type,
-                         void* data, std::vector<int> dims)
+                         void* data, std::vector<size_t> dims)
 {
     /* Creates a tensor with the provided information and adds
     the tensor name to the .tensors metadata
@@ -47,7 +47,7 @@ void DataSet::add_tensor(const std::string& name,
 
 void DataSet::add_tensor_buf_only(const std::string& name,
                                   const std::string& type,
-                                  std::vector<int> dims,
+                                  std::vector<size_t> dims,
                                   std::string_view buf)
 {
     /* This adds tensors to the dataset, but does not add them
@@ -61,7 +61,7 @@ void DataSet::add_tensor_buf_only(const std::string& name,
 
 void DataSet::get_tensor(const std::string&  name,
                          const std::string&  type,
-                         void*& data, std::vector<int>& dims)
+                         void*& data, std::vector<size_t>& dims)
 {
     /* This function will retrieve tensor data pointer to the
     user.  If the pointer does not exist (e.g. it is a tensor
@@ -82,12 +82,43 @@ void DataSet::get_tensor(const std::string&  name,
 
     data = this->_tensorpack.get_tensor_data(name);
     dims = this->_tensorpack.get_tensor(name)->get_tensor_dims();
+    return;
+}
 
+void DataSet::get_tensor(const std::string&  name,
+                         const std::string&  type,
+                         void*& data, size_t*& dims,
+                         size_t& n_dims)
+{
+    /* This function will retrieve tensor data
+    pointer to the user.  If the pointer does not
+    exist (e.g. it is a tensor with buffer data only),
+    memory will be allocated and the buffer will be
+    copied into the new memory.  This memory will be
+    freed when the dataset is destroyed.  If the data
+    pointer in the tensor already points to a memory
+    space, that c_ptr will be returned.
+    */
+    std::vector<size_t> dims_vec;
+    this->get_tensor(name, type, data, dims_vec);
+
+    size_t n_bytes = sizeof(int)*dims_vec.size();
+    dims = _dim_queries.allocate_bytes(n_bytes);
+
+    std::vector<size_t>::const_iterator it = dims_vec.cbegin();
+    std::vector<size_t>::const_iterator it_end = dims_vec.cend();
+    size_t i = 0;
+    while(it!=it_end) {
+        dims[i] = *it;
+        i++;
+        it++;
+    }
+    return;
 }
 
 void DataSet::unpack_tensor(const std::string&  name,
                             const std::string&  type,
-                            void* data, std::vector<int> dims)
+                            void* data, std::vector<size_t> dims)
 {
     /* This function will take the tensor data buffer and put it into
     the provided memory space (data).
@@ -112,7 +143,7 @@ void DataSet::add_meta(const std::string& name,
 
 void DataSet::get_meta(const std::string& name,
                        const std::string& type,
-                       void*& data, int& length)
+                       void*& data, size_t& length)
 {
     /* This function points the data pointer to a dynamically allocated
     array of the metadata and sets the length pointer value to the number

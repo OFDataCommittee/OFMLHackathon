@@ -63,13 +63,13 @@ class TensorBase{
         TensorBase(const std::string& name /*!< The name used to reference the tensor*/,
                    const std::string& type /*!< The data type of the tensor*/,
                    void* data /*!< A c_ptr to the data of the tensor*/,
-                   const std::vector<int>& dims /*! The dimensions of the data*/
+                   const std::vector<size_t>& dims /*! The dimensions of the data*/
                    );
 
         //! TensorBase constructor using data bufffer without tensor data pointer
         TensorBase(const std::string& name /*!< The name used to reference the tensor*/,
                    const std::string& type /*!< The data type of the tensor*/,
-                   const std::vector<int>& dims /*! The dimensions of the data*/,
+                   const std::vector<size_t>& dims /*! The dimensions of the data*/,
                    const std::string_view& data_buf /*! The data buffer*/
                    );
 
@@ -88,7 +88,7 @@ class TensorBase{
         std::string get_tensor_type();
 
         //! Retrieve the tensor dims
-        std::vector<int> get_tensor_dims();
+        std::vector<size_t> get_tensor_dims();
 
         //! Get the tensor data as a buffer
         std::string_view get_data_buf();
@@ -98,7 +98,7 @@ class TensorBase{
 
         //! Fill a user provided memory space with values from tensor buffer
         virtual void fill_data_from_buf(void* data /*!< Pointer to the allocated memory space*/,
-                                       std::vector<int> dims /*!< The dimensions of the memory space*/,
+                                       std::vector<size_t> dims /*!< The dimensions of the memory space*/,
                                        const std::string& type /*!< The datatype of the allocated memory space*/
                                        ) = 0;
 
@@ -112,7 +112,7 @@ class TensorBase{
         std::string _type;
 
         //! Tensor dims
-        std::vector<int> _dims;
+        std::vector<size_t> _dims;
 
         //! Pointer to the data memory space
         void* _data;
@@ -121,7 +121,7 @@ class TensorBase{
         char* _data_buf;
 
         //! The length of the data buff in bytes
-        unsigned long long _buf_size;
+        size_t _buf_size;
 
         //! Function to generate the data buffer from the data
         virtual void _generate_data_buf() = 0;
@@ -137,7 +137,7 @@ class TensorBase{
         //! Function to check for errors in constructor inputs
         void _check_constructor_input(const std::string& name /*!< The name used to reference the tensor*/,
                                       const std::string& type /*!< The data type of the tensor*/,
-                                      std::vector<int> dims /*! The dimensions of the data*/
+                                      std::vector<size_t> dims /*! The dimensions of the data*/
                                       );
 
 };

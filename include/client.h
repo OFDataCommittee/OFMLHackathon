@@ -63,14 +63,14 @@ public:
   void put_tensor(const std::string& key /*!< The key to use to place the tensor*/,
                   const std::string& type /*!< The data type of the tensor*/,
                   void* data /*!< A c ptr to the beginning of the data*/,
-                  const std::vector<int>& dims /*!< The dimensions of the tensor*/
+                  const std::vector<size_t>& dims /*!< The dimensions of the tensor*/
                   );
 
   //! Get a tensor from the database and fill the provided memory space (result) that is layed out as defined by dims
   void get_tensor(const std::string& key /*!< The key to use to fetch the tensor*/,
                   const std::string& type /*!< The data type of the tensor*/,
                   void* result /*!< A c ptr to the beginning of the result array to fill*/,
-                  const std::vector<int>& dims /*!< The dimensions of the provided array which should match the tensor*/
+                  const std::vector<size_t>& dims /*!< The dimensions of the provided array which should match the tensor*/
                   );
 
   //! Move a tensor to a new key
@@ -212,7 +212,7 @@ protected:
                          );
 
   //! Parse tensor dimensions from a database reply
-  std::vector<int> _get_tensor_dims(CommandReply& reply /*!< The database reply*/
+  std::vector<size_t> _get_tensor_dims(CommandReply& reply /*!< The database reply*/
                                     );
 
   //! Retrieve a string_view of data buffer string from the database reply
@@ -265,6 +265,24 @@ protected:
                           std::vector<std::string> inputs /*!< The keys of the input tensors*/,
                           std::vector<std::string> outputs /*!< The keys of the output tensors*/
                           );
+
+  //! Append vector of keys with get prefixes
+  void _append_with_get_prefix(std::vector<std::string>& keys);
+
+  //! Append vector of keys with put prefixes
+  void _append_with_put_prefix(std::vector<std::string>& keys);
+
+  //! Gets a mapping between original names and temporary names for identical hash slot requirement
+  std::vector<std::string>  _get_tmp_names(std::vector<std::string> names,
+                                           std::string db_prefix);
+
+  //! Copy a list of tensor names
+  void _copy_tensors(std::vector<std::string> src,
+                     std::vector<std::string> dest);
+
+  //! Delete a list of keys
+  void _delete_keys(std::vector<std::string> key,
+                    std::string db_prefix="");
 
 private:
   sw::redis::RedisCluster* redis_cluster;

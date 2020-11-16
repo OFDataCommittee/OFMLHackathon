@@ -37,7 +37,7 @@ class DataSet
         //! Dataset constructor using serialized buffer
         DataSet(const std::string& name /*!< The name used to reference the dataset*/,
                 char* buf /*!< The buffer used for object construction*/,
-                unsigned long long buf_size /*!< The buffer length*/
+                size_t buf_size /*!< The buffer length*/
                 );
 
         //! DataSet copy constructor
@@ -48,7 +48,7 @@ class DataSet
         void add_tensor(const std::string& name /*!< The name used to reference the tensor*/,
                         const std::string& type /*!< The data type of the tensor*/,
                         void* data /*!< A c_ptr to the data of the tensor*/,
-                        std::vector<int> dims /*! The dimensions of the data*/
+                        std::vector<size_t> dims /*! The dimensions of the data*/
                         );
 
         //! Add metadata field to the DataSet.  Default behavior is to append existing fields.
@@ -61,30 +61,36 @@ class DataSet
         void get_tensor(const std::string& name /*!< The name used to reference the tensor*/,
                         const std::string& type /*!< The data type of the tensor*/,
                         void*& data /*!< A c_ptr to the tensor data */,
-                        std::vector<int>& dims /*! The dimensions of the tensor retrieved*/
+                        std::vector<size_t>& dims /*! The dimensions of the tensor retrieved*/
+                        );
+
+        //! Get tensor data and return an allocated multi-dimensional array
+        void get_tensor(const std::string& name /*!< The name used to reference the tensor*/,
+                        const std::string& type /*!< The data type of the tensor*/,
+                        void*& data /*!< A c_ptr to the tensor data */,
+                        size_t*& dims /*! The dimensions of the tensor retrieved*/,
+                        size_t& n_dims /*! The number of dimensions retrieved*/
                         );
 
         //! Get tensor data and fill an already allocated array
         void unpack_tensor(const std::string& name /*!< The name used to reference the tensor*/,
                            const std::string& type /*!< The data type of the tensor*/,
                            void* data /*!< A c_ptr to the data of the tensor*/,
-                           std::vector<int> dims /*! The dimensions of the data*/
+                           std::vector<size_t> dims /*! The dimensions of the data*/
                            );
 
-        //TODO rethink this function prototype.  Seems annoying ot have void** and int*
-        //Maybe return std::pair<void* int> or maybe
         //! Get metadata field from the DataSet
         void get_meta(const std::string& name /*!< The name used to reference the metadata*/,
                       const std::string& type /*!< The data type of the metadata*/,
                       void*& data /*!< A c_ptr reference to the metadata*/,
-                      int& length /*!< The length of the meta*/
+                      size_t& length /*!< The length of the meta*/
                       );
 
         //! Method for adding a tensor when we only have the buffer and no data
         //! pointer.  This is meant to be used primarily by the client.
         void add_tensor_buf_only(const std::string& name /*!< The name used to reference the tensor*/,
                                  const std::string& type /*!< The data type of the tensor*/,
-                                 std::vector<int> dims /*! The dimensions of the data*/,
+                                 std::vector<size_t> dims /*! The dimensions of the data*/,
                                  std::string_view buf /*!< A c_ptr to the data of the tensor*/
                                  );
 
@@ -118,5 +124,7 @@ class DataSet
         MetaData _metadata;
         //! The tensorpack object that holds all tensors
         TensorPack _tensorpack;
+        //! MemoryList object to hold allocated int arrays stemming from get_tensor queries
+        MemoryList<size_t> _dim_queries;
 };
 #endif //SMARTSIM_DATASET_H

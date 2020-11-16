@@ -3,7 +3,7 @@
 TensorBase::TensorBase(const std::string& name,
                        const std::string& type,
                        void* data,
-                       const std::vector<int>& dims)
+                       const std::vector<size_t>& dims)
 {
     /* The TensorBase constructor makes a copy of the name, type, and dims
     associated with the tensor, but does not copy the data of the tensor.
@@ -26,7 +26,7 @@ TensorBase::TensorBase(const std::string& name,
 
 TensorBase::TensorBase(const std::string& name,
                        const std::string& type,
-                       const std::vector<int>& dims,
+                       const std::vector<size_t>& dims,
                        const std::string_view& data_buf)
 {
     /* This TensorBase constructor sets the data pointer to 0,
@@ -116,7 +116,7 @@ std::string TensorBase::get_tensor_type()
    return this->_type;
 }
 
-std::vector<int> TensorBase::get_tensor_dims()
+std::vector<size_t> TensorBase::get_tensor_dims()
 {
     /* Return the tensor dims
     */
@@ -138,7 +138,7 @@ std::string_view TensorBase::get_data_buf()
 
 void TensorBase::_check_constructor_input(const std::string& name,
                                           const std::string& type,
-                                          std::vector<int> dims)
+                                          std::vector<size_t> dims)
 {
     /* This function checks the validity of constructor inputs.
     This was taken out of the constructor to reduce code
@@ -161,10 +161,14 @@ void TensorBase::_check_constructor_input(const std::string& name,
         throw std::runtime_error("Must provide a dimensions vector "\
                                  "with at least one dimension.");
 
-    for(int i=0; i<dims.size(); i++) {
-        if( dims[i] <= 0)
+    std::vector<size_t>::const_iterator it = dims.cbegin();
+    std::vector<size_t>::const_iterator it_end = dims.cend();
+    while(it!=it_end) {
+        if((*it)<0) {
             throw std::runtime_error("All tensor dimensions must "\
                                      "be positive.");
+        }
+        it++;
     }
     return;
 }

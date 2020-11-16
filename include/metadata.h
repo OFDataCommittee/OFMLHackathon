@@ -83,7 +83,7 @@ class MetaData
         void get_values(const std::string& name /*!< The name of the metadata field*/,
                         const std::string& type /*!< The data type of the field*/,
                         void*& data /*!< The pointer that will be pointed to the metadata*/,
-                        int& length /*!< An integer that will be set to the number of values in the metadata field*/
+                        size_t& length /*!< An integer that will be set to the number of values in the metadata field*/
                         );
 
         //! Get the metadata fields as a buffer
@@ -136,14 +136,14 @@ class MetaData
         //! Get an array of string metadata values
         void _get_string_field_values(gpb::Message* msg /*!< Protobuf message containing the string field*/,
                                      void*& data /*!< The pointer that will be pointed to the metadata*/,
-                                     int& length /*!< An integer that will be set to the number of values in the metadata field*/
+                                     size_t& length /*!< An integer that will be set to the number of values in the metadata field*/
                                      );
 
         //! Get non-string numeric field values
         template <typename T>
         void _get_numeric_field_values(gpb::Message* msg /*!< Protobuf message containing the string field*/,
                                        void*& data /*!< The pointer that will be pointed to the metadata*/,
-                                       int& n_values /*!< An integer that will be set to the number of values in the metadata field*/,
+                                       size_t& n_values /*!< An integer that will be set to the number of values in the metadata field*/,
                                        MemoryList<T>& mem_list /*!< Memory manager for the metadata heap allocations*/
                                        );
 

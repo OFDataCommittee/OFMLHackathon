@@ -130,7 +130,7 @@ TensorPack::~TensorPack()
 void TensorPack::add_tensor(const std::string& name,
                             const std::string& type,
                             void* data,
-                            const std::vector<int>& dims)
+                            const std::vector<size_t>& dims)
 {
     /* This function adds a tensor with associated c_ptr for data.
     */
@@ -195,7 +195,7 @@ void TensorPack::add_tensor(const std::string& name,
 
 void TensorPack::add_tensor(const std::string& name,
                             const std::string& type,
-                            const std::vector<int>& dims,
+                            const std::vector<size_t>& dims,
                             const std::string_view& buf)
 {
     /* This function adds a tensor with associated data buffer
