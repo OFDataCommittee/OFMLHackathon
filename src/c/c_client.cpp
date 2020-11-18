@@ -34,7 +34,7 @@ void put_dataset(void* c_client, const void* dataset)
 
 extern "C"
 void* get_dataset(void* c_client, const char* name,
-                 const size_t name_length)
+                  const size_t name_length)
 {
   /* Return a pointer to a new dataset.  The user is
   responsible for deleting the dataset.
@@ -42,8 +42,6 @@ void* get_dataset(void* c_client, const char* name,
   SmartSimClient* s = (SmartSimClient *)c_client;
   std::string dataset_name = std::string(name, name_length);
   DataSet* dataset = new DataSet(s->get_dataset(dataset_name));
-  throw std::runtime_error("Move (r-value reference) constructor "\
-                           "not implemented for DataSet.");
   return (void*)dataset;
 }
 
@@ -93,7 +91,7 @@ extern "C"
 void put_tensor(void* c_client, const char* key,
                 const size_t key_length, const char* type,
                 const size_t type_length, void* data,
-                const int* dims, const int n_dims)
+                const size_t* dims, const size_t n_dims)
 {
   /* Put a tensor of a specified type into the database
   */
@@ -101,8 +99,8 @@ void put_tensor(void* c_client, const char* key,
   std::string key_str = std::string(key, key_length);
   std::string type_str = std::string(type, type_length);
 
-  std::vector<int> dims_vec;
-  for(int i=0; i<n_dims; i++)
+  std::vector<size_t> dims_vec;
+  for(size_t i=0; i<n_dims; i++)
     dims_vec.push_back(dims[i]);
 
   s->put_tensor(key_str, type_str, data, dims_vec);
@@ -113,7 +111,7 @@ extern "C"
 void get_tensor(void* c_client, const char* key,
                 const size_t key_length, const char* type,
                 const size_t type_length, void* result,
-                const int* dims, const int n_dims
+                const size_t* dims, const size_t n_dims
                 )
 {
   /* Get a tensor of a specified type from the database
@@ -122,8 +120,8 @@ void get_tensor(void* c_client, const char* key,
   std::string key_str = std::string(key, key_length);
   std::string type_str = std::string(type, type_length);
 
-  std::vector<int> dims_vec;
-  for(int i=0; i<n_dims; i++)
+  std::vector<size_t> dims_vec;
+  for(size_t i=0; i<n_dims; i++)
     dims_vec.push_back(dims[i]);
 
   s->get_tensor(key_str, type_str, result, dims_vec);

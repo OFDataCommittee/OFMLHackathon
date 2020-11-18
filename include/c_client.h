@@ -57,8 +57,8 @@ void put_tensor(void* c_client /*!< The c client to use for communication*/,
                 const char* type /*!< The data type of the tensor*/,
                 const size_t type_length /*!< The length of the type c-string, excluding null terminating character */,
                 void* data /*!< A c ptr to the beginning of the data*/,
-                const int* dims /*!< Length along each dimension of the tensor*/,
-                const int n_dims /*!< The number of dimensions of the tensor*/
+                const size_t* dims /*!< Length along each dimension of the tensor*/,
+                const size_t n_dims /*!< The number of dimensions of the tensor*/
                 );
 
 //! Get a tensor from the database and fill the provided memory space (result) that is layed out as defined by dims
@@ -68,8 +68,8 @@ void get_tensor(void* c_client /*!< The c client to use for communication*/,
                 const char* type /*!< The data type of the tensor*/,
                 const size_t type_length /*!< The length of the type c-string, excluding null terminating character */,
                 void* result /*!< A c ptr to the beginning of the result array to fill*/,
-                const int* dims /*!< The dimensions of the tensor*/,
-                const int n_dims /*!< The number of dimensions of the tensor*/
+                const size_t* dims /*!< The dimensions of the tensor*/,
+                const size_t n_dims /*!< The number of dimensions of the tensor*/
                 );
 
 //! Move a tensor to a new key

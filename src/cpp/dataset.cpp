@@ -12,18 +12,20 @@ DataSet::DataSet(DataSet&& dataset)
     this->name = std::move(dataset.name);
     this->_metadata = std::move(dataset._metadata);
     this->_tensorpack = std::move(dataset._tensorpack);
+    this->_dim_queries = std::move(dataset._dim_queries);
 }
 
 DataSet& DataSet::operator=(DataSet&& dataset)
 {
     /* Move assignment operator for DataSet
     */
-   if(this!=&dataset) {
+    if(this!=&dataset) {
         this->name = std::move(dataset.name);
         this->_metadata = std::move(dataset._metadata);
         this->_tensorpack = std::move(dataset._tensorpack);
-   }
-   return *this;
+        this->_dim_queries = std::move(dataset._dim_queries);
+    }
+    return *this;
 }
 
 DataSet::DataSet(const std::string& name, char* buf,

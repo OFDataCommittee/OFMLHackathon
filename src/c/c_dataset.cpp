@@ -15,7 +15,7 @@ extern "C"
 void add_tensor(void* dataset,
                 const char* name, const size_t name_length,
                 const char* type, const size_t type_length,
-                void* data, const int* dims, const int n_dims)
+                void* data, const size_t* dims, const size_t n_dims)
 {
   /* This function adds a tensor to the dataset.
   */
@@ -23,8 +23,8 @@ void add_tensor(void* dataset,
   std::string name_str = std::string(name, name_length);
   std::string type_str = std::string(type, type_length);
 
-  std::vector<int> dims_vec;
-  for(int i=0; i<n_dims; i++)
+  std::vector<size_t> dims_vec;
+  for(size_t i=0; i<n_dims; i++)
     dims_vec.push_back(dims[i]);
 
   d->add_tensor(name_str, type_str, data, dims_vec);
@@ -51,7 +51,7 @@ extern "C"
 void get_dataset_tensor(void* dataset,
                 const char* name, const size_t name_length,
                 const char* type, const size_t type_length,
-                void*& data, int*& dims, int& n_dims)
+                void** data, size_t** dims, size_t* n_dims)
 {
   /* Get a tensor of a specified type from the database.
   This function may allocate new memory for the tensor.
@@ -62,15 +62,15 @@ void get_dataset_tensor(void* dataset,
   std::string name_str = std::string(name, name_length);
   std::string type_str = std::string(type, type_length);
 
-  d->get_tensor(name_str, type_str, data, dims, n_dims);
+  d->get_tensor(name_str, type_str, *data, *dims, *n_dims);
   return;
 }
 
 extern "C"
 void unpack_dataset_tensor(void* dataset,
-                const char* name, const size_t name_length,
-                const char* type, const size_t type_length,
-                void*& data, const int* dims, const int n_dims)
+                           const char* name, const size_t name_length,
+                           const char* type, const size_t type_length,
+                           void* data, const size_t* dims, const size_t n_dims)
 {
   /* This function will take the tensor data buffer and copy
   it into the provided memory space (data).
@@ -79,8 +79,8 @@ void unpack_dataset_tensor(void* dataset,
   std::string name_str = std::string(name, name_length);
   std::string type_str = std::string(type, type_length);
 
-  std::vector<int> dims_vec;
-  for(int i=0; i<n_dims; i++)
+  std::vector<size_t> dims_vec;
+  for(size_t i=0; i<n_dims; i++)
     dims_vec.push_back(dims[i]);
 
   d->unpack_tensor(name_str, type_str, data, dims_vec);
@@ -91,7 +91,7 @@ extern "C"
 void get_meta(void* dataset,
               const char* name, const size_t name_length,
               const char* type, const size_t type_length,
-              void*& data, int* length)
+              void** data, size_t* length)
 {
   /* Get a meta data field.. This method may allocated
   memory that is cleared when the user deletes the
@@ -100,6 +100,6 @@ void get_meta(void* dataset,
   DataSet* d = (DataSet*)dataset;
   std::string key_str = std::string(name, name_length);
   std::string type_str = std::string(type, type_length);
-  d->get_meta(key_str, type_str, data, *length);
+  d->get_meta(key_str, type_str, *data, *length);
   return;
 }

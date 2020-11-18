@@ -1,6 +1,6 @@
-#ifndef SMARTSIM_DATASET_H
+//#ifndef SMARTSIM_DATASET_H
 #define SMARTSIM_DATASET_H
-
+#ifdef __cplusplus
 #include "stdlib.h"
 #include <string>
 #include <vector>
@@ -16,7 +16,7 @@
 
 
 ///@file
-///\brief The DataSet class encapsulating numeric data and metadata.
+///\brief cdThe DataSet class encapsulating numeric data and metadata.
 
 class DataSet;
 
