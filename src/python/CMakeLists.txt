@@ -64,7 +64,8 @@ set(CLIENT_SRC
 	 ../../../src/cpp/tensorpack.cpp
 	 ../../../src/cpp/dbnode.cpp
 	 ../../../src/cpp/commandreply.cpp
-     ../../../utils/protobuf/silc.pb.cc)
+	 ../../../utils/protobuf/silc.pb.cc
+	 ../src/pyclient.cpp)
 
 pybind11_add_module(silc ${CLIENT_SRC} ${CLIENT_LIBRARIES} ../bindings/bind.cpp)
 target_link_libraries(silc PUBLIC ${CLIENT_LIBRARIES})
