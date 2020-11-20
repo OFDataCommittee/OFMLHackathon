@@ -34,14 +34,14 @@ void add_meta(void* dataset /*!< A c_ptr to the dataset object */,
 
 //! Get tensor data and return an allocated multi-dimensional array
 void get_dataset_tensor(void* dataset /*!< A c_ptr to the dataset object */,
-                const char* name /*!< The name used to reference the tensor*/,
-                const size_t name_length /*!< The length of the tensor name c-string, excluding null terminating character*/,
-                const char* type /*!< The data type of the tensor*/,
-                const size_t type_length /*!< The length of the data type c-string, excluding null terminating character*/,
-                void** data /*!< A c_ptr to the tensor data */,
-                size_t** dims /*!< Length along each dimension of the tensor*/,
-                size_t* n_dims /*!< The number of dimensions of the tensor*/
-                );
+                        const char* name /*!< The name used to reference the tensor*/,
+                        const size_t name_length /*!< The length of the tensor name c-string, excluding null terminating character*/,
+                        char** type /*!< The data type of the tensor*/,
+                        size_t* type_length /*!< The length of the data type c-string, excluding null terminating character*/,
+                        void** data /*!< A c_ptr to the tensor data */,
+                        size_t** dims /*!< Length along each dimension of the tensor*/,
+                        size_t* n_dims /*!< The number of dimensions of the tensor*/
+                        );
 
 //! Get tensor data and fill an already allocated array
 void unpack_dataset_tensor(void* dataset /*!< A c_ptr to the dataset object */,

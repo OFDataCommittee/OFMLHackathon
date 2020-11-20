@@ -1,4 +1,4 @@
-//#ifndef SMARTSIM_DATASET_H
+#ifndef SMARTSIM_DATASET_H
 #define SMARTSIM_DATASET_H
 #ifdef __cplusplus
 #include "stdlib.h"
@@ -59,20 +59,21 @@ class DataSet
 
         //! Get tensor data and return an allocated multi-dimensional array
         void get_tensor(const std::string& name /*!< The name used to reference the tensor*/,
-                        const std::string& type /*!< The data type of the tensor*/,
+                        std::string& type /*!< The data type of the tensor*/,
                         void*& data /*!< A c_ptr to the tensor data */,
                         std::vector<size_t>& dims /*! The dimensions of the tensor retrieved*/
                         );
 
         //! Get tensor data and return an allocated multi-dimensional array
         void get_tensor(const std::string& name /*!< The name used to reference the tensor*/,
-                        const std::string& type /*!< The data type of the tensor*/,
+                        char*& type /*!< The data type of the tensor*/,
+                        size_t& type_length /*!< The length of the tensor type string*/,
                         void*& data /*!< A c_ptr to the tensor data */,
                         size_t*& dims /*! The dimensions of the tensor retrieved*/,
                         size_t& n_dims /*! The number of dimensions retrieved*/
                         );
 
-        //! Get tensor data and fill an already allocated array
+        //! Get tensor data and fill an already allocated array memory space
         void unpack_tensor(const std::string& name /*!< The name used to reference the tensor*/,
                            const std::string& type /*!< The data type of the tensor*/,
                            void* data /*!< A c_ptr to the data of the tensor*/,
@@ -124,7 +125,10 @@ class DataSet
         MetaData _metadata;
         //! The tensorpack object that holds all tensors
         TensorPack _tensorpack;
-        //! MemoryList object to hold allocated int arrays stemming from get_tensor queries
+        //! MemoryList object to hold allocated size_t arrays stemming from get_tensor queries
         MemoryList<size_t> _dim_queries;
+        //! MemoryList to handle type queries
+        MemoryList<char> _type_queries;
 };
+#endif
 #endif //SMARTSIM_DATASET_H

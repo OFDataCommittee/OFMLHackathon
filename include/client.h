@@ -66,12 +66,28 @@ public:
                   const std::vector<size_t>& dims /*!< The dimensions of the tensor*/
                   );
 
-  //! Get a tensor from the database and fill the provided memory space (result) that is layed out as defined by dims
-  void get_tensor(const std::string& key /*!< The key to use to fetch the tensor*/,
-                  const std::string& type /*!< The data type of the tensor*/,
-                  void* result /*!< A c ptr to the beginning of the result array to fill*/,
-                  const std::vector<size_t>& dims /*!< The dimensions of the provided array which should match the tensor*/
+  //! Get tensor data and return an allocated multi-dimensional array
+  void get_tensor(const std::string& key /*!< The name used to reference the tensor*/,
+                  std::string& type /*!< The data type of the tensor*/,
+                  void*& data /*!< A c_ptr to the tensor data */,
+                  std::vector<size_t>& dims /*!< The dimensions of the provided array which should match the tensor*/
                   );
+
+  //! Get tensor data and return an allocated multi-dimensional array (c-style interface for type and dimensions)
+  void get_tensor(const std::string& name /*!< The name used to reference the tensor*/,
+                  char*& type /*!< The data type of the tensor*/,
+                  size_t& type_length /*!< The length of the tensor type*/,
+                  void*& data /*!< A c_ptr to the tensor data */,
+                  size_t*& dims /*! The dimensions of the tensor retrieved*/,
+                  size_t& n_dims /*! The number of dimensions retrieved*/
+                  );
+
+  //! Get tensor data and fill an already allocated array memory space
+  void unpack_tensor(const std::string& key /*!< The key to use to fetch the tensor*/,
+                     const std::string& type /*!< The data type of the tensor*/,
+                     void* data /*!< A c ptr to the beginning of the result array to fill*/,
+                     const std::vector<size_t>& dims /*!< The dimensions of the provided array which should match the tensor*/
+                     );
 
   //! Move a tensor to a new key
   void rename_tensor(const std::string& key /*!< The original tensor key*/,
@@ -288,8 +304,16 @@ private:
   sw::redis::RedisCluster* redis_cluster;
   sw::redis::Redis* redis;
 
+  //! MemoryList to handle get_model commands to return model string
   MemoryList<char> _model_queries;
+  //! MemoryList to handle dimensions that are returned to the user
+  MemoryList<size_t> _dim_queries;
+  //! MemoryList to handle type queries
+  MemoryList<char> _type_queries;
 
+  //! //! The _tensor_pack memory is not for querying by name, but is used
+  //! to manage memory.
+  TensorPack _tensor_memory;
   std::string _put_key_prefix;
   std::string _get_key_prefix;
   std::vector<std::string> _get_key_prefixes;

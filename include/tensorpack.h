@@ -50,6 +50,13 @@ class TensorPack
                         const std::string_view& buf /*!< A c_ptr to the data of the tensor*/
                         );
 
+        //! Method to add a tensor object that has already been created on the heap.
+        //! DO NOT add tensors allocated on the stack that may be deleted outside of
+        //! the tensor pack.  This function will cast the TensorBase to the correct
+        //! Tensor<T> type.
+        void add_tensor(TensorBase* tensor /*!< Pointer to the tensor allocated on the heap*/
+                        );
+
         //! Iterators for tensors
         typedef std::forward_list<TensorBase*>::iterator tensorbase_iterator;
         typedef std::forward_list<TensorBase*>::const_iterator const_tensorbase_iterator;
@@ -117,4 +124,5 @@ class TensorPack
         void _delete_tensor_list(
             std::forward_list<Tensor<T>*>& tensor_list /*!< The tensor list to delete*/);
 };
+
 #endif //SMARTSIM_TENSORPACK_H

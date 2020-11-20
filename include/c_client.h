@@ -65,12 +65,23 @@ void put_tensor(void* c_client /*!< The c client to use for communication*/,
 void get_tensor(void* c_client /*!< The c client to use for communication*/,
                 const char* key /*!< The key to use to fetch the tensor*/,
                 const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-                const char* type /*!< The data type of the tensor*/,
-                const size_t type_length /*!< The length of the type c-string, excluding null terminating character */,
-                void* result /*!< A c ptr to the beginning of the result array to fill*/,
-                const size_t* dims /*!< The dimensions of the tensor*/,
-                const size_t n_dims /*!< The number of dimensions of the tensor*/
+                char** type /*!< The data type of the tensor*/,
+                size_t* type_length /*!< The length of the type c-string, excluding null terminating character */,
+                void** data /*!< A c ptr to the beginning of the result array to fill*/,
+                size_t** dims /*!< The dimensions of the tensor*/,
+                size_t* n_dims /*!< The number of dimensions of the tensor*/
                 );
+
+//! Get a tensor from the database and fill the provided memory space (result) that is layed out as defined by dims
+void unpack_tensor(void* c_client /*!< The c client to use for communication*/,
+                  const char* key /*!< The key to use to fetch the tensor*/,
+                  const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
+                  const char* type /*!< The data type of the tensor*/,
+                  const size_t type_length /*!< The length of the type c-string, excluding null terminating character */,
+                  void* result /*!< A c ptr to the beginning of the result array to fill*/,
+                  const size_t* dims /*!< The dimensions of the tensor*/,
+                  const size_t n_dims /*!< The number of dimensions of the tensor*/
+                  );
 
 //! Move a tensor to a new key
 void rename_tensor(void* c_client /*!< The c client to use for communication*/,

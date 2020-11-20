@@ -144,11 +144,44 @@ void put_get_3D_array(
 
   // Retrieve tensors where the DataSet handles memory allocation
   void* t_get_1;
-  RetrievedDataSet.get_tensor("tensor_1", type, t_get_1, dims);
+  std::string t_get_1_type;
+  std::vector<size_t> t_get_1_dims;
+  RetrievedDataSet.get_tensor("tensor_1", t_get_1_type,
+                              t_get_1, t_get_1_dims);
   void* t_get_2;
-  RetrievedDataSet.get_tensor("tensor_2", type, t_get_2, dims);
+  std::string t_get_2_type;
+  std::vector<size_t> t_get_2_dims;
+  RetrievedDataSet.get_tensor("tensor_2", t_get_2_type,
+                              t_get_2, t_get_2_dims);
   void* t_get_3;
-  RetrievedDataSet.get_tensor("tensor_3", type, t_get_3, dims);
+  std::string t_get_3_type;
+  std::vector<size_t> t_get_3_dims;
+  RetrievedDataSet.get_tensor("tensor_3", t_get_3_type,
+                              t_get_3, t_get_3_dims);
+
+  if(t_get_1_type!=type)
+    throw std::runtime_error("Retrieved type for tensor_1 "\
+                             "does not match known type");
+
+  if(t_get_2_type!=type)
+    throw std::runtime_error("Retrieved type for tensor_2 "\
+                             "does not match known type");
+
+  if(t_get_3_type!=type)
+    throw std::runtime_error("Retrieved type for tensor_3 "\
+                             "does not match known type");
+
+  if(t_get_1_dims!=dims)
+    throw std::runtime_error("Retrieved dims for tensor_1 "\
+                             "do not match the known dims.");
+
+  if(t_get_2_dims!=dims)
+    throw std::runtime_error("Retrieved dims for tensor_2 "\
+                             "do not match the known dims.");
+
+  if(t_get_3_dims!=dims)
+    throw std::runtime_error("Retrieved dims for tensor_3 "\
+                             "do not match the known dims.");
 
   if(is_equal_3D_array(t_send_1, (T_recv***)t_get_1, dims[0], dims[1], dims[2]))
     std::cout<<"Correctly fetched and allocated t_get_1."<<std::endl;

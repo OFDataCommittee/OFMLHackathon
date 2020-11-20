@@ -11,11 +11,12 @@ void put_get_1D_array(
         std::string type,
         std::string key_suffix="")
 {
-  SmartSimClient client(false);
+  SmartSimClient client(true);
 
   //Allocate and fill arrays
   T_send* array = (T_send*)malloc(dims[0]*sizeof(T_send));
-  T_recv* result = (T_recv*)malloc(dims[0]*sizeof(T_recv));
+  T_recv* u_result = (T_recv*)malloc(dims[0]*sizeof(T_recv));
+
   fill_array(array, dims[0]);
 
   int rank = 0;
@@ -24,27 +25,59 @@ void put_get_1D_array(
   std::string key = "1D_tensor_test_rank_" +
                     std::to_string(rank) + key_suffix;
 
+  /*
   for(int i = 0; i < dims[0]; i++) {
       std::cout.precision(17);
       std::cout<<"Sending value "<<i<<": "
                <<std::fixed<<array[i]<<std::endl;
   }
-
+  */
   client.put_tensor(key, type, (void*)array, dims);
-  client.get_tensor(key, type, result, dims);
-
+  client.unpack_tensor(key, type, u_result, dims);
+  /*
   for(int i = 0; i < dims[0]; i++) {
       std::cout<< "Value " << i
                << " Sent: " << array[i] <<" Received: "
-               << result[i] << std::endl;
+               << u_result[i] << std::endl;
   }
-  if (!is_equal_1D_array<T_send, T_recv>(array, result,
+  */
+
+  if (!is_equal_1D_array<T_send, T_recv>(array, u_result,
+                                         dims[0]))
+	  throw std::runtime_error("The results do not match for "\
+				                     "the 1D put and get test!");
+
+  std::string g_type;
+  std::vector<size_t> g_dims;
+  void* g_result;
+  client.get_tensor(key, g_type, g_result, g_dims);
+  T_recv* g_type_result = (T_recv*)g_result;
+
+  /*
+  for(int i = 0; i < dims[0]; i++) {
+      std::cout<< "Value " << i
+               << " Sent: " << array[i] <<" Received: "
+               << g_type_result[i] << std::endl;
+  }
+  */
+  if(type.compare(g_type)!=0)
+    throw std::runtime_error("The tensor type " + g_type + " "\
+                             "retrieved with client.get_tensor() "\
+                             "does not match the known type " +
+                             type);
+
+  if(g_dims!=dims)
+    throw std::runtime_error("The tensor dimensions retrieved "\
+                             "client.get_tensor() do not match "\
+                             "the known tensor dimensions.");
+
+  if (!is_equal_1D_array<T_send, T_recv>(array, g_type_result,
                                          dims[0]))
 	  throw std::runtime_error("The results do not match for "\
 				                     "the 1D put and get test!");
 
   free_1D_array(array);
-  free_1D_array(result);
+  free_1D_array(u_result);
 
   return;
 }
@@ -63,7 +96,7 @@ int main(int argc, char* argv[]) {
   put_get_1D_array<float,float>(
 				&set_1D_array_floating_point_values<float>,
 				dims, "FLOAT", "_flt");
-  std::cout<<"starting int64"<<std::endl;
+
   put_get_1D_array<int64_t,int64_t>(
 				    &set_1D_array_integral_values<int64_t>,
 				    dims, "INT64", "_i64");
@@ -87,6 +120,8 @@ int main(int argc, char* argv[]) {
   put_get_1D_array<uint8_t,uint8_t>(
 				      &set_1D_array_integral_values<uint8_t>,
 				      dims, "UINT8", "_ui8");
+
+  std::cout<<"1D put and test complete"<<std::endl;
 
   MPI_Finalize();
 

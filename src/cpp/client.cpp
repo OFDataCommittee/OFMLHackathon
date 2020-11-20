@@ -222,12 +222,133 @@ void SmartSimClient::put_tensor(const std::string& key,
 }
 
 void SmartSimClient::get_tensor(const std::string& key,
-                                const std::string& type,
-                                void* result,
-                                const std::vector<size_t>& dims)
+                                std::string& type, void*& data,
+                                std::vector<size_t>& dims)
 {
   /* This function gets a tensor from the database and stores
-  it in the result pointer.
+  it in the data pointer.
+  */
+  CommandReply reply;
+  Command cmd;
+
+  cmd.add_field("AI.TENSORGET");
+  cmd.add_field(this->_get_prefix() + key);
+  cmd.add_field("META");
+  cmd.add_field("BLOB");
+  reply = this->_execute_command(cmd);
+
+  dims = this->_get_tensor_dims(reply);
+  type = this->_get_tensor_data_type(reply);
+  std::string_view blob = this->_get_tensor_data_blob(reply);
+
+  if(dims.size()<=0)
+    throw std::runtime_error("The number of dimensions of the fetched "\
+                             "tensor are invalid: " +
+                             std::to_string(dims.size()));
+
+  for(size_t i=0; i<dims.size(); i++) {
+    if(dims[i]<=0) {
+      throw std::runtime_error("Dimension " + std::to_string(dims[i]) +
+                               "of the fetched tensor is not valid: " +
+                               std::to_string(dims[i]));
+    }
+  }
+
+  if(TENSOR_TYPE_MAP.count(type)==0)
+    throw std::runtime_error("The type of the fetched tensor "\
+                             "is not valid: " + type);
+
+  int data_type = TENSOR_TYPE_MAP.at(type);
+  TensorBase* ptr;
+  switch(data_type) {
+    case DOUBLE_TENSOR_TYPE :
+      ptr = new Tensor<double>(key, type, dims, blob);
+      this->_tensor_memory.add_tensor(ptr);
+      break;
+    case FLOAT_TENSOR_TYPE :
+      ptr = new Tensor<float>(key, type, dims, blob);
+      this->_tensor_memory.add_tensor(ptr);
+      break;
+    case INT64_TENSOR_TYPE :
+      ptr = new Tensor<int64_t>(key, type, dims, blob);
+      this->_tensor_memory.add_tensor(ptr);
+      break;
+    case INT32_TENSOR_TYPE :
+      ptr = new Tensor<int32_t>(key, type, dims, blob);
+      this->_tensor_memory.add_tensor(ptr);
+      break;
+    case INT16_TENSOR_TYPE :
+      ptr = new Tensor<int16_t>(key, type, dims, blob);
+      this->_tensor_memory.add_tensor(ptr);
+      break;
+    case INT8_TENSOR_TYPE :
+      ptr = new Tensor<int8_t>(key, type, dims, blob);
+      this->_tensor_memory.add_tensor(ptr);
+      break;
+    case UINT16_TENSOR_TYPE :
+      ptr = new Tensor<uint16_t>(key, type, dims, blob);
+      this->_tensor_memory.add_tensor(ptr);
+      break;
+    case UINT8_TENSOR_TYPE :
+      ptr = new Tensor<uint8_t>(key, type, dims, blob);
+      this->_tensor_memory.add_tensor(ptr);
+      break;
+    default :
+      throw std::runtime_error("The tensor could not be retrieved "\
+                               "in client.get_tensor().");
+      break;
+  }
+  data = ptr->get_data();
+  return;
+}
+
+void SmartSimClient::get_tensor(const std::string&  name,
+                                char*& type, size_t& type_length,
+                                void*& data, size_t*& dims,
+                                size_t& n_dims)
+{
+  /* This function will retrieve tensor data
+  pointer to the user.  This interface is a c-style
+  interface for the dimensions and type for the
+  c-interface because memory mamange for
+  the dimensions needs to be handled within
+  the client.  The retrieved tensor data and
+  dimensions will be freed when the client
+  is destroyed.
+  */
+  std::vector<size_t> dims_vec;
+  std::string type_str;
+  this->get_tensor(name, type_str, data, dims_vec);
+
+  size_t dims_bytes = sizeof(int)*dims_vec.size();
+  dims = this->_dim_queries.allocate_bytes(dims_bytes);
+  n_dims = dims_vec.size();
+
+  std::vector<size_t>::const_iterator it = dims_vec.cbegin();
+  std::vector<size_t>::const_iterator it_end = dims_vec.cend();
+  size_t i = 0;
+  while(it!=it_end) {
+      dims[i] = *it;
+      i++;
+      it++;
+  }
+
+  //We will make the type char* null-terminated for safety,
+  //but we will not include that in the length.
+  size_t type_bytes = sizeof(char)*(type_str.size()+1);
+  type = this->_type_queries.allocate_bytes(type_bytes);
+  type_length=type_str.size();
+  std::memcpy(type, type_str.data(), type_bytes);
+  return;
+}
+
+void SmartSimClient::unpack_tensor(const std::string& key,
+                                   const std::string& type,
+                                   void* data,
+                                   const std::vector<size_t>& dims)
+{
+  /* This function gets a tensor from the database and stores
+  it in the data pointer.
   */
   CommandReply reply;
   Command cmd;
@@ -241,11 +362,14 @@ void SmartSimClient::get_tensor(const std::string& key,
   std::vector<size_t> reply_dims = this->_get_tensor_dims(reply);
 
   if(dims.size()!= reply_dims.size())
-    throw std::runtime_error("The dimensions of the fetched tensor "\
-                             "do not match the provided dimensions "\
-                             "of the user memory space.");
+    throw std::runtime_error("The number of dimensions of the fetched "\
+                             "tensor, " +
+                             std::to_string(reply_dims.size()) + " "\
+                             "do not match the number of dimensions "\
+                             "of the user memory space, " +
+                             std::to_string(dims.size()));
 
-  for(std::vector<size_t>::size_type i=0; i<reply_dims.size(); i++) {
+  for(size_t i=0; i<reply_dims.size(); i++) {
     if(dims[i]!=reply_dims[i]) {
       throw std::runtime_error("The dimensions of the fetched tensor "\
                                "do not match the provided dimensions "\
@@ -255,8 +379,10 @@ void SmartSimClient::get_tensor(const std::string& key,
 
   std::string reply_type = this->_get_tensor_data_type(reply);
   if(type.compare(reply_type)!=0)
-    throw std::runtime_error("The type of the fetched tensor "\
-                             "does not match the provided type.");
+    throw std::runtime_error("The type of the fetched tensor, " +
+                             reply_type +
+                             ", does not match the provided type: " +
+                             type);
 
   std::string_view blob = this->_get_tensor_data_blob(reply);
 
@@ -288,7 +414,7 @@ void SmartSimClient::get_tensor(const std::string& key,
       tensor = new Tensor<uint8_t>(key, type, dims, blob);
     break;
   }
-  tensor->fill_data_from_buf(result, dims, type);
+  tensor->fill_data_from_buf(data, dims, type);
   delete tensor;
   return;
 }
@@ -320,7 +446,6 @@ void SmartSimClient::rename_tensor(const std::string& key,
     cmd.add_field(new_key);
     reply = this->_execute_command(cmd);
   }
-
   return;
 }
 

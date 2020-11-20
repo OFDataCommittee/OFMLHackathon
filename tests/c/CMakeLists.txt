@@ -69,14 +69,24 @@ set(CLIENT_SRC
 	 ../../utils/protobuf/silc.pb.cc)
 
 
-add_executable(client_test_put_get_1D
-	client_test_put_get_1D.c
+add_executable(client_test_put_unpack_1D
+	client_test_put_unpack_1D.c
 	${CLIENT_SRC}
 )
 
-target_link_libraries(client_test_put_get_1D
+target_link_libraries(client_test_put_unpack_1D
 	MPI::MPI_C
 	${CLIENT_LIBRARIES}
+)
+
+add_executable(client_test_put_get_1D
+        client_test_put_get_1D.c
+        ${CLIENT_SRC}
+)
+
+target_link_libraries(client_test_put_get_1D
+        MPI::MPI_C
+        ${CLIENT_LIBRARIES}
 )
 
 add_executable(client_test_put_get_2D
@@ -95,6 +105,16 @@ add_executable(client_test_put_get_3D
 )
 
 target_link_libraries(client_test_put_get_3D
+        MPI::MPI_C
+        ${CLIENT_LIBRARIES}
+)
+
+add_executable(client_test_dataset
+        client_test_dataset.c
+        ${CLIENT_SRC}
+)
+
+target_link_libraries(client_test_dataset
         MPI::MPI_C
         ${CLIENT_LIBRARIES}
 )

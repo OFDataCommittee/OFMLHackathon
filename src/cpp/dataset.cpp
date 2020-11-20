@@ -62,7 +62,7 @@ void DataSet::add_tensor_buf_only(const std::string& name,
 }
 
 void DataSet::get_tensor(const std::string&  name,
-                         const std::string&  type,
+                        std::string&  type,
                          void*& data, std::vector<size_t>& dims)
 {
     /* This function will retrieve tensor data pointer to the
@@ -78,17 +78,14 @@ void DataSet::get_tensor(const std::string&  name,
                                                + " does not exist in "
                                                + this->name + " dataset.");
 
-    //TODO should we do checks on the type here to
-    //make sure they match up with tensor?
-
-
+    type = this->_tensorpack.get_tensor(name)->get_tensor_type();
     data = this->_tensorpack.get_tensor_data(name);
     dims = this->_tensorpack.get_tensor(name)->get_tensor_dims();
     return;
 }
 
 void DataSet::get_tensor(const std::string&  name,
-                         const std::string&  type,
+                         char*& type, size_t& type_length,
                          void*& data, size_t*& dims,
                          size_t& n_dims)
 {
@@ -102,10 +99,12 @@ void DataSet::get_tensor(const std::string&  name,
     space, that c_ptr will be returned.
     */
     std::vector<size_t> dims_vec;
-    this->get_tensor(name, type, data, dims_vec);
+    std::string type_str;
+    this->get_tensor(name, type_str, data, dims_vec);
 
     size_t n_bytes = sizeof(int)*dims_vec.size();
-    dims = _dim_queries.allocate_bytes(n_bytes);
+    dims = this->_dim_queries.allocate_bytes(n_bytes);
+    n_dims = dims_vec.size();
 
     std::vector<size_t>::const_iterator it = dims_vec.cbegin();
     std::vector<size_t>::const_iterator it_end = dims_vec.cend();
@@ -115,6 +114,13 @@ void DataSet::get_tensor(const std::string&  name,
         i++;
         it++;
     }
+
+    //We will make the type char* null-terminated for safety,
+    //but we will not include that in the length.
+    size_t type_bytes = sizeof(char)*(type_str.size()+1);
+    type = this->_type_queries.allocate_bytes(type_bytes);
+    type_length=type_str.size();
+    std::memcpy(type, type_str.data(), type_bytes);
     return;
 }
 

@@ -109,12 +109,30 @@ void put_tensor(void* c_client, const char* key,
 
 extern "C"
 void get_tensor(void* c_client, const char* key,
-                const size_t key_length, const char* type,
-                const size_t type_length, void* result,
-                const size_t* dims, const size_t n_dims
+                const size_t key_length, char** type,
+                size_t* type_length, void** result,
+                size_t** dims, size_t* n_dims
                 )
 {
   /* Get a tensor of a specified type from the database
+  */
+  SmartSimClient* s = (SmartSimClient *)c_client;
+  std::string key_str = std::string(key, key_length);
+
+  s->get_tensor(key_str, *type, *type_length,
+                *result, *dims, *n_dims);
+  return;
+}
+
+extern "C"
+void unpack_tensor(void* c_client, const char* key,
+                   const size_t key_length, const char* type,
+                   const size_t type_length, void* result,
+                   const size_t* dims, const size_t n_dims
+                   )
+{
+  /* Get a tensor of a specified type from the database
+  and put the values into the user provided memory space.
   */
   SmartSimClient* s = (SmartSimClient *)c_client;
   std::string key_str = std::string(key, key_length);
@@ -124,7 +142,7 @@ void get_tensor(void* c_client, const char* key,
   for(size_t i=0; i<n_dims; i++)
     dims_vec.push_back(dims[i]);
 
-  s->get_tensor(key_str, type_str, result, dims_vec);
+  s->unpack_tensor(key_str, type_str, result, dims_vec);
   return;
 }
 

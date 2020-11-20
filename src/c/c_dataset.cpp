@@ -49,9 +49,9 @@ void add_meta(void* dataset,
 
 extern "C"
 void get_dataset_tensor(void* dataset,
-                const char* name, const size_t name_length,
-                const char* type, const size_t type_length,
-                void** data, size_t** dims, size_t* n_dims)
+                        const char* name, const size_t name_length,
+                        char** type, size_t* type_length,
+                        void** data, size_t** dims, size_t* n_dims)
 {
   /* Get a tensor of a specified type from the database.
   This function may allocate new memory for the tensor.
@@ -60,9 +60,9 @@ void get_dataset_tensor(void* dataset,
   */
   DataSet* d = (DataSet*)dataset;
   std::string name_str = std::string(name, name_length);
-  std::string type_str = std::string(type, type_length);
 
-  d->get_tensor(name_str, type_str, *data, *dims, *n_dims);
+  d->get_tensor(name_str, *type, *type_length,
+                          *data, *dims, *n_dims);
   return;
 }
 
