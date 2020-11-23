@@ -302,7 +302,7 @@ void SmartSimClient::get_tensor(const std::string& key,
   return;
 }
 
-void SmartSimClient::get_tensor(const std::string&  name,
+void SmartSimClient::get_tensor(const std::string& name,
                                 char*& type, size_t& type_length,
                                 void*& data, size_t*& dims,
                                 size_t& n_dims)
@@ -1273,30 +1273,33 @@ CommandReply SmartSimClient::_execute_command(Command& cmd,
 
 std::string SmartSimClient::_get_ssdb()
 {
-  std::string env = std::string(getenv("SSDB"));
+  std::string env_str = std::string(getenv("SSDB"));
 
-  if (env.size()==0)
+  if (env_str.size()==0)
     throw std::runtime_error("The environment variable SSDB "\
                              "must be set to use the client.");
 
   std::vector<std::string> hosts_ports;
+
   size_t i_pos = 0;
-  size_t j_pos = env.find(';');
+  size_t j_pos = env_str.find(';');
   while(j_pos!=std::string::npos) {
-      if (env[i_pos] == '"') {
-        i_pos = i_pos + 1;
-      }
-      hosts_ports.push_back("tcp://"+
-        env.substr(i_pos, j_pos-i_pos));
-      i_pos = j_pos + 1;
-      j_pos = env.find(";", i_pos);
+    hosts_ports.push_back("tcp://"+
+      env_str.substr(i_pos, j_pos-i_pos));
+    i_pos = j_pos + 1;
+    j_pos = env_str.find(";", i_pos);
   }
+  //Catch the last value that does not have a trailing ';'
+  if(i_pos<env_str.size())
+    hosts_ports.push_back("tcp://"+
+      env_str.substr(i_pos, j_pos-i_pos));
 
   std::chrono::high_resolution_clock::time_point t =
     std::chrono::high_resolution_clock::now();
 
   srand(std::chrono::time_point_cast<std::chrono::nanoseconds>(t).time_since_epoch().count());
   int hp = rand()%hosts_ports.size();
+
   return hosts_ports[hp];
 }
 
