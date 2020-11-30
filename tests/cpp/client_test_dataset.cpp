@@ -52,9 +52,12 @@ void put_get_3D_array(
   DataSet MyDataSet(dataset_name);
 
   //Add tensors to the DataSet
-  MyDataSet.add_tensor("tensor_1", type, t_send_1, dims);
-  MyDataSet.add_tensor("tensor_2", type, t_send_2, dims);
-  MyDataSet.add_tensor("tensor_3", type, t_send_3, dims);
+  MyDataSet.add_tensor("tensor_1", type, t_send_1,
+                       dims, MemoryLayout::nested);
+  MyDataSet.add_tensor("tensor_2", type, t_send_2,
+                       dims, MemoryLayout::nested);
+  MyDataSet.add_tensor("tensor_3", type, t_send_3,
+                       dims, MemoryLayout::nested);
 
   //Add metadata fields to the DataSet.  _meta_1 and _meta_2
   //values added to _field_1 and _meta_3 is added to _field_2.
@@ -95,9 +98,12 @@ void put_get_3D_array(
   T_recv*** t_recv_3 = allocate_3D_array<T_recv>(dims[0], dims[1], dims[2]);
 
   DataSet RetrievedDataSet = client.get_dataset(dataset_name);
-  RetrievedDataSet.unpack_tensor("tensor_1", type, t_recv_1, dims);
-  RetrievedDataSet.unpack_tensor("tensor_2", type, t_recv_2, dims);
-  RetrievedDataSet.unpack_tensor("tensor_3", type, t_recv_3, dims);
+  RetrievedDataSet.unpack_tensor("tensor_1", type, t_recv_1,
+                                 dims, MemoryLayout::nested);
+  RetrievedDataSet.unpack_tensor("tensor_2", type, t_recv_2,
+                                 dims, MemoryLayout::nested);
+  RetrievedDataSet.unpack_tensor("tensor_3", type, t_recv_3,
+                                 dims, MemoryLayout::nested);
 
   /*
   for(int i = 0; i < dims[0]; i++)
@@ -147,17 +153,20 @@ void put_get_3D_array(
   std::string t_get_1_type;
   std::vector<size_t> t_get_1_dims;
   RetrievedDataSet.get_tensor("tensor_1", t_get_1_type,
-                              t_get_1, t_get_1_dims);
+                              t_get_1, t_get_1_dims,
+                              MemoryLayout::nested);
   void* t_get_2;
   std::string t_get_2_type;
   std::vector<size_t> t_get_2_dims;
   RetrievedDataSet.get_tensor("tensor_2", t_get_2_type,
-                              t_get_2, t_get_2_dims);
+                              t_get_2, t_get_2_dims,
+                              MemoryLayout::nested);
   void* t_get_3;
   std::string t_get_3_type;
   std::vector<size_t> t_get_3_dims;
   RetrievedDataSet.get_tensor("tensor_3", t_get_3_type,
-                              t_get_3, t_get_3_dims);
+                              t_get_3, t_get_3_dims,
+                              MemoryLayout::nested);
 
   if(t_get_1_type!=type)
     throw std::runtime_error("Retrieved type for tensor_1 "\

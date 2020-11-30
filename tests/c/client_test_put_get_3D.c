@@ -49,10 +49,11 @@ void put_get_3D_tensor(void* tensor, size_t* dims, size_t n_dims,
   pos += key_suffix_length;
   key[pos] = 0;
 
+  CMemoryLayout layout = c_nested;
   put_tensor(client, key, key_length, type, type_length,
-             (void*)tensor, dims, n_dims);
+             (void*)tensor, dims, n_dims, layout);
   get_tensor(client, key, key_length, type, type_length,
-             result, dims, n_dims);
+             result, dims, n_dims, layout);
 
   free(rank_str);
   free(key);

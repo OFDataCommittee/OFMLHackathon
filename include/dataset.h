@@ -16,7 +16,7 @@
 
 
 ///@file
-///\brief cdThe DataSet class encapsulating numeric data and metadata.
+///\brief The DataSet class encapsulating numeric data and metadata.
 
 class DataSet;
 
@@ -29,10 +29,10 @@ class DataSet
                 );
 
         //! DataSet move constructor
-        DataSet(DataSet&& dataset);
+        DataSet(DataSet&& dataset /*!< The dataset to move for construction*/);
 
         //! DataSet move assignment operator
-        DataSet& operator=(DataSet&& dataset);
+        DataSet& operator=(DataSet&& dataset /*!< The dataset to move for assignment*/);
 
         //! Dataset constructor using serialized buffer
         DataSet(const std::string& name /*!< The name used to reference the dataset*/,
@@ -40,15 +40,12 @@ class DataSet
                 size_t buf_size /*!< The buffer length*/
                 );
 
-        //! DataSet copy constructor
-        DataSet(const DataSet& dataset /*!< The dataset to copy for construction*/
-                );
-
         //! Add a tensor to the dataset
         void add_tensor(const std::string& name /*!< The name used to reference the tensor*/,
                         const std::string& type /*!< The data type of the tensor*/,
                         void* data /*!< A c_ptr to the data of the tensor*/,
-                        std::vector<size_t> dims /*! The dimensions of the data*/
+                        const std::vector<size_t>& dims /*! The dimensions of the data*/,
+                        const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
                         );
 
         //! Add metadata field to the DataSet.  Default behavior is to append existing fields.
@@ -61,7 +58,8 @@ class DataSet
         void get_tensor(const std::string& name /*!< The name used to reference the tensor*/,
                         std::string& type /*!< The data type of the tensor*/,
                         void*& data /*!< A c_ptr to the tensor data */,
-                        std::vector<size_t>& dims /*! The dimensions of the tensor retrieved*/
+                        std::vector<size_t>& dims /*! The dimensions of the tensor retrieved*/,
+                        const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
                         );
 
         //! Get tensor data and return an allocated multi-dimensional array
@@ -70,14 +68,16 @@ class DataSet
                         size_t& type_length /*!< The length of the tensor type string*/,
                         void*& data /*!< A c_ptr to the tensor data */,
                         size_t*& dims /*! The dimensions of the tensor retrieved*/,
-                        size_t& n_dims /*! The number of dimensions retrieved*/
+                        size_t& n_dims /*! The number of dimensions retrieved*/,
+                        const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
                         );
 
         //! Get tensor data and fill an already allocated array memory space
         void unpack_tensor(const std::string& name /*!< The name used to reference the tensor*/,
                            const std::string& type /*!< The data type of the tensor*/,
                            void* data /*!< A c_ptr to the data of the tensor*/,
-                           std::vector<size_t> dims /*! The dimensions of the data*/
+                           const std::vector<size_t>& dims /*! The dimensions of the supplied memory space*/,
+                           const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
                            );
 
         //! Get metadata field from the DataSet
@@ -86,14 +86,6 @@ class DataSet
                       void*& data /*!< A c_ptr reference to the metadata*/,
                       size_t& length /*!< The length of the meta*/
                       );
-
-        //! Method for adding a tensor when we only have the buffer and no data
-        //! pointer.  This is meant to be used primarily by the client.
-        void add_tensor_buf_only(const std::string& name /*!< The name used to reference the tensor*/,
-                                 const std::string& type /*!< The data type of the tensor*/,
-                                 std::vector<size_t> dims /*! The dimensions of the data*/,
-                                 std::string_view buf /*!< A c_ptr to the data of the tensor*/
-                                 );
 
         //! The name of the DataSet
         std::string name;
@@ -120,6 +112,15 @@ class DataSet
         std::string get_tensor_type(const std::string& name /*!< The name used to reference the tensor*/
                                     );
 
+        friend class SmartSimClient;
+    protected:
+
+        inline void _add_to_tensorpack(const std::string& name /*!< The name used to reference the tensor*/,
+                                       const std::string& type /*!< The data type of the tensor*/,
+                                       void* data /*!< A c_ptr to the data of the tensor*/,
+                                       const std::vector<size_t>& dims /*! The dimensions of the data*/,
+                                       const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
+                                       );
     private:
         //! The meta data object
         MetaData _metadata;

@@ -40,14 +40,8 @@ class TensorPack
         void add_tensor(const std::string& name /*!< The name used to reference the tensor*/,
                         const std::string& type /*!< The data type of the tensor*/,
                         void* data /*!< A c_ptr to the data of the tensor*/,
-                        const std::vector<size_t>& dims /*! The dimensions of the data*/
-                        );
-
-        //! Method for adding a tensor using a buffer instead of data
-        void add_tensor(const std::string& name /*!< The name used to reference the tensor*/,
-                        const std::string& type /*!< The data type of the tensor*/,
                         const std::vector<size_t>& dims /*! The dimensions of the data*/,
-                        const std::string_view& buf /*!< A c_ptr to the data of the tensor*/
+                        const MemoryLayout mem_layout /*! The memory layout of the data*/
                         );
 
         //! Method to add a tensor object that has already been created on the heap.

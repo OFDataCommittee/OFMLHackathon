@@ -91,7 +91,8 @@ extern "C"
 void put_tensor(void* c_client, const char* key,
                 const size_t key_length, const char* type,
                 const size_t type_length, void* data,
-                const size_t* dims, const size_t n_dims)
+                const size_t* dims, const size_t n_dims,
+                CMemoryLayout mem_layout)
 {
   /* Put a tensor of a specified type into the database
   */
@@ -103,7 +104,9 @@ void put_tensor(void* c_client, const char* key,
   for(size_t i=0; i<n_dims; i++)
     dims_vec.push_back(dims[i]);
 
-  s->put_tensor(key_str, type_str, data, dims_vec);
+  s->put_tensor(key_str, type_str, data,
+                dims_vec,
+                convert_layout(mem_layout));
   return;
 }
 
@@ -111,8 +114,8 @@ extern "C"
 void get_tensor(void* c_client, const char* key,
                 const size_t key_length, char** type,
                 size_t* type_length, void** result,
-                size_t** dims, size_t* n_dims
-                )
+                size_t** dims, size_t* n_dims,
+                CMemoryLayout mem_layout)
 {
   /* Get a tensor of a specified type from the database
   */
@@ -120,7 +123,8 @@ void get_tensor(void* c_client, const char* key,
   std::string key_str = std::string(key, key_length);
 
   s->get_tensor(key_str, *type, *type_length,
-                *result, *dims, *n_dims);
+                *result, *dims, *n_dims,
+                convert_layout(mem_layout));
   return;
 }
 
@@ -128,8 +132,8 @@ extern "C"
 void unpack_tensor(void* c_client, const char* key,
                    const size_t key_length, const char* type,
                    const size_t type_length, void* result,
-                   const size_t* dims, const size_t n_dims
-                   )
+                   const size_t* dims, const size_t n_dims,
+                   CMemoryLayout mem_layout)
 {
   /* Get a tensor of a specified type from the database
   and put the values into the user provided memory space.
@@ -142,7 +146,9 @@ void unpack_tensor(void* c_client, const char* key,
   for(size_t i=0; i<n_dims; i++)
     dims_vec.push_back(dims[i]);
 
-  s->unpack_tensor(key_str, type_str, result, dims_vec);
+  s->unpack_tensor(key_str, type_str, result,
+                   dims_vec,
+                   convert_layout(mem_layout));
   return;
 }
 
@@ -398,4 +404,24 @@ bool poll_key(void* c_client,
   SmartSimClient* s = (SmartSimClient *)c_client;
   std::string key_str = std::string(key, key_length);
   return s->poll_key(key_str, poll_frequency_ms, num_tries);
+}
+
+MemoryLayout convert_layout(CMemoryLayout layout) {
+  /* This function converts the CMemoryLayout to
+  MemoryLayout.  This function is needed because
+  of namespace limitations not allowed for the
+  direct use of MemoryLayout.
+  */
+
+  switch(layout) {
+    case(c_nested) :
+      return MemoryLayout::nested;
+      break;
+    case(c_contiguous) :
+      return MemoryLayout::contiguous;
+      break;
+    default :
+      throw std::runtime_error("Unsupported enum "\
+                               "conversion.");
+  }
 }

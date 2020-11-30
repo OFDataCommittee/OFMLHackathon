@@ -13,6 +13,7 @@ DataSet::DataSet(DataSet&& dataset)
     this->_metadata = std::move(dataset._metadata);
     this->_tensorpack = std::move(dataset._tensorpack);
     this->_dim_queries = std::move(dataset._dim_queries);
+    this->_type_queries = std::move(dataset._type_queries);
 }
 
 DataSet& DataSet::operator=(DataSet&& dataset)
@@ -24,6 +25,7 @@ DataSet& DataSet::operator=(DataSet&& dataset)
         this->_metadata = std::move(dataset._metadata);
         this->_tensorpack = std::move(dataset._tensorpack);
         this->_dim_queries = std::move(dataset._dim_queries);
+        this->_type_queries = std::move(dataset._type_queries);
     }
     return *this;
 }
@@ -37,57 +39,45 @@ DataSet::DataSet(const std::string& name, char* buf,
 
 void DataSet::add_tensor(const std::string& name,
                          const std::string& type,
-                         void* data, std::vector<size_t> dims)
+                         void* data,
+                         const std::vector<size_t>& dims,
+                         MemoryLayout mem_layout)
 {
     /* Creates a tensor with the provided information and adds
     the tensor name to the .tensors metadata
     */
-    this->_tensorpack.add_tensor(name, type, data, dims);
+    this->_add_to_tensorpack(name, type, data, dims, mem_layout);
     this->_metadata.add_value(".tensors", "STRING", name.c_str());
     return;
 }
 
-void DataSet::add_tensor_buf_only(const std::string& name,
-                                  const std::string& type,
-                                  std::vector<size_t> dims,
-                                  std::string_view buf)
-{
-    /* This adds tensors to the dataset, but does not add them
-    to the .tensors metadata message because it is assumed that
-    those tensors are being read from a buffer inventory and
-    .tensors already exists
-    */
-    this->_tensorpack.add_tensor(name, type, dims, buf);
-    return;
-}
-
 void DataSet::get_tensor(const std::string&  name,
-                        std::string&  type,
-                         void*& data, std::vector<size_t>& dims)
+                         std::string&  type,
+                         void*& data, std::vector<size_t>& dims,
+                         MemoryLayout mem_layout)
 {
-    /* This function will retrieve tensor data pointer to the
-    user.  If the pointer does not exist (e.g. it is a tensor
-    with buffer data only), memory will be allocated and
-    the buffer will be copied into the new memory.  This memory
-    will be freed when the dataset is destroyed.  If the
-    data pointer in the tensor already points to a memory
-    space, that c_ptr will be returned.
+    /* This function gets a tensor from the database,
+    allocates memory in the specified format for the
+    user, sets the dimensions of the dims vector
+    for the user, and points the data pointer to
+    the allocated memory space.
     */
     if(!(this->_tensorpack.tensor_exists(name)))
         throw std::runtime_error("The tensor " + std::string(name)
                                                + " does not exist in "
                                                + this->name + " dataset.");
 
-    type = this->_tensorpack.get_tensor(name)->get_tensor_type();
-    data = this->_tensorpack.get_tensor_data(name);
-    dims = this->_tensorpack.get_tensor(name)->get_tensor_dims();
+    type = this->_tensorpack.get_tensor(name)->type();
+    data = this->_tensorpack.get_tensor(name)->data_view(mem_layout);
+    dims = this->_tensorpack.get_tensor(name)->dims();
     return;
 }
 
 void DataSet::get_tensor(const std::string&  name,
                          char*& type, size_t& type_length,
                          void*& data, size_t*& dims,
-                         size_t& n_dims)
+                         size_t& n_dims,
+                         MemoryLayout mem_layout)
 {
     /* This function will retrieve tensor data
     pointer to the user.  If the pointer does not
@@ -100,7 +90,7 @@ void DataSet::get_tensor(const std::string&  name,
     */
     std::vector<size_t> dims_vec;
     std::string type_str;
-    this->get_tensor(name, type_str, data, dims_vec);
+    this->get_tensor(name, type_str, data, dims_vec, mem_layout);
 
     size_t n_bytes = sizeof(int)*dims_vec.size();
     dims = this->_dim_queries.allocate_bytes(n_bytes);
@@ -126,7 +116,9 @@ void DataSet::get_tensor(const std::string&  name,
 
 void DataSet::unpack_tensor(const std::string&  name,
                             const std::string&  type,
-                            void* data, std::vector<size_t> dims)
+                            void* data,
+                            const std::vector<size_t>& dims,
+                            MemoryLayout mem_layout)
 {
     /* This function will take the tensor data buffer and put it into
     the provided memory space (data).
@@ -137,7 +129,7 @@ void DataSet::unpack_tensor(const std::string&  name,
                                                + " does not exist in "
                                                + this->name + " dataset.");
 
-    this->_tensorpack.get_tensor(name)->fill_data_from_buf(data, dims, type);
+    this->_tensorpack.get_tensor(name)->fill_mem_space(data, dims);
     return;
 }
 
@@ -177,7 +169,21 @@ std::string DataSet::get_tensor_type(const std::string& name)
 {
     /* Returns the tensor data type
     */
-    return this->_tensorpack.get_tensor(name)->get_tensor_name();
+    return this->_tensorpack.get_tensor(name)->name();
+}
+
+inline void DataSet::_add_to_tensorpack(const std::string& name,
+                                        const std::string& type,
+                                        void* data,
+                                        const std::vector<size_t>& dims,
+                                        MemoryLayout mem_layout)
+{
+    /* This function adds the tensor to the
+    internal TensorPack object.
+    */
+    this->_tensorpack.add_tensor(name, type, data,
+                                 dims, mem_layout);
+    return;
 }
 
 DataSet::tensor_iterator DataSet::tensor_begin()

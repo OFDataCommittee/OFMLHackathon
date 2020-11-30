@@ -32,8 +32,8 @@ void put_get_1D_array(
                <<std::fixed<<array[i]<<std::endl;
   }
   */
-  client.put_tensor(key, type, (void*)array, dims);
-  client.unpack_tensor(key, type, u_result, dims);
+  client.put_tensor(key, type, (void*)array, dims, MemoryLayout::nested);
+  client.unpack_tensor(key, type, u_result, dims, MemoryLayout::nested);
   /*
   for(int i = 0; i < dims[0]; i++) {
       std::cout<< "Value " << i
@@ -50,7 +50,7 @@ void put_get_1D_array(
   std::string g_type;
   std::vector<size_t> g_dims;
   void* g_result;
-  client.get_tensor(key, g_type, g_result, g_dims);
+  client.get_tensor(key, g_type, g_result, g_dims, MemoryLayout::nested);
   T_recv* g_type_result = (T_recv*)g_result;
 
   /*

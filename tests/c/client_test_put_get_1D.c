@@ -55,13 +55,15 @@ int put_get_1D_tensor(void* client, void* tensor,
   size_t g_type_length;
   size_t* g_dims;
   size_t g_n_dims;
+
+  CMemoryLayout layout = c_nested;
   put_tensor(client, key, key_length, type, type_length,
-             (void*)tensor, dims, n_dims);
+             (void*)tensor, dims, n_dims, layout);
   get_tensor(client, key, key_length,
              &g_type, &g_type_length,
-             result, &g_dims, &g_n_dims);
+             result, &g_dims, &g_n_dims, layout);
 
-  int r_value;
+  int r_value = 0;
   if(g_n_dims!=n_dims) {
     printf("%s", "The number of fetched dimensions with "\
                  "client.get_tensor() does not match "\

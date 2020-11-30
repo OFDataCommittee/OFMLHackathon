@@ -63,30 +63,34 @@ public:
   void put_tensor(const std::string& key /*!< The key to use to place the tensor*/,
                   const std::string& type /*!< The data type of the tensor*/,
                   void* data /*!< A c ptr to the beginning of the data*/,
-                  const std::vector<size_t>& dims /*!< The dimensions of the tensor*/
+                  const std::vector<size_t>& dims /*!< The dimensions of the tensor*/,
+                  const MemoryLayout mem_layout /*! The memory layout of the data*/
                   );
 
   //! Get tensor data and return an allocated multi-dimensional array
   void get_tensor(const std::string& key /*!< The name used to reference the tensor*/,
                   std::string& type /*!< The data type of the tensor*/,
                   void*& data /*!< A c_ptr to the tensor data */,
-                  std::vector<size_t>& dims /*!< The dimensions of the provided array which should match the tensor*/
+                  std::vector<size_t>& dims /*!< The dimensions of the provided array which should match the tensor*/,
+                  const MemoryLayout mem_layout /*! The memory layout of the data*/
                   );
 
   //! Get tensor data and return an allocated multi-dimensional array (c-style interface for type and dimensions)
-  void get_tensor(const std::string& name /*!< The name used to reference the tensor*/,
+  void get_tensor(const std::string& key /*!< The name used to reference the tensor*/,
                   char*& type /*!< The data type of the tensor*/,
                   size_t& type_length /*!< The length of the tensor type*/,
                   void*& data /*!< A c_ptr to the tensor data */,
                   size_t*& dims /*! The dimensions of the tensor retrieved*/,
-                  size_t& n_dims /*! The number of dimensions retrieved*/
+                  size_t& n_dims /*! The number of dimensions retrieved*/,
+                  const MemoryLayout mem_layout /*! The memory layout of the data*/
                   );
 
   //! Get tensor data and fill an already allocated array memory space
   void unpack_tensor(const std::string& key /*!< The key to use to fetch the tensor*/,
                      const std::string& type /*!< The data type of the tensor*/,
                      void* data /*!< A c ptr to the beginning of the result array to fill*/,
-                     const std::vector<size_t>& dims /*!< The dimensions of the provided array which should match the tensor*/
+                     const std::vector<size_t>& dims /*!< The dimensions of the provided array which should match the tensor*/,
+                     const MemoryLayout mem_layout /*! The memory layout of the data*/
                      );
 
   //! Move a tensor to a new key
