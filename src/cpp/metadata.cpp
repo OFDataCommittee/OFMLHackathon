@@ -112,7 +112,7 @@ void MetaData::add_value(const std::string& field_name,
 
 void MetaData::get_values(const std::string& name,
                           const std::string& type,
-                          void*& data, int& length)
+                          void*& data, size_t& length)
 {
     /* This function allocates the memory to return a pointer
     (via pointer reference "data") to the user and sets the value
@@ -291,7 +291,7 @@ void MetaData::_set_string_in_message(gpb::Message* msg,
 
 void MetaData::_get_string_field_values(gpb::Message* msg,
                                         void*& data,
-                                        int& n_values) {
+                                        size_t& n_values) {
     /* This funcition retrieves all of the metadata
     "data" string fields from the message.  A copy
     of the protobuf values is made using the
@@ -324,7 +324,7 @@ void MetaData::_get_string_field_values(gpb::Message* msg,
 template <typename T>
 void MetaData::_get_numeric_field_values(gpb::Message* msg,
                                          void*& data,
-                                         int& n_values,
+                                         size_t& n_values,
                                          MemoryList<T>& mem_list)
 {
     /* This funcition retrieves all of the metadata

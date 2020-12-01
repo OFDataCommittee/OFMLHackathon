@@ -6,7 +6,7 @@
 template <typename T_send, typename T_recv>
 void put_get_3D_array(
 		    void (*fill_array)(T_send***, int, int, int),
-		    std::vector<int> dims,
+		    std::vector<size_t> dims,
         std::string type,
         std::string key_suffix,
         std::string dataset_name)
@@ -52,9 +52,12 @@ void put_get_3D_array(
   DataSet MyDataSet(dataset_name);
 
   //Add tensors to the DataSet
-  MyDataSet.add_tensor("tensor_1", type, t_send_1, dims);
-  MyDataSet.add_tensor("tensor_2", type, t_send_2, dims);
-  MyDataSet.add_tensor("tensor_3", type, t_send_3, dims);
+  MyDataSet.add_tensor("tensor_1", type, t_send_1,
+                       dims, MemoryLayout::nested);
+  MyDataSet.add_tensor("tensor_2", type, t_send_2,
+                       dims, MemoryLayout::nested);
+  MyDataSet.add_tensor("tensor_3", type, t_send_3,
+                       dims, MemoryLayout::nested);
 
   //Add metadata fields to the DataSet.  _meta_1 and _meta_2
   //values added to _field_1 and _meta_3 is added to _field_2.
@@ -95,9 +98,12 @@ void put_get_3D_array(
   T_recv*** t_recv_3 = allocate_3D_array<T_recv>(dims[0], dims[1], dims[2]);
 
   DataSet RetrievedDataSet = client.get_dataset(dataset_name);
-  RetrievedDataSet.unpack_tensor("tensor_1", type, t_recv_1, dims);
-  RetrievedDataSet.unpack_tensor("tensor_2", type, t_recv_2, dims);
-  RetrievedDataSet.unpack_tensor("tensor_3", type, t_recv_3, dims);
+  RetrievedDataSet.unpack_tensor("tensor_1", type, t_recv_1,
+                                 dims, MemoryLayout::nested);
+  RetrievedDataSet.unpack_tensor("tensor_2", type, t_recv_2,
+                                 dims, MemoryLayout::nested);
+  RetrievedDataSet.unpack_tensor("tensor_3", type, t_recv_3,
+                                 dims, MemoryLayout::nested);
 
   /*
   for(int i = 0; i < dims[0]; i++)
@@ -108,7 +114,7 @@ void put_get_3D_array(
 
   //Check metadata .tensors value for consistency
   char** tensor_ids;
-  int n_strings;
+  size_t n_strings;
   RetrievedDataSet.get_meta(".tensors", "STRING",
                             (void*&)tensor_ids, n_strings);
   if(n_strings!=3)
@@ -144,11 +150,47 @@ void put_get_3D_array(
 
   // Retrieve tensors where the DataSet handles memory allocation
   void* t_get_1;
-  RetrievedDataSet.get_tensor("tensor_1", type, t_get_1, dims);
+  std::string t_get_1_type;
+  std::vector<size_t> t_get_1_dims;
+  RetrievedDataSet.get_tensor("tensor_1", t_get_1_type,
+                              t_get_1, t_get_1_dims,
+                              MemoryLayout::nested);
   void* t_get_2;
-  RetrievedDataSet.get_tensor("tensor_2", type, t_get_2, dims);
+  std::string t_get_2_type;
+  std::vector<size_t> t_get_2_dims;
+  RetrievedDataSet.get_tensor("tensor_2", t_get_2_type,
+                              t_get_2, t_get_2_dims,
+                              MemoryLayout::nested);
   void* t_get_3;
-  RetrievedDataSet.get_tensor("tensor_3", type, t_get_3, dims);
+  std::string t_get_3_type;
+  std::vector<size_t> t_get_3_dims;
+  RetrievedDataSet.get_tensor("tensor_3", t_get_3_type,
+                              t_get_3, t_get_3_dims,
+                              MemoryLayout::nested);
+
+  if(t_get_1_type!=type)
+    throw std::runtime_error("Retrieved type for tensor_1 "\
+                             "does not match known type");
+
+  if(t_get_2_type!=type)
+    throw std::runtime_error("Retrieved type for tensor_2 "\
+                             "does not match known type");
+
+  if(t_get_3_type!=type)
+    throw std::runtime_error("Retrieved type for tensor_3 "\
+                             "does not match known type");
+
+  if(t_get_1_dims!=dims)
+    throw std::runtime_error("Retrieved dims for tensor_1 "\
+                             "do not match the known dims.");
+
+  if(t_get_2_dims!=dims)
+    throw std::runtime_error("Retrieved dims for tensor_2 "\
+                             "do not match the known dims.");
+
+  if(t_get_3_dims!=dims)
+    throw std::runtime_error("Retrieved dims for tensor_3 "\
+                             "do not match the known dims.");
 
   if(is_equal_3D_array(t_send_1, (T_recv***)t_get_1, dims[0], dims[1], dims[2]))
     std::cout<<"Correctly fetched and allocated t_get_1."<<std::endl;
@@ -170,7 +212,7 @@ void put_get_3D_array(
 
   //Check that the metadata values are correct for dbl_field_1
   double* dbl_meta_field_1;
-  int n_dbl_meta_field_1;
+  size_t n_dbl_meta_field_1;
   RetrievedDataSet.get_meta("dbl_field_1", "DOUBLE",
                             (void*&)dbl_meta_field_1, n_dbl_meta_field_1);
   if(n_dbl_meta_field_1!=2)
@@ -185,7 +227,7 @@ void put_get_3D_array(
 
   //Check that the metadata values are correct for dbl_field_2
   double* dbl_meta_field_2;
-  int n_dbl_meta_field_2;
+  size_t n_dbl_meta_field_2;
   RetrievedDataSet.get_meta("dbl_field_2", "DOUBLE",
                             (void*&)dbl_meta_field_2, n_dbl_meta_field_2);
   if(n_dbl_meta_field_2!=1)
@@ -199,7 +241,7 @@ void put_get_3D_array(
 
   //Check that the metadata values are correct for flt_field_1
   float* flt_meta_field_1;
-  int n_flt_meta_field_1;
+  size_t n_flt_meta_field_1;
   RetrievedDataSet.get_meta("flt_field_1", "FLOAT",
                             (void*&)flt_meta_field_1, n_flt_meta_field_1);
   if(n_flt_meta_field_1!=2)
@@ -214,7 +256,7 @@ void put_get_3D_array(
 
   //Check that the metadata values are correct for flt_field_2
   float* flt_meta_field_2;
-  int n_flt_meta_field_2;
+  size_t n_flt_meta_field_2;
   RetrievedDataSet.get_meta("flt_field_2", "FLOAT",
                             (void*&)flt_meta_field_2, n_flt_meta_field_2);
   if(n_flt_meta_field_2!=1)
@@ -228,7 +270,7 @@ void put_get_3D_array(
 
   //Check that the metadata values are correct for i64_field_1
   int64_t* i64_meta_field_1;
-  int n_i64_meta_field_1;
+  size_t n_i64_meta_field_1;
   RetrievedDataSet.get_meta("i64_field_1", "INT64",
                             (void*&)i64_meta_field_1, n_i64_meta_field_1);
   if(n_i64_meta_field_1!=2)
@@ -243,7 +285,7 @@ void put_get_3D_array(
 
   //Check that the metadata values are correct for i64_field_2
   int64_t* i64_meta_field_2;
-  int n_i64_meta_field_2;
+  size_t n_i64_meta_field_2;
   RetrievedDataSet.get_meta("i64_field_2", "INT64",
                             (void*&)i64_meta_field_2, n_i64_meta_field_2);
   if(n_i64_meta_field_2!=1)
@@ -257,7 +299,7 @@ void put_get_3D_array(
 
   //Check that the metadata values are correct for i32_field_1
   int32_t* i32_meta_field_1;
-  int n_i32_meta_field_1;
+  size_t n_i32_meta_field_1;
   RetrievedDataSet.get_meta("i32_field_1", "INT32",
                             (void*&)i32_meta_field_1, n_i32_meta_field_1);
   if(n_i32_meta_field_1!=2)
@@ -272,7 +314,7 @@ void put_get_3D_array(
 
   //Check that the metadata values are correct for i32_field_2
   int32_t* i32_meta_field_2;
-  int n_i32_meta_field_2;
+  size_t n_i32_meta_field_2;
   RetrievedDataSet.get_meta("i32_field_2", "INT32",
                             (void*&)i32_meta_field_2, n_i32_meta_field_2);
   if(n_i32_meta_field_2!=1)
@@ -286,7 +328,7 @@ void put_get_3D_array(
 
   //Check that the metadata values are correct for ui64_field_1
   uint64_t* ui64_meta_field_1;
-  int n_ui64_meta_field_1;
+  size_t n_ui64_meta_field_1;
   RetrievedDataSet.get_meta("ui64_field_1", "UINT64",
                             (void*&)ui64_meta_field_1, n_ui64_meta_field_1);
   if(n_ui64_meta_field_1!=2)
@@ -301,7 +343,7 @@ void put_get_3D_array(
 
   //Check that the metadata values are correct for ui64_field_2
   uint64_t* ui64_meta_field_2;
-  int n_ui64_meta_field_2;
+  size_t n_ui64_meta_field_2;
   RetrievedDataSet.get_meta("ui64_field_2", "UINT64",
                             (void*&)ui64_meta_field_2, n_ui64_meta_field_2);
   if(n_ui64_meta_field_2!=1)
@@ -315,7 +357,7 @@ void put_get_3D_array(
 
   //Check that the metadata values are correct for ui32_field_1
   uint32_t* ui32_meta_field_1;
-  int n_ui32_meta_field_1;
+  size_t n_ui32_meta_field_1;
   RetrievedDataSet.get_meta("ui32_field_1", "UINT32",
                             (void*&)ui32_meta_field_1, n_ui32_meta_field_1);
   if(n_ui32_meta_field_1!=2)
@@ -330,7 +372,7 @@ void put_get_3D_array(
 
   //Check that the metadata values are correct for ui32_field_2
   uint32_t* ui32_meta_field_2;
-  int n_ui32_meta_field_2;
+  size_t n_ui32_meta_field_2;
   RetrievedDataSet.get_meta("ui32_field_2", "UINT32",
                             (void*&)ui32_meta_field_2, n_ui32_meta_field_2);
   if(n_ui32_meta_field_2!=1)
@@ -344,7 +386,7 @@ void put_get_3D_array(
 
   //Check that the metadata values are correct for str_field_1
   char** str_meta_field_1;
-  int n_str_meta_field_1;
+  size_t n_str_meta_field_1;
   RetrievedDataSet.get_meta("str_field_1", "STRING",
                             (void*&)str_meta_field_1, n_str_meta_field_1);
   if(n_str_meta_field_1!=2)
@@ -359,7 +401,7 @@ void put_get_3D_array(
 
   //Check that the metadata values are correct for str_field_2
   char** str_meta_field_2;
-  int n_str_meta_field_2;
+  size_t n_str_meta_field_2;
   RetrievedDataSet.get_meta("str_field_2", "STRING",
                             (void*&)str_meta_field_2, n_str_meta_field_2);
   if(n_str_meta_field_2!=1)
@@ -389,7 +431,7 @@ int main(int argc, char* argv[]) {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   //Declare the dimensions for the 3D arrays
-  std::vector<int> dims{5,4,17};
+  std::vector<size_t> dims{5,4,17};
 
 
   //Double 3D array

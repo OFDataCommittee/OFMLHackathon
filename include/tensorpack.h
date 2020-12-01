@@ -40,14 +40,15 @@ class TensorPack
         void add_tensor(const std::string& name /*!< The name used to reference the tensor*/,
                         const std::string& type /*!< The data type of the tensor*/,
                         void* data /*!< A c_ptr to the data of the tensor*/,
-                        const std::vector<int>& dims /*! The dimensions of the data*/
+                        const std::vector<size_t>& dims /*! The dimensions of the data*/,
+                        const MemoryLayout mem_layout /*! The memory layout of the data*/
                         );
 
-        //! Method for adding a tensor using a buffer instead of data
-        void add_tensor(const std::string& name /*!< The name used to reference the tensor*/,
-                        const std::string& type /*!< The data type of the tensor*/,
-                        const std::vector<int>& dims /*! The dimensions of the data*/,
-                        const std::string_view& buf /*!< A c_ptr to the data of the tensor*/
+        //! Method to add a tensor object that has already been created on the heap.
+        //! DO NOT add tensors allocated on the stack that may be deleted outside of
+        //! the tensor pack.  This function will cast the TensorBase to the correct
+        //! Tensor<T> type.
+        void add_tensor(TensorBase* tensor /*!< Pointer to the tensor allocated on the heap*/
                         );
 
         //! Iterators for tensors
@@ -117,4 +118,5 @@ class TensorPack
         void _delete_tensor_list(
             std::forward_list<Tensor<T>*>& tensor_list /*!< The tensor list to delete*/);
 };
+
 #endif //SMARTSIM_TENSORPACK_H

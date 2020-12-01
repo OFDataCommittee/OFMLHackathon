@@ -41,13 +41,13 @@ void run_mnist(const std::string& model_name,
 
   std::string dataset_name = "mnist_input_dataset";
   DataSet dataset = DataSet(dataset_name);
-  dataset.add_tensor(in_key, "FLOAT", array, {1,1,28,28});
+  dataset.add_tensor(in_key, "FLOAT", array, {1,1,28,28}, MemoryLayout::nested);
   client.put_dataset(dataset);
 
   std::string dataset_in_key = "{" + dataset_name + "}." + in_key;
   client.run_script(script_name, "pre_process", {dataset_in_key}, {script_out_key});
   client.run_model(model_name, {script_out_key}, {out_key});
-  client.get_tensor(out_key, "FLOAT", result, {1,10});
+  client.unpack_tensor(out_key, "FLOAT", result, {1,10}, MemoryLayout::nested);
 
   for(int i=0; i<10; i++)
     std::cout<<"result "<<result[0][i]<<std::endl;

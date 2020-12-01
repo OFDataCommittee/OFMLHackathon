@@ -11,15 +11,17 @@ SmartSimClient::SmartSimClient(bool cluster, bool fortran_array)
   while(n_connection_trials > 0) {
     if(cluster) {
       try {
-        std::cout << _get_ssdb() << std::endl;
         redis_cluster = new sw::redis::RedisCluster(_get_ssdb());
         n_connection_trials = -1;
         redis = 0;
       }
       catch (sw::redis::TimeoutError &e) {
-        std::cout << "WARNING: Caught redis TimeoutError: " << e.what() << std::endl;
-        std::cout << "WARNING: TimeoutError occurred with initial client connection.";
-        std::cout << "WARNING: "<< n_connection_trials << " more trials will be made.";
+        std::cout << "WARNING: Caught redis TimeoutError: "
+                  << e.what() << std::endl;
+        std::cout << "WARNING: TimeoutError occurred with "\
+                     "initial client connection.";
+        std::cout << "WARNING: "<< n_connection_trials
+                  << " more trials will be made.";
         n_connection_trials--;
         std::this_thread::sleep_for(std::chrono::seconds(2));
       }
@@ -31,9 +33,12 @@ SmartSimClient::SmartSimClient(bool cluster, bool fortran_array)
         n_connection_trials = -1;
       }
       catch (sw::redis::TimeoutError &e) {
-        std::cout << "WARNING: Caught redis TimeoutError: " << e.what() << std::endl;
-        std::cout << "WARNING: TimeoutError occurred with initial client connection.";
-        std::cout << "WARNING: "<< n_connection_trials << " more trials will be made.";
+        std::cout << "WARNING: Caught redis TimeoutError: "
+                  << e.what() << std::endl;
+        std::cout << "WARNING: TimeoutError occurred with "\
+                     "initial client connection.";
+        std::cout << "WARNING: "<< n_connection_trials
+                  << " more trials will be made.";
         n_connection_trials--;
         std::this_thread::sleep_for(std::chrono::seconds(2));
       }
@@ -85,11 +90,11 @@ void SmartSimClient::put_dataset(DataSet& dataset)
     cmd->add_field("AI.TENSORSET");
     cmd->add_field(this->_put_prefix() + "{"
                    + dataset.name + "}."
-                   + tensor->get_tensor_name());
-    cmd->add_field(tensor->get_tensor_type());
-    cmd->add_fields(tensor->get_tensor_dims());
+                   + tensor->name());
+    cmd->add_field(tensor->type());
+    cmd->add_fields(tensor->dims());
     cmd->add_field("BLOB");
-    cmd->add_field_ptr(tensor->get_data_buf());
+    cmd->add_field_ptr(tensor->buf());
     it++;
   }
   this->_execute_commands(cmds);
@@ -114,10 +119,11 @@ DataSet SmartSimClient::get_dataset(const std::string& name)
 
   // Loop through and add each tensor to the dataset
   char** tensor_names;
-  int n_tensors;
-  dataset.get_meta(".tensors", "STRING", (void*&)tensor_names, n_tensors);
+  size_t n_tensors;
+  dataset.get_meta(".tensors", "STRING",
+                   (void*&)tensor_names, n_tensors);
 
-  for(int i=0; i<n_tensors; i++) {
+  for(size_t i=0; i<n_tensors; i++) {
     std::string t_name = this->_get_prefix() +
                          "{" + dataset.name + "}."
                              + tensor_names[i];
@@ -129,11 +135,12 @@ DataSet SmartSimClient::get_dataset(const std::string& name)
     CommandReply reply;
     reply = this->_execute_command(cmd);
 
-    std::vector<int> reply_dims = this->_get_tensor_dims(reply);
+    std::vector<size_t> reply_dims = this->_get_tensor_dims(reply);
     std::string_view blob = this->_get_tensor_data_blob(reply);
     std::string type = this->_get_tensor_data_type(reply);
-    dataset.add_tensor_buf_only(tensor_names[i], type.c_str(),
-                                reply_dims, blob);
+    dataset._add_to_tensorpack(tensor_names[i], type,
+                               (void*)blob.data(), reply_dims,
+                               MemoryLayout::contiguous);
   }
   return dataset;
 }
@@ -170,7 +177,8 @@ void SmartSimClient::delete_dataset(const std::string& name)
 void SmartSimClient::put_tensor(const std::string& key,
                                 const std::string& type,
                                 void* data,
-                                const std::vector<int>& dims)
+                                const std::vector<size_t>& dims,
+                                const MemoryLayout mem_layout)
 {
   /* This function puts a tensor into the datastore
   */
@@ -181,29 +189,38 @@ void SmartSimClient::put_tensor(const std::string& key,
   TensorBase* tensor;
   int data_type = TENSOR_TYPE_MAP.at(type);
   switch(data_type) {
-    case DOUBLE_TENSOR_TYPE :
-      tensor = new Tensor<double>(key, type, data, dims);
+    case DOUBLE_TENSOR_TYPE : {
+      tensor = new Tensor<double>(key, type, data,
+                                  dims, mem_layout);
     break;
+    }
     case FLOAT_TENSOR_TYPE :
-      tensor = new Tensor<float>(key, type, data, dims);
+      tensor = new Tensor<float>(key, type, data,
+                                 dims, mem_layout);
     break;
     case INT64_TENSOR_TYPE :
-      tensor = new Tensor<int64_t>(key, type, data, dims);
+      tensor = new Tensor<int64_t>(key, type, data,
+                                   dims, mem_layout);
     break;
     case INT32_TENSOR_TYPE :
-      tensor = new Tensor<int32_t>(key, type, data, dims);
+      tensor = new Tensor<int32_t>(key, type, data,
+                                   dims, mem_layout);
     break;
     case INT16_TENSOR_TYPE :
-      tensor = new Tensor<int16_t>(key, type, data, dims);
+      tensor = new Tensor<int16_t>(key, type, data,
+                                   dims, mem_layout);
     break;
     case INT8_TENSOR_TYPE :
-      tensor = new Tensor<int8_t>(key, type, data, dims);
+      tensor = new Tensor<int8_t>(key, type, data,
+                                  dims, mem_layout);
     break;
     case UINT16_TENSOR_TYPE :
-      tensor = new Tensor<uint16_t>(key, type, data, dims);
+      tensor = new Tensor<uint16_t>(key, type, data,
+                                    dims, mem_layout);
     break;
     case UINT8_TENSOR_TYPE :
-      tensor = new Tensor<uint8_t>(key, type, data, dims);
+      tensor = new Tensor<uint8_t>(key, type, data,
+                                   dims, mem_layout);
     break;
   }
 
@@ -213,22 +230,25 @@ void SmartSimClient::put_tensor(const std::string& key,
   cmd.add_field("AI.TENSORSET");
   cmd.add_field(this->_put_prefix() + key);
   cmd.add_field(type);
-  for(int i=0; i<dims.size(); i++)
+  for(size_t i=0; i<dims.size(); i++)
     cmd.add_field(std::to_string(dims[i]));
   cmd.add_field("BLOB");
-  cmd.add_field_ptr(tensor->get_data_buf());
+  cmd.add_field_ptr(tensor->buf());
   reply = this->_execute_command(cmd);
 
   delete tensor;
 }
 
 void SmartSimClient::get_tensor(const std::string& key,
-                                const std::string& type,
-                                void* result,
-                                const std::vector<int>& dims)
+                                std::string& type, void*& data,
+                                std::vector<size_t>& dims,
+                                const MemoryLayout mem_layout)
 {
-  /* This function gets a tensor from the database and stores
-  it in the result pointer.
+  /* This function gets a tensor from the database,
+  allocates memory in the specified format for the
+  user, sets the dimensions of the dims vector
+  for the user, and points the data pointer to
+  the allocated memory space.
   */
   CommandReply reply;
   Command cmd;
@@ -239,25 +259,185 @@ void SmartSimClient::get_tensor(const std::string& key,
   cmd.add_field("BLOB");
   reply = this->_execute_command(cmd);
 
-  std::vector<int> reply_dims = this->_get_tensor_dims(reply);
+  dims = this->_get_tensor_dims(reply);
+  type = this->_get_tensor_data_type(reply);
+  std::string_view blob = this->_get_tensor_data_blob(reply);
 
-  if(dims.size()!= reply_dims.size())
-    throw std::runtime_error("The dimensions of the fetched tensor "\
-                             "do not match the provided dimensions "\
-                             "of the user memory space.");
+  if(dims.size()<=0)
+    throw std::runtime_error("The number of dimensions of the fetched "\
+                             "tensor are invalid: " +
+                             std::to_string(dims.size()));
 
-  for(std::vector<int>::size_type i=0; i<reply_dims.size(); i++) {
-    if(dims[i]!=reply_dims[i]) {
+  for(size_t i=0; i<dims.size(); i++) {
+    if(dims[i]<=0) {
+      throw std::runtime_error("Dimension " + std::to_string(dims[i]) +
+                               "of the fetched tensor is not valid: " +
+                               std::to_string(dims[i]));
+    }
+  }
+
+  if(TENSOR_TYPE_MAP.count(type)==0)
+    throw std::runtime_error("The type of the fetched tensor "\
+                             "is not valid: " + type);
+
+  int data_type = TENSOR_TYPE_MAP.at(type);
+  TensorBase* ptr;
+  switch(data_type) {
+    case DOUBLE_TENSOR_TYPE :
+      ptr = new Tensor<double>(key, type, (void*)blob.data(),
+                               dims, MemoryLayout::contiguous);
+      this->_tensor_memory.add_tensor(ptr);
+      break;
+    case FLOAT_TENSOR_TYPE :
+      ptr = new Tensor<float>(key, type, (void*)blob.data(),
+                              dims, MemoryLayout::contiguous);
+      this->_tensor_memory.add_tensor(ptr);
+      break;
+    case INT64_TENSOR_TYPE :
+      ptr = new Tensor<int64_t>(key, type, (void*)blob.data(),
+                                dims, MemoryLayout::contiguous);
+      this->_tensor_memory.add_tensor(ptr);
+      break;
+    case INT32_TENSOR_TYPE :
+      ptr = new Tensor<int32_t>(key, type, (void*)blob.data(),
+                                dims, MemoryLayout::contiguous);
+      this->_tensor_memory.add_tensor(ptr);
+      break;
+    case INT16_TENSOR_TYPE :
+      ptr = new Tensor<int16_t>(key, type, (void*)blob.data(),
+                                dims, MemoryLayout::contiguous);
+      this->_tensor_memory.add_tensor(ptr);
+      break;
+    case INT8_TENSOR_TYPE :
+      ptr = new Tensor<int8_t>(key, type, (void*)blob.data(),
+                               dims, MemoryLayout::contiguous);
+      this->_tensor_memory.add_tensor(ptr);
+      break;
+    case UINT16_TENSOR_TYPE :
+      ptr = new Tensor<uint16_t>(key, type, (void*)blob.data(),
+                                 dims, MemoryLayout::contiguous);
+      this->_tensor_memory.add_tensor(ptr);
+      break;
+    case UINT8_TENSOR_TYPE :
+      ptr = new Tensor<uint8_t>(key, type, (void*)blob.data(),
+                                dims, MemoryLayout::contiguous);
+      this->_tensor_memory.add_tensor(ptr);
+      break;
+    default :
+      throw std::runtime_error("The tensor could not be retrieved "\
+                               "in client.get_tensor().");
+      break;
+  }
+  data = ptr->data_view(mem_layout);
+  return;
+}
+
+void SmartSimClient::get_tensor(const std::string& key,
+                                char*& type, size_t& type_length,
+                                void*& data, size_t*& dims,
+                                size_t& n_dims,
+                                const MemoryLayout mem_layout)
+{
+  /* This function will retrieve tensor data
+  pointer to the user.  This interface is a c-style
+  interface for the dimensions and type for the
+  c-interface because memory mamange for
+  the dimensions needs to be handled within
+  the client.  The retrieved tensor data and
+  dimensions will be freed when the client
+  is destroyed.
+  */
+  std::vector<size_t> dims_vec;
+  std::string type_str;
+  this->get_tensor(key, type_str, data,
+                   dims_vec, mem_layout);
+
+  size_t dims_bytes = sizeof(int)*dims_vec.size();
+  dims = this->_dim_queries.allocate_bytes(dims_bytes);
+  n_dims = dims_vec.size();
+
+  std::vector<size_t>::const_iterator it = dims_vec.cbegin();
+  std::vector<size_t>::const_iterator it_end = dims_vec.cend();
+  size_t i = 0;
+  while(it!=it_end) {
+      dims[i] = *it;
+      i++;
+      it++;
+  }
+
+  //We will make the type char* null-terminated for safety,
+  //but we will not include that in the length.
+  size_t type_bytes = sizeof(char)*(type_str.size()+1);
+  type = this->_type_queries.allocate_bytes(type_bytes);
+  type_length=type_str.size();
+  std::memcpy(type, type_str.data(), type_bytes);
+  return;
+}
+
+void SmartSimClient::unpack_tensor(const std::string& key,
+                                   const std::string& type,
+                                   void* data,
+                                   const std::vector<size_t>& dims,
+                                   const MemoryLayout mem_layout)
+{
+  /* This function gets a tensor from the database and stores
+  it in the data pointer.
+  */
+
+  if(mem_layout == MemoryLayout::contiguous &&
+     dims.size()>1) {
+       throw std::runtime_error("The destination memory space "\
+                                "dimension vector should only "\
+                                "be of size one if the memory "\
+                                "layout is contiguous.");
+     }
+
+  CommandReply reply;
+  Command cmd;
+
+  cmd.add_field("AI.TENSORGET");
+  cmd.add_field(this->_get_prefix() + key);
+  cmd.add_field("META");
+  cmd.add_field("BLOB");
+  reply = this->_execute_command(cmd);
+
+  std::vector<size_t> reply_dims = this->_get_tensor_dims(reply);
+
+  if(mem_layout == MemoryLayout::contiguous) {
+    int total_dims = 1;
+    for(size_t i=0; i<reply_dims.size(); i++) {
+      total_dims *= reply_dims[i];
+    }
+    if(total_dims != dims[0])
       throw std::runtime_error("The dimensions of the fetched tensor "\
-                               "do not match the provided dimensions "\
-                               "of the user memory space.");
+                               "do not match the length of the "\
+                               "contiguous memory space.");
+  }
+
+  if(mem_layout == MemoryLayout::nested) {
+    if(dims.size()!= reply_dims.size())
+      throw std::runtime_error("The number of dimensions of the  "\
+                               "fetched tensor, " +
+                               std::to_string(reply_dims.size()) + " "\
+                               "do not match the number of dimensions "\
+                               "of the user memory space, " +
+                               std::to_string(dims.size()));
+
+    for(size_t i=0; i<reply_dims.size(); i++) {
+      if(dims[i]!=reply_dims[i]) {
+        throw std::runtime_error("The dimensions of the fetched tensor "\
+                                 "do not match the provided dimensions "\
+                                 "of the user memory space.");
+      }
     }
   }
 
   std::string reply_type = this->_get_tensor_data_type(reply);
   if(type.compare(reply_type)!=0)
-    throw std::runtime_error("The type of the fetched tensor "\
-                             "does not match the provided type.");
+    throw std::runtime_error("The type of the fetched tensor, " +
+                             reply_type +
+                             ", does not match the provided type: " +
+                             type);
 
   std::string_view blob = this->_get_tensor_data_blob(reply);
 
@@ -265,31 +445,40 @@ void SmartSimClient::get_tensor(const std::string& key,
   int data_type = TENSOR_TYPE_MAP.at(type);
   switch(data_type) {
     case DOUBLE_TENSOR_TYPE :
-      tensor = new Tensor<double>(key, type, dims, blob);
+      tensor = new Tensor<double>(key, type, (void*)blob.data(),
+                                  dims, MemoryLayout::contiguous);
     break;
     case FLOAT_TENSOR_TYPE :
-      tensor = new Tensor<float>(key, type, dims, blob);
+      tensor = new Tensor<float>(key, type, (void*)blob.data(),
+                                 dims, MemoryLayout::contiguous);
     break;
     case INT64_TENSOR_TYPE :
-      tensor = new Tensor<int64_t>(key, type, dims, blob);
+      tensor = new Tensor<int64_t>(key, type, (void*)blob.data(),
+                                   dims, MemoryLayout::contiguous);
     break;
     case INT32_TENSOR_TYPE :
-      tensor = new Tensor<int32_t>(key, type, dims, blob);
+      tensor = new Tensor<int32_t>(key, type, (void*)blob.data(),
+                                   dims, MemoryLayout::contiguous);
     break;
     case INT16_TENSOR_TYPE :
-      tensor = new Tensor<int16_t>(key, type, dims, blob);
+      tensor = new Tensor<int16_t>(key, type, (void*)blob.data(),
+                                   dims, MemoryLayout::contiguous);
     break;
     case INT8_TENSOR_TYPE :
-      tensor = new Tensor<int8_t>(key, type, dims, blob);
+      tensor = new Tensor<int8_t>(key, type, (void*)blob.data(),
+                                  dims, MemoryLayout::contiguous);
     break;
     case UINT16_TENSOR_TYPE :
-      tensor = new Tensor<uint16_t>(key, type, dims, blob);
+      tensor = new Tensor<uint16_t>(key, type, (void*)blob.data(),
+                                    dims, MemoryLayout::contiguous);
     break;
     case UINT8_TENSOR_TYPE :
-      tensor = new Tensor<uint8_t>(key, type, dims, blob);
+      tensor = new Tensor<uint8_t>(key, type, (void*)blob.data(),
+                                   dims, MemoryLayout::contiguous);
     break;
   }
-  tensor->fill_data_from_buf(result, dims, type);
+
+  tensor->fill_mem_space(data, dims);
   delete tensor;
   return;
 }
@@ -321,7 +510,6 @@ void SmartSimClient::rename_tensor(const std::string& key,
     cmd.add_field(new_key);
     reply = this->_execute_command(cmd);
   }
-
   return;
 }
 
@@ -571,94 +759,50 @@ void SmartSimClient::run_model(const std::string& key,
   //We will choose it based on the db of the firs tinput tensor.
 
   //Update input and output tensor names for ensembling prefix
-  std::vector<std::string>::iterator prefix_it;
-  std::vector<std::string>::iterator prefix_it_end;
-
-  prefix_it = inputs.begin();
-  prefix_it_end = inputs.end();
-  while(prefix_it != prefix_it_end) {
-    *prefix_it = this->_get_prefix() + *prefix_it;
-    prefix_it++;
-  }
-
-  prefix_it = outputs.begin();
-  prefix_it_end = outputs.end();
-  while(prefix_it != prefix_it_end) {
-    *prefix_it = this->_put_prefix() + *prefix_it;
-    prefix_it++;
-  }
+  this->_append_with_get_prefix(inputs);
+  this->_append_with_put_prefix(outputs);
 
   uint16_t hash_slot = this->_get_hash_slot(inputs[0]);
   uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
                                               this->_n_db_nodes);
   DBNode* db = &(this->_db_nodes[db_index]);
 
-  //Copy all input tensors so they are in the same hash slot
-  //as the model
-  std::unordered_map<std::string, std::string> tmp_input_map;
-  for(int i=0; i<inputs.size(); i++) {
-    std::string new_key = "{" + db->prefix + "}." +
-                          inputs[i] + ".TMP";
-    this->copy_tensor(inputs[i], new_key);
-    tmp_input_map.insert({new_key, inputs[i]});
-    inputs[i] = new_key;
-  }
+  //Generate temporary names so that all keys go to same slot
+  std::vector<std::string> tmp_inputs =
+    _get_tmp_names(inputs, db->prefix);
+  std::vector<std::string> tmp_outputs =
+    _get_tmp_names(outputs, db->prefix);
 
-  //Copy all output tensors so they are in the same hash slot
-  //as the model
-  std::unordered_map<std::string, std::string> tmp_output_map;
-  for(int i=0; i<outputs.size(); i++) {
-    std::string new_key = "{" + db->prefix + "}." +
-                           outputs[i] + ".TMP";
-    tmp_output_map.insert({outputs[i], new_key});
-    outputs[i] = new_key;
-  }
+  //Copy all input tensors to temporary names to align hash slots
+  this->_copy_tensors(inputs, tmp_inputs);
 
   std::string model_name = "{" + db->prefix +
                            "}." + std::string(key);
-  Command cmd;
 
+  Command cmd;
   cmd.add_field("AI.MODELRUN");
   cmd.add_field(model_name);
   cmd.add_field("INPUTS");
-  cmd.add_fields(inputs);
+  cmd.add_fields(tmp_inputs);
   cmd.add_field("OUTPUTS");
-  cmd.add_fields(outputs);
+  cmd.add_fields(tmp_outputs);
   if(this->redis_cluster)
     this->_execute_command(cmd, db->prefix);
   else
     this->_execute_command(cmd);
 
 
+  this->_copy_tensors(tmp_outputs, outputs);
+
   std::vector<std::string> keys_to_delete;
+  keys_to_delete.insert(keys_to_delete.end(),
+                        tmp_outputs.begin(),
+                        tmp_outputs.end());
+  keys_to_delete.insert(keys_to_delete.end(),
+                        tmp_inputs.begin(),
+                        tmp_inputs.end());
 
-  //Move temporary output to the correct location
-  std::unordered_map<std::string,std::string>::const_iterator j_it
-    = tmp_output_map.cbegin();
-  std::unordered_map<std::string,std::string>::const_iterator j_it_end
-    = tmp_output_map.cend();
-  while(j_it!=j_it_end) {
-    this->copy_tensor(j_it->second, j_it->first);
-    keys_to_delete.push_back(j_it->second);
-    j_it++;
-  }
-
-  //Delete temporary input and output tensors
-  std::unordered_map<std::string,std::string>::const_iterator i_it
-    = tmp_input_map.cbegin();
-  std::unordered_map<std::string,std::string>::const_iterator i_it_end
-    = tmp_input_map.cend();
-  while(i_it!=i_it_end) {
-    keys_to_delete.push_back(i_it->first);
-    i_it++;
-  }
-
-  CommandReply reply;
-  Command del_cmd;
-  del_cmd.add_field("DEL");
-  for(int i=0; i<keys_to_delete.size(); i++)
-    del_cmd.add_field(keys_to_delete[i]);
-  reply = this->_execute_command(del_cmd, db->prefix);
+  this->_delete_keys(keys_to_delete, db->prefix);
 
   return;
 }
@@ -773,49 +917,22 @@ void SmartSimClient::run_script(const std::string& key,
   */
 
   //Update input and output tensor names for ensembling prefix
-  std::vector<std::string>::iterator prefix_it;
-  std::vector<std::string>::iterator prefix_it_end;
-
-  prefix_it = inputs.begin();
-  prefix_it_end = inputs.end();
-  while(prefix_it != prefix_it_end) {
-    *prefix_it = this->_get_prefix() + *prefix_it;
-    prefix_it++;
-  }
-
-  prefix_it = outputs.begin();
-  prefix_it_end = outputs.end();
-  while(prefix_it != prefix_it_end) {
-    *prefix_it = this->_put_prefix() + *prefix_it;
-    prefix_it++;
-  }
-
+  this->_append_with_get_prefix(inputs);
+  this->_append_with_put_prefix(outputs);
 
   uint16_t hash_slot = this->_get_hash_slot(inputs[0]);
   uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
                                               this->_n_db_nodes);
   DBNode* db = &(this->_db_nodes[db_index]);
 
-  //Copy all input tensors so they are in the same hash slot
-  //as the model
-  std::unordered_map<std::string, std::string> tmp_input_map;
-  for(int i=0; i<inputs.size(); i++) {
-    std::string new_key = "{" + db->prefix + "}." +
-                          inputs[i] + ".TMP";
-    this->copy_tensor(inputs[i], new_key);
-    tmp_input_map.insert({new_key, inputs[i]});
-    inputs[i] = new_key;
-  }
+  //Generate temporary names so that all keys go to same slot
+  std::vector<std::string> tmp_inputs =
+    _get_tmp_names(inputs, db->prefix);
+  std::vector<std::string> tmp_outputs =
+    _get_tmp_names(outputs, db->prefix);
 
-  //Copy all output tensors so they are in the same hash slot
-  //as the model
-  std::unordered_map<std::string, std::string> tmp_output_map;
-  for(int i=0; i<outputs.size(); i++) {
-    std::string new_key = "{" + db->prefix + "}." +
-                           outputs[i] + ".TMP";
-    tmp_output_map.insert({outputs[i], new_key});
-    outputs[i] = new_key;
-  }
+  //Copy all input tensors to temporary names to align hash slots
+  this->_copy_tensors(inputs, tmp_inputs);
 
   std::string script_name = "{" + db->prefix +
                            "}." + std::string(key);
@@ -825,45 +942,25 @@ void SmartSimClient::run_script(const std::string& key,
   cmd.add_field(script_name);
   cmd.add_field(function);
   cmd.add_field("INPUTS");
-  cmd.add_fields(inputs);
+  cmd.add_fields(tmp_inputs);
   cmd.add_field("OUTPUTS");
-  cmd.add_fields(outputs);
-
+  cmd.add_fields(tmp_outputs);
   if(this->redis_cluster)
     this->_execute_command(cmd, db->prefix);
   else
     this->_execute_command(cmd);
 
+  this->_copy_tensors(tmp_outputs, outputs);
+
   std::vector<std::string> keys_to_delete;
+  keys_to_delete.insert(keys_to_delete.end(),
+                        tmp_outputs.begin(),
+                        tmp_outputs.end());
+  keys_to_delete.insert(keys_to_delete.end(),
+                        tmp_inputs.begin(),
+                        tmp_inputs.end());
 
-  //Move temporary output to the correct location
-  std::unordered_map<std::string,std::string>::const_iterator j_it
-    = tmp_output_map.cbegin();
-  std::unordered_map<std::string,std::string>::const_iterator j_it_end
-    = tmp_output_map.cend();
-  while(j_it!=j_it_end) {
-    this->copy_tensor(j_it->second, j_it->first);
-    keys_to_delete.push_back(j_it->second);
-    j_it++;
-  }
-
-  //Delete temporary input and output tensors
-  std::unordered_map<std::string,std::string>::const_iterator i_it
-    = tmp_input_map.cbegin();
-  std::unordered_map<std::string,std::string>::const_iterator i_it_end
-    = tmp_input_map.cend();
-  while(i_it!=i_it_end) {
-    keys_to_delete.push_back(i_it->first);
-    i_it++;
-  }
-
-  CommandReply reply;
-  Command del_cmd;
-  del_cmd.add_field("DEL");
-  for(int i=0; i<keys_to_delete.size(); i++)
-    del_cmd.add_field(keys_to_delete[i]);
-  reply = this->_execute_command(del_cmd, db->prefix);
-
+  this->_delete_keys(keys_to_delete, db->prefix);
   return;
 }
 
@@ -1002,8 +1099,8 @@ void SmartSimClient::_populate_db_node_data(bool cluster)
       throw std::runtime_error("SSDB is not formatted correctly.");
     this->_db_nodes[0].ip = node_port.substr(0, i);
     this->_db_nodes[0].port = atoi(node_port.substr(i).c_str());
-    this->_db_nodes[0].prefix = std::string(this->_get_crc16_prefix(
-                                this->_db_nodes[0].lower_hash_slot),2);
+    this->_db_nodes[0].prefix = this->_get_crc16_prefix(
+                                this->_db_nodes[0].lower_hash_slot);
   }
   return;
 }
@@ -1037,8 +1134,8 @@ void SmartSimClient::_parse_reply_for_slots(CommandReply& reply)
                    this->_db_nodes[i].lower_hash_slot + 1;
     int k = 0;
     while(!acceptable_prefix && k<=n_hashes) {
-      this->_db_nodes[i].prefix = std::string(this->_get_crc16_prefix(
-                                  this->_db_nodes[i].lower_hash_slot+k),2);
+      this->_db_nodes[i].prefix = this->_get_crc16_prefix(
+                                  this->_db_nodes[i].lower_hash_slot+k);
       std::string prefix = this->_db_nodes[i].prefix;
       bool found_bracket = false;
       for(int j=0; j<prefix.size(); j++) {
@@ -1058,7 +1155,7 @@ void SmartSimClient::_parse_reply_for_slots(CommandReply& reply)
   return;
 }
 
-std::vector<int> SmartSimClient::_get_tensor_dims(CommandReply& reply)
+std::vector<size_t> SmartSimClient::_get_tensor_dims(CommandReply& reply)
 {
   /* This function will fill a vector with the dimensions of the
   tensor.  We assume right now that the META reply is always
@@ -1069,10 +1166,10 @@ std::vector<int> SmartSimClient::_get_tensor_dims(CommandReply& reply)
     throw std::runtime_error("The message does not have the "\
                              "correct number of fields");
 
-  int n_dims = reply[3].n_elements();
-  std::vector<int> dims(n_dims);
+  size_t n_dims = reply[3].n_elements();
+  std::vector<size_t> dims(n_dims);
 
-  for(int i = 0; i < n_dims; i++) {
+  for(size_t i=0; i<n_dims; i++) {
     dims[i] = reply[3][i].integer();
   }
 
@@ -1240,30 +1337,33 @@ CommandReply SmartSimClient::_execute_command(Command& cmd,
 
 std::string SmartSimClient::_get_ssdb()
 {
-  std::string env = std::string(getenv("SSDB"));
+  std::string env_str = std::string(getenv("SSDB"));
 
-  if (env.size()==0)
+  if (env_str.size()==0)
     throw std::runtime_error("The environment variable SSDB "\
                              "must be set to use the client.");
 
   std::vector<std::string> hosts_ports;
+
   size_t i_pos = 0;
-  size_t j_pos = env.find(';');
+  size_t j_pos = env_str.find(';');
   while(j_pos!=std::string::npos) {
-      if (env[i_pos] == '"') {
-        i_pos = i_pos + 1;
-      }
-      hosts_ports.push_back("tcp://"+
-        env.substr(i_pos, j_pos-i_pos+1));
-      i_pos = j_pos + 1;
-      j_pos = env.find(";", i_pos);
+    hosts_ports.push_back("tcp://"+
+      env_str.substr(i_pos, j_pos-i_pos));
+    i_pos = j_pos + 1;
+    j_pos = env_str.find(";", i_pos);
   }
+  //Catch the last value that does not have a trailing ';'
+  if(i_pos<env_str.size())
+    hosts_ports.push_back("tcp://"+
+      env_str.substr(i_pos, j_pos-i_pos));
 
   std::chrono::high_resolution_clock::time_point t =
     std::chrono::high_resolution_clock::now();
 
   srand(std::chrono::time_point_cast<std::chrono::nanoseconds>(t).time_since_epoch().count());
   int hp = rand()%hosts_ports.size();
+
   return hosts_ports[hp];
 }
 
@@ -1285,7 +1385,7 @@ uint64_t SmartSimClient::_crc16_inverse(uint64_t remainder)
   return remainder;
 }
 
-char* SmartSimClient::_get_crc16_prefix(uint64_t hash_slot)
+std::string SmartSimClient::_get_crc16_prefix(uint64_t hash_slot)
 {
     /* This takes hash slot and returns a
     two character prefix (potentially with
@@ -1300,7 +1400,9 @@ char* SmartSimClient::_get_crc16_prefix(uint64_t hash_slot)
         prefix[i] = (crc_out&byte_filter);
         crc_out = crc_out>>8;
     }
-    return prefix;
+    std::string prefix_str = std::string(prefix, 2);
+    delete[] prefix;
+    return prefix_str;
 }
 
 DBNode* SmartSimClient::_get_model_script_db(const std::string& name,
@@ -1481,4 +1583,98 @@ inline std::string SmartSimClient::_get_prefix()
     prefix =  this->_get_key_prefix + ".";
   return prefix;
 
+}
+
+void SmartSimClient::_append_with_get_prefix(
+                     std::vector<std::string>& keys)
+{
+  /* This function will append each key with the
+  get prefix.
+  */
+  std::vector<std::string>::iterator prefix_it;
+  std::vector<std::string>::iterator prefix_it_end;
+  prefix_it = keys.begin();
+  prefix_it_end = keys.end();
+  while(prefix_it != prefix_it_end) {
+    *prefix_it = this->_get_prefix() + *prefix_it;
+    prefix_it++;
+  }
+  return;
+}
+
+void SmartSimClient::_append_with_put_prefix(
+                     std::vector<std::string>& keys)
+{
+  /* This function will append each key with the
+  put prefix.
+  */
+  std::vector<std::string>::iterator prefix_it;
+  std::vector<std::string>::iterator prefix_it_end;
+  prefix_it = keys.begin();
+  prefix_it_end = keys.end();
+  while(prefix_it != prefix_it_end) {
+    *prefix_it = this->_put_prefix() + *prefix_it;
+    prefix_it++;
+  }
+  return;
+}
+
+std::vector<std::string>
+SmartSimClient::_get_tmp_names(std::vector<std::string> names,
+                               std::string db_prefix)
+{
+  /* This function returns a map between the original
+  names and temporary names that are needed to make sure
+  keys hash to the same hash slot.
+  */
+  std::vector<std::string> tmp;
+  std::vector<std::string>::iterator it = names.begin();
+  std::vector<std::string>::iterator it_end = names.end();
+  while(it!=it_end) {
+    std::string new_key = "{" + db_prefix + "}." +
+                          *it + ".TMP";
+    tmp.push_back(new_key);
+    it++;
+  }
+  return tmp;
+}
+
+void SmartSimClient::_copy_tensors(std::vector<std::string> src,
+                                   std::vector<std::string> dest)
+{
+  /* This function will copy a list of tensors from
+  src to destination.
+  */
+  std::vector<std::string>::const_iterator src_it = src.cbegin();
+  std::vector<std::string>::const_iterator src_it_end = src.cend();
+
+  std::vector<std::string>::const_iterator dest_it = dest.cbegin();
+  std::vector<std::string>::const_iterator dest_it_end = dest.cend();
+
+  while(src_it!=src_it_end && dest_it!=dest_it_end)
+  {
+    this->copy_tensor(*src_it, *dest_it);
+    src_it++;
+    dest_it++;
+  }
+  return;
+}
+
+void SmartSimClient::_delete_keys(std::vector<std::string> keys,
+                                  std::string db_prefix)
+{
+  /* This function will delete a list of tensor names in a single
+  command.  This assumes they are all in the same hash slot.
+  */
+  CommandReply reply;
+  Command del_cmd;
+  del_cmd.add_field("DEL");
+  std::vector<std::string>::const_iterator it = keys.cbegin();
+  std::vector<std::string>::const_iterator it_end = keys.cend();
+  while(it!=it_end) {
+    del_cmd.add_field(*it);
+    it++;
+  }
+  reply = this->_execute_command(del_cmd, db_prefix);
+  return;
 }

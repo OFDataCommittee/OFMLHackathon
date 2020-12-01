@@ -40,10 +40,12 @@ void run_mnist(const std::string& model_name,
   std::string out_key = "mnist_output_rank_" + std::to_string(rank);
 
 
-  client.put_tensor(in_key, "FLOAT", array, {1,1,28,28});
+  client.put_tensor(in_key, "FLOAT", array, {1,1,28,28},
+                    MemoryLayout::nested);
   client.run_script(script_name, "pre_process", {in_key}, {script_out_key});
   client.run_model(model_name, {script_out_key}, {out_key});
-  client.get_tensor(out_key, "FLOAT", result, {1,10});
+  client.unpack_tensor(out_key, "FLOAT", result, {1,10},
+                       MemoryLayout::nested);
 
   for(int i=0; i<10; i++)
     std::cout<<"result "<<result[0][i]<<std::endl;

@@ -52,6 +52,13 @@ static const std::unordered_map<std::string, int>
         {DATATYPE_TENSOR_STR_UINT16, UINT16_TENSOR_TYPE},
         {DATATYPE_TENSOR_STR_UINT8, UINT8_TENSOR_TYPE} };
 
+enum MemoryLayout{
+    nested=1,
+    contiguous=2,
+    fortran_nested=3,
+    fortran_contiguous=4
+};
+
 ///@file
 ///\brief The TensorBase class giving access to common Tensor methods and attributes
 class TensorBase;
@@ -59,48 +66,55 @@ class TensorBase;
 class TensorBase{
 
     public:
-        //! TensorBase constructor using tensor data pointer
+        //! TensorBase constructor
         TensorBase(const std::string& name /*!< The name used to reference the tensor*/,
                    const std::string& type /*!< The data type of the tensor*/,
-                   void* data /*!< A c_ptr to the data of the tensor*/,
-                   const std::vector<int>& dims /*! The dimensions of the data*/
+                   void* data /*!< A c_ptr to the source data for the tensor*/,
+                   const std::vector<size_t>& dims /*! The dimensions of the tensor*/,
+                   const MemoryLayout mem_layout /*! The memory layout of the source data*/
                    );
 
-        //! TensorBase constructor using data bufffer without tensor data pointer
-        TensorBase(const std::string& name /*!< The name used to reference the tensor*/,
-                   const std::string& type /*!< The data type of the tensor*/,
-                   const std::vector<int>& dims /*! The dimensions of the data*/,
-                   const std::string_view& data_buf /*! The data buffer*/
-                   );
-
-        //! Copy contrustor for Tensorbase
-        TensorBase(const TensorBase& tb);
-
-        //! Copy assignment operator for TensorBase
-        TensorBase&  operator=(const TensorBase& tb);
         //! TensorBase destructor
         virtual ~TensorBase();
 
+        //! Copy contrustor for TensorBase
+        TensorBase(const TensorBase& tb);
+
+        //! Move constructor for TensorBase
+        TensorBase(TensorBase&& tb);
+
+        //! Copy assignment operator for TensorBase
+        TensorBase&  operator=(const TensorBase& tb);
+
+        //! Move assignment operator for TensorBase
+        TensorBase& operator=(TensorBase&& tb);
+
         //! Retrive the tensor name
-        std::string get_tensor_name();
+        std::string name();
 
         //! Retreive the tensor type
-        std::string get_tensor_type();
+        std::string type();
 
         //! Retrieve the tensor dims
-        std::vector<int> get_tensor_dims();
+        std::vector<size_t> dims();
 
-        //! Get the tensor data as a buffer
-        std::string_view get_data_buf();
+        //! Get the total number of values in the tensor
+        size_t num_values();
 
-        //! Get pointer to tensor memory space
-        virtual void* get_data() = 0;
+        //! Get the tensor data pointer
+        void* data();
 
-        //! Fill a user provided memory space with values from tensor buffer
-        virtual void fill_data_from_buf(void* data /*!< Pointer to the allocated memory space*/,
-                                       std::vector<int> dims /*!< The dimensions of the memory space*/,
-                                       const std::string& type /*!< The datatype of the allocated memory space*/
-                                       ) = 0;
+        //! Get the tensor data as a buf
+        virtual std::string_view buf();
+
+        //! Get pointer to the tensor memory space in the specific layout
+        virtual void* data_view(const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of data view*/
+                                ) = 0;
+
+        //! Fill a user provided memory space with values from tensor data
+        virtual void fill_mem_space(void* data /*!< Pointer to the allocated memory space*/,
+                                    std::vector<size_t> dims /*!< The dimensions of the memory space*/
+                                    ) = 0;
 
 
         protected:
@@ -112,19 +126,10 @@ class TensorBase{
         std::string _type;
 
         //! Tensor dims
-        std::vector<int> _dims;
+        std::vector<size_t> _dims;
 
         //! Pointer to the data memory space
         void* _data;
-
-        //! The data buffer
-        char* _data_buf;
-
-        //! The length of the data buff in bytes
-        unsigned long long _buf_size;
-
-        //! Function to generate the data buffer from the data
-        virtual void _generate_data_buf() = 0;
 
         //TODO implement this
         //! Function to copy tensor data into this tensor data
@@ -135,10 +140,18 @@ class TensorBase{
         private:
 
         //! Function to check for errors in constructor inputs
-        void _check_constructor_input(const std::string& name /*!< The name used to reference the tensor*/,
-                                      const std::string& type /*!< The data type of the tensor*/,
-                                      std::vector<int> dims /*! The dimensions of the data*/
-                                      );
+        inline void _check_inputs(const void* src_data /*!< A pointer to the data source for the tensor*/,
+                                  const std::string& name /*!< The name used to reference the tensor*/,
+                                  const std::string& type /*!< The data type of the tensor*/,
+                                  const std::vector<size_t>& dims /*! The dimensions of the data*/
+                                  );
 
+        //! Set the tensor data from a src memory location
+        virtual void _set_tensor_data(void* src_data,
+                                      const std::vector<size_t>& dims,
+                                      const MemoryLayout mem_layout) = 0;
+
+        //! Get the total number of bytes of the Tensor data
+        virtual size_t _n_data_bytes() = 0;
 };
 #endif //SMARTSIM_TENSORBASE_H

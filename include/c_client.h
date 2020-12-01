@@ -5,6 +5,15 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "client.h"
+
+typedef enum{
+    c_nested=1,
+    c_contiguous=2,
+    c_fortran_nested=3,
+    c_fortran_contiguous=4
+}CMemoryLayout;
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -12,6 +21,10 @@ extern "C" {
 //! SmartSimClient C-client constructor
 void* SmartSimCClient(bool cluster /*!< Flag to indicate if a database cluster is being used*/
                      );
+
+//! SmartSimClient C-client destructor
+void DeleteCClient(void* c_client /*!< The c client to use for communication*/
+                   );
 
 //! Put a DataSet object into the database
 void put_dataset(void* c_client /*!< The c client to use for communication*/,
@@ -53,20 +66,34 @@ void put_tensor(void* c_client /*!< The c client to use for communication*/,
                 const char* type /*!< The data type of the tensor*/,
                 const size_t type_length /*!< The length of the type c-string, excluding null terminating character */,
                 void* data /*!< A c ptr to the beginning of the data*/,
-                const int* dims /*!< Length along each dimension of the tensor*/,
-                const int n_dims /*!< The number of dimensions of the tensor*/
+                const size_t* dims /*!< Length along each dimension of the tensor*/,
+                const size_t n_dims /*!< The number of dimensions of the tensor*/,
+                CMemoryLayout mem_layout /*! The memory layout of the data*/
                 );
 
 //! Get a tensor from the database and fill the provided memory space (result) that is layed out as defined by dims
 void get_tensor(void* c_client /*!< The c client to use for communication*/,
                 const char* key /*!< The key to use to fetch the tensor*/,
                 const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-                const char* type /*!< The data type of the tensor*/,
-                const size_t type_length /*!< The length of the type c-string, excluding null terminating character */,
-                void* result /*!< A c ptr to the beginning of the result array to fill*/,
-                const int* dims /*!< The dimensions of the tensor*/,
-                const int n_dims /*!< The number of dimensions of the tensor*/
+                char** type /*!< The data type of the tensor*/,
+                size_t* type_length /*!< The length of the type c-string, excluding null terminating character */,
+                void** data /*!< A c ptr to the beginning of the result array to fill*/,
+                size_t** dims /*!< The dimensions of the tensor*/,
+                size_t* n_dims /*!< The number of dimensions of the tensor*/,
+                CMemoryLayout mem_layout /*! The memory layout of the data*/
                 );
+
+//! Get a tensor from the database and fill the provided memory space (result) that is layed out as defined by dims
+void unpack_tensor(void* c_client /*!< The c client to use for communication*/,
+                  const char* key /*!< The key to use to fetch the tensor*/,
+                  const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
+                  const char* type /*!< The data type of the tensor*/,
+                  const size_t type_length /*!< The length of the type c-string, excluding null terminating character */,
+                  void* result /*!< A c ptr to the beginning of the result array to fill*/,
+                  const size_t* dims /*!< The dimensions of the tensor*/,
+                  const size_t n_dims /*!< The number of dimensions of the tensor*/,
+                  CMemoryLayout mem_layout /*! The memory layout of the data*/
+                  );
 
 //! Move a tensor to a new key
 void rename_tensor(void* c_client /*!< The c client to use for communication*/,
@@ -212,5 +239,9 @@ bool poll_key(void* c_client /*!< The c client to use for communication*/,
 
 #ifdef __cplusplus
 }
+
+//! Helper method to convert between CMemoryLayout and MemoryLayout
+MemoryLayout convert_layout(CMemoryLayout layout);
+
 #endif
 #endif // SMARTSIM_C_CLIENT_H

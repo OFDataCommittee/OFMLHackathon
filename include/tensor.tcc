@@ -6,188 +6,281 @@ template <class T>
 Tensor<T>::Tensor(const std::string& name,
                   const std::string& type,
                   void* data,
-                  const std::vector<int>& dims) :
-                  TensorBase(name, type, data, dims)
-{}
-
-template <class T>
-Tensor<T>::Tensor(const std::string& name,
-                  const std::string& type,
-                  const std::vector<int>& dims,
-                  const std::string_view& data_buf) :
-                  TensorBase(name, type, dims, data_buf)
-{}
+                  const std::vector<size_t>& dims,
+                  MemoryLayout mem_layout) :
+                  TensorBase(name, type, data, dims, mem_layout)
+{
+    /* Constructor for the Tensor class.
+    */
+    this->_set_tensor_data(data, dims, mem_layout);
+}
 
 template <class T>
 Tensor<T>::~Tensor()
-{}
+{
+    /* Destructor for the Tensor class.
+    */
+    if(this->_data)
+        free(this->_data);
+}
 
 template <class T>
 Tensor<T>::Tensor(const Tensor<T>& tensor) : TensorBase(tensor)
-{}
+{
+    /* Copy constructor for Tensor.  The data
+    and allocated ptrs are copied.
+    */
+    this->_set_tensor_data(tensor._data, tensor._dims,
+                           MemoryLayout::contiguous);
+    this->_ptr_mem_list = tensor._ptr_mem_list;
+}
+
+template <class T>
+Tensor<T>::Tensor(Tensor<T>&& tensor) : TensorBase(tensor)
+{
+    /* Move constructor for Tensor.  The data
+    and allocated ptrs are moved and old data
+    is left in a safe, but empty state.
+    */
+
+    this->_data = tensor._data;
+    tensor._data = 0;
+    this->_ptr_mem_list = std::move(tensor._ptr_mem_list);
+}
 
 template <class T>
 Tensor<T>& Tensor<T>::operator=(const Tensor<T>& tensor)
 {
-    TensorBase::operator=(tensor);
-}
-
-template <class T>
-void* Tensor<T>::get_data()
-{
-    /* This function returns a pointer to the memory space
-    of the tensor data.  If the pointer does not exist and
-    a buffer does exist, memory will be allocated and the
-    buffer coppied into the memory space.
+    /* Copy assignment operator for Tensor.  The data
+    and allocated ptrs are copied.
     */
-    if(this->_data)
-        return this->_data;
-    else {
-        this->_allocate_data_memory(&(this->_data),
-                                    this->_dims.data(),
-                                    this->_dims.size());
-        int start_position = 0;
-        this->_buf_to_data(this->_data, this->_dims.data(),
-                           this->_dims.size(), start_position,
-                           this->_data_buf);
-        return this->_data;
-    }
+    this->TensorBase::operator=(tensor);
+    this->_set_tensor_data(tensor._data, tensor._dims,
+                           MemoryLayout::contiguous);
+    this->_ptr_mem_list = tensor._ptr_mem_list;
+    return *this;
 }
 
 template <class T>
-void Tensor<T>::fill_data_from_buf(void* data, std::vector<int> dims,
-                                   const std::string& type)
+Tensor<T>& Tensor<T>::operator=(Tensor<T>&& tensor)
+{
+    /* Move assignment operator for Tensor.  The data
+    and allocated ptrs are moved and old data
+    is left in a safe, but empty state.
+    */
+    if(this!=&tensor) {
+        this->_data = tensor._data;
+        tensor._data = 0;
+        this->_ptr_mem_list = std::move(tensor._ptr_mem_list);
+    }
+    return *this;
+}
+
+template <class T>
+void* Tensor<T>::data_view(const MemoryLayout mem_layout)
+{
+    /* This function returns a pointer to a memory
+    view of the underlying tensor data.  The
+    view of the underlying tensor data depends
+    on the mem_layout value.  The following values
+    result in the following views:
+    1) MemoryLayout::contiguous : The returned view
+       pointer points to the first position in
+       the tensor data array.  The caller is
+       expected to only index into the view
+       pointer with a single []
+       MemoryLayout::nested : The returned view
+       pointer points to a nested structure of
+       pointers so that the caller can cast
+       to a nested pointer structure and index
+       with multiple [] operators.
+    */
+
+    void* ptr = 0;
+
+    switch(mem_layout) {
+        case(MemoryLayout::contiguous) :
+            ptr = this->_data;
+            break;
+        case(MemoryLayout::nested) :
+            this->_build_nested_memory(&ptr,
+                                       this->_dims.data(),
+                                       this->_dims.size(),
+                                       (T*)this->_data);
+            break;
+        default :
+            throw std::runtime_error(
+                "Unsupported MemoryLayout "\
+                "value in "\
+                "Tensor<T>.data_view().");
+    }
+    return ptr;
+}
+
+template <class T>
+void Tensor<T>::fill_mem_space(void* data,
+                               std::vector<size_t> dims)
 {
     /* This function will fill a supplied memory space
-    (data) with the values in the tensor buffer.
+    (data) with the values in the tensor data array.
     */
-    if(!this->_data_buf)
+    if(!this->_data)
         throw std::runtime_error("The tensor does not have "\
-                                 "a databuf to fill with.");
+                                 "a data array to fill with.");
 
     if(dims.size() == 0)
         throw std::runtime_error("The dimensions must have "\
                                  "size greater than 0.");
 
-    int n_values = 1;
-    for(int i=0; i<dims.size(); i++) {
-        if(dims[i]<=0)
+    size_t n_values = 1;
+    std::vector<size_t>::const_iterator it = dims.cbegin();
+    std::vector<size_t>::const_iterator it_end = dims.cend();
+    while(it!=it_end) {
+        if((*it)<=0)
             throw std::runtime_error("All dimensions must "\
                                      "be greater than 0.");
-        n_values*=dims[i];
+        n_values*=(*it);
+        it++;
     }
 
-    int buf_vals = this->_buf_size / sizeof(T);
-    if(n_values!=buf_vals)
+    if(n_values!=this->num_values())
         throw std::runtime_error("The provided dimensions do "\
                                   "not match the size of the "\
-                                  "buffer");
+                                  "tensor data array");
 
-    int buf_starting_position = 0;
-    this->_buf_to_data(data, dims.data(),
-                       dims.size(),
-                       buf_starting_position,
-                       this->_data_buf);
+    size_t starting_position = 0;
+
+    this->_fill_nested_mem_with_data(data, dims.data(),
+                                     dims.size(),
+                                     starting_position,
+                                     this->_data);
     return;
 }
 
 template <class T>
-void Tensor<T>::_generate_data_buf()
+void* Tensor<T>::_copy_nested_to_contiguous(void* src_data,
+                                            const size_t* dims,
+                                            const size_t n_dims,
+                                            void* dest_data)
 {
-    /* This function will turn the tensor data into a binary string
-    buffer that can be used for data transfer.
+    /* This function will copy the src_data, which is in a nested
+    memory structure, to the dest_data memory space which is flat
+    and contiguous.  The value returned by the first execution
+    of this function will change the copy of dest_data and return
+    a value that is not equal to the original source data value.
+    As a result, the inital call of this function SHOULD NOT
+    use the returned value.
     */
 
-    /*TODO there is an optimization possible that if the data is
-    contiguous in memory (e.g. special fortran or numpy arrays)
-    or if it is 1D data (all languages) We can have data_buf
-    just point to data and there will be absolutely no copies.
-    until we get into redis itself.
-    */
-    int n_bytes = 1;
-    for (int i = 0; i < this->_dims.size(); i++) {
-        n_bytes *= this->_dims[i];
-    }
-    n_bytes *= sizeof(T);
-
-    this->_buf_size = n_bytes;
-    this->_data_buf = (char*)malloc(n_bytes);
-
-    /*TODO Now that this is in a Tensor class, we might
-    be able to remove some of the arguments being passed to
-    clean it up, but may not be able to because of recursive
-    nature
-    */
-    this->_vals_to_buf(this->_data, &(this->_dims[0]),
-                       this->_dims.size(), (void*)this->_data_buf);
-    return;
-}
-
-template <class T>
-void* Tensor<T>::_vals_to_buf(void* data, int* dims, int n_dims,
-                                       void* buf)
-{
-    /* This function will copy the tensor data values into the
-    binary buffer
-    */
-
-    //TODO we should check at some point that we don't exceed buf length
     if(n_dims > 1) {
-        T** current = (T**) data;
-        for(int i = 0; i < dims[0]; i++) {
-          buf = this->_vals_to_buf(*current, &dims[1], n_dims-1, buf);
+        T** current = (T**)src_data;
+        for(size_t i = 0; i < dims[0]; i++) {
+          dest_data =
+            this->_copy_nested_to_contiguous(*current, &dims[1],
+                                             n_dims-1, dest_data);
           current++;
         }
     }
     else {
-        std::memcpy(buf, data, sizeof(T)*dims[0]);
-        return &((T*)buf)[dims[0]];
+        std::memcpy(dest_data, src_data, sizeof(T)*dims[0]);
+        return &((T*)dest_data)[dims[0]];
     }
-    return buf;
+    return dest_data;
 }
 
 template <class T>
-void Tensor<T>::_buf_to_data(void* data, int* dims, int n_dims,
-                             int& buf_position, void* buf)
+void Tensor<T>::_fill_nested_mem_with_data(void* data,
+                                           size_t* dims,
+                                           size_t n_dims,
+                                           size_t& data_position,
+                                           void* tensor_data)
 {
-    /* This recursive function copies data from the buf into
-    a formatted data array
+    /* This recursive function copies the tensor_data
+    into the nested data memory space.  The caller
+    should provide an inital value of 0 for data_position.
     */
     if(n_dims > 1) {
         T** current = (T**) data;
-        for(int i = 0; i < dims[0]; i++) {
-            this->_buf_to_data(*current, &dims[1], n_dims-1,
-                               buf_position, buf);
+        for(size_t i = 0; i < dims[0]; i++) {
+            this->_fill_nested_mem_with_data(
+                    *current, &dims[1], n_dims-1,
+                    data_position, tensor_data);
             current++;
         }
     }
     else {
-        T* buf_to_copy = &(((T*)buf)[buf_position]);
-	std::memcpy(data, buf_to_copy, dims[0]*sizeof(T));
-        buf_position += dims[0];
+        T* data_to_copy = &(((T*)tensor_data)[data_position]);
+	    std::memcpy(data, data_to_copy, dims[0]*sizeof(T));
+        data_position += dims[0];
     }
     return;
 }
 
 template <class T>
-void Tensor<T>::_allocate_data_memory(void** data, int* dims, int n_dims)
+T* Tensor<T>::_build_nested_memory(void** data,
+                                   size_t* dims,
+                                   size_t n_dims,
+                                   T* contiguous_mem)
 {
-    /* This function recursively allocates a tensor data pointer
+    /* This function creates a nested tensor data
+    structure that points to the underlying contiguous
+    memory allocation of the data.  The initial caller
+    SHOULD NOT use the return value.  The return value
+    is for recursive value passing only.
     */
     if(n_dims>1) {
         T** new_data = this->_ptr_mem_list.allocate(dims[0]);
         (*data) = (void*)new_data;
-        for(int i=0; i<dims[0]; i++)
-            this->_allocate_data_memory((void**)&(new_data[i]),
-                                        &dims[1], n_dims-1);
+        for(size_t i=0; i<dims[0]; i++)
+            contiguous_mem =
+                this->_build_nested_memory((void**)(&new_data[i]),
+                                           &dims[1], n_dims-1,
+                                           contiguous_mem);
     }
-    else
-    {
-        T* new_data = this->_numeric_mem_list.allocate(dims[0]);
-        (*data) = (void*)new_data;
+    else {
+        (*data) = (T*)contiguous_mem;
+        contiguous_mem += dims[0];
     }
+    return contiguous_mem;
+}
 
+//! Set the tensor data from a src memory location
+template <class T>
+void Tensor<T>::_set_tensor_data(void* src_data,
+                                 const std::vector<size_t>& dims,
+                                 const MemoryLayout mem_layout)
+{
+    /* Set the tensor data from the src_data.  This involves
+    a memcopy to a contiguous array.
+    */
+
+    if(this->_data)
+        free(this->_data);
+
+    size_t n_values = this->num_values();
+    size_t n_bytes = n_values * sizeof(T);
+    this->_data = malloc(n_bytes);
+
+    switch(mem_layout) {
+        case(MemoryLayout::contiguous) :
+            std::memcpy(this->_data, src_data, n_bytes);
+            break;
+        case(MemoryLayout::nested) :
+            this->_copy_nested_to_contiguous(src_data,
+                                             dims.data(),
+                                             dims.size(),
+                                             this->_data);
+            break;
+    }
     return;
 }
 
+template <class T>
+size_t Tensor<T>::_n_data_bytes()
+{
+    /* This function returns the total number
+    of bytes in memory occupied by this->_data.
+    */
+    return this->num_values()*sizeof(T);
+}
 #endif //SMARTSIM_TENSOR_TCC

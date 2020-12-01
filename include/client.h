@@ -63,15 +63,35 @@ public:
   void put_tensor(const std::string& key /*!< The key to use to place the tensor*/,
                   const std::string& type /*!< The data type of the tensor*/,
                   void* data /*!< A c ptr to the beginning of the data*/,
-                  const std::vector<int>& dims /*!< The dimensions of the tensor*/
+                  const std::vector<size_t>& dims /*!< The dimensions of the tensor*/,
+                  const MemoryLayout mem_layout /*! The memory layout of the data*/
                   );
 
-  //! Get a tensor from the database and fill the provided memory space (result) that is layed out as defined by dims
-  void get_tensor(const std::string& key /*!< The key to use to fetch the tensor*/,
-                  const std::string& type /*!< The data type of the tensor*/,
-                  void* result /*!< A c ptr to the beginning of the result array to fill*/,
-                  const std::vector<int>& dims /*!< The dimensions of the provided array which should match the tensor*/
+  //! Get tensor data and return an allocated multi-dimensional array
+  void get_tensor(const std::string& key /*!< The name used to reference the tensor*/,
+                  std::string& type /*!< The data type of the tensor*/,
+                  void*& data /*!< A c_ptr to the tensor data */,
+                  std::vector<size_t>& dims /*!< The dimensions of the provided array which should match the tensor*/,
+                  const MemoryLayout mem_layout /*! The memory layout of the data*/
                   );
+
+  //! Get tensor data and return an allocated multi-dimensional array (c-style interface for type and dimensions)
+  void get_tensor(const std::string& key /*!< The name used to reference the tensor*/,
+                  char*& type /*!< The data type of the tensor*/,
+                  size_t& type_length /*!< The length of the tensor type*/,
+                  void*& data /*!< A c_ptr to the tensor data */,
+                  size_t*& dims /*! The dimensions of the tensor retrieved*/,
+                  size_t& n_dims /*! The number of dimensions retrieved*/,
+                  const MemoryLayout mem_layout /*! The memory layout of the data*/
+                  );
+
+  //! Get tensor data and fill an already allocated array memory space
+  void unpack_tensor(const std::string& key /*!< The key to use to fetch the tensor*/,
+                     const std::string& type /*!< The data type of the tensor*/,
+                     void* data /*!< A c ptr to the beginning of the result array to fill*/,
+                     const std::vector<size_t>& dims /*!< The dimensions of the provided array which should match the tensor*/,
+                     const MemoryLayout mem_layout /*! The memory layout of the data*/
+                     );
 
   //! Move a tensor to a new key
   void rename_tensor(const std::string& key /*!< The original tensor key*/,
@@ -212,7 +232,7 @@ protected:
                          );
 
   //! Parse tensor dimensions from a database reply
-  std::vector<int> _get_tensor_dims(CommandReply& reply /*!< The database reply*/
+  std::vector<size_t> _get_tensor_dims(CommandReply& reply /*!< The database reply*/
                                     );
 
   //! Retrieve a string_view of data buffer string from the database reply
@@ -224,8 +244,8 @@ protected:
                                     );
 
   //! Get a prefix for a model or script based on the hash slot
-  char* _get_crc16_prefix(uint64_t hash_slot /*!< The hash slot*/
-                          );
+  std::string _get_crc16_prefix(uint64_t hash_slot /*!< The hash slot*/
+                                );
 
   //! Perform an inverse CRC16 calculation
   uint64_t _crc16_inverse(uint64_t remainder /*!< The remainder of the CRC16 calculation*/
@@ -266,12 +286,38 @@ protected:
                           std::vector<std::string> outputs /*!< The keys of the output tensors*/
                           );
 
+  //! Append vector of keys with get prefixes
+  void _append_with_get_prefix(std::vector<std::string>& keys);
+
+  //! Append vector of keys with put prefixes
+  void _append_with_put_prefix(std::vector<std::string>& keys);
+
+  //! Gets a mapping between original names and temporary names for identical hash slot requirement
+  std::vector<std::string>  _get_tmp_names(std::vector<std::string> names,
+                                           std::string db_prefix);
+
+  //! Copy a list of tensor names
+  void _copy_tensors(std::vector<std::string> src,
+                     std::vector<std::string> dest);
+
+  //! Delete a list of keys
+  void _delete_keys(std::vector<std::string> key,
+                    std::string db_prefix="");
+
 private:
   sw::redis::RedisCluster* redis_cluster;
   sw::redis::Redis* redis;
 
+  //! MemoryList to handle get_model commands to return model string
   MemoryList<char> _model_queries;
+  //! MemoryList to handle dimensions that are returned to the user
+  MemoryList<size_t> _dim_queries;
+  //! MemoryList to handle type queries
+  MemoryList<char> _type_queries;
 
+  //! //! The _tensor_pack memory is not for querying by name, but is used
+  //! to manage memory.
+  TensorPack _tensor_memory;
   std::string _put_key_prefix;
   std::string _get_key_prefix;
   std::vector<std::string> _get_key_prefixes;

@@ -1,6 +1,6 @@
 #ifndef SMARTSIM_DATASET_H
 #define SMARTSIM_DATASET_H
-
+#ifdef __cplusplus
 #include "stdlib.h"
 #include <string>
 #include <vector>
@@ -29,26 +29,23 @@ class DataSet
                 );
 
         //! DataSet move constructor
-        DataSet(DataSet&& dataset);
+        DataSet(DataSet&& dataset /*!< The dataset to move for construction*/);
 
         //! DataSet move assignment operator
-        DataSet& operator=(DataSet&& dataset);
+        DataSet& operator=(DataSet&& dataset /*!< The dataset to move for assignment*/);
 
         //! Dataset constructor using serialized buffer
         DataSet(const std::string& name /*!< The name used to reference the dataset*/,
                 char* buf /*!< The buffer used for object construction*/,
-                unsigned long long buf_size /*!< The buffer length*/
-                );
-
-        //! DataSet copy constructor
-        DataSet(const DataSet& dataset /*!< The dataset to copy for construction*/
+                size_t buf_size /*!< The buffer length*/
                 );
 
         //! Add a tensor to the dataset
         void add_tensor(const std::string& name /*!< The name used to reference the tensor*/,
                         const std::string& type /*!< The data type of the tensor*/,
                         void* data /*!< A c_ptr to the data of the tensor*/,
-                        std::vector<int> dims /*! The dimensions of the data*/
+                        const std::vector<size_t>& dims /*! The dimensions of the data*/,
+                        const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
                         );
 
         //! Add metadata field to the DataSet.  Default behavior is to append existing fields.
@@ -59,34 +56,36 @@ class DataSet
 
         //! Get tensor data and return an allocated multi-dimensional array
         void get_tensor(const std::string& name /*!< The name used to reference the tensor*/,
-                        const std::string& type /*!< The data type of the tensor*/,
+                        std::string& type /*!< The data type of the tensor*/,
                         void*& data /*!< A c_ptr to the tensor data */,
-                        std::vector<int>& dims /*! The dimensions of the tensor retrieved*/
+                        std::vector<size_t>& dims /*! The dimensions of the tensor retrieved*/,
+                        const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
                         );
 
-        //! Get tensor data and fill an already allocated array
+        //! Get tensor data and return an allocated multi-dimensional array
+        void get_tensor(const std::string& name /*!< The name used to reference the tensor*/,
+                        char*& type /*!< The data type of the tensor*/,
+                        size_t& type_length /*!< The length of the tensor type string*/,
+                        void*& data /*!< A c_ptr to the tensor data */,
+                        size_t*& dims /*! The dimensions of the tensor retrieved*/,
+                        size_t& n_dims /*! The number of dimensions retrieved*/,
+                        const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
+                        );
+
+        //! Get tensor data and fill an already allocated array memory space
         void unpack_tensor(const std::string& name /*!< The name used to reference the tensor*/,
                            const std::string& type /*!< The data type of the tensor*/,
                            void* data /*!< A c_ptr to the data of the tensor*/,
-                           std::vector<int> dims /*! The dimensions of the data*/
+                           const std::vector<size_t>& dims /*! The dimensions of the supplied memory space*/,
+                           const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
                            );
 
-        //TODO rethink this function prototype.  Seems annoying ot have void** and int*
-        //Maybe return std::pair<void* int> or maybe
         //! Get metadata field from the DataSet
         void get_meta(const std::string& name /*!< The name used to reference the metadata*/,
                       const std::string& type /*!< The data type of the metadata*/,
                       void*& data /*!< A c_ptr reference to the metadata*/,
-                      int& length /*!< The length of the meta*/
+                      size_t& length /*!< The length of the meta*/
                       );
-
-        //! Method for adding a tensor when we only have the buffer and no data
-        //! pointer.  This is meant to be used primarily by the client.
-        void add_tensor_buf_only(const std::string& name /*!< The name used to reference the tensor*/,
-                                 const std::string& type /*!< The data type of the tensor*/,
-                                 std::vector<int> dims /*! The dimensions of the data*/,
-                                 std::string_view buf /*!< A c_ptr to the data of the tensor*/
-                                 );
 
         //! The name of the DataSet
         std::string name;
@@ -113,10 +112,24 @@ class DataSet
         std::string get_tensor_type(const std::string& name /*!< The name used to reference the tensor*/
                                     );
 
+        friend class SmartSimClient;
+    protected:
+
+        inline void _add_to_tensorpack(const std::string& name /*!< The name used to reference the tensor*/,
+                                       const std::string& type /*!< The data type of the tensor*/,
+                                       void* data /*!< A c_ptr to the data of the tensor*/,
+                                       const std::vector<size_t>& dims /*! The dimensions of the data*/,
+                                       const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
+                                       );
     private:
         //! The meta data object
         MetaData _metadata;
         //! The tensorpack object that holds all tensors
         TensorPack _tensorpack;
+        //! MemoryList object to hold allocated size_t arrays stemming from get_tensor queries
+        MemoryList<size_t> _dim_queries;
+        //! MemoryList to handle type queries
+        MemoryList<char> _type_queries;
 };
+#endif
 #endif //SMARTSIM_DATASET_H

@@ -162,7 +162,7 @@ int CommandReply::has_error()
     if(this->_reply->type == REDIS_REPLY_ERROR)
         num_errors++;
     else if(this->_reply->type == REDIS_REPLY_ARRAY) {
-        for(int i=0; i<this->_reply->elements; i++) {
+        for(size_t i=0; i<this->_reply->elements; i++) {
           CommandReply tmp = (*this)[i];
           num_errors += tmp.has_error();
         }
@@ -181,7 +181,7 @@ void CommandReply::print_reply_error()
         std::cout<<error<<std::endl;
     }
     else if(this->_reply->type == REDIS_REPLY_ARRAY) {
-        for(int i=0; i<this->_reply->elements; i++) {
+        for(size_t i=0; i<this->_reply->elements; i++) {
           CommandReply tmp = (*this)[i];
           tmp.print_reply_error();
         }
@@ -257,7 +257,7 @@ void CommandReply::print_reply_structure(std::string index_tracker)
                <<std::endl;
       break;
     case REDIS_REPLY_ARRAY:
-      for(int i=0; i<this->n_elements(); i++) {
+      for(size_t i=0; i<this->n_elements(); i++) {
         std::string r_prefix = index_tracker + "[" + std::to_string(i) + "]";
         CommandReply tmp = (*this)[i];
         tmp.print_reply_structure(r_prefix);

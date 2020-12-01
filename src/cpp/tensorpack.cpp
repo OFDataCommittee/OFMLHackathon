@@ -130,7 +130,8 @@ TensorPack::~TensorPack()
 void TensorPack::add_tensor(const std::string& name,
                             const std::string& type,
                             void* data,
-                            const std::vector<int>& dims)
+                            const std::vector<size_t>& dims,
+                            const MemoryLayout mem_layout)
 {
     /* This function adds a tensor with associated c_ptr for data.
     */
@@ -138,124 +139,104 @@ void TensorPack::add_tensor(const std::string& name,
         throw std::runtime_error("The tensor " + std::string(name)
                                                + " already exists");
 
-    if(DATATYPE_TENSOR_STR_DOUBLE.compare(type)==0) {
-        Tensor<double>* ptr = new Tensor<double>(name, type, data, dims);
-        this->_tensors_double.push_front(ptr);
-        this->_tensorbase_inventory[name] = ptr;
-        this->_all_tensors.push_front(ptr);
-    }
-    else if(DATATYPE_TENSOR_STR_FLOAT.compare(type)==0) {
-        Tensor<float>* ptr = new Tensor<float>(name, type, data, dims);
-        this->_tensors_float.push_front(ptr);
-        this->_tensorbase_inventory[name] = ptr;
-        this->_all_tensors.push_front(ptr);
-    }
-    else if(DATATYPE_TENSOR_STR_INT64.compare(type)==0) {
-        Tensor<int64_t>* ptr = new Tensor<int64_t>(name, type, data, dims);
-        this->_tensors_int64.push_front(ptr);
-        this->_tensorbase_inventory[name] = ptr;
-        this->_all_tensors.push_front(ptr);
-    }
-    else if(DATATYPE_TENSOR_STR_INT32.compare(type)==0) {
-        Tensor<int32_t>* ptr = new Tensor<int32_t>(name, type, data, dims);
-        this->_tensors_int32.push_front(ptr);
-        this->_tensorbase_inventory[name] = ptr;
-        this->_all_tensors.push_front(ptr);
-    }
-    else if(DATATYPE_TENSOR_STR_INT16.compare(type)==0) {
-        Tensor<int16_t>* ptr = new Tensor<int16_t>(name, type, data, dims);
-        this->_tensors_int16.push_front(ptr);
-        this->_tensorbase_inventory[name] = ptr;
-        this->_all_tensors.push_front(ptr);
-    }
-    else if(DATATYPE_TENSOR_STR_INT8.compare(type)==0) {
-        Tensor<int8_t>* ptr = new Tensor<int8_t>(name, type, data, dims);
-        this->_tensors_int8.push_front(ptr);
-        this->_tensorbase_inventory[name] = ptr;
-        this->_all_tensors.push_front(ptr);
-    }
-    else if(DATATYPE_TENSOR_STR_UINT16.compare(type)==0) {
-        Tensor<uint16_t>* ptr = new Tensor<uint16_t>(name, type, data, dims);
-        this->_tensors_uint16.push_front(ptr);
-        this->_tensorbase_inventory[name] = ptr;
-        this->_all_tensors.push_front(ptr);
-    }
-    else if(DATATYPE_TENSOR_STR_UINT8.compare(type)==0) {
-        Tensor<uint8_t>* ptr = new Tensor<uint8_t>(name, type, data, dims);
-        this->_tensors_uint8.push_front(ptr);
-        this->_tensorbase_inventory[name] = ptr;
-        this->_all_tensors.push_front(ptr);
-    }
-    else {
-        throw std::runtime_error("Invalid tensor type in TensorPack: "+
+    if(TENSOR_DATATYPES.count(type)<=0)
+        throw std::runtime_error("Invalid tensor type in "\
+                                 "TensorPack: " +
                                  std::string(type));
+
+    TensorBase* ptr;
+    int data_type = TENSOR_TYPE_MAP.at(type);
+    switch(data_type) {
+        case DOUBLE_TENSOR_TYPE:
+            ptr = new Tensor<double>(name, type, data,
+                                    dims, mem_layout);
+            break;
+        case FLOAT_TENSOR_TYPE :
+            ptr = new Tensor<float>(name, type, data,
+                                    dims, mem_layout);
+            break;
+        case INT64_TENSOR_TYPE :
+            ptr = new Tensor<int64_t>(name, type, data,
+                                      dims, mem_layout);
+            break;
+        case INT32_TENSOR_TYPE :
+            ptr = new Tensor<int32_t>(name, type, data,
+                                      dims, mem_layout);
+            break;
+        case INT16_TENSOR_TYPE :
+            ptr = new Tensor<int16_t>(name, type, data,
+                                     dims, mem_layout);
+            break;
+        case INT8_TENSOR_TYPE :
+            ptr = new Tensor<int8_t>(name, type, data,
+                                     dims, mem_layout);
+            break;
+        case UINT16_TENSOR_TYPE :
+            ptr = new Tensor<uint16_t>(name, type, data,
+                                       dims, mem_layout);
+            break;
+        case UINT8_TENSOR_TYPE :
+             ptr = new Tensor<uint8_t>(name, type, data,
+                                       dims, mem_layout);
+             break;
     }
+    this->add_tensor(ptr);
     return;
 }
 
-void TensorPack::add_tensor(const std::string& name,
-                            const std::string& type,
-                            const std::vector<int>& dims,
-                            const std::string_view& buf)
+void TensorPack::add_tensor(TensorBase* tensor)
 {
-    /* This function adds a tensor with associated data buffer
+    /* This function will add a tensor that was allocated
+    on the heap to the TensorPack inventories to track.
+    Note that the TensorBase pointer will be cast
+    to Tensor<T> based on the type string in the TensorBase
+    object.
     */
-    if(this->_tensorbase_inventory.count(std::string(name))>0)
-        throw std::runtime_error("The tensor " + std::string(name)
-                                               + " already exists");
+    std::string type =  tensor->type();
+    std::string name = tensor->name();
 
-    if(DATATYPE_TENSOR_STR_DOUBLE.compare(type)==0) {
-        Tensor<double>* ptr = new Tensor<double>(name, type, dims, buf);
-        this->_tensors_double.push_front(ptr);
-        this->_tensorbase_inventory[name] = ptr;
-        this->_all_tensors.push_front(ptr);
-    }
-    else if(DATATYPE_TENSOR_STR_FLOAT.compare(type)==0) {
-        Tensor<float>* ptr = new Tensor<float>(name, type, dims, buf);
-        this->_tensors_float.push_front(ptr);
-        this->_tensorbase_inventory[name] = ptr;
-        this->_all_tensors.push_front(ptr);
-    }
-    else if(DATATYPE_TENSOR_STR_INT64.compare(type)==0) {
-        Tensor<int64_t>* ptr = new Tensor<int64_t>(name, type, dims, buf);
-        this->_tensors_int64.push_front(ptr);
-        this->_tensorbase_inventory[name] = ptr;
-        this->_all_tensors.push_front(ptr);
-    }
-    else if(DATATYPE_TENSOR_STR_INT32.compare(type)==0) {
-        Tensor<int32_t>* ptr = new Tensor<int32_t>(name, type, dims, buf);
-        this->_tensors_int32.push_front(ptr);
-        this->_tensorbase_inventory[name] = ptr;
-        this->_all_tensors.push_front(ptr);
-    }
-    else if(DATATYPE_TENSOR_STR_INT16.compare(type)==0) {
-        Tensor<int16_t>* ptr = new Tensor<int16_t>(name, type, dims, buf);
-        this->_tensors_int16.push_front(ptr);
-        this->_tensorbase_inventory[name] = ptr;
-        this->_all_tensors.push_front(ptr);
-    }
-    else if(DATATYPE_TENSOR_STR_INT8.compare(type)==0) {
-        Tensor<int8_t>* ptr = new Tensor<int8_t>(name, type, dims, buf);
-        this->_tensors_int8.push_front(ptr);
-        this->_tensorbase_inventory[name] = ptr;
-        this->_all_tensors.push_front(ptr);
-    }
-    else if(DATATYPE_TENSOR_STR_UINT16.compare(type)==0) {
-        Tensor<uint16_t>* ptr = new Tensor<uint16_t>(name, type, dims, buf);
-        this->_tensors_uint16.push_front(ptr);
-        this->_tensorbase_inventory[name] = ptr;
-        this->_all_tensors.push_front(ptr);
-    }
-    else if(DATATYPE_TENSOR_STR_UINT8.compare(type)==0) {
-        Tensor<uint8_t>* ptr = new Tensor<uint8_t>(name, type, dims, buf);
-        this->_tensors_uint8.push_front(ptr);
-        this->_tensorbase_inventory[name] = ptr;
-        this->_all_tensors.push_front(ptr);
-    }
-    else {
-        throw std::runtime_error("Invalid tensor type in TensorPack: "+
+    if(TENSOR_DATATYPES.count(type)<=0)
+        throw std::runtime_error("Invalid tensor type in "\
+                                 "TensorPack: " +
                                  std::string(type));
+
+    if(name.size()==0)
+        throw std::runtime_error("The tensor name must "\
+                                 "be greater than 0.");
+
+
+    int data_type = TENSOR_TYPE_MAP.at(type);
+
+    switch(data_type) {
+        case DOUBLE_TENSOR_TYPE:
+            this->_tensors_double.push_front((Tensor<double>*)tensor);
+        break;
+        case FLOAT_TENSOR_TYPE:
+            this->_tensors_float.push_front((Tensor<float>*)tensor);
+        break;
+        case INT64_TENSOR_TYPE:
+            this->_tensors_int64.push_front((Tensor<int64_t>*)tensor);
+        break;
+        case INT32_TENSOR_TYPE:
+            this->_tensors_int32.push_front((Tensor<int32_t>*)tensor);
+        break;
+        case INT16_TENSOR_TYPE:
+            this->_tensors_int16.push_front((Tensor<int16_t>*)tensor);
+        break;
+        case INT8_TENSOR_TYPE:
+            this->_tensors_int8.push_front((Tensor<int8_t>*)tensor);
+        break;
+        case UINT16_TENSOR_TYPE:
+            this->_tensors_uint16.push_front((Tensor<uint16_t>*)tensor);
+        break;
+        case UINT8_TENSOR_TYPE:
+            this->_tensors_uint8.push_front((Tensor<uint8_t>*)tensor);
+        break;
     }
+
+    this->_tensorbase_inventory[name] = tensor;
+    this->_all_tensors.push_front(tensor);
+
     return;
 }
 
@@ -271,7 +252,7 @@ void* TensorPack::get_tensor_data(const std::string& name)
     /* Returns a pointer to the tensor data
     memory space.
     */
-    return this->_tensorbase_inventory[name]->get_data();
+    return this->_tensorbase_inventory[name]->data();
 }
 
 bool TensorPack::tensor_exists(const std::string& name)
@@ -352,6 +333,7 @@ void TensorPack::_refresh_tensorbase_inventory()
     this->_add_to_tensorbase_inventory<int8_t>(this->_tensors_int8);
     this->_add_to_tensorbase_inventory<uint16_t>(this->_tensors_uint16);
     this->_add_to_tensorbase_inventory<uint8_t>(this->_tensors_uint8);
+    return;
 }
 
 template <typename T>
@@ -367,11 +349,11 @@ void TensorPack::_add_to_tensorbase_inventory(
                                             tensor_list.cend();
 
     while(it!=it_end) {
-        _tensorbase_inventory[(*it)->get_tensor_name()] = *it;
+        _tensorbase_inventory[(*it)->name()] = *it;
         _all_tensors.push_front(*it);
         it++;
     }
-
+    return;
 }
 
 void TensorPack::_delete_all_tensors()
@@ -389,6 +371,7 @@ void TensorPack::_delete_all_tensors()
     this->_delete_tensor_list<uint8_t>(this->_tensors_uint8);
     this->_tensorbase_inventory.clear();
     this->_all_tensors.clear();
+    return;
 }
 
 template <typename T>
