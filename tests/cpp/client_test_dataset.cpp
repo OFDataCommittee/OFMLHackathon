@@ -3,6 +3,59 @@
 #include "client_test_utils.h"
 #include <mpi.h>
 
+template <typename T>
+void check_meta_field(DataSet& dataset,
+                      std::string field_name,
+                      std::string type,
+                      std::vector<T> vals)
+{
+  /* This function will check the meta data field
+  that is supposed to have the provided values
+  and type.
+  */
+
+  T* retrieved_vals;
+  size_t retrieved_length;
+  std::string retrieved_type;
+
+  dataset.get_meta(field_name,
+                   retrieved_type,
+                   (void*&)retrieved_vals,
+                   retrieved_length);
+
+  if(retrieved_type.compare(type.c_str())!=0)
+    throw std::runtime_error("The retrieved type of " +
+                             retrieved_type +
+                             "does not match "\
+                             "expected value of " + type +
+                             "for field " + field_name);
+
+  if(retrieved_length!=vals.size())
+    throw std::runtime_error("The number of values in field " +
+                             field_name + " does not match "\
+                             "expected value of " +
+                             std::to_string(vals.size()));
+
+  for(size_t i=0; i<vals.size(); i++) {
+    T retrieved_val = ((T*)retrieved_vals)[i];
+    if((retrieved_val)!=vals[i]) {
+      throw std::runtime_error("The " + std::to_string(i)+
+                              " value of field " +
+                               field_name + " does not match "\
+                               "expected value of " +
+                               std::to_string(vals[i]) + " . A "\
+                               "value of " +
+                               std::to_string(retrieved_val) +
+                               " was retrieved.");
+    }
+  }
+
+  std::cout<<"Correct fetched metadata field "
+           <<field_name<<std::endl;
+
+  return;
+}
+
 template <typename T_send, typename T_recv>
 void put_get_3D_array(
 		    void (*fill_array)(T_send***, int, int, int),
@@ -115,8 +168,16 @@ void put_get_3D_array(
   //Check metadata .tensors value for consistency
   char** tensor_ids;
   size_t n_strings;
-  RetrievedDataSet.get_meta(".tensors", "STRING",
-                            (void*&)tensor_ids, n_strings);
+  std::string tensor_meta_type;
+  RetrievedDataSet.get_meta(".tensors",
+                            tensor_meta_type,
+                            (void*&)tensor_ids,
+                            n_strings);
+
+  if(tensor_meta_type.compare("STRING")!=0)
+    throw std::runtime_error("The .tensor metadata field has the "\
+                             "wrong type.");
+
   if(n_strings!=3)
     throw std::runtime_error("The .tensors metadata field does not "\
                              "contain the correct number of entries.");
@@ -210,184 +271,82 @@ void put_get_3D_array(
     throw std::runtime_error("tensor_3 could not be retrieved correctly "\
                              "with get_tensor.");
 
-  //Check that the metadata values are correct for dbl_field_1
-  double* dbl_meta_field_1;
-  size_t n_dbl_meta_field_1;
-  RetrievedDataSet.get_meta("dbl_field_1", "DOUBLE",
-                            (void*&)dbl_meta_field_1, n_dbl_meta_field_1);
-  if(n_dbl_meta_field_1!=2)
-    throw std::runtime_error("The number of entries in dbl_meta_field_1 "\
-                             "is incorrect.");
-  if(dbl_meta_field_1[0]!=dbl_meta_1)
-    throw std::runtime_error("The retrieved value for dbl_meta_1 "\
-                             "is incorrect.");
-  if(dbl_meta_field_1[1]!=dbl_meta_2)
-    throw std::runtime_error("The retrieved value for dbl_meta_2 "\
-                             "is incorrect.");
+  //Check that the metadata values are correct for dbl
+  check_meta_field<double>(RetrievedDataSet,
+                           "dbl_field_1",
+                           "DOUBLE",
+                           {dbl_meta_1, dbl_meta_2});
 
-  //Check that the metadata values are correct for dbl_field_2
-  double* dbl_meta_field_2;
-  size_t n_dbl_meta_field_2;
-  RetrievedDataSet.get_meta("dbl_field_2", "DOUBLE",
-                            (void*&)dbl_meta_field_2, n_dbl_meta_field_2);
-  if(n_dbl_meta_field_2!=1)
-    throw std::runtime_error("The number of entries in dbl_meta_field_2 "\
-                             "is incorrect.");
-  if(dbl_meta_field_2[0]!=dbl_meta_3)
-    throw std::runtime_error("The retrieved value for dbl_meta_3 "\
-                             "is incorrect.");
+  check_meta_field<double>(RetrievedDataSet,
+                           "dbl_field_2",
+                           "DOUBLE",
+                           {dbl_meta_3});
 
-  std::cout<<"Correctly fetched double type metadata"<<std::endl;
+  //Check that the metadata values are correct for flt
 
-  //Check that the metadata values are correct for flt_field_1
-  float* flt_meta_field_1;
-  size_t n_flt_meta_field_1;
-  RetrievedDataSet.get_meta("flt_field_1", "FLOAT",
-                            (void*&)flt_meta_field_1, n_flt_meta_field_1);
-  if(n_flt_meta_field_1!=2)
-    throw std::runtime_error("The number of entries in flt_meta_field_1 "\
-                             "is incorrect.");
-  if(flt_meta_field_1[0]!=flt_meta_1)
-    throw std::runtime_error("The retrieved value for flt_meta_1 "\
-                             "is incorrect.");
-  if(flt_meta_field_1[1]!=flt_meta_2)
-    throw std::runtime_error("The retrieved value for flt_meta_2 "\
-                             "is incorrect.");
+  check_meta_field<float>(RetrievedDataSet,
+                          "flt_field_1",
+                          "FLOAT",
+                          {flt_meta_1, flt_meta_2});
 
-  //Check that the metadata values are correct for flt_field_2
-  float* flt_meta_field_2;
-  size_t n_flt_meta_field_2;
-  RetrievedDataSet.get_meta("flt_field_2", "FLOAT",
-                            (void*&)flt_meta_field_2, n_flt_meta_field_2);
-  if(n_flt_meta_field_2!=1)
-    throw std::runtime_error("The number of entries in flt_meta_field_2 "\
-                             "is incorrect.");
-  if(flt_meta_field_2[0]!=flt_meta_3)
-    throw std::runtime_error("The retrieved value for flt_meta_3 "\
-                             "is incorrect.");
+  check_meta_field<float>(RetrievedDataSet,
+                         "flt_field_2",
+                         "FLOAT",
+                         {flt_meta_3});
 
-  std::cout<<"Correctly fetched float type metadata"<<std::endl;
+  //Check that the metadata values are correct for i64
 
-  //Check that the metadata values are correct for i64_field_1
-  int64_t* i64_meta_field_1;
-  size_t n_i64_meta_field_1;
-  RetrievedDataSet.get_meta("i64_field_1", "INT64",
-                            (void*&)i64_meta_field_1, n_i64_meta_field_1);
-  if(n_i64_meta_field_1!=2)
-    throw std::runtime_error("The number of entries in i64_meta_field_1 "\
-                             "is incorrect.");
-  if(i64_meta_field_1[0]!=i64_meta_1)
-    throw std::runtime_error("The retrieved value for i64_meta_1 "\
-                             "is incorrect.");
-  if(i64_meta_field_1[1]!=i64_meta_2)
-    throw std::runtime_error("The retrieved value for i64_meta_2 "\
-                             "is incorrect.");
+  check_meta_field<int64_t>(RetrievedDataSet,
+                            "i64_field_1",
+                            "INT64",
+                            {i64_meta_1, i64_meta_2});
 
-  //Check that the metadata values are correct for i64_field_2
-  int64_t* i64_meta_field_2;
-  size_t n_i64_meta_field_2;
-  RetrievedDataSet.get_meta("i64_field_2", "INT64",
-                            (void*&)i64_meta_field_2, n_i64_meta_field_2);
-  if(n_i64_meta_field_2!=1)
-    throw std::runtime_error("The number of entries in i64_meta_field_2 "\
-                             "is incorrect.");
-  if(i64_meta_field_2[0]!=i64_meta_3)
-    throw std::runtime_error("The retrieved value for i64_meta_3 "\
-                             "is incorrect.");
+  check_meta_field<int64_t>(RetrievedDataSet,
+                            "i64_field_2",
+                            "INT64",
+                            {i64_meta_3});
 
-  std::cout<<"Correctly fetched i64 type metadata"<<std::endl;
+  //Check that the metadata values are correct for i32
 
-  //Check that the metadata values are correct for i32_field_1
-  int32_t* i32_meta_field_1;
-  size_t n_i32_meta_field_1;
-  RetrievedDataSet.get_meta("i32_field_1", "INT32",
-                            (void*&)i32_meta_field_1, n_i32_meta_field_1);
-  if(n_i32_meta_field_1!=2)
-    throw std::runtime_error("The number of entries in i32_meta_field_1 "\
-                             "is incorrect.");
-  if(i32_meta_field_1[0]!=i32_meta_1)
-    throw std::runtime_error("The retrieved value for i32_meta_1 "\
-                             "is incorrect.");
-  if(i32_meta_field_1[1]!=i32_meta_2)
-    throw std::runtime_error("The retrieved value for i32_meta_2 "\
-                             "is incorrect.");
+  check_meta_field<int32_t>(RetrievedDataSet,
+                            "i32_field_1",
+                            "INT32",
+                            {i32_meta_1, i32_meta_2});
 
-  //Check that the metadata values are correct for i32_field_2
-  int32_t* i32_meta_field_2;
-  size_t n_i32_meta_field_2;
-  RetrievedDataSet.get_meta("i32_field_2", "INT32",
-                            (void*&)i32_meta_field_2, n_i32_meta_field_2);
-  if(n_i32_meta_field_2!=1)
-    throw std::runtime_error("The number of entries in i32_meta_field_2 "\
-                             "is incorrect.");
-  if(i32_meta_field_2[0]!=i32_meta_3)
-    throw std::runtime_error("The retrieved value for i32_meta_3 "\
-                             "is incorrect.");
+  check_meta_field<int32_t>(RetrievedDataSet,
+                            "i32_field_2",
+                            "INT32",
+                            {i32_meta_3});
 
-  std::cout<<"Correctly fetched i32 type metadata"<<std::endl;
+  //Check that the metadata values are correct for ui64
 
-  //Check that the metadata values are correct for ui64_field_1
-  uint64_t* ui64_meta_field_1;
-  size_t n_ui64_meta_field_1;
-  RetrievedDataSet.get_meta("ui64_field_1", "UINT64",
-                            (void*&)ui64_meta_field_1, n_ui64_meta_field_1);
-  if(n_ui64_meta_field_1!=2)
-    throw std::runtime_error("The number of entries in ui64_meta_field_1 "\
-                             "is incorrect.");
-  if(ui64_meta_field_1[0]!=ui64_meta_1)
-    throw std::runtime_error("The retrieved value for ui64_meta_1 "\
-                             "is incorrect.");
-  if(ui64_meta_field_1[1]!=ui64_meta_2)
-    throw std::runtime_error("The retrieved value for ui64_meta_1 "\
-                             "is incorrect.");
+  check_meta_field<uint64_t>(RetrievedDataSet,
+                             "ui64_field_1",
+                             "UINT64",
+                             {ui64_meta_1, ui64_meta_2});
 
-  //Check that the metadata values are correct for ui64_field_2
-  uint64_t* ui64_meta_field_2;
-  size_t n_ui64_meta_field_2;
-  RetrievedDataSet.get_meta("ui64_field_2", "UINT64",
-                            (void*&)ui64_meta_field_2, n_ui64_meta_field_2);
-  if(n_ui64_meta_field_2!=1)
-    throw std::runtime_error("The number of entries in ui64_meta_field_2 "\
-                             "is incorrect.");
-  if(ui64_meta_field_2[0]!=ui64_meta_3)
-    throw std::runtime_error("The retrieved value for ui64_meta_3 "\
-                             "is incorrect.");
+  check_meta_field<uint64_t>(RetrievedDataSet,
+                             "ui64_field_2",
+                             "UINT64",
+                             {ui64_meta_3});
 
-  std::cout<<"Correctly fetched ui64 type metadata"<<std::endl;
+  //Check that the metadata values are correct for ui32
+  check_meta_field<uint32_t>(RetrievedDataSet,
+                             "ui32_field_1",
+                             "UINT32",
+                             {ui32_meta_1, ui32_meta_2});
 
-  //Check that the metadata values are correct for ui32_field_1
-  uint32_t* ui32_meta_field_1;
-  size_t n_ui32_meta_field_1;
-  RetrievedDataSet.get_meta("ui32_field_1", "UINT32",
-                            (void*&)ui32_meta_field_1, n_ui32_meta_field_1);
-  if(n_ui32_meta_field_1!=2)
-    throw std::runtime_error("The number of entries in ui32_meta_field_1 "\
-                             "is incorrect.");
-  if(ui32_meta_field_1[0]!=ui32_meta_1)
-    throw std::runtime_error("The retrieved value for ui32_meta_1 "\
-                             "is incorrect.");
-  if(ui32_meta_field_1[1]!=ui32_meta_2)
-    throw std::runtime_error("The retrieved value for ui32_meta_2 "\
-                             "is incorrect.");
+  check_meta_field<uint32_t>(RetrievedDataSet,
+                             "ui32_field_2",
+                             "UINT32",
+                             {ui32_meta_3});
 
-  //Check that the metadata values are correct for ui32_field_2
-  uint32_t* ui32_meta_field_2;
-  size_t n_ui32_meta_field_2;
-  RetrievedDataSet.get_meta("ui32_field_2", "UINT32",
-                            (void*&)ui32_meta_field_2, n_ui32_meta_field_2);
-  if(n_ui32_meta_field_2!=1)
-    throw std::runtime_error("The number of entries in ui32_meta_field_2 "\
-                             "is incorrect.");
-  if(ui32_meta_field_2[0]!=ui32_meta_3)
-    throw std::runtime_error("The retrieved value for ui32_meta_3 "\
-                             "is incorrect.");
+  //Check that the metadata values are correct for str
 
-  std::cout<<"Correctly fetched ui32 type metadata"<<std::endl;
-
-  //Check that the metadata values are correct for str_field_1
   char** str_meta_field_1;
   size_t n_str_meta_field_1;
-  RetrievedDataSet.get_meta("str_field_1", "STRING",
+  std::string str_field_1_type;
+  RetrievedDataSet.get_meta("str_field_1", str_field_1_type,
                             (void*&)str_meta_field_1, n_str_meta_field_1);
   if(n_str_meta_field_1!=2)
     throw std::runtime_error("The number of entries in str_meta_field_1 "\
@@ -399,11 +358,27 @@ void put_get_3D_array(
     throw std::runtime_error("The retrieved value for str_meta_2 "\
                              "is incorrect.");
 
+  if(str_field_1_type.compare("STRING")!=0)
+    throw std::runtime_error("The retrieved type of " +
+                             str_field_1_type +
+                             "does not match "\
+                             "expected value of STRING "\
+                             "for field str_field_1");
+
   //Check that the metadata values are correct for str_field_2
   char** str_meta_field_2;
   size_t n_str_meta_field_2;
-  RetrievedDataSet.get_meta("str_field_2", "STRING",
+  std::string str_field_2_type;
+  RetrievedDataSet.get_meta("str_field_2", str_field_2_type,
                             (void*&)str_meta_field_2, n_str_meta_field_2);
+
+  if(str_field_2_type.compare("STRING")!=0)
+    throw std::runtime_error("The retrieved type of " +
+                             str_field_2_type +
+                             "does not match "\
+                             "expected value of STRING "\
+                             "for field str_field_2");
+
   if(n_str_meta_field_2!=1)
     throw std::runtime_error("The number of entries in str_meta_field_2 "\
                              "is incorrect.");

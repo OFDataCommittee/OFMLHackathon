@@ -81,7 +81,7 @@ class MetaData
 
         //! Get metadata values from field
         void get_values(const std::string& name /*!< The name of the metadata field*/,
-                        const std::string& type /*!< The data type of the field*/,
+                        std::string& type /*!< The data type of the field*/,
                         void*& data /*!< The pointer that will be pointed to the metadata*/,
                         size_t& length /*!< An integer that will be set to the number of values in the metadata field*/
                         );
@@ -154,6 +154,9 @@ class MetaData
         //! Gets the type integer
         int _get_type_integer(const std::string& type /*!< The data type of the metadata field*/
                               );
+
+        //! Get the type of the metadata value by name.
+        std::string _get_meta_value_type(const std::string& name);
 };
 
 #endif //SMARTSIM_METADATA_H

@@ -82,7 +82,15 @@ class DataSet
 
         //! Get metadata field from the DataSet
         void get_meta(const std::string& name /*!< The name used to reference the metadata*/,
-                      const std::string& type /*!< The data type of the metadata*/,
+                      std::string& type /*!< The data type of the metadata*/,
+                      void*& data /*!< A c_ptr reference to the metadata*/,
+                      size_t& length /*!< The length of the meta*/
+                      );
+
+        //! Get metadata field from the DataSet using C-style interface
+        void get_meta(const std::string& name /*!< The name used to reference the metadata*/,
+                      char*& type /*!< The data type of the metadata*/,
+                      size_t& type_length /*!< The length of the type name*/,
                       void*& data /*!< A c_ptr reference to the metadata*/,
                       size_t& length /*!< The length of the meta*/
                       );
