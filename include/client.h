@@ -18,6 +18,8 @@
 #include "dbnode.h"
 #include "memorylist.h"
 #include "commandreply.h"
+#include "enums/cpp_tensor_type.h"
+#include "enums/cpp_memory_layout.h"
 
 ///@file
 ///\brief The C++ SmartSimClient class
@@ -61,35 +63,34 @@ public:
 
   //! Put a tensor into the database
   void put_tensor(const std::string& key /*!< The key to use to place the tensor*/,
-                  const std::string& type /*!< The data type of the tensor*/,
                   void* data /*!< A c ptr to the beginning of the data*/,
                   const std::vector<size_t>& dims /*!< The dimensions of the tensor*/,
+                  const TensorType type /*!< The data type of the tensor*/,
                   const MemoryLayout mem_layout /*! The memory layout of the data*/
                   );
 
   //! Get tensor data and return an allocated multi-dimensional array
   void get_tensor(const std::string& key /*!< The name used to reference the tensor*/,
-                  std::string& type /*!< The data type of the tensor*/,
                   void*& data /*!< A c_ptr to the tensor data */,
                   std::vector<size_t>& dims /*!< The dimensions of the provided array which should match the tensor*/,
+                  TensorType& type /*!< The data type of the tensor*/,
                   const MemoryLayout mem_layout /*! The memory layout of the data*/
                   );
 
   //! Get tensor data and return an allocated multi-dimensional array (c-style interface for type and dimensions)
   void get_tensor(const std::string& key /*!< The name used to reference the tensor*/,
-                  char*& type /*!< The data type of the tensor*/,
-                  size_t& type_length /*!< The length of the tensor type*/,
                   void*& data /*!< A c_ptr to the tensor data */,
                   size_t*& dims /*! The dimensions of the tensor retrieved*/,
                   size_t& n_dims /*! The number of dimensions retrieved*/,
+                  TensorType& type /*! The number of dimensions retrieved*/,
                   const MemoryLayout mem_layout /*! The memory layout of the data*/
                   );
 
   //! Get tensor data and fill an already allocated array memory space
   void unpack_tensor(const std::string& key /*!< The key to use to fetch the tensor*/,
-                     const std::string& type /*!< The data type of the tensor*/,
                      void* data /*!< A c ptr to the beginning of the result array to fill*/,
                      const std::vector<size_t>& dims /*!< The dimensions of the provided array which should match the tensor*/,
+                     const TensorType type /*!< The data type corresponding the the user provided memory space*/,
                      const MemoryLayout mem_layout /*! The memory layout of the data*/
                      );
 
@@ -240,7 +241,7 @@ protected:
                                          );
 
   //! Get tensor data type from the database reply
-  std::string _get_tensor_data_type(CommandReply& reply /*!< The database reply*/
+  TensorType _get_tensor_data_type(CommandReply& reply /*!< The database reply*/
                                     );
 
   //! Get a prefix for a model or script based on the hash slot
@@ -312,8 +313,6 @@ private:
   MemoryList<char> _model_queries;
   //! MemoryList to handle dimensions that are returned to the user
   MemoryList<size_t> _dim_queries;
-  //! MemoryList to handle type queries
-  MemoryList<char> _type_queries;
 
   //! //! The _tensor_pack memory is not for querying by name, but is used
   //! to manage memory.
@@ -322,4 +321,5 @@ private:
   std::string _get_key_prefix;
   std::vector<std::string> _get_key_prefixes;
 };
+
 #endif //SMARTSIM_CPP_CLIENT_H

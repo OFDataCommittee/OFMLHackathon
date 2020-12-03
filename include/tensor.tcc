@@ -4,11 +4,11 @@
 
 template <class T>
 Tensor<T>::Tensor(const std::string& name,
-                  const std::string& type,
                   void* data,
                   const std::vector<size_t>& dims,
-                  MemoryLayout mem_layout) :
-                  TensorBase(name, type, data, dims, mem_layout)
+                  const TensorType type,
+                  const MemoryLayout mem_layout) :
+                  TensorBase(name, data, dims, type, mem_layout)
 {
     /* Constructor for the Tensor class.
     */
@@ -28,7 +28,7 @@ template <class T>
 Tensor<T>::Tensor(const Tensor<T>& tensor) : TensorBase(tensor)
 {
     /* Copy constructor for Tensor.  The data
-    and allocated ptrs are copied.
+    and allocated pointers are copied.
     */
     this->_set_tensor_data(tensor._data, tensor._dims,
                            MemoryLayout::contiguous);
@@ -168,7 +168,7 @@ void* Tensor<T>::_copy_nested_to_contiguous(void* src_data,
     and contiguous.  The value returned by the first execution
     of this function will change the copy of dest_data and return
     a value that is not equal to the original source data value.
-    As a result, the inital call of this function SHOULD NOT
+    As a result, the initial call of this function SHOULD NOT
     use the returned value.
     */
 
@@ -197,7 +197,7 @@ void Tensor<T>::_fill_nested_mem_with_data(void* data,
 {
     /* This recursive function copies the tensor_data
     into the nested data memory space.  The caller
-    should provide an inital value of 0 for data_position.
+    should provide an initial value of 0 for data_position.
     */
     if(n_dims > 1) {
         T** current = (T**) data;
@@ -251,7 +251,7 @@ void Tensor<T>::_set_tensor_data(void* src_data,
                                  const MemoryLayout mem_layout)
 {
     /* Set the tensor data from the src_data.  This involves
-    a memcopy to a contiguous array.
+    a memcpy to a contiguous array.
     */
 
     if(this->_data)

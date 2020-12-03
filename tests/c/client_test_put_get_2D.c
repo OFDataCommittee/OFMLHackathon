@@ -5,11 +5,16 @@
 #include <mpi.h>
 #include "stdint.h"
 
-void put_get_2D_tensor(void* tensor, int* dims, int n_dims,
-                       void* result, char* type,
-                       int type_length,
-                       char* key_suffix,
-                       int key_suffix_length)
+bool cluster = true;
+
+int put_get_2D_tensor(void* client,
+                      void* tensor,
+                      size_t* dims,
+                      size_t n_dims,
+                      void** result,
+                      char* key_suffix,
+                      size_t key_suffix_length,
+                      CTensorType type)
 {
   /* This function is a data type agnostic put and
   get for 3D tensors.  The result vector
@@ -17,8 +22,6 @@ void put_get_2D_tensor(void* tensor, int* dims, int n_dims,
   checking is done outside of this function because
   the type is not known.
   */
-
-  void* client = SmartSimCClient(true);
 
   int rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -49,44 +52,73 @@ void put_get_2D_tensor(void* tensor, int* dims, int n_dims,
   pos += key_suffix_length;
   key[pos] = 0;
 
+  CTensorType g_type;
+  size_t* g_dims;
+  size_t g_n_dims;
+
   CMemoryLayout layout = c_nested;
-  put_tensor(client, key, key_length, type, type_length,
-             (void*)tensor, dims, n_dims, layout);
-  get_tensor(client, key, key_length, type, type_length,
-             result, dims, n_dims, layout);
+  put_tensor(client, key, key_length,
+             (void*)tensor, dims, n_dims, type, layout);
+  get_tensor(client, key, key_length,
+             result, &g_dims, &g_n_dims,
+             &g_type, layout);
+
+  int r_value = 0;
+  if(g_n_dims!=n_dims) {
+    printf("%s", "The number of fetched dimensions with "\
+                 "client.get_tensor() does not match "\
+                 "known length.\n");
+    r_value = -1;
+  }
+
+  for(size_t i=0; i<n_dims; i++) {
+    if(g_dims[i]!=dims[i]) {
+      printf("%s", "The fetched dimensions with "\
+                   "client.get_tensor() do not match "\
+                   "the known tensor dimensions.\n");
+      r_value = -1;
+    }
+  }
+
+  if(g_type!=type) {
+    printf("%s", "The fetched type with "\
+                 "client.get_tensor() does not match "\
+                  "the known tensor type.\n");
+    r_value = -1;
+  }
 
   free(rank_str);
   free(key);
-  DeleteCClient(client);
+  return r_value;
 }
 
-int put_get_2D_tensor_double(int* dims, int n_dims,
+int put_get_2D_tensor_double(size_t* dims, int n_dims,
                   char* key_suffix, int key_suffix_length)
 {
   /* This function puts and gets a 2D tensor of double
   values.  If the sent and received tensors do not match,
   a non-zero value is returned.
   */
+
+  void* client = SmartSimCClient(cluster);
+
   double** tensor = (double**)malloc(dims[0]*sizeof(double*));
-  double** result = (double**)malloc(dims[0]*sizeof(double*));
+  double** result = 0;
 
   for(int i=0; i<dims[0]; i++) {
     tensor[i] = (double*)malloc(dims[1]*sizeof(double));
-    result[i] = (double*)malloc(dims[1]*sizeof(double));
   }
 
   for(int i=0; i<dims[0]; i++)
     for(int j=0; j<dims[1]; j++)
       tensor[i][j] = ((double)rand())/RAND_MAX;
 
-  char* type = "DOUBLE";
-  size_t type_length = strlen(type);
-
-  put_get_2D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                    type, type_length, key_suffix,
-                    key_suffix_length);
-
   int r_value = 0;
+  r_value = put_get_2D_tensor(client, (void*)tensor,
+                              dims, n_dims, (void**)(&result),
+                              key_suffix, key_suffix_length,
+                              c_dbl);
+
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++) {
       if(tensor[i][j]!=result[i][j]) {
@@ -98,41 +130,40 @@ int put_get_2D_tensor_double(int* dims, int n_dims,
 
   for(int i=0; i<dims[0]; i++) {
     free(tensor[i]);
-    free(result[i]);
   }
   free(tensor);
-  free(result);
+  DeleteCClient(client);
   return r_value;
 }
 
-int put_get_2D_tensor_float(int* dims, int n_dims,
-                           char* key_suffix,
-                           int key_suffix_length)
+int put_get_2D_tensor_float(size_t* dims, int n_dims,
+                            char* key_suffix,
+                            int key_suffix_length)
 {
   /* This function puts and gets a 2D tensor of float
   values.  If the sent and received tensors do not match,
   a non-zero value is returned.
   */
+
+  void* client = SmartSimCClient(cluster);
+
   float** tensor = (float**)malloc(dims[0]*sizeof(float*));
-  float** result = (float**)malloc(dims[0]*sizeof(float*));
+  float** result = 0;
 
   for(int i=0; i<dims[0]; i++) {
     tensor[i] = (float*)malloc(dims[1]*sizeof(float));
-    result[i] = (float*)malloc(dims[1]*sizeof(float));
   }
 
   for(int i=0; i<dims[0]; i++)
     for(int j=0; j<dims[1]; j++)
       tensor[i][j] = ((float)rand())/RAND_MAX;
 
-  char* type = "FLOAT";
-  size_t type_length = strlen(type);
-
-  put_get_2D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                    type, type_length, key_suffix,
-                    key_suffix_length);
-
   int r_value = 0;
+  r_value = put_get_2D_tensor(client, (void*)tensor,
+                              dims, n_dims, (void**)(&result),
+                              key_suffix, key_suffix_length,
+                              c_flt);
+
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++) {
       if(tensor[i][j]!=result[i][j]) {
@@ -144,14 +175,13 @@ int put_get_2D_tensor_float(int* dims, int n_dims,
 
   for(int i=0; i<dims[0]; i++) {
     free(tensor[i]);
-    free(result[i]);
   }
   free(tensor);
-  free(result);
+  DeleteCClient(client);
   return r_value;
 }
 
-int put_get_2D_tensor_i8(int* dims, int n_dims,
+int put_get_2D_tensor_i8(size_t* dims, int n_dims,
                          char* key_suffix,
                          int key_suffix_length)
 {
@@ -159,12 +189,14 @@ int put_get_2D_tensor_i8(int* dims, int n_dims,
   values.  If the sent and received tensors do not match,
   a non-zero value is returned.
   */
+
+  void* client = SmartSimCClient(cluster);
+
   int8_t** tensor = (int8_t**)malloc(dims[0]*sizeof(int8_t*));
-  int8_t** result = (int8_t**)malloc(dims[0]*sizeof(int8_t*));
+  int8_t** result = 0;
 
   for(int i=0; i<dims[0]; i++) {
     tensor[i] = (int8_t*)malloc(dims[1]*sizeof(int8_t));
-    result[i] = (int8_t*)malloc(dims[1]*sizeof(int8_t));
   }
 
   for(int i=0; i<dims[0]; i++) {
@@ -175,15 +207,13 @@ int put_get_2D_tensor_i8(int* dims, int n_dims,
     }
   }
 
-  char* type = "INT8";
-  size_t type_length = strlen(type);
-
-  put_get_2D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                    type, type_length, key_suffix,
-                    key_suffix_length);
-
   int r_value = 0;
-  for(int i=0; i<dims[0]; i++) {
+  r_value = put_get_2D_tensor(client, (void*)tensor,
+                              dims, n_dims, (void**)(&result),
+                              key_suffix, key_suffix_length,
+                              c_int8);
+
+for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){
       if(tensor[i][j]!=result[i][j]) {
         printf("%s", "The tensors do not match!");
@@ -194,14 +224,13 @@ int put_get_2D_tensor_i8(int* dims, int n_dims,
 
   for(int i=0; i<dims[0]; i++) {
     free(tensor[i]);
-    free(result[i]);
   }
   free(tensor);
-  free(result);
+  DeleteCClient(client);
   return r_value;
 }
 
-int put_get_2D_tensor_i16(int* dims, int n_dims,
+int put_get_2D_tensor_i16(size_t* dims, int n_dims,
                          char* key_suffix,
                          int key_suffix_length)
 {
@@ -209,12 +238,14 @@ int put_get_2D_tensor_i16(int* dims, int n_dims,
   values.  If the sent and received tensors do not match,
   a non-zero value is returned.
   */
+
+  void* client = SmartSimCClient(cluster);
+
   int16_t** tensor = (int16_t**)malloc(dims[0]*sizeof(int16_t*));
-  int16_t** result = (int16_t**)malloc(dims[0]*sizeof(int16_t*));
+  int16_t** result = 0;
 
   for(int i=0; i<dims[0]; i++) {
     tensor[i] = (int16_t*)malloc(dims[1]*sizeof(int16_t));
-    result[i] = (int16_t*)malloc(dims[1]*sizeof(int16_t));
   }
 
   for(int i=0; i<dims[0]; i++) {
@@ -225,14 +256,12 @@ int put_get_2D_tensor_i16(int* dims, int n_dims,
     }
   }
 
-  char* type = "INT16";
-  size_t type_length = strlen(type);
-
-  put_get_2D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                    type, type_length, key_suffix,
-                    key_suffix_length);
-
   int r_value = 0;
+  r_value = put_get_2D_tensor(client, (void*)tensor,
+                              dims, n_dims, (void**)(&result),
+                              key_suffix, key_suffix_length,
+                              c_int16);
+
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){
       if(tensor[i][j]!=result[i][j]) {
@@ -244,14 +273,13 @@ int put_get_2D_tensor_i16(int* dims, int n_dims,
 
   for(int i=0; i<dims[0]; i++) {
     free(tensor[i]);
-    free(result[i]);
   }
   free(tensor);
-  free(result);
+  DeleteCClient(client);
   return r_value;
 }
 
-int put_get_2D_tensor_i32(int* dims, int n_dims,
+int put_get_2D_tensor_i32(size_t* dims, int n_dims,
                          char* key_suffix,
                          int key_suffix_length)
 {
@@ -259,12 +287,14 @@ int put_get_2D_tensor_i32(int* dims, int n_dims,
   values.  If the sent and received tensors do not match,
   a non-zero value is returned.
   */
+
+  void* client = SmartSimCClient(cluster);
+
   int32_t** tensor = (int32_t**)malloc(dims[0]*sizeof(int32_t*));
-  int32_t** result = (int32_t**)malloc(dims[0]*sizeof(int32_t*));
+  int32_t** result = 0;
 
   for(int i=0; i<dims[0]; i++) {
     tensor[i] = (int32_t*)malloc(dims[1]*sizeof(int32_t));
-    result[i] = (int32_t*)malloc(dims[1]*sizeof(int32_t));
   }
 
   for(int i=0; i<dims[0]; i++) {
@@ -275,14 +305,12 @@ int put_get_2D_tensor_i32(int* dims, int n_dims,
     }
   }
 
-  char* type = "INT32";
-  size_t type_length = strlen(type);
-
-  put_get_2D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                    type, type_length, key_suffix,
-                    key_suffix_length);
-
   int r_value = 0;
+  r_value = put_get_2D_tensor(client, (void*)tensor,
+                              dims, n_dims, (void**)(&result),
+                              key_suffix, key_suffix_length,
+                              c_int32);
+
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){
       if(tensor[i][j]!=result[i][j]) {
@@ -294,14 +322,13 @@ int put_get_2D_tensor_i32(int* dims, int n_dims,
 
   for(int i=0; i<dims[0]; i++) {
     free(tensor[i]);
-    free(result[i]);
   }
   free(tensor);
-  free(result);
+  DeleteCClient(client);
   return r_value;
 }
 
-int put_get_2D_tensor_i64(int* dims, int n_dims,
+int put_get_2D_tensor_i64(size_t* dims, int n_dims,
                          char* key_suffix,
                          int key_suffix_length)
 {
@@ -309,12 +336,14 @@ int put_get_2D_tensor_i64(int* dims, int n_dims,
   values.  If the sent and received tensors do not match,
   a non-zero value is returned.
   */
+
+  void* client = SmartSimCClient(cluster);
+
   int64_t** tensor = (int64_t**)malloc(dims[0]*sizeof(int64_t*));
-  int64_t** result = (int64_t**)malloc(dims[0]*sizeof(int64_t*));
+  int64_t** result = 0;
 
   for(int i=0; i<dims[0]; i++) {
     tensor[i] = (int64_t*)malloc(dims[1]*sizeof(int64_t));
-    result[i] = (int64_t*)malloc(dims[1]*sizeof(int64_t));
   }
 
   for(int i=0; i<dims[0]; i++) {
@@ -325,14 +354,12 @@ int put_get_2D_tensor_i64(int* dims, int n_dims,
     }
   }
 
-  char* type = "INT64";
-  size_t type_length = strlen(type);
-
-  put_get_2D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                    type, type_length, key_suffix,
-                    key_suffix_length);
-
   int r_value = 0;
+  r_value = put_get_2D_tensor(client, (void*)tensor,
+                              dims, n_dims, (void**)(&result),
+                              key_suffix, key_suffix_length,
+                              c_int64);
+
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){
       if(tensor[i][j]!=result[i][j]) {
@@ -344,14 +371,13 @@ int put_get_2D_tensor_i64(int* dims, int n_dims,
 
   for(int i=0; i<dims[0]; i++) {
     free(tensor[i]);
-    free(result[i]);
   }
   free(tensor);
-  free(result);
+  DeleteCClient(client);
   return r_value;
 }
 
-int put_get_2D_tensor_ui8(int* dims, int n_dims,
+int put_get_2D_tensor_ui8(size_t* dims, int n_dims,
                           char* key_suffix,
                           int key_suffix_length)
 {
@@ -359,12 +385,14 @@ int put_get_2D_tensor_ui8(int* dims, int n_dims,
   values.  If the sent and received tensors do not match,
   a non-zero value is returned.
   */
+
+  void* client = SmartSimCClient(cluster);
+
   uint8_t** tensor = (uint8_t**)malloc(dims[0]*sizeof(uint8_t*));
-  uint8_t** result = (uint8_t**)malloc(dims[0]*sizeof(uint8_t*));
+  uint8_t** result = 0;
 
   for(int i=0; i<dims[0]; i++) {
     tensor[i] = (uint8_t*)malloc(dims[1]*sizeof(uint8_t));
-    result[i] = (uint8_t*)malloc(dims[1]*sizeof(uint8_t));
   }
 
   for(int i=0; i<dims[0]; i++) {
@@ -373,14 +401,12 @@ int put_get_2D_tensor_ui8(int* dims, int n_dims,
     }
   }
 
-  char* type = "UINT8";
-  size_t type_length = strlen(type);
-
-  put_get_2D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                    type, type_length, key_suffix,
-                    key_suffix_length);
-
   int r_value = 0;
+  r_value = put_get_2D_tensor(client, (void*)tensor,
+                              dims, n_dims, (void**)(&result),
+                              key_suffix, key_suffix_length,
+                              c_uint8);
+
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){
       if(tensor[i][j]!=result[i][j]) {
@@ -392,14 +418,13 @@ int put_get_2D_tensor_ui8(int* dims, int n_dims,
 
   for(int i=0; i<dims[0]; i++) {
     free(tensor[i]);
-    free(result[i]);
   }
   free(tensor);
-  free(result);
+  DeleteCClient(client);
   return r_value;
 }
 
-int put_get_2D_tensor_ui16(int* dims, int n_dims,
+int put_get_2D_tensor_ui16(size_t* dims, int n_dims,
                           char* key_suffix,
                           int key_suffix_length)
 {
@@ -407,12 +432,14 @@ int put_get_2D_tensor_ui16(int* dims, int n_dims,
   values.  If the sent and received tensors do not match,
   a non-zero value is returned.
   */
+
+  void* client = SmartSimCClient(cluster);
+
   uint16_t** tensor = (uint16_t**)malloc(dims[0]*sizeof(uint16_t*));
-  uint16_t** result = (uint16_t**)malloc(dims[0]*sizeof(uint16_t*));
+  uint16_t** result = 0;
 
   for(int i=0; i<dims[0]; i++) {
     tensor[i] = (uint16_t*)malloc(dims[1]*sizeof(uint16_t));
-    result[i] = (uint16_t*)malloc(dims[1]*sizeof(uint16_t));
   }
 
   for(int i=0; i<dims[0]; i++) {
@@ -421,14 +448,12 @@ int put_get_2D_tensor_ui16(int* dims, int n_dims,
     }
   }
 
-  char* type = "UINT16";
-  size_t type_length = strlen(type);
-
-  put_get_2D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                    type, type_length, key_suffix,
-                    key_suffix_length);
-
   int r_value = 0;
+  r_value = put_get_2D_tensor(client, (void*)tensor,
+                              dims, n_dims, (void**)(&result),
+                              key_suffix, key_suffix_length,
+                              c_uint16);
+
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){
       if(tensor[i][j]!=result[i][j]) {
@@ -440,10 +465,9 @@ int put_get_2D_tensor_ui16(int* dims, int n_dims,
 
   for(int i=0; i<dims[0]; i++) {
     free(tensor[i]);
-    free(result[i]);
   }
   free(tensor);
-  free(result);
+  DeleteCClient(client);
   return r_value;
 }
 
@@ -451,7 +475,7 @@ int main(int argc, char* argv[]) {
 
   MPI_Init(&argc, &argv);
 
-  int* dims = malloc(2*sizeof(int));
+  size_t* dims = malloc(2*sizeof(int));
   dims[0] = 10;
   dims[1] = 26;
   int n_dims = 2;

@@ -8,6 +8,7 @@
 #include <google/protobuf/reflection.h>
 #include <google/protobuf/stubs/port.h>
 #include "memorylist.h"
+#include "enums/cpp_metadata_type.h"
 
 namespace gpb = google::protobuf;
 namespace spb = SILCProtobuf;
@@ -20,25 +21,6 @@ typedef spb::RepeatedSInt64Meta Int64Msg;
 typedef spb::RepeatedUInt64Meta UInt64Msg;
 typedef spb::RepeatedSInt32Meta Int32Msg;
 typedef spb::RepeatedUInt32Meta UInt32Msg;
-
-//An unordered_map of std::string type (key) and value
-//integer that to cut down on strcmp throughout the code
-static const int string_type = 1;
-static const int double_type = 2;
-static const int float_type = 3;
-static const int int64_type = 4;
-static const int uint64_type = 5;
-static const int int32_type = 6;
-static const int uint32_type = 7;
-
-static const std::unordered_map<std::string, int>
-    meta_type_map{ {"STRING", string_type},
-                   {"DOUBLE", double_type},
-                   {"FLOAT", float_type},
-                   {"INT64", int64_type},
-                   {"UINT64", uint64_type},
-                   {"INT32", int32_type},
-                   {"UINT32", uint32_type} };
 
 //Declare the top level container names in the
 //protobuf message so that they are not constant
@@ -75,15 +57,15 @@ class MetaData
 
         //! Add a value to a metadata field
         void add_value(const std::string& field_name /*!< The name of the metadata field*/,
-                       const std::string& type /*!< The data type of the field*/,
-                       const void* value /*!< The value of the metadata field*/
+                       const void* value /*!< The value of the metadata field*/,
+                       const MetaDataType type /*!< The data type of the field*/
                        );
 
         //! Get metadata values from field
         void get_values(const std::string& name /*!< The name of the metadata field*/,
-                        std::string& type /*!< The data type of the field*/,
                         void*& data /*!< The pointer that will be pointed to the metadata*/,
-                        size_t& length /*!< An integer that will be set to the number of values in the metadata field*/
+                        size_t& length /*!< An integer that will be set to the number of values in the metadata field*/,
+                        MetaDataType& type /*!< The data type of the field*/
                         );
 
         //! Get the metadata fields as a buffer
@@ -117,7 +99,7 @@ class MetaData
 
         //! Create a metadata message for the field and type
         void _create_message(const std::string& field_name /*!< The name of the metadata field*/,
-                             const std::string& type /*!< The data type of the field*/
+                             const MetaDataType type /*!< The data type of the field*/
                              );
 
         //! Templated function for creating metadata field
@@ -151,12 +133,8 @@ class MetaData
         bool _field_exists(const std::string& field_name /*!< The name of the metadata field*/
                            );
 
-        //! Gets the type integer
-        int _get_type_integer(const std::string& type /*!< The data type of the metadata field*/
-                              );
-
-        //! Get the type of the metadata value by name.
-        std::string _get_meta_value_type(const std::string& name);
+        //! Gets the metadata type for a particular field
+        MetaDataType _get_meta_value_type(const std::string& name);
 };
 
 #endif //SMARTSIM_METADATA_H

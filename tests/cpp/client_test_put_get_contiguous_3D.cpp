@@ -8,7 +8,7 @@ template <typename T_send, typename T_recv>
 void put_get_3D_array(
 		    void (*fill_array)(T_send*, int),
 		    std::vector<size_t> dims,
-        std::string type,
+        TensorType type,
         std::string key_suffix="")
 {
   SmartSimClient client(true);
@@ -45,14 +45,14 @@ void put_get_3D_array(
   }
   */
 
-  client.put_tensor(key, type, (void*)array, dims,
+  client.put_tensor(key, (void*)array, dims, type,
                     MemoryLayout::contiguous);
 
-  client.unpack_tensor(key, type, u_contig_result,
-                       {dims[0]*dims[1]*dims[2]},
+  client.unpack_tensor(key, u_contig_result,
+                       {dims[0]*dims[1]*dims[2]}, type,
                        MemoryLayout::contiguous);
 
-  client.unpack_tensor(key, type, u_nested_result, dims,
+  client.unpack_tensor(key, u_nested_result, dims, type,
                        MemoryLayout::nested);
 
   /*
@@ -90,20 +90,18 @@ void put_get_3D_array(
     }
   }
 
-  std::string g_type_nested;
+  TensorType g_type_nested;
   std::vector<size_t> g_dims_nested;
   void* g_nested_result;
-  client.get_tensor(key, g_type_nested,
-                    g_nested_result, g_dims_nested,
+  client.get_tensor(key, g_nested_result,
+                    g_dims_nested, g_type_nested,
                     MemoryLayout::nested);
   T_recv*** g_type_nested_result = (T_recv***)g_nested_result;
 
-  if(type.compare(g_type_nested)!=0)
-    throw std::runtime_error("The tensor type " + g_type_nested + " "\
+  if(type!=g_type_nested)
+    throw std::runtime_error("The tensor type "\
                              "retrieved with client.get_tensor() "\
-                             "does not match the known type " +
-                             type);
-
+                             "does not match the known type.");
   if(g_dims_nested!=dims)
     throw std::runtime_error("The tensor dimensions retrieved "\
                              "client.get_tensor() do not match "\
@@ -135,11 +133,11 @@ void put_get_3D_array(
     }
   }
 
-  std::string g_type_contig;
+  TensorType g_type_contig;
   std::vector<size_t> g_dims_contig;
   void* g_contig_result;
-  client.get_tensor(key, g_type_contig,
-                    g_contig_result, g_dims_contig,
+  client.get_tensor(key, g_contig_result,
+                    g_dims_contig, g_type_contig,
                     MemoryLayout::contiguous);
 
   if(g_dims_contig!=dims)
@@ -148,11 +146,10 @@ void put_get_3D_array(
                              "the known tensor dimensions.");
 
 
-  if(type.compare(g_type_contig)!=0)
-    throw std::runtime_error("The tensor type " + g_type_contig + " "\
+  if(type!=g_type_contig)
+    throw std::runtime_error("The tensor type "\
                              "retrieved with client.get_tensor() "\
-                             "does not match the known type " +
-                             type);
+                             "does not match the known type.");
 
   if (!is_equal_1D_array<T_send, T_recv>(array,
                                          (T_recv*)g_contig_result,
@@ -181,35 +178,35 @@ int main(int argc, char* argv[]) {
 
   put_get_3D_array<double,double>(
 				  &set_1D_array_floating_point_values<double>,
-				  dims, "DOUBLE", "_dbl");
+				  dims, TensorType::dbl, "_dbl");
 
   put_get_3D_array<float,float>(
 				&set_1D_array_floating_point_values<float>,
-				dims, "FLOAT", "_flt");
+				dims, TensorType::flt, "_flt");
 
   put_get_3D_array<int64_t,int64_t>(
 				    &set_1D_array_integral_values<int64_t>,
-				    dims, "INT64", "_i64");
+				    dims, TensorType::int64, "_i64");
 
   put_get_3D_array<int32_t,int32_t>(
 				    &set_1D_array_integral_values<int32_t>,
-				    dims, "INT32", "_i32");
+				    dims, TensorType::int32, "_i32");
 
   put_get_3D_array<int16_t,int16_t>(
 				      &set_1D_array_integral_values<int16_t>,
-				      dims, "INT16", "_i16");
+				      dims, TensorType::int16, "_i16");
 
   put_get_3D_array<int8_t,int8_t>(
 				      &set_1D_array_integral_values<int8_t>,
-				      dims, "INT8", "_i8");
+				      dims, TensorType::int8, "_i8");
 
   put_get_3D_array<uint16_t,uint16_t>(
 				      &set_1D_array_integral_values<uint16_t>,
-				      dims, "UINT16", "_ui16");
+				      dims, TensorType::uint16, "_ui16");
 
   put_get_3D_array<uint8_t,uint8_t>(
 				      &set_1D_array_integral_values<uint8_t>,
-				      dims, "UINT8", "_ui8");
+				      dims, TensorType::uint8, "_ui8");
 
   std::cout<<"3D put and get with contiguous "\
              "data test complete."<<std::endl;

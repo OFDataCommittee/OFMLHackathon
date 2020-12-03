@@ -1,9 +1,9 @@
 #include "tensorbase.h"
 
 TensorBase::TensorBase(const std::string& name,
-                       const std::string& type,
                        void* data,
                        const std::vector<size_t>& dims,
+                       const TensorType type,
                        const MemoryLayout mem_layout)
 {
     /* The TensorBase constructor makes a copy of the
@@ -12,7 +12,7 @@ TensorBase::TensorBase(const std::string& name,
     owned by the tensor.
     */
 
-    this->_check_inputs(data, name, type, dims);
+    this->_check_inputs(data, name, dims);
 
     this->_name = name;
     this->_type = type;
@@ -86,11 +86,18 @@ std::string TensorBase::name()
     return this->_name;
 }
 
-std::string TensorBase::type()
+TensorType TensorBase::type()
 {
     /* Return the tensor type.
     */
    return this->_type;
+}
+
+std::string TensorBase::type_str(){
+    /* Return the string version
+    of the tensor type.
+    */
+    return TENSOR_STR_MAP.at(this->type());
 }
 
 std::vector<size_t> TensorBase::dims()
@@ -132,7 +139,6 @@ std::string_view TensorBase::buf()
 
 inline void TensorBase::_check_inputs(const void* src_data,
                                       const std::string& name,
-                                      const std::string& type,
                                       const std::vector<size_t>& dims)
 {
     /* This function checks the validity of constructor
@@ -144,7 +150,6 @@ inline void TensorBase::_check_inputs(const void* src_data,
         throw std::runtime_error("Must provide non-Null "\
                                  "pointer to data.");
 
-
     if(name.size()==0)
         throw std::runtime_error("A name must be "\
                                  "provided for the tensor");
@@ -153,10 +158,6 @@ inline void TensorBase::_check_inputs(const void* src_data,
         throw std::runtime_error(".META is an internally "\
                                  "reserved name that is not "\
                                  "allowed.");
-
-    if(TENSOR_DATATYPES.count(type) == 0)
-        throw std::runtime_error("Unsupported tensor data type " +
-                                 std::string(type));
 
     if(dims.size()==0)
         throw std::runtime_error("Must provide a dimensions "\

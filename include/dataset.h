@@ -13,7 +13,9 @@
 #include "memorylist.h"
 #include "tensorpack.h"
 #include "tensor.h"
-
+#include "enums/cpp_tensor_type.h"
+#include "enums/cpp_memory_layout.h"
+#include "enums/cpp_metadata_type.h"
 
 ///@file
 ///\brief The DataSet class encapsulating numeric data and metadata.
@@ -42,57 +44,48 @@ class DataSet
 
         //! Add a tensor to the dataset
         void add_tensor(const std::string& name /*!< The name used to reference the tensor*/,
-                        const std::string& type /*!< The data type of the tensor*/,
                         void* data /*!< A c_ptr to the data of the tensor*/,
                         const std::vector<size_t>& dims /*! The dimensions of the data*/,
+                        const TensorType type /*!< The data type of the tensor*/,
                         const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
                         );
 
         //! Add metadata field to the DataSet.  Default behavior is to append existing fields.
         void add_meta(const std::string& name /*!< The name used to reference the metadata*/,
-                      const std::string& type /*!< The data type of the metadata*/,
-                      const void* data /*!< A c_ptr to the metadata*/
+                      const void* data /*!< A c_ptr to the metadata*/,
+                      const MetaDataType type /*!< The data type of the metadata*/
                       );
 
         //! Get tensor data and return an allocated multi-dimensional array
         void get_tensor(const std::string& name /*!< The name used to reference the tensor*/,
-                        std::string& type /*!< The data type of the tensor*/,
                         void*& data /*!< A c_ptr to the tensor data */,
                         std::vector<size_t>& dims /*! The dimensions of the tensor retrieved*/,
+                        TensorType& type /*!< The data type of the tensor*/,
                         const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
                         );
 
         //! Get tensor data and return an allocated multi-dimensional array
         void get_tensor(const std::string& name /*!< The name used to reference the tensor*/,
-                        char*& type /*!< The data type of the tensor*/,
-                        size_t& type_length /*!< The length of the tensor type string*/,
                         void*& data /*!< A c_ptr to the tensor data */,
                         size_t*& dims /*! The dimensions of the tensor retrieved*/,
                         size_t& n_dims /*! The number of dimensions retrieved*/,
+                        TensorType& type /*!< The data type of the tensor*/,
                         const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
                         );
 
         //! Get tensor data and fill an already allocated array memory space
         void unpack_tensor(const std::string& name /*!< The name used to reference the tensor*/,
-                           const std::string& type /*!< The data type of the tensor*/,
                            void* data /*!< A c_ptr to the data of the tensor*/,
                            const std::vector<size_t>& dims /*! The dimensions of the supplied memory space*/,
+                           const TensorType type /*!< The data type corresponding to the user memory space*/,
                            const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
                            );
 
         //! Get metadata field from the DataSet
         void get_meta(const std::string& name /*!< The name used to reference the metadata*/,
-                      std::string& type /*!< The data type of the metadata*/,
                       void*& data /*!< A c_ptr reference to the metadata*/,
-                      size_t& length /*!< The length of the meta*/
-                      );
-
-        //! Get metadata field from the DataSet using C-style interface
-        void get_meta(const std::string& name /*!< The name used to reference the metadata*/,
-                      char*& type /*!< The data type of the metadata*/,
-                      size_t& type_length /*!< The length of the type name*/,
-                      void*& data /*!< A c_ptr reference to the metadata*/,
-                      size_t& length /*!< The length of the meta*/
+                      size_t& length /*!< The length of the meta*/,
+                      MetaDataType& type /*!< The data type of the metadata*/
                       );
 
         //! The name of the DataSet
@@ -124,9 +117,9 @@ class DataSet
     protected:
 
         inline void _add_to_tensorpack(const std::string& name /*!< The name used to reference the tensor*/,
-                                       const std::string& type /*!< The data type of the tensor*/,
                                        void* data /*!< A c_ptr to the data of the tensor*/,
                                        const std::vector<size_t>& dims /*! The dimensions of the data*/,
+                                       const TensorType type /*! The type of the tensor*/,
                                        const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
                                        );
     private:
@@ -136,8 +129,6 @@ class DataSet
         TensorPack _tensorpack;
         //! MemoryList object to hold allocated size_t arrays stemming from get_tensor queries
         MemoryList<size_t> _dim_queries;
-        //! MemoryList to handle type queries
-        MemoryList<char> _type_queries;
 };
 #endif
 #endif //SMARTSIM_DATASET_H

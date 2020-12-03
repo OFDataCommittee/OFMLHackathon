@@ -8,7 +8,13 @@
 #include <string>
 #include <cstring>
 #include <stdexcept>
+#include "enums/cpp_tensor_type.h"
+#include "enums/cpp_memory_layout.h"
 
+/* The strings and unordered map below is used for
+fast conversion between RedisAI string and enum
+value
+*/
 // Numeric data type of tensor elements that are allowed
 static std::string DATATYPE_TENSOR_STR_FLOAT = "FLOAT";
 static std::string DATATYPE_TENSOR_STR_DOUBLE = "DOUBLE";
@@ -19,45 +25,27 @@ static std::string DATATYPE_TENSOR_STR_INT64 = "INT64";
 static std::string DATATYPE_TENSOR_STR_UINT8 = "UINT8";
 static std::string DATATYPE_TENSOR_STR_UINT16 = "UINT16";
 
-static const std::unordered_set<std::string> TENSOR_DATATYPES {
-    DATATYPE_TENSOR_STR_FLOAT,
-    DATATYPE_TENSOR_STR_DOUBLE,
-    DATATYPE_TENSOR_STR_INT8,
-    DATATYPE_TENSOR_STR_INT16,
-    DATATYPE_TENSOR_STR_INT32,
-    DATATYPE_TENSOR_STR_INT64,
-    DATATYPE_TENSOR_STR_UINT8,
-    DATATYPE_TENSOR_STR_UINT16
-};
-
-//An unordered_map of std::string type (key) and value
-//integer that to cut down on strcmp throughout the code
-static const int DOUBLE_TENSOR_TYPE = 1;
-static const int FLOAT_TENSOR_TYPE = 2;
-static const int INT64_TENSOR_TYPE = 3;
-static const int INT32_TENSOR_TYPE = 4;
-static const int INT16_TENSOR_TYPE = 5;
-static const int INT8_TENSOR_TYPE = 6;
-static const int UINT16_TENSOR_TYPE = 7;
-static const int UINT8_TENSOR_TYPE = 8;
-
-static const std::unordered_map<std::string, int>
+static const std::unordered_map<std::string, TensorType>
     TENSOR_TYPE_MAP{
-        {DATATYPE_TENSOR_STR_DOUBLE, DOUBLE_TENSOR_TYPE},
-        {DATATYPE_TENSOR_STR_FLOAT, FLOAT_TENSOR_TYPE},
-        {DATATYPE_TENSOR_STR_INT64, INT64_TENSOR_TYPE},
-        {DATATYPE_TENSOR_STR_INT32, INT32_TENSOR_TYPE},
-        {DATATYPE_TENSOR_STR_INT16, INT16_TENSOR_TYPE},
-        {DATATYPE_TENSOR_STR_INT8, INT8_TENSOR_TYPE},
-        {DATATYPE_TENSOR_STR_UINT16, UINT16_TENSOR_TYPE},
-        {DATATYPE_TENSOR_STR_UINT8, UINT8_TENSOR_TYPE} };
+        {DATATYPE_TENSOR_STR_DOUBLE, TensorType::dbl},
+        {DATATYPE_TENSOR_STR_FLOAT, TensorType::flt},
+        {DATATYPE_TENSOR_STR_INT64, TensorType::int64},
+        {DATATYPE_TENSOR_STR_INT32, TensorType::int32},
+        {DATATYPE_TENSOR_STR_INT16, TensorType::int16},
+        {DATATYPE_TENSOR_STR_INT8, TensorType::int8},
+        {DATATYPE_TENSOR_STR_UINT16, TensorType::uint16},
+        {DATATYPE_TENSOR_STR_UINT8, TensorType::uint8} };
 
-enum MemoryLayout{
-    nested=1,
-    contiguous=2,
-    fortran_nested=3,
-    fortran_contiguous=4
-};
+static const std::unordered_map<TensorType, std::string>
+    TENSOR_STR_MAP{
+        {TensorType::dbl, DATATYPE_TENSOR_STR_DOUBLE},
+        {TensorType::flt, DATATYPE_TENSOR_STR_FLOAT},
+        {TensorType::int64, DATATYPE_TENSOR_STR_INT64},
+        {TensorType::int32, DATATYPE_TENSOR_STR_INT32},
+        {TensorType::int16, DATATYPE_TENSOR_STR_INT16},
+        {TensorType::int8, DATATYPE_TENSOR_STR_INT8},
+        {TensorType::uint16, DATATYPE_TENSOR_STR_UINT16},
+        {TensorType::uint8, DATATYPE_TENSOR_STR_UINT8} };
 
 ///@file
 ///\brief The TensorBase class giving access to common Tensor methods and attributes
@@ -68,9 +56,9 @@ class TensorBase{
     public:
         //! TensorBase constructor
         TensorBase(const std::string& name /*!< The name used to reference the tensor*/,
-                   const std::string& type /*!< The data type of the tensor*/,
                    void* data /*!< A c_ptr to the source data for the tensor*/,
                    const std::vector<size_t>& dims /*! The dimensions of the tensor*/,
+                   const TensorType type /*!< The data type of the tensor*/,
                    const MemoryLayout mem_layout /*! The memory layout of the source data*/
                    );
 
@@ -92,8 +80,11 @@ class TensorBase{
         //! Retrive the tensor name
         std::string name();
 
-        //! Retreive the tensor type
-        std::string type();
+        //! Retreive the TensorType of the tensor
+        TensorType type();
+
+        //! Return a string representation of the TensorType
+        std::string type_str();
 
         //! Retrieve the tensor dims
         std::vector<size_t> dims();
@@ -123,7 +114,7 @@ class TensorBase{
         std::string _name;
 
         //! Tensor type
-        std::string _type;
+        TensorType _type;
 
         //! Tensor dims
         std::vector<size_t> _dims;
@@ -142,7 +133,6 @@ class TensorBase{
         //! Function to check for errors in constructor inputs
         inline void _check_inputs(const void* src_data /*!< A pointer to the data source for the tensor*/,
                                   const std::string& name /*!< The name used to reference the tensor*/,
-                                  const std::string& type /*!< The data type of the tensor*/,
                                   const std::vector<size_t>& dims /*! The dimensions of the data*/
                                   );
 
