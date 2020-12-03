@@ -111,21 +111,26 @@ void MetaData::add_value(const std::string& field_name,
 }
 
 void MetaData::get_values(const std::string& name,
-                          const std::string& type,
-                          void*& data, size_t& length)
+                          std::string& type,
+                          void*& data,
+                          size_t& length)
 {
-    /* This function allocates the memory to return a pointer
-    (via pointer reference "data") to the user and sets the value
-    of "length" to the number of values in data.
+    /* This function allocates the memory to
+    return a pointer (via pointer reference "data")
+    to the user and sets the value of "length" to
+    the number of values in data.
     */
 
     if(!this->_field_exists(name))
-        throw std::runtime_error("The metadata string field "
-                                 + name + " does not exist.");
+        throw std::runtime_error("The metadata field "
+                                 + name +
+                                 " does not exist.");
+
+    type = this->_get_meta_value_type(name);
+    int data_type = this->_get_type_integer(type);
 
     gpb::Message* msg = this->_meta_msg_map[name];
 
-    int data_type = this->_get_type_integer(type);
     switch(data_type) {
         case string_type :
             this->_get_string_field_values(msg, data, length);
@@ -376,4 +381,44 @@ inline int MetaData::_get_type_integer(const std::string& type)
     catch (const std::out_of_range& oor) {
         throw std::runtime_error("The provide type is invalid: " + type);
     }
+}
+
+inline std::string MetaData::_get_meta_value_type(const std::string& name)
+{
+    /* This function returns the metadata field type
+    string for the metadata field.
+    */
+    gpb::Message* msg = this->_meta_msg_map[name];
+    const gpb::Reflection* refl = msg->GetReflection();
+    const gpb::FieldDescriptor* field_desc =
+        msg->GetDescriptor()->FindFieldByName("data");
+
+    std::string type;
+    switch(field_desc->cpp_type()) {
+        case gpb::FieldDescriptor::CppType::CPPTYPE_INT32 :
+            type = "INT32";
+            break;
+        case gpb::FieldDescriptor::CppType::CPPTYPE_INT64 :
+            type = "INT64";
+            break;
+        case gpb::FieldDescriptor::CppType::CPPTYPE_UINT32 :
+            type = "UINT32";
+            break;
+        case gpb::FieldDescriptor::CppType::CPPTYPE_UINT64 :
+            type = "UINT64";
+            break;
+        case gpb::FieldDescriptor::CppType::CPPTYPE_FLOAT :
+            type = "FLOAT";
+            break;
+        case gpb::FieldDescriptor::CppType::CPPTYPE_DOUBLE :
+            type = "DOUBLE";
+            break;
+        case gpb::FieldDescriptor::CppType::CPPTYPE_STRING :
+            type = "STRING";
+            break;
+        default :
+            throw std::runtime_error("Unexpected type encountered in"\
+                                     "MetaData._get_meta_value_type().");
+    }
+    return type;
 }

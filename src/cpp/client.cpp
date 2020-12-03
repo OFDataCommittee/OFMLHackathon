@@ -120,8 +120,15 @@ DataSet SmartSimClient::get_dataset(const std::string& name)
   // Loop through and add each tensor to the dataset
   char** tensor_names;
   size_t n_tensors;
-  dataset.get_meta(".tensors", "STRING",
+  std::string type;
+  dataset.get_meta(".tensors", type,
                    (void*&)tensor_names, n_tensors);
+
+  if(type.compare("STRING")!=0)
+    throw std::runtime_error("The .tensors field "\
+                             "for dataset " +
+                             name +
+                             "has been corrupted.");
 
   for(size_t i=0; i<n_tensors; i++) {
     std::string t_name = this->_get_prefix() +

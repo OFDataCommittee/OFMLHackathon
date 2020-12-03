@@ -142,27 +142,46 @@ void DataSet::add_meta(const std::string& name,
 }
 
 void DataSet::get_meta(const std::string& name,
-                       const std::string& type,
-                       void*& data, size_t& length)
+                       std::string& type,
+                       void*& data,
+                       size_t& length)
 {
-    /* This function points the data pointer to a dynamically allocated
-    array of the metadata and sets the length pointer value to the number
-    of elements in the array.
+    /* This function points the data pointer to a
+    dynamically allocated array of the metadata
+    and sets the length pointer value to the number
+    of elements in the array.  The parameter type
+    is set to the return type so that the user
+    knows how to use the values if they are
+    unsure of the type.
     */
-   //TODO this assumes the user knows what type the metadata is before
-   //they request it.  We can throw an error if it doesn't match what
-   //is in the database, or just return nothing with a warning.  We need
-   //to figure that out.  I'm not sure how we can design something that
-   //Maybe what we do is there is a separate function that returns
-   //the metadata type, and the user can use that to typecast the
-   //return value.  That seems like it could work for containerized
-   //return types like a numpy.ndaray, but could get tricky
-   //for c++, c, and fortran pointer types.  Maybe we need
-   //should return a containerized metadata object for the data
-   //that would allow us to define all the operators to iterator through
-   //that would remove this from the user.
-   this->_metadata.get_values(name, type, data, length);
-   return;
+    this->_metadata.get_values(name, type, data, length);
+    return;
+}
+
+void DataSet::get_meta(const std::string& name,
+                       char*& type,
+                       size_t& type_length,
+                       void*& data,
+                       size_t& length)
+{
+    /* This function points the data pointer to a
+    dynamically allocated array of the metadata
+    and sets the length pointer value to the number
+    of elements in the array.  The parameter type
+    is set to the return type so that the user
+    knows how to use the values if they are
+    unsure of the type.  This c-style interface
+    is used to manage memory needed to allocate
+    the type string.
+    */
+
+    std::string str_type;
+    this->_metadata.get_values(name, str_type, data, length);
+    size_t n_bytes = sizeof(char)*(str_type.size()+1);
+    type = this->_type_queries.allocate_bytes(n_bytes);
+    std::memcpy(type, str_type.data(), n_bytes-1);
+    type[n_bytes-1] = 0;
+    return;
 }
 
 std::string DataSet::get_tensor_type(const std::string& name)

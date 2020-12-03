@@ -110,8 +110,8 @@ extern "C"
 void get_meta(void* dataset,
               const char* name,
               const size_t name_length,
-              const char* type,
-              const size_t type_length,
+              char** type,
+              size_t* type_length,
               void** data,
               size_t* length)
 {
@@ -121,7 +121,6 @@ void get_meta(void* dataset,
   */
   DataSet* d = (DataSet*)dataset;
   std::string key_str = std::string(name, name_length);
-  std::string type_str = std::string(type, type_length);
-  d->get_meta(key_str, type_str, *data, *length);
+  d->get_meta(key_str, *type, *type_length, *data, *length);
   return;
 }
