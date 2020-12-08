@@ -210,9 +210,10 @@ void set_model_from_file(void* c_client,
                          const char* device, const size_t device_length,
                          const int batch_size, const int min_batch_size,
                          const char* tag, const size_t tag_length,
-                         const char** inputs, const int* input_lengths,
-                         const int n_inputs, const char** outputs,
-                         const int* output_lengths, const int n_outputs)
+                         const char** inputs, const size_t* input_lengths,
+                         const size_t n_inputs,
+                         const char** outputs, const size_t* output_lengths,
+                         const size_t n_outputs)
 {
   /* This function sets a model stored in a binary file.
   */
@@ -224,11 +225,11 @@ void set_model_from_file(void* c_client,
   std::string tag_str = std::string(tag, tag_length);
 
   std::vector<std::string> input_vec;
-  for(int i=0; i<n_inputs; i++)
+  for(size_t i=0; i<n_inputs; i++)
     input_vec.push_back(std::string(inputs[i], input_lengths[i]));
 
   std::vector<std::string> output_vec;
-  for(int i=0; i<n_outputs; i++)
+  for(size_t i=0; i<n_outputs; i++)
     output_vec.push_back(std::string(outputs[i], output_lengths[i]));
 
   s->set_model_from_file(key_str, model_file_str, backend_str, device_str,
@@ -245,9 +246,10 @@ void set_model(void* c_client,
                const char* device, const size_t device_length,
                const int batch_size, const int min_batch_size,
                const char* tag, const size_t tag_length,
-               const char** inputs, const int* input_lengths,
-               const int n_inputs, const char** outputs,
-               const int* output_lengths, const int n_outputs)
+               const char** inputs, const size_t* input_lengths,
+               const size_t n_inputs,
+               const char** outputs, const size_t* output_lengths,
+               const size_t n_outputs)
 {
   /* This function sets a model stored in a buffer c-string.
   */
@@ -259,11 +261,11 @@ void set_model(void* c_client,
   std::string tag_str = std::string(tag, tag_length);
 
   std::vector<std::string> input_vec;
-  for(int i=0; i<n_inputs; i++)
+  for(size_t i=0; i<n_inputs; i++)
     input_vec.push_back(std::string(inputs[i], input_lengths[i]));
 
   std::vector<std::string> output_vec;
-  for(int i=0; i<n_outputs; i++)
+  for(size_t i=0; i<n_outputs; i++)
     output_vec.push_back(std::string(outputs[i], output_lengths[i]));
 
   s->set_model(key_str, model_str, backend_str, device_str,
@@ -345,12 +347,16 @@ void get_script(void* c_client,
 
 extern "C"
 void run_script(void* c_client,
-                const char* key, const size_t key_length,
-                const char* function, const size_t function_length,
+                const char* key,
+                const size_t key_length,
+                const char* function,
+                const size_t function_length,
                 const char** inputs,
-                const int* input_lengths, const int n_inputs,
+                const size_t* input_lengths,
+                const size_t n_inputs,
                 const char** outputs,
-                const int* output_lengths, const int n_outputs)
+                const size_t* output_lengths,
+                const size_t n_outputs)
 {
   /* This function runs a script function in the database
   */
@@ -359,11 +365,11 @@ void run_script(void* c_client,
   std::string function_str = std::string(function, function_length);
 
   std::vector<std::string> input_vec;
-  for(int i=0; i<n_inputs; i++)
+  for(size_t i=0; i<n_inputs; i++)
     input_vec.push_back(std::string(inputs[i], input_lengths[i]));
 
   std::vector<std::string> output_vec;
-  for(int i=0; i<n_outputs; i++)
+  for(size_t i=0; i<n_outputs; i++)
     output_vec.push_back(std::string(outputs[i], output_lengths[i]));
 
   s->run_script(key_str, function_str, input_vec, output_vec);
@@ -372,11 +378,14 @@ void run_script(void* c_client,
 
 extern "C"
 void run_model(void* c_client,
-               const char* key, const size_t key_length,
+               const char* key,
+               const size_t key_length,
                const char** inputs,
-               const int* input_lengths, const int n_inputs,
+               const size_t* input_lengths,
+               const size_t n_inputs,
                const char** outputs,
-               const int* output_lengths, const int n_outputs)
+               const size_t* output_lengths,
+               const size_t n_outputs)
 {
   /* This function runs a model in the database
   */
@@ -384,11 +393,11 @@ void run_model(void* c_client,
   std::string key_str = std::string(key, key_length);
 
   std::vector<std::string> input_vec;
-  for(int i=0; i<n_inputs; i++)
+  for(size_t i=0; i<n_inputs; i++)
     input_vec.push_back(std::string(inputs[i], input_lengths[i]));
 
   std::vector<std::string> output_vec;
-  for(int i=0; i<n_outputs; i++)
+  for(size_t i=0; i<n_outputs; i++)
     output_vec.push_back(std::string(outputs[i], output_lengths[i]));
 
   s->run_model(key_str, input_vec, output_vec);

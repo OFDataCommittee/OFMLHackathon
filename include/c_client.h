@@ -123,11 +123,11 @@ void set_model_from_file(void* c_client /*!< The c client to use for communicati
                          const char* tag /*!< A tag to attach to the model for information purposes*/,
                          const size_t tag_length /*!< The length of the tag c-string, excluding null terminating character */,
                          const char** inputs /*!< One or more names of model input nodes (TF models) */,
-                         const int* input_lengths /*!< The length of each input name c-string, excluding null terminating character*/,
-                         const int n_inputs /*!< The number of inputs*/,
+                         const size_t* input_lengths /*!< The length of each input name c-string, excluding null terminating character*/,
+                         const size_t n_inputs /*!< The number of inputs*/,
                          const char** outputs /*!< One or more names of model output nodes (TF models) */,
-                         const int* output_lengths /*!< The length of each output name c-string, excluding null terminating character*/,
-                         const int n_outputs /*!< The number of outputs*/
+                         const size_t* output_lengths /*!< The length of each output name c-string, excluding null terminating character*/,
+                         const size_t n_outputs /*!< The number of outputs*/
                          );
 
 //! Set a model (from buffer) in the database for future execution
@@ -145,11 +145,11 @@ void set_model(void* c_client /*!< The c client to use for communication*/,
                const char* tag /*!< A tag to attach to the model for information purposes*/,
                const size_t tag_length /*!< The length of the tag c-string, excluding null terminating character */,
                const char** inputs /*!< One or more names of model input nodes (TF models) */,
-               const int* input_lengths /*!< The length of each input name c-string, excluding null terminating character*/,
-               const int n_inputs /*!< The number of inputs*/,
+               const size_t* input_lengths /*!< The length of each input name c-string, excluding null terminating character*/,
+               const size_t n_inputs /*!< The number of inputs*/,
                const char** outputs /*!< One or more names of model output nodes (TF models) */,
-               const int* output_lengths /*!< The length of each output name c-string, excluding null terminating character*/,
-               const int n_outputs /*!< The number of outputs*/
+               const size_t* output_lengths /*!< The length of each output name c-string, excluding null terminating character*/,
+               const size_t n_outputs /*!< The number of outputs*/
                );
 
 //! Get a model in the database
@@ -195,11 +195,11 @@ void run_script(void* c_client /*!< The c client to use for communication*/,
                 const char* function /*!< The name of the function in the script to call*/,
                 const size_t function_length /*!< The length of the function name c-string, excluding null terminating character */,
                 const char** inputs /*!< One or more names of model input nodes (TF models) */,
-                const int* input_lengths /*!< The length of each input name c-string, excluding null terminating character*/,
-                const int n_inputs /*!< The number of inputs*/,
+                const size_t* input_lengths /*!< The length of each input name c-string, excluding null terminating character*/,
+                const size_t n_inputs /*!< The number of inputs*/,
                 const char** outputs /*!< One or more names of model output nodes (TF models) */,
-                const int* output_lengths /*!< The length of each output name c-string, excluding null terminating character*/,
-                const int n_outputs /*!< The number of outputs*/
+                const size_t* output_lengths /*!< The length of each output name c-string, excluding null terminating character*/,
+                const size_t n_outputs /*!< The number of outputs*/
                 );
 
 //! Run a model in the database
@@ -207,11 +207,11 @@ void run_model(void* c_client /*!< The c client to use for communication*/,
                const char* key /*!< The key to use to run the model*/,
                const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
                const char** inputs /*!< One or more names of model input nodes (TF models) */,
-               const int* input_lengths /*!< The length of each input name c-string, excluding null terminating character*/,
-               const int n_inputs /*!< The number of inputs*/,
+               const size_t* input_lengths /*!< The length of each input name c-string, excluding null terminating character*/,
+               const size_t n_inputs /*!< The number of inputs*/,
                const char** outputs /*!< One or more names of model output nodes (TF models) */,
-               const int* output_lengths /*!< The length of each output name c-string, excluding null terminating character*/,
-               const int n_outputs /*!< The number of outputs*/
+               const size_t* output_lengths /*!< The length of each output name c-string, excluding null terminating character*/,
+               const size_t n_outputs /*!< The number of outputs*/
                );
 
 //! Check if a key exists
