@@ -67,5 +67,5 @@ set(CLIENT_SRC
 	 ../../../utils/protobuf/silc.pb.cc
 	 ../src/pyclient.cpp)
 
-pybind11_add_module(silc ${CLIENT_SRC} ${CLIENT_LIBRARIES} ../bindings/bind.cpp)
-target_link_libraries(silc PUBLIC ${CLIENT_LIBRARIES})
+pybind11_add_module(silcPy ${CLIENT_SRC} ${CLIENT_LIBRARIES} ../bindings/bind.cpp)
+target_link_libraries(silcPy PUBLIC ${CLIENT_LIBRARIES})

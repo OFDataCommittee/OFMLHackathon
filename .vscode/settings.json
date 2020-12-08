@@ -2,5 +2,7 @@
     "cmake.configureOnOpen": true,
     "files.associations": {
         "*.tcc": "cpp"
-    }
+    },
+    "editor.tabSize": 2,
+    "editor.detectIndentation": true
 }

@@ -3,7 +3,7 @@
 namespace py = pybind11;
 
 
-PYBIND11_MODULE(silc, m) {
+PYBIND11_MODULE(silcPy, m) {
     m.doc() = "silc client"; // optional module docstring
 
     py::class_<SmartSimPyClient>(m, "Client")

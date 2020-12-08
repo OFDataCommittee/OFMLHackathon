@@ -7,7 +7,7 @@ SmartSimPyClient::SmartSimPyClient(bool cluster, bool fortran_array)
   SmartSimClient* client = new SmartSimClient(cluster, fortran_array);
   this->_client = client;
 }
-// put tensor
+
 
 SmartSimPyClient::~SmartSimPyClient() {
   delete this->_client;
