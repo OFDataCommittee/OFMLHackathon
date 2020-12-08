@@ -128,9 +128,9 @@ TensorPack::~TensorPack()
 }
 
 void TensorPack::add_tensor(const std::string& name,
-                            const std::string& type,
                             void* data,
                             const std::vector<size_t>& dims,
+                            const TensorType type,
                             const MemoryLayout mem_layout)
 {
     /* This function adds a tensor with associated c_ptr for data.
@@ -139,45 +139,40 @@ void TensorPack::add_tensor(const std::string& name,
         throw std::runtime_error("The tensor " + std::string(name)
                                                + " already exists");
 
-    if(TENSOR_DATATYPES.count(type)<=0)
-        throw std::runtime_error("Invalid tensor type in "\
-                                 "TensorPack: " +
-                                 std::string(type));
-
     TensorBase* ptr;
-    int data_type = TENSOR_TYPE_MAP.at(type);
-    switch(data_type) {
-        case DOUBLE_TENSOR_TYPE:
-            ptr = new Tensor<double>(name, type, data,
-                                    dims, mem_layout);
+
+    switch(type) {
+        case TensorType::dbl :
+            ptr = new Tensor<double>(name, data, dims,
+                                    type, mem_layout);
             break;
-        case FLOAT_TENSOR_TYPE :
-            ptr = new Tensor<float>(name, type, data,
-                                    dims, mem_layout);
+        case TensorType::flt :
+            ptr = new Tensor<float>(name, data, dims,
+                                    type, mem_layout);
             break;
-        case INT64_TENSOR_TYPE :
-            ptr = new Tensor<int64_t>(name, type, data,
-                                      dims, mem_layout);
+        case TensorType::int64 :
+            ptr = new Tensor<int64_t>(name, data, dims,
+                                      type, mem_layout);
             break;
-        case INT32_TENSOR_TYPE :
-            ptr = new Tensor<int32_t>(name, type, data,
-                                      dims, mem_layout);
+        case TensorType::int32 :
+            ptr = new Tensor<int32_t>(name, data, dims,
+                                      type, mem_layout);
             break;
-        case INT16_TENSOR_TYPE :
-            ptr = new Tensor<int16_t>(name, type, data,
-                                     dims, mem_layout);
+        case TensorType::int16 :
+            ptr = new Tensor<int16_t>(name, data, dims,
+                                     type, mem_layout);
             break;
-        case INT8_TENSOR_TYPE :
-            ptr = new Tensor<int8_t>(name, type, data,
-                                     dims, mem_layout);
+        case TensorType::int8 :
+            ptr = new Tensor<int8_t>(name, data, dims,
+                                     type, mem_layout);
             break;
-        case UINT16_TENSOR_TYPE :
-            ptr = new Tensor<uint16_t>(name, type, data,
-                                       dims, mem_layout);
+        case TensorType::uint16 :
+            ptr = new Tensor<uint16_t>(name, data, dims,
+                                       type, mem_layout);
             break;
-        case UINT8_TENSOR_TYPE :
-             ptr = new Tensor<uint8_t>(name, type, data,
-                                       dims, mem_layout);
+        case TensorType::uint8 :
+             ptr = new Tensor<uint8_t>(name, data, dims,
+                                       type, mem_layout);
              break;
     }
     this->add_tensor(ptr);
@@ -192,44 +187,37 @@ void TensorPack::add_tensor(TensorBase* tensor)
     to Tensor<T> based on the type string in the TensorBase
     object.
     */
-    std::string type =  tensor->type();
+    TensorType type =  tensor->type();
     std::string name = tensor->name();
-
-    if(TENSOR_DATATYPES.count(type)<=0)
-        throw std::runtime_error("Invalid tensor type in "\
-                                 "TensorPack: " +
-                                 std::string(type));
 
     if(name.size()==0)
         throw std::runtime_error("The tensor name must "\
                                  "be greater than 0.");
 
 
-    int data_type = TENSOR_TYPE_MAP.at(type);
-
-    switch(data_type) {
-        case DOUBLE_TENSOR_TYPE:
+    switch(type) {
+        case TensorType::dbl :
             this->_tensors_double.push_front((Tensor<double>*)tensor);
         break;
-        case FLOAT_TENSOR_TYPE:
+        case TensorType::flt :
             this->_tensors_float.push_front((Tensor<float>*)tensor);
         break;
-        case INT64_TENSOR_TYPE:
+        case TensorType::int64 :
             this->_tensors_int64.push_front((Tensor<int64_t>*)tensor);
         break;
-        case INT32_TENSOR_TYPE:
+        case TensorType::int32 :
             this->_tensors_int32.push_front((Tensor<int32_t>*)tensor);
         break;
-        case INT16_TENSOR_TYPE:
+        case TensorType::int16 :
             this->_tensors_int16.push_front((Tensor<int16_t>*)tensor);
         break;
-        case INT8_TENSOR_TYPE:
+        case TensorType::int8 :
             this->_tensors_int8.push_front((Tensor<int8_t>*)tensor);
         break;
-        case UINT16_TENSOR_TYPE:
+        case TensorType::uint16 :
             this->_tensors_uint16.push_front((Tensor<uint16_t>*)tensor);
         break;
-        case UINT8_TENSOR_TYPE:
+        case TensorType::uint8 :
             this->_tensors_uint8.push_front((Tensor<uint8_t>*)tensor);
         break;
     }

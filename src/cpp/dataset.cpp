@@ -13,7 +13,6 @@ DataSet::DataSet(DataSet&& dataset)
     this->_metadata = std::move(dataset._metadata);
     this->_tensorpack = std::move(dataset._tensorpack);
     this->_dim_queries = std::move(dataset._dim_queries);
-    this->_type_queries = std::move(dataset._type_queries);
 }
 
 DataSet& DataSet::operator=(DataSet&& dataset)
@@ -25,7 +24,6 @@ DataSet& DataSet::operator=(DataSet&& dataset)
         this->_metadata = std::move(dataset._metadata);
         this->_tensorpack = std::move(dataset._tensorpack);
         this->_dim_queries = std::move(dataset._dim_queries);
-        this->_type_queries = std::move(dataset._type_queries);
     }
     return *this;
 }
@@ -38,22 +36,33 @@ DataSet::DataSet(const std::string& name, char* buf,
 }
 
 void DataSet::add_tensor(const std::string& name,
-                         const std::string& type,
                          void* data,
                          const std::vector<size_t>& dims,
+                         const TensorType type,
                          MemoryLayout mem_layout)
 {
     /* Creates a tensor with the provided information and adds
     the tensor name to the .tensors metadata
     */
-    this->_add_to_tensorpack(name, type, data, dims, mem_layout);
-    this->_metadata.add_value(".tensors", "STRING", name.c_str());
+    this->_add_to_tensorpack(name, data, dims,
+                             type, mem_layout);
+    this->_metadata.add_value(".tensors", name.c_str(),
+                              MetaDataType::string);
     return;
 }
 
-void DataSet::get_tensor(const std::string&  name,
-                         std::string&  type,
-                         void*& data, std::vector<size_t>& dims,
+void DataSet::add_meta(const std::string& name,
+                       const void* data,
+                       const MetaDataType type)
+{
+    this->_metadata.add_value(name, data, type);
+    return;
+}
+
+void DataSet::get_tensor(const std::string& name,
+                         void*& data,
+                         std::vector<size_t>& dims,
+                         TensorType& type,
                          MemoryLayout mem_layout)
 {
     /* This function gets a tensor from the database,
@@ -63,9 +72,10 @@ void DataSet::get_tensor(const std::string&  name,
     the allocated memory space.
     */
     if(!(this->_tensorpack.tensor_exists(name)))
-        throw std::runtime_error("The tensor " + std::string(name)
-                                               + " does not exist in "
-                                               + this->name + " dataset.");
+        throw std::runtime_error("The tensor " +
+                                 std::string(name) +
+                                 " does not exist in " +
+                                 this->name + " dataset.");
 
     type = this->_tensorpack.get_tensor(name)->type();
     data = this->_tensorpack.get_tensor(name)->data_view(mem_layout);
@@ -74,9 +84,10 @@ void DataSet::get_tensor(const std::string&  name,
 }
 
 void DataSet::get_tensor(const std::string&  name,
-                         char*& type, size_t& type_length,
-                         void*& data, size_t*& dims,
+                         void*& data,
+                         size_t*& dims,
                          size_t& n_dims,
+                         TensorType& type,
                          MemoryLayout mem_layout)
 {
     /* This function will retrieve tensor data
@@ -89,8 +100,8 @@ void DataSet::get_tensor(const std::string&  name,
     space, that c_ptr will be returned.
     */
     std::vector<size_t> dims_vec;
-    std::string type_str;
-    this->get_tensor(name, type_str, data, dims_vec, mem_layout);
+    this->get_tensor(name, data, dims_vec,
+                     type, mem_layout);
 
     size_t n_bytes = sizeof(int)*dims_vec.size();
     dims = this->_dim_queries.allocate_bytes(n_bytes);
@@ -105,19 +116,13 @@ void DataSet::get_tensor(const std::string&  name,
         it++;
     }
 
-    //We will make the type char* null-terminated for safety,
-    //but we will not include that in the length.
-    size_t type_bytes = sizeof(char)*(type_str.size()+1);
-    type = this->_type_queries.allocate_bytes(type_bytes);
-    type_length=type_str.size();
-    std::memcpy(type, type_str.data(), type_bytes);
     return;
 }
 
-void DataSet::unpack_tensor(const std::string&  name,
-                            const std::string&  type,
+void DataSet::unpack_tensor(const std::string& name,
                             void* data,
                             const std::vector<size_t>& dims,
+                            const TensorType type,
                             MemoryLayout mem_layout)
 {
     /* This function will take the tensor data buffer and put it into
@@ -133,18 +138,10 @@ void DataSet::unpack_tensor(const std::string&  name,
     return;
 }
 
-void DataSet::add_meta(const std::string& name,
-                       const std::string& type,
-                       const void* data)
-{
-    this->_metadata.add_value(name, type, data);
-    return;
-}
-
 void DataSet::get_meta(const std::string& name,
-                       std::string& type,
                        void*& data,
-                       size_t& length)
+                       size_t& length,
+                       MetaDataType& type)
 {
     /* This function points the data pointer to a
     dynamically allocated array of the metadata
@@ -154,33 +151,7 @@ void DataSet::get_meta(const std::string& name,
     knows how to use the values if they are
     unsure of the type.
     */
-    this->_metadata.get_values(name, type, data, length);
-    return;
-}
-
-void DataSet::get_meta(const std::string& name,
-                       char*& type,
-                       size_t& type_length,
-                       void*& data,
-                       size_t& length)
-{
-    /* This function points the data pointer to a
-    dynamically allocated array of the metadata
-    and sets the length pointer value to the number
-    of elements in the array.  The parameter type
-    is set to the return type so that the user
-    knows how to use the values if they are
-    unsure of the type.  This c-style interface
-    is used to manage memory needed to allocate
-    the type string.
-    */
-
-    std::string str_type;
-    this->_metadata.get_values(name, str_type, data, length);
-    size_t n_bytes = sizeof(char)*(str_type.size()+1);
-    type = this->_type_queries.allocate_bytes(n_bytes);
-    std::memcpy(type, str_type.data(), n_bytes-1);
-    type[n_bytes-1] = 0;
+    this->_metadata.get_values(name, data, length, type);
     return;
 }
 
@@ -192,16 +163,16 @@ std::string DataSet::get_tensor_type(const std::string& name)
 }
 
 inline void DataSet::_add_to_tensorpack(const std::string& name,
-                                        const std::string& type,
                                         void* data,
                                         const std::vector<size_t>& dims,
-                                        MemoryLayout mem_layout)
+                                        const TensorType type,
+                                        const MemoryLayout mem_layout)
 {
     /* This function adds the tensor to the
     internal TensorPack object.
     */
-    this->_tensorpack.add_tensor(name, type, data,
-                                 dims, mem_layout);
+    this->_tensorpack.add_tensor(name, data, dims,
+                                 type, mem_layout);
     return;
 }
 

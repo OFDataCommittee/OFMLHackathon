@@ -38,9 +38,9 @@ class TensorPack
 
         //! Add a tensor to the dataset
         void add_tensor(const std::string& name /*!< The name used to reference the tensor*/,
-                        const std::string& type /*!< The data type of the tensor*/,
                         void* data /*!< A c_ptr to the data of the tensor*/,
                         const std::vector<size_t>& dims /*! The dimensions of the data*/,
+                        const TensorType type /*!< The data type of the tensor*/,
                         const MemoryLayout mem_layout /*! The memory layout of the data*/
                         );
 

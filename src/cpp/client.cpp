@@ -91,7 +91,7 @@ void SmartSimClient::put_dataset(DataSet& dataset)
     cmd->add_field(this->_put_prefix() + "{"
                    + dataset.name + "}."
                    + tensor->name());
-    cmd->add_field(tensor->type());
+    cmd->add_field(tensor->type_str());
     cmd->add_fields(tensor->dims());
     cmd->add_field("BLOB");
     cmd->add_field_ptr(tensor->buf());
@@ -120,11 +120,11 @@ DataSet SmartSimClient::get_dataset(const std::string& name)
   // Loop through and add each tensor to the dataset
   char** tensor_names;
   size_t n_tensors;
-  std::string type;
-  dataset.get_meta(".tensors", type,
-                   (void*&)tensor_names, n_tensors);
+  MetaDataType type;
+  dataset.get_meta(".tensors", (void*&)tensor_names,
+                   n_tensors, type);
 
-  if(type.compare("STRING")!=0)
+  if(type!=MetaDataType::string)
     throw std::runtime_error("The .tensors field "\
                              "for dataset " +
                              name +
@@ -144,10 +144,10 @@ DataSet SmartSimClient::get_dataset(const std::string& name)
 
     std::vector<size_t> reply_dims = this->_get_tensor_dims(reply);
     std::string_view blob = this->_get_tensor_data_blob(reply);
-    std::string type = this->_get_tensor_data_type(reply);
-    dataset._add_to_tensorpack(tensor_names[i], type,
+    TensorType type = this->_get_tensor_data_type(reply);
+    dataset._add_to_tensorpack(tensor_names[i],
                                (void*)blob.data(), reply_dims,
-                               MemoryLayout::contiguous);
+                               type, MemoryLayout::contiguous);
   }
   return dataset;
 }
@@ -182,52 +182,49 @@ void SmartSimClient::delete_dataset(const std::string& name)
 }
 
 void SmartSimClient::put_tensor(const std::string& key,
-                                const std::string& type,
                                 void* data,
                                 const std::vector<size_t>& dims,
+                                const TensorType type,
                                 const MemoryLayout mem_layout)
 {
   /* This function puts a tensor into the datastore
   */
 
-  if(TENSOR_DATATYPES.count(type)<=0)
-    throw std::runtime_error("Invalid tensor type: " + \
-                             std::string(type));
   TensorBase* tensor;
-  int data_type = TENSOR_TYPE_MAP.at(type);
-  switch(data_type) {
-    case DOUBLE_TENSOR_TYPE : {
-      tensor = new Tensor<double>(key, type, data,
-                                  dims, mem_layout);
+
+  switch(type) {
+    case TensorType::dbl : {
+      tensor = new Tensor<double>(key, data, dims,
+                                  type, mem_layout);
     break;
     }
-    case FLOAT_TENSOR_TYPE :
-      tensor = new Tensor<float>(key, type, data,
-                                 dims, mem_layout);
+    case TensorType::flt :
+      tensor = new Tensor<float>(key, data, dims,
+                                 type, mem_layout);
     break;
-    case INT64_TENSOR_TYPE :
-      tensor = new Tensor<int64_t>(key, type, data,
-                                   dims, mem_layout);
+    case TensorType::int64 :
+      tensor = new Tensor<int64_t>(key, data, dims,
+                                   type, mem_layout);
     break;
-    case INT32_TENSOR_TYPE :
-      tensor = new Tensor<int32_t>(key, type, data,
-                                   dims, mem_layout);
+    case TensorType::int32 :
+      tensor = new Tensor<int32_t>(key, data, dims,
+                                   type, mem_layout);
     break;
-    case INT16_TENSOR_TYPE :
-      tensor = new Tensor<int16_t>(key, type, data,
-                                   dims, mem_layout);
+    case TensorType::int16 :
+      tensor = new Tensor<int16_t>(key, data, dims,
+                                   type, mem_layout);
     break;
-    case INT8_TENSOR_TYPE :
-      tensor = new Tensor<int8_t>(key, type, data,
-                                  dims, mem_layout);
+    case TensorType::int8 :
+      tensor = new Tensor<int8_t>(key, data, dims,
+                                  type, mem_layout);
     break;
-    case UINT16_TENSOR_TYPE :
-      tensor = new Tensor<uint16_t>(key, type, data,
-                                    dims, mem_layout);
+    case TensorType::uint16 :
+      tensor = new Tensor<uint16_t>(key, data, dims,
+                                    type, mem_layout);
     break;
-    case UINT8_TENSOR_TYPE :
-      tensor = new Tensor<uint8_t>(key, type, data,
-                                   dims, mem_layout);
+    case TensorType::uint8 :
+      tensor = new Tensor<uint8_t>(key, data, dims,
+                                   type, mem_layout);
     break;
   }
 
@@ -236,7 +233,7 @@ void SmartSimClient::put_tensor(const std::string& key,
 
   cmd.add_field("AI.TENSORSET");
   cmd.add_field(this->_put_prefix() + key);
-  cmd.add_field(type);
+  cmd.add_field(tensor->type_str());
   for(size_t i=0; i<dims.size(); i++)
     cmd.add_field(std::to_string(dims[i]));
   cmd.add_field("BLOB");
@@ -247,8 +244,9 @@ void SmartSimClient::put_tensor(const std::string& key,
 }
 
 void SmartSimClient::get_tensor(const std::string& key,
-                                std::string& type, void*& data,
+                                void*& data,
                                 std::vector<size_t>& dims,
+                                TensorType& type,
                                 const MemoryLayout mem_layout)
 {
   /* This function gets a tensor from the database,
@@ -283,51 +281,46 @@ void SmartSimClient::get_tensor(const std::string& key,
     }
   }
 
-  if(TENSOR_TYPE_MAP.count(type)==0)
-    throw std::runtime_error("The type of the fetched tensor "\
-                             "is not valid: " + type);
-
-  int data_type = TENSOR_TYPE_MAP.at(type);
   TensorBase* ptr;
-  switch(data_type) {
-    case DOUBLE_TENSOR_TYPE :
-      ptr = new Tensor<double>(key, type, (void*)blob.data(),
-                               dims, MemoryLayout::contiguous);
+  switch(type) {
+    case TensorType::dbl :
+      ptr = new Tensor<double>(key, (void*)blob.data(), dims,
+                               type, MemoryLayout::contiguous);
       this->_tensor_memory.add_tensor(ptr);
       break;
-    case FLOAT_TENSOR_TYPE :
-      ptr = new Tensor<float>(key, type, (void*)blob.data(),
-                              dims, MemoryLayout::contiguous);
+    case TensorType::flt :
+      ptr = new Tensor<float>(key, (void*)blob.data(), dims,
+                              type, MemoryLayout::contiguous);
       this->_tensor_memory.add_tensor(ptr);
       break;
-    case INT64_TENSOR_TYPE :
-      ptr = new Tensor<int64_t>(key, type, (void*)blob.data(),
-                                dims, MemoryLayout::contiguous);
+    case TensorType::int64 :
+      ptr = new Tensor<int64_t>(key, (void*)blob.data(), dims,
+                                type, MemoryLayout::contiguous);
       this->_tensor_memory.add_tensor(ptr);
       break;
-    case INT32_TENSOR_TYPE :
-      ptr = new Tensor<int32_t>(key, type, (void*)blob.data(),
-                                dims, MemoryLayout::contiguous);
+    case TensorType::int32 :
+      ptr = new Tensor<int32_t>(key, (void*)blob.data(), dims,
+                                type, MemoryLayout::contiguous);
       this->_tensor_memory.add_tensor(ptr);
       break;
-    case INT16_TENSOR_TYPE :
-      ptr = new Tensor<int16_t>(key, type, (void*)blob.data(),
-                                dims, MemoryLayout::contiguous);
+    case TensorType::int16 :
+      ptr = new Tensor<int16_t>(key, (void*)blob.data(), dims,
+                                type, MemoryLayout::contiguous);
       this->_tensor_memory.add_tensor(ptr);
       break;
-    case INT8_TENSOR_TYPE :
-      ptr = new Tensor<int8_t>(key, type, (void*)blob.data(),
-                               dims, MemoryLayout::contiguous);
+    case TensorType::int8 :
+      ptr = new Tensor<int8_t>(key, (void*)blob.data(), dims,
+                               type, MemoryLayout::contiguous);
       this->_tensor_memory.add_tensor(ptr);
       break;
-    case UINT16_TENSOR_TYPE :
-      ptr = new Tensor<uint16_t>(key, type, (void*)blob.data(),
-                                 dims, MemoryLayout::contiguous);
+    case TensorType::uint16 :
+      ptr = new Tensor<uint16_t>(key, (void*)blob.data(), dims,
+                                 type, MemoryLayout::contiguous);
       this->_tensor_memory.add_tensor(ptr);
       break;
-    case UINT8_TENSOR_TYPE :
-      ptr = new Tensor<uint8_t>(key, type, (void*)blob.data(),
-                                dims, MemoryLayout::contiguous);
+    case TensorType::uint8 :
+      ptr = new Tensor<uint8_t>(key, (void*)blob.data(), dims,
+                                type, MemoryLayout::contiguous);
       this->_tensor_memory.add_tensor(ptr);
       break;
     default :
@@ -340,9 +333,10 @@ void SmartSimClient::get_tensor(const std::string& key,
 }
 
 void SmartSimClient::get_tensor(const std::string& key,
-                                char*& type, size_t& type_length,
-                                void*& data, size_t*& dims,
+                                void*& data,
+                                size_t*& dims,
                                 size_t& n_dims,
+                                TensorType& type,
                                 const MemoryLayout mem_layout)
 {
   /* This function will retrieve tensor data
@@ -355,11 +349,10 @@ void SmartSimClient::get_tensor(const std::string& key,
   is destroyed.
   */
   std::vector<size_t> dims_vec;
-  std::string type_str;
-  this->get_tensor(key, type_str, data,
-                   dims_vec, mem_layout);
+  this->get_tensor(key, data, dims_vec,
+                   type, mem_layout);
 
-  size_t dims_bytes = sizeof(int)*dims_vec.size();
+  size_t dims_bytes = sizeof(size_t)*dims_vec.size();
   dims = this->_dim_queries.allocate_bytes(dims_bytes);
   n_dims = dims_vec.size();
 
@@ -372,23 +365,17 @@ void SmartSimClient::get_tensor(const std::string& key,
       it++;
   }
 
-  //We will make the type char* null-terminated for safety,
-  //but we will not include that in the length.
-  size_t type_bytes = sizeof(char)*(type_str.size()+1);
-  type = this->_type_queries.allocate_bytes(type_bytes);
-  type_length=type_str.size();
-  std::memcpy(type, type_str.data(), type_bytes);
   return;
 }
 
 void SmartSimClient::unpack_tensor(const std::string& key,
-                                   const std::string& type,
                                    void* data,
                                    const std::vector<size_t>& dims,
+                                   const TensorType type,
                                    const MemoryLayout mem_layout)
 {
-  /* This function gets a tensor from the database and stores
-  it in the data pointer.
+  /* This function gets a tensor from the database and
+  copies the data to the data pointer location.
   */
 
   if(mem_layout == MemoryLayout::contiguous &&
@@ -439,49 +426,53 @@ void SmartSimClient::unpack_tensor(const std::string& key,
     }
   }
 
-  std::string reply_type = this->_get_tensor_data_type(reply);
-  if(type.compare(reply_type)!=0)
-    throw std::runtime_error("The type of the fetched tensor, " +
-                             reply_type +
-                             ", does not match the provided type: " +
-                             type);
-
+  TensorType reply_type = this->_get_tensor_data_type(reply);
+  if(type!=reply_type)
+    throw std::runtime_error("The type of the fetched tensor "\
+                             "does not match the provided type");
   std::string_view blob = this->_get_tensor_data_blob(reply);
 
   TensorBase* tensor;
-  int data_type = TENSOR_TYPE_MAP.at(type);
-  switch(data_type) {
-    case DOUBLE_TENSOR_TYPE :
-      tensor = new Tensor<double>(key, type, (void*)blob.data(),
-                                  dims, MemoryLayout::contiguous);
+  switch(reply_type) {
+    case TensorType::dbl :
+      tensor = new Tensor<double>(key, (void*)blob.data(), dims,
+                                  reply_type,
+                                  MemoryLayout::contiguous);
     break;
-    case FLOAT_TENSOR_TYPE :
-      tensor = new Tensor<float>(key, type, (void*)blob.data(),
-                                 dims, MemoryLayout::contiguous);
+    case TensorType::flt :
+      tensor = new Tensor<float>(key, (void*)blob.data(), dims,
+                                 reply_type,
+                                 MemoryLayout::contiguous);
     break;
-    case INT64_TENSOR_TYPE :
-      tensor = new Tensor<int64_t>(key, type, (void*)blob.data(),
-                                   dims, MemoryLayout::contiguous);
+    case TensorType::int64  :
+      tensor = new Tensor<int64_t>(key, (void*)blob.data(), dims,
+                                   reply_type,
+                                   MemoryLayout::contiguous);
     break;
-    case INT32_TENSOR_TYPE :
-      tensor = new Tensor<int32_t>(key, type, (void*)blob.data(),
-                                   dims, MemoryLayout::contiguous);
+    case TensorType::int32 :
+      tensor = new Tensor<int32_t>(key, (void*)blob.data(), dims,
+                                   reply_type,
+                                   MemoryLayout::contiguous);
     break;
-    case INT16_TENSOR_TYPE :
-      tensor = new Tensor<int16_t>(key, type, (void*)blob.data(),
-                                   dims, MemoryLayout::contiguous);
+    case TensorType::int16 :
+      tensor = new Tensor<int16_t>(key, (void*)blob.data(), dims,
+                                   reply_type,
+                                   MemoryLayout::contiguous);
     break;
-    case INT8_TENSOR_TYPE :
-      tensor = new Tensor<int8_t>(key, type, (void*)blob.data(),
-                                  dims, MemoryLayout::contiguous);
+    case TensorType::int8 :
+      tensor = new Tensor<int8_t>(key, (void*)blob.data(), dims,
+                                  reply_type,
+                                  MemoryLayout::contiguous);
     break;
-    case UINT16_TENSOR_TYPE :
-      tensor = new Tensor<uint16_t>(key, type, (void*)blob.data(),
-                                    dims, MemoryLayout::contiguous);
+    case TensorType::uint16 :
+      tensor = new Tensor<uint16_t>(key, (void*)blob.data(), dims,
+                                    reply_type,
+                                    MemoryLayout::contiguous);
     break;
-    case UINT8_TENSOR_TYPE :
-      tensor = new Tensor<uint8_t>(key, type, (void*)blob.data(),
-                                   dims, MemoryLayout::contiguous);
+    case TensorType::uint8 :
+      tensor = new Tensor<uint8_t>(key, (void*)blob.data(), dims,
+                                   reply_type,
+                                   MemoryLayout::contiguous);
     break;
   }
 
@@ -1199,7 +1190,7 @@ std::string_view SmartSimClient::_get_tensor_data_blob(CommandReply& reply)
   return std::string_view(reply[5].str(), reply[5].str_len());
 }
 
-std::string SmartSimClient::_get_tensor_data_type(CommandReply& reply)
+TensorType SmartSimClient::_get_tensor_data_type(CommandReply& reply)
 {
   /* Returns a string of the tensor type
   */
@@ -1212,7 +1203,8 @@ std::string SmartSimClient::_get_tensor_data_type(CommandReply& reply)
     throw std::runtime_error("The message does not have the correct "\
                              "number of fields");
 
-  return std::string(reply[1].str(), reply[1].str_len());
+  return TENSOR_TYPE_MAP.at(std::string(reply[1].str(),
+                                        reply[1].str_len()));
 }
 
 

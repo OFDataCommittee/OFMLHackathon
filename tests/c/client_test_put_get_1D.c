@@ -8,12 +8,14 @@
 
 bool cluster = true;
 
-int put_get_1D_tensor(void* client, void* tensor,
-                      size_t* dims, size_t n_dims,
-                      void** result, char* type,
-                      size_t type_length,
+int put_get_1D_tensor(void* client,
+                      void* tensor,
+                      size_t* dims,
+                      size_t n_dims,
+                      void** result,
                       char* key_suffix,
-                      size_t key_suffix_length)
+                      size_t key_suffix_length,
+                      CTensorType type)
 {
   /* This function is a data type agnostic put and
   get for 1D tensors.  The result vector
@@ -51,17 +53,16 @@ int put_get_1D_tensor(void* client, void* tensor,
   pos += key_suffix_length;
   key[pos] = 0;
 
-  char* g_type;
-  size_t g_type_length;
+  CTensorType g_type;
   size_t* g_dims;
   size_t g_n_dims;
 
   CMemoryLayout layout = c_nested;
-  put_tensor(client, key, key_length, type, type_length,
-             (void*)tensor, dims, n_dims, layout);
+  put_tensor(client, key, key_length,
+             (void*)tensor, dims, n_dims, type, layout);
   get_tensor(client, key, key_length,
-             &g_type, &g_type_length,
-             result, &g_dims, &g_n_dims, layout);
+             result, &g_dims, &g_n_dims,
+             &g_type, layout);
 
   int r_value = 0;
   if(g_n_dims!=n_dims) {
@@ -80,14 +81,7 @@ int put_get_1D_tensor(void* client, void* tensor,
     }
   }
 
-  if(g_type_length!=type_length) {
-    printf("%s", "The fetched type length with "\
-                 "client.get_tensor() does not match "\
-                 "the known tensor type length.\n");
-    r_value = -1;
-  }
-
-  if(strcmp(g_type, type)!=0) {
+  if(g_type!=type) {
     printf("%s", "The fetched type with "\
                  "client.get_tensor() does not match "\
                   "the known tensor type.\n");
@@ -115,14 +109,11 @@ int put_get_1D_tensor_double(size_t* dims, size_t n_dims,
   for(size_t i=0; i<dims[0]; i++)
     tensor[i] = ((double)rand())/RAND_MAX;
 
-  char* type = "DOUBLE";
-  size_t type_length = strlen(type);
-
   int r_value = 0;
   r_value = put_get_1D_tensor(client,(void*)tensor,
                               dims, n_dims, (void**)(&result),
-                              type, type_length, key_suffix,
-                              key_suffix_length);
+                              key_suffix, key_suffix_length,
+                              c_dbl);
 
   if(!is_equal_1D_tensor_dbl(tensor, result, dims[0])) {
       printf("%s", "The double tensors do not match!\n");
@@ -151,14 +142,11 @@ int put_get_1D_tensor_float(size_t* dims, size_t n_dims,
   for(size_t i=0; i<dims[0]; i++)
     tensor[i] = ((float)rand())/RAND_MAX;
 
-  char* type = "FLOAT";
-  size_t type_length = strlen(type);
-
   int r_value = 0;
   r_value = put_get_1D_tensor(client,(void*)tensor,
                               dims, n_dims, (void**)(&result),
-                              type, type_length, key_suffix,
-                              key_suffix_length);
+                              key_suffix, key_suffix_length,
+                              c_flt);
 
   free(tensor);
   DeleteCClient(client);
@@ -185,14 +173,11 @@ int put_get_1D_tensor_i8(size_t* dims, size_t n_dims,
       tensor[i] *= -1;
   }
 
-  char* type = "INT8";
-  size_t type_length = strlen(type);
-
   int r_value = 0;
   r_value = put_get_1D_tensor(client,(void*)tensor,
                               dims, n_dims, (void**)(&result),
-                              type, type_length, key_suffix,
-                              key_suffix_length);
+                              key_suffix, key_suffix_length,
+                              c_int8);
 
   if(!is_equal_1D_tensor_i8(tensor, result, dims[0])) {
       printf("%s", "The i8 tensors do not match!\n");
@@ -224,14 +209,11 @@ int put_get_1D_tensor_i16(size_t* dims, size_t n_dims,
       tensor[i] *= -1;
   }
 
-  char* type = "INT16";
-  size_t type_length = strlen(type);
-
   int r_value = 0;
   r_value = put_get_1D_tensor(client,(void*)tensor,
                               dims, n_dims, (void**)(&result),
-                              type, type_length, key_suffix,
-                              key_suffix_length);
+                              key_suffix, key_suffix_length,
+                              c_int16);
 
   if(!is_equal_1D_tensor_i16(tensor, result, dims[0])) {
       printf("%s", "The i16 tensors do not match!\n");
@@ -263,14 +245,11 @@ int put_get_1D_tensor_i32(size_t* dims, size_t n_dims,
       tensor[i] *= -1;
   }
 
-  char* type = "INT32";
-  size_t type_length = strlen(type);
-
   int r_value = 0;
   r_value = put_get_1D_tensor(client,(void*)tensor,
                               dims, n_dims, (void**)(&result),
-                              type, type_length, key_suffix,
-                              key_suffix_length);
+                              key_suffix, key_suffix_length,
+                              c_int32);
 
   if(!is_equal_1D_tensor_i32(tensor, result, dims[0])) {
       printf("%s", "The i32 tensors do not match!\n");
@@ -302,14 +281,11 @@ int put_get_1D_tensor_i64(size_t* dims, size_t n_dims,
       tensor[i] *= -1;
   }
 
-  char* type = "INT64";
-  size_t type_length = strlen(type);
-
   int r_value = 0;
   r_value = put_get_1D_tensor(client,(void*)tensor,
                               dims, n_dims, (void**)(&result),
-                              type, type_length, key_suffix,
-                              key_suffix_length);
+                              key_suffix, key_suffix_length,
+                              c_int64);
 
   if(!is_equal_1D_tensor_i64(tensor, result, dims[0])) {
       printf("%s", "The i64 tensors do not match!\n");
@@ -338,14 +314,11 @@ int put_get_1D_tensor_ui8(size_t* dims, size_t n_dims,
   for(size_t i=0; i<dims[0]; i++)
     tensor[i] = rand()%UINT8_MAX;
 
-  char* type = "UINT8";
-  size_t type_length = strlen(type);
-
   int r_value = 0;
   r_value = put_get_1D_tensor(client,(void*)tensor,
                               dims, n_dims, (void**)(&result),
-                              type, type_length, key_suffix,
-                              key_suffix_length);
+                              key_suffix, key_suffix_length,
+                              c_uint8);
 
   if(!is_equal_1D_tensor_ui8(tensor, result, dims[0])) {
       printf("%s", "The ui8 tensors do not match!\n");
@@ -374,14 +347,11 @@ int put_get_1D_tensor_ui16(size_t* dims, size_t n_dims,
   for(int i=0; i<dims[0]; i++)
     tensor[i] = rand()%UINT16_MAX;
 
-  char* type = "UINT16";
-  size_t type_length = strlen(type);
-
   int r_value = 0;
   r_value = put_get_1D_tensor(client,(void*)tensor,
                               dims, n_dims, (void**)(&result),
-                              type, type_length, key_suffix,
-                              key_suffix_length);
+                              key_suffix, key_suffix_length,
+                              c_uint16);
 
   if(!is_equal_1D_tensor_ui16(tensor, result, dims[0])) {
       printf("%s", "The ui16 tensors do not match!\n");

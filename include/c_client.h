@@ -5,14 +5,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "client.h"
-
-typedef enum{
-    c_nested=1,
-    c_contiguous=2,
-    c_fortran_nested=3,
-    c_fortran_contiguous=4
-}CMemoryLayout;
-
+#include "enums/c_memory_layout.h"
+#include "enums/c_tensor_type.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,11 +57,10 @@ void delete_dataset(void* c_client /*!< The c client to use for communication*/,
 void put_tensor(void* c_client /*!< The c client to use for communication*/,
                 const char* key /*!< The key to use to place the tensor*/,
                 const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-                const char* type /*!< The data type of the tensor*/,
-                const size_t type_length /*!< The length of the type c-string, excluding null terminating character */,
                 void* data /*!< A c ptr to the beginning of the data*/,
                 const size_t* dims /*!< Length along each dimension of the tensor*/,
                 const size_t n_dims /*!< The number of dimensions of the tensor*/,
+                CTensorType type /*!< The data type of the tensor*/,
                 CMemoryLayout mem_layout /*! The memory layout of the data*/
                 );
 
@@ -75,11 +68,10 @@ void put_tensor(void* c_client /*!< The c client to use for communication*/,
 void get_tensor(void* c_client /*!< The c client to use for communication*/,
                 const char* key /*!< The key to use to fetch the tensor*/,
                 const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-                char** type /*!< The data type of the tensor*/,
-                size_t* type_length /*!< The length of the type c-string, excluding null terminating character */,
                 void** data /*!< A c ptr to the beginning of the result array to fill*/,
                 size_t** dims /*!< The dimensions of the tensor*/,
                 size_t* n_dims /*!< The number of dimensions of the tensor*/,
+                CTensorType* type /*!< The data type of the tensor*/,
                 CMemoryLayout mem_layout /*! The memory layout of the data*/
                 );
 
@@ -87,11 +79,10 @@ void get_tensor(void* c_client /*!< The c client to use for communication*/,
 void unpack_tensor(void* c_client /*!< The c client to use for communication*/,
                   const char* key /*!< The key to use to fetch the tensor*/,
                   const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-                  const char* type /*!< The data type of the tensor*/,
-                  const size_t type_length /*!< The length of the type c-string, excluding null terminating character */,
                   void* result /*!< A c ptr to the beginning of the result array to fill*/,
                   const size_t* dims /*!< The dimensions of the tensor*/,
                   const size_t n_dims /*!< The number of dimensions of the tensor*/,
+                  CTensorType type /*!< The data type of the tensor*/,
                   CMemoryLayout mem_layout /*! The memory layout of the data*/
                   );
 
@@ -239,9 +230,6 @@ bool poll_key(void* c_client /*!< The c client to use for communication*/,
 
 #ifdef __cplusplus
 }
-
-//! Helper method to convert between CMemoryLayout and MemoryLayout
-MemoryLayout convert_layout(CMemoryLayout layout);
 
 #endif
 #endif // SMARTSIM_C_CLIENT_H

@@ -69,7 +69,9 @@ void run_mnist(const std::string& model_name,
   std::string out_key = "mnist_output_rank_" + std::to_string(rank);
 
   double put_tensor_start = MPI_Wtime();
-  client.put_tensor(in_key, "FLOAT", array, {1,1,28,28}, MemoryLayout::nested);
+  client.put_tensor(in_key, array, {1,1,28,28},
+                    TensorType::flt,
+                    MemoryLayout::nested);
   double put_tensor_end = MPI_Wtime();
   delta_t = put_tensor_end - put_tensor_start;
   timing_file << rank << "," << "put_tensor" << ","
@@ -90,7 +92,9 @@ void run_mnist(const std::string& model_name,
               << delta_t << std::endl << std::flush;
 
   double unpack_tensor_start = MPI_Wtime();
-  client.unpack_tensor(out_key, "FLOAT", result, {1,10}, MemoryLayout::nested);
+  client.unpack_tensor(out_key, result, {1,10},
+                       TensorType::flt,
+                       MemoryLayout::nested);
   double unpack_tensor_end = MPI_Wtime();
   delta_t = unpack_tensor_end - unpack_tensor_start;
   timing_file << rank << "," << "unpack_tensor" << ","

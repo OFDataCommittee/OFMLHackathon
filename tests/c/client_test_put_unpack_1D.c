@@ -7,8 +7,8 @@
 #include "stdint.h"
 
 void put_unpack_1D_tensor(void* tensor, size_t* dims, size_t n_dims,
-                       void* result, char* type,
-                       size_t type_length,
+                       void* result,
+                       CTensorType type,
                        char* key_suffix,
                        size_t key_suffix_length)
 {
@@ -50,10 +50,12 @@ void put_unpack_1D_tensor(void* tensor, size_t* dims, size_t n_dims,
   pos += key_suffix_length;
   key[pos] = 0;
 
-  put_tensor(client, key, key_length, type, type_length,
-             (void*)tensor, dims, n_dims);
-  unpack_tensor(client, key, key_length, type, type_length,
-                result, dims, n_dims);
+  CMemoryLayout layout = c_nested;
+  put_tensor(client, key, key_length,
+             (void*)tensor, dims, n_dims, type, layout);
+  unpack_tensor(client, key, key_length,
+                result, dims, n_dims,
+                type, layout);
 
   free(rank_str);
   free(key);
@@ -73,12 +75,9 @@ int put_unpack_1D_tensor_double(size_t* dims, size_t n_dims,
   for(size_t i=0; i<dims[0]; i++)
     tensor[i] = ((double)rand())/RAND_MAX;
 
-  char* type = "DOUBLE";
-  size_t type_length = strlen(type);
-
   put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                    type, type_length, key_suffix,
-                    key_suffix_length);
+                        c_dbl, key_suffix,
+                        key_suffix_length);
 
   int r_value = 0;
   if(!is_equal_1D_tensor_dbl(tensor, result, dims[0])) {
@@ -105,12 +104,9 @@ int put_unpack_1D_tensor_float(size_t* dims, size_t n_dims,
   for(size_t i=0; i<dims[0]; i++)
     tensor[i] = ((float)rand())/RAND_MAX;
 
-  char* type = "FLOAT";
-  size_t type_length = strlen(type);
-
   put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                    type, type_length, key_suffix,
-                    key_suffix_length);
+                       c_flt, key_suffix,
+                       key_suffix_length);
 
   int r_value = 0;
   if(!is_equal_1D_tensor_flt(tensor, result, dims[0])) {
@@ -140,12 +136,8 @@ int put_unpack_1D_tensor_i8(size_t* dims, size_t n_dims,
       tensor[i] *= -1;
   }
 
-  char* type = "INT8";
-  size_t type_length = strlen(type);
-
   put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                    type, type_length, key_suffix,
-                    key_suffix_length);
+                       c_int8, key_suffix, key_suffix_length);
 
   int r_value = 0;
   if(!is_equal_1D_tensor_i8(tensor, result, dims[0])) {
@@ -175,12 +167,8 @@ int put_unpack_1D_tensor_i16(size_t* dims, size_t n_dims,
       tensor[i] *= -1;
   }
 
-  char* type = "INT16";
-  size_t type_length = strlen(type);
-
   put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                    type, type_length, key_suffix,
-                    key_suffix_length);
+                       c_int16, key_suffix, key_suffix_length);
 
   int r_value = 0;
   if(!is_equal_1D_tensor_i16(tensor, result, dims[0])) {
@@ -214,8 +202,7 @@ int put_unpack_1D_tensor_i32(size_t* dims, size_t n_dims,
   size_t type_length = strlen(type);
 
   put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                    type, type_length, key_suffix,
-                    key_suffix_length);
+                       c_int32, key_suffix, key_suffix_length);
 
   int r_value = 0;
   if(!is_equal_1D_tensor_i32(tensor, result, dims[0])) {
@@ -249,8 +236,7 @@ int put_unpack_1D_tensor_i64(size_t* dims, size_t n_dims,
   size_t type_length = strlen(type);
 
   put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                    type, type_length, key_suffix,
-                    key_suffix_length);
+                       c_int64, key_suffix, key_suffix_length);
 
   int r_value = 0;
   if(!is_equal_1D_tensor_i64(tensor, result, dims[0])) {
@@ -281,8 +267,7 @@ int put_unpack_1D_tensor_ui8(size_t* dims, size_t n_dims,
   size_t type_length = strlen(type);
 
   put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                    type, type_length, key_suffix,
-                    key_suffix_length);
+                       c_uint8, key_suffix, key_suffix_length);
 
   int r_value = 0;
   if(!is_equal_1D_tensor_ui8(tensor, result, dims[0])) {
@@ -313,8 +298,7 @@ int put_unpack_1D_tensor_ui16(size_t* dims, size_t n_dims,
   size_t type_length = strlen(type);
 
   put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                    type, type_length, key_suffix,
-                    key_suffix_length);
+                       c_uint16, key_suffix, key_suffix_length);
 
   int r_value = 0;
   if(!is_equal_1D_tensor_ui16(tensor, result, dims[0])) {

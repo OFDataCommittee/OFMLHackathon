@@ -66,8 +66,8 @@ void MetaData::fill_from_buffer(const char* buf, unsigned long long buf_size)
 }
 
 void MetaData::add_value(const std::string& field_name,
-                         const std::string& type,
-                         const void* value)
+                         const void* value,
+                         MetaDataType type)
 {
     /* This functions adds a meta data value to the metadata
     field given by fieldname.  The default behavior is to append
@@ -75,7 +75,7 @@ void MetaData::add_value(const std::string& field_name,
     field.
     */
     if(!(this->_field_exists(field_name)))
-        this->_create_message(field_name, type);
+         this->_create_message(field_name, type);
 
     gpb::Message* msg = this->_meta_msg_map[field_name];
     const gpb::Reflection* refl = msg->GetReflection();
@@ -83,27 +83,26 @@ void MetaData::add_value(const std::string& field_name,
         msg->GetDescriptor()->FindFieldByName("data");
 
     //TODO add try catch for protobuf errors
-    int data_type = this->_get_type_integer(type);
-    switch(data_type) {
-        case string_type :
+    switch(type) {
+        case MetaDataType::string :
             refl->AddString(msg, field, std::string((char*)value));
             break;
-        case double_type :
+        case MetaDataType::dbl :
             refl->AddDouble(msg, field, *((double*)value));
             break;
-        case float_type :
+        case MetaDataType::flt :
             refl->AddFloat(msg, field, *((float*)value));
             break;
-        case int64_type :
+        case MetaDataType::int64 :
             refl->AddInt64(msg, field, *((int64_t*)value));
             break;
-        case uint64_type :
+        case MetaDataType::uint64 :
             refl->AddUInt64(msg, field, *((uint64_t*)value));
             break;
-        case int32_type :
+        case MetaDataType::int32 :
             refl->AddInt32(msg, field, *((int32_t*)value));
             break;
-        case uint32_type :
+        case MetaDataType::uint32 :
             refl->AddUInt32(msg, field, *((uint32_t*)value));
             break;
     }
@@ -111,9 +110,9 @@ void MetaData::add_value(const std::string& field_name,
 }
 
 void MetaData::get_values(const std::string& name,
-                          std::string& type,
                           void*& data,
-                          size_t& length)
+                          size_t& length,
+                          MetaDataType& type)
 {
     /* This function allocates the memory to
     return a pointer (via pointer reference "data")
@@ -127,35 +126,32 @@ void MetaData::get_values(const std::string& name,
                                  " does not exist.");
 
     type = this->_get_meta_value_type(name);
-    int data_type = this->_get_type_integer(type);
-
     gpb::Message* msg = this->_meta_msg_map[name];
-
-    switch(data_type) {
-        case string_type :
+    switch(type) {
+        case MetaDataType::string :
             this->_get_string_field_values(msg, data, length);
             break;
-        case double_type :
+        case MetaDataType::dbl :
             this->_get_numeric_field_values<double>
                 (msg, data, length, this->_double_mem_mgr);
             break;
-        case float_type :
+        case MetaDataType::flt :
             this->_get_numeric_field_values<float>
                 (msg, data, length, this->_float_mem_mgr);
             break;
-        case int64_type :
+        case MetaDataType::int64 :
             this->_get_numeric_field_values<int64_t>
                 (msg, data, length, this->_int64_mem_mgr);
             break;
-        case uint64_type :
+        case MetaDataType::uint64 :
             this->_get_numeric_field_values<uint64_t>
                 (msg, data, length, this->_uint64_mem_mgr);
             break;
-        case int32_type :
+        case MetaDataType::int32 :
             this->_get_numeric_field_values<int32_t>
                 (msg, data, length, this->_int32_mem_mgr);
             break;
-        case uint32_type :
+        case MetaDataType::uint32 :
             this->_get_numeric_field_values<uint32_t>
                 (msg, data, length, this->_uint32_mem_mgr);
             break;
@@ -211,38 +207,37 @@ void MetaData::_unpack_metadata(const std::string& field_name)
 }
 
 void MetaData::_create_message(const std::string& field_name,
-                               const std::string& type)
+                               const MetaDataType type)
 {
     /* This function will create a new protobuf message to
     hold the metadata of the specified type.
     */
-    int data_type = this->_get_type_integer(type);
-    switch(data_type) {
-        case string_type :
+    switch(type) {
+        case MetaDataType::string :
             this->_create_message_by_type
                     <StringMsg>(field_name,top_string_msg);
             break;
-        case double_type :
+        case MetaDataType::dbl :
             this->_create_message_by_type
                     <DoubleMsg>(field_name,top_double_msg);
             break;
-        case float_type :
+        case MetaDataType::flt :
             this->_create_message_by_type
                     <FloatMsg>(field_name,top_float_msg);
             break;
-        case int64_type :
+        case MetaDataType::int64 :
             this->_create_message_by_type
                     <Int64Msg>(field_name,top_int64_msg);
             break;
-        case uint64_type :
+        case MetaDataType::uint64 :
             this->_create_message_by_type
                     <UInt64Msg>(field_name,top_uint64_msg);
             break;
-        case int32_type :
+        case MetaDataType::int32 :
             this->_create_message_by_type
                     <Int32Msg>(field_name,top_int32_msg);
             break;
-        case uint32_type :
+        case MetaDataType::uint32 :
             this->_create_message_by_type
                     <UInt32Msg>(field_name,top_uint32_msg);
             break;
@@ -367,23 +362,7 @@ bool MetaData::_field_exists(const std::string& field_name)
    return (_meta_msg_map.count(field_name)>0);
 }
 
-inline int MetaData::_get_type_integer(const std::string& type)
-{
-    /* Returns the integer type value corresponding
-    to the provided type.  This function will
-    throw an error if the type is not valid.
-    Error checking is not separated from the function
-    because it is implicit in the unordered_map.at()
-    */
-    try {
-        return meta_type_map.at(type);
-    }
-    catch (const std::out_of_range& oor) {
-        throw std::runtime_error("The provide type is invalid: " + type);
-    }
-}
-
-inline std::string MetaData::_get_meta_value_type(const std::string& name)
+inline MetaDataType MetaData::_get_meta_value_type(const std::string& name)
 {
     /* This function returns the metadata field type
     string for the metadata field.
@@ -393,28 +372,28 @@ inline std::string MetaData::_get_meta_value_type(const std::string& name)
     const gpb::FieldDescriptor* field_desc =
         msg->GetDescriptor()->FindFieldByName("data");
 
-    std::string type;
+    MetaDataType type;
     switch(field_desc->cpp_type()) {
         case gpb::FieldDescriptor::CppType::CPPTYPE_INT32 :
-            type = "INT32";
+            type = MetaDataType::int32;
             break;
         case gpb::FieldDescriptor::CppType::CPPTYPE_INT64 :
-            type = "INT64";
+            type = MetaDataType::int64;
             break;
         case gpb::FieldDescriptor::CppType::CPPTYPE_UINT32 :
-            type = "UINT32";
+            type = MetaDataType::uint32;
             break;
         case gpb::FieldDescriptor::CppType::CPPTYPE_UINT64 :
-            type = "UINT64";
+            type = MetaDataType::uint64;
             break;
         case gpb::FieldDescriptor::CppType::CPPTYPE_FLOAT :
-            type = "FLOAT";
+            type = MetaDataType::flt;
             break;
         case gpb::FieldDescriptor::CppType::CPPTYPE_DOUBLE :
-            type = "DOUBLE";
+            type = MetaDataType::dbl;
             break;
         case gpb::FieldDescriptor::CppType::CPPTYPE_STRING :
-            type = "STRING";
+            type = MetaDataType::string;
             break;
         default :
             throw std::runtime_error("Unexpected type encountered in"\
