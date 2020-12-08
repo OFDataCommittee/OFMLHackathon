@@ -8,6 +8,7 @@ PYBIND11_MODULE(silc, m) {
 
     py::class_<SmartSimPyClient>(m, "Client")
         .def(py::init<bool, bool>())
-        .def("put_tensor", &SmartSimPyClient::put_tensor);
+        .def("put_tensor", &SmartSimPyClient::put_tensor)
+        .def("get_tensor", &SmartSimPyClient::get_tensor);
 }
 

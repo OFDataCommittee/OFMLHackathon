@@ -25,6 +25,9 @@ public:
                   std::string& type /*!< The data type of the tensor*/,
                   py::array data /*!< Numpy array with Pybind*/
                   );
+
+  py::array get_tensor(std::string& key);
+
 private:
   SmartSimClient* _client;
 
