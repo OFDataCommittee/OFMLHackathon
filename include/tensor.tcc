@@ -1,6 +1,5 @@
 #ifndef SMARTSIM_TENSOR_TCC
 #define SMARTSIM_TENSOR_TCC
-#include <stdexcept>
 
 template <class T>
 Tensor<T>::Tensor(const std::string& name,
@@ -89,11 +88,16 @@ void* Tensor<T>::data_view(const MemoryLayout mem_layout)
        the tensor data array.  The caller is
        expected to only index into the view
        pointer with a single []
-       MemoryLayout::nested : The returned view
+    2) MemoryLayout::nested : The returned view
        pointer points to a nested structure of
        pointers so that the caller can cast
        to a nested pointer structure and index
        with multiple [] operators.
+    3) MemoryLayout::fortran_contiguous :
+       The internal row major format will
+       be copied into a new allocated memory
+       space that is the transpose (column major)
+       of the row major layout.
     */
 
     void* ptr = 0;
@@ -101,6 +105,11 @@ void* Tensor<T>::data_view(const MemoryLayout mem_layout)
     switch(mem_layout) {
         case(MemoryLayout::contiguous) :
             ptr = this->_data;
+            break;
+        case(MemoryLayout::fortran_contiguous) :
+            ptr = this->_f_mem_views.allocate_bytes(
+                                     this->_n_data_bytes());
+            this->_c_to_f_memcpy((T*)ptr, (T*)this->_data, this->_dims);
             break;
         case(MemoryLayout::nested) :
             this->_build_nested_memory(&ptr,
@@ -119,7 +128,8 @@ void* Tensor<T>::data_view(const MemoryLayout mem_layout)
 
 template <class T>
 void Tensor<T>::fill_mem_space(void* data,
-                               std::vector<size_t> dims)
+                               std::vector<size_t> dims,
+                               MemoryLayout mem_layout)
 {
     /* This function will fill a supplied memory space
     (data) with the values in the tensor data array.
@@ -148,12 +158,24 @@ void Tensor<T>::fill_mem_space(void* data,
                                   "not match the size of the "\
                                   "tensor data array");
 
-    size_t starting_position = 0;
 
-    this->_fill_nested_mem_with_data(data, dims.data(),
-                                     dims.size(),
-                                     starting_position,
-                                     this->_data);
+
+    switch(mem_layout) {
+        case MemoryLayout::fortran_contiguous :
+            this->_c_to_f_memcpy((T*)data, (T*)this->_data, this->_dims);
+            break;
+        case MemoryLayout::contiguous :
+            std::memcpy(data, this->_data, this->_n_data_bytes());
+            break;
+        case MemoryLayout::nested : {
+            size_t starting_position = 0;
+            this->_fill_nested_mem_with_data(data, dims.data(),
+                                             dims.size(),
+                                             starting_position,
+                                             this->_data);
+            }
+            break;
+    }
     return;
 }
 
@@ -265,6 +287,9 @@ void Tensor<T>::_set_tensor_data(void* src_data,
         case(MemoryLayout::contiguous) :
             std::memcpy(this->_data, src_data, n_bytes);
             break;
+        case(MemoryLayout::fortran_contiguous) :
+            this->_f_to_c_memcpy((T*)this->_data, (T*) src_data, dims);
+            break;
         case(MemoryLayout::nested) :
             this->_copy_nested_to_contiguous(src_data,
                                              dims.data(),
@@ -283,4 +308,145 @@ size_t Tensor<T>::_n_data_bytes()
     */
     return this->num_values()*sizeof(T);
 }
+
+template <class T>
+void Tensor<T>::_f_to_c_memcpy(T* c_data,
+                               T* f_data,
+                               const std::vector<size_t>& dims)
+{
+    /* This function will copy a tensor
+    memory space from a column major
+    layout to a row major layout.
+    */
+    std::vector<size_t> dim_positions(dims.size(), 0);
+    _f_to_c(c_data, f_data, dims, dim_positions, 0);
+}
+
+template <class T>
+void Tensor<T>::_c_to_f_memcpy(T* f_data,
+                               T* c_data,
+                               const std::vector<size_t>& dims)
+{
+    /* This function will copy a tensor
+    memory space from a row major
+    layout to a column major layout.
+    */
+    std::vector<size_t> dim_positions(dims.size(), 0);
+    _c_to_f(f_data, c_data, dims, dim_positions, 0);
+}
+
+template <class T>
+void Tensor<T>::_f_to_c(T* c_data,
+                        T* f_data,
+                        const std::vector<size_t>& dims,
+                        std::vector<size_t> dim_positions,
+                        size_t current_dim)
+{
+    /* This function will recursively copy the fortran
+    column major memory to the c-style row major memory.
+    */
+
+    size_t start = dim_positions[current_dim];
+    size_t end = dims[current_dim];
+    size_t f_index;
+    size_t c_index;
+    bool more_dims = true;
+
+    if( (current_dim+1) == dims.size() )
+        more_dims = false;
+
+    for(size_t i=start; i<end; i++) {
+
+        if(more_dims)
+            this->_f_to_c(c_data, f_data, dims,
+                          dim_positions,
+                          current_dim+1);
+        else {
+            f_index = this->_f_index(dims, dim_positions);
+            c_index = this->_c_index(dims, dim_positions);
+            c_data[c_index] = f_data[f_index];
+        }
+        dim_positions[current_dim]++;
+    }
+    return;
+}
+
+template <class T>
+void Tensor<T>::_c_to_f(T* f_data,
+                        T* c_data,
+                        const std::vector<size_t>& dims,
+                        std::vector<size_t> dim_positions,
+                        size_t current_dim)
+{
+    /* This function will recursively copy the c-style
+    row major memory to the fortran row major memory.
+    */
+
+    size_t start = dim_positions[current_dim];
+    size_t end = dims[current_dim];
+    size_t f_index;
+    size_t c_index;
+    bool more_dims = true;
+
+    if( (current_dim+1) == dims.size() )
+        more_dims = false;
+
+    for(size_t i=start; i<end; i++) {
+
+        if(more_dims)
+            this->_c_to_f(f_data, c_data, dims,
+                          dim_positions,
+                          current_dim+1);
+        else {
+            f_index = this->_f_index(dims, dim_positions);
+            c_index = this->_c_index(dims, dim_positions);
+            f_data[f_index] = c_data[c_index];
+        }
+        dim_positions[current_dim]++;
+    }
+    return;
+}
+
+template <class T>
+inline size_t Tensor<T>::_f_index(const std::vector<size_t>& dims,
+                                  const std::vector<size_t>& dim_positions)
+{
+    /* This function will return the column major
+    index in a contiguous memory array corresponding
+    to the dimensions and dimension positions.
+    */
+
+    size_t position = 0;
+    size_t sum_product;
+
+    for(size_t k = 0; k < dims.size(); k++) {
+        sum_product = dim_positions[k];
+        for(size_t m = 0; m < k; m++) {
+            sum_product *= dims[m];
+        }
+        position += sum_product;
+    }
+    return position;
+}
+
+template <class T>
+inline size_t Tensor<T>::_c_index(const std::vector<size_t>& dims,
+                                  const std::vector<size_t>& dim_positions)
+{
+    /* This function will return the row major
+    index in a contiguous memory array corresponding
+    to the dimensions and dimension positions.
+    */
+    size_t position = 0;
+    size_t sum_product;
+    for(size_t k = 0; k < dims.size(); k++) {
+        sum_product = dim_positions[k];
+        for(size_t m = k+1; m < dims.size(); m++) {
+            sum_product *= dims[m];
+        }
+        position += sum_product;
+    }
+    return position;
+}
+
 #endif //SMARTSIM_TENSOR_TCC

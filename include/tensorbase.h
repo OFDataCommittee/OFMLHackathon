@@ -3,10 +3,8 @@
 
 #include "stdlib.h"
 #include <vector>
-#include <unordered_set>
 #include <unordered_map>
 #include <string>
-#include <cstring>
 #include <stdexcept>
 #include "enums/cpp_tensor_type.h"
 #include "enums/cpp_memory_layout.h"
@@ -104,7 +102,8 @@ class TensorBase{
 
         //! Fill a user provided memory space with values from tensor data
         virtual void fill_mem_space(void* data /*!< Pointer to the allocated memory space*/,
-                                    std::vector<size_t> dims /*!< The dimensions of the memory space*/
+                                    std::vector<size_t> dims /*!< The dimensions of the memory space*/,
+                                    MemoryLayout mem_layout /*!< The memory layout of the provided memory space*/
                                     ) = 0;
 
 
