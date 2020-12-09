@@ -23,8 +23,6 @@ else
     echo "Found PROTOBUF_INSTALL_PATH: $PROTOBUF_INSTALL_PATH"
 fi
 
-# remove old build directory
-rm -r ./build
 
 # setup build dirs
 mkdir build

@@ -16,10 +16,10 @@ help:
 # help: Build
 # help: -------
 
-# help: build-py                       - Build the python client bindings
-.PHONY: build-py
-build-py: SHELL:=/bin/bash
-build-py:
+# help: pyclient                       - Build the python client bindings
+.PHONY: pyclient
+pyclient: SHELL:=/bin/bash
+pyclient:
 	@bash ./build-scripts/build-python-bindings.sh
 
 
