@@ -1,11 +1,9 @@
-
-from .silcPy import Client
 from .error import ConnectionError
+from .silcPy import Client
 from .util import Dtypes
 
 
 class RAIClient:
-
     def __init__(self, cluster=False, fortran=False):
         # TODO allow SSDB to be passed and detect if not present
         try:
