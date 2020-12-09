@@ -1,4 +1,4 @@
-from .error import ConnectionError
+from .error import RedisConnectionError
 from .silcPy import Client
 from .util import Dtypes
 
@@ -8,13 +8,18 @@ class RAIClient:
         # TODO allow SSDB to be passed and detect if not present
         try:
             self._client = Client(cluster, fortran)
-        # TODO: find out what exception this is
-        except Exception:
-            raise ConnectionError("Could not connect to Redis DB")
+        except RuntimeError as e:
+            raise RedisConnectionError(str(e))
 
     def put_tensor(self, key, data):
         dtype = Dtypes.tensor_from_numpy(data)
-        self._client.put_tensor(key, dtype, data)
+        try:
+            self._client.put_tensor(key, dtype, data)
+        except RuntimeError as e:
+            raise RedisConnectionError(str(e))
 
     def get_tensor(self, key):
-        return self._client.get_tensor(key)
+        try:
+            return self._client.get_tensor(key)
+        except RuntimeError as e:
+            raise RedisConnectionError(str(e))

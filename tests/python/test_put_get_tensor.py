@@ -4,11 +4,13 @@ from silc import RAIClient
 
 # ----- Tests -----------------------------------------------------------
 
+CLUSTER = True
+
 
 def test_1D_put_get():
     """Test put/get_tensor for 1D numpy arrays"""
 
-    client = RAIClient(False, False)
+    client = RAIClient(CLUSTER, False)
     data = create_data(10)
     send_get_arrays(client, data)
 
@@ -16,7 +18,7 @@ def test_1D_put_get():
 def test_2D_put_get():
     """Test put/get_tensor for 2D numpy arrays"""
 
-    client = RAIClient(False, False)
+    client = RAIClient(CLUSTER, False)
     data = create_data((10, 10))
     send_get_arrays(client, data)
 
@@ -24,7 +26,7 @@ def test_2D_put_get():
 def test_3D_put_get():
     """Test put/get_tensor for 3D numpy arrays"""
 
-    client = RAIClient(False, False)
+    client = RAIClient(CLUSTER, False)
     data = create_data((10, 10, 10))
     send_get_arrays(client, data)
 

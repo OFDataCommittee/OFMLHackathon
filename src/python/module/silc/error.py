@@ -1,13 +1,15 @@
-class RuntimeError(Exception):
-    """Base client runtime error"""
+from os import environ
 
-    def __init__(self, message):
-        self.msg = message
+
+class RedisConnectionError(RuntimeError):
+    def __init__(self, cpp_error):
+        self.msg = self._set_message()
+        self.error_from_cpp = cpp_error
 
     def __str__(self):
-        return self.msg
+        return "\n".join((self.error_from_cpp, self.msg))
 
-
-class ConnectionError(RuntimeError):
-    def __init__(self, message):
-        super().__init__(message)
+    def _set_message(self):
+        if environ["SSDB"]:
+            return f"Could not connect to SSDB at {environ['SSDB']}"
+        return "Could not connect to database. $SSDB not set"

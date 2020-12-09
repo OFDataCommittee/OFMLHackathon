@@ -82,6 +82,15 @@ clobber: clean clean-deps
 # help: Style
 # help: -------
 
+# help: style                          - Sort imports and format with black
+.PHONY: style
+style: sort-imports format
+
+
+# help: check-style                    - check code style compliance
+.PHONY: check-style
+check-style: check-sort-imports check-format
+
 
 # help: format                         - perform code style format
 .PHONY: format
@@ -107,16 +116,6 @@ check-sort-imports:
 	@isort  ./src/python/module/silc ./tests/python/ --check-only --profile black
 
 
-# help: style                          - perform code style format
-.PHONY: style
-style: sort-imports format
-
-
-# help: check-style                    - check code style compliance
-.PHONY: check-style
-check-style: check-sort-imports check-format
-
-
 # help: check-lint                     - run static analysis checks
 .PHONY: check-lint
 check-lint:
@@ -137,17 +136,36 @@ docs: coverage
 # help: Test
 # help: -------
 
-# help: test                           - run all tests (C, C++, Fortran, Python)
+# help: test                           - Build and run all tests (C, C++, Fortran, Python)
 .PHONY: test
 test: build-tests
 test:
-	@python -m pytest ./tests
-
-
-# help: test-v                         - run all tests [verbosely]
-.PHONY: test-v
-test-v:
 	@python -m pytest -vv ./tests
+
+
+# help: test-verbose                   - Build and run all tests [verbosely]
+.PHONY: test-verbose
+test-verbose: build-tests
+test-verbose:
+	@python -m pytest -vv -s ./tests
+
+# help: test-c                         - Build and run all C tests
+.PHONY: test-c
+test-c: build-test-c
+test-c:
+	@python -m pytest -vv -s ./tests/c/
+
+# help: test-cpp                       - Build and run all C++ tests
+.PHONY: test-cpp
+test-cpp: build-test-cpp
+test-cpp:
+	@python -m pytest -vv -s ./tests/cpp/
+
+
+# help: test-py                        - run python tests
+.PHONY: test-py
+test-py:
+	@python -m pytest -vv ./tests/python/
 
 
 # help: testpy-cov                     - run python tests with coverage
