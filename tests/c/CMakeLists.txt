@@ -109,12 +109,3 @@ target_link_libraries(client_test_put_get_3D
         ${CLIENT_LIBRARIES}
 )
 
-add_executable(client_test_dataset
-        client_test_dataset.c
-        ${CLIENT_SRC}
-)
-
-target_link_libraries(client_test_dataset
-        MPI::MPI_C
-        ${CLIENT_LIBRARIES}
-)

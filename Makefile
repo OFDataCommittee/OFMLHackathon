@@ -12,35 +12,76 @@ MAKEFLAGS += --no-print-directory
 help:
 	@grep "^# help\:" Makefile | grep -v grep | sed 's/\# help\: //' | sed 's/\# help\://'
 
+# help:
+# help: Build
+# help: -------
 
-# help: clean                          - clean all files using .gitignore rules
+# help: build-py                       - Build the python client bindings
+.PHONY: build-py
+build-py: SHELL:=/bin/bash
+build-py:
+	@bash ./build-scripts/build-python-bindings.sh
+
+
+# help: deps                           - Make SILC dependencies
+.PHONY: deps
+deps: SHELL:=/bin/bash
+deps:
+	@bash ./build-scripts/build_deps.sh
+
+
+# help: test-deps                      - Make SILC testing dependencies
+.PHONY: test-deps
+test-deps: SHELL:=/bin/bash
+test-deps:
+	@bash ./build-scripts/build_test_deps.sh
+
+
+# help: test-deps-gpu                  - Make SILC GPU testing dependencies
+.PHONY: test-deps
+test-deps-gpu: SHELL:=/bin/bash
+test-deps-gpu:
+	@bash ./build-scripts/build_test_deps.sh gpu
+
+
+# help: build-tests                    - build all tests (C, C++, Fortran)
+.PHONY: build-tests
+build-tests: build-test-cpp build-test-c
+
+
+# help: build-test-cpp                 - build the C++ tests
+.PHONY: build-test-cpp
+build-test-cpp:
+	./build-scripts/build_cpp_tests.sh
+
+
+# help: build-test-c                   - build the C tests
+.PHONY: build-test-c
+build-test-c:
+	./build-scripts/build_c_tests.sh
+
+
+# help: clean-deps                     - remove third-party deps
+.PHONY: clean-deps
+clean-deps:
+	@rm -rf ./third-party
+
+
+# help: clean                          - remove builds, pyc files, .gitignore rules
 .PHONY: clean
 clean:
 	@git clean -X -f -d
 
 
-# help: scrub                          - clean all files, even untracked files
-.PHONY: scrub
-scrub:
-	git clean -x -f -d
+# help: clobber                        - clean, remove deps, builds, (be careful)
+.PHONY: clobber
+clobber: clean clean-deps
 
 
-# help: test                           - run tests
-.PHONY: test
-test:
-	@python -m pytest ./tests
+# help:
+# help: Style
+# help: -------
 
-
-# help: test-v                         - run tests [verbosely]
-.PHONY: test-v
-test-v:
-	@python -m pytest -vv ./tests
-
-
-# help: test-cov                       - perform test coverage checks
-.PHONY: test-cov
-test-cov:
-	@python -m pytest --cov=./src/python/module/silc/ -vv ./tests
 
 # help: format                         - perform code style format
 .PHONY: format
@@ -82,9 +123,35 @@ check-lint:
 	@pylint --rcfile=.pylintrc ./src/python/module/silc ./tests/python
 
 
+# help:
+# help: Documentation
+# help: -------
+
 # help: docs                           - generate project documentation
 .PHONY: docs
 docs: coverage
 	@cd docs; make html
 
+
+# help:
+# help: Test
+# help: -------
+
+# help: test                           - run all tests (C, C++, Fortran, Python)
+.PHONY: test
+test: build-tests
+test:
+	@python -m pytest ./tests
+
+
+# help: test-v                         - run all tests [verbosely]
+.PHONY: test-v
+test-v:
+	@python -m pytest -vv ./tests
+
+
+# help: testpy-cov                     - run python tests with coverage
+.PHONY: testpy-cov
+testpy-cov:
+	@python -m pytest --cov=./src/python/module/silc/ -vv ./tests/python/
 

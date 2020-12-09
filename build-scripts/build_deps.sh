@@ -1,15 +1,13 @@
 #!/bin/sh
 
 if [[ ! -d "./third-party" ]]; then
-    mkdir third-party
+    mkdir ./third-party
 fi
-cd third-party
+cd ./third-party
 
 # Install Hiredis
 if ls ./hiredis/install/lib/libhiredis* 1>/dev/null 2>&1; then
     echo "Hiredis has already been downloaded and installed"
-    export HIREDIS_INSTALL_PATH="$(pwd)/hiredis/install"
-    export LD_LIBRARY_PATH="$HIREDIS_INSTALL_PATH/lib":$LD_LIBRARY_PATH
 else
     if [[ ! -d "./hiredis" ]]; then
 	git clone https://github.com/redis/hiredis.git hiredis --branch master --depth=1
@@ -19,8 +17,6 @@ else
     CC=gcc CXX=g++ make PREFIX="$(pwd)/install"
     CC=gcc CXX=g++ make PREFIX="$(pwd)/install" install
     cd ../
-    export HIREDIS_INSTALL_PATH="$(pwd)/hiredis/install"
-    export LD_LIBRARY_PATH="$HIREDIS_INSTALL_PATH/lib":$LD_LIBRARY_PATH
     echo "Finished installing Hiredis"
 fi
 
@@ -28,8 +24,6 @@ fi
 #Install Redis-plus-plus
 if ls ./redis-plus-plus/install/lib/libredis++* 1>/dev/null 2>&1; then
     echo "Redis-plus-plus has already been downloaded and installed"
-    export REDISPP_INSTALL_PATH="$(pwd)/redis-plus-plus/install"
-    export LD_LIBRARY_PATH="$REDISPP_INSTALL_PATH/lib":$LD_LIBRARY_PATH
 else
     if [[ ! -d "./redis-plus-plus" ]]; then
         git clone https://github.com/sewenew/redis-plus-plus.git redis-plus-plus --branch master --depth=1
@@ -43,17 +37,13 @@ else
     CC=gcc CXX=g++ make -j 2
     CC=gcc CXX=g++ make install
     cd ../../
-    export REDISPP_INSTALL_PATH="$(pwd)/redis-plus-plus/install"
-    export LD_LIBRARY_PATH="$REDISPP_INSTALL_PATH/lib":$LD_LIBRARY_PATH
     echo "Finished installing Redis-plus-plus"
 fi
+
 
 # Install Protobuf
 if [[ -f ./protobuf/install/bin/protoc ]]; then
     echo "Protobuf has already been downloaded and installed"
-    export PROTOBUF_INSTALL_PATH="$(pwd)/protobuf/install"
-    export LD_LIBRARY_PATH="$PROTOBUF_INSTALL_PATH/lib":$LD_LIBRARY_PATH
-    export PATH="$PROTOBUF_INSTALL_PATH/bin":$PATH
 else
     if [[ ! -d "./protobuf" ]]; then
 	git clone https://github.com/protocolbuffers/protobuf.git protobuf
@@ -71,9 +61,6 @@ else
     CC=gcc CXX=g++ make -j 8
     CC=gcc CXX=g++ make check -j 8
     CC=gcc CXX=g++ make install
-    export PROTOBUF_INSTALL_PATH="$(pwd)/install"
-    export LD_LIBRARY_PATH="$PROTOBUF_INSTALL_PATH/lib":$LD_LIBRARY_PATH
-    export PATH="$PROTOBUF_INSTALL_PATH/bin":$PATH
     echo "Finished installing Protobuf"
     cd ../
 fi
@@ -82,8 +69,6 @@ fi
 # Install Pybind11
 if [[ -d "./pybind" ]]; then
     echo "PyBind11 has already been downloaded and installed"
-    export PYBIND_INCLUDE_PATH="$(pwd)/pybind/include/pybind11/"
-    export PYBIND_INSTALL_PATH="$(pwd)/pybind/"
 else
 	git clone https://github.com/pybind/pybind11.git pybind --depth=1
     cd pybind
