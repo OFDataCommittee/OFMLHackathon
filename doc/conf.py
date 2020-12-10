@@ -17,12 +17,12 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'SmartSim'
+project = 'SILC'
 copyright = '2020, Cray, a Hewlett Packard Enterprise company'
 author = 'HPE AI & Advanced Productivity'
 
 # The full version, including alpha/beta/rc tags
-release = 'internal_release'
+release = '0.1.0-alpha'
 
 
 # -- General configuration ---------------------------------------------------
@@ -66,4 +66,4 @@ html_theme = "sphinx_rtd_theme"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+#html_static_path = ['_static']
