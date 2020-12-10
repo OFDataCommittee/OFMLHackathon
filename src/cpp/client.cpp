@@ -539,7 +539,7 @@ void SmartSimClient::copy_tensor(const std::string& src_key,
   /* This function copies a tensor from the src_key to the
   dest_key.
   */
-  this->_copy_key(src_key, dest_key);
+  this->_copy_tensor(src_key, dest_key);
   return;
 }
 
@@ -1024,47 +1024,48 @@ inline void SmartSimClient::_set_script(const std::string& script_name,
   return;
 }
 
-inline void SmartSimClient::_copy_key(const std::string& src_key,
-                                      const std::string& dest_key)
+inline void SmartSimClient::_copy_tensor(const std::string& src_key,
+                                         const std::string& dest_key)
 {
-  /* This function copies a key to a new name via DUMP
-  and RESTORE commands.
+  /* This function a tensor from src_key
+  to dest_key.
   */
-  CommandReply dump_reply;
-  Command dump_cmd;
-  dump_cmd.add_field("DUMP");
-  dump_cmd.add_field(src_key);
 
-  std::string dump_hash_tag;
+  CommandReply cmd_get_reply;
+  Command cmd_get;
+
+  cmd_get.add_field("AI.TENSORGET");
+  cmd_get.add_field(src_key);
+  cmd_get.add_field("META");
+  cmd_get.add_field("BLOB");
+
+  std::string get_hash_tag;
   if(this->_has_hash_tag(src_key))
-    dump_hash_tag = this->_get_hash_tag(src_key);
+    get_hash_tag = this->_get_hash_tag(src_key);
 
-  if(dump_hash_tag.size()>0)
-    dump_reply = this->_execute_command(dump_cmd, dump_hash_tag);
-  else
-    dump_reply = this->_execute_command(dump_cmd);
+  cmd_get_reply = this->_execute_command(cmd_get, get_hash_tag);
 
-  std::string_view tensor_view =
-    std::string_view(dump_reply.str(), dump_reply.str_len());
+  std::vector<size_t> dims = this->_get_tensor_dims(cmd_get_reply);
+  std::string_view blob = this->_get_tensor_data_blob(cmd_get_reply);
+  TensorType type = this->_get_tensor_data_type(cmd_get_reply);
 
-  CommandReply rest_reply;
-  Command rest_cmd;
-  rest_cmd.add_field("RESTORE");
-  rest_cmd.add_field(dest_key);
-  rest_cmd.add_field("0");
-  rest_cmd.add_field_ptr(tensor_view);
-  rest_cmd.add_field("REPLACE");
+  CommandReply cmd_put_reply;
+  Command cmd_put;
 
-  std::string rest_hash_key;
+  cmd_put.add_field("AI.TENSORSET");
+  cmd_put.add_field(dest_key);
+  cmd_put.add_field(TENSOR_STR_MAP.at(type));
+  for(size_t i=0; i<dims.size(); i++)
+    cmd_put.add_field(std::to_string(dims[i]));
+  cmd_put.add_field("BLOB");
+  cmd_put.add_field_ptr(blob);
+
+  std::string dest_hash_key;
   if(this->_has_hash_tag(dest_key))
-    rest_hash_key = this->_get_hash_tag(dest_key);
+    dest_hash_key = this->_get_hash_tag(dest_key);
 
-  if(rest_hash_key.size()>0)
-    rest_reply = this->_execute_command(rest_cmd, rest_hash_key);
-  else
-    rest_reply = this->_execute_command(rest_cmd);
+  cmd_put_reply = this->_execute_command(cmd_put, dest_hash_key);
 
-  rest_reply = this->_execute_command(rest_cmd);
   return;
 }
 

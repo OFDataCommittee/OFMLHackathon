@@ -219,9 +219,9 @@ protected:
                           std::string_view script /*!< The script content*/
                           );
 
-  // Copy a key via Dump and Restore
-  inline void _copy_key(const std::string& src_key,
-                        const std::string& dest_key);
+  // Copy a tensor from src_key to dest_key
+  inline void _copy_tensor(const std::string& src_key,
+                           const std::string& dest_key);
 
   //! Execute a database command
   CommandReply _execute_command(Command& cmd /*!< The command to execute*/,
