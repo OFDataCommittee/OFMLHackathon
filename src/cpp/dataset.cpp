@@ -134,7 +134,7 @@ void DataSet::unpack_tensor(const std::string& name,
                                                + " does not exist in "
                                                + this->name + " dataset.");
 
-    this->_tensorpack.get_tensor(name)->fill_mem_space(data, dims);
+    this->_tensorpack.get_tensor(name)->fill_mem_space(data, dims, mem_layout);
     return;
 }
 

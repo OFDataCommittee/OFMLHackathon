@@ -3,6 +3,7 @@
 
 #include "stdlib.h"
 #include <string>
+#include <stdexcept>
 #include "tensorbase.h"
 #include "memorylist.h"
 
@@ -43,7 +44,8 @@ class Tensor : public TensorBase
 
         //! Fill a user provided memory space with values from tensor data
         virtual void fill_mem_space(void* data /*!< Pointer to the allocated memory space*/,
-                                    std::vector<size_t> dims /*!< The dimensions of the memory space*/
+                                    std::vector<size_t> dims /*!< The dimensions of the memory space*/,
+                                    MemoryLayout mem_layout /*!< The memory layout of the provided memory space*/
                                     );
 
     protected:
@@ -78,12 +80,50 @@ class Tensor : public TensorBase
                                       const MemoryLayout mem_layout /*!< The layout of the source data memory structure*/
                                       );
 
+        //! This function will copy a fortran array memory space (column major) to a c-style memory space layout (row major)
+        void _f_to_c_memcpy(T* c_data,
+                            T* f_data,
+                            const std::vector<size_t>& dims);
+
+        //! This function will copy a c-style array memory space (row major) to a fortran memory space layout (col major)
+        void _c_to_f_memcpy(T* f_data,
+                            T* c_data,
+                            const std::vector<size_t>& dims);
+
+        //! This is a recursive function used to copy fortran column major memory to c-style row major memory
+        void _f_to_c(T* c_data,
+                     T* f_data,
+                     const std::vector<size_t>& dims,
+                     std::vector<size_t> dim_positions,
+                     size_t current_dim);
+
+        //! This is a recursive function used to copy c-style row major memory to fortran column major memory
+        void _c_to_f(T* f_data,
+                     T* c_data,
+                     const std::vector<size_t>& dims,
+                     std::vector<size_t> dim_positions,
+                     size_t current_dim);
+
+
+        //! Calculate the contiguous array position for a column major position
+        inline size_t _f_index(const std::vector<size_t>& dims,
+                               const std::vector<size_t>& dim_positions);
+
+        //! Calculate the contiguous array position for a column major position
+        inline size_t _c_index(const std::vector<size_t>& dims,
+                               const std::vector<size_t>& dim_positions);
+
         //! Get the total number of bytes of the Tensor data
         virtual size_t _n_data_bytes();
 
         //! Memory list that is used to hold recursively allocated
         //! when a data view is requested.
         MemoryList<T*> _ptr_mem_list;
+
+        //! Memory list that is needed to retrun memory view of
+        //! of tensor data in column major order because
+        //! this operation is not done in place.
+        MemoryList<T> _f_mem_views;
 };
 
 #include "tensor.tcc"

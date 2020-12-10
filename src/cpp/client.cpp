@@ -397,7 +397,9 @@ void SmartSimClient::unpack_tensor(const std::string& key,
 
   std::vector<size_t> reply_dims = this->_get_tensor_dims(reply);
 
-  if(mem_layout == MemoryLayout::contiguous) {
+  if(mem_layout == MemoryLayout::contiguous ||
+     mem_layout == MemoryLayout::fortran_contiguous) {
+
     int total_dims = 1;
     for(size_t i=0; i<reply_dims.size(); i++) {
       total_dims *= reply_dims[i];
@@ -413,7 +415,7 @@ void SmartSimClient::unpack_tensor(const std::string& key,
       throw std::runtime_error("The number of dimensions of the  "\
                                "fetched tensor, " +
                                std::to_string(reply_dims.size()) + " "\
-                               "do not match the number of dimensions "\
+                               "does not match the number of dimensions "\
                                "of the user memory space, " +
                                std::to_string(dims.size()));
 
@@ -435,48 +437,48 @@ void SmartSimClient::unpack_tensor(const std::string& key,
   TensorBase* tensor;
   switch(reply_type) {
     case TensorType::dbl :
-      tensor = new Tensor<double>(key, (void*)blob.data(), dims,
-                                  reply_type,
+      tensor = new Tensor<double>(key, (void*)blob.data(),
+                                  reply_dims, reply_type,
                                   MemoryLayout::contiguous);
     break;
     case TensorType::flt :
-      tensor = new Tensor<float>(key, (void*)blob.data(), dims,
-                                 reply_type,
+      tensor = new Tensor<float>(key, (void*)blob.data(),
+                                 reply_dims, reply_type,
                                  MemoryLayout::contiguous);
     break;
     case TensorType::int64  :
-      tensor = new Tensor<int64_t>(key, (void*)blob.data(), dims,
-                                   reply_type,
+      tensor = new Tensor<int64_t>(key, (void*)blob.data(),
+                                   reply_dims, reply_type,
                                    MemoryLayout::contiguous);
     break;
     case TensorType::int32 :
-      tensor = new Tensor<int32_t>(key, (void*)blob.data(), dims,
-                                   reply_type,
+      tensor = new Tensor<int32_t>(key, (void*)blob.data(),
+                                   reply_dims, reply_type,
                                    MemoryLayout::contiguous);
     break;
     case TensorType::int16 :
-      tensor = new Tensor<int16_t>(key, (void*)blob.data(), dims,
-                                   reply_type,
+      tensor = new Tensor<int16_t>(key, (void*)blob.data(),
+                                   reply_dims, reply_type,
                                    MemoryLayout::contiguous);
     break;
     case TensorType::int8 :
-      tensor = new Tensor<int8_t>(key, (void*)blob.data(), dims,
-                                  reply_type,
+      tensor = new Tensor<int8_t>(key, (void*)blob.data(),
+                                  reply_dims, reply_type,
                                   MemoryLayout::contiguous);
     break;
     case TensorType::uint16 :
-      tensor = new Tensor<uint16_t>(key, (void*)blob.data(), dims,
-                                    reply_type,
+      tensor = new Tensor<uint16_t>(key, (void*)blob.data(),
+                                    reply_dims, reply_type,
                                     MemoryLayout::contiguous);
     break;
     case TensorType::uint8 :
-      tensor = new Tensor<uint8_t>(key, (void*)blob.data(), dims,
-                                   reply_type,
+      tensor = new Tensor<uint8_t>(key, (void*)blob.data(),
+                                   reply_dims, reply_type,
                                    MemoryLayout::contiguous);
     break;
   }
 
-  tensor->fill_mem_space(data, dims);
+  tensor->fill_mem_space(data, dims, mem_layout);
   delete tensor;
   return;
 }

@@ -112,6 +112,14 @@ target_link_libraries(client_test_put_get_contiguous_3D
 	${CLIENT_LIBRARIES}
 )
 
+add_executable(client_test_put_get_transpose_3D
+	client_test_put_get_transpose_3D.cpp
+	${CLIENT_SRC}
+)
+target_link_libraries(client_test_put_get_transpose_3D
+	MPI::MPI_CXX
+	${CLIENT_LIBRARIES}
+)
 
 add_executable(client_test_put_get_2D
 	client_test_put_get_2D.cpp
