@@ -1,6 +1,6 @@
 module silc
 
-use iso_c_binding,   only : c_ptr, c_bool, c_null_ptr, c_char
+use iso_c_binding,   only : c_ptr, c_bool, c_null_ptr, c_char, c_int
 use iso_c_binding,   only : c_int8_t, c_int16_t, c_int32_t, c_int64_t, c_float, c_double, c_size_t
 use iso_c_binding,   only : c_loc, c_f_pointer
 use fortran_c_utils, only : make_c_string
@@ -30,6 +30,8 @@ type, public :: client
 
   procedure :: initialize
   procedure :: destructor
+  procedure :: key_exists
+  procedure :: poll_key
   procedure :: get_tensor
   procedure :: rename_tensor
   procedure :: delete_tensor
@@ -63,8 +65,6 @@ type, public :: client
   ! procedure :: get_script            => client_get_script
   ! procedure :: run_script            => client_run_script
   ! procedure :: run_model             => client_run_model
-  ! procedure :: key_exists            => client_key_exists
-  ! procedure :: poll_key              => client_poll_key
 end type client
 
 contains
