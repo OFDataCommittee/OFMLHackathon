@@ -8,6 +8,8 @@ cd ./third-party
 # Install Hiredis
 if ls ./hiredis/install/lib/libhiredis* 1>/dev/null 2>&1; then
     echo "Hiredis has already been downloaded and installed"
+    export HIREDIS_INSTALL_PATH="$(pwd)/hiredis/install"
+    export LD_LIBRARY_PATH="$HIREDIS_INSTALL_PATH/lib":$LD_LIBRARY_PATH
 else
     if [[ ! -d "./hiredis" ]]; then
 	git clone https://github.com/redis/hiredis.git hiredis --branch master --depth=1
@@ -17,6 +19,8 @@ else
     CC=gcc CXX=g++ make PREFIX="$(pwd)/install"
     CC=gcc CXX=g++ make PREFIX="$(pwd)/install" install
     cd ../
+    export HIREDIS_INSTALL_PATH="$(pwd)/hiredis/install"
+    export LD_LIBRARY_PATH="$HIREDIS_INSTALL_PATH/lib":$LD_LIBRARY_PATH
     echo "Finished installing Hiredis"
 fi
 
