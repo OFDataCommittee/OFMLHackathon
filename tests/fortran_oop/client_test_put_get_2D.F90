@@ -6,22 +6,23 @@ program main
   implicit none
 
   integer, parameter :: dim1 = 10
+  integer, parameter :: dim2 = 20
 
-  real(kind=4),    dimension(dim1) :: recv_array_real_32
-  real(kind=8),    dimension(dim1) :: recv_array_real_64
-  integer(kind=1), dimension(dim1) :: recv_array_integer_8
-  integer(kind=2), dimension(dim1) :: recv_array_integer_16
-  integer(kind=4), dimension(dim1) :: recv_array_integer_32
-  integer(kind=8), dimension(dim1) :: recv_array_integer_64
+  real(kind=4),    dimension(dim1,dim2) :: recv_array_real_32
+  real(kind=8),    dimension(dim1,dim2) :: recv_array_real_64
+  integer(kind=1), dimension(dim1,dim2) :: recv_array_integer_8
+  integer(kind=2), dimension(dim1,dim2) :: recv_array_integer_16
+  integer(kind=4), dimension(dim1,dim2) :: recv_array_integer_32
+  integer(kind=8), dimension(dim1,dim2) :: recv_array_integer_64
 
-  real(kind=4),    dimension(dim1) :: true_array_real_32
-  real(kind=8),    dimension(dim1) :: true_array_real_64
-  integer(kind=1), dimension(dim1) :: true_array_integer_8
-  integer(kind=2), dimension(dim1) :: true_array_integer_16
-  integer(kind=4), dimension(dim1) :: true_array_integer_32
-  integer(kind=8), dimension(dim1) :: true_array_integer_64
+  real(kind=4),    dimension(dim1,dim2) :: true_array_real_32
+  real(kind=8),    dimension(dim1,dim2) :: true_array_real_64
+  integer(kind=1), dimension(dim1,dim2) :: true_array_integer_8
+  integer(kind=2), dimension(dim1,dim2) :: true_array_integer_16
+  integer(kind=4), dimension(dim1,dim2) :: true_array_integer_32
+  integer(kind=8), dimension(dim1,dim2) :: true_array_integer_64
 
-  integer :: i
+  integer :: i, j
   type(silc_client) :: client
 
   integer :: err_code, pe_id
@@ -33,21 +34,21 @@ program main
 
   call random_number(true_array_real_32)
   call random_number(true_array_real_64)
-  do i=1,dim1
-    true_array_integer_8(i) = irand()
-    true_array_integer_16(i) = irand()
-    true_array_integer_32(i) = irand()
-    true_array_integer_64(i) = irand()
-  enddo
+  do j=1,dim2; do i=1,dim1
+    true_array_integer_8(i,j) = irand()
+    true_array_integer_16(i,j) = irand()
+    true_array_integer_32(i,j) = irand()
+    true_array_integer_64(i,j) = irand()
+  enddo; enddo
 
   call random_number(recv_array_real_32)
   call random_number(recv_array_real_64)
-  do i=1,dim1
-    recv_array_integer_8(i) = irand()
-    recv_array_integer_16(i) = irand()
-    recv_array_integer_32(i) = irand()
-    recv_array_integer_64(i) = irand()
-  enddo
+  do j=1,dim2; do i=1,dim1
+    recv_array_integer_8(i,j) = irand()
+    recv_array_integer_16(i,j) = irand()
+    recv_array_integer_32(i,j) = irand()
+    recv_array_integer_64(i,j) = irand()
+  enddo; enddo
 
   call client%initialize(cluster=.true.)
 

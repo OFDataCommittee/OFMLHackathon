@@ -5,7 +5,7 @@ set(CMAKE_BUILD_TYPE DEBUG)
 cmake_minimum_required(VERSION 3.10)
 
 SET(CMAKE_CXX_STANDARD 17)
-SET(CMAKE_Fortran_COMPILER "mpif90")
+#SET(CMAKE_Fortran_COMPILER "")
 enable_language(Fortran)
 
 #TODO put in output warnings
@@ -78,6 +78,24 @@ add_executable(client_test_put_get_1D
 	${CLIENT_SRC}
 )
 target_link_libraries(client_test_put_get_1D
+	MPI::MPI_Fortran
+	${CLIENT_LIBRARIES}
+)
+
+add_executable(client_test_put_get_2D
+	client_test_put_get_2D.F90
+	${CLIENT_SRC}
+)
+target_link_libraries(client_test_put_get_2D
+	MPI::MPI_Fortran
+	${CLIENT_LIBRARIES}
+)
+
+add_executable(client_test_put_get_3D
+	client_test_put_get_3D.F90
+	${CLIENT_SRC}
+)
+target_link_libraries(client_test_put_get_3D
 	MPI::MPI_Fortran
 	${CLIENT_LIBRARIES}
 )

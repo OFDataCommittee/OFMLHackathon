@@ -1,27 +1,30 @@
 program main
 
   use mpi
+  use iso_c_binding
   use silc, only : silc_client => client
 
   implicit none
 
   integer, parameter :: dim1 = 10
+  integer, parameter :: dim2 = 20
+  integer, parameter :: dim3 = 30
 
-  real(kind=4),    dimension(dim1) :: recv_array_real_32
-  real(kind=8),    dimension(dim1) :: recv_array_real_64
-  integer(kind=1), dimension(dim1) :: recv_array_integer_8
-  integer(kind=2), dimension(dim1) :: recv_array_integer_16
-  integer(kind=4), dimension(dim1) :: recv_array_integer_32
-  integer(kind=8), dimension(dim1) :: recv_array_integer_64
+  real(kind=4),    dimension(dim1, dim2, dim3) :: recv_array_real_32
+  real(kind=8),    dimension(dim1, dim2, dim3) :: recv_array_real_64
+  integer(kind=1), dimension(dim1, dim2, dim3) :: recv_array_integer_8
+  integer(kind=2), dimension(dim1, dim2, dim3) :: recv_array_integer_16
+  integer(kind=4), dimension(dim1, dim2, dim3) :: recv_array_integer_32
+  integer(kind=8), dimension(dim1, dim2, dim3) :: recv_array_integer_64
 
-  real(kind=4),    dimension(dim1) :: true_array_real_32
-  real(kind=8),    dimension(dim1) :: true_array_real_64
-  integer(kind=1), dimension(dim1) :: true_array_integer_8
-  integer(kind=2), dimension(dim1) :: true_array_integer_16
-  integer(kind=4), dimension(dim1) :: true_array_integer_32
-  integer(kind=8), dimension(dim1) :: true_array_integer_64
+  real(kind=c_float),    dimension(dim1, dim2, dim3) :: true_array_real_32
+  real(kind=c_double),    dimension(dim1, dim2, dim3) :: true_array_real_64
+  integer(kind=1), dimension(dim1, dim2, dim3) :: true_array_integer_8
+  integer(kind=2), dimension(dim1, dim2, dim3) :: true_array_integer_16
+  integer(kind=4), dimension(dim1, dim2, dim3) :: true_array_integer_32
+  integer(kind=8), dimension(dim1, dim2, dim3) :: true_array_integer_64
 
-  integer :: i
+  integer :: i, j, k
   type(silc_client) :: client
 
   integer :: err_code, pe_id
@@ -33,21 +36,21 @@ program main
 
   call random_number(true_array_real_32)
   call random_number(true_array_real_64)
-  do i=1,dim1
-    true_array_integer_8(i) = irand()
-    true_array_integer_16(i) = irand()
-    true_array_integer_32(i) = irand()
-    true_array_integer_64(i) = irand()
-  enddo
+  do k=1,dim3; do j=1,dim2 ; do i=1,dim1
+    true_array_integer_8(i,j,k) = irand()
+    true_array_integer_16(i,j,k) = irand()
+    true_array_integer_32(i,j,k) = irand()
+    true_array_integer_64(i,j,k) = irand()
+  enddo; enddo; enddo
 
   call random_number(recv_array_real_32)
   call random_number(recv_array_real_64)
-  do i=1,dim1
-    recv_array_integer_8(i) = irand()
-    recv_array_integer_16(i) = irand()
-    recv_array_integer_32(i) = irand()
-    recv_array_integer_64(i) = irand()
-  enddo
+  do k=1,dim3; do j=1,dim2; do i=1,dim1
+    recv_array_integer_8(i,j,k) = irand()
+    recv_array_integer_16(i,j,k) = irand()
+    recv_array_integer_32(i,j,k) = irand()
+    recv_array_integer_64(i,j,k) = irand()
+  enddo; enddo; enddo
 
   call client%initialize(cluster=.true.)
 
@@ -74,8 +77,6 @@ program main
   call client%put_tensor(key_prefix//"true_array_integer_64", true_array_integer_64, shape(true_array_integer_64))
   call client%unpack_tensor(key_prefix//"true_array_integer_64", recv_array_integer_64, shape(recv_array_integer_64))
   if (.not. all(true_array_integer_64 == recv_array_integer_64)) stop 'true_array_integer_64: FAILED'
-
-  write(*,*) "1D put/get: passed"
 
   call mpi_finalize(err_code)
 
