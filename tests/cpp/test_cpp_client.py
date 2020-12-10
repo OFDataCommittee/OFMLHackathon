@@ -47,15 +47,18 @@ def execute_cmd(cmd_list):
             print("OUTPUT:", out.decode("utf-8"))
         if err:
             print("ERROR:", err.decode("utf-8"))
+        assert(proc.returncode == 0)
     except TimeoutExpired:
         proc.kill()
         output, errs = proc.communicate()
         print("TIMEOUT: test timed out after test timeout limit of 120 seconds")
         print("OUTPUT:", output.decode("utf-8"))
         print("ERROR:", errs.decode("utf-8"))
+        assert(False)
     except Exception:
         proc.kill()
         output, errs = proc.communicate()
         print("OUTPUT:", output.decode("utf-8"))
         print("ERROR:", errs.decode("utf-8"))
+        assert(False)
 

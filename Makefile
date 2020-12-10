@@ -128,8 +128,8 @@ check-lint:
 
 # help: docs                           - generate project documentation
 .PHONY: docs
-docs: coverage
-	@cd docs; make html
+docs:
+	@cd doc; make html
 
 
 # help:

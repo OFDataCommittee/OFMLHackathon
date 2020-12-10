@@ -55,7 +55,10 @@ output/*.html
 output/*/index.html
 
 # Sphinx
-docs/_build
+doc/_build
+doc/c_client
+doc/cpp_client
+doc/fortran_client
 
 .DS_Store
 *~
