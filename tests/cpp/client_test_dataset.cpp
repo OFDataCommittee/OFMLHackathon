@@ -18,10 +18,10 @@ void check_meta_field(DataSet& dataset,
   size_t retrieved_length;
   MetaDataType retrieved_type;
 
-  dataset.get_meta(field_name,
-                   (void*&)retrieved_vals,
-                   retrieved_length,
-                   retrieved_type);
+  dataset.get_meta_scalars(field_name,
+                          (void*&)retrieved_vals,
+                          retrieved_length,
+                          retrieved_type);
 
   if(retrieved_type!=type)
     throw std::runtime_error("The retrieved type "\
@@ -113,33 +113,33 @@ void put_get_3D_array(
 
   //Add metadata fields to the DataSet.  _meta_1 and _meta_2
   //values added to _field_1 and _meta_3 is added to _field_2.
-  MyDataSet.add_meta("dbl_field_1", &dbl_meta_1, MetaDataType::dbl);
-  MyDataSet.add_meta("dbl_field_1", &dbl_meta_2, MetaDataType::dbl);
-  MyDataSet.add_meta("dbl_field_2", &dbl_meta_3, MetaDataType::dbl);
+  MyDataSet.add_meta_scalar("dbl_field_1", &dbl_meta_1, MetaDataType::dbl);
+  MyDataSet.add_meta_scalar("dbl_field_1", &dbl_meta_2, MetaDataType::dbl);
+  MyDataSet.add_meta_scalar("dbl_field_2", &dbl_meta_3, MetaDataType::dbl);
 
-  MyDataSet.add_meta("flt_field_1", &flt_meta_1, MetaDataType::flt);
-  MyDataSet.add_meta("flt_field_1", &flt_meta_2, MetaDataType::flt);
-  MyDataSet.add_meta("flt_field_2", &flt_meta_3, MetaDataType::flt);
+  MyDataSet.add_meta_scalar("flt_field_1", &flt_meta_1, MetaDataType::flt);
+  MyDataSet.add_meta_scalar("flt_field_1", &flt_meta_2, MetaDataType::flt);
+  MyDataSet.add_meta_scalar("flt_field_2", &flt_meta_3, MetaDataType::flt);
 
-  MyDataSet.add_meta("i64_field_1", &i64_meta_1, MetaDataType::int64);
-  MyDataSet.add_meta("i64_field_1", &i64_meta_2, MetaDataType::int64);
-  MyDataSet.add_meta("i64_field_2", &i64_meta_3, MetaDataType::int64);
+  MyDataSet.add_meta_scalar("i64_field_1", &i64_meta_1, MetaDataType::int64);
+  MyDataSet.add_meta_scalar("i64_field_1", &i64_meta_2, MetaDataType::int64);
+  MyDataSet.add_meta_scalar("i64_field_2", &i64_meta_3, MetaDataType::int64);
 
-  MyDataSet.add_meta("i32_field_1", &i32_meta_1, MetaDataType::int32);
-  MyDataSet.add_meta("i32_field_1", &i32_meta_2, MetaDataType::int32);
-  MyDataSet.add_meta("i32_field_2", &i32_meta_3, MetaDataType::int32);
+  MyDataSet.add_meta_scalar("i32_field_1", &i32_meta_1, MetaDataType::int32);
+  MyDataSet.add_meta_scalar("i32_field_1", &i32_meta_2, MetaDataType::int32);
+  MyDataSet.add_meta_scalar("i32_field_2", &i32_meta_3, MetaDataType::int32);
 
-  MyDataSet.add_meta("ui64_field_1", &ui64_meta_1, MetaDataType::uint64);
-  MyDataSet.add_meta("ui64_field_1", &ui64_meta_2, MetaDataType::uint64);
-  MyDataSet.add_meta("ui64_field_2", &ui64_meta_3, MetaDataType::uint64);
+  MyDataSet.add_meta_scalar("ui64_field_1", &ui64_meta_1, MetaDataType::uint64);
+  MyDataSet.add_meta_scalar("ui64_field_1", &ui64_meta_2, MetaDataType::uint64);
+  MyDataSet.add_meta_scalar("ui64_field_2", &ui64_meta_3, MetaDataType::uint64);
 
-  MyDataSet.add_meta("ui32_field_1", &ui32_meta_1, MetaDataType::uint32);
-  MyDataSet.add_meta("ui32_field_1", &ui32_meta_2, MetaDataType::uint32);
-  MyDataSet.add_meta("ui32_field_2", &ui32_meta_3, MetaDataType::uint32);
+  MyDataSet.add_meta_scalar("ui32_field_1", &ui32_meta_1, MetaDataType::uint32);
+  MyDataSet.add_meta_scalar("ui32_field_1", &ui32_meta_2, MetaDataType::uint32);
+  MyDataSet.add_meta_scalar("ui32_field_2", &ui32_meta_3, MetaDataType::uint32);
 
-  MyDataSet.add_meta("str_field_1", str_meta_1.c_str(), MetaDataType::string);
-  MyDataSet.add_meta("str_field_1", str_meta_2.c_str(), MetaDataType::string);
-  MyDataSet.add_meta("str_field_2", str_meta_3.c_str(), MetaDataType::string);
+  MyDataSet.add_meta_string("str_field_1", str_meta_1);
+  MyDataSet.add_meta_string("str_field_1", str_meta_2);
+  MyDataSet.add_meta_string("str_field_2", str_meta_3);
 
   //Put the DataSet into the database
   client.put_dataset(MyDataSet);
@@ -167,15 +167,17 @@ void put_get_3D_array(
   //Check metadata .tensors value for consistency
   char** tensor_ids;
   size_t n_strings;
-  MetaDataType tensor_meta_type;
-  RetrievedDataSet.get_meta(".tensors",
-                            (void*&)tensor_ids,
-                            n_strings,
-                            tensor_meta_type);
+  size_t* lengths;
+  RetrievedDataSet.get_meta_strings(".tensors",
+                                    tensor_ids,
+                                    n_strings,
+                                    lengths);
 
-  if(tensor_meta_type!=MetaDataType::string)
-    throw std::runtime_error("The .tensor metadata field has the "\
-                             "wrong type.");
+  for(size_t q=0; q<n_strings; q++) {
+    if(std::strlen(tensor_ids[q])!=lengths[q])
+      throw std::runtime_error("The tensor id length does not "\
+                               "the retrieved length.");
+  }
 
   if(n_strings!=3)
     throw std::runtime_error("The .tensors metadata field does not "\
@@ -342,48 +344,27 @@ void put_get_3D_array(
 
   //Check that the metadata values are correct for str
 
-  char** str_meta_field_1;
-  size_t n_str_meta_field_1;
-  MetaDataType str_field_1_type;
-  RetrievedDataSet.get_meta("str_field_1",
-                            (void*&)str_meta_field_1,
-                            n_str_meta_field_1,
-                            str_field_1_type);
-  if(n_str_meta_field_1!=2)
+  std::vector<std::string> str_meta_field_1 =
+    RetrievedDataSet.get_meta_strings("str_field_1");
+
+  if(str_meta_field_1.size()!=2)
     throw std::runtime_error("The number of entries in str_meta_field_1 "\
                              "is incorrect.");
-  if(str_meta_1.compare(std::string(str_meta_field_1[0]))!=0)
+  if(str_meta_1.compare(str_meta_field_1[0])!=0)
     throw std::runtime_error("The retrieved value for str_meta_1 "\
                              "is incorrect.");
-  if(str_meta_2.compare(std::string(str_meta_field_1[1]))!=0)
+  if(str_meta_2.compare(str_meta_field_1[1])!=0)
     throw std::runtime_error("The retrieved value for str_meta_2 "\
                              "is incorrect.");
 
-  if(str_field_1_type!=MetaDataType::string)
-    throw std::runtime_error("The retrieved type "\
-                             "does not match "\
-                             "expected value of STRING "\
-                             "for field str_field_1");
-
   //Check that the metadata values are correct for str_field_2
-  char** str_meta_field_2;
-  size_t n_str_meta_field_2;
-  MetaDataType str_field_2_type;
-  RetrievedDataSet.get_meta("str_field_2",
-                            (void*&)str_meta_field_2,
-                             n_str_meta_field_2,
-                             str_field_2_type);
+  std::vector<std::string> str_meta_field_2 =
+    RetrievedDataSet.get_meta_strings("str_field_2");
 
-  if(str_field_2_type!=MetaDataType::string)
-    throw std::runtime_error("The retrieved type "\
-                             "does not match "\
-                             "expected value of STRING "\
-                             "for field str_field_2");
-
-  if(n_str_meta_field_2!=1)
+  if(str_meta_field_2.size()!=1)
     throw std::runtime_error("The number of entries in str_meta_field_2 "\
                              "is incorrect.");
-  if(str_meta_3.compare(std::string(str_meta_field_2[0]))!=0)
+  if(str_meta_3.compare(str_meta_field_2[0])!=0)
     throw std::runtime_error("The retrieved value for str_meta_3 "\
                              "is incorrect.");
 

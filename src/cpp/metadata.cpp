@@ -18,6 +18,7 @@ MetaData::MetaData(MetaData&& metadata)
     this->_uint64_mem_mgr = std::move(metadata._uint64_mem_mgr);
     this->_int32_mem_mgr = std::move(metadata._int32_mem_mgr);
     this->_uint32_mem_mgr = std::move(metadata._uint32_mem_mgr);
+    this->_str_len_mem_mgr = std::move(metadata._str_len_mem_mgr);
     this->_buf = std::move(metadata._buf);
     this->_pb_metadata_msg = std::move(metadata._pb_metadata_msg);
 }
@@ -37,6 +38,7 @@ MetaData& MetaData::operator=(MetaData&& metadata)
         this->_uint64_mem_mgr = std::move(metadata._uint64_mem_mgr);
         this->_int32_mem_mgr = std::move(metadata._int32_mem_mgr);
         this->_uint32_mem_mgr = std::move(metadata._uint32_mem_mgr);
+        this->_str_len_mem_mgr = std::move(metadata._str_len_mem_mgr);
         this->_buf = std::move(metadata._buf);
         this->_pb_metadata_msg = std::move(metadata._pb_metadata_msg);
     }
@@ -65,9 +67,9 @@ void MetaData::fill_from_buffer(const char* buf, unsigned long long buf_size)
     return;
 }
 
-void MetaData::add_value(const std::string& field_name,
-                         const void* value,
-                         MetaDataType type)
+void MetaData::add_scalar(const std::string& field_name,
+                          const void* value,
+                          MetaDataType type)
 {
     /* This functions adds a meta data value to the metadata
     field given by fieldname.  The default behavior is to append
@@ -85,7 +87,9 @@ void MetaData::add_value(const std::string& field_name,
     //TODO add try catch for protobuf errors
     switch(type) {
         case MetaDataType::string :
-            refl->AddString(msg, field, std::string((char*)value));
+            throw std::runtime_error("Use add_string() to add "\
+                                     "a string to the metadata "\
+                                     "field.");
             break;
         case MetaDataType::dbl :
             refl->AddDouble(msg, field, *((double*)value));
@@ -105,14 +109,39 @@ void MetaData::add_value(const std::string& field_name,
         case MetaDataType::uint32 :
             refl->AddUInt32(msg, field, *((uint32_t*)value));
             break;
+        default :
+            throw std::runtime_error("Unsupported type used "\
+                                     "in MetaData.add_scalar().");
+            break;
     }
     return;
 }
 
-void MetaData::get_values(const std::string& name,
-                          void*& data,
-                          size_t& length,
-                          MetaDataType& type)
+void MetaData::add_string(const std::string& field_name,
+                          const std::string& value)
+{
+    /* This functions adds a meta data value to the metadata
+    field given by fieldname.  The default behavior is to append
+    the field if it exists, and if it does not exist, create the
+    field.
+    */
+    if(!(this->_field_exists(field_name)))
+         this->_create_message(field_name, MetaDataType::string);
+
+    gpb::Message* msg = this->_meta_msg_map[field_name];
+    const gpb::Reflection* refl = msg->GetReflection();
+    const gpb::FieldDescriptor* field =
+        msg->GetDescriptor()->FindFieldByName("data");
+
+    refl->AddString(msg, field, value);
+
+    return;
+}
+
+void MetaData::get_scalar_values(const std::string& name,
+                                void*& data,
+                                size_t& length,
+                                MetaDataType& type)
 {
     /* This function allocates the memory to
     return a pointer (via pointer reference "data")
@@ -128,9 +157,6 @@ void MetaData::get_values(const std::string& name,
     type = this->_get_meta_value_type(name);
     gpb::Message* msg = this->_meta_msg_map[name];
     switch(type) {
-        case MetaDataType::string :
-            this->_get_string_field_values(msg, data, length);
-            break;
         case MetaDataType::dbl :
             this->_get_numeric_field_values<double>
                 (msg, data, length, this->_double_mem_mgr);
@@ -155,8 +181,70 @@ void MetaData::get_values(const std::string& name,
             this->_get_numeric_field_values<uint32_t>
                 (msg, data, length, this->_uint32_mem_mgr);
             break;
+        case MetaDataType::string :
+            throw std::runtime_error("MetaData.get_scalar_values() "\
+                                     "cannot retrieve strings.");
+            break;
     }
     return;
+}
+
+void MetaData::get_string_values(const std::string& name,
+                                 char**& data,
+                                 size_t& n_strings,
+                                 size_t*& lengths)
+
+{
+    /* This function allocates the memory to
+    return a pointer (via pointer reference "data")
+    to the user that points to an array of c-style
+    strings.  The variable n_strings is set to
+    the length of that array and the array lengths
+    is the length of each c-style string.
+    */
+
+    std::vector<std::string> field_strings =
+        this->get_string_values(name);
+
+    //Copy each metadata string into new char*
+    n_strings = field_strings.size();
+    data = this->_char_array_mem_mgr.allocate(n_strings);
+    lengths = this->_str_len_mem_mgr.allocate(n_strings);
+    for(int i = 0; i < n_strings; i++) {
+        size_t size = field_strings[i].size();
+        char* c = this->_char_mem_mgr.allocate(size+1);
+        field_strings[i].copy(c, size, 0);
+        c[size]=0;
+        data[i] = c;
+        lengths[i] = size;
+    }
+
+    return;
+}
+
+std::vector<std::string>
+MetaData::get_string_values(const std::string& name)
+
+{
+    /* This function returns a vector of strings
+    that are stored in the metadata field
+    */
+
+    if(!this->_field_exists(name))
+        throw std::runtime_error("The metadata field "
+                                 + name +
+                                 " does not exist.");
+
+    MetaDataType type = this->_get_meta_value_type(name);
+
+    if(type!=MetaDataType::string)
+        throw std::runtime_error("The metadata field " +
+                                 name +
+                                 " is not a string field.");
+
+    gpb::Message* msg = this->_meta_msg_map[name];
+
+    return this->_get_string_field_values(msg);
 }
 
 std::string_view MetaData::get_metadata_buf()
@@ -289,9 +377,7 @@ void MetaData::_set_string_in_message(gpb::Message* msg,
 }
 
 
-void MetaData::_get_string_field_values(gpb::Message* msg,
-                                        void*& data,
-                                        size_t& n_values) {
+std::vector<std::string> MetaData::_get_string_field_values(gpb::Message* msg) {
     /* This funcition retrieves all of the metadata
     "data" string fields from the message.  A copy
     of the protobuf values is made using the
@@ -305,20 +391,15 @@ void MetaData::_get_string_field_values(gpb::Message* msg,
         msg->GetDescriptor()->FindFieldByName("data");
 
     //Get the number of entries and bytes
-    n_values = refl->FieldSize(*msg,field_desc);
-    data = (void*)this->_char_array_mem_mgr.allocate(n_values);
+    int n_values = refl->FieldSize(*msg,field_desc);
 
-    //Copy each metadata string into new char*
+    std::vector<std::string> field_strings(n_values);
+
     for(int i = 0; i < n_values; i++) {
-        std::string value =
+        field_strings[i] =
             refl->GetRepeatedString(*msg, field_desc, i);
-        unsigned size = value.size();
-        char* c = this->_char_mem_mgr.allocate(size+1);
-        value.copy(c, size, 0);
-        c[size]=0;
-        ((char**)data)[i] = c;
     }
-    return;
+    return field_strings;
 }
 
 template <typename T>

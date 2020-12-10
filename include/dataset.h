@@ -50,11 +50,16 @@ class DataSet
                         const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
                         );
 
+        //! Add metadata scalar field (non-string) to the DataSet.  Default behavior is to append existing fields.
+        void add_meta_scalar(const std::string& name /*!< The name used to reference the metadata*/,
+                             const void* data /*!< A c_ptr to the metadata*/,
+                             const MetaDataType type /*!< The data type of the metadata*/
+                             );
+
         //! Add metadata field to the DataSet.  Default behavior is to append existing fields.
-        void add_meta(const std::string& name /*!< The name used to reference the metadata*/,
-                      const void* data /*!< A c_ptr to the metadata*/,
-                      const MetaDataType type /*!< The data type of the metadata*/
-                      );
+        void add_meta_string(const std::string& name /*!< The name used to reference the metadata*/,
+                             const std::string& data /*!< The string to add to the metadata field*/
+                             );
 
         //! Get tensor data and return an allocated multi-dimensional array
         void get_tensor(const std::string& name /*!< The name used to reference the tensor*/,
@@ -81,12 +86,23 @@ class DataSet
                            const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
                            );
 
-        //! Get metadata field from the DataSet
-        void get_meta(const std::string& name /*!< The name used to reference the metadata*/,
-                      void*& data /*!< A c_ptr reference to the metadata*/,
-                      size_t& length /*!< The length of the meta*/,
-                      MetaDataType& type /*!< The data type of the metadata*/
-                      );
+        //! Get metadata scalar field from the DataSet
+        void get_meta_scalars(const std::string& name /*!< The name used to reference the metadata*/,
+                              void*& data /*!< A c_ptr reference to the metadata that is contained in the field*/,
+                              size_t& length /*!< The number of metdata values in the field*/,
+                              MetaDataType& type /*!< The data type of the metadata field*/
+                              );
+
+        //! Get metadata string field from the DataSet
+        std::vector<std::string> get_meta_strings(const std::string& name /*!< The name used to reference the metadata*/
+                                                  );
+
+        //! Get metadata string field from the DataSet using c-style interface
+        void get_meta_strings(const std::string& name /*!< The name used to reference the metadata*/,
+                              char**& data /*!< An array of c-style strings pointing to the metadata field values*/,
+                              size_t& n_strings /*!< The number of strings in the metadata field*/,
+                              size_t*& lengths /*!< An array of string lengths provided to the user for iterating over the c-strings*/
+                              );
 
         //! The name of the DataSet
         std::string name;

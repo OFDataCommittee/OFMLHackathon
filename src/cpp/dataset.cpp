@@ -46,16 +46,28 @@ void DataSet::add_tensor(const std::string& name,
     */
     this->_add_to_tensorpack(name, data, dims,
                              type, mem_layout);
-    this->_metadata.add_value(".tensors", name.c_str(),
-                              MetaDataType::string);
+    this->_metadata.add_string(".tensors", name);
     return;
 }
 
-void DataSet::add_meta(const std::string& name,
-                       const void* data,
-                       const MetaDataType type)
+void DataSet::add_meta_scalar(const std::string& name,
+                              const void* data,
+                              const MetaDataType type)
 {
-    this->_metadata.add_value(name, data, type);
+    /* This function will add a metadata scalar
+    values that are not strings.
+    */
+    this->_metadata.add_scalar(name, data, type);
+    return;
+}
+
+void DataSet::add_meta_string(const std::string& name,
+                              const std::string& data)
+{
+    /* This function will add a metadata string
+    to the field
+    */
+    this->_metadata.add_string(name, data);
     return;
 }
 
@@ -138,10 +150,10 @@ void DataSet::unpack_tensor(const std::string& name,
     return;
 }
 
-void DataSet::get_meta(const std::string& name,
-                       void*& data,
-                       size_t& length,
-                       MetaDataType& type)
+void DataSet::get_meta_scalars(const std::string& name,
+                               void*& data,
+                               size_t& length,
+                               MetaDataType& type)
 {
     /* This function points the data pointer to a
     dynamically allocated array of the metadata
@@ -151,8 +163,35 @@ void DataSet::get_meta(const std::string& name,
     knows how to use the values if they are
     unsure of the type.
     */
-    this->_metadata.get_values(name, data, length, type);
+    this->_metadata.get_scalar_values(name, data,
+                                      length, type);
     return;
+}
+
+void DataSet::get_meta_strings(const std::string& name,
+                               char**& data,
+                               size_t& n_strings,
+                               size_t*& lengths)
+{
+    /* This function points the data pointer to a
+    dynamically allocated array of the metadata
+    strings and sets the lengths pointer to an
+    a dynamically allocated array of string lengths.
+    The reference variable n_strings is set
+    to the length of the data array (i.e.
+    number of strings).
+    */
+    this->_metadata.get_string_values(name, data,
+                                      n_strings, lengths);
+    return;
+}
+
+std::vector<std::string> DataSet::get_meta_strings(const std::string& name)
+{
+    /* This function returns a vector of strings for the
+    string metadata field.
+    */
+    return this->_metadata.get_string_values(name);
 }
 
 std::string DataSet::get_tensor_type(const std::string& name)

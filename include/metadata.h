@@ -55,18 +55,34 @@ class MetaData
                               unsigned long long buf_size /*!< The length of the buffer*/
                               );
 
-        //! Add a value to a metadata field
-        void add_value(const std::string& field_name /*!< The name of the metadata field*/,
-                       const void* value /*!< The value of the metadata field*/,
-                       const MetaDataType type /*!< The data type of the field*/
-                       );
-
-        //! Get metadata values from field
-        void get_values(const std::string& name /*!< The name of the metadata field*/,
-                        void*& data /*!< The pointer that will be pointed to the metadata*/,
-                        size_t& length /*!< An integer that will be set to the number of values in the metadata field*/,
-                        MetaDataType& type /*!< The data type of the field*/
+        //! Add a value to a metadata field (non-string)
+        void add_scalar(const std::string& field_name /*!< The name of the metadata field*/,
+                        const void* value /*!< The value of the metadata field*/,
+                        const MetaDataType type /*!< The data type of the field*/
                         );
+
+        //! Add a value to a metadata field (non-string)
+        void add_string(const std::string& field_name /*!< The name of the metadata field*/,
+                        const std::string& value /*!< The value of the metadata field*/
+                        );
+
+        //! Get metadata values from field that are scalars (non-string)
+        void get_scalar_values(const std::string& name /*!< The name of the metadata field*/,
+                               void*& data /*!< The pointer that will be pointed to the metadata*/,
+                               size_t& length /*!< An integer that will be set to the number of values in the metadata field*/,
+                               MetaDataType& type /*!< The data type of the field*/
+                               );
+
+        //! Get metadata values from field that are strings
+        std::vector<std::string> get_string_values(const std::string& name /*!< The name of the metadata field*/
+                                                   );
+
+        //! Get metadata values from field that are strings using a c-style interface
+        void get_string_values(const std::string& name /*!< The name of the metadata field*/,
+                               char**& data /*!< The pointer that will be pointed to the metadata*/,
+                               size_t& n_strings /*!< An integer that will be set to the number of values in the metadata field*/,
+                               size_t*& lengths /*!< An array of string lengths provided to the user for iterating over the c-strings*/
+                               );
 
         //! Get the metadata fields as a buffer
         std::string_view get_metadata_buf();
@@ -88,6 +104,7 @@ class MetaData
         MemoryList<uint64_t> _uint64_mem_mgr;
         MemoryList<int32_t> _int32_mem_mgr;
         MemoryList<uint32_t> _uint32_mem_mgr;
+        MemoryList<size_t> _str_len_mem_mgr;
 
         //! The metadata buffer
         std::string _buf;
@@ -116,10 +133,8 @@ class MetaData
                                     );
 
         //! Get an array of string metadata values
-        void _get_string_field_values(gpb::Message* msg /*!< Protobuf message containing the string field*/,
-                                     void*& data /*!< The pointer that will be pointed to the metadata*/,
-                                     size_t& length /*!< An integer that will be set to the number of values in the metadata field*/
-                                     );
+        std::vector<std::string> _get_string_field_values(gpb::Message* msg /*!< Protobuf message containing the string field*/
+                                                          );
 
         //! Get non-string numeric field values
         template <typename T>

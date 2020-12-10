@@ -118,19 +118,10 @@ DataSet SmartSimClient::get_dataset(const std::string& name)
   DataSet dataset = DataSet(name, reply.str(), reply.str_len());
 
   // Loop through and add each tensor to the dataset
-  char** tensor_names;
-  size_t n_tensors;
-  MetaDataType type;
-  dataset.get_meta(".tensors", (void*&)tensor_names,
-                   n_tensors, type);
+  std::vector<std::string> tensor_names =
+    dataset.get_meta_strings(".tensors");
 
-  if(type!=MetaDataType::string)
-    throw std::runtime_error("The .tensors field "\
-                             "for dataset " +
-                             name +
-                             "has been corrupted.");
-
-  for(size_t i=0; i<n_tensors; i++) {
+  for(size_t i=0; i<tensor_names.size(); i++) {
     std::string t_name = this->_get_prefix() +
                          "{" + dataset.name + "}."
                              + tensor_names[i];
