@@ -5,7 +5,7 @@ Python
 Using the Python Client
 =======================
 
-The SmartSim Python client allows users to send data to and receive data from
+The SmartSim Python client allows users to send and receive data from
 other SmartSim entities stored in the database. The code snippet below shows
 the code required to send and receive data with the Python client. In the
 following subsections, general groups of functions that are provided by the

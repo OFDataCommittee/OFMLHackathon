@@ -107,21 +107,13 @@ To install the Python client, follow the steps below:
 
 .. code-block:: bash
 
-  conda activte env # activate/create a virtual environment.
+  conda activate env # activate/create a virtual environment.
   cd silc # navigate to top level of SILC
   pip install -r requirements.txt
   make deps
   source setup_env.sh
   make pyclient
 
-After the following script is used, the Python client module
-will need to be added to your ``PYTHONPATH``. Eventually this
-will be handled by a Pip install, but for now, navigate to
-`silc/src/python/module` and run
-
-.. code-block:: bash
-
-  export PYTHONPATH=$PYTHONPATH:$(pwd)
 
 After following the above steps, the python client should be
 ready for use in any python program.
@@ -131,7 +123,7 @@ ready for use in any python program.
   from silc import RAIClient
   import numpy as np
 
-  client = RAIClient(cluster=False, Fortran=False)
+  client = RAIClient(cluster=False, fortran=False)
 
 
 

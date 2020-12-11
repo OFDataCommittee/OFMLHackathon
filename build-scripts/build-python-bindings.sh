@@ -3,7 +3,7 @@
 cd ./src/python
 
 # remove existing build
-rm -r build
+rm -rf build
 
 # create build dir
 mkdir build
@@ -14,4 +14,4 @@ cmake ..
 make
 
 # move python module to module directory
-cp silcPy.cpython-38-darwin.so ../module/silc/
+cp silcPy.cpython-*.so ../module/silc/

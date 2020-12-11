@@ -1,3 +1,5 @@
+#!/bin/bash
+
 
 # setup the necessary environment variables for testing and builds
 # this must be *sourced* in the top level smartsim directory in the
@@ -48,4 +50,13 @@ fi
 if [[ -f ./third-party/RedisAI/install-gpu/redisai.so ]]; then
     export REDISAI_GPU_INSTALL_PATH="$(pwd)/third-party/RedisAI/install-gpu"
     echo "Set RedisAI GPU install path to $REDISAI_GPU_INSTALL_PATH"
+fi
+
+# Update PYTHONPATH
+if [[ ":$PYTHONPATH:" != *"$(pwd)/src/python/module/"* ]]; then
+    echo "Adding SILC to PYTHONPATH"
+    export PYTHONPATH="$(pwd):${PYTHONPATH}"
+    echo $PYTHONPATH
+else
+    echo "SILC found in PYTHONPATH"
 fi
