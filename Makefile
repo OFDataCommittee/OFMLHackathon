@@ -173,8 +173,8 @@ test-py:
 
 # help: test-fortran                        - run fortran tests
 .PHONY: test-fortran
-test-fortran:
-	@python -m pytest -vv ./tests/fortran_oop/
+test-fortran: build-test-fortran
+	@python -m pytest -vv ./tests/fortran
 
 # help: testpy-cov                     - run python tests with coverage
 .PHONY: testpy-cov
