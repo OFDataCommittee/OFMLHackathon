@@ -27,7 +27,7 @@ void add_tensor(void* dataset /*!< A c_ptr to the dataset object */,
                 CMemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
                 );
 
-//! Add metadata field value (non-string) to the DataSet.  Default behavior is to append existing fields.
+//! Add metadata field value (non-string) to the DataSet.  Values will be appended to existing fields.
 void add_meta_scalar(void* dataset /*!< A c_ptr to the dataset object */,
                      const char* name /*!< The name of the metadata field*/,
                      const size_t name_length /*!< The length of the metadata name c-string, excluding null terminating character*/,
@@ -35,7 +35,7 @@ void add_meta_scalar(void* dataset /*!< A c_ptr to the dataset object */,
                      CMetaDataType type /*!< The data type of the metadata */
                      );
 
-//! Add metadata string field value to the DataSet.  Default behavior is to append existing fields.
+//! Add metadata string field value to the DataSet.  Values will be appended to existing fields.
 void add_meta_string(void* dataset /*!< A c_ptr to the dataset object */,
                      const char* name /*!< The name of the metadata field*/,
                      const size_t name_length /*!< The length of the metadata name c-string, excluding null terminating character*/,

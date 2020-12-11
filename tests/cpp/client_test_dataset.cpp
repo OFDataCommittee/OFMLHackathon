@@ -390,38 +390,47 @@ int main(int argc, char* argv[]) {
   //Declare the dimensions for the 3D arrays
   std::vector<size_t> dims{5,4,17};
 
+  std::string dataset_name;
 
+  dataset_name = "3D_dbl_dataset_rank_" + std::to_string(rank);
   put_get_3D_array<double,double>(
 				  &set_3D_array_floating_point_values<double>,
-				  dims, TensorType::dbl, "_dbl", "3D_dbl_dataset");
+				  dims, TensorType::dbl, "_dbl", dataset_name);
 
+  dataset_name = "3D_flt_dataset_rank_" + std::to_string(rank);
   put_get_3D_array<float,float>(
-				&set_3D_array_floating_point_values<float>,
-				dims, TensorType::flt, "_flt", "3D_flt_dataset");
+	  			&set_3D_array_floating_point_values<float>,
+  				dims, TensorType::flt, "_flt", dataset_name);
 
+  dataset_name = "3D_i64_dataset_rank_" + std::to_string(rank);
   put_get_3D_array<int64_t,int64_t>(
 				    &set_3D_array_integral_values<int64_t>,
-				    dims, TensorType::int64, "_i64", "3D_i64_dataset");
+				    dims, TensorType::int64, "_i64", dataset_name);
 
+  dataset_name = "3D_i32_dataset_rank_" + std::to_string(rank);
   put_get_3D_array<int32_t,int32_t>(
 				    &set_3D_array_integral_values<int32_t>,
-				    dims, TensorType::int32, "_i32", "3D_i32_dataset");
+				    dims, TensorType::int32, "_i32", dataset_name);
 
+  dataset_name = "3D_i16_dataset_rank_" + std::to_string(rank);
   put_get_3D_array<int16_t,int16_t>(
 				      &set_3D_array_integral_values<int16_t>,
-				      dims, TensorType::int16, "_i16", "3D_i16_dataset");
+				      dims, TensorType::int16, "_i16", dataset_name);
 
+  dataset_name = "3D_i8_dataset_rank_" + std::to_string(rank);
   put_get_3D_array<int8_t,int8_t>(
 				      &set_3D_array_integral_values<int8_t>,
-				      dims, TensorType::int8, "_i8", "3D_i8_dataset");
+				      dims, TensorType::int8, "_i8", dataset_name);
 
+  dataset_name = "3D_ui16_dataset_rank_" + std::to_string(rank);
   put_get_3D_array<uint16_t,uint16_t>(
 				      &set_3D_array_integral_values<uint16_t>,
-				      dims, TensorType::uint16, "_ui16", "3D_ui16_dataset");
+				      dims, TensorType::uint16, "_ui16", dataset_name);
 
+  dataset_name = "3D_ui8_dataset_rank_" + std::to_string(rank);
   put_get_3D_array<uint8_t,uint8_t>(
 				      &set_3D_array_integral_values<uint8_t>,
-				      dims, TensorType::uint8, "_ui8", "3D_ui8_dataset");
+				      dims, TensorType::uint8, "_ui8", dataset_name);
 
   MPI_Finalize();
 

@@ -50,13 +50,13 @@ class DataSet
                         const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
                         );
 
-        //! Add metadata scalar field (non-string) to the DataSet.  Default behavior is to append existing fields.
+        //! Add metadata scalar field (non-string) to the DataSet.  Values will be appended to existing fields.
         void add_meta_scalar(const std::string& name /*!< The name used to reference the metadata*/,
                              const void* data /*!< A c_ptr to the metadata*/,
                              const MetaDataType type /*!< The data type of the metadata*/
                              );
 
-        //! Add metadata field to the DataSet.  Default behavior is to append existing fields.
+        //! Add metadata field to the DataSet.  Values will be appended to existing fields.
         void add_meta_string(const std::string& name /*!< The name used to reference the metadata*/,
                              const std::string& data /*!< The string to add to the metadata field*/
                              );
