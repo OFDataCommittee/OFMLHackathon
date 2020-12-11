@@ -13,6 +13,7 @@ include 'put_tensor_interfaces.inc'
 include 'get_tensor_interfaces.inc'
 include 'unpack_tensor_interfaces.inc'
 include 'misc_tensor_interfaces.inc'
+include 'model_interfaces.inc'
 
 type, public :: client
   private
@@ -74,5 +75,6 @@ include 'put_tensor_methods.inc'
 include 'get_tensor_methods.inc'
 include 'unpack_tensor_methods.inc'
 include 'misc_tensor_methods.inc'
+include 'model_methods.inc'
 
 end module silc
