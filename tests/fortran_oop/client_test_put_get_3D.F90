@@ -79,5 +79,6 @@ program main
   if (.not. all(true_array_integer_64 == recv_array_integer_64)) stop 'true_array_integer_64: FAILED'
 
   call mpi_finalize(err_code)
+  write(*,*) "3D put/get: passed"
 
 end program main

@@ -395,7 +395,7 @@ void SmartSimClient::unpack_tensor(const std::string& key,
     for(size_t i=0; i<reply_dims.size(); i++) {
       total_dims *= reply_dims[i];
     }
-    if(total_dims != dims[0])
+    if( (total_dims != dims[0]) && (mem_layout == MemoryLayout::contiguous) )
       throw std::runtime_error("The dimensions of the fetched tensor "\
                                "do not match the length of the "\
                                "contiguous memory space.");

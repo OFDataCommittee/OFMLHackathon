@@ -46,7 +46,7 @@ test-deps-gpu:
 
 # help: build-tests                    - build all tests (C, C++, Fortran)
 .PHONY: build-tests
-build-tests: build-test-cpp build-test-c
+build-tests: build-test-cpp build-test-c build-test-fortran
 
 
 # help: build-test-cpp                 - build the C++ tests
@@ -60,6 +60,10 @@ build-test-cpp:
 build-test-c:
 	./build-scripts/build_c_tests.sh
 
+# help: build-test-fortran             - build the Fortran tests
+.PHONY: build-test-fortran
+build-test-fortran:
+	./build-scripts/build_fortran_tests.sh
 
 # help: clean-deps                     - remove third-party deps
 .PHONY: clean-deps
@@ -167,6 +171,10 @@ test-cpp:
 test-py:
 	@python -m pytest -vv ./tests/python/
 
+# help: test-fortran                        - run fortran tests
+.PHONY: test-fortran
+test-fortran:
+	@python -m pytest -vv ./tests/fortran_oop/
 
 # help: testpy-cov                     - run python tests with coverage
 .PHONY: testpy-cov

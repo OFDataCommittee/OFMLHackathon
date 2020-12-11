@@ -22,9 +22,10 @@ end enum
 
 ! MemoryLayout​
 enum, bind(c)
-  enumerator :: nested             = 1
-  enumerator :: contiguous         = 2
-  enumerator :: fortran_contiguous = 3
+  enumerator :: c_nested             = 1
+  enumerator :: c_contiguous         = 2
+  enumerator :: c_fortran_nested     = 3
+  enumerator :: c_fortran_contiguous = 4
 end enum
 
 ! MetadataType​

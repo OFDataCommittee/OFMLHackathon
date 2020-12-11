@@ -76,7 +76,7 @@ program main
   call client%unpack_tensor(key_prefix//"true_array_integer_64", recv_array_integer_64, shape(recv_array_integer_64))
   if (.not. all(true_array_integer_64 == recv_array_integer_64)) stop 'true_array_integer_64: FAILED'
 
-  write(*,*) "1D put/get: passed"
+  write(*,*) "2D put/get: passed"
 
   call mpi_finalize(err_code)
 

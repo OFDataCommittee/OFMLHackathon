@@ -16,3 +16,4 @@
   c_dims(:) = dims(:)
   c_n_dims = size(dims)
   c_dims_ptr = c_loc(c_dims)
+  mem_layout = c_fortran_contiguous

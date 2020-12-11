@@ -27,6 +27,9 @@ inline MemoryLayout convert_layout(CMemoryLayout layout) {
     case(c_contiguous) :
       return MemoryLayout::contiguous;
       break;
+    case(c_fortran_contiguous) :
+      return MemoryLayout::fortran_contiguous;
+      break;
     default :
       throw std::runtime_error("Unsupported enum "\
                                "conversion.");
