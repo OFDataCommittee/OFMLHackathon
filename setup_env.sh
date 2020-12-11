@@ -55,7 +55,7 @@ fi
 # Update PYTHONPATH
 if [[ ":$PYTHONPATH:" != *"$(pwd)/src/python/module/"* ]]; then
     echo "Adding SILC to PYTHONPATH"
-    export PYTHONPATH="$(pwd):${PYTHONPATH}"
+    export PYTHONPATH="$(pwd)/src/python/module/:${PYTHONPATH}"
     echo $PYTHONPATH
 else
     echo "SILC found in PYTHONPATH"
