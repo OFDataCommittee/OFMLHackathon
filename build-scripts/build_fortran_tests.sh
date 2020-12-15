@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ./tests/fortran_oop/
+cd ./tests/fortran/
 
 if [ -z "$HIREDIS_INSTALL_PATH" ]; then
     echo "WARNING: HIREDIS_INSTALL_PATH is not set"

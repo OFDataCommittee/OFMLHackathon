@@ -171,10 +171,10 @@ test-cpp:
 test-py:
 	@python -m pytest -vv ./tests/python/
 
-# help: test-fortran                        - run fortran tests
+# help: test-fortran                   - run fortran tests
 .PHONY: test-fortran
 test-fortran: build-test-fortran
-	@python -m pytest -vv ./tests/fortran
+	@python -m pytest -vv ./tests/fortran/
 
 # help: testpy-cov                     - run python tests with coverage
 .PHONY: testpy-cov
