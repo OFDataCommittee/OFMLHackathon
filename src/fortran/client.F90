@@ -14,6 +14,7 @@ include 'get_tensor_interfaces.inc'
 include 'unpack_tensor_interfaces.inc'
 include 'misc_tensor_interfaces.inc'
 include 'model_interfaces.inc'
+include 'script_interfaces.inc'
 
 type, public :: client
   private
@@ -37,6 +38,14 @@ type, public :: client
   procedure :: rename_tensor
   procedure :: delete_tensor
   procedure :: copy_tensor
+  procedure :: set_model_from_file
+  procedure :: set_model
+  procedure :: get_model
+  procedure :: set_script_from_file
+  procedure :: set_script
+  procedure :: get_script
+  procedure :: run_script
+  procedure :: run_model
 
   ! Private procedures
   procedure, private :: put_tensor_i8
@@ -58,14 +67,6 @@ type, public :: client
   ! procedure :: rename_dataset        => client_rename_dataset
   ! procedure :: copy_dataset          => client_copy_dataset
   ! procedure :: delete_dataset        => client_delete_dataset
-  ! procedure :: set_model_from_file   => client_set_model_from_file
-  ! procedure :: set_model             => client_set_model
-  ! procedure :: get_model             => client_get_model
-  ! procedure :: set_script_from_file  => client_set_script_from_file
-  ! procedure :: set_script            => client_set_script
-  ! procedure :: get_script            => client_get_script
-  ! procedure :: run_script            => client_run_script
-  ! procedure :: run_model             => client_run_model
 end type client
 
 contains
@@ -76,5 +77,6 @@ include 'get_tensor_methods.inc'
 include 'unpack_tensor_methods.inc'
 include 'misc_tensor_methods.inc'
 include 'model_methods.inc'
+include 'script_methods.inc'
 
 end module silc
