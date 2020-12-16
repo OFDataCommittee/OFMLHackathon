@@ -1,2 +1,2 @@
 
-*.inc linguist-language=Fortran
+./src/fortran/*.inc linguist-language=Fortran
