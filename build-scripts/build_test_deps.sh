@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# set variables for RedisAI
+RAI_BUILD_TYPE=${1:-"cpu"}
+RAI_PT=${2:-1}
+RAI_TF=${3:-1}
+RAI_TFL=${4:-0}
+RAI_ONNX=${5:-0}
+
 cd ./third-party
 
 # build KeyDB

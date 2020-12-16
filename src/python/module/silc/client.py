@@ -1,8 +1,8 @@
 import numpy as np
 
-from .util import Dtypes
-from .silcPy import Client
 from .error import RedisConnectionError
+from .silcPy import Client
+from .util import Dtypes
 
 
 class RAIClient:

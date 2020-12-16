@@ -24,27 +24,38 @@ else
 fi
 
 
+
 # setup build dirs
 mkdir build
 cd ./build
 
-# TODO add platform dependent build step here
-cmake ..
+DO_FORTRAN="yes"
 
-if [ $? != 0 ]; then
-    echo "ERROR: cmake for Fortran tests failed"
-    cd ..
-    exit 1
+if [ "$(uname)" == "Darwin" ]; then
+    DO_FORTRAN="no"
 fi
 
-make -j 4
+if [[ $DO_FORTRAN == "yes" ]]; then
+    # TODO add platform dependent build step here
+    cmake ..
 
-if [ $? != 0 ]; then
-    echo "ERROR: failed to make Fortran tests"
-    cd ..
-    exit 1
+    if [ $? != 0 ]; then
+        echo "ERROR: cmake for Fortran tests failed"
+        cd ..
+        exit 1
+    fi
+
+    make -j 4
+
+    if [ $? != 0 ]; then
+        echo "ERROR: failed to make Fortran tests"
+        cd ..
+        exit 1
+    fi
+
+    cd ../
+    echo "Fortran tests built"
+else
+    echo "Skipping Fortran test build"
 fi
 
-cd ../
-
-echo

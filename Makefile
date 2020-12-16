@@ -36,7 +36,6 @@ test-deps: SHELL:=/bin/bash
 test-deps:
 	@bash ./build-scripts/build_test_deps.sh
 
-
 # help: test-deps-gpu                  - Make SILC GPU testing dependencies
 .PHONY: test-deps
 test-deps-gpu: SHELL:=/bin/bash
