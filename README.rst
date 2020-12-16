@@ -20,16 +20,16 @@ of redis-based clients built primarily for use with SmartSim.
      - Stable
    * - C
      - C99
-     - In development
+     - Stable
    * - Fortran
      - Fortran 2003 +
-     - Awaiting development
+     - In development
 
 Project Status
 ==============
 
-Currently the C++ is the only mature implementation of the SILC clients. The
-C and Python client are in development and should be done soon.
+Currently the C++, and C are the only mature implementations of the SILC clients.
+The Python and Fortran clients will be finished soon.
 
 
 Using SILC
@@ -38,12 +38,15 @@ Using SILC
 Installation
 ------------
 
-To build the dependencies for the C++ client, invoke the ``build_deps.sh``
-script from within the root directory of this repository
+To install SILC, follow the instructions in the documentation. To build
+the documentation, install the python dependencies (including sphinx) and
+in the top level of the SILC directory execute the following
 
 .. code-block:: bash
 
-    source build_deps.sh
+  make docs
+
+Then open ``doc/_build/html/index.html`` in a browser
 
 Examples
 --------
