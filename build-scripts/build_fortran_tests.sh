@@ -32,7 +32,7 @@ cd ./build
 cmake ..
 
 if [ $? != 0 ]; then
-    echo "ERROR: cmake for C tests failed"
+    echo "ERROR: cmake for Fortran tests failed"
     cd ..
     exit 1
 fi
@@ -40,7 +40,7 @@ fi
 make -j 4
 
 if [ $? != 0 ]; then
-    echo "ERROR: failed to make C tests"
+    echo "ERROR: failed to make Fortran tests"
     cd ..
     exit 1
 fi
