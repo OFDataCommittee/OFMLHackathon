@@ -1,4 +1,4 @@
-module silc
+module silc_client
 
 use iso_c_binding,   only : c_ptr, c_bool, c_null_ptr, c_char, c_int
 use iso_c_binding,   only : c_int8_t, c_int16_t, c_int32_t, c_int64_t, c_float, c_double, c_size_t
@@ -7,16 +7,16 @@ use fortran_c_utils, only : make_c_string
 
 implicit none; private
 
-include 'enum_fortran.inc'
-include 'client_interfaces.inc'
-include 'put_tensor_interfaces.inc'
-include 'get_tensor_interfaces.inc'
-include 'unpack_tensor_interfaces.inc'
-include 'misc_tensor_interfaces.inc'
-include 'model_interfaces.inc'
-include 'script_interfaces.inc'
+include 'client/enum_fortran.inc'
+include 'client/client_interfaces.inc'
+include 'client/put_tensor_interfaces.inc'
+include 'client/get_tensor_interfaces.inc'
+include 'client/unpack_tensor_interfaces.inc'
+include 'client/misc_tensor_interfaces.inc'
+include 'client/model_interfaces.inc'
+include 'client/script_interfaces.inc'
 
-type, public :: client
+type, public :: client_type
   private
 
   logical(kind=c_bool) :: cluster = .false.        !< True if a database cluster is being used
@@ -67,16 +67,16 @@ type, public :: client
   ! procedure :: rename_dataset        => client_rename_dataset
   ! procedure :: copy_dataset          => client_copy_dataset
   ! procedure :: delete_dataset        => client_delete_dataset
-end type client
+end type client_type
 
 contains
 
-include 'client_methods.inc'
-include 'put_tensor_methods.inc'
-include 'get_tensor_methods.inc'
-include 'unpack_tensor_methods.inc'
-include 'misc_tensor_methods.inc'
-include 'model_methods.inc'
-include 'script_methods.inc'
+include 'client/client_methods.inc'
+include 'client/put_tensor_methods.inc'
+include 'client/get_tensor_methods.inc'
+include 'client/unpack_tensor_methods.inc'
+include 'client/misc_tensor_methods.inc'
+include 'client/model_methods.inc'
+include 'client/script_methods.inc'
 
-end module silc
+end module silc_client

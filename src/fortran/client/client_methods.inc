@@ -1,5 +1,5 @@
 subroutine initialize( this, cluster )
-  class(client) :: this
+  class(client_type) :: this
   logical, optional :: cluster !< If true, client uses a database cluster (Default: .false.)
 
   if (present(cluster)) this%cluster = cluster
@@ -8,14 +8,14 @@ subroutine initialize( this, cluster )
 end subroutine initialize
 
 subroutine destructor( this )
-  class(client) :: this
+  class(client_type) :: this
 
   call c_destructor(this%client_ptr)
 end subroutine destructor
 
 !> Check if the specified key exists in the database
 logical function key_exists(this, key)
-  class(client)    :: this
+  class(client_type)    :: this
   character(len=*) :: key
 
   character(kind=c_char) :: c_key(len_trim(key)+1)
@@ -30,7 +30,7 @@ end function key_exists
 
 !> Repeatedly poll the database until the key exists or the number of tries is exceeded
 logical function poll_key( this, key, poll_frequency_ms, num_tries )
-  class(client)    :: this
+  class(client_type)    :: this
   character(len=*) :: key !< Key in the database to poll
   integer          :: poll_frequency_ms !< Frequency at which to poll the database (ms)
   integer          :: num_tries !< Number of times to poll the database before failing

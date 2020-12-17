@@ -1,6 +1,6 @@
 !> Get the (opaque) tensor from the database
 subroutine get_tensor(this, key, data, data_type, dims, n_dims)
-  class(client),                            intent(in   ) :: this      !< Fortran SILC client
+  class(client_type),                       intent(in   ) :: this      !< Fortran SILC client
   character(len=*),                         intent(in   ) :: key       !< The unique key used to query the database
   type(c_ptr),                              intent(  out) :: data      !< A pointer to the opaque tensor object
   integer,                                  intent(  out) :: data_type !< The type of data in the tensor object

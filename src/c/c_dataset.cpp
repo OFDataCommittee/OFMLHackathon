@@ -122,10 +122,9 @@ void unpack_dataset_tensor(void* dataset,
 }
 
 extern "C"
-void get_meta_scalars(void* dataset,
+void* get_meta_scalars(void* dataset,
                       const char* name,
                       const size_t name_length,
-                      void** data,
                       size_t* length,
                       CMetaDataType* type)
 {
@@ -133,13 +132,15 @@ void get_meta_scalars(void* dataset,
   memory that is cleared when the user deletes the
   DataSet object
   */
+
+  void* data;
   DataSet* d = (DataSet*)dataset;
   std::string key_str = std::string(name, name_length);
 
   MetaDataType m_type;
-  d->get_meta_scalars(key_str, *data, *length, m_type);
+  d->get_meta_scalars(key_str, data, *length, m_type);
   *type = convert_metadata_type(m_type);
-  return;
+  return data;
 }
 
 extern "C"

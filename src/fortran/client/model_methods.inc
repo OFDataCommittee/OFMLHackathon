@@ -1,7 +1,6 @@
-
 !> Retrieve the model from the database
 subroutine get_model(this, key, model)
-  class(client),                    intent(in   ) :: this  !< An initialized SILC client
+  class(client_type),               intent(in   ) :: this  !< An initialized SILC client
   character(len=*),                 intent(in   ) :: key   !< The key to use to place the model
   character(len=*),                 intent(  out) :: model !< The model as a continuous buffer
 
@@ -27,7 +26,7 @@ end subroutine get_model
 !> Load the machine learning model from a file and set the configuration
 subroutine set_model_from_file( this, key, model_file, backend, device, batch_size, min_batch_size, tag, &
     inputs, outputs )
-  class(client),                  intent(in) :: this           !< An initialized SILC client
+  class(client_type),             intent(in) :: this           !< An initialized SILC client
   character(len=*),               intent(in) :: key            !< The key to use to place the model
   character(len=*),               intent(in) :: model_file     !< The file storing the model
   character(len=*),               intent(in) :: backend        !< The name of the backend (TF, TFLITE, TORCH, ONNX)
@@ -112,7 +111,7 @@ end subroutine set_model_from_file
 
 subroutine set_model( this, key, model, backend, device, batch_size, min_batch_size, tag, &
     inputs, outputs )
-  class(client),                  intent(in) :: this           !< An initialized SILC client
+  class(client_type),             intent(in) :: this           !< An initialized SILC client
   character(len=*),               intent(in) :: key            !< The key to use to place the model
   character(len=*),               intent(in) :: model          !< The binary representaiton o
   character(len=*),               intent(in) :: backend        !< The name of the backend (TF, TFLITE, TORCH, ONNX)
@@ -195,7 +194,7 @@ subroutine set_model( this, key, model, backend, device, batch_size, min_batch_s
 end subroutine set_model
 
 subroutine run_model(this, key, inputs, outputs)
-  class(client),                  intent(in) :: this           !< An initialized SILC client
+  class(client_type),             intent(in) :: this           !< An initialized SILC client
   character(len=*),               intent(in) :: key            !< The key to use to place the model
   character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of model input nodes (TF models)
   character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of model output nodes (TF models)

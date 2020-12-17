@@ -1,13 +1,13 @@
   !** Beginning of code common to all put_tensor subroutines
 
-  class(client),                         intent(in) :: this !< Fortran SLIC client
-  character(len=*),                      intent(in) :: key  !< The unique key used to store in the database
+  class(dataset_type),                   intent(in) :: this !< Fortran SLIC dataset
+  character(len=*),                      intent(in) :: name  !< The unique name used to store in the database
   integer, dimension(:),                 intent(in) :: dims !< The length of each dimension
   ! Local variables
   integer(kind=c_size_t)                      :: c_n_dims ! Number of dimensions
   type(c_ptr) :: data_ptr, c_dims_ptr
-  character(kind=c_char) :: c_key(len_trim(key)+1) !< Transformed fortran 'key' to a c-string
-  integer(kind=c_size_t) :: key_length
+  character(kind=c_char) :: c_name(len_trim(name)) !< Transformed fortran 'name' to a c-string
+  integer(kind=c_size_t) :: name_length
   integer(kind=c_size_t), target :: c_dims(size(dims))
   integer(kind=enum_kind) :: data_type
 
@@ -17,9 +17,9 @@
   ! Create the pointer to the data array
   data_ptr = c_loc(data)
 
-  ! Process the key and calculate its length
-  c_key = make_c_string(key)
-  key_length = len_trim(key)
+  ! Process the name and calculate its length
+  c_name = trim(name)
+  name_length = len_trim(name)
 
   c_dims(:) = dims(:)
   c_dims_ptr = c_loc(c_dims)

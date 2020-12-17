@@ -2,7 +2,7 @@ program main
 
   use mpi
   use iso_c_binding
-  use silc, only : silc_client => client
+  use silc_client, only : client_type
 
   implicit none
 
@@ -25,7 +25,7 @@ program main
   integer(kind=8), dimension(dim1, dim2, dim3) :: true_array_integer_64
 
   integer :: i, j, k
-  type(silc_client) :: client
+  type(client_type) :: client
 
   integer :: err_code, pe_id
   character(len=9) :: key_prefix

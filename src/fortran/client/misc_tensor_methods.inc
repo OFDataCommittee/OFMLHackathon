@@ -1,6 +1,6 @@
 !> Move a tensor to a new key
 subroutine rename_tensor(this, key, new_key)
-  class(client),    intent(in) :: this    !< The initialized Fortran SILC client
+  class(client_type), intent(in) :: this    !< The initialized Fortran SILC client
   character(len=*), intent(in) :: key     !< The key to use to place the tensor
                                           !! excluding null terminating character
   character(len=*), intent(in) :: new_key !< The new tensor key
@@ -21,7 +21,7 @@ end subroutine rename_tensor
 
 !> Delete a tensor
 subroutine delete_tensor(this, key)
-  class(client),    intent(in) :: this !<  The initialized Fortran SILC client
+  class(client_type), intent(in) :: this !<  The initialized Fortran SILC client
   character(len=*), intent(in) :: key  !< The key to use to place the tensor
 
   character(kind=c_char) :: c_key(len_trim(key)+1)
@@ -35,7 +35,7 @@ end subroutine delete_tensor
 
 !> Copy a tensor to the destination key
 subroutine copy_tensor(this, src_name, dest_name)
-  class(client),    intent(in) :: this      !< The initialized Fortran SILC client
+  class(client_type), intent(in) :: this      !< The initialized Fortran SILC client
   character(len=*), intent(in) :: src_name  !< The key to use to place the tensor
                                             !! excluding null terminating character
   character(len=*), intent(in) :: dest_name !< The new tensor key

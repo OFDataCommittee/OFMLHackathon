@@ -1,6 +1,6 @@
 !> Retrieve the script from the database
 subroutine get_script(this, key, script)
-  class(client),                    intent(in   ) :: this  !< An initialized SILC client
+  class(client_type),               intent(in   ) :: this  !< An initialized SILC client
   character(len=*),                 intent(in   ) :: key   !< The key to use to place the script
   character(len=*),                 intent(  out) :: script !< The script as a continuous buffer
 
@@ -24,7 +24,7 @@ subroutine get_script(this, key, script)
 end subroutine get_script
 
 subroutine set_script_from_file( this, key, device, script_file )
-  class(client),                  intent(in) :: this        !< An initialized SILC client
+  class(client_type),             intent(in) :: this        !< An initialized SILC client
   character(len=*),               intent(in) :: key         !< The key to use to place the script
   character(len=*),               intent(in) :: device      !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
   character(len=*),               intent(in) :: script_file !< The file storing the script
@@ -47,7 +47,7 @@ subroutine set_script_from_file( this, key, device, script_file )
 end subroutine set_script_from_file
 
 subroutine set_script( this, key, device, script )
-  class(client),                  intent(in) :: this   !< An initialized SILC client
+  class(client_type),             intent(in) :: this   !< An initialized SILC client
   character(len=*),               intent(in) :: key    !< The key to use to place the script
   character(len=*),               intent(in) :: device !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
   character(len=*),               intent(in) :: script !< The file storing the script
@@ -69,7 +69,7 @@ subroutine set_script( this, key, device, script )
 end subroutine set_script
 
 subroutine run_script(this, key, func, inputs, outputs)
-  class(client),                  intent(in) :: this           !< An initialized SILC client
+  class(client_type),             intent(in) :: this           !< An initialized SILC client
   character(len=*),               intent(in) :: key            !< The key to use to place the script
   character(len=*),               intent(in) :: func           !< The name of the function in the script to call
   character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of script input nodes (TF scripts)

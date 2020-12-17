@@ -67,10 +67,9 @@ void unpack_dataset_tensor(void* dataset /*!< A c_ptr to the dataset object */,
                            );
 
 //! Get metadata (non-string) field from the DataSet
-void get_meta_scalars(void* dataset /*!< A c_ptr to the dataset object */,
+void* get_meta_scalars(void* dataset /*!< A c_ptr to the dataset object */,
                       const char* name /*!< The name used to reference the metadata*/,
                       const size_t name_length /*!< The length of the metadata field name c-string, excluding null terminating character*/,
-                      void** data /*!< A c_ptr reference to the metadata*/,
                       size_t* length /*!< The length of the metadata c_ptr*/,
                       CMetaDataType* type /*!< The data type of the metadata*/
                       );

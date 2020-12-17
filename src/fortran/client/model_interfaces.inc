@@ -7,7 +7,6 @@ interface
     type(c_ptr),                   intent(inout) :: model      !< The model as a continuous buffer
     integer(kind=c_size_t),        intent(  out) :: model_length !< Length of the model buffer c-string
   end subroutine get_model_c
-
 end interface
 
 interface
