@@ -18,10 +18,10 @@ logical function key_exists(this, key)
   class(client_type)    :: this
   character(len=*) :: key
 
-  character(kind=c_char) :: c_key(len_trim(key)+1)
+  character(kind=c_char) :: c_key(len_trim(key))
   integer(kind=c_size_t) :: c_key_length
 
-  c_key = make_c_string(key)
+  c_key = trim(key)
   c_key_length = len_trim(key)
 
   key_exists = key_exists_c( this%client_ptr, c_key, c_key_length)
@@ -35,11 +35,11 @@ logical function poll_key( this, key, poll_frequency_ms, num_tries )
   integer          :: poll_frequency_ms !< Frequency at which to poll the database (ms)
   integer          :: num_tries !< Number of times to poll the database before failing
 
-  character(kind=c_char) :: c_key(len_trim(key)+1)
+  character(kind=c_char) :: c_key(len_trim(key))
   integer(kind=c_size_t) :: c_key_length
   integer(kind=c_int) :: c_poll_frequency, c_num_tries
 
-  c_key = make_c_string(key)
+  c_key = trim(key)
   c_key_length = len_trim(key)
 
   poll_key = poll_key_c(this%client_ptr, c_key, c_key_length, c_poll_frequency, c_num_tries)

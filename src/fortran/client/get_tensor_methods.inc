@@ -7,7 +7,7 @@ subroutine get_tensor(this, key, data, data_type, dims, n_dims)
   integer, dimension(:), allocatable,       intent(  out) :: dims      !< The length along each dimension
   integer,                                  intent(  out) :: n_dims    !< Number of dimensions
 
-  character(kind=c_char) :: c_key(len_trim(key)+1)
+  character(kind=c_char) :: c_key(len_trim(key))
   integer :: i
   integer(kind=enum_kind) :: c_data_type, c_mem_layout
   integer(kind=enum_kind), pointer :: enum_ptr
@@ -16,7 +16,7 @@ subroutine get_tensor(this, key, data, data_type, dims, n_dims)
   type(c_ptr) :: data_type_c_ptr, dims_c_ptr
 
   ! Process the key and calculate its length
-  c_key = make_c_string(key)
+  c_key = trim(key)
   key_length = len_trim(key)
   call get_tensor_c(this%client_ptr, c_key, key_length, data, dims_c_ptr, c_n_dims, data_type_c_ptr, c_mem_layout)
 

@@ -1,13 +1,14 @@
 module silc_client
 
-use iso_c_binding,   only : c_ptr, c_bool, c_null_ptr, c_char, c_int
-use iso_c_binding,   only : c_int8_t, c_int16_t, c_int32_t, c_int64_t, c_float, c_double, c_size_t
-use iso_c_binding,   only : c_loc, c_f_pointer
-use fortran_c_utils, only : make_c_string
+use iso_c_binding, only : c_ptr, c_bool, c_null_ptr, c_char, c_int
+use iso_c_binding, only : c_int8_t, c_int16_t, c_int32_t, c_int64_t, c_float, c_double, c_size_t
+use iso_c_binding, only : c_loc, c_f_pointer
+
+use silc_dataset, only : dataset_type
 
 implicit none; private
 
-include 'client/enum_fortran.inc'
+include 'enum_fortran.inc'
 include 'client/client_interfaces.inc'
 include 'client/put_tensor_interfaces.inc'
 include 'client/get_tensor_interfaces.inc'

@@ -5,12 +5,12 @@ subroutine rename_tensor(this, key, new_key)
                                           !! excluding null terminating character
   character(len=*), intent(in) :: new_key !< The new tensor key
 
-  character(kind=c_char) :: c_key(len_trim(key)+1)
-  character(kind=c_char) :: c_new_key(len_trim(new_key)+1)
+  character(kind=c_char) :: c_key(len_trim(key))
+  character(kind=c_char) :: c_new_key(len_trim(new_key))
   integer(kind=c_size_t) :: key_length, new_key_length
 
-  c_key = make_c_string(key)
-  c_new_key = make_c_string(new_key)
+  c_key = trim(key)
+  c_new_key = trim(new_key)
 
   key_length = len_trim(key)
   new_key_length = len_trim(new_key)
@@ -24,10 +24,10 @@ subroutine delete_tensor(this, key)
   class(client_type), intent(in) :: this !<  The initialized Fortran SILC client
   character(len=*), intent(in) :: key  !< The key to use to place the tensor
 
-  character(kind=c_char) :: c_key(len_trim(key)+1)
+  character(kind=c_char) :: c_key(len_trim(key))
   integer(kind=c_size_t) :: key_length
 
-  c_key = make_c_string(key)
+  c_key = trim(key)
   key_length = len_trim(key)
 
   call delete_tensor_c(this%client_ptr, c_key, key_length)
@@ -40,12 +40,12 @@ subroutine copy_tensor(this, src_name, dest_name)
                                             !! excluding null terminating character
   character(len=*), intent(in) :: dest_name !< The new tensor key
 
-  character(kind=c_char) :: c_src_name(len_trim(src_name)+1)
-  character(kind=c_char) :: c_dest_name(len_trim(dest_name)+1)
+  character(kind=c_char) :: c_src_name(len_trim(src_name))
+  character(kind=c_char) :: c_dest_name(len_trim(dest_name))
   integer(kind=c_size_t) :: src_name_length, dest_name_length
 
-  c_src_name = make_c_string(src_name)
-  c_dest_name = make_c_string(dest_name)
+  c_src_name = trim(src_name)
+  c_dest_name = trim(dest_name)
 
   src_name_length = len_trim(src_name, kind=c_size_t)
   dest_name_length = len_trim(dest_name, kind=c_size_t)
