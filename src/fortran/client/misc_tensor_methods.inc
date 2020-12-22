@@ -9,8 +9,8 @@ subroutine rename_tensor(this, key, new_key)
   character(kind=c_char) :: c_new_key(len_trim(new_key))
   integer(kind=c_size_t) :: key_length, new_key_length
 
-  c_key = trim(key)
-  c_new_key = trim(new_key)
+  c_key = transfer(trim(key),c_key)
+  c_new_key = transfer(trim(new_key), c_new_key)
 
   key_length = len_trim(key)
   new_key_length = len_trim(new_key)
@@ -27,7 +27,7 @@ subroutine delete_tensor(this, key)
   character(kind=c_char) :: c_key(len_trim(key))
   integer(kind=c_size_t) :: key_length
 
-  c_key = trim(key)
+  c_key = transfer(trim(key),c_key)
   key_length = len_trim(key)
 
   call delete_tensor_c(this%client_ptr, c_key, key_length)
@@ -44,8 +44,8 @@ subroutine copy_tensor(this, src_name, dest_name)
   character(kind=c_char) :: c_dest_name(len_trim(dest_name))
   integer(kind=c_size_t) :: src_name_length, dest_name_length
 
-  c_src_name = trim(src_name)
-  c_dest_name = trim(dest_name)
+  c_src_name = transfer(trim(src_name), c_src_name)
+  c_dest_name = transfer(trim(dest_name), c_dest_name)
 
   src_name_length = len_trim(src_name, kind=c_size_t)
   dest_name_length = len_trim(dest_name, kind=c_size_t)

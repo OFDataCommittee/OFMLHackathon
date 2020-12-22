@@ -47,7 +47,8 @@ find_package(MPI)
 include_directories(SYSTEM
     ${MPI_INCLUDE_PATH}
     ../../include
-	../../utils/protobuf
+    ../../utils/protobuf
+    ../../src/fortran
     /usr/local/include
     ${HIREDIS_INCLUDE_PATH}
     ${REDISPP_INCLUDE_PATH}
@@ -68,8 +69,8 @@ set(CLIENT_SRC
 	 ../../../src/cpp/dbnode.cpp
 	 ../../../src/cpp/commandreply.cpp
 	 ../../../utils/protobuf/silc.pb.cc
-	 ../../../src/fortran/client.F90
-	 ../../../src/fortran/fortran_c_utils.F90)
+   ../../../src/fortran/fortran_c_interop.F90
+   ../../../src/fortran/client.F90)
 
 # ld executables
 
@@ -96,6 +97,15 @@ add_executable(client_test_put_get_3D
 	${CLIENT_SRC}
 )
 target_link_libraries(client_test_put_get_3D
+	MPI::MPI_Fortran
+	${CLIENT_LIBRARIES}
+)
+
+add_executable(client_test_mnist
+	client_test_mnist.F90
+	${CLIENT_SRC}
+)
+target_link_libraries(client_test_mnist
 	MPI::MPI_Fortran
 	${CLIENT_LIBRARIES}
 )

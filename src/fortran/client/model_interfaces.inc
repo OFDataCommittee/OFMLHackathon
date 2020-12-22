@@ -1,12 +1,12 @@
 interface
-  subroutine get_model_c( c_client, key, key_length, model, model_length)
+  type(c_ptr) function get_model_c( c_client, key, key_length, model, model_length) bind(c,name="get_model")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
-    type(c_ptr),                   intent(in)    :: c_client   !< Initialized SILC client
+    type(c_ptr), value,            intent(in)    :: c_client   !< Initialized SILC client
     character(kind=c_char),        intent(in)    :: key(*)     !< The key to use to place the model
     integer(kind=c_size_t), value, intent(in)    :: key_length !< The length of the key c-string, excluding null
     type(c_ptr),                   intent(inout) :: model      !< The model as a continuous buffer
     integer(kind=c_size_t),        intent(  out) :: model_length !< Length of the model buffer c-string
-  end subroutine get_model_c
+  end function get_model_c
 end interface
 
 interface
@@ -14,7 +14,7 @@ interface
       backend, backend_length, device, device_length, batch_size, min_batch_size, tag, tag_length, &
       inputs, input_lengths, n_inputs, outputs, output_lengths, n_outputs ) bind(c, name="set_model_from_file")
     use iso_c_binding, only : c_ptr, c_size_t, c_int, c_char
-    type(c_ptr),                   intent(in) :: c_client          !< Initialized SILC client
+    type(c_ptr), value,            intent(in) :: c_client          !< Initialized SILC client
     character(kind=c_char),        intent(in) :: key(*)            !< The key to use to place the model
     integer(kind=c_size_t), value, intent(in) :: key_length        !< The length of the key c-string, excluding null
     character(kind=c_char),        intent(in) :: model_file(*)     !< The file storing the model
@@ -49,7 +49,7 @@ interface
       backend, backend_length, device, device_length, batch_size, min_batch_size, tag, tag_length, &
       inputs, input_lengths, n_inputs, outputs, output_lengths, n_outputs ) bind(c, name="set_model")
     use iso_c_binding, only : c_ptr, c_size_t, c_int, c_char
-    type(c_ptr),                   intent(in) :: c_client          !< Initialized SILC client
+    type(c_ptr), value,            intent(in) :: c_client          !< Initialized SILC client
     character(kind=c_char),        intent(in) :: key(*)            !< The key to use to place the model
     integer(kind=c_size_t), value, intent(in) :: key_length        !< The length of the key c-string, excluding null
     character(kind=c_char),        intent(in) :: model(*)          !< The file storing the model
@@ -83,7 +83,7 @@ interface
   subroutine run_model_c(c_client, key, key_length, inputs, input_lengths, n_inputs, &
                          outputs, output_lengths, n_outputs) bind(c, name="run_model")
     use iso_c_binding, only : c_ptr, c_size_t, c_char
-    type(c_ptr),                   intent(in) :: c_client          !< Initialized SILC client
+    type(c_ptr), value,            intent(in) :: c_client          !< Initialized SILC client
     character(kind=c_char),        intent(in) :: key(*)            !< The key to use to place the model
     integer(kind=c_size_t), value, intent(in) :: key_length        !< The length of the key c-string, excluding null
     type(c_ptr),            value, intent(in) :: inputs            !< One or more names of model input nodes (TF models)

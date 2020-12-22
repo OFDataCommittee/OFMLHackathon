@@ -18,7 +18,7 @@
   data_ptr = c_loc(data)
 
   ! Process the key and calculate its length
-  c_key = trim(key)
+  c_key = transfer(trim(key),c_key)
   key_length = len_trim(key)
 
   c_dims(:) = dims(:)

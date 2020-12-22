@@ -224,13 +224,26 @@ void set_model_from_file(void* c_client,
   std::string device_str = std::string(device, device_length);
   std::string tag_str = std::string(tag, tag_length);
 
+  // Catch the case where an empty string was sent (default C++ client behavior)
   std::vector<std::string> input_vec;
-  for(size_t i=0; i<n_inputs; i++)
-    input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+  if (n_inputs == 1 && input_lengths[0] == 0) {
+    input_vec = std::vector<std::string>();
+  }
+  else {
+    for(size_t i=0; i<n_inputs; i++) {
+      input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+    }
+  }
 
   std::vector<std::string> output_vec;
-  for(size_t i=0; i<n_outputs; i++)
-    output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+  if (n_outputs == 1 && output_lengths[0] == 0) {
+    output_vec = std::vector<std::string>();
+  }
+  else {
+    for(size_t i=0; i<n_outputs; i++) {
+      output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+    }
+  }
 
   s->set_model_from_file(key_str, model_file_str, backend_str, device_str,
                          batch_size, min_batch_size, tag_str, input_vec,
@@ -260,13 +273,26 @@ void set_model(void* c_client,
   std::string device_str = std::string(device, device_length);
   std::string tag_str = std::string(tag, tag_length);
 
+  // Catch the case where an empty string was sent (default C++ client behavior)
   std::vector<std::string> input_vec;
-  for(size_t i=0; i<n_inputs; i++)
-    input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+  if (n_inputs == 1 && input_lengths[0] == 0) {
+    input_vec = std::vector<std::string>();
+  }
+  else {
+    for(size_t i=0; i<n_inputs; i++) {
+      input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+    }
+  }
 
   std::vector<std::string> output_vec;
-  for(size_t i=0; i<n_outputs; i++)
-    output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+  if (n_outputs == 1 && output_lengths[0] == 0) {
+    output_vec = std::vector<std::string>();
+  }
+  else {
+    for(size_t i=0; i<n_outputs; i++) {
+      output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+    }
+  }
 
   s->set_model(key_str, model_str, backend_str, device_str,
                batch_size, min_batch_size, tag_str, input_vec,
@@ -275,9 +301,8 @@ void set_model(void* c_client,
 }
 
 extern "C"
-void get_model(void* c_client, const char* key,
-               const size_t key_length, const char** model,
-               size_t* model_length)
+const char* get_model(void* c_client, const char* key,
+               const size_t key_length, size_t* model_length)
 {
   /* This function returns the model and model length
   from the database
@@ -285,8 +310,9 @@ void get_model(void* c_client, const char* key,
   SmartSimClient* s = (SmartSimClient *)c_client;
   std::string key_str = std::string(key, key_length);
   std::string_view model_str_view = s->get_model(key_str);
-  (*model) = model_str_view.data();
+  const char *model = model_str_view.data();
   (*model_length) = model_str_view.size();
+  return model;
 }
 
 extern "C"

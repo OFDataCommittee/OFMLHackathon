@@ -153,10 +153,9 @@ void set_model(void* c_client /*!< The c client to use for communication*/,
                );
 
 //! Get a model in the database
-void get_model(void* c_client /*!< The c c lient to use for communication*/,
+const char* get_model(void* c_client /*!< The c c lient to use for communication*/,
                const char* key /*!< The key to use to get the model*/,
                const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-               const char** model /*!< The model as a continuous buffer*/,
                size_t* model_length /*!< The length of the model buffer c-string, excluding null terminating character*/
                );
 

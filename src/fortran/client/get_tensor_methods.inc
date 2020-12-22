@@ -16,7 +16,7 @@ subroutine get_tensor(this, key, data, data_type, dims, n_dims)
   type(c_ptr) :: data_type_c_ptr, dims_c_ptr
 
   ! Process the key and calculate its length
-  c_key = trim(key)
+  c_key = transfer(trim(key), c_key)
   key_length = len_trim(key)
   call get_tensor_c(this%client_ptr, c_key, key_length, data, dims_c_ptr, c_n_dims, data_type_c_ptr, c_mem_layout)
 

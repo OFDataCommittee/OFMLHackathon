@@ -5,6 +5,7 @@ use iso_c_binding, only : c_int8_t, c_int16_t, c_int32_t, c_int64_t, c_float, c_
 use iso_c_binding, only : c_loc, c_f_pointer
 
 use silc_dataset, only : dataset_type
+use fortran_c_interop, only : convert_char_array_to_c
 
 implicit none; private
 

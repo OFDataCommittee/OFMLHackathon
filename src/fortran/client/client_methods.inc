@@ -16,7 +16,7 @@ end subroutine destructor
 !> Check if the specified key exists in the database
 logical function key_exists(this, key)
   class(client_type)    :: this
-  character(len=*) :: key
+  character(len=*)      :: key
 
   character(kind=c_char) :: c_key(len_trim(key))
   integer(kind=c_size_t) :: c_key_length
