@@ -18,7 +18,7 @@
   data_ptr = c_loc(data)
 
   ! Process the name and calculate its length
-  c_name = trim(name)
+  c_name = transfer(trim(name),c_name)
   name_length = len_trim(name)
 
   c_dims(:) = dims(:)

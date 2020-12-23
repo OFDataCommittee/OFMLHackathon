@@ -111,3 +111,12 @@ target_link_libraries(client_test_mnist
 	MPI::MPI_Fortran
 	${CLIENT_LIBRARIES}
 )
+
+add_executable(client_test_dataset
+	client_test_dataset.F90
+	${CLIENT_SRC}
+)
+target_link_libraries(client_test_dataset
+	MPI::MPI_Fortran
+	${CLIENT_LIBRARIES}
+)
