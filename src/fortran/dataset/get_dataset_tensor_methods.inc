@@ -18,7 +18,9 @@ subroutine get_dataset_tensor(this, name, data, data_type, dims, n_dims)
   ! Process the name and calculate its length
   c_name = trim(name)
   name_length = len_trim(name)
-  call get_tensor_c(this%dataset, c_name, name_length, data, dims_c_ptr, c_n_dims, data_type_c_ptr, c_mem_layout)
+  c_mem_layout = c_fortran_contiguous
+  call get_dataset_tensor_c(this%dataset, c_name, name_length, data, dims_c_ptr, c_n_dims, data_type_c_ptr, &
+                            c_mem_layout)
 
   ! Cast the number of dimensions to a standard Fortran integer
   n_dims = c_n_dims

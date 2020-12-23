@@ -2,6 +2,7 @@ program main
 
   use mpi
   use silc_client, only : client_type
+  use test_utils,  only : irand
 
   implicit none
 

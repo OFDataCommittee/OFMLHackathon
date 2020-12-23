@@ -1,6 +1,6 @@
 interface
-  subroutine unpack_tensor_c(dataset, name, name_length, result, dims, n_dims, data_type, mem_layout) &
-      bind(c, name="unpack_tensor")
+  subroutine unpack_dataset_tensor_c(dataset, name, name_length, result, dims, n_dims, data_type, mem_layout) &
+      bind(c, name="unpack_dataset_tensor")
     use iso_c_binding, only: c_ptr, c_char, c_size_t
     import :: enum_kind
     type(c_ptr),                          value, intent(in)    :: dataset     !< Pointer to the initialized client
@@ -13,5 +13,5 @@ interface
     integer(kind=c_size_t),               value, intent(in)    :: n_dims     !< The number of dimensions of the tensor
     integer(kind=enum_kind),              value, intent(in)    :: data_type  !< The data type of the tensor
     integer(kind=enum_kind),              value, intent(in)    :: mem_layout !< The memory layout of the data
-  end subroutine unpack_tensor_c
+  end subroutine unpack_dataset_tensor_c
 end interface

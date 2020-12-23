@@ -70,7 +70,9 @@ set(CLIENT_SRC
 	 ../../../src/cpp/commandreply.cpp
 	 ../../../utils/protobuf/silc.pb.cc
    ../../../src/fortran/fortran_c_interop.F90
-   ../../../src/fortran/client.F90)
+   ../../../src/fortran/dataset.F90
+   ../../../src/fortran/client.F90
+	 test_utils.F90)
 
 # ld executables
 

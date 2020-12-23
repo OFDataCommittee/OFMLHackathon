@@ -41,6 +41,8 @@ logical function poll_key( this, key, poll_frequency_ms, num_tries )
 
   c_key = trim(key)
   c_key_length = len_trim(key)
+  c_num_tries = num_tries
+  c_poll_frequency = poll_frequency_ms
 
   poll_key = poll_key_c(this%client_ptr, c_key, c_key_length, c_poll_frequency, c_num_tries)
 
