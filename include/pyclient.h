@@ -2,6 +2,7 @@
 #ifdef __cplusplus
 
 #include "client.h"
+#include "pydataset.h"
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
@@ -27,6 +28,10 @@ public:
                   );
 
   py::array get_tensor(std::string& key);
+
+  void put_dataset(PyDataset& dataset);
+
+  PyDataset* get_dataset(const std::string& name);
 
 private:
   SmartSimClient* _client;

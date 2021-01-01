@@ -11,14 +11,18 @@ class PyDataset;
 class PyDataset
 {
 public:
-  PyDataset(std::string& name);
+  PyDataset(const std::string& name);
+  PyDataset(DataSet& dataset);
   ~PyDataset();
 
   void add_tensor(const std::string& name,
                   py::array data,
                   std::string& type);
 
+  py::array get_tensor(const std::string& key);
+
+  DataSet* get();
+
 private:
   DataSet* _dataset;
-
 };

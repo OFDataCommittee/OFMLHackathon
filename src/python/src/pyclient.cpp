@@ -96,3 +96,16 @@ py::array SmartSimPyClient::get_tensor(std::string& key) {
       break;
   }
 }
+
+void SmartSimPyClient::put_dataset(PyDataset& dataset) {
+
+  this->_client->put_dataset(*dataset.get());
+  return;
+}
+
+PyDataset* SmartSimPyClient::get_dataset(const std::string& name) {
+  DataSet* data = new DataSet(this->_client->get_dataset(name));
+  PyDataset* dataset = new PyDataset(*data);
+  return dataset;
+}
+
