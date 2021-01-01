@@ -1,1 +1,2 @@
-from .client import RAIClient
+from .client import Client
+from .dataset import Dataset

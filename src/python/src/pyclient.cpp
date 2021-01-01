@@ -2,18 +2,18 @@
 
 namespace py = pybind11;
 
-SmartSimPyClient::SmartSimPyClient(bool cluster, bool fortran_array)
+PyClient::PyClient(bool cluster, bool fortran_array)
 {
   SmartSimClient* client = new SmartSimClient(cluster, fortran_array);
   this->_client = client;
 }
 
 
-SmartSimPyClient::~SmartSimPyClient() {
+PyClient::~PyClient() {
   delete this->_client;
 }
 
-void SmartSimPyClient::put_tensor(std::string& key, std::string& type, py::array data) {
+void PyClient::put_tensor(std::string& key, std::string& type, py::array data) {
 
   auto buffer = data.request();
   void* ptr = buffer.ptr;
@@ -30,7 +30,7 @@ void SmartSimPyClient::put_tensor(std::string& key, std::string& type, py::array
 }
 
 
-py::array SmartSimPyClient::get_tensor(std::string& key) {
+py::array PyClient::get_tensor(std::string& key) {
 
   // placeholder variables to be filled
   TensorType type;
@@ -97,13 +97,13 @@ py::array SmartSimPyClient::get_tensor(std::string& key) {
   }
 }
 
-void SmartSimPyClient::put_dataset(PyDataset& dataset) {
+void PyClient::put_dataset(PyDataset& dataset) {
 
   this->_client->put_dataset(*dataset.get());
   return;
 }
 
-PyDataset* SmartSimPyClient::get_dataset(const std::string& name) {
+PyDataset* PyClient::get_dataset(const std::string& name) {
   DataSet* data = new DataSet(this->_client->get_dataset(name));
   PyDataset* dataset = new PyDataset(*data);
   return dataset;

@@ -14,11 +14,11 @@ Python client API will be described.
 .. code-block:: python
   :linenos:
 
-  from silc import RAIClient
+  from silc import Client
   import numpy as np
 
   # initialize the client (keep connections alive)
-  client = RAIClient(False, False)
+  client = Client(False, False)
 
   # Send a 2D Tensor
   key = "2D_array"
@@ -45,11 +45,28 @@ Python Client API
 
 .. autosummary::
 
-    RAIClient.__init__
-    RAIClient.put_tensor
-    RAIClient.get_tensor
+    Client.__init__
+    Client.put_tensor
+    Client.get_tensor
 
-.. autoclass:: RAIClient
+.. autoclass:: Client
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+
+Python Dataset API
+==================
+
+.. currentmodule::  silc
+
+.. autosummary::
+
+    Dataset.__init__
+    Dataset.add_tensor
+    Dataset.get_tensor
+
+.. autoclass:: Dataset
    :members:
    :show-inheritance:
    :inherited-members:
