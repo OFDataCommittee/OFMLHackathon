@@ -1,15 +1,18 @@
 import time
+
 import numpy as np
-from silc import Dataset, Client
+
+from silc import Client, Dataset
 
 CLUSTER = True
+
 
 def test_put_get_dataset(mock_data):
     """test sending and recieving a dataset with 2D tensors
     of every datatype
     """
 
-    data = mock_data.create_data((10,10))
+    data = mock_data.create_data((10, 10))
 
     # Create a dataset to put
     dataset = Dataset("test-dataset")
@@ -25,5 +28,7 @@ def test_put_get_dataset(mock_data):
         key = f"tensor_{str(index)}"
         rtensor = rdataset.get_tensor(key)
         np.testing.assert_array_equal(
-            rtensor, tensor, "Dataset returned from get_dataset not the same as sent dataset"
+            rtensor,
+            tensor,
+            "Dataset returned from get_dataset not the same as sent dataset",
         )

@@ -14,5 +14,4 @@ class Dtypes:
         dtype = str(array.dtype)
         if dtype in mapping:
             return mapping[dtype]
-        else:
-            raise TypeError(f"Incompatible tensor type provided {dtype}")
+        raise TypeError(f"Incompatible tensor type provided {dtype}")

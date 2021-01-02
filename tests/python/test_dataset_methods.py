@@ -1,6 +1,5 @@
-
-
 import numpy as np
+
 from silc import Dataset
 
 
@@ -14,6 +13,7 @@ def test_add_get_tensor(mock_data):
     data = mock_data.create_data(10)
     add_get_arrays(dataset, data)
 
+
 def test_add_get_tensor_2D(mock_data):
     """Test adding and retrieving 2D tensors to
     a dataset and with all datatypes
@@ -21,8 +21,9 @@ def test_add_get_tensor_2D(mock_data):
     dataset = Dataset("test-dataset")
 
     # 2D tensors of all data types
-    data_2D = mock_data.create_data((10,10))
+    data_2D = mock_data.create_data((10, 10))
     add_get_arrays(dataset, data_2D)
+
 
 def test_add_get_tensor_3D(mock_data):
     """Test adding and retrieving 3D tensors to
@@ -31,11 +32,12 @@ def test_add_get_tensor_3D(mock_data):
     dataset = Dataset("test-dataset")
 
     # 3D tensors of all datatypes
-    data_3D = mock_data.create_data((10,10,10))
+    data_3D = mock_data.create_data((10, 10, 10))
     add_get_arrays(dataset, data_3D)
 
 
 # ------- Helper Functions -----------------------------------------------
+
 
 def add_get_arrays(dataset, data):
     """Helper for dataset tests"""

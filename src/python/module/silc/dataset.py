@@ -1,9 +1,10 @@
 import numpy as np
-from .util import Dtypes
+
 from .silcPy import PyDataset
+from .util import Dtypes
+
 
 class Dataset(PyDataset):
-
     def __init__(self, name):
         """Initialize a Dataset object
 

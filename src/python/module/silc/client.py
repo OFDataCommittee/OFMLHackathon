@@ -1,8 +1,9 @@
 import numpy as np
+
+from .dataset import Dataset
 from .error import RedisConnectionError, RedisReplyError
 from .silcPy import PyClient
 from .util import Dtypes
-from .dataset import Dataset
 
 
 class Client(PyClient):
@@ -52,7 +53,7 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), key, "get_tensor") from None
 
-    def put_datset(self, dataset):
+    def put_dataset(self, dataset):
         """Put a Dataset instance into the database
 
         All associated tensors and metadata within the Dataset

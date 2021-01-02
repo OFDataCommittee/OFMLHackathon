@@ -6,6 +6,7 @@ from silc import Client
 
 CLUSTER = True
 
+
 def test_1D_put_get(mock_data):
     """Test put/get_tensor for 1D numpy arrays"""
 
