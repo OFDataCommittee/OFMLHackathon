@@ -27,8 +27,6 @@
    developer/git
    developer/python
    developer/editor
-   developer/documentation
-
 
 
 Indices and tables

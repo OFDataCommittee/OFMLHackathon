@@ -120,10 +120,10 @@ ready for use in any python program.
 
 .. code-block:: python
 
-  from silc import RAIClient
+  from silc import Client
   import numpy as np
 
-  client = RAIClient(cluster=False, fortran=False)
+  client = Client(cluster=False, fortran=False)
 
 
 

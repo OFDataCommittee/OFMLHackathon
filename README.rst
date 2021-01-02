@@ -28,8 +28,8 @@ of redis-based clients built primarily for use with SmartSim.
 Project Status
 ==============
 
-Currently the C++, and C are the only mature implementations of the SILC clients.
-The Python and Fortran clients will be finished soon.
+Currently the C++, and C are the only full implementations of the SILC clients.
+The Fortran and Python partially cover the API and will soon be feature-complete.
 
 
 Using SILC

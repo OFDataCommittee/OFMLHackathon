@@ -48,6 +48,8 @@ Python Client API
     Client.__init__
     Client.put_tensor
     Client.get_tensor
+    Client.put_dataset
+    Client.get_dataset
 
 .. autoclass:: Client
    :members:
