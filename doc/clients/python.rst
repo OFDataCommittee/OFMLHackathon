@@ -40,6 +40,9 @@ nodes which is referred to as a cluster.
 Python Client API
 =================
 
+.. note::
+
+  The Python client documentation is incomplete.
 
 .. currentmodule::  silc
 

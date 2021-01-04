@@ -3,6 +3,10 @@
 Fortran
 *******
 
+.. note::
+
+  The Fortran client documentation is incomplete.
+
 Fortran client API
 ==================
 
