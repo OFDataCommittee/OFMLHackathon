@@ -20,7 +20,6 @@ type, public :: dataset_type
 
   procedure :: initialize
   procedure :: get_dataset_tensor
-  ! procedure :: add_meta_scalar
   ! procedure :: add_meta_string
   ! procedure :: get_meta_scalars
   ! procedure :: get_meta_strings ! Not supported currently
@@ -30,6 +29,9 @@ type, public :: dataset_type
   generic :: unpack_dataset_tensor => unpack_dataset_tensor_i8, unpack_dataset_tensor_i16, &
                                       unpack_dataset_tensor_i32, unpack_dataset_tensor_i64, &
                                       unpack_dataset_tensor_float, unpack_dataset_tensor_double
+  generic :: add_meta_scalar => add_meta_scalar_double, add_meta_scalar_float, add_meta_scalar_i32, add_meta_scalar_i64
+  generic :: get_meta_scalars => get_meta_scalars_double, get_meta_scalars_float, get_meta_scalars_i32, &
+                                 get_meta_scalars_i64
 
   ! Private procedures
   procedure, private :: add_tensor_i8
@@ -44,7 +46,14 @@ type, public :: dataset_type
   procedure, private :: unpack_dataset_tensor_i64
   procedure, private :: unpack_dataset_tensor_float
   procedure, private :: unpack_dataset_tensor_double
-
+  procedure, private :: add_meta_scalar_double
+  procedure, private :: add_meta_scalar_float
+  procedure, private :: add_meta_scalar_i32
+  procedure, private :: add_meta_scalar_i64
+  procedure, private :: get_meta_scalars_double
+  procedure, private :: get_meta_scalars_float
+  procedure, private :: get_meta_scalars_i32
+  procedure, private :: get_meta_scalars_i64
 end type dataset_type
 
 contains
