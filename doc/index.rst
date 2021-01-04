@@ -19,6 +19,12 @@
    clients/c-plus
    clients/fortran
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Examples
+
+   examples/fortran
+
 
 .. toctree::
    :maxdepth: 2
