@@ -9,7 +9,7 @@ use fortran_c_interop, only : convert_char_array_to_c
 
 implicit none; private
 
-include 'enum_fortran.inc'
+include 'enums/enum_fortran.inc'
 include 'client/client_interfaces.inc'
 include 'client/put_tensor_interfaces.inc'
 include 'client/get_tensor_interfaces.inc'

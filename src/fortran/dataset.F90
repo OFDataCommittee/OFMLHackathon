@@ -6,7 +6,7 @@ use iso_c_binding,   only : c_loc, c_f_pointer
 
 implicit none; private
 
-include 'enum_fortran.inc'
+include 'enums/enum_fortran.inc'
 include 'dataset/dataset_interfaces.inc'
 include 'dataset/add_tensor_interfaces.inc'
 include 'dataset/get_dataset_tensor_interfaces.inc'

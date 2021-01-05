@@ -10,15 +10,15 @@ program main
   integer, parameter :: dim2 = 20
   integer, parameter :: dim3 = 30
 
-  real(kind=c_float),       dimension(dim1, dim2, dim3) :: recv_array_real_32
-  real(kind=c_double),      dimension(dim1, dim2, dim3) :: recv_array_real_64
+  real(kind=c_float),      dimension(dim1, dim2, dim3) :: recv_array_real_32
+  real(kind=c_double),     dimension(dim1, dim2, dim3) :: recv_array_real_64
   integer(kind=c_int8_t),  dimension(dim1, dim2, dim3) :: recv_array_integer_8
   integer(kind=c_int16_t), dimension(dim1, dim2, dim3) :: recv_array_integer_16
   integer(kind=c_int32_t), dimension(dim1, dim2, dim3) :: recv_array_integer_32
   integer(kind=c_int64_t), dimension(dim1, dim2, dim3) :: recv_array_integer_64
 
-  real(kind=c_float),       dimension(dim1, dim2, dim3) :: true_array_real_32
-  real(kind=c_double),      dimension(dim1, dim2, dim3) :: true_array_real_64
+  real(kind=c_float),      dimension(dim1, dim2, dim3) :: true_array_real_32
+  real(kind=c_double),     dimension(dim1, dim2, dim3) :: true_array_real_64
   integer(kind=c_int8_t),  dimension(dim1, dim2, dim3) :: true_array_integer_8
   integer(kind=c_int16_t), dimension(dim1, dim2, dim3) :: true_array_integer_16
   integer(kind=c_int32_t), dimension(dim1, dim2, dim3) :: true_array_integer_32
@@ -42,9 +42,11 @@ program main
   type(dataset_type) :: dataset
 
   integer :: err_code, pe_id
+  character(len=9) :: key_prefix
 
   call MPI_init( err_code )
   call MPI_comm_rank( MPI_COMM_WORLD, pe_id, err_code)
+  write(key_prefix, "(A,I6.6)") "pe_",pe_id
 
   call random_number(true_array_real_32)
   call random_number(true_array_real_64)
@@ -64,7 +66,7 @@ program main
     recv_array_integer_64(i,j,k) = irand()
   enddo; enddo; enddo
 
-  call dataset%initialize("test")
+  call dataset%initialize(key_prefix//"test")
 
   ! Test adding and retrieving a tensor of every supported type
   call dataset%add_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))
@@ -113,7 +115,7 @@ program main
   call dataset%get_meta_scalars(meta_int64, meta_int64_recv)
   if (.not. all(meta_int64_recv == meta_int64_vec)) stop 'meta_int64: FAILED'
 
+  write(*,*) "Fortran Dataset: passed"
   call mpi_finalize(err_code)
-  write(*,*) "Fortran Dataset tests passed"
 
 end program main
