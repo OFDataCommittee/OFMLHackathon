@@ -7,7 +7,7 @@ subroutine get_tensor(this, key, data, data_type, dims, n_dims)
   integer, dimension(:), allocatable,       intent(  out) :: dims      !< The length along each dimension
   integer,                                  intent(  out) :: n_dims    !< Number of dimensions
 
-  character(kind=c_char) :: c_key(len_trim(key))
+  character(kind=c_char, len=len_trim(key)) :: c_key
   integer :: i
   integer(kind=enum_kind) :: c_data_type, c_mem_layout
   integer(kind=enum_kind), pointer :: enum_ptr

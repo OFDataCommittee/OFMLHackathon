@@ -39,8 +39,11 @@ subroutine set_model_from_file( this, key, model_file, backend, device, batch_si
                                                                           !! models)
   character(len=*), dimension(:), optional,  intent(in) :: outputs        !< One or more names of model output nodes (TF models)
 
-  character(kind=c_char) :: c_key(len_trim(key)), c_model_file(len_trim(model_file)), &
-                            c_backend(len_trim(backend)), c_device(len_trim(device)), c_tag
+  character(kind=c_char, len=len_trim(key)) :: c_key
+  character(kind=c_char, len=len_trim(model_file)) :: c_model_file
+  character(kind=c_char, len=len_trim(backend)) :: c_backend
+  character(kind=c_char, len=len_trim(device)) :: c_device
+  character(kind=c_char, len=:), allocatable :: c_tag
 
   character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
   character(kind=c_char,len=1), target, dimension(1) :: dummy_inputs, dummy_outputs
@@ -60,19 +63,26 @@ subroutine set_model_from_file( this, key, model_file, backend, device, batch_si
   if (present(batch_size)) c_batch_size = batch_size
   c_min_batch_size = 0
   if (present(min_batch_size)) c_min_batch_size = min_batch_size
+  if (present(tag)) then
+    allocate( character(kind=c_char, len=len_trim(tag)) :: c_tag)
+    c_tag = tag
+    tag_length = len_trim(tag)
+  else
+    allocate( character(kind=c_char, len=1) :: c_tag)
+    c_tag = ''
+    tag_length = 1
+  endif
 
   ! Cast to c_char kind stringts
-  c_key = transfer(trim(key),c_key)
-  c_model_file = transfer(trim(model_file),c_model_file)
-  c_backend(:) = transfer(trim(backend),c_backend)
-  c_device = transfer(trim(device),c_device)
-  c_tag = transfer(trim(tag),c_tag)
+  c_key = trim(key)
+  c_model_file = trim(model_file)
+  c_backend = trim(backend)
+  c_device = trim(device)
 
   key_length = len_trim(key)
   model_file_length = len_trim(model_file)
   backend_length = len_trim(backend)
   device_length = len_trim(device)
-  tag_length = len_trim(tag)
 
   dummy_inputs = ''
   if (present(inputs)) then
@@ -100,6 +110,7 @@ subroutine set_model_from_file( this, key, model_file, backend, device, batch_si
   deallocate(input_lengths)
   deallocate(c_outputs)
   deallocate(output_lengths)
+  deallocate(c_tag)
 end subroutine set_model_from_file
 
 subroutine set_model( this, key, model, backend, device, batch_size, min_batch_size, tag, &
@@ -115,8 +126,11 @@ subroutine set_model( this, key, model, backend, device, batch_size, min_batch_s
   character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of model input nodes (TF models)
   character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of model output nodes (TF models)
 
-  character(kind=c_char) :: c_key(len_trim(key)), c_model(len_trim(model)), &
-                            c_backend(len_trim(backend)), c_device(len_trim(device)), c_tag(len_trim(tag))
+  character(kind=c_char, len=len_trim(key)) :: c_key
+  character(kind=c_char, len=len_trim(model)) :: c_model
+  character(kind=c_char, len=len_trim(backend)) :: c_backend
+  character(kind=c_char, len=len_trim(device)) :: c_device
+  character(kind=c_char, len=len_trim(tag)) :: c_tag
 
   character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
 
@@ -130,11 +144,11 @@ subroutine set_model( this, key, model, backend, device, batch_size, min_batch_s
   integer :: i
   integer :: max_length, length
 
-  c_key = transfer(trim(key),c_key)
-  c_model = transfer(trim(model),c_model)
-  c_backend = transfer(trim(backend),c_backend)
-  c_device = transfer(trim(device),c_device)
-  c_tag = transfer(trim(tag),c_tag)
+  c_key = trim(key)
+  c_model = trim(model)
+  c_backend = trim(backend)
+  c_device = trim(device)
+  c_tag = trim(tag)
 
   key_length = len_trim(key)
   model_length = len_trim(model)
@@ -168,7 +182,7 @@ subroutine run_model(this, key, inputs, outputs)
   character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of model input nodes (TF models)
   character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of model output nodes (TF models)
 
-  character(kind=c_char) :: c_key(len_trim(key))
+  character(kind=c_char, len=len_trim(key)) :: c_key
   character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
 
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
@@ -179,7 +193,7 @@ subroutine run_model(this, key, inputs, outputs)
   integer :: i
   integer :: max_length, length
 
-  c_key = transfer(trim(key),c_key)
+  c_key = trim(key)
   key_length = len_trim(key)
 
   call convert_char_array_to_c( inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &

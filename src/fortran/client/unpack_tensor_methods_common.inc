@@ -5,12 +5,12 @@
   ! Local variables
   integer(kind=c_size_t) :: ndim ! Number of dimensions
   type(c_ptr) :: data_ptr, c_dims_ptr
-  character(kind=c_char) :: c_key(len_trim(key)) !< Transformed fortran 'key' to a c-string
+  character(kind=c_char, len=len_trim(key)) :: c_key !< Transformed fortran 'key' to a c-string
   integer(kind=c_size_t) :: key_length, c_n_dims
   integer(kind=c_size_t), target :: c_dims(size(dims))
   integer(kind=enum_kind) :: data_type, mem_layout
 
-  c_key = transfer(trim(key),c_key)
+  c_key = trim(key)
   key_length = len_trim(key)
   data_ptr = c_loc(result)
   c_dims(:) = dims(:)

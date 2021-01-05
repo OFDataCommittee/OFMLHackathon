@@ -39,7 +39,6 @@ subroutine convert_char_array_to_c(character_array_f, character_array_c, string_
     length = len_trim(character_array_f(i))
     max_length = max(max_length, length)
     string_lengths(i) = length
-    print *, character_array_f(i), length
   enddo
   ptr_to_string_lengths = c_loc(string_lengths)
   allocate(character(len=max_length) :: character_array_c(n_strings))

@@ -23,7 +23,6 @@ program mnist_test
   call client%initialize(.true.)
 
   if (pe_id == 0) then
-    print *, "WOO"
     call client%set_model_from_file(model_key, model_file, "TORCH", "CPU")
     call client%set_script_from_file(script_key, "CPU", script_file)
   endif

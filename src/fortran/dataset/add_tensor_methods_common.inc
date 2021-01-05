@@ -6,7 +6,7 @@
   ! Local variables
   integer(kind=c_size_t)                      :: c_n_dims ! Number of dimensions
   type(c_ptr) :: data_ptr, c_dims_ptr
-  character(kind=c_char) :: c_name(len_trim(name)) !< Transformed fortran 'name' to a c-string
+  character(kind=c_char, len=len_trim(name)) :: c_name !< Transformed fortran 'name' to a c-string
   integer(kind=c_size_t) :: name_length
   integer(kind=c_size_t), target :: c_dims(size(dims))
   integer(kind=enum_kind) :: data_type
@@ -18,7 +18,7 @@
   data_ptr = c_loc(data)
 
   ! Process the name and calculate its length
-  c_name = transfer(trim(name),c_name)
+  c_name = trim(name)
   name_length = len_trim(name)
 
   c_dims(:) = dims(:)

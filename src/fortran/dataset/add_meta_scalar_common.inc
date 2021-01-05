@@ -1,9 +1,9 @@
-  character(kind=c_char)  :: c_name(len_trim(name))
+  character(kind=c_char, len=len_trim(name))  :: c_name
   integer(kind=enum_kind) :: c_data_type, expected_data_type
   integer(kind=c_size_t) :: name_length
   type(c_ptr) :: meta_ptr
 
-  c_name = transfer(trim(name),c_name)
+  c_name = trim(name)
   name_length = len_trim(name)
   meta_ptr = c_loc(meta)
 

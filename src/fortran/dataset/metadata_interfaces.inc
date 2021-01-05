@@ -19,8 +19,8 @@ interface
     character(kind=c_char),         intent(in) :: name(*)     !< The name to use to place the tensor
     integer(kind=c_size_t),  value, intent(in) :: name_length !< The length of the name c-string,
                                                               !! excluding null terminating character
-    character(kind=c_char),  value, intent(in) :: data        !< A c ptr to the beginning of the data
-    integer(kind=c_size_t),  value, intent(in) :: data_length !< The c-type of the data
+    character(kind=c_char),         intent(in) :: data(*)     !< The actual metadata string
+    integer(kind=c_size_t),  value, intent(in) :: data_length !< Length of the metadata string
   end subroutine add_meta_string_c
 end interface
 

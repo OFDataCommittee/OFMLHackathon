@@ -6,7 +6,7 @@ subroutine get_dataset_tensor(this, name, data, data_type, dims)
   integer,                                  intent(  out) :: data_type !< The type of data in the tensor object
   integer, dimension(:), allocatable,       intent(  out) :: dims      !< The length along each dimension
 
-  character(kind=c_char) :: c_name(len_trim(name)+1)
+  character(kind=c_char, len=len_trim(name)) :: c_name
   integer :: i
   integer(kind=enum_kind) :: c_data_type, c_mem_layout
   integer(kind=enum_kind), pointer :: enum_ptr

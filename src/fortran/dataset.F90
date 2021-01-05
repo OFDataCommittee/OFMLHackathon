@@ -20,8 +20,7 @@ type, public :: dataset_type
 
   procedure :: initialize
   procedure :: get_dataset_tensor
-  ! procedure :: add_meta_string
-  ! procedure :: get_meta_scalars
+  procedure :: add_meta_string
   ! procedure :: get_meta_strings ! Not supported currently
 
   generic :: add_tensor => add_tensor_i8, add_tensor_i16, add_tensor_i32, add_tensor_i64, &
