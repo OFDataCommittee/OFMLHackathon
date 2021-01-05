@@ -72,7 +72,8 @@ subroutine run_mnist( client, key_suffix, model_name, script_name )
   result(:,:) = 0.
   call client%unpack_tensor(out_key, result, shape(result))
 
-  print *, result
+  print *, "Result: ", result
+  print *, "Fortran test mnist: passed"
 
 end subroutine run_mnist
 

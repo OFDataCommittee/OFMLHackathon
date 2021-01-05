@@ -17,12 +17,13 @@ include 'client/unpack_tensor_interfaces.inc'
 include 'client/misc_tensor_interfaces.inc'
 include 'client/model_interfaces.inc'
 include 'client/script_interfaces.inc'
+include 'client/client_dataset_interfaces.inc'
 
 type, public :: client_type
   private
 
   logical(kind=c_bool) :: cluster = .false.        !< True if a database cluster is being used
-  type(c_ptr)          :: client_ptr  = c_null_ptr !< Pointer to the initialized SILC::Client
+  type(c_ptr)          :: client_ptr = c_null_ptr !< Pointer to the initialized SmartSimClient
 
   contains
 
@@ -48,6 +49,11 @@ type, public :: client_type
   procedure :: get_script
   procedure :: run_script
   procedure :: run_model
+  procedure :: put_dataset
+  procedure :: get_dataset
+  procedure :: rename_dataset
+  procedure :: copy_dataset
+  procedure :: delete_dataset
 
   ! Private procedures
   procedure, private :: put_tensor_i8
@@ -63,12 +69,6 @@ type, public :: client_type
   procedure, private :: unpack_tensor_float
   procedure, private :: unpack_tensor_double
 
-  ! Not yet implemented
-  ! procedure :: put_dataset           => client_put_dataset
-  ! procedure :: get_dataset           => client_get_dataset
-  ! procedure :: rename_dataset        => client_rename_dataset
-  ! procedure :: copy_dataset          => client_copy_dataset
-  ! procedure :: delete_dataset        => client_delete_dataset
 end type client_type
 
 contains
@@ -80,5 +80,6 @@ include 'client/unpack_tensor_methods.inc'
 include 'client/misc_tensor_methods.inc'
 include 'client/model_methods.inc'
 include 'client/script_methods.inc'
+include 'client/client_dataset_methods.inc'
 
 end module silc_client
