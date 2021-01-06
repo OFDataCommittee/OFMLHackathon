@@ -31,6 +31,8 @@ release = '0.1.0-alpha'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinxfortran.fortran_domain',
+    'sphinxfortran.fortran_autodoc',
     'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
@@ -56,6 +58,11 @@ breathe_projects = {
         "fortran_client":"fortran_client/xml",
         "cpp_client":"cpp_client/xml"
         }
+
+fortran_src = [
+    "../src/fortran/client.F90",
+    "../src/fortran/dataset.F90"
+]
 
 # -- Options for HTML output -------------------------------------------------
 
