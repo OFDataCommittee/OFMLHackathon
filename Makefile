@@ -134,6 +134,11 @@ check-lint:
 docs:
 	@cd doc; make html
 
+# help: cov                            - generate html coverage report for Python client
+.PHONY: cov
+cov:
+	@coverage html
+	@echo if data was present, coverage report is in htmlcov/index.html
 
 # help:
 # help: Test
