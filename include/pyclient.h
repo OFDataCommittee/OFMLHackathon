@@ -42,17 +42,14 @@ public:
                             const std::string& device /*!< The device to run the script*/,
                             const std::string& script_file /*!< The name of the script file*/
                             );
-
   //! Set a script (from buffer) in the database for future execution
   void set_script(const std::string& key /*!< The key to use to place the script*/,
                   const std::string& device /*!< The device to run the script*/,
                   const std::string_view& script /*!< The name of the script file*/
                   );
-
   //! Get the script from the database
   std::string_view get_script(const std::string& key /*!< The key to use to retrieve the script*/
                               );
-
   //! Run a script in the database
   void run_script(const std::string& key /*!< The key of the script to run*/,
                   const std::string& function /*!< The name of the function to run in the script*/,

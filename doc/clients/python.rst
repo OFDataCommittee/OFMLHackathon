@@ -53,11 +53,15 @@ Python Client API
     Client.get_tensor
     Client.put_dataset
     Client.get_dataset
+    Client.set_function
+    Client.set_script
+    Client.set_script_from_file
+    Client.get_script
+    Client.run_script
 
 .. autoclass:: Client
    :members:
    :show-inheritance:
-   :inherited-members:
 
 
 Python Dataset API
@@ -74,5 +78,4 @@ Python Dataset API
 .. autoclass:: Dataset
    :members:
    :show-inheritance:
-   :inherited-members:
 
