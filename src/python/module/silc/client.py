@@ -71,11 +71,10 @@ class Client(PyClient):
         """
         if not isinstance(dataset, Dataset):
             raise TypeError("Argument to put_dataset was not of type Dataset")
-        else:
-            try:
-                super().put_dataset(dataset)
-            except RuntimeError as e:
-                raise RedisReplyError(str(e), "put_dataset") from None
+        try:
+            super().put_dataset(dataset)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "put_dataset") from None
 
     def get_dataset(self, key):
         """Get a dataset from the database
@@ -98,8 +97,8 @@ class Client(PyClient):
         Function must be a callable TorchScript function and have at least
         one input and one output. Call the function with the Client.run_script
         method.
-
         Device selection is either "GPU" or "CPU". If many devices are
+
         present, a number can be passed for specification e.g. "GPU:1"
 
         :param key: key to store function at
@@ -114,8 +113,8 @@ class Client(PyClient):
         device = self.__check_device(device)
         if not callable(function):
             raise TypeError("Argument provided was not a callable function")
+        fn_src = inspect.getsource(function)
         try:
-            fn_src = inspect.getsource(function)
             super().set_script(key, device, fn_src)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "set_function") from None

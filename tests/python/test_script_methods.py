@@ -56,7 +56,6 @@ def test_run_script_multi():
             out, expected, "Returned array from script not equal to expected result"
         )
 
-
 def one_to_one(data):
     """Sample torchscript script that returns the
     highest element in an array.
@@ -75,7 +74,6 @@ def two_to_one(data, data_2):
     # return the highest element
     merged = torch.cat((data, data_2))
     return merged.max(1)[0]
-
 
 def read_script_from_file():
     script_path = osp.join(file_path, "./data_processing_script.txt")

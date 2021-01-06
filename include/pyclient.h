@@ -53,8 +53,8 @@ public:
   //! Run a script in the database
   void run_script(const std::string& key /*!< The key of the script to run*/,
                   const std::string& function /*!< The name of the function to run in the script*/,
-                  std::vector<std::string> inputs /*!< The keys of the input tensors*/,
-                  std::vector<std::string> outputs /*!< The keys of the output tensors*/
+                  std::vector<std::string>& inputs /*!< The keys of the input tensors*/,
+                  std::vector<std::string>& outputs /*!< The keys of the output tensors*/
                   );
 
 private:

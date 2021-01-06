@@ -132,8 +132,8 @@ std::string_view PyClient::get_script(const std::string& key) {
 
 void PyClient::run_script(const std::string& key,
                 const std::string& function,
-                std::vector<std::string> inputs,
-                std::vector<std::string> outputs)
+                std::vector<std::string>& inputs,
+                std::vector<std::string>& outputs)
 {
   this->_client->run_script(key, function, inputs, outputs);
   return;
