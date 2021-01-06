@@ -12,7 +12,11 @@ PYBIND11_MODULE(silcPy, m) {
         .def("put_tensor", &PyClient::put_tensor)
         .def("get_tensor", &PyClient::get_tensor)
         .def("put_dataset", &PyClient::put_dataset)
-        .def("get_dataset", &PyClient::get_dataset);
+        .def("get_dataset", &PyClient::get_dataset)
+        .def("set_script_from_file", &PyClient::set_script_from_file)
+        .def("set_script", &PyClient::set_script)
+        .def("get_script", &PyClient::get_script)
+        .def("run_script", &PyClient::run_script);
 
     // Python Dataset class
     py::class_<PyDataset>(m, "PyDataset")

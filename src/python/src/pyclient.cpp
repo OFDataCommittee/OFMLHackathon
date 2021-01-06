@@ -109,3 +109,32 @@ PyDataset* PyClient::get_dataset(const std::string& name) {
   return dataset;
 }
 
+void PyClient::set_script_from_file(const std::string& key,
+                                    const std::string& device,
+                                    const std::string& script_file)
+{
+  this->_client->set_script_from_file(key, device, script_file);
+  return;
+}
+
+void PyClient::set_script(const std::string& key,
+                          const std::string& device,
+                          const std::string_view& script)
+{
+  this->_client->set_script(key, device, script);
+  return;
+}
+
+  //! Get the script from the database
+std::string_view PyClient::get_script(const std::string& key) {
+  return this->_client->get_script(key);
+}
+
+void PyClient::run_script(const std::string& key,
+                const std::string& function,
+                std::vector<std::string> inputs,
+                std::vector<std::string> outputs)
+{
+  this->_client->run_script(key, function, inputs, outputs);
+  return;
+}
