@@ -52,5 +52,5 @@ def add_get_arrays(dataset, data):
         key = f"array_{str(index)}"
         rarray = dataset.get_tensor(key)
         np.testing.assert_array_equal(
-            rarray, array, "Returned array from get_tensor not equal to sent tensor"
+            rarray, array, "Returned array from get_tensor not equal to tensor added to dataset"
         )
