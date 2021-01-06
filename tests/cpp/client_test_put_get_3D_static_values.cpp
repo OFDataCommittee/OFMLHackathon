@@ -7,10 +7,10 @@
 template <typename T_send, typename T_recv>
 void put_get_3D_array(
 		    std::vector<size_t> dims,
-        TensorType type,
+        SILC::TensorType type,
         std::string key_suffix="")
 {
-  SmartSimClient client(true);
+  SILC::Client client(true);
 
   //Allocate and fill arrays
   T_send*** array = allocate_3D_array<T_send>(dims[0], dims[1], dims[2]);
@@ -45,9 +45,9 @@ void put_get_3D_array(
   */
 
   client.put_tensor(key, (void*)array, dims,
-                    type, MemoryLayout::nested);
+                    type, SILC::MemoryLayout::nested);
   client.unpack_tensor(key, u_result, dims,
-                       type, MemoryLayout::nested);
+                       type, SILC::MemoryLayout::nested);
 
   /*
   for(int i = 0; i < dims[0]; i++) {
@@ -75,11 +75,11 @@ void put_get_3D_array(
     }
   }
 
-  TensorType g_type;
+  SILC::TensorType g_type;
   std::vector<size_t> g_dims;
   void* g_result;
   client.get_tensor(key, g_result, g_dims,
-                    g_type, MemoryLayout::nested);
+                    g_type, SILC::MemoryLayout::nested);
   T_recv*** g_type_result = (T_recv***)g_result;
 
   if(type!=g_type)
@@ -135,28 +135,28 @@ int main(int argc, char* argv[]) {
   std::vector<size_t> dims = {dim1, dim2, dim3};
 
   put_get_3D_array<double,double>(
-				  dims, TensorType::dbl, "_dbl");
+				  dims, SILC::TensorType::dbl, "_dbl");
 
   put_get_3D_array<float,float>(
-				dims, TensorType::flt, "_flt");
+				dims, SILC::TensorType::flt, "_flt");
 
   put_get_3D_array<int64_t,int64_t>(
-				    dims, TensorType::int64, "_i64");
+				    dims, SILC::TensorType::int64, "_i64");
 
   put_get_3D_array<int32_t,int32_t>(
-				    dims, TensorType::int32, "_i32");
+				    dims, SILC::TensorType::int32, "_i32");
 
   put_get_3D_array<int16_t,int16_t>(
-				      dims, TensorType::int16, "_i16");
+				      dims, SILC::TensorType::int16, "_i16");
 
   put_get_3D_array<int8_t,int8_t>(
-				      dims, TensorType::int8, "_i8");
+				      dims, SILC::TensorType::int8, "_i8");
 
   put_get_3D_array<uint16_t,uint16_t>(
-				      dims, TensorType::uint16, "_ui16");
+				      dims, SILC::TensorType::uint16, "_ui16");
 
   put_get_3D_array<uint8_t,uint8_t>(
-				      dims, TensorType::uint8, "_ui8");
+				      dims, SILC::TensorType::uint8, "_ui8");
 
 
   std::cout<<"3D put and get test using "\

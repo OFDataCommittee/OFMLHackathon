@@ -8,6 +8,8 @@
 #include <pybind11/numpy.h>
 #include <string>
 
+using namespace SILC;
+
 namespace py = pybind11;
 
 class PyClient;
@@ -34,7 +36,7 @@ public:
   PyDataset* get_dataset(const std::string& name);
 
 private:
-  SmartSimClient* _client;
+  Client* _client;
 
 };
 #endif //PY_CLIENT_H

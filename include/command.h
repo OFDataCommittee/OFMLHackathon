@@ -11,6 +11,9 @@
 
 ///@file
 ///\brief The Command class for constructing data transfer commands
+
+namespace SILC {
+
 class Command;
 
 class Command
@@ -61,5 +64,7 @@ class Command
 };
 
 #include "command.tcc"
+
+} //namespace SILC
 
 #endif //SMARTSIM_COMMAND_H

@@ -7,6 +7,9 @@
 
 ///@file
 ///\brief The CommandList class for constructing data transfer commands
+
+namespace SILC {
+
 class CommandList;
 
 class CommandList
@@ -39,4 +42,7 @@ class CommandList
         const_iterator cend();
 
 };
+
+} //namespace SILC
+
 #endif //SMARTSIM_COMMANDLIST_H

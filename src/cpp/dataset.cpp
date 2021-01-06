@@ -1,5 +1,7 @@
 #include "dataset.h"
 
+using namespace SILC;
+
 DataSet::DataSet(const std::string& name)
 {
     this->name = name;

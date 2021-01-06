@@ -3,6 +3,8 @@
 
 #include "enums/c_metadata_type.h"
 
+namespace SILC {
+
 enum class MetaDataType {
     dbl     = 1,
     flt     = 2,
@@ -77,5 +79,6 @@ inline MetaDataType convert_metadata_type(CMetaDataType type) {
     return t;
 }
 
+} //namespace SILC
 
 #endif //SMARTSIM_METADATATYPE_H

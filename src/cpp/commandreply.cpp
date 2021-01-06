@@ -1,5 +1,7 @@
 #include "commandreply.h"
 
+using namespace SILC;
+
 CommandReply::CommandReply()
 {
 }

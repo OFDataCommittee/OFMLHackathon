@@ -1,12 +1,14 @@
 #include "c_client.h"
 
+using namespace SILC;
+
 extern "C"
 void* SmartSimCClient(bool cluster)
 {
-  /* Return a pointer to a new SmartSimClient.
+  /* Return a pointer to a new Client.
   The user is responsible for deleting the client.
   */
-  SmartSimClient* s = new SmartSimClient(cluster);
+  Client* s = new Client(cluster);
   return (void*)s;
 }
 
@@ -16,7 +18,7 @@ void DeleteCClient(void* c_client)
   /* This function frees the memory associated
   with the c client.
   */
-  SmartSimClient* s = (SmartSimClient*)c_client;
+  Client* s = (Client*)c_client;
   delete s;
   return;
 }
@@ -26,7 +28,7 @@ void put_dataset(void* c_client, const void* dataset)
 {
   /* Put a dataset into the database.
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   DataSet* d = (DataSet*)dataset;
   s->put_dataset(*d);
   return;
@@ -39,7 +41,7 @@ void* get_dataset(void* c_client, const char* name,
   /* Return a pointer to a new dataset.  The user is
   responsible for deleting the dataset.
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string dataset_name = std::string(name, name_length);
   DataSet* dataset = new DataSet(s->get_dataset(dataset_name));
   return (void*)dataset;
@@ -52,7 +54,7 @@ void rename_dataset(void* c_client, const char* name,
 {
   /* Rename a dataset in the database.
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string name_str = std::string(name, name_length);
   std::string new_name_str = std::string(new_name, new_name_length);
   s->rename_dataset(name_str, new_name_str);
@@ -67,7 +69,7 @@ void copy_dataset(void* c_client, const char* src_name,
 {
   /* Copy a dataset from teh src_name to the dest_name
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string src_name_str = std::string(src_name, src_name_length);
   std::string dest_name_str = std::string(dest_name, dest_name_length);
   s->copy_dataset(src_name_str, dest_name_str);
@@ -81,7 +83,7 @@ void delete_dataset(void* c_client, const char* name,
   /* Delete a dataset (all metadata and tensors) from the
   database.
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string dataset_name = std::string(name, name_length);
   s->delete_dataset(dataset_name);
   return;
@@ -99,7 +101,7 @@ void put_tensor(void* c_client,
 {
   /* Put a tensor of a specified type into the database
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
 
   std::vector<size_t> dims_vec;
@@ -123,7 +125,7 @@ void get_tensor(void* c_client, const char* key,
 {
   /* Get a tensor of a specified type from the database
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
 
   TensorType t_type;
@@ -147,7 +149,7 @@ void unpack_tensor(void* c_client,
   /* Get a tensor of a specified type from the database
   and put the values into the user provided memory space.
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
 
   std::vector<size_t> dims_vec;
@@ -167,7 +169,7 @@ void rename_tensor(void* c_client, const char* key,
 {
   /* This function renames a tensor from key to new_key
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
   std::string new_key_str = std::string(new_key, new_key_length);
   s->rename_tensor(key_str, new_key_str);
@@ -180,7 +182,7 @@ void delete_tensor(void* c_client, const char* key,
 {
   /* This function deletes a tensor from the database.
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
   s->delete_tensor(key);
   return;
@@ -195,7 +197,7 @@ void copy_tensor(void* c_client, const char* src_name,
   /* This function copies a tensor from src_name to
   dest_name.
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string src_str = std::string(src_name, src_name_length);
   std::string dest_str = std::string(dest_name, dest_name_length);
   s->copy_tensor(src_str, dest_str);
@@ -217,7 +219,7 @@ void set_model_from_file(void* c_client,
 {
   /* This function sets a model stored in a binary file.
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
   std::string model_file_str = std::string(model_file, model_file_length);
   std::string backend_str = std::string(backend, backend_length);
@@ -266,7 +268,7 @@ void set_model(void* c_client,
 {
   /* This function sets a model stored in a buffer c-string.
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
   std::string model_str = std::string(model, model_length);
   std::string backend_str = std::string(backend, backend_length);
@@ -307,7 +309,7 @@ const char* get_model(void* c_client, const char* key,
   /* This function returns the model and model length
   from the database
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
   std::string_view model_str_view = s->get_model(key_str);
   const char *model = model_str_view.data();
@@ -327,7 +329,7 @@ void set_script_from_file(void* c_client,
   /* This function puts a script in the database
   that is stored in a file.
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
   std::string device_str = std::string(device, device_length);
   std::string script_file_str = std::string(script_file,
@@ -348,7 +350,7 @@ void set_script(void* c_client,
   /* This function puts a script in the database
   that is stored in a file.
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
   std::string device_str = std::string(device, device_length);
   std::string script_str = std::string(script, script_length);
@@ -363,7 +365,7 @@ void get_script(void* c_client,
 {
   /* Get the script stored in the database
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
   std::string_view script_str_view = s->get_script(key_str);
   (*script) = script_str_view.data();
@@ -386,7 +388,7 @@ void run_script(void* c_client,
 {
   /* This function runs a script function in the database
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
   std::string function_str = std::string(function, function_length);
 
@@ -415,7 +417,7 @@ void run_model(void* c_client,
 {
   /* This function runs a model in the database
   */
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
 
   std::vector<std::string> input_vec;
@@ -434,7 +436,7 @@ extern "C"
 bool key_exists(void* c_client, const char* key,
                 const size_t key_length)
 {
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
   return s->key_exists(key_str);
 }
@@ -444,7 +446,7 @@ bool poll_key(void* c_client,
               const char* key, const size_t key_length,
               const int poll_frequency_ms, const int num_tries)
 {
-  SmartSimClient* s = (SmartSimClient *)c_client;
+  Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
   return s->poll_key(key_str, poll_frequency_ms, num_tries);
 }

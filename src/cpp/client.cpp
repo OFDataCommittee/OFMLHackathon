@@ -1,8 +1,10 @@
 #include "client.h"
 
-SmartSimClient::SmartSimClient(bool cluster, bool fortran_array)
+using namespace SILC;
+
+Client::Client(bool cluster, bool fortran_array)
 {
-  /* SmartSimClient constructor
+  /* Client constructor
   */
   this->_fortran_array = fortran_array;
 
@@ -61,12 +63,12 @@ SmartSimClient::SmartSimClient(bool cluster, bool fortran_array)
   return;
 }
 
-SmartSimClient::~SmartSimClient() {
+Client::~Client() {
   delete this->redis_cluster;
   delete this->redis;
 }
 
-void SmartSimClient::put_dataset(DataSet& dataset)
+void Client::put_dataset(DataSet& dataset)
 {
   /* This function will place a DataSet into the database
   */
@@ -101,7 +103,7 @@ void SmartSimClient::put_dataset(DataSet& dataset)
   return;
 }
 
-DataSet SmartSimClient::get_dataset(const std::string& name)
+DataSet Client::get_dataset(const std::string& name)
 {
   /* This function will retrieve a dataset from the database
   */
@@ -143,8 +145,8 @@ DataSet SmartSimClient::get_dataset(const std::string& name)
   return dataset;
 }
 
-void SmartSimClient::rename_dataset(const std::string& name,
-                                    const std::string& new_name)
+void Client::rename_dataset(const std::string& name,
+                            const std::string& new_name)
 {
   /* This function will rename a dataset (all tensors
   and metadata).
@@ -153,8 +155,8 @@ void SmartSimClient::rename_dataset(const std::string& name,
   return;
 }
 
-void SmartSimClient::copy_dataset(const std::string& src_name,
-                                  const std::string& dest_name)
+void Client::copy_dataset(const std::string& src_name,
+                          const std::string& dest_name)
 {
   /* This function will copy a dataset (all tensors
   and metadata).
@@ -163,7 +165,7 @@ void SmartSimClient::copy_dataset(const std::string& src_name,
   return;
 }
 
-void SmartSimClient::delete_dataset(const std::string& name)
+void Client::delete_dataset(const std::string& name)
 {
   /* This function will delete a dataset (all tensors
   and metadata).
@@ -172,11 +174,11 @@ void SmartSimClient::delete_dataset(const std::string& name)
   return;
 }
 
-void SmartSimClient::put_tensor(const std::string& key,
-                                void* data,
-                                const std::vector<size_t>& dims,
-                                const TensorType type,
-                                const MemoryLayout mem_layout)
+void Client::put_tensor(const std::string& key,
+                        void* data,
+                        const std::vector<size_t>& dims,
+                        const TensorType type,
+                        const MemoryLayout mem_layout)
 {
   /* This function puts a tensor into the datastore
   */
@@ -234,11 +236,11 @@ void SmartSimClient::put_tensor(const std::string& key,
   delete tensor;
 }
 
-void SmartSimClient::get_tensor(const std::string& key,
-                                void*& data,
-                                std::vector<size_t>& dims,
-                                TensorType& type,
-                                const MemoryLayout mem_layout)
+void Client::get_tensor(const std::string& key,
+                        void*& data,
+                        std::vector<size_t>& dims,
+                        TensorType& type,
+                        const MemoryLayout mem_layout)
 {
   /* This function gets a tensor from the database,
   allocates memory in the specified format for the
@@ -323,7 +325,7 @@ void SmartSimClient::get_tensor(const std::string& key,
   return;
 }
 
-void SmartSimClient::get_tensor(const std::string& key,
+void Client::get_tensor(const std::string& key,
                                 void*& data,
                                 size_t*& dims,
                                 size_t& n_dims,
@@ -359,11 +361,11 @@ void SmartSimClient::get_tensor(const std::string& key,
   return;
 }
 
-void SmartSimClient::unpack_tensor(const std::string& key,
-                                   void* data,
-                                   const std::vector<size_t>& dims,
-                                   const TensorType type,
-                                   const MemoryLayout mem_layout)
+void Client::unpack_tensor(const std::string& key,
+                          void* data,
+                          const std::vector<size_t>& dims,
+                          const TensorType type,
+                          const MemoryLayout mem_layout)
 {
   /* This function gets a tensor from the database and
   copies the data to the data pointer location.
@@ -474,7 +476,7 @@ void SmartSimClient::unpack_tensor(const std::string& key,
   return;
 }
 
-void SmartSimClient::rename_tensor(const std::string& key,
+void Client::rename_tensor(const std::string& key,
                                    const std::string& new_key)
 {
   /* This function moves a tensor from the key to the new_key.
@@ -504,7 +506,7 @@ void SmartSimClient::rename_tensor(const std::string& key,
   return;
 }
 
-void SmartSimClient::delete_tensor(const std::string& key)
+void Client::delete_tensor(const std::string& key)
 {
   /* This function will delete a tensor from the database
   */
@@ -524,8 +526,8 @@ void SmartSimClient::delete_tensor(const std::string& key)
   return;
 }
 
-void SmartSimClient::copy_tensor(const std::string& src_key,
-                                 const std::string& dest_key)
+void Client::copy_tensor(const std::string& src_key,
+                         const std::string& dest_key)
 {
   /* This function copies a tensor from the src_key to the
   dest_key.
@@ -534,15 +536,15 @@ void SmartSimClient::copy_tensor(const std::string& src_key,
   return;
 }
 
-void SmartSimClient::set_model_from_file(const std::string& key,
-                                         const std::string& model_file,
-                                         const std::string& backend,
-                                         const std::string& device,
-                                         int batch_size,
-                                         int min_batch_size,
-                                         const std::string& tag,
-                                         const std::vector<std::string>& inputs,
-                                         const std::vector<std::string>& outputs)
+void Client::set_model_from_file(const std::string& key,
+                                 const std::string& model_file,
+                                 const std::string& backend,
+                                 const std::string& device,
+                                 int batch_size,
+                                 int min_batch_size,
+                                 const std::string& tag,
+                                 const std::vector<std::string>& inputs,
+                                 const std::vector<std::string>& outputs)
 {
   /*This function will set a model from the database that is saved
   in a file.  It is assumed that the file is a binary file.
@@ -563,15 +565,15 @@ void SmartSimClient::set_model_from_file(const std::string& key,
   return;
 }
 
-void SmartSimClient::set_model(const std::string& key,
-                               const std::string_view& model,
-                               const std::string& backend,
-                               const std::string& device,
-                               int batch_size,
-                               int min_batch_size,
-                               const std::string& tag,
-                               const std::vector<std::string>& inputs,
-                               const std::vector<std::string>& outputs)
+void Client::set_model(const std::string& key,
+                       const std::string_view& model,
+                       const std::string& backend,
+                       const std::string& device,
+                       int batch_size,
+                       int min_batch_size,
+                       const std::string& tag,
+                       const std::vector<std::string>& inputs,
+                       const std::vector<std::string>& outputs)
 {
   /*This function will set a model from the provided buffer.
   */
@@ -633,7 +635,7 @@ void SmartSimClient::set_model(const std::string& key,
   return;
 }
 
-std::string_view SmartSimClient::get_model(const std::string& key)
+std::string_view Client::get_model(const std::string& key)
 {
   /* This function returns the model via the char* model
   variable and the length reference variable.  Note that
@@ -662,9 +664,9 @@ std::string_view SmartSimClient::get_model(const std::string& key)
   return std::string_view(model, reply.str_len());
 }
 
-void SmartSimClient::set_script_from_file(const std::string& key,
-                                          const std::string& device,
-                                          const std::string& script_file)
+void Client::set_script_from_file(const std::string& key,
+                                  const std::string& device,
+                                  const std::string& script_file)
 {
   /*This function will set a script that is saved in a file.
   It is assumed it is an ascii file.
@@ -681,9 +683,9 @@ void SmartSimClient::set_script_from_file(const std::string& key,
 }
 
 
-void SmartSimClient::set_script(const std::string& key,
-                                const std::string& device,
-                                const std::string_view& script)
+void Client::set_script(const std::string& key,
+                        const std::string& device,
+                        const std::string_view& script)
 {
   /*This function will set a script from the provided buffer.
   */
@@ -707,7 +709,7 @@ void SmartSimClient::set_script(const std::string& key,
   return;
 }
 
-std::string_view SmartSimClient::get_script(const std::string& key)
+std::string_view Client::get_script(const std::string& key)
 {
   /* This function returns the script via the char* script
   variable and the length reference variable.  Note that
@@ -736,9 +738,9 @@ std::string_view SmartSimClient::get_script(const std::string& key)
   return std::string_view(script, reply.str_len());
 }
 
-void SmartSimClient::run_model(const std::string& key,
-                               std::vector<std::string> inputs,
-                               std::vector<std::string> outputs)
+void Client::run_model(const std::string& key,
+                       std::vector<std::string> inputs,
+                       std::vector<std::string> outputs)
 {
   /*This function will run a RedisAI model.
   */
@@ -798,9 +800,9 @@ void SmartSimClient::run_model(const std::string& key,
   return;
 }
 
-void SmartSimClient::__run_model_dagrun(const std::string& key,
-                                        std::vector<std::string> inputs,
-                                         std::vector<std::string> outputs)
+void Client::__run_model_dagrun(const std::string& key,
+                                std::vector<std::string> inputs,
+                                std::vector<std::string> outputs)
 {
   /*This function will run a RedisAI model.  Because the RedisAI
   AI.RUNMODEL and AI.DAGRUN commands assume that the tensors
@@ -899,10 +901,10 @@ void SmartSimClient::__run_model_dagrun(const std::string& key,
   return;
 }
 
-void SmartSimClient::run_script(const std::string& key,
-                                const std::string& function,
-                                std::vector<std::string> inputs,
-                                std::vector<std::string> outputs)
+void Client::run_script(const std::string& key,
+                        const std::string& function,
+                        std::vector<std::string> inputs,
+                        std::vector<std::string> outputs)
 {
   /*This function will run a RedisAI script.
   */
@@ -955,16 +957,16 @@ void SmartSimClient::run_script(const std::string& key,
   return;
 }
 
-inline void SmartSimClient::_set_model(const std::string& model_name,
-                                       std::string_view model,
-                                       const std::string& backend,
-                                       const std::string& device,
-                                       int batch_size,
-                                       int min_batch_size,
-                                       const std::string& tag,
-                                       const std::vector<std::string>& inputs,
-                                       const std::vector<std::string>& outputs
-                                       )
+inline void Client::_set_model(const std::string& model_name,
+                               std::string_view model,
+                               const std::string& backend,
+                               const std::string& device,
+                               int batch_size,
+                               int min_batch_size,
+                               const std::string& tag,
+                               const std::vector<std::string>& inputs,
+                               const std::vector<std::string>& outputs
+                               )
 {
   /*This function will set the provided model into the database
   */
@@ -999,9 +1001,9 @@ inline void SmartSimClient::_set_model(const std::string& model_name,
   return;
 }
 
-inline void SmartSimClient::_set_script(const std::string& script_name,
-                                        const std::string& device,
-                                        std::string_view script)
+inline void Client::_set_script(const std::string& script_name,
+                                const std::string& device,
+                                std::string_view script)
 {
   /*This function will set the provided script into the database.
   */
@@ -1015,8 +1017,8 @@ inline void SmartSimClient::_set_script(const std::string& script_name,
   return;
 }
 
-inline void SmartSimClient::_copy_tensor(const std::string& src_key,
-                                         const std::string& dest_key)
+inline void Client::_copy_tensor(const std::string& src_key,
+                                 const std::string& dest_key)
 {
   /* This function a tensor from src_key
   to dest_key.
@@ -1060,7 +1062,7 @@ inline void SmartSimClient::_copy_tensor(const std::string& src_key,
   return;
 }
 
-void SmartSimClient::_populate_db_node_data(bool cluster)
+void Client::_populate_db_node_data(bool cluster)
 {
   /*This function retrieves hash slot information from the cluster
   and stores it in the client data structure.  This is currently
@@ -1097,7 +1099,7 @@ void SmartSimClient::_populate_db_node_data(bool cluster)
   return;
 }
 
-void SmartSimClient::_parse_reply_for_slots(CommandReply& reply)
+void Client::_parse_reply_for_slots(CommandReply& reply)
 {
   /*This function parses a CommandReply for cluster slot
   information.
@@ -1147,7 +1149,7 @@ void SmartSimClient::_parse_reply_for_slots(CommandReply& reply)
   return;
 }
 
-std::vector<size_t> SmartSimClient::_get_tensor_dims(CommandReply& reply)
+std::vector<size_t> Client::_get_tensor_dims(CommandReply& reply)
 {
   /* This function will fill a vector with the dimensions of the
   tensor.  We assume right now that the META reply is always
@@ -1168,7 +1170,7 @@ std::vector<size_t> SmartSimClient::_get_tensor_dims(CommandReply& reply)
   return dims;
 }
 
-std::string_view SmartSimClient::_get_tensor_data_blob(CommandReply& reply)
+std::string_view Client::_get_tensor_data_blob(CommandReply& reply)
 {
   /* Returns a string view of the data tensor blob value
   */
@@ -1184,7 +1186,7 @@ std::string_view SmartSimClient::_get_tensor_data_blob(CommandReply& reply)
   return std::string_view(reply[5].str(), reply[5].str_len());
 }
 
-TensorType SmartSimClient::_get_tensor_data_type(CommandReply& reply)
+TensorType Client::_get_tensor_data_type(CommandReply& reply)
 {
   /* Returns a string of the tensor type
   */
@@ -1203,7 +1205,7 @@ TensorType SmartSimClient::_get_tensor_data_type(CommandReply& reply)
 
 
 // These routines potentially modify keys by adding a prefix
-bool SmartSimClient::key_exists(const std::string& key)
+bool Client::key_exists(const std::string& key)
 {
   std::string_view key_view(key.c_str(), key.size());
   if(redis_cluster)
@@ -1212,7 +1214,7 @@ bool SmartSimClient::key_exists(const std::string& key)
     return redis->exists(key_view);
 }
 
-bool SmartSimClient::poll_key(const std::string& key,
+bool Client::poll_key(const std::string& key,
                               int poll_frequency_ms,
                               int num_tries)
 {
@@ -1234,8 +1236,8 @@ bool SmartSimClient::poll_key(const std::string& key,
     return false;
 }
 
-void SmartSimClient::_execute_commands(CommandList& cmds,
-                                       std::string prefix)
+void Client::_execute_commands(CommandList& cmds,
+                               std::string prefix)
 {
   /* This function executes a series of Command objects
   contained in a CommandList
@@ -1250,8 +1252,8 @@ void SmartSimClient::_execute_commands(CommandList& cmds,
   }
 }
 
-CommandReply SmartSimClient::_execute_command(Command& cmd,
-                                              std::string prefix)
+CommandReply Client::_execute_command(Command& cmd,
+                                      std::string prefix)
 {
   /* This function executes a Command
   */
@@ -1328,7 +1330,7 @@ CommandReply SmartSimClient::_execute_command(Command& cmd,
   return reply;
 }
 
-std::string SmartSimClient::_get_ssdb()
+std::string Client::_get_ssdb()
 {
   std::string env_str = std::string(getenv("SSDB"));
 
@@ -1360,7 +1362,7 @@ std::string SmartSimClient::_get_ssdb()
   return hosts_ports[hp];
 }
 
-uint64_t SmartSimClient::_crc16_inverse(uint64_t remainder)
+uint64_t Client::_crc16_inverse(uint64_t remainder)
 {
   /* This function inverts the crc16 process
   to return a message that will result in the
@@ -1378,7 +1380,7 @@ uint64_t SmartSimClient::_crc16_inverse(uint64_t remainder)
   return remainder;
 }
 
-std::string SmartSimClient::_get_crc16_prefix(uint64_t hash_slot)
+std::string Client::_get_crc16_prefix(uint64_t hash_slot)
 {
     /* This takes hash slot and returns a
     two character prefix (potentially with
@@ -1398,9 +1400,9 @@ std::string SmartSimClient::_get_crc16_prefix(uint64_t hash_slot)
     return prefix_str;
 }
 
-DBNode* SmartSimClient::_get_model_script_db(const std::string& name,
-                                            std::vector<std::string>& inputs,
-                                            std::vector<std::string>& outputs)
+DBNode* Client::_get_model_script_db(const std::string& name,
+                                     std::vector<std::string>& inputs,
+                                     std::vector<std::string>& outputs)
 {
   /* This function calculates the optimal model name to use
   to run the provided inputs.  If a cluster is not being used,
@@ -1440,7 +1442,7 @@ DBNode* SmartSimClient::_get_model_script_db(const std::string& name,
   return db;
 }
 
-bool SmartSimClient::_has_hash_tag(const std::string& key)
+bool Client::_has_hash_tag(const std::string& key)
 {
   /* This function determines if the key has a hash
   slot.
@@ -1457,7 +1459,7 @@ bool SmartSimClient::_has_hash_tag(const std::string& key)
     return true;
 }
 
-std::string SmartSimClient::_get_hash_tag(const std::string& key)
+std::string Client::_get_hash_tag(const std::string& key)
 {
   /* This function determines if the key has a hash
   slot.
@@ -1474,8 +1476,8 @@ std::string SmartSimClient::_get_hash_tag(const std::string& key)
     return key.substr(first,second-first+1);
 }
 
-uint16_t SmartSimClient::_get_dbnode_index(uint16_t hash_slot,
-                                           unsigned lhs, unsigned rhs)
+uint16_t Client::_get_dbnode_index(uint16_t hash_slot,
+                                   unsigned lhs, unsigned rhs)
 {
   /*  This is a binomial search to determine the
   DBNode that is responsible for the hash slot.
@@ -1493,7 +1495,7 @@ uint16_t SmartSimClient::_get_dbnode_index(uint16_t hash_slot,
   }
 }
 
-uint16_t SmartSimClient::_get_hash_slot(const std::string& key)
+uint16_t Client::_get_hash_slot(const std::string& key)
 {
   /* This function returns the hash slot of the key.
   */
@@ -1506,7 +1508,7 @@ uint16_t SmartSimClient::_get_hash_slot(const std::string& key)
                           hash_key.size()) % 16384;
 }
 
-void SmartSimClient::_set_prefixes_from_env()
+void Client::_set_prefixes_from_env()
 {
   const char* keyout_p = std::getenv("SSKEYOUT");
   if (keyout_p)
@@ -1536,7 +1538,7 @@ void SmartSimClient::_set_prefixes_from_env()
     this->set_data_source(this->_get_key_prefixes[0].c_str());
 }
 
-void SmartSimClient::set_data_source(std::string source_id)
+void Client::set_data_source(std::string source_id)
 {
   /* This function sets the prefix for fetching keys
   from the database
@@ -1560,7 +1562,7 @@ void SmartSimClient::set_data_source(std::string source_id)
 			     "initialization.");
 }
 
-inline std::string SmartSimClient::_put_prefix()
+inline std::string Client::_put_prefix()
 {
   std::string prefix;
   if(this->_put_key_prefix.size()>0)
@@ -1569,7 +1571,7 @@ inline std::string SmartSimClient::_put_prefix()
 
 }
 
-inline std::string SmartSimClient::_get_prefix()
+inline std::string Client::_get_prefix()
 {
   std::string prefix;
   if(this->_get_key_prefix.size()>0)
@@ -1578,7 +1580,7 @@ inline std::string SmartSimClient::_get_prefix()
 
 }
 
-void SmartSimClient::_append_with_get_prefix(
+void Client::_append_with_get_prefix(
                      std::vector<std::string>& keys)
 {
   /* This function will append each key with the
@@ -1595,7 +1597,7 @@ void SmartSimClient::_append_with_get_prefix(
   return;
 }
 
-void SmartSimClient::_append_with_put_prefix(
+void Client::_append_with_put_prefix(
                      std::vector<std::string>& keys)
 {
   /* This function will append each key with the
@@ -1613,8 +1615,8 @@ void SmartSimClient::_append_with_put_prefix(
 }
 
 std::vector<std::string>
-SmartSimClient::_get_tmp_names(std::vector<std::string> names,
-                               std::string db_prefix)
+Client::_get_tmp_names(std::vector<std::string> names,
+                       std::string db_prefix)
 {
   /* This function returns a map between the original
   names and temporary names that are needed to make sure
@@ -1632,8 +1634,8 @@ SmartSimClient::_get_tmp_names(std::vector<std::string> names,
   return tmp;
 }
 
-void SmartSimClient::_copy_tensors(std::vector<std::string> src,
-                                   std::vector<std::string> dest)
+void Client::_copy_tensors(std::vector<std::string> src,
+                           std::vector<std::string> dest)
 {
   /* This function will copy a list of tensors from
   src to destination.
@@ -1653,8 +1655,8 @@ void SmartSimClient::_copy_tensors(std::vector<std::string> src,
   return;
 }
 
-void SmartSimClient::_delete_keys(std::vector<std::string> keys,
-                                  std::string db_prefix)
+void Client::_delete_keys(std::vector<std::string> keys,
+                          std::string db_prefix)
 {
   /* This function will delete a list of tensor names in a single
   command.  This assumes they are all in the same hash slot.

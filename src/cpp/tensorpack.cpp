@@ -1,5 +1,7 @@
 #include "tensorpack.h"
 
+using namespace SILC;
+
 TensorPack::TensorPack()
 {}
 

@@ -1,7 +1,7 @@
 #ifndef SMARTSIM_C_CLIENT_H
 #define SMARTSIM_C_CLIENT_H
 ///@file
-///\brief C-wrappers for the C++ SmartSimClient class
+///\brief C-wrappers for the C++ Client class
 #include <stdlib.h>
 #include <stdbool.h>
 #include "client.h"
@@ -12,11 +12,11 @@
 extern "C" {
 #endif
 
-//! SmartSimClient C-client constructor
+//! Client C-client constructor
 void* SmartSimCClient(bool cluster /*!< Flag to indicate if a database cluster is being used*/
                      );
 
-//! SmartSimClient C-client destructor
+//! Client C-client destructor
 void DeleteCClient(void* c_client /*!< The c client to use for communication*/
                    );
 

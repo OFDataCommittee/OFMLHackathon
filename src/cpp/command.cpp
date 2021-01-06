@@ -1,5 +1,7 @@
 #include "command.h"
 
+using namespace SILC;
+
 Command::Command()
 {
 }

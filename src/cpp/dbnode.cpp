@@ -1,5 +1,7 @@
 #include "dbnode.h"
 
+using namespace SILC;
+
 DBNode::DBNode()
 {
     /* Default DBNode constructor

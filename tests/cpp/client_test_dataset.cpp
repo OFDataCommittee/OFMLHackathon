@@ -4,9 +4,9 @@
 #include <mpi.h>
 
 template <typename T>
-void check_meta_field(DataSet& dataset,
+void check_meta_field(SILC::DataSet& dataset,
                       std::string field_name,
-                      MetaDataType type,
+                      SILC::MetaDataType type,
                       std::vector<T> vals)
 {
   /* This function will check the meta data field
@@ -16,7 +16,7 @@ void check_meta_field(DataSet& dataset,
 
   T* retrieved_vals;
   size_t retrieved_length;
-  MetaDataType retrieved_type;
+  SILC::MetaDataType retrieved_type;
 
   dataset.get_meta_scalars(field_name,
                           (void*&)retrieved_vals,
@@ -59,7 +59,7 @@ template <typename T_send, typename T_recv>
 void put_get_3D_array(
 		    void (*fill_array)(T_send***, int, int, int),
 		    std::vector<size_t> dims,
-        TensorType type,
+        SILC::TensorType type,
         std::string key_suffix,
         std::string dataset_name)
 {
@@ -100,42 +100,42 @@ void put_get_3D_array(
   std::string str_meta_3 = std::string("test_meta_string_3");
 
   //Create Client and DataSet
-  SmartSimClient client(true);
-  DataSet MyDataSet(dataset_name);
+  SILC::Client client(true);
+  SILC::DataSet MyDataSet(dataset_name);
 
   //Add tensors to the DataSet
   MyDataSet.add_tensor("tensor_1", t_send_1,
-                       dims, type, MemoryLayout::nested);
+                       dims, type, SILC::MemoryLayout::nested);
   MyDataSet.add_tensor("tensor_2", t_send_2,
-                       dims, type, MemoryLayout::nested);
+                       dims, type, SILC::MemoryLayout::nested);
   MyDataSet.add_tensor("tensor_3", t_send_3,
-                       dims, type, MemoryLayout::nested);
+                       dims, type, SILC::MemoryLayout::nested);
 
   //Add metadata fields to the DataSet.  _meta_1 and _meta_2
   //values added to _field_1 and _meta_3 is added to _field_2.
-  MyDataSet.add_meta_scalar("dbl_field_1", &dbl_meta_1, MetaDataType::dbl);
-  MyDataSet.add_meta_scalar("dbl_field_1", &dbl_meta_2, MetaDataType::dbl);
-  MyDataSet.add_meta_scalar("dbl_field_2", &dbl_meta_3, MetaDataType::dbl);
+  MyDataSet.add_meta_scalar("dbl_field_1", &dbl_meta_1, SILC::MetaDataType::dbl);
+  MyDataSet.add_meta_scalar("dbl_field_1", &dbl_meta_2, SILC::MetaDataType::dbl);
+  MyDataSet.add_meta_scalar("dbl_field_2", &dbl_meta_3, SILC::MetaDataType::dbl);
 
-  MyDataSet.add_meta_scalar("flt_field_1", &flt_meta_1, MetaDataType::flt);
-  MyDataSet.add_meta_scalar("flt_field_1", &flt_meta_2, MetaDataType::flt);
-  MyDataSet.add_meta_scalar("flt_field_2", &flt_meta_3, MetaDataType::flt);
+  MyDataSet.add_meta_scalar("flt_field_1", &flt_meta_1, SILC::MetaDataType::flt);
+  MyDataSet.add_meta_scalar("flt_field_1", &flt_meta_2, SILC::MetaDataType::flt);
+  MyDataSet.add_meta_scalar("flt_field_2", &flt_meta_3, SILC::MetaDataType::flt);
 
-  MyDataSet.add_meta_scalar("i64_field_1", &i64_meta_1, MetaDataType::int64);
-  MyDataSet.add_meta_scalar("i64_field_1", &i64_meta_2, MetaDataType::int64);
-  MyDataSet.add_meta_scalar("i64_field_2", &i64_meta_3, MetaDataType::int64);
+  MyDataSet.add_meta_scalar("i64_field_1", &i64_meta_1, SILC::MetaDataType::int64);
+  MyDataSet.add_meta_scalar("i64_field_1", &i64_meta_2, SILC::MetaDataType::int64);
+  MyDataSet.add_meta_scalar("i64_field_2", &i64_meta_3, SILC::MetaDataType::int64);
 
-  MyDataSet.add_meta_scalar("i32_field_1", &i32_meta_1, MetaDataType::int32);
-  MyDataSet.add_meta_scalar("i32_field_1", &i32_meta_2, MetaDataType::int32);
-  MyDataSet.add_meta_scalar("i32_field_2", &i32_meta_3, MetaDataType::int32);
+  MyDataSet.add_meta_scalar("i32_field_1", &i32_meta_1, SILC::MetaDataType::int32);
+  MyDataSet.add_meta_scalar("i32_field_1", &i32_meta_2, SILC::MetaDataType::int32);
+  MyDataSet.add_meta_scalar("i32_field_2", &i32_meta_3, SILC::MetaDataType::int32);
 
-  MyDataSet.add_meta_scalar("ui64_field_1", &ui64_meta_1, MetaDataType::uint64);
-  MyDataSet.add_meta_scalar("ui64_field_1", &ui64_meta_2, MetaDataType::uint64);
-  MyDataSet.add_meta_scalar("ui64_field_2", &ui64_meta_3, MetaDataType::uint64);
+  MyDataSet.add_meta_scalar("ui64_field_1", &ui64_meta_1, SILC::MetaDataType::uint64);
+  MyDataSet.add_meta_scalar("ui64_field_1", &ui64_meta_2, SILC::MetaDataType::uint64);
+  MyDataSet.add_meta_scalar("ui64_field_2", &ui64_meta_3, SILC::MetaDataType::uint64);
 
-  MyDataSet.add_meta_scalar("ui32_field_1", &ui32_meta_1, MetaDataType::uint32);
-  MyDataSet.add_meta_scalar("ui32_field_1", &ui32_meta_2, MetaDataType::uint32);
-  MyDataSet.add_meta_scalar("ui32_field_2", &ui32_meta_3, MetaDataType::uint32);
+  MyDataSet.add_meta_scalar("ui32_field_1", &ui32_meta_1, SILC::MetaDataType::uint32);
+  MyDataSet.add_meta_scalar("ui32_field_1", &ui32_meta_2, SILC::MetaDataType::uint32);
+  MyDataSet.add_meta_scalar("ui32_field_2", &ui32_meta_3, SILC::MetaDataType::uint32);
 
   MyDataSet.add_meta_string("str_field_1", str_meta_1);
   MyDataSet.add_meta_string("str_field_1", str_meta_2);
@@ -149,13 +149,13 @@ void put_get_3D_array(
   T_recv*** t_recv_2 = allocate_3D_array<T_recv>(dims[0], dims[1], dims[2]);
   T_recv*** t_recv_3 = allocate_3D_array<T_recv>(dims[0], dims[1], dims[2]);
 
-  DataSet RetrievedDataSet = client.get_dataset(dataset_name);
+  SILC::DataSet RetrievedDataSet = client.get_dataset(dataset_name);
   RetrievedDataSet.unpack_tensor("tensor_1", t_recv_1,
-                                 dims, type, MemoryLayout::nested);
+                                 dims, type, SILC::MemoryLayout::nested);
   RetrievedDataSet.unpack_tensor("tensor_2", t_recv_2,
-                                 dims, type, MemoryLayout::nested);
+                                 dims, type, SILC::MemoryLayout::nested);
   RetrievedDataSet.unpack_tensor("tensor_3", t_recv_3,
-                                 dims, type, MemoryLayout::nested);
+                                 dims, type, SILC::MemoryLayout::nested);
 
   /*
   for(int i = 0; i < dims[0]; i++)
@@ -212,23 +212,23 @@ void put_get_3D_array(
 
   // Retrieve tensors where the DataSet handles memory allocation
   void* t_get_1;
-  TensorType t_get_1_type;
+  SILC::TensorType t_get_1_type;
   std::vector<size_t> t_get_1_dims;
   RetrievedDataSet.get_tensor("tensor_1", t_get_1,
                               t_get_1_dims, t_get_1_type,
-                              MemoryLayout::nested);
+                              SILC::MemoryLayout::nested);
   void* t_get_2;
-  TensorType t_get_2_type;
+  SILC::TensorType t_get_2_type;
   std::vector<size_t> t_get_2_dims;
   RetrievedDataSet.get_tensor("tensor_2", t_get_2,
                               t_get_2_dims, t_get_2_type,
-                              MemoryLayout::nested);
+                              SILC::MemoryLayout::nested);
   void* t_get_3;
-  TensorType t_get_3_type;
+  SILC::TensorType t_get_3_type;
   std::vector<size_t> t_get_3_dims;
   RetrievedDataSet.get_tensor("tensor_3", t_get_3,
                               t_get_3_dims, t_get_3_type,
-                              MemoryLayout::nested);
+                              SILC::MemoryLayout::nested);
 
   if(t_get_1_type!=type)
     throw std::runtime_error("Retrieved type for tensor_1 "\
@@ -275,71 +275,71 @@ void put_get_3D_array(
   //Check that the metadata values are correct for dbl
   check_meta_field<double>(RetrievedDataSet,
                            "dbl_field_1",
-                           MetaDataType::dbl,
+                           SILC::MetaDataType::dbl,
                            {dbl_meta_1, dbl_meta_2});
 
   check_meta_field<double>(RetrievedDataSet,
                            "dbl_field_2",
-                           MetaDataType::dbl,
+                           SILC::MetaDataType::dbl,
                            {dbl_meta_3});
 
   //Check that the metadata values are correct for flt
 
   check_meta_field<float>(RetrievedDataSet,
                           "flt_field_1",
-                          MetaDataType::flt,
+                          SILC::MetaDataType::flt,
                           {flt_meta_1, flt_meta_2});
 
   check_meta_field<float>(RetrievedDataSet,
                          "flt_field_2",
-                         MetaDataType::flt,
+                         SILC::MetaDataType::flt,
                          {flt_meta_3});
 
   //Check that the metadata values are correct for i64
 
   check_meta_field<int64_t>(RetrievedDataSet,
                             "i64_field_1",
-                            MetaDataType::int64,
+                            SILC::MetaDataType::int64,
                             {i64_meta_1, i64_meta_2});
 
   check_meta_field<int64_t>(RetrievedDataSet,
                             "i64_field_2",
-                            MetaDataType::int64,
+                            SILC::MetaDataType::int64,
                             {i64_meta_3});
 
   //Check that the metadata values are correct for i32
 
   check_meta_field<int32_t>(RetrievedDataSet,
                             "i32_field_1",
-                            MetaDataType::int32,
+                            SILC::MetaDataType::int32,
                             {i32_meta_1, i32_meta_2});
 
   check_meta_field<int32_t>(RetrievedDataSet,
                             "i32_field_2",
-                            MetaDataType::int32,
+                            SILC::MetaDataType::int32,
                             {i32_meta_3});
 
   //Check that the metadata values are correct for ui64
 
   check_meta_field<uint64_t>(RetrievedDataSet,
                              "ui64_field_1",
-                             MetaDataType::uint64,
+                             SILC::MetaDataType::uint64,
                              {ui64_meta_1, ui64_meta_2});
 
   check_meta_field<uint64_t>(RetrievedDataSet,
                              "ui64_field_2",
-                             MetaDataType::uint64,
+                             SILC::MetaDataType::uint64,
                              {ui64_meta_3});
 
   //Check that the metadata values are correct for ui32
   check_meta_field<uint32_t>(RetrievedDataSet,
                              "ui32_field_1",
-                             MetaDataType::uint32,
+                             SILC::MetaDataType::uint32,
                              {ui32_meta_1, ui32_meta_2});
 
   check_meta_field<uint32_t>(RetrievedDataSet,
                              "ui32_field_2",
-                             MetaDataType::uint32,
+                             SILC::MetaDataType::uint32,
                              {ui32_meta_3});
 
   //Check that the metadata values are correct for str
@@ -395,42 +395,42 @@ int main(int argc, char* argv[]) {
   dataset_name = "3D_dbl_dataset_rank_" + std::to_string(rank);
   put_get_3D_array<double,double>(
 				  &set_3D_array_floating_point_values<double>,
-				  dims, TensorType::dbl, "_dbl", dataset_name);
+				  dims, SILC::TensorType::dbl, "_dbl", dataset_name);
 
   dataset_name = "3D_flt_dataset_rank_" + std::to_string(rank);
   put_get_3D_array<float,float>(
 	  			&set_3D_array_floating_point_values<float>,
-  				dims, TensorType::flt, "_flt", dataset_name);
+  				dims, SILC::TensorType::flt, "_flt", dataset_name);
 
   dataset_name = "3D_i64_dataset_rank_" + std::to_string(rank);
   put_get_3D_array<int64_t,int64_t>(
 				    &set_3D_array_integral_values<int64_t>,
-				    dims, TensorType::int64, "_i64", dataset_name);
+				    dims, SILC::TensorType::int64, "_i64", dataset_name);
 
   dataset_name = "3D_i32_dataset_rank_" + std::to_string(rank);
   put_get_3D_array<int32_t,int32_t>(
 				    &set_3D_array_integral_values<int32_t>,
-				    dims, TensorType::int32, "_i32", dataset_name);
+				    dims, SILC::TensorType::int32, "_i32", dataset_name);
 
   dataset_name = "3D_i16_dataset_rank_" + std::to_string(rank);
   put_get_3D_array<int16_t,int16_t>(
 				      &set_3D_array_integral_values<int16_t>,
-				      dims, TensorType::int16, "_i16", dataset_name);
+				      dims, SILC::TensorType::int16, "_i16", dataset_name);
 
   dataset_name = "3D_i8_dataset_rank_" + std::to_string(rank);
   put_get_3D_array<int8_t,int8_t>(
 				      &set_3D_array_integral_values<int8_t>,
-				      dims, TensorType::int8, "_i8", dataset_name);
+				      dims, SILC::TensorType::int8, "_i8", dataset_name);
 
   dataset_name = "3D_ui16_dataset_rank_" + std::to_string(rank);
   put_get_3D_array<uint16_t,uint16_t>(
 				      &set_3D_array_integral_values<uint16_t>,
-				      dims, TensorType::uint16, "_ui16", dataset_name);
+				      dims, SILC::TensorType::uint16, "_ui16", dataset_name);
 
   dataset_name = "3D_ui8_dataset_rank_" + std::to_string(rank);
   put_get_3D_array<uint8_t,uint8_t>(
 				      &set_3D_array_integral_values<uint8_t>,
-				      dims, TensorType::uint8, "_ui8", dataset_name);
+				      dims, SILC::TensorType::uint8, "_ui8", dataset_name);
 
   MPI_Finalize();
 

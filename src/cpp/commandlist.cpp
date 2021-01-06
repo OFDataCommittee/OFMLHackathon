@@ -1,5 +1,7 @@
 #include "commandlist.h"
 
+using namespace SILC;
+
 CommandList::CommandList()
 {
 }

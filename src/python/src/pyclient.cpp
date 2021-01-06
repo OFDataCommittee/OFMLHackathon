@@ -1,13 +1,14 @@
 #include "pyclient.h"
 
+using namespace SILC;
+
 namespace py = pybind11;
 
 PyClient::PyClient(bool cluster, bool fortran_array)
 {
-  SmartSimClient* client = new SmartSimClient(cluster, fortran_array);
+  Client* client = new Client(cluster, fortran_array);
   this->_client = client;
 }
-
 
 PyClient::~PyClient() {
   delete this->_client;
@@ -28,7 +29,6 @@ void PyClient::put_tensor(std::string& key, std::string& type, py::array data) {
   this->_client->put_tensor(key, ptr, dims, ttype, MemoryLayout::contiguous);
   return;
 }
-
 
 py::array PyClient::get_tensor(std::string& key) {
 

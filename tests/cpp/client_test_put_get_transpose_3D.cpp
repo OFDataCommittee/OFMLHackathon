@@ -28,12 +28,12 @@ template <typename T_send, typename T_recv>
 void put_get_3D_array(
 		    void (*fill_array)(T_send*, int),
 		    std::vector<size_t> dims,
-        TensorType type,
+        SILC::TensorType type,
         std::string key_suffix="",
-        MemoryLayout send_direction=MemoryLayout::contiguous,
-        MemoryLayout recv_direction=MemoryLayout::contiguous)
+        SILC::MemoryLayout send_direction=SILC::MemoryLayout::contiguous,
+        SILC::MemoryLayout recv_direction=SILC::MemoryLayout::contiguous)
 {
-  SmartSimClient client(true);
+  SILC::Client client(true);
 
   //Allocate and fill arrays
   T_send* array =
@@ -92,13 +92,13 @@ void put_get_3D_array(
   for(size_t i = 0; i < dims[0]; i++) {
     for(size_t j = 0; j < dims[1]; j++) {
       for(size_t k = 0; k < dims[2]; k++) {
-        if(send_direction == MemoryLayout::fortran_contiguous &&
-           recv_direction == MemoryLayout::contiguous) {
+        if(send_direction == SILC::MemoryLayout::fortran_contiguous &&
+           recv_direction == SILC::MemoryLayout::contiguous) {
           u_index = _c_index(dims, {i,j,k});
           index = _c_index(r_dims, {k,j,i});
         }
-        else if(send_direction == MemoryLayout::contiguous &&
-                recv_direction == MemoryLayout::fortran_contiguous) {
+        else if(send_direction == SILC::MemoryLayout::contiguous &&
+                recv_direction == SILC::MemoryLayout::fortran_contiguous) {
           index = _c_index(dims, {i,j,k});
           u_index = _c_index(r_dims, {k,j,i});
         }
@@ -113,7 +113,7 @@ void put_get_3D_array(
     }
   }
 
-  TensorType g_type_transpose;
+  SILC::TensorType g_type_transpose;
   std::vector<size_t> g_dims_transpose;
   void* g_array;
   client.get_tensor(key, g_array,
@@ -135,13 +135,13 @@ void put_get_3D_array(
   for(size_t i = 0; i < dims[0]; i++) {
     for(size_t j = 0; j < dims[1]; j++) {
       for(size_t k = 0; k < dims[2]; k++) {
-        if(send_direction == MemoryLayout::fortran_contiguous &&
-           recv_direction == MemoryLayout::contiguous) {
+        if(send_direction == SILC::MemoryLayout::fortran_contiguous &&
+           recv_direction == SILC::MemoryLayout::contiguous) {
           g_index = _c_index(dims, {i,j,k});
           index = _c_index(r_dims, {k,j,i});
         }
-        else if(send_direction == MemoryLayout::contiguous &&
-          recv_direction == MemoryLayout::fortran_contiguous) {
+        else if(send_direction == SILC::MemoryLayout::contiguous &&
+          recv_direction == SILC::MemoryLayout::fortran_contiguous) {
           index = _c_index(dims, {i,j,k});
           g_index = _c_index(r_dims, {k,j,i});
         }
@@ -185,101 +185,101 @@ int main(int argc, char* argv[]) {
   */
   put_get_3D_array<double,double>(
 				  &set_1D_array_floating_point_values<double>,
-				  dims, TensorType::dbl, "_dbl",
-          MemoryLayout::fortran_contiguous,
-          MemoryLayout::contiguous);
+				  dims, SILC::TensorType::dbl, "_dbl",
+          SILC::MemoryLayout::fortran_contiguous,
+          SILC::MemoryLayout::contiguous);
 
   put_get_3D_array<float,float>(
 				&set_1D_array_floating_point_values<float>,
-				dims, TensorType::flt, "_flt",
-        MemoryLayout::fortran_contiguous,
-        MemoryLayout::contiguous);
+				dims, SILC::TensorType::flt, "_flt",
+        SILC::MemoryLayout::fortran_contiguous,
+        SILC::MemoryLayout::contiguous);
 
   put_get_3D_array<int64_t,int64_t>(
 				    &set_1D_array_integral_values<int64_t>,
-				    dims, TensorType::int64, "_i64",
-            MemoryLayout::fortran_contiguous,
-            MemoryLayout::contiguous);
+				    dims, SILC::TensorType::int64, "_i64",
+            SILC::MemoryLayout::fortran_contiguous,
+            SILC::MemoryLayout::contiguous);
 
   put_get_3D_array<int32_t,int32_t>(
 				    &set_1D_array_integral_values<int32_t>,
-				    dims, TensorType::int32, "_i32",
-            MemoryLayout::fortran_contiguous,
-            MemoryLayout::contiguous);
+				    dims, SILC::TensorType::int32, "_i32",
+            SILC::MemoryLayout::fortran_contiguous,
+            SILC::MemoryLayout::contiguous);
 
   put_get_3D_array<int16_t,int16_t>(
 				      &set_1D_array_integral_values<int16_t>,
-				      dims, TensorType::int16, "_i16",
-              MemoryLayout::fortran_contiguous,
-              MemoryLayout::contiguous);
+				      dims, SILC::TensorType::int16, "_i16",
+              SILC::MemoryLayout::fortran_contiguous,
+              SILC::MemoryLayout::contiguous);
 
   put_get_3D_array<int8_t,int8_t>(
 				      &set_1D_array_integral_values<int8_t>,
-				      dims, TensorType::int8, "_i8",
-              MemoryLayout::fortran_contiguous,
-              MemoryLayout::contiguous);
+				      dims, SILC::TensorType::int8, "_i8",
+              SILC::MemoryLayout::fortran_contiguous,
+              SILC::MemoryLayout::contiguous);
 
   put_get_3D_array<uint16_t,uint16_t>(
 				      &set_1D_array_integral_values<uint16_t>,
-				      dims, TensorType::uint16, "_ui16",
-              MemoryLayout::fortran_contiguous,
-              MemoryLayout::contiguous);
+				      dims, SILC::TensorType::uint16, "_ui16",
+              SILC::MemoryLayout::fortran_contiguous,
+              SILC::MemoryLayout::contiguous);
 
   put_get_3D_array<uint8_t,uint8_t>(
 				      &set_1D_array_integral_values<uint8_t>,
-				      dims, TensorType::uint8, "_ui8",
-              MemoryLayout::fortran_contiguous,
-              MemoryLayout::contiguous);
+				      dims, SILC::TensorType::uint8, "_ui8",
+              SILC::MemoryLayout::fortran_contiguous,
+              SILC::MemoryLayout::contiguous);
 
   /* Test conversion on the get side
   */
   put_get_3D_array<double,double>(
 				  &set_1D_array_floating_point_values<double>,
-				  dims, TensorType::dbl, "_dbl",
-          MemoryLayout::contiguous,
-          MemoryLayout::fortran_contiguous);
+				  dims, SILC::TensorType::dbl, "_dbl",
+          SILC::MemoryLayout::contiguous,
+          SILC::MemoryLayout::fortran_contiguous);
 
   put_get_3D_array<float,float>(
 				&set_1D_array_floating_point_values<float>,
-				dims, TensorType::flt, "_flt",
-        MemoryLayout::contiguous,
-        MemoryLayout::fortran_contiguous);
+				dims, SILC::TensorType::flt, "_flt",
+        SILC::MemoryLayout::contiguous,
+        SILC::MemoryLayout::fortran_contiguous);
 
   put_get_3D_array<int64_t,int64_t>(
 				    &set_1D_array_integral_values<int64_t>,
-				    dims, TensorType::int64, "_i64",
-            MemoryLayout::contiguous,
-            MemoryLayout::fortran_contiguous);
+				    dims, SILC::TensorType::int64, "_i64",
+            SILC::MemoryLayout::contiguous,
+            SILC::MemoryLayout::fortran_contiguous);
 
   put_get_3D_array<int32_t,int32_t>(
 				    &set_1D_array_integral_values<int32_t>,
-				    dims, TensorType::int32, "_i32",
-            MemoryLayout::contiguous,
-            MemoryLayout::fortran_contiguous);
+				    dims, SILC::TensorType::int32, "_i32",
+            SILC::MemoryLayout::contiguous,
+            SILC::MemoryLayout::fortran_contiguous);
 
   put_get_3D_array<int16_t,int16_t>(
 				      &set_1D_array_integral_values<int16_t>,
-				      dims, TensorType::int16, "_i16",
-              MemoryLayout::contiguous,
-              MemoryLayout::fortran_contiguous);
+				      dims, SILC::TensorType::int16, "_i16",
+              SILC::MemoryLayout::contiguous,
+              SILC::MemoryLayout::fortran_contiguous);
 
   put_get_3D_array<int8_t,int8_t>(
 				      &set_1D_array_integral_values<int8_t>,
-				      dims, TensorType::int8, "_i8",
-              MemoryLayout::contiguous,
-              MemoryLayout::fortran_contiguous);
+				      dims, SILC::TensorType::int8, "_i8",
+              SILC::MemoryLayout::contiguous,
+              SILC::MemoryLayout::fortran_contiguous);
 
   put_get_3D_array<uint16_t,uint16_t>(
 				      &set_1D_array_integral_values<uint16_t>,
-				      dims, TensorType::uint16, "_ui16",
-              MemoryLayout::contiguous,
-              MemoryLayout::fortran_contiguous);
+				      dims, SILC::TensorType::uint16, "_ui16",
+              SILC::MemoryLayout::contiguous,
+              SILC::MemoryLayout::fortran_contiguous);
 
   put_get_3D_array<uint8_t,uint8_t>(
 				      &set_1D_array_integral_values<uint8_t>,
-				      dims, TensorType::uint8, "_ui8",
-              MemoryLayout::contiguous,
-              MemoryLayout::fortran_contiguous);
+				      dims, SILC::TensorType::uint8, "_ui8",
+              SILC::MemoryLayout::contiguous,
+              SILC::MemoryLayout::fortran_contiguous);
 
   std::cout<<"3D put and get to test matrix "\
              "transpose complete."<<std::endl;

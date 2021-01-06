@@ -57,9 +57,11 @@ int main(int argc, char* argv[])
         for(int i=0; i<2; i++) {
             //std::cout<<"prefix["<<i<<"] = "<<prefix[i]<<std::endl;
             //std::cout << std::bitset<8>(prefix[i])<<std::endl;
+            /*
             if(prefix[i]==0) {
                 std::cout<<"hash_slot "<<hash_slot<<" has zero!"<<std::endl;
             }
+            */
         }
         if(prefix[0]!=0)
             non_zero++;

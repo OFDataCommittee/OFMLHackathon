@@ -4,6 +4,8 @@
 #include <forward_list>
 #include <cstring>
 
+namespace SILC {
+
 typedef unsigned long long bytesize;
 
 template <class T>
@@ -49,6 +51,8 @@ class MemoryList {
 };
 
 #include "memorylist.tcc"
+
+} //namespace SILC
 
 #endif //SMARTSIM_METADATA_H
 

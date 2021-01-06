@@ -7,6 +7,9 @@
 the layout of the memory space that
 is provided or requested by the user.
 */
+
+namespace SILC {
+
 enum class MemoryLayout{
     nested = 1,
     contiguous = 2,
@@ -35,5 +38,7 @@ inline MemoryLayout convert_layout(CMemoryLayout layout) {
                                "conversion.");
   }
 }
+
+} // namespace SILC
 
 #endif //SMARTSIM_MEMORYLAYOUT_H

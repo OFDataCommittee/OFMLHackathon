@@ -1,5 +1,7 @@
 #include "metadata.h"
 
+using namespace SILC;
+
 MetaData::MetaData()
 {
 }

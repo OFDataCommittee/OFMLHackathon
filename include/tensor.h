@@ -10,6 +10,8 @@
 ///@file
 ///\brief The Tensor class for data and buffer tensor operations
 
+namespace SILC {
+
 template <class T>
 class Tensor : public TensorBase
 {
@@ -127,5 +129,7 @@ class Tensor : public TensorBase
 };
 
 #include "tensor.tcc"
+
+} //namespace SILC
 
 #endif //SMARTSIM_TENSOR_H

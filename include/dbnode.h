@@ -4,10 +4,13 @@
 #include "stdlib.h"
 #include <string>
 
-class DBNode;
-
 ///@file
 ///\brief This class stores database node information
+
+namespace SILC {
+
+class DBNode;
+
 class DBNode{
 
     public:
@@ -48,5 +51,7 @@ class DBNode{
         std::string prefix;
 
 };
+
+} //namespace SILC
 
 #endif //SMARTSIM_DBNODE_H

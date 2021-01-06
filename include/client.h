@@ -22,23 +22,25 @@
 #include "enums/cpp_memory_layout.h"
 
 ///@file
-///\brief The C++ SmartSimClient class
+///\brief The C++ Client class
 
-class SmartSimClient;
+namespace SILC {
+
+class Client;
 
 typedef redisReply ReplyElem;
 
-class SmartSimClient
+class Client
 {
 public:
-  //! SmartSim client constructor
-  SmartSimClient(
+  //! Client constructor
+  Client(
       bool cluster /*!< Flag to indicate if a database cluster is being used*/,
       bool fortran_array = false /*!< Flag to indicate if fortran arrays are being used*/
       );
 
-  //! SmartSim client destructor
-  ~SmartSimClient();
+  //! Client destructor
+  ~Client();
 
   //! Put a DataSet object into the database
   void put_dataset(DataSet& dataset /*!< The DataSet object to send*/
@@ -321,5 +323,7 @@ private:
   std::string _get_key_prefix;
   std::vector<std::string> _get_key_prefixes;
 };
+
+} //namespace SILC
 
 #endif //SMARTSIM_CPP_CLIENT_H

@@ -8,6 +8,8 @@ enum should be used by users.
 
 #include "enums/c_tensor_type.h"
 
+namespace SILC {
+
 enum class TensorType{
     dbl    = 1,
     flt    = 2,
@@ -88,5 +90,7 @@ inline CTensorType convert_tensor_type(TensorType type) {
     return t;
 
 }
+
+} //namespace SILC
 
 #endif //SMARTSIM_TENSORTYPE_H

@@ -12,6 +12,8 @@
 ///@file
 ///\brief The TensorPack class is a container for multiple tensors
 
+namespace SILC {
+
 class TensorPack;
 
 class TensorPack
@@ -118,5 +120,7 @@ class TensorPack
         void _delete_tensor_list(
             std::forward_list<Tensor<T>*>& tensor_list /*!< The tensor list to delete*/);
 };
+
+} //namespace SILC
 
 #endif //SMARTSIM_TENSORPACK_H

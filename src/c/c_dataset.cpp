@@ -1,9 +1,11 @@
 #include "c_dataset.h"
 
+using namespace SILC;
+
 extern "C"
 void* CDataSet(const char* name, const size_t name_length)
 {
-  /* Return a pointer to a new SmartSimClient.
+  /* Return a pointer to a new DataSet.
   The user is responsible for deleting the client.
   */
   std::string name_str = std::string(name, name_length);

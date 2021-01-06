@@ -4,6 +4,8 @@
 #include <pybind11/numpy.h>
 #include <string>
 
+using namespace SILC;
+
 namespace py = pybind11;
 
 class PyDataset;

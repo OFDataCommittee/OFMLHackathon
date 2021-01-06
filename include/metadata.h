@@ -35,6 +35,9 @@ static const char* top_uint32_msg = "repeated_uint32_meta";
 
 ///@file
 ///\brief The Command class for constructing meta data messages
+
+namespace SILC {
+
 class MetaData;
 
 class MetaData
@@ -151,5 +154,7 @@ class MetaData
         //! Gets the metadata type for a particular field
         MetaDataType _get_meta_value_type(const std::string& name);
 };
+
+} //namespace SILC
 
 #endif //SMARTSIM_METADATA_H

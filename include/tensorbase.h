@@ -9,6 +9,11 @@
 #include "enums/cpp_tensor_type.h"
 #include "enums/cpp_memory_layout.h"
 
+///@file
+///\brief The TensorBase class giving access to common Tensor methods and attributes
+
+namespace SILC {
+
 /* The strings and unordered map below is used for
 fast conversion between RedisAI string and enum
 value
@@ -45,8 +50,6 @@ static const std::unordered_map<TensorType, std::string>
         {TensorType::uint16, DATATYPE_TENSOR_STR_UINT16},
         {TensorType::uint8, DATATYPE_TENSOR_STR_UINT8} };
 
-///@file
-///\brief The TensorBase class giving access to common Tensor methods and attributes
 class TensorBase;
 
 class TensorBase{
@@ -143,4 +146,7 @@ class TensorBase{
         //! Get the total number of bytes of the Tensor data
         virtual size_t _n_data_bytes() = 0;
 };
+
+} //namespace SILC
+
 #endif //SMARTSIM_TENSORBASE_H

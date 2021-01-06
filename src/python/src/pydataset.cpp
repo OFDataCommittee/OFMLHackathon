@@ -1,6 +1,8 @@
 
 #include "pydataset.h"
 
+using namespace SILC;
+
 namespace py = pybind11;
 
 PyDataset::PyDataset(const std::string& name) {

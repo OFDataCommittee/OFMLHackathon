@@ -1,5 +1,7 @@
 #include "tensorbase.h"
 
+using namespace SILC;
+
 TensorBase::TensorBase(const std::string& name,
                        void* data,
                        const std::vector<size_t>& dims,

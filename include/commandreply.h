@@ -5,6 +5,8 @@
 #include <sw/redis++/redis++.h>
 #include <iostream>
 
+namespace SILC {
+
 class CommandReply;
 
 typedef std::unique_ptr<redisReply, sw::redis::ReplyDeleter>
@@ -82,5 +84,7 @@ class CommandReply {
         void _print_nested_reply_structure(redisReply* reply,
                                            std::string index_tracker);
 };
+
+} //namespace SILC
 
 #endif //SMARTSIM_COMMANDREPLY_H

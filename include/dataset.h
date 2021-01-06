@@ -20,6 +20,8 @@
 ///@file
 ///\brief The DataSet class encapsulating numeric data and metadata.
 
+namespace SILC{
+
 class DataSet;
 
 class DataSet
@@ -129,7 +131,7 @@ class DataSet
         std::string get_tensor_type(const std::string& name /*!< The name used to reference the tensor*/
                                     );
 
-        friend class SmartSimClient;
+        friend class Client;
     protected:
 
         inline void _add_to_tensorpack(const std::string& name /*!< The name used to reference the tensor*/,
@@ -146,5 +148,8 @@ class DataSet
         //! MemoryList object to hold allocated size_t arrays stemming from get_tensor queries
         MemoryList<size_t> _dim_queries;
 };
+
+} //namespace SILC
+
 #endif
 #endif //SMARTSIM_DATASET_H
