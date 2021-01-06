@@ -20,7 +20,8 @@ def test_put_get_dataset(mock_data):
         key = f"tensor_{str(index)}"
         dataset.add_tensor(key, tensor)
 
-    client = Client(CLUSTER, False)
+    client = Client(None, CLUSTER, False)
+
     client.put_dataset(dataset)
 
     rdataset = client.get_dataset("test-dataset")

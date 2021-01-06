@@ -1,8 +1,8 @@
-import os
 import inspect
-import numpy as np
+import os
 import os.path as osp
 
+import numpy as np
 
 from .dataset import Dataset
 from .error import RedisConnectionError, RedisReplyError
@@ -11,21 +11,31 @@ from .util import Dtypes
 
 
 class Client(PyClient):
-    def __init__(self, cluster=False, fortran=False):
+    def __init__(self, address=None, cluster=False, fortran=False):
         """Initialize a RedisAI client.
 
+        For clusters, the address can be a single tcp/ip address and port
+        of a database node. The rest of the cluster will be discovered
+        by the client itself. (e.g. address="127.0.0.1:6379")
+
+        If an address is not set, the client will look for the environment
+        variable ``$SSDB`` (e.g. SSDB="127.0.0.1:6379;")
+
+        :param address: Address of the database
         :param cluster: True if connecting to a redis cluster, defaults to False
         :type cluster: bool, optional
         :param fortran: True if using Fortran arrays, defaults to False
         :type fortran: bool, optional
         :raises RedisConnectionError: if connection initialization fails
         """
+        if address:
+            self.__set_address(address)
         if "SSDB" not in os.environ:
             raise RedisConnectionError()
         try:
             super().__init__(cluster, fortran)
         except RuntimeError as e:
-            raise RedisConnectionError(str(e))
+            raise RedisConnectionError(str(e)) from None
 
     def put_tensor(self, key, data):
         """Put a tensor to a Redis database
@@ -202,3 +212,9 @@ class Client(PyClient):
         if not device.startswith("CPU") and not device.startswith("GPU"):
             raise TypeError("Device argument must start with either CPU or GPU")
         return device
+
+    @staticmethod
+    def __set_address(address):
+        if "SSDB" in os.environ:
+            del os.environ["SSDB"]
+        os.environ["SSDB"] = address
