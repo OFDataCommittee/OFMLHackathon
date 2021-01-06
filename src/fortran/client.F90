@@ -12,7 +12,6 @@ implicit none; private
 #include "enums/enum_fortran.inc"
 #include "client/client_interfaces.inc"
 #include "client/put_tensor_interfaces.inc"
-#include "client/get_tensor_interfaces.inc"
 #include "client/unpack_tensor_interfaces.inc"
 #include "client/misc_tensor_interfaces.inc"
 #include "client/model_interfaces.inc"
@@ -44,8 +43,6 @@ type, public :: client_type
   procedure :: key_exists
   !> Poll the database and return if the key exisdts
   procedure :: poll_key
-  !> Get a tensor as an opaque data structure
-  procedure :: get_tensor
   !> Rename a tensor within the database
   procedure :: rename_tensor
   !> Delete a tensor from the database
@@ -202,45 +199,6 @@ subroutine put_tensor_double(this, key, data, dims)
   data_type = tensor_dbl
   call put_tensor_c(this%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, data_type, c_fortran_contiguous)
 end subroutine put_tensor_double
-
-!> Get the (opaque) tensor from the database
-subroutine get_tensor(this, key, data, data_type, dims, n_dims)
-  class(client_type),                       intent(in   ) :: this      !< Fortran SILC client
-  character(len=*),                         intent(in   ) :: key       !< The unique key used to query the database
-  type(c_ptr),                              intent(  out) :: data      !< A pointer to the opaque tensor object
-  integer,                                  intent(  out) :: data_type !< The type of data in the tensor object
-  integer, dimension(:), allocatable,       intent(  out) :: dims      !< The length along each dimension
-  integer,                                  intent(  out) :: n_dims    !< Number of dimensions
-
-  character(kind=c_char, len=len_trim(key)) :: c_key
-  integer :: i
-  integer(kind=enum_kind) :: c_data_type, c_mem_layout
-  integer(kind=enum_kind), pointer :: enum_ptr
-  integer(kind=c_size_t) :: c_n_dims, key_length
-  integer(kind=c_size_t), dimension(:), pointer :: dims_f_ptr
-  type(c_ptr) :: data_type_c_ptr, dims_c_ptr
-
-  ! Process the key and calculate its length
-  c_key = transfer(trim(key), c_key)
-  key_length = len_trim(key)
-  c_mem_layout = c_fortran_contiguous
-  call get_tensor_c(this%client_ptr, c_key, key_length, data, dims_c_ptr, c_n_dims, data_type_c_ptr, c_mem_layout)
-
-  ! Cast the number of dimensions to a standard Fortran integer
-  n_dims = c_n_dims
-
-  ! Fill the dims array
-  if (allocated(dims)) deallocate(dims)
-  allocate(dims(c_n_dims))
-  call c_f_pointer( dims_c_ptr, dims_f_ptr, [c_n_dims] )
-  dims(:) = dims_f_ptr(:)
-  deallocate(dims_f_ptr)
-
-  ! Cast the data type into a Fortran integer
-  call c_f_pointer( data_type_c_ptr, enum_ptr )
-  data_type = enum_ptr
-
-end subroutine get_tensor
 
 !> Put a tensor whose Fortran type is the equivalent 'int8' C-type
 subroutine unpack_tensor_i8(this, key, result, dims)
