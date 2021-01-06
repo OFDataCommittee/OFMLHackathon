@@ -9,16 +9,17 @@ use fortran_c_interop, only : convert_char_array_to_c
 
 implicit none; private
 
-include 'enums/enum_fortran.inc'
-include 'client/client_interfaces.inc'
-include 'client/put_tensor_interfaces.inc'
-include 'client/get_tensor_interfaces.inc'
-include 'client/unpack_tensor_interfaces.inc'
-include 'client/misc_tensor_interfaces.inc'
-include 'client/model_interfaces.inc'
-include 'client/script_interfaces.inc'
-include 'client/client_dataset_interfaces.inc'
+#include "enums/enum_fortran.inc"
+#include "client/client_interfaces.inc"
+#include "client/put_tensor_interfaces.inc"
+#include "client/get_tensor_interfaces.inc"
+#include "client/unpack_tensor_interfaces.inc"
+#include "client/misc_tensor_interfaces.inc"
+#include "client/model_interfaces.inc"
+#include "client/script_interfaces.inc"
+#include "client/client_dataset_interfaces.inc"
 
+!> Stores all data and methods associated with the SILC client that is used to communicate with the database
 type, public :: client_type
   private
 
@@ -28,31 +29,54 @@ type, public :: client_type
   contains
 
   ! Public procedures
+  !> Puts a tensor into the database (overloaded)
   generic :: put_tensor => put_tensor_i8, put_tensor_i16, put_tensor_i32, put_tensor_i64, &
                            put_tensor_float, put_tensor_double
+  !> Retrieve the tensor in the database into already allocated memory (overloaded)
   generic :: unpack_tensor => unpack_tensor_i8, unpack_tensor_i16, unpack_tensor_i32, unpack_tensor_i64, &
                               unpack_tensor_float, unpack_tensor_double
 
+  !> Initializes a new instance of the SILC client
   procedure :: initialize
+  !> Destructs a new instance of the SILC client
   procedure :: destructor
+  !> Check the database for the existence of a specific key
   procedure :: key_exists
+  !> Poll the database and return if the key exisdts
   procedure :: poll_key
+  !> Get a tensor as an opaque data structure
   procedure :: get_tensor
+  !> Rename a tensor within the database
   procedure :: rename_tensor
+  !> Delete a tensor from the database
   procedure :: delete_tensor
+  !> Copy a tensor within the database to a new key
   procedure :: copy_tensor
+  !> Set a model from a file
   procedure :: set_model_from_file
+  !> Set a model from a byte string that has been loaded within the application
   procedure :: set_model
+  !> Retrieve the model as a byte string
   procedure :: get_model
+  !> Set a script from a specified file
   procedure :: set_script_from_file
+  !> Set a script as a byte or text string
   procedure :: set_script
+  !> Retrieve the script from the database
   procedure :: get_script
+  !> Run a script that has already been stored in the database
   procedure :: run_script
+  !> Run a model that has already been stored in the database
   procedure :: run_model
+  !> Put a SILC dataset into the database
   procedure :: put_dataset
+  !> Retrieve a SILC dataset from the database
   procedure :: get_dataset
+  !> Rename the dataset within the database
   procedure :: rename_dataset
+  !> Copy a dataset stored in the database into another key
   procedure :: copy_dataset
+  !> Delete the dataset from the database
   procedure :: delete_dataset
 
   ! Private procedures
@@ -73,13 +97,650 @@ end type client_type
 
 contains
 
-include 'client/client_methods.inc'
-include 'client/put_tensor_methods.inc'
-include 'client/get_tensor_methods.inc'
-include 'client/unpack_tensor_methods.inc'
-include 'client/misc_tensor_methods.inc'
-include 'client/model_methods.inc'
-include 'client/script_methods.inc'
-include 'client/client_dataset_methods.inc'
+!> Initializes a new instance of a SILC client
+subroutine initialize( this, cluster )
+  class(client_type) :: this
+  logical, optional :: cluster !< If true, client uses a database cluster (Default: .false.)
+
+  if (present(cluster)) this%cluster = cluster
+  this%client_ptr = c_constructor(this%cluster)
+
+end subroutine initialize
+
+!> A destructor for the SILC client
+subroutine destructor( this )
+  class(client_type) :: this
+
+  call c_destructor(this%client_ptr)
+end subroutine destructor
+
+!> Check if the specified key exists in the database
+logical function key_exists(this, key)
+  class(client_type)    :: this
+  character(len=*)      :: key
+
+  character(kind=c_char) :: c_key(len_trim(key))
+  integer(kind=c_size_t) :: c_key_length
+
+  c_key = trim(key)
+  c_key_length = len_trim(key)
+
+  key_exists = key_exists_c( this%client_ptr, c_key, c_key_length)
+
+end function key_exists
+
+!> Repeatedly poll the database until the key exists or the number of tries is exceeded
+logical function poll_key( this, key, poll_frequency_ms, num_tries )
+  class(client_type)    :: this
+  character(len=*) :: key !< Key in the database to poll
+  integer          :: poll_frequency_ms !< Frequency at which to poll the database (ms)
+  integer          :: num_tries !< Number of times to poll the database before failing
+
+  character(kind=c_char) :: c_key(len_trim(key))
+  integer(kind=c_size_t) :: c_key_length
+  integer(kind=c_int) :: c_poll_frequency, c_num_tries
+
+  c_key = trim(key)
+  c_key_length = len_trim(key)
+  c_num_tries = num_tries
+  c_poll_frequency = poll_frequency_ms
+
+  poll_key = poll_key_c(this%client_ptr, c_key, c_key_length, c_poll_frequency, c_num_tries)
+
+end function poll_key
+
+!> Put a tensor whose Fortran type is the equivalent 'int8' C-type
+subroutine put_tensor_i8(this, key, data, dims)
+  integer(kind=c_int8_t), dimension(..), target, intent(in) :: data !< Data to be sent
+  include 'client/put_tensor_methods_common.inc'
+  ! Define the type and call the C-interface
+  data_type = tensor_int8
+  call put_tensor_c(this%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, data_type, c_fortran_contiguous)
+end subroutine put_tensor_i8
+
+!> Put a tensor whose Fortran type is the equivalent 'int16' C-type
+subroutine put_tensor_i16(this, key, data, dims)
+  integer(kind=c_int16_t), dimension(..), target, intent(in) :: data !< Data to be sent
+  include 'client/put_tensor_methods_common.inc'
+  ! Define the type and call the C-interface
+  data_type = tensor_int16
+  call put_tensor_c(this%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, data_type, c_fortran_contiguous)
+end subroutine put_tensor_i16
+
+!> Put a tensor whose Fortran type is the equivalent 'int32' C-type
+subroutine put_tensor_i32(this, key, data, dims)
+  integer(kind=c_int32_t), dimension(..), target, intent(in) :: data !< Data to be sent
+  include 'client/put_tensor_methods_common.inc'
+  ! Define the type and call the C-interface
+  data_type = tensor_int32
+  call put_tensor_c(this%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, data_type, c_fortran_contiguous)
+end subroutine put_tensor_i32
+
+!> Put a tensor whose Fortran type is the equivalent 'int64' C-type
+subroutine put_tensor_i64(this, key, data, dims)
+  integer(kind=c_int64_t), dimension(..), target, intent(in) :: data !< Data to be sent
+  include 'client/put_tensor_methods_common.inc'
+  ! Define the type and call the C-interface
+  data_type = tensor_int64
+  call put_tensor_c(this%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, data_type, c_fortran_contiguous)
+end subroutine put_tensor_i64
+
+!> Put a tensor whose Fortran type is the equivalent 'float' C-type
+subroutine put_tensor_float(this, key, data, dims)
+  real(kind=c_float), dimension(..), target, intent(in) :: data !< Data to be sent
+  include 'client/put_tensor_methods_common.inc'
+  ! Define the type and call the C-interface
+  data_type = tensor_flt
+  call put_tensor_c(this%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, data_type, c_fortran_contiguous)
+end subroutine put_tensor_float
+
+!> Put a tensor whose Fortran type is the equivalent 'double' C-type
+subroutine put_tensor_double(this, key, data, dims)
+  real(kind=c_double), dimension(..), target, intent(in) :: data !< Data to be sent
+  include 'client/put_tensor_methods_common.inc'
+  ! Define the type and call the C-interface
+  data_type = tensor_dbl
+  call put_tensor_c(this%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, data_type, c_fortran_contiguous)
+end subroutine put_tensor_double
+
+!> Get the (opaque) tensor from the database
+subroutine get_tensor(this, key, data, data_type, dims, n_dims)
+  class(client_type),                       intent(in   ) :: this      !< Fortran SILC client
+  character(len=*),                         intent(in   ) :: key       !< The unique key used to query the database
+  type(c_ptr),                              intent(  out) :: data      !< A pointer to the opaque tensor object
+  integer,                                  intent(  out) :: data_type !< The type of data in the tensor object
+  integer, dimension(:), allocatable,       intent(  out) :: dims      !< The length along each dimension
+  integer,                                  intent(  out) :: n_dims    !< Number of dimensions
+
+  character(kind=c_char, len=len_trim(key)) :: c_key
+  integer :: i
+  integer(kind=enum_kind) :: c_data_type, c_mem_layout
+  integer(kind=enum_kind), pointer :: enum_ptr
+  integer(kind=c_size_t) :: c_n_dims, key_length
+  integer(kind=c_size_t), dimension(:), pointer :: dims_f_ptr
+  type(c_ptr) :: data_type_c_ptr, dims_c_ptr
+
+  ! Process the key and calculate its length
+  c_key = transfer(trim(key), c_key)
+  key_length = len_trim(key)
+  c_mem_layout = c_fortran_contiguous
+  call get_tensor_c(this%client_ptr, c_key, key_length, data, dims_c_ptr, c_n_dims, data_type_c_ptr, c_mem_layout)
+
+  ! Cast the number of dimensions to a standard Fortran integer
+  n_dims = c_n_dims
+
+  ! Fill the dims array
+  if (allocated(dims)) deallocate(dims)
+  allocate(dims(c_n_dims))
+  call c_f_pointer( dims_c_ptr, dims_f_ptr, [c_n_dims] )
+  dims(:) = dims_f_ptr(:)
+  deallocate(dims_f_ptr)
+
+  ! Cast the data type into a Fortran integer
+  call c_f_pointer( data_type_c_ptr, enum_ptr )
+  data_type = enum_ptr
+
+end subroutine get_tensor
+
+!> Put a tensor whose Fortran type is the equivalent 'int8' C-type
+subroutine unpack_tensor_i8(this, key, result, dims)
+  integer(kind=c_int8_t), dimension(..), target, intent(out) :: result !< Data to be sent
+  include 'client/unpack_tensor_methods_common.inc'
+  ! Define the type and call the C-interface
+  data_type = tensor_int8
+  call unpack_tensor_c( this%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, data_type, mem_layout )
+end subroutine unpack_tensor_i8
+
+!> Put a tensor whose Fortran type is the equivalent 'int16' C-type
+subroutine unpack_tensor_i16(this, key, result, dims)
+  integer(kind=c_int16_t), dimension(..), target, intent(out) :: result !< Data to be sent
+  include 'client/unpack_tensor_methods_common.inc'
+  ! Define the type and call the C-interface
+  data_type = tensor_int16
+  call unpack_tensor_c( this%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, data_type, mem_layout )
+end subroutine unpack_tensor_i16
+
+!> Put a tensor whose Fortran type is the equivalent 'int32' C-type
+subroutine unpack_tensor_i32(this, key, result, dims)
+  integer(kind=c_int32_t), dimension(..), target, intent(out) :: result !< Data to be sent
+  include 'client/unpack_tensor_methods_common.inc'
+  ! Define the type and call the C-interface
+  data_type = tensor_int32
+  call unpack_tensor_c( this%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, data_type, mem_layout )
+end subroutine unpack_tensor_i32
+
+!> Put a tensor whose Fortran type is the equivalent 'int64' C-type
+subroutine unpack_tensor_i64(this, key, result, dims)
+  integer(kind=c_int64_t), dimension(..), target, intent(out) :: result !< Data to be sent
+  include 'client/unpack_tensor_methods_common.inc'
+  ! Define the type and call the C-interface
+  data_type = tensor_int64
+  call unpack_tensor_c( this%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, data_type, mem_layout )
+end subroutine unpack_tensor_i64
+
+!> Put a tensor whose Fortran type is the equivalent 'float' C-type
+subroutine unpack_tensor_float(this, key, result, dims)
+  real(kind=c_float), dimension(..), target, intent(out) :: result !< Data to be sent
+  include 'client/unpack_tensor_methods_common.inc'
+  ! Define the type and call the C-interface
+  data_type = tensor_flt
+  call unpack_tensor_c( this%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, data_type, mem_layout )
+end subroutine unpack_tensor_float
+
+!> Put a tensor whose Fortran type is the equivalent 'double' C-type
+subroutine unpack_tensor_double(this, key, result, dims)
+  real(kind=c_double), dimension(..), target, intent(out) :: result !< Data to be sent
+  include 'client/unpack_tensor_methods_common.inc'
+  ! Define the type and call the C-interface
+  data_type = tensor_dbl
+  call unpack_tensor_c( this%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, data_type, mem_layout )
+end subroutine unpack_tensor_double
+
+!> Move a tensor to a new key
+subroutine rename_tensor(this, key, new_key)
+  class(client_type), intent(in) :: this    !< The initialized Fortran SILC client
+  character(len=*), intent(in) :: key     !< The key to use to place the tensor
+                                          !! excluding null terminating character
+  character(len=*), intent(in) :: new_key !< The new tensor key
+
+  character(kind=c_char, len=len_trim(key)) :: c_key
+  character(kind=c_char, len=len_trim(new_key)) :: c_new_key
+  integer(kind=c_size_t) :: key_length, new_key_length
+
+  c_key = trim(key)
+  c_new_key = trim(new_key)
+
+  key_length = len_trim(key)
+  new_key_length = len_trim(new_key)
+
+  call rename_tensor_c(this%client_ptr, c_key, key_length, c_new_key, new_key_length)
+
+end subroutine rename_tensor
+
+!> Delete a tensor
+subroutine delete_tensor(this, key)
+  class(client_type), intent(in) :: this !<  The initialized Fortran SILC client
+  character(len=*), intent(in) :: key  !< The key to use to place the tensor
+
+  character(kind=c_char, len=len_trim(key)) :: c_key(len_trim(key))
+  integer(kind=c_size_t) :: key_length
+
+  c_key = trim(key)
+  key_length = len_trim(key)
+
+  call delete_tensor_c(this%client_ptr, c_key, key_length)
+end subroutine delete_tensor
+
+!> Copy a tensor to the destination key
+subroutine copy_tensor(this, src_name, dest_name)
+  class(client_type), intent(in) :: this      !< The initialized Fortran SILC client
+  character(len=*), intent(in) :: src_name  !< The key to use to place the tensor
+                                            !! excluding null terminating character
+  character(len=*), intent(in) :: dest_name !< The new tensor key
+
+  character(kind=c_char, len=len_trim(src_name))  :: c_src_name
+  character(kind=c_char, len=len_trim(dest_name)) :: c_dest_name
+  integer(kind=c_size_t) :: src_name_length, dest_name_length
+
+  c_src_name = trim(src_name)
+  c_dest_name = trim(dest_name)
+
+  src_name_length = len_trim(src_name, kind=c_size_t)
+  dest_name_length = len_trim(dest_name, kind=c_size_t)
+
+  call copy_tensor_c(this%client_ptr, c_src_name, src_name_length, c_dest_name, dest_name_length)
+
+end subroutine copy_tensor
+
+!> Retrieve the model from the database
+subroutine get_model(this, key, model)
+  class(client_type),               intent(in   ) :: this  !< An initialized SILC client
+  character(len=*),                 intent(in   ) :: key   !< The key to use to place the model
+  character(len=*),                 intent(  out) :: model !< The model as a continuous buffer
+
+  character(kind=c_char,len=len_trim(key)) :: c_key
+  integer(kind=c_size_t) :: key_length, model_length
+  character(kind=c_char), dimension(:), pointer :: f_str_ptr
+  type(c_ptr) :: c_str_ptr
+  integer :: i
+
+  c_key = trim(key)
+  key_length = len_trim(key)
+
+  c_str_ptr = get_model_c(this%client_ptr, key, key_length, c_str_ptr, model_length)
+
+  call c_f_pointer(c_str_ptr, f_str_ptr, [ model_length ])
+
+  do i=1,model_length
+    model(i:i) = f_str_ptr(i)
+  enddo
+
+end subroutine get_model
+
+!> Load the machine learning model from a file and set the configuration
+subroutine set_model_from_file( this, key, model_file, backend, device, batch_size, min_batch_size, tag, &
+    inputs, outputs )
+  class(client_type),             intent(in) :: this           !< An initialized SILC client
+  character(len=*),               intent(in) :: key            !< The key to use to place the model
+  character(len=*),               intent(in) :: model_file     !< The file storing the model
+  character(len=*),               intent(in) :: backend        !< The name of the backend (TF, TFLITE, TORCH, ONNX)
+  character(len=*),               intent(in) :: device         !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
+  integer,                        optional,  intent(in) :: batch_size     !< The batch size for model execution
+  integer,                        optional,  intent(in) :: min_batch_size !< The minimum batch size for model execution
+  character(len=*),               optional,  intent(in) :: tag            !< A tag to attach to the model for
+                                                                          !! information purposes
+  character(len=*), dimension(:), optional,  intent(in) :: inputs         !< One or more names of model input nodes (TF
+                                                                          !! models)
+  character(len=*), dimension(:), optional,  intent(in) :: outputs        !< One or more names of model output nodes (TF models)
+
+  character(kind=c_char, len=len_trim(key)) :: c_key
+  character(kind=c_char, len=len_trim(model_file)) :: c_model_file
+  character(kind=c_char, len=len_trim(backend)) :: c_backend
+  character(kind=c_char, len=len_trim(device)) :: c_device
+  character(kind=c_char, len=:), allocatable :: c_tag
+
+  character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
+  character(kind=c_char,len=1), target, dimension(1) :: dummy_inputs, dummy_outputs
+
+  integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
+  integer(kind=c_size_t) :: key_length, model_file_length, backend_length, device_length, tag_length, n_inputs, &
+                            n_outputs
+  integer(kind=c_int)    :: c_batch_size, c_min_batch_size
+  type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
+  type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
+
+  integer :: i
+  integer :: max_length, length
+
+  ! Set default values for the optional inputs
+  c_batch_size = 0
+  if (present(batch_size)) c_batch_size = batch_size
+  c_min_batch_size = 0
+  if (present(min_batch_size)) c_min_batch_size = min_batch_size
+  if (present(tag)) then
+    allocate( character(kind=c_char, len=len_trim(tag)) :: c_tag)
+    c_tag = tag
+    tag_length = len_trim(tag)
+  else
+    allocate( character(kind=c_char, len=1) :: c_tag)
+    c_tag = ''
+    tag_length = 1
+  endif
+
+  ! Cast to c_char kind stringts
+  c_key = trim(key)
+  c_model_file = trim(model_file)
+  c_backend = trim(backend)
+  c_device = trim(device)
+
+  key_length = len_trim(key)
+  model_file_length = len_trim(model_file)
+  backend_length = len_trim(backend)
+  device_length = len_trim(device)
+
+  dummy_inputs = ''
+  if (present(inputs)) then
+    call convert_char_array_to_c( inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
+                                  n_inputs)
+  else
+    call convert_char_array_to_c( dummy_inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr,&
+                                  n_inputs)
+  endif
+
+  dummy_outputs =''
+  if (present(outputs)) then
+    call convert_char_array_to_c( outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, output_lengths_ptr,&
+                                  n_outputs)
+  else
+    call convert_char_array_to_c( dummy_outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+                                  output_lengths_ptr, n_outputs)
+  endif
+
+  call set_model_from_file_c(this%client_ptr, c_key, key_length, c_model_file, model_file_length,               &
+                             c_backend, backend_length, c_device, device_length, c_batch_size, c_min_batch_size,&
+                             c_tag, tag_length, inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr,           &
+                             output_lengths_ptr, n_outputs)
+  deallocate(c_inputs)
+  deallocate(input_lengths)
+  deallocate(c_outputs)
+  deallocate(output_lengths)
+  deallocate(c_tag)
+end subroutine set_model_from_file
+
+subroutine set_model( this, key, model, backend, device, batch_size, min_batch_size, tag, &
+    inputs, outputs )
+  class(client_type),             intent(in) :: this           !< An initialized SILC client
+  character(len=*),               intent(in) :: key            !< The key to use to place the model
+  character(len=*),               intent(in) :: model          !< The binary representaiton o
+  character(len=*),               intent(in) :: backend        !< The name of the backend (TF, TFLITE, TORCH, ONNX)
+  character(len=*),               intent(in) :: device         !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
+  integer,                        intent(in) :: batch_size     !< The batch size for model execution
+  integer,                        intent(in) :: min_batch_size !< The minimum batch size for model execution
+  character(len=*),               intent(in) :: tag            !< A tag to attach to the model for information purposes
+  character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of model input nodes (TF models)
+  character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of model output nodes (TF models)
+
+  character(kind=c_char, len=len_trim(key)) :: c_key
+  character(kind=c_char, len=len_trim(model)) :: c_model
+  character(kind=c_char, len=len_trim(backend)) :: c_backend
+  character(kind=c_char, len=len_trim(device)) :: c_device
+  character(kind=c_char, len=len_trim(tag)) :: c_tag
+
+  character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
+
+  integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
+  integer(kind=c_size_t) :: key_length, model_length, backend_length, device_length, tag_length, n_inputs, &
+                            n_outputs
+  integer(kind=c_int)    :: c_batch_size, c_min_batch_size
+  type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
+  type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
+
+  integer :: i
+  integer :: max_length, length
+
+  c_key = trim(key)
+  c_model = trim(model)
+  c_backend = trim(backend)
+  c_device = trim(device)
+  c_tag = trim(tag)
+
+  key_length = len_trim(key)
+  model_length = len_trim(model)
+  backend_length = len_trim(backend)
+  device_length = len_trim(device)
+  tag_length = len_trim(tag)
+
+  ! Copy the input array into a c_char
+  call convert_char_array_to_c( inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
+                                n_inputs)
+  call convert_char_array_to_c( outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+                                output_lengths_ptr, n_outputs)
+
+  ! Cast the batch sizes to C integers
+  c_batch_size = batch_size
+  c_min_batch_size = min_batch_size
+
+  call set_model_c(this%client_ptr, c_key, key_length, c_model, model_length, c_backend, backend_length, &
+                 c_device, device_length, batch_size, min_batch_size, c_tag, tag_length,                 &
+                 inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, output_lengths_ptr, n_outputs)
+
+  deallocate(c_inputs)
+  deallocate(input_lengths)
+  deallocate(c_outputs)
+  deallocate(output_lengths)
+end subroutine set_model
+
+subroutine run_model(this, key, inputs, outputs)
+  class(client_type),             intent(in) :: this           !< An initialized SILC client
+  character(len=*),               intent(in) :: key            !< The key to use to place the model
+  character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of model input nodes (TF models)
+  character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of model output nodes (TF models)
+
+  character(kind=c_char, len=len_trim(key)) :: c_key
+  character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
+
+  integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
+  integer(kind=c_size_t) :: n_inputs, n_outputs, key_length
+  type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
+  type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
+
+  integer :: i
+  integer :: max_length, length
+
+  c_key = trim(key)
+  key_length = len_trim(key)
+
+  call convert_char_array_to_c( inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
+                                n_inputs)
+  call convert_char_array_to_c( outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+                                output_lengths_ptr, n_outputs)
+
+  call run_model_c(this%client_ptr, c_key, key_length, inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, &
+                  output_lengths_ptr, n_outputs)
+
+  deallocate(c_inputs)
+  deallocate(input_lengths)
+  deallocate(c_outputs)
+  deallocate(output_lengths)
+
+end subroutine run_model
+
+!> Retrieve the script from the database
+subroutine get_script(this, key, script)
+  class(client_type),               intent(in   ) :: this  !< An initialized SILC client
+  character(len=*),                 intent(in   ) :: key   !< The key to use to place the script
+  character(len=*),                 intent(  out) :: script !< The script as a continuous buffer
+
+  character(kind=c_char,len=len_trim(key)) :: c_key
+  integer(kind=c_size_t) :: key_length, script_length
+  character(kind=c_char), dimension(:), pointer :: f_str_ptr
+  type(c_ptr) :: c_str_ptr
+  integer :: i
+
+  c_key = transfer(trim(key), c_key)
+  key_length = len_trim(key)
+
+  call get_script_c(this%client_ptr, key, key_length, c_str_ptr, script_length)
+
+  call c_f_pointer(c_str_ptr, f_str_ptr, [ script_length ])
+
+  do i=1,script_length
+    script(i:i) = f_str_ptr(i)
+  enddo
+
+end subroutine get_script
+
+subroutine set_script_from_file( this, key, device, script_file )
+  class(client_type),             intent(in) :: this        !< An initialized SILC client
+  character(len=*),               intent(in) :: key         !< The key to use to place the script
+  character(len=*),               intent(in) :: device      !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
+  character(len=*),               intent(in) :: script_file !< The file storing the script
+
+  character(kind=c_char) :: c_key(len_trim(key)), c_script_file(len_trim(script_file)), c_device(len_trim(device))
+
+  integer(kind=c_size_t) :: key_length, script_file_length, device_length
+
+  c_key = transfer(trim(key), c_key)
+  c_script_file = transfer(trim(script_file), c_script_file)
+  c_device = transfer(trim(device), c_device)
+
+  key_length = len_trim(key)
+  script_file_length = len_trim(script_file)
+  device_length = len_trim(device)
+
+  call set_script_from_file_c(this%client_ptr, c_key, key_length, c_device, device_length, &
+                              c_script_file, script_file_length)
+
+end subroutine set_script_from_file
+
+subroutine set_script( this, key, device, script )
+  class(client_type),             intent(in) :: this   !< An initialized SILC client
+  character(len=*),               intent(in) :: key    !< The key to use to place the script
+  character(len=*),               intent(in) :: device !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
+  character(len=*),               intent(in) :: script !< The file storing the script
+
+  character(kind=c_char) :: c_key(len_trim(key)), c_script(len_trim(script)), c_device(len_trim(device))
+
+  integer(kind=c_size_t) :: key_length, script_length, device_length
+
+  c_key    = transfer(trim(key), c_key)
+  c_script = transfer(trim(script), c_script)
+  c_device = transfer(trim(device), c_device)
+
+  key_length = len_trim(key)
+  script_length = len_trim(script)
+  device_length = len_trim(device)
+
+  call set_script_c(this%client_ptr, c_key, key_length, c_device, device_length, c_script, script_length)
+
+end subroutine set_script
+
+subroutine run_script(this, key, func, inputs, outputs)
+  class(client_type),             intent(in) :: this           !< An initialized SILC client
+  character(len=*),               intent(in) :: key            !< The key to use to place the script
+  character(len=*),               intent(in) :: func           !< The name of the function in the script to call
+  character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of script input nodes (TF scripts)
+  character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of script output nodes (TF scripts)
+
+  character(kind=c_char) :: c_key(len_trim(key)), c_func(len_trim(func))
+  character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
+
+  integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
+  integer(kind=c_size_t) :: n_inputs, n_outputs, key_length, func_length
+  type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
+  type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
+
+  integer :: i
+  integer :: max_length, length
+
+  c_key  = transfer(trim(key), c_key)
+  c_func = transfer(trim(func), c_func)
+
+  key_length = len_trim(key)
+  func_length = len_trim(func)
+
+  call convert_char_array_to_c( inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
+                                n_inputs)
+  call convert_char_array_to_c( outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+                                output_lengths_ptr, n_outputs)
+
+  call run_script_c(this%client_ptr, c_key, key_length, c_func, func_length, inputs_ptr, input_lengths_ptr, n_inputs, &
+                    outputs_ptr, output_lengths_ptr, n_outputs)
+
+  deallocate(c_inputs)
+  deallocate(input_lengths)
+  deallocate(c_outputs)
+  deallocate(output_lengths)
+
+end subroutine run_script
+!> Store a dataset in the database
+subroutine put_dataset( this, dataset )
+  class(client_type), intent(in) :: this
+  type(dataset_type), intent(in) :: dataset !< Dataset to store in the dataset
+
+  call put_dataset_c(this%client_ptr, dataset%dataset)
+end subroutine put_dataset
+
+!> Retrieve a dataset from the database
+type(dataset_type) function get_dataset( this, name )
+  class(client_type) :: this
+  character(len=*)   :: name !< Name of the dataset to get
+
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  integer(kind=c_size_t) :: name_length
+
+  c_name = trim(name)
+  name_length = len_trim(name)
+  get_dataset%dataset = get_dataset_c(this%client_ptr, c_name, name_length)
+end function get_dataset
+
+!> Rename a dataset stored in the database
+subroutine rename_dataset( this, name, new_name )
+  class(client_type) :: this
+  character(len=*)   :: name     !< Original name of the dataset
+  character(len=*)   :: new_name !< New name of the dataset
+
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  character(kind=c_char, len=len_trim(new_name)) :: c_new_name
+  integer(kind=c_size_t) :: name_length, new_name_length
+
+  c_name = trim(name)
+  c_new_name = trim(new_name)
+  name_length = len_trim(name)
+  new_name_length = len_trim(new_name)
+
+  call rename_dataset_c(this%client_ptr, c_name, name_length, c_new_name, new_name_length)
+end subroutine rename_dataset
+
+!> Copy a dataset within the database to a new name
+subroutine copy_dataset( this, name, new_name )
+  class(client_type) :: this
+  character(len=*)   :: name     !< Original name of the dataset
+  character(len=*)   :: new_name !< New name of the dataset
+
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  character(kind=c_char, len=len_trim(new_name)) :: c_new_name
+  integer(kind=c_size_t) :: name_length, new_name_length
+
+  c_name = trim(name)
+  c_new_name = trim(new_name)
+  name_length = len_trim(name)
+  new_name_length = len_trim(new_name)
+
+  call copy_dataset_c(this%client_ptr, c_name, name_length, c_new_name, new_name_length)
+end subroutine copy_dataset
+
+!> Delete a dataset stored within a database
+subroutine delete_dataset( this, name )
+  class(client_type) :: this
+  character(len=*)   :: name !< Name of the dataset to delete
+
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  integer(kind=c_size_t) :: name_length
+
+  c_name = trim(name)
+  name_length = len_trim(name)
+  call delete_dataset_c(this%client_ptr, c_name, name_length)
+end subroutine delete_dataset
 
 end module silc_client
