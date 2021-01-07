@@ -23,8 +23,8 @@
    :maxdepth: 2
    :caption: Examples
 
-   examples/fortran
-
+   examples/fortran_mnist
+   examples/fortran_api_examples
 
 .. toctree::
    :maxdepth: 2
