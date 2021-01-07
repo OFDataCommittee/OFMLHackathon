@@ -129,3 +129,12 @@ target_link_libraries(client_test_put_get_unpack_dataset
 	MPI::MPI_Fortran
 	${CLIENT_LIBRARIES}
 )
+
+add_executable(client_test_misc_tensor
+	client_test_misc_tensor.F90
+	${CLIENT_SRC}
+)
+target_link_libraries(client_test_misc_tensor
+	MPI::MPI_Fortran
+	${CLIENT_LIBRARIES}
+)

@@ -37,6 +37,7 @@ Due to limitations of C/Fortran interoperability, some of the features in the Py
 been implemented. This includes
 
 * Retrieving metadata strings (Dataset: ``get_meta_strings``)
+* Returning a dataset tensor or tensor from the database as an opaque type (Dataset: ``get_dataset_tensor``, Client: ``get_tensor``)
 * Getting tensors from the database as an opaque type (Client:``get_tensor``) (note unpacking tensors into allocated
   memory is supported)
 
@@ -45,7 +46,7 @@ Source code organization
 SILC-Fortran source code is contained within the following files
 
 * ``client.F90``: Contains the ``client_type`` and all associated methods
-* ``dataset.F90`` Contains the ``dataset_type`` and all associated
+* ``dataset.F90`` Contains the ``dataset_type`` and all associated methods
 * ``fortran_c_interop.F90``: Routines to aid in Fortran/C interoperability
 
 The ``client.F90`` and ``dataset.F90`` files are further broken down into a number of 'included' files to prevent
@@ -53,14 +54,12 @@ duplicated code and organize the variety of methods included within each type. T
 general functionality and suffixed by the type of code contained within.
 
 * ``<functionality>_interfaces.inc``: Define the C-bound interfaces to the SILC-C methods
-* ``<functionality>_methods.inc``: Contain the subroutine/function signatures for the type-bound procedures
 * ``<functionality>_methods_common.inc``: Represents the source code that is exactly the same for all methods which
 share the same functionality, but differ only by the type of variable
 
 For example, ``client/put_tensor_interfaces.inc`` define the Fortran-C interfaces to put a tensor into the database.
-``client/put_tensor_methods.inc`` are the actual Fortran subroutines that represent the type-bound procedures based
-tensor type. ``client/put_tensor_methods_common.inc`` form the main body of the source code that handles the
-conversion and calling of the Fortran-C interfaces.
+``client/put_tensor_methods_common.inc`` form the main body of the source code that handles the conversion and
+calling of the Fortran-C interfaces.
 
 
 API Reference

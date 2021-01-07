@@ -184,7 +184,7 @@ void delete_tensor(void* c_client, const char* key,
   */
   Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
-  s->delete_tensor(key);
+  s->delete_tensor(key_str);
   return;
 }
 

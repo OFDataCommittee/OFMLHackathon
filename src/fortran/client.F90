@@ -116,7 +116,7 @@ logical function key_exists(this, key)
   class(client_type)    :: this
   character(len=*)      :: key
 
-  character(kind=c_char) :: c_key(len_trim(key))
+  character(kind=c_char, len=len_trim(key)) :: c_key
   integer(kind=c_size_t) :: c_key_length
 
   c_key = trim(key)
@@ -133,7 +133,7 @@ logical function poll_key( this, key, poll_frequency_ms, num_tries )
   integer          :: poll_frequency_ms !< Frequency at which to poll the database (ms)
   integer          :: num_tries !< Number of times to poll the database before failing
 
-  character(kind=c_char) :: c_key(len_trim(key))
+  character(kind=c_char,len=len_trim(key)) :: c_key
   integer(kind=c_size_t) :: c_key_length
   integer(kind=c_int) :: c_poll_frequency, c_num_tries
 
@@ -280,7 +280,7 @@ subroutine delete_tensor(this, key)
   class(client_type), intent(in) :: this !<  The initialized Fortran SILC client
   character(len=*), intent(in) :: key  !< The key to use to place the tensor
 
-  character(kind=c_char, len=len_trim(key)) :: c_key(len_trim(key))
+  character(kind=c_char, len=len_trim(key)) :: c_key
   integer(kind=c_size_t) :: key_length
 
   c_key = trim(key)
