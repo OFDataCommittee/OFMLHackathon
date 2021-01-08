@@ -29,6 +29,11 @@ deps: SHELL:=/bin/bash
 deps:
 	@bash ./build-scripts/build_deps.sh
 
+# help: lib                            - Build SILC clients into a static library
+.PHONY: lib
+lib: SHELL:=/bin/bash
+lib: deps
+	@mkdir -p build; (cd build; cmake ..; make)
 
 # help: test-deps                      - Make SILC testing dependencies
 .PHONY: test-deps
