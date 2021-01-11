@@ -195,6 +195,9 @@ protected:
   //! Retrieve environment variable SSDB
   std::string _get_ssdb();
 
+  //! Check that the SSDB environment string conforms to permissable characters
+  void _check_ssdb_string(const std::string& env_str);
+
   //! Populate hash slot and db node information
   void _populate_db_node_data(bool cluster);
 
