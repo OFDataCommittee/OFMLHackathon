@@ -11,12 +11,12 @@
 #include <sw/redis++/redis++.h>
 #include <fstream>
 #include "dataset.h"
+#include "sharedmemorylist.h"
 #include "command.h"
 #include "commandlist.h"
 #include "tensorbase.h"
 #include "tensor.h"
 #include "dbnode.h"
-#include "memorylist.h"
 #include "commandreply.h"
 #include "enums/cpp_tensor_type.h"
 #include "enums/cpp_memory_layout.h"
@@ -314,10 +314,10 @@ private:
   sw::redis::RedisCluster* redis_cluster;
   sw::redis::Redis* redis;
 
-  //! MemoryList to handle get_model commands to return model string
-  MemoryList<char> _model_queries;
-  //! MemoryList to handle dimensions that are returned to the user
-  MemoryList<size_t> _dim_queries;
+  //! SharedMemoryList to handle get_model commands to return model string
+  SharedMemoryList<char> _model_queries;
+  //! SharedMemoryList to handle dimensions that are returned to the user
+  SharedMemoryList<size_t> _dim_queries;
 
   //! //! The _tensor_pack memory is not for querying by name, but is used
   //! to manage memory.

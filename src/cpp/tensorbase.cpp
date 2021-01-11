@@ -1,5 +1,5 @@
 #include "tensorbase.h"
-
+#include <iostream>
 using namespace SILC;
 
 TensorBase::TensorBase(const std::string& name,
@@ -15,70 +15,67 @@ TensorBase::TensorBase(const std::string& name,
     */
 
     this->_check_inputs(data, name, dims);
-
     this->_name = name;
     this->_type = type;
     this->_dims = dims;
-    this->_data = 0;
 }
 
 TensorBase::TensorBase(const TensorBase& tb)
 {
     /* This is the copy constructor for TensorBase.
-    Copying of the data is left to the child classes.
+    A deep copy of the tensor data is performed here.
     */
-    this->_name = tb._name;
-    this->_type = tb._type;
-    this->_dims = tb._dims;
-    this->_data = 0;
-    return;
+    this->_dims = std::vector<size_t>(tb._dims);
+    this->_name = std::string(tb._name);
+    this->_type = TensorType(tb._type);
 }
 
 TensorBase::TensorBase(TensorBase&& tb)
 {
     /* This is the move constructor for TensorBase.
-    Moving of dynamically allocated tensor data
-    memory and data pointers is the responsibility
-    of the child class.
     */
     this->_name = std::move(tb._name);
     this->_type = std::move(tb._type);
     this->_dims = std::move(tb._dims);
-    this->_data = 0;
-    return;
+    this->_data = tb._data;
+    tb._data = 0;
+}
+
+TensorBase::~TensorBase()
+{
+    if(this->_data)
+        free(this->_data);
 }
 
 TensorBase& TensorBase::operator=(const TensorBase& tb)
 {
     /* This is the copy assignment operator for
-    TensorBase. Copying of the data is left to
-    the child class.
+    TensorBase.  A deep copy of the tensor
+    data is performed.
     */
-    this->_name = tb._name;
-    this->_type = tb._type;
-    this->_dims = tb._dims;
-    this->_data = 0;
-    return *this;
+   if(this!=&tb) {
+        this->_name = tb._name;
+        this->_type = tb._type;
+        this->_dims = tb._dims;
+        if(this->_data)
+            free(this->_data);
+   }
+   return *this;
 }
 
 TensorBase& TensorBase::operator=(TensorBase&& tb)
 {
     /* This is the move assignment operator for
-    TensorBase. Moving of dynamically allocated tensor
-    data memory and data pointers is the responsibility
-    of the child class.
+    TensorBase.
     */
     if(this!=&tb) {
         this->_name = std::move(tb._name);
         this->_type = std::move(tb._type);
         this->_dims = std::move(tb._dims);
-        this->_data = 0;
+        this->_data = tb._data;
+        tb._data = 0;
     }
     return *this;
-}
-
-TensorBase::~TensorBase()
-{
 }
 
 std::string TensorBase::name()

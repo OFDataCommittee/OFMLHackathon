@@ -100,48 +100,69 @@ void put_get_3D_array(
 
   //Create Client and DataSet
   SILC::Client client(true);
-  SILC::DataSet MyDataSet(dataset_name);
+  SILC::DataSet* MyDataSet = new SILC::DataSet(dataset_name);
 
   //Add tensors to the DataSet
-  MyDataSet.add_tensor("tensor_1", t_send_1,
+  MyDataSet->add_tensor("tensor_1", t_send_1,
                        dims, type, SILC::MemoryLayout::nested);
-  MyDataSet.add_tensor("tensor_2", t_send_2,
+  MyDataSet->add_tensor("tensor_2", t_send_2,
                        dims, type, SILC::MemoryLayout::nested);
-  MyDataSet.add_tensor("tensor_3", t_send_3,
+  MyDataSet->add_tensor("tensor_3", t_send_3,
                        dims, type, SILC::MemoryLayout::nested);
 
   //Add metadata fields to the DataSet.  _meta_1 and _meta_2
   //values added to _field_1 and _meta_3 is added to _field_2.
-  MyDataSet.add_meta_scalar("dbl_field_1", &dbl_meta_1, SILC::MetaDataType::dbl);
-  MyDataSet.add_meta_scalar("dbl_field_1", &dbl_meta_2, SILC::MetaDataType::dbl);
-  MyDataSet.add_meta_scalar("dbl_field_2", &dbl_meta_3, SILC::MetaDataType::dbl);
+  MyDataSet->add_meta_scalar("dbl_field_1", &dbl_meta_1, SILC::MetaDataType::dbl);
+  MyDataSet->add_meta_scalar("dbl_field_1", &dbl_meta_2, SILC::MetaDataType::dbl);
+  MyDataSet->add_meta_scalar("dbl_field_2", &dbl_meta_3, SILC::MetaDataType::dbl);
 
-  MyDataSet.add_meta_scalar("flt_field_1", &flt_meta_1, SILC::MetaDataType::flt);
-  MyDataSet.add_meta_scalar("flt_field_1", &flt_meta_2, SILC::MetaDataType::flt);
-  MyDataSet.add_meta_scalar("flt_field_2", &flt_meta_3, SILC::MetaDataType::flt);
+  MyDataSet->add_meta_scalar("flt_field_1", &flt_meta_1, SILC::MetaDataType::flt);
+  MyDataSet->add_meta_scalar("flt_field_1", &flt_meta_2, SILC::MetaDataType::flt);
+  MyDataSet->add_meta_scalar("flt_field_2", &flt_meta_3, SILC::MetaDataType::flt);
 
-  MyDataSet.add_meta_scalar("i64_field_1", &i64_meta_1, SILC::MetaDataType::int64);
-  MyDataSet.add_meta_scalar("i64_field_1", &i64_meta_2, SILC::MetaDataType::int64);
-  MyDataSet.add_meta_scalar("i64_field_2", &i64_meta_3, SILC::MetaDataType::int64);
+  MyDataSet->add_meta_scalar("i64_field_1", &i64_meta_1, SILC::MetaDataType::int64);
+  MyDataSet->add_meta_scalar("i64_field_1", &i64_meta_2, SILC::MetaDataType::int64);
+  MyDataSet->add_meta_scalar("i64_field_2", &i64_meta_3, SILC::MetaDataType::int64);
 
-  MyDataSet.add_meta_scalar("i32_field_1", &i32_meta_1, SILC::MetaDataType::int32);
-  MyDataSet.add_meta_scalar("i32_field_1", &i32_meta_2, SILC::MetaDataType::int32);
-  MyDataSet.add_meta_scalar("i32_field_2", &i32_meta_3, SILC::MetaDataType::int32);
+  MyDataSet->add_meta_scalar("i32_field_1", &i32_meta_1, SILC::MetaDataType::int32);
+  MyDataSet->add_meta_scalar("i32_field_1", &i32_meta_2, SILC::MetaDataType::int32);
+  MyDataSet->add_meta_scalar("i32_field_2", &i32_meta_3, SILC::MetaDataType::int32);
 
-  MyDataSet.add_meta_scalar("ui64_field_1", &ui64_meta_1, SILC::MetaDataType::uint64);
-  MyDataSet.add_meta_scalar("ui64_field_1", &ui64_meta_2, SILC::MetaDataType::uint64);
-  MyDataSet.add_meta_scalar("ui64_field_2", &ui64_meta_3, SILC::MetaDataType::uint64);
+  MyDataSet->add_meta_scalar("ui64_field_1", &ui64_meta_1, SILC::MetaDataType::uint64);
+  MyDataSet->add_meta_scalar("ui64_field_1", &ui64_meta_2, SILC::MetaDataType::uint64);
+  MyDataSet->add_meta_scalar("ui64_field_2", &ui64_meta_3, SILC::MetaDataType::uint64);
 
-  MyDataSet.add_meta_scalar("ui32_field_1", &ui32_meta_1, SILC::MetaDataType::uint32);
-  MyDataSet.add_meta_scalar("ui32_field_1", &ui32_meta_2, SILC::MetaDataType::uint32);
-  MyDataSet.add_meta_scalar("ui32_field_2", &ui32_meta_3, SILC::MetaDataType::uint32);
+  MyDataSet->add_meta_scalar("ui32_field_1", &ui32_meta_1, SILC::MetaDataType::uint32);
 
-  MyDataSet.add_meta_string("str_field_1", str_meta_1);
-  MyDataSet.add_meta_string("str_field_1", str_meta_2);
-  MyDataSet.add_meta_string("str_field_2", str_meta_3);
+  //Copy the DataSet half way through metadata additions to
+  //test that we can continue adding new fields to the old fields
+  SILC::DataSet CopiedDataSet = SILC::DataSet(*MyDataSet);
 
-  //Put the DataSet into the database
-  client.put_dataset(MyDataSet);
+  CopiedDataSet.add_meta_scalar("ui32_field_1", &ui32_meta_2, SILC::MetaDataType::uint32);
+  CopiedDataSet.add_meta_scalar("ui32_field_2", &ui32_meta_3, SILC::MetaDataType::uint32);
+
+  CopiedDataSet.add_meta_string("str_field_1", str_meta_1);
+  CopiedDataSet.add_meta_string("str_field_1", str_meta_2);
+  CopiedDataSet.add_meta_string("str_field_2", str_meta_3);
+
+  client.put_dataset(*MyDataSet);
+
+  //Check that the meta fields we added to CopiedDataSet do not show up
+  //in MyDataSet if we put MyDataSet in the repo.
+  //Check that the metadata values are correct for ui32
+  //TODO we should add a method to DataSet to check if a field exists
+  //and confirm that the other fields have not been added.  Currently
+  //if we get a field that does not exist we will get a std::runtime_error.
+  //Currently the test that there is only one entry in ui32_field_1
+  //is sufficient.
+  SILC::DataSet RetrievedDataSet1 = client.get_dataset(dataset_name);
+  check_meta_field<uint32_t>(RetrievedDataSet1,
+                             "ui32_field_1",
+                             SILC::MetaDataType::uint32,
+                             {ui32_meta_1});
+
+  delete MyDataSet;
+  client.put_dataset(CopiedDataSet);
 
   //Retrieving a dataset
   T_recv*** t_recv_1 = allocate_3D_array<T_recv>(dims[0], dims[1], dims[2]);
@@ -427,5 +448,6 @@ int main(int argc, char* argv[]) {
 				      &set_3D_array_integral_values<uint8_t>,
 				      dims, SILC::TensorType::uint8, "_ui8", dataset_name);
 
+  std::cout<<"Finished DataSet copy constructor test."<<std::endl;
   return 0;
 }

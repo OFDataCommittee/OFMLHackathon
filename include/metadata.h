@@ -3,11 +3,10 @@
 
 #include "stdlib.h"
 #include <string>
-#include <unordered_map>
 #include "silc.pb.h"
 #include <google/protobuf/reflection.h>
 #include <google/protobuf/stubs/port.h>
-#include "memorylist.h"
+#include "sharedmemorylist.h"
 #include "enums/cpp_metadata_type.h"
 
 namespace gpb = google::protobuf;
@@ -45,13 +44,19 @@ class MetaData
     public:
 
         //! MetaData constructor
-        MetaData();
+        MetaData() = default;
+
+        //! MetaData copy constructor
+        MetaData(const MetaData& metadata);
 
         //! MetaData move constructor
-        MetaData(MetaData&& metadata);
+        MetaData(MetaData&& metadata) = default;
+
+        //! MetaData copy assignment operator
+        MetaData& operator=(const MetaData&);
 
         //! MetaData move assignment operator
-        MetaData& operator=(MetaData&& metadata);
+        MetaData& operator=(MetaData&& metadata) = default;
 
         //! Reconstruct metadata from buffer
         void fill_from_buffer(const char* buf /*!< The buffer used to fill the metadata object*/,
@@ -95,19 +100,23 @@ class MetaData
         //! The protobuf message holding all metadata
         spb::MetaData _pb_metadata_msg;
 
-        //! Maps meta data field name to the protobuf metadata message
+        //! Maps meta data field name to the protobuf metadata message.
+        //! This map does not need to manage memory because all of these
+        //! fields will be added ot the top level message and that
+        //! top level message will handle memory.
         std::unordered_map<std::string, gpb::Message*> _meta_msg_map;
 
-        //! MemoryList objects for each metadata type for managing memalloc
-        MemoryList<char*>_char_array_mem_mgr;
-        MemoryList<char> _char_mem_mgr;
-        MemoryList<double> _double_mem_mgr;
-        MemoryList<float> _float_mem_mgr;
-        MemoryList<int64_t> _int64_mem_mgr;
-        MemoryList<uint64_t> _uint64_mem_mgr;
-        MemoryList<int32_t> _int32_mem_mgr;
-        MemoryList<uint32_t> _uint32_mem_mgr;
-        MemoryList<size_t> _str_len_mem_mgr;
+        //! SharedMemoryList objects for each metadata type for managing
+        //! memory allocations associated with retrieving metadata
+        SharedMemoryList<char*>_char_array_mem_mgr;
+        SharedMemoryList<char> _char_mem_mgr;
+        SharedMemoryList<double> _double_mem_mgr;
+        SharedMemoryList<float> _float_mem_mgr;
+        SharedMemoryList<int64_t> _int64_mem_mgr;
+        SharedMemoryList<uint64_t> _uint64_mem_mgr;
+        SharedMemoryList<int32_t> _int32_mem_mgr;
+        SharedMemoryList<uint32_t> _uint32_mem_mgr;
+        SharedMemoryList<size_t> _str_len_mem_mgr;
 
         //! The metadata buffer
         std::string _buf;
@@ -144,7 +153,7 @@ class MetaData
         void _get_numeric_field_values(gpb::Message* msg /*!< Protobuf message containing the string field*/,
                                        void*& data /*!< The pointer that will be pointed to the metadata*/,
                                        size_t& n_values /*!< An integer that will be set to the number of values in the metadata field*/,
-                                       MemoryList<T>& mem_list /*!< Memory manager for the metadata heap allocations*/
+                                       SharedMemoryList<T>& mem_list /*!< Memory manager for the metadata heap allocations*/
                                        );
 
         //! Check if a metadata field already exists by the name
@@ -153,6 +162,9 @@ class MetaData
 
         //! Gets the metadata type for a particular field
         MetaDataType _get_meta_value_type(const std::string& name);
+
+        //! Rebuild the protobuf message map
+        void _rebuild_message_map();
 };
 
 } //namespace SILC

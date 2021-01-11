@@ -85,6 +85,42 @@ target_link_libraries(client_test_dataset
 	${CLIENT_LIBRARIES}
 )
 
+add_executable(client_test_dataset_copy_constructor
+	client_test_dataset_copy_constructor.cpp
+	${CLIENT_SRC}
+)
+target_link_libraries(client_test_dataset_copy_constructor
+	MPI::MPI_CXX
+	${CLIENT_LIBRARIES}
+)
+
+add_executable(client_test_dataset_move_constructor
+	client_test_dataset_copy_constructor.cpp
+	${CLIENT_SRC}
+)
+target_link_libraries(client_test_dataset_move_constructor
+	MPI::MPI_CXX
+	${CLIENT_LIBRARIES}
+)
+
+add_executable(client_test_dataset_copy_assignment
+	client_test_dataset_copy_assignment.cpp
+	${CLIENT_SRC}
+)
+target_link_libraries(client_test_dataset_copy_assignment
+	MPI::MPI_CXX
+	${CLIENT_LIBRARIES}
+)
+
+add_executable(client_test_dataset_move_assignment
+	client_test_dataset_copy_assignment.cpp
+	${CLIENT_SRC}
+)
+target_link_libraries(client_test_dataset_move_assignment
+	MPI::MPI_CXX
+	${CLIENT_LIBRARIES}
+)
+
 add_executable(client_test_put_get_3D
 	client_test_put_get_3D.cpp
 	${CLIENT_SRC}

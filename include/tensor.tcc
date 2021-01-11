@@ -15,48 +15,44 @@ Tensor<T>::Tensor(const std::string& name,
 }
 
 template <class T>
-Tensor<T>::~Tensor()
-{
-    /* Destructor for the Tensor class.
-    */
-    if(this->_data)
-        free(this->_data);
-}
-
-template <class T>
 Tensor<T>::Tensor(const Tensor<T>& tensor) : TensorBase(tensor)
 {
-    /* Copy constructor for Tensor.  The data
-    and allocated pointers are copied.
+    /* Copy constructor for Tensor.
     */
     this->_set_tensor_data(tensor._data, tensor._dims,
                            MemoryLayout::contiguous);
-    this->_ptr_mem_list = tensor._ptr_mem_list;
+    this->_c_mem_views = tensor._c_mem_views;
+    this->_f_mem_views = tensor._f_mem_views;
 }
 
 template <class T>
 Tensor<T>::Tensor(Tensor<T>&& tensor) : TensorBase(tensor)
 {
-    /* Move constructor for Tensor.  The data
-    and allocated ptrs are moved and old data
-    is left in a safe, but empty state.
+    /* Move constructor for Tensor.
     */
+    this->_c_mem_views = std::move(tensor._c_mem_views);
+    this->_f_mem_views = std::move(tensor._f_mem_views);
+}
 
-    this->_data = tensor._data;
-    tensor._data = 0;
-    this->_ptr_mem_list = std::move(tensor._ptr_mem_list);
+template <class T>
+Tensor<T>::~Tensor()
+{
+    /* Destructor for the Tensor class.
+    */
 }
 
 template <class T>
 Tensor<T>& Tensor<T>::operator=(const Tensor<T>& tensor)
 {
-    /* Copy assignment operator for Tensor.  The data
-    and allocated ptrs are copied.
+    /* Copy assignment operator for Tensor.
     */
-    this->TensorBase::operator=(tensor);
-    this->_set_tensor_data(tensor._data, tensor._dims,
-                           MemoryLayout::contiguous);
-    this->_ptr_mem_list = tensor._ptr_mem_list;
+    if(this!=&tensor) {
+        this->TensorBase::operator=(tensor);
+        this->_set_tensor_data(tensor._data, tensor._dims,
+                               MemoryLayout::contiguous);
+        this->_c_mem_views = tensor._c_mem_views;
+        this->_f_mem_views = tensor._f_mem_views;
+    }
     return *this;
 }
 
@@ -68,9 +64,9 @@ Tensor<T>& Tensor<T>::operator=(Tensor<T>&& tensor)
     is left in a safe, but empty state.
     */
     if(this!=&tensor) {
-        this->_data = tensor._data;
-        tensor._data = 0;
-        this->_ptr_mem_list = std::move(tensor._ptr_mem_list);
+        this->TensorBase::operator=(tensor);
+        this->_c_mem_views = std::move(tensor._c_mem_views);
+        this->_f_mem_views = std::move(tensor._c_mem_views);
     }
     return *this;
 }
@@ -251,7 +247,7 @@ T* Tensor<T>::_build_nested_memory(void** data,
     is for recursive value passing only.
     */
     if(n_dims>1) {
-        T** new_data = this->_ptr_mem_list.allocate(dims[0]);
+        T** new_data = this->_c_mem_views.allocate(dims[0]);
         (*data) = (void*)new_data;
         for(size_t i=0; i<dims[0]; i++)
             contiguous_mem =
@@ -275,9 +271,6 @@ void Tensor<T>::_set_tensor_data(void* src_data,
     /* Set the tensor data from the src_data.  This involves
     a memcpy to a contiguous array.
     */
-
-    if(this->_data)
-        free(this->_data);
 
     size_t n_values = this->num_values();
     size_t n_bytes = n_values * sizeof(T);

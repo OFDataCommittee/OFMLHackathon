@@ -2,47 +2,38 @@
 
 using namespace SILC;
 
-MetaData::MetaData()
-{
+MetaData::MetaData(const MetaData& metadata) {
+    /* Copy constructor for Metadata
+    */
+    this->_pb_metadata_msg = metadata._pb_metadata_msg;
+    this->_rebuild_message_map();
+    this->_char_array_mem_mgr = metadata._char_array_mem_mgr;
+    this->_char_mem_mgr = metadata._char_mem_mgr;
+    this->_double_mem_mgr = metadata._double_mem_mgr;
+    this->_float_mem_mgr = metadata._float_mem_mgr;
+    this->_int64_mem_mgr = metadata._int64_mem_mgr;
+    this->_uint64_mem_mgr = metadata._uint64_mem_mgr;
+    this->_int32_mem_mgr = metadata._int32_mem_mgr;
+    this->_uint32_mem_mgr = metadata._uint32_mem_mgr;
+    this->_str_len_mem_mgr = metadata._str_len_mem_mgr;
+    this->_buf = metadata._buf;
 }
 
-MetaData::MetaData(MetaData&& metadata)
-{
-    /* This is the move constructor for the MetaData object
-    */
-    this->_meta_msg_map = std::move(metadata._meta_msg_map);
-    metadata._meta_msg_map.clear();
-    this->_char_array_mem_mgr = std::move(metadata._char_array_mem_mgr);
-    this->_char_mem_mgr = std::move(metadata._char_mem_mgr);
-    this->_double_mem_mgr = std::move(metadata._double_mem_mgr);
-    this->_float_mem_mgr = std::move(metadata._float_mem_mgr);
-    this->_int64_mem_mgr = std::move(metadata._int64_mem_mgr);
-    this->_uint64_mem_mgr = std::move(metadata._uint64_mem_mgr);
-    this->_int32_mem_mgr = std::move(metadata._int32_mem_mgr);
-    this->_uint32_mem_mgr = std::move(metadata._uint32_mem_mgr);
-    this->_str_len_mem_mgr = std::move(metadata._str_len_mem_mgr);
-    this->_buf = std::move(metadata._buf);
-    this->_pb_metadata_msg = std::move(metadata._pb_metadata_msg);
-}
+MetaData& MetaData::operator=(const MetaData& metadata) {
 
-MetaData& MetaData::operator=(MetaData&& metadata)
-{
-    /* This is the move assignment operator.
-    */
     if(this!=&metadata) {
-        this->_meta_msg_map = std::move(metadata._meta_msg_map);
-        metadata._meta_msg_map.clear();
-        this->_char_array_mem_mgr = std::move(metadata._char_array_mem_mgr);
-        this->_char_mem_mgr = std::move(metadata._char_mem_mgr);
-        this->_double_mem_mgr = std::move(metadata._double_mem_mgr);
-        this->_float_mem_mgr = std::move(metadata._float_mem_mgr);
-        this->_int64_mem_mgr = std::move(metadata._int64_mem_mgr);
-        this->_uint64_mem_mgr = std::move(metadata._uint64_mem_mgr);
-        this->_int32_mem_mgr = std::move(metadata._int32_mem_mgr);
-        this->_uint32_mem_mgr = std::move(metadata._uint32_mem_mgr);
-        this->_str_len_mem_mgr = std::move(metadata._str_len_mem_mgr);
-        this->_buf = std::move(metadata._buf);
-        this->_pb_metadata_msg = std::move(metadata._pb_metadata_msg);
+        this->_pb_metadata_msg = metadata._pb_metadata_msg;
+        this->_rebuild_message_map();
+        this->_char_array_mem_mgr = metadata._char_array_mem_mgr;
+        this->_char_mem_mgr = metadata._char_mem_mgr;
+        this->_double_mem_mgr = metadata._double_mem_mgr;
+        this->_float_mem_mgr = metadata._float_mem_mgr;
+        this->_int64_mem_mgr = metadata._int64_mem_mgr;
+        this->_uint64_mem_mgr = metadata._uint64_mem_mgr;
+        this->_int32_mem_mgr = metadata._int32_mem_mgr;
+        this->_uint32_mem_mgr = metadata._uint32_mem_mgr;
+        this->_str_len_mem_mgr = metadata._str_len_mem_mgr;
+        this->_buf = metadata._buf;
     }
     return *this;
 }
@@ -78,13 +69,16 @@ void MetaData::add_scalar(const std::string& field_name,
     the field if it exists, and if it does not exist, create the
     field.
     */
-    if(!(this->_field_exists(field_name)))
+    if(!(this->_field_exists(field_name))) {
          this->_create_message(field_name, type);
+    }
 
     gpb::Message* msg = this->_meta_msg_map[field_name];
     const gpb::Reflection* refl = msg->GetReflection();
     const gpb::FieldDescriptor* field =
         msg->GetDescriptor()->FindFieldByName("data");
+
+
 
     //TODO add try catch for protobuf errors
     switch(type) {
@@ -408,7 +402,7 @@ template <typename T>
 void MetaData::_get_numeric_field_values(gpb::Message* msg,
                                          void*& data,
                                          size_t& n_values,
-                                         MemoryList<T>& mem_list)
+                                         SharedMemoryList<T>& mem_list)
 {
     /* This funcition retrieves all of the metadata
     "data" non-string fields from the message.  A copy
@@ -483,4 +477,39 @@ inline MetaDataType MetaData::_get_meta_value_type(const std::string& name)
                                      "MetaData._get_meta_value_type().");
     }
     return type;
+}
+
+void MetaData::_rebuild_message_map() {
+    /* This function rebuilds the protobuf message
+    map.  This function should be invoked if
+    the location of messages in the map changes.
+    The message map is rebuilt by looping through
+    all fields in the main protobuf message.
+    */
+    this->_meta_msg_map.clear();
+
+    const gpb::Reflection* refl = this->_pb_metadata_msg.GetReflection();
+    std::vector<const gpb::FieldDescriptor*> field_descriptors;
+    refl->ListFields(this->_pb_metadata_msg,&field_descriptors);
+
+    std::vector<const gpb::FieldDescriptor*>::const_iterator it =
+        field_descriptors.cbegin();
+    std::vector<const gpb::FieldDescriptor*>::const_iterator it_end =
+        field_descriptors.cend();
+
+    while(it!=it_end) {
+        int field_size = refl->FieldSize(this->_pb_metadata_msg, *it);
+        for(int i=0; i<field_size; i++) {
+            gpb::Message* sub_msg =
+                refl->MutableRepeatedMessage(&(this->_pb_metadata_msg),*it, i);
+            const gpb::Reflection* sub_refl = sub_msg->GetReflection();
+            const gpb::FieldDescriptor* sub_field =
+                sub_msg->GetDescriptor()->FindFieldByName("id");
+            std::string name = sub_refl->GetString(*sub_msg, sub_field);
+            this->_meta_msg_map[name] = sub_msg;
+        }
+        it++;
+    }
+    return;
+
 }

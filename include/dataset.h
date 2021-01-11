@@ -4,21 +4,17 @@
 #include "stdlib.h"
 #include <string>
 #include <vector>
-#include <set>
-#include <unordered_map>
-#include <forward_list>
-#include "tensor.h"
 #include "command.h"
-#include "metadata.h"
-#include "memorylist.h"
-#include "tensorpack.h"
 #include "tensor.h"
+#include "tensorpack.h"
+#include "metadata.h"
+#include "sharedmemorylist.h"
 #include "enums/cpp_tensor_type.h"
 #include "enums/cpp_memory_layout.h"
 #include "enums/cpp_metadata_type.h"
 
 ///@file
-///\brief The DataSet class encapsulating numeric data and metadata.
+///\brief The DataSet class encapsulating tensor data and metadata.
 
 namespace SILC{
 
@@ -32,17 +28,27 @@ class DataSet
         DataSet(const std::string& name /*!< The name used to reference the dataset*/
                 );
 
-        //! DataSet move constructor
-        DataSet(DataSet&& dataset /*!< The dataset to move for construction*/);
-
-        //! DataSet move assignment operator
-        DataSet& operator=(DataSet&& dataset /*!< The dataset to move for assignment*/);
-
         //! Dataset constructor using serialized buffer
         DataSet(const std::string& name /*!< The name used to reference the dataset*/,
                 char* buf /*!< The buffer used for object construction*/,
                 size_t buf_size /*!< The buffer length*/
                 );
+
+        //! DataSet copy constructor
+        DataSet(const DataSet& dataset /*!< The dataset to copy for construction*/
+                ) = default;
+
+        //! DataSet copy assignment operator
+        DataSet& operator=(const DataSet& dataset /*!< The dataset to assign to this dataset*/
+                           ) = default;
+
+        //! DataSet move constructor
+        DataSet(DataSet&& dataset /*!< The dataset to move for construction*/
+                ) = default;
+
+        //! DataSet move assignment operator
+        DataSet& operator=(DataSet&& dataset /*!< The dataset to move for assignment*/
+                           ) = default;
 
         //! Add a tensor to the dataset
         void add_tensor(const std::string& name /*!< The name used to reference the tensor*/,
@@ -146,7 +152,7 @@ class DataSet
         //! The tensorpack object that holds all tensors
         TensorPack _tensorpack;
         //! MemoryList object to hold allocated size_t arrays stemming from get_tensor queries
-        MemoryList<size_t> _dim_queries;
+        SharedMemoryList<size_t> _dim_queries;
 };
 
 } //namespace SILC

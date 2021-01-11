@@ -5,7 +5,7 @@
 #include <string>
 #include <stdexcept>
 #include "tensorbase.h"
-#include "memorylist.h"
+#include "sharedmemorylist.h"
 
 ///@file
 ///\brief The Tensor class for data and buffer tensor operations
@@ -25,14 +25,14 @@ class Tensor : public TensorBase
                const MemoryLayout mem_layout /*! The memory layout of the source data*/
                 );
 
-        //! Tensor destructor
-        virtual ~Tensor();
-
         //! Tensor copy constructor
         Tensor(const Tensor<T>& tensor);
 
         //! Tensor move constructor
         Tensor(Tensor<T>&& tensor);
+
+        //! Tensor destructor
+        virtual ~Tensor();
 
         //! Tensor copy assignment operator
         Tensor<T>& operator=(const Tensor<T>& tensor);
@@ -118,14 +118,11 @@ class Tensor : public TensorBase
         //! Get the total number of bytes of the Tensor data
         virtual size_t _n_data_bytes();
 
-        //! Memory list that is used to hold recursively allocated
-        //! when a data view is requested.
-        MemoryList<T*> _ptr_mem_list;
+        //! Memory allocated for c nested tensor memory views
+        SharedMemoryList<T*> _c_mem_views;
 
-        //! Memory list that is needed to retrun memory view of
-        //! of tensor data in column major order because
-        //! this operation is not done in place.
-        MemoryList<T> _f_mem_views;
+        //! Memory allocated for f nested tensor memory views
+        SharedMemoryList<T> _f_mem_views;
 };
 
 #include "tensor.tcc"

@@ -7,30 +7,8 @@ DataSet::DataSet(const std::string& name)
     this->name = name;
 }
 
-DataSet::DataSet(DataSet&& dataset)
-{
-    /* This is the move constructor for DataSet
-    */
-    this->name = std::move(dataset.name);
-    this->_metadata = std::move(dataset._metadata);
-    this->_tensorpack = std::move(dataset._tensorpack);
-    this->_dim_queries = std::move(dataset._dim_queries);
-}
-
-DataSet& DataSet::operator=(DataSet&& dataset)
-{
-    /* Move assignment operator for DataSet
-    */
-    if(this!=&dataset) {
-        this->name = std::move(dataset.name);
-        this->_metadata = std::move(dataset._metadata);
-        this->_tensorpack = std::move(dataset._tensorpack);
-        this->_dim_queries = std::move(dataset._dim_queries);
-    }
-    return *this;
-}
-
-DataSet::DataSet(const std::string& name, char* buf,
+DataSet::DataSet(const std::string& name,
+                 char* buf,
                  size_t buf_size)
 {
     this->name = name;
@@ -46,6 +24,7 @@ void DataSet::add_tensor(const std::string& name,
     /* Creates a tensor with the provided information and adds
     the tensor name to the .tensors metadata
     */
+
     this->_add_to_tensorpack(name, data, dims,
                              type, mem_layout);
     this->_metadata.add_string(".tensors", name);

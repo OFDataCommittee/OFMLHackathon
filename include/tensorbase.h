@@ -63,17 +63,17 @@ class TensorBase{
                    const MemoryLayout mem_layout /*! The memory layout of the source data*/
                    );
 
-        //! TensorBase destructor
-        virtual ~TensorBase();
-
         //! Copy contrustor for TensorBase
         TensorBase(const TensorBase& tb);
 
         //! Move constructor for TensorBase
         TensorBase(TensorBase&& tb);
 
+        //! TensorBase destructor
+        virtual ~TensorBase();
+
         //! Copy assignment operator for TensorBase
-        TensorBase&  operator=(const TensorBase& tb);
+        TensorBase& operator=(const TensorBase& tb);
 
         //! Move assignment operator for TensorBase
         TensorBase& operator=(TensorBase&& tb);

@@ -2,131 +2,35 @@
 
 using namespace SILC;
 
-TensorPack::TensorPack()
-{}
-
-TensorPack::TensorPack(const TensorPack& tensorpack)
-{
-    /* This is the copy constructor for the TensorPack
-    class.  A copy of each tensor is made using
-    the tensor copy constructor.
+TensorPack::TensorPack(const TensorPack& tp) {
+    /* Copy constructor for TensorPack
     */
-
-    TensorPack::_copy_tensor_list<double>(tensorpack._tensors_double,
-                                          this->_tensors_double);
-    TensorPack::_copy_tensor_list<float>(tensorpack._tensors_float,
-                                         this->_tensors_float);
-    TensorPack::_copy_tensor_list<int64_t>(tensorpack._tensors_int64,
-                                           this->_tensors_int64);
-    TensorPack::_copy_tensor_list<int32_t>(tensorpack._tensors_int32,
-                                            this->_tensors_int32);
-    TensorPack::_copy_tensor_list<int16_t>(tensorpack._tensors_int16,
-                                           this->_tensors_int16);
-    TensorPack::_copy_tensor_list<int8_t>(tensorpack._tensors_int8,
-                                           this->_tensors_int8);
-    TensorPack::_copy_tensor_list<uint16_t>(tensorpack._tensors_uint16,
-                                            this->_tensors_uint16);
-    TensorPack::_copy_tensor_list<uint8_t>(tensorpack._tensors_uint8,
-                                            this->_tensors_uint8);
-    this->_refresh_tensorbase_inventory();
+    this->_tensors_double = tp._tensors_double;
+    this->_tensors_float = tp._tensors_float;
+    this->_tensors_int64 = tp._tensors_int64;
+    this->_tensors_int32 = tp._tensors_int32;
+    this->_tensors_int16 = tp._tensors_int16;
+    this->_tensors_int8 = tp._tensors_int8;
+    this->_tensors_uint16 = tp._tensors_uint16;
+    this->_tensors_uint8 = tp._tensors_uint8;
+    this->_rebuild_tensor_inventory();
 }
 
-TensorPack::TensorPack(TensorPack&& tensorpack)
-{
-    /* This is a move constructor for the TensorPack.
+TensorPack& TensorPack::operator=(const TensorPack& tp) {
+    /* Copy assignment operator
     */
-
-    // Move all inventory data structures
-    this->_tensors_double = std::move(tensorpack._tensors_double);
-    this->_tensors_float = std::move(tensorpack._tensors_float);
-    this->_tensors_int64 = std::move(tensorpack._tensors_int64);
-    this->_tensors_int32 = std::move(tensorpack._tensors_int32);
-    this->_tensors_int16 = std::move(tensorpack._tensors_int16);
-    this->_tensors_int8 = std::move(tensorpack._tensors_int8);
-    this->_tensors_uint16 = std::move(tensorpack._tensors_uint16);
-    this->_tensors_uint8 = std::move(tensorpack._tensors_uint8);
-    this->_all_tensors = std::move(tensorpack._all_tensors);
-    this->_tensorbase_inventory = std::move(tensorpack._tensorbase_inventory);
-
-    // Clear inventory data structors to make sure memory is not
-    // freed
-    tensorpack._tensors_double.clear();
-    tensorpack._tensors_float.clear();
-    tensorpack._tensors_int64.clear();
-    tensorpack._tensors_int32.clear();
-    tensorpack._tensors_int16.clear();
-    tensorpack._tensors_int8.clear();
-    tensorpack._tensors_uint16.clear();
-    tensorpack._tensors_uint8.clear();
-    tensorpack._all_tensors.clear();
-    tensorpack._tensorbase_inventory.clear();
-    return;
-}
-
-TensorPack& TensorPack::operator=(const TensorPack& tensorpack)
-{
-    /* This is the copy assignment operator that will
-    copy the tensorpack into this.  Before copying,
-    all current tensors in the tensorpack are deleted.
-    */
-    if (this != &tensorpack) {
-        this->_delete_all_tensors();
-        TensorPack::_copy_tensor_list<double>(tensorpack._tensors_double,
-                                            this->_tensors_double);
-        TensorPack::_copy_tensor_list<float>(tensorpack._tensors_float,
-                                            this->_tensors_float);
-        TensorPack::_copy_tensor_list<int64_t>(tensorpack._tensors_int64,
-                                            this->_tensors_int64);
-        TensorPack::_copy_tensor_list<int32_t>(tensorpack._tensors_int32,
-                                            this->_tensors_int32);
-        TensorPack::_copy_tensor_list<int16_t>(tensorpack._tensors_int16,
-                                            this->_tensors_int16);
-        TensorPack::_copy_tensor_list<int8_t>(tensorpack._tensors_int8,
-                                            this->_tensors_int8);
-        TensorPack::_copy_tensor_list<uint16_t>(tensorpack._tensors_uint16,
-                                            this->_tensors_uint16);
-        TensorPack::_copy_tensor_list<uint8_t>(tensorpack._tensors_uint8,
-                                            this->_tensors_uint8);
-        this->_refresh_tensorbase_inventory();
+    if(this!=&tp) {
+        this->_tensors_double = tp._tensors_double;
+        this->_tensors_float = tp._tensors_float;
+        this->_tensors_int64 = tp._tensors_int64;
+        this->_tensors_int32 = tp._tensors_int32;
+        this->_tensors_int16 = tp._tensors_int16;
+        this->_tensors_int8 = tp._tensors_int8;
+        this->_tensors_uint16 = tp._tensors_uint16;
+        this->_tensors_uint8 = tp._tensors_uint8;
+        this->_rebuild_tensor_inventory();
     }
     return *this;
-}
-
-TensorPack& TensorPack::operator=(TensorPack&& tensorpack)
-{
-    if (this != &tensorpack) {
-        // Move all inventory data structures
-        this->_tensors_double = std::move(tensorpack._tensors_double);
-        this->_tensors_float = std::move(tensorpack._tensors_float);
-        this->_tensors_int64 = std::move(tensorpack._tensors_int64);
-        this->_tensors_int32 = std::move(tensorpack._tensors_int32);
-        this->_tensors_int16 = std::move(tensorpack._tensors_int16);
-        this->_tensors_int8 = std::move(tensorpack._tensors_int8);
-        this->_tensors_uint16 = std::move(tensorpack._tensors_uint16);
-        this->_tensors_uint8 = std::move(tensorpack._tensors_uint8);
-        this->_all_tensors = std::move(tensorpack._all_tensors);
-        this->_tensorbase_inventory = std::move(tensorpack._tensorbase_inventory);
-
-        // Clear inventory data structors to make sure memory is not
-        // freed
-        tensorpack._tensors_double.clear();
-        tensorpack._tensors_float.clear();
-        tensorpack._tensors_int64.clear();
-        tensorpack._tensors_int32.clear();
-        tensorpack._tensors_int16.clear();
-        tensorpack._tensors_int8.clear();
-        tensorpack._tensors_uint16.clear();
-        tensorpack._tensors_uint8.clear();
-        tensorpack._all_tensors.clear();
-        tensorpack._tensorbase_inventory.clear();
-    }
-    return *this;
-}
-
-
-TensorPack::~TensorPack()
-{
-    this->_delete_all_tensors();
 }
 
 void TensorPack::add_tensor(const std::string& name,
@@ -135,11 +39,17 @@ void TensorPack::add_tensor(const std::string& name,
                             const TensorType type,
                             const MemoryLayout mem_layout)
 {
-    /* This function adds a tensor with associated c_ptr for data.
+    /* This function adds a Tensor to the TensorPack.
     */
-    if(this->_tensorbase_inventory.count(std::string(name))>0)
-        throw std::runtime_error("The tensor " + std::string(name)
-                                               + " already exists");
+
+    if(name.size()==0)
+        throw std::runtime_error("The tensor name must "\
+                                 "be greater than 0.");
+
+    if(this->tensor_exists(name))
+        throw std::runtime_error("The tensor " +
+                                 std::string(name) +
+                                 " already exists");
 
     TensorBase* ptr;
 
@@ -189,41 +99,40 @@ void TensorPack::add_tensor(TensorBase* tensor)
     to Tensor<T> based on the type string in the TensorBase
     object.
     */
-    TensorType type =  tensor->type();
+
     std::string name = tensor->name();
 
     if(name.size()==0)
         throw std::runtime_error("The tensor name must "\
                                  "be greater than 0.");
 
-
+    TensorType type =  tensor->type();
     switch(type) {
         case TensorType::dbl :
-            this->_tensors_double.push_front((Tensor<double>*)tensor);
+            this->_tensors_double.add_tensor(tensor);
         break;
         case TensorType::flt :
-            this->_tensors_float.push_front((Tensor<float>*)tensor);
+            this->_tensors_float.add_tensor(tensor);
         break;
         case TensorType::int64 :
-            this->_tensors_int64.push_front((Tensor<int64_t>*)tensor);
+            this->_tensors_int64.add_tensor(tensor);
         break;
         case TensorType::int32 :
-            this->_tensors_int32.push_front((Tensor<int32_t>*)tensor);
+            this->_tensors_int32.add_tensor(tensor);
         break;
         case TensorType::int16 :
-            this->_tensors_int16.push_front((Tensor<int16_t>*)tensor);
+            this->_tensors_int16.add_tensor(tensor);
         break;
         case TensorType::int8 :
-            this->_tensors_int8.push_front((Tensor<int8_t>*)tensor);
+            this->_tensors_int8.add_tensor(tensor);
         break;
         case TensorType::uint16 :
-            this->_tensors_uint16.push_front((Tensor<uint16_t>*)tensor);
+            this->_tensors_uint16.add_tensor(tensor);
         break;
         case TensorType::uint8 :
-            this->_tensors_uint8.push_front((Tensor<uint8_t>*)tensor);
+            this->_tensors_uint8.add_tensor(tensor);
         break;
     }
-
     this->_tensorbase_inventory[name] = tensor;
     this->_all_tensors.push_front(tensor);
 
@@ -234,7 +143,8 @@ TensorBase* TensorPack::get_tensor(const std::string& name)
 {
     /* Returns a pointer to the tensor by name
     */
-    return this->_tensorbase_inventory[name];
+    TensorBase* ptr = this->_tensorbase_inventory.at(name);
+    return ptr;
 }
 
 void* TensorPack::get_tensor_data(const std::string& name)
@@ -242,17 +152,15 @@ void* TensorPack::get_tensor_data(const std::string& name)
     /* Returns a pointer to the tensor data
     memory space.
     */
-    return this->_tensorbase_inventory[name]->data();
+    TensorBase* ptr = this->_tensorbase_inventory.at(name);
+    return ptr->data();
 }
 
 bool TensorPack::tensor_exists(const std::string& name)
 {
     /* Check if a tensor exists by name
     */
-    if(this->_tensorbase_inventory.count(name)>0)
-        return true;
-    else
-        return false;
+    return (this->_tensorbase_inventory.count(name)>0);
 }
 
 TensorPack::tensorbase_iterator TensorPack::tensor_begin()
@@ -283,100 +191,38 @@ TensorPack::const_tensorbase_iterator TensorPack::tensor_cend()
     return this->_all_tensors.cend();
 }
 
-
-template <typename T>
-void TensorPack::_copy_tensor_list(const std::forward_list<Tensor<T>*> &src_list,
-                                   std::forward_list<Tensor<T>*> &dest_list)
-{
-    /* This function will copy a src_list Tensor list to the dest_list
-    Tensor list.  The src_list is not cleared, but values are pushed to
-    the front of the tensor list.  It is the responsibility of the caller
-    to make sure both lists are in the correct state.
+void TensorPack::_rebuild_tensor_inventory() {
+    /* This function will rebuild the tensor inventories.
     */
-    typename std::forward_list<Tensor<T>*>::const_iterator it =
-                                                src_list.cbegin();
-    typename std::forward_list<Tensor<T>*>::const_iterator it_end =
-                                                dest_list.cend();
-
-    while(it!=it_end)
-    {
-        dest_list.push_front(new Tensor<T>(**it));
-        it++;
-    }
-    dest_list.reverse();
-    return;
-}
-
-void TensorPack::_refresh_tensorbase_inventory()
-{
-    /* This function will clear the current tensorbase inventory
-    and then add all tensors in the tensor lists to the
-    tensorbase inventory
-    */
-    this->_tensorbase_inventory.clear();
     this->_all_tensors.clear();
-    this->_add_to_tensorbase_inventory<double>(this->_tensors_double);
-    this->_add_to_tensorbase_inventory<float>(this->_tensors_float);
-    this->_add_to_tensorbase_inventory<int64_t>(this->_tensors_int64);
-    this->_add_to_tensorbase_inventory<int32_t>(this->_tensors_int32);
-    this->_add_to_tensorbase_inventory<int16_t>(this->_tensors_int16);
-    this->_add_to_tensorbase_inventory<int8_t>(this->_tensors_int8);
-    this->_add_to_tensorbase_inventory<uint16_t>(this->_tensors_uint16);
-    this->_add_to_tensorbase_inventory<uint8_t>(this->_tensors_uint8);
+    this->_tensorbase_inventory.clear();
+    this->_add_tensorlist_to_inventory<double>(this->_tensors_double);
+    this->_add_tensorlist_to_inventory<float>(this->_tensors_float);
+    this->_add_tensorlist_to_inventory<int64_t>(this->_tensors_int64);
+    this->_add_tensorlist_to_inventory<int32_t>(this->_tensors_int32);
+    this->_add_tensorlist_to_inventory<int16_t>(this->_tensors_int16);
+    this->_add_tensorlist_to_inventory<int8_t>(this->_tensors_int8);
+    this->_add_tensorlist_to_inventory<uint16_t>(this->_tensors_uint16);
+    this->_add_tensorlist_to_inventory<uint8_t>(this->_tensors_uint8);
     return;
 }
 
 template <typename T>
-void TensorPack::_add_to_tensorbase_inventory(
-                 const std::forward_list<Tensor<T>*>& tensor_list)
-{
-    /* This function will add entries in the tensor list
-    into the tensorbase inventory
+void TensorPack::_add_tensorlist_to_inventory(TensorList<T>& t_list) {
+    /* This function will add a TensorList<T> to the
+    tensor inventory.
     */
-    typename std::forward_list<Tensor<T>*>::const_iterator it =
-                                            tensor_list.cbegin();
-    typename std::forward_list<Tensor<T>*>::const_iterator it_end =
-                                            tensor_list.cend();
+    typename TensorList<T>::iterator it =
+        t_list.begin();
+    typename TensorList<T>::iterator it_end =
+        t_list.end();
 
     while(it!=it_end) {
-        _tensorbase_inventory[(*it)->name()] = *it;
-        _all_tensors.push_front(*it);
+        this->_all_tensors.push_front((TensorBase*)(*it));
+        this->_tensorbase_inventory[(*it)->name()] = (TensorBase*)(*it);
         it++;
     }
     return;
+
 }
 
-void TensorPack::_delete_all_tensors()
-{
-    /* This function deletes all tensors in each
-    tensor list and clears the tensor inventory.
-    */
-    this->_delete_tensor_list<double>(this->_tensors_double);
-    this->_delete_tensor_list<float>(this->_tensors_float);
-    this->_delete_tensor_list<int64_t>(this->_tensors_int64);
-    this->_delete_tensor_list<int32_t>(this->_tensors_int32);
-    this->_delete_tensor_list<int16_t>(this->_tensors_int16);
-    this->_delete_tensor_list<int8_t>(this->_tensors_int8);
-    this->_delete_tensor_list<uint16_t>(this->_tensors_uint16);
-    this->_delete_tensor_list<uint8_t>(this->_tensors_uint8);
-    this->_tensorbase_inventory.clear();
-    this->_all_tensors.clear();
-    return;
-}
-
-template <typename T>
-void TensorPack::_delete_tensor_list(std::forward_list<Tensor<T>*>& tensor_list)
-{
-    /* Deletes all Tensor objects held in a tensor list
-    */
-    typename std::forward_list<Tensor<T>*>::iterator it =
-                                        tensor_list.begin();
-    typename std::forward_list<Tensor<T>*>::iterator it_end =
-                                        tensor_list.end();
-
-    while(it!=it_end) {
-        delete *it;
-        it++;
-    }
-    return;
-}

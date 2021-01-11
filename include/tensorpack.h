@@ -8,6 +8,7 @@
 #include <forward_list>
 #include "tensor.h"
 #include "tensorbase.h"
+#include "tensorlist.h"
 
 ///@file
 ///\brief The TensorPack class is a container for multiple tensors
@@ -21,22 +22,22 @@ class TensorPack
     public:
 
         //! Dataset constructor
-        TensorPack();
+        TensorPack() = default;
 
         //! Copy constructor
         TensorPack(const TensorPack& tensorpack);
 
         //! Move constructor
-        TensorPack(TensorPack&& tensorpack);
+        TensorPack(TensorPack&& tensorpack) = default;
 
         //! Copy assignment operator
         TensorPack& operator=(const TensorPack& tensorpack);
 
         //! Move assignment operator
-        TensorPack& operator=(TensorPack&& tensorpack);
+        TensorPack& operator=(TensorPack&& tensorpack) = default;
 
         //! TensorPack destructor
-        ~TensorPack();
+        ~TensorPack() = default;
 
         //! Add a tensor to the dataset
         void add_tensor(const std::string& name /*!< The name used to reference the tensor*/,
@@ -87,38 +88,23 @@ class TensorPack
         //! the TensoreBase values since the Tensors are templated.
         std::unordered_map<std::string, TensorBase*> _tensorbase_inventory;
 
-        //! Forward lists of the actual tensor types that will be used
-        //! for memory management and operations on non-base class tensors
-        std::forward_list<Tensor<double>*> _tensors_double;
-        std::forward_list<Tensor<float>*> _tensors_float;
-        std::forward_list<Tensor<int64_t>*> _tensors_int64;
-        std::forward_list<Tensor<int32_t>*> _tensors_int32;
-        std::forward_list<Tensor<int16_t>*> _tensors_int16;
-        std::forward_list<Tensor<int8_t>*> _tensors_int8;
-        std::forward_list<Tensor<uint16_t>*> _tensors_uint16;
-        std::forward_list<Tensor<uint8_t>*> _tensors_uint8;
+        //! TensorLists for memory management and operations on non-base class tensors
+        TensorList<double> _tensors_double;
+        TensorList<float> _tensors_float;
+        TensorList<int64_t> _tensors_int64;
+        TensorList<int32_t> _tensors_int32;
+        TensorList<int16_t> _tensors_int16;
+        TensorList<int8_t> _tensors_int8;
+        TensorList<uint16_t> _tensors_uint16;
+        TensorList<uint8_t> _tensors_uint8;
 
-        //! Copy a Tensor forward list
+        //! Rebuild the tensor map and forward_list iterator
+        void _rebuild_tensor_inventory();
+
+        //! Add a TensorList to the tensor inventory
         template <typename T>
-        static void _copy_tensor_list(
-                const std::forward_list<Tensor<T>*>& src_list /*!< The source tensor list*/,
-                std::forward_list<Tensor<T>*>& dest_list /*!< The destination tensor list*/);
-
-        //! This function will clear and refresh the tensorbase inventory
-        void _refresh_tensorbase_inventory();
-
-        //! Add all entries in the Tensor list to the tensor inventory
-        template <typename T>
-        void _add_to_tensorbase_inventory(
-            const std::forward_list<Tensor<T>*>& tensor_list /*!< The tensor list to add to the inventory*/);
-
-        //! This deletes all tensors in each tensor list
-        void _delete_all_tensors();
-
-        //! Delete an individual tensor list
-        template <typename T>
-        void _delete_tensor_list(
-            std::forward_list<Tensor<T>*>& tensor_list /*!< The tensor list to delete*/);
+        void _add_tensorlist_to_inventory(TensorList<T>& t_list /*!< The TensorList to add*/
+                                          );
 };
 
 } //namespace SILC
