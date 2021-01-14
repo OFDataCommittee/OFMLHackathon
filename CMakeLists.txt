@@ -1,4 +1,4 @@
-project(CppClientTester)
+project(SILC)
 
 set(CMAKE_BUILD_TYPE DEBUG)
 
@@ -41,14 +41,11 @@ else()
 	   find_path(PROTOBUF_INCLUDE_PATH protobuf PATH_SUFFIXES "/include")
 endif()
 
-find_package(MPI)
-
 include_directories(SYSTEM
-    ${MPI_INCLUDE_PATH}
     include
     utils/protobuf
-		src/fortran
-		/usr/local/include
+    src/fortran
+    /usr/local/include
     ${HIREDIS_INCLUDE_PATH}
     ${REDISPP_INCLUDE_PATH}
     ${PROTOBUF_INCLUDE_PATH}
