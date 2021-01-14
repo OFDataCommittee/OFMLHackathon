@@ -64,6 +64,10 @@ Python Client API
     Client.set_script_from_file
     Client.get_script
     Client.run_script
+    Client.set_model
+    Client.set_model_from_file
+    Client.get_model
+    Client.run_model
 
 .. autoclass:: Client
    :members:

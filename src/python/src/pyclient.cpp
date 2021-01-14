@@ -138,3 +138,53 @@ void PyClient::run_script(const std::string& key,
   this->_client->run_script(key, function, inputs, outputs);
   return;
 }
+
+//! Get a model in the database
+py::bytes PyClient::get_model(const std::string& key) {
+  std::string model = std::string(this->_client->get_model(key));
+  model = py::bytes(model);
+  return model;
+}
+
+//! Set a model (from buffer) in the database for future execution
+void PyClient::set_model(const std::string& key,
+                 const std::string_view& model,
+                 const std::string& backend,
+                 const std::string& device,
+                 int batch_size,
+                 int min_batch_size,
+                 const std::string& tag,
+                 const std::vector<std::string>& inputs,
+                 const std::vector<std::string>& outputs)
+{
+  this->_client->set_model(key, model, backend, device,
+                           batch_size, min_batch_size, tag,
+                           inputs, outputs);
+  return;
+}
+
+//! Set a model (from buffer) in the database for future execution
+void PyClient::set_model_from_file(const std::string& key,
+                                   const std::string& model_file,
+                                   const std::string& backend,
+                                   const std::string& device,
+                                   int batch_size,
+                                   int min_batch_size,
+                                   const std::string& tag,
+                                   const std::vector<std::string>& inputs,
+                                   const std::vector<std::string>& outputs)
+{
+  this->_client->set_model_from_file(key, model_file, backend, device,
+                                     batch_size, min_batch_size, tag,
+                                     inputs, outputs);
+  return;
+}
+
+//! Run a model in the database
+void PyClient::run_model(const std::string& key,
+                std::vector<std::string> inputs,
+                std::vector<std::string> outputs)
+{
+  this->_client->run_model(key, inputs, outputs);
+  return;
+}

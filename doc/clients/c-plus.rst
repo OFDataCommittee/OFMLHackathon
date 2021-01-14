@@ -5,7 +5,7 @@ C++
 C++ client API
 ==============
 
-.. doxygenclass:: SmartSimClient
+.. doxygenclass:: SILC::Client
    :project: cpp_client
    :members:
    :undoc-members:
@@ -14,7 +14,7 @@ C++ client API
 C++ Dataset API
 ===============
 
-.. doxygenclass:: DataSet
+.. doxygenclass:: SILC::DataSet
    :project: cpp_client
    :members:
    :undoc-members:

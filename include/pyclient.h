@@ -57,6 +57,45 @@ public:
                   std::vector<std::string>& outputs /*!< The keys of the output tensors*/
                   );
 
+  //! Set a model (from buffer) in the database for future execution
+  void set_model(const std::string& key /*!< The key to use to place the model*/,
+                 const std::string_view& model /*!< The model as a continuous buffer string_view*/,
+                 const std::string& backend /*!< The name of the backend (TF, TFLITE, TORCH, ONNX)*/,
+                 const std::string& device /*!< The name of the device (CPU, GPU, GPU:0, GPU:1...)*/,
+                 int batch_size = 0 /*!< The batch size for model execution*/,
+                 int min_batch_size = 0 /*!< The minimum batch size for model execution*/,
+                 const std::string& tag = "" /*!< A tag to attach to the model for information purposes*/,
+                 const std::vector<std::string>& inputs
+                  = std::vector<std::string>() /*!< One or more names of model input nodes (TF models)*/,
+                 const std::vector<std::string>& outputs
+                  = std::vector<std::string>() /*!< One or more names of model output nodes (TF models)*/
+                 );
+
+  //! Set a model (from file) in the database for future execution
+  void set_model_from_file(const std::string& key /*!< The key to use to place the model*/,
+                           const std::string& model_file /*!< The file storing the model*/,
+                           const std::string& backend /*!< The name of the backend (TF, TFLITE, TORCH, ONNX)*/,
+                           const std::string& device /*!< The name of the device (CPU, GPU, GPU:0, GPU:1...)*/,
+                           int batch_size = 0 /*!< The batch size for model execution*/,
+                           int min_batch_size = 0 /*!< The minimum batch size for model execution*/,
+                           const std::string& tag = "" /*!< A tag to attach to the model for information purposes*/,
+                           const std::vector<std::string>& inputs
+                            = std::vector<std::string>() /*!< One or more names of model input nodes (TF models)*/,
+                           const std::vector<std::string>& outputs
+                            = std::vector<std::string>() /*!< One or more names of model output nodes (TF models)*/
+                           );
+
+  //! Run a model in the database
+  void run_model(const std::string& key /*!< The key of the model to run*/,
+                 std::vector<std::string> inputs /*!< The keys of the input tensors*/,
+                 std::vector<std::string> outputs /*!< The keys of the output tensors*/
+                );
+
+  //! Get a model in the database
+  py::bytes get_model(const std::string& key /*!< The key to use to retrieve the model*/
+                             );
+
+
 private:
   Client* _client;
 

@@ -7,7 +7,7 @@ import numpy as np
 from .dataset import Dataset
 from .error import RedisConnectionError, RedisReplyError
 from .silcPy import PyClient
-from .util import Dtypes
+from .util import Dtypes, init_default
 
 
 class Client(PyClient):
@@ -151,6 +151,7 @@ class Client(PyClient):
 
     def set_script_from_file(self, key, file, device="CPU"):
         """Same as Client.set_script but from file
+
         :param key: key to store script under
         :type key: str
         :param file: path to TorchScript code
@@ -182,7 +183,7 @@ class Client(PyClient):
             raise RedisReplyError(str(e), "get_script") from None
 
     def run_script(self, key, fn_name, inputs, outputs):
-        """Execute TorchScript stored inside the databse remotely
+        """Execute TorchScript stored inside the database remotely
 
         :param key: key script is stored under
         :type key: str
@@ -194,10 +195,168 @@ class Client(PyClient):
         :type outputs: list[str]
         :raises RedisReplyError: if script execution fails
         """
+        inputs, outputs = self.__check_tensor_args(inputs, outputs)
         try:
             super().run_script(key, fn_name, inputs, outputs)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "run_script") from None
+
+    def get_model(self, key):
+        """Get a stored model
+
+        :param key: key of stored model
+        :type key: str
+        :raises RedisReplyError: if get fails or model doesnt exist
+        :return: model
+        :rtype: bytes
+        """
+        try:
+            model = super().get_model(key)
+            return model
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "get_model")
+
+    def set_model(
+        self,
+        key,
+        model,
+        backend,
+        device="CPU",
+        batch_size=0,
+        min_batch_size=0,
+        tag="",
+        inputs=None,
+        outputs=None,
+    ):
+        """Put a TF, TF-lite, PT, or ONNX model in the database
+
+        :param key: key to store model under
+        :type key: str
+        :param model: serialized model
+        :type model: bytes
+        :param backend: name of the backend (TORCH, TF, TFLITE, ONNX)
+        :type backend: str
+        :param device: name of device for execution, defaults to "CPU"
+        :type device: str, optional
+        :param batch_size: batch size for execution, defaults to 0
+        :type batch_size: int, optional
+        :param min_batch_size: minimum batch size for model execution, defaults to 0
+        :type min_batch_size: int, optional
+        :param tag: additional tag for model information, defaults to ""
+        :type tag: str, optional
+        :param inputs: model inputs (TF only), defaults to None
+        :type inputs: list[str], optional
+        :param outputs: model outupts (TF only), defaults to None
+        :type outputs: list[str], optional
+        :raises RedisReplyError: if model fails to set
+        """
+        device = self.__check_device(device)
+        backend = self.__check_backend(backend)
+        inputs, outputs = self.__check_tensor_args(inputs, outputs)
+        try:
+            super().set_model(
+                key,
+                model,
+                backend,
+                device,
+                batch_size,
+                min_batch_size,
+                tag,
+                inputs,
+                outputs,
+            )
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "set_model") from None
+
+    def set_model_from_file(
+        self,
+        key,
+        model_file,
+        backend,
+        device="CPU",
+        batch_size=0,
+        min_batch_size=0,
+        tag="",
+        inputs=None,
+        outputs=None,
+    ):
+        """Put a TF, TF-lite, PT, or ONNX model from file in the database
+
+        :param key: key to store model under
+        :type key: str
+        :param model_file: serialized model
+        :type model_file: file path to model
+        :param backend: name of the backend (TORCH, TF, TFLITE, ONNX)
+        :type backend: str
+        :param device: name of device for execution, defaults to "CPU"
+        :type device: str, optional
+        :param batch_size: batch size for execution, defaults to 0
+        :type batch_size: int, optional
+        :param min_batch_size: minimum batch size for model execution, defaults to 0
+        :type min_batch_size: int, optional
+        :param tag: additional tag for model information, defaults to ""
+        :type tag: str, optional
+        :param inputs: model inputs (TF only), defaults to None
+        :type inputs: list[str], optional
+        :param outputs: model outupts (TF only), defaults to None
+        :type outputs: list[str], optional
+        :raises RedisReplyError: if model fails to set
+        """
+        device = self.__check_device(device)
+        backend = self.__check_backend(backend)
+        m_file = self.__check_file(model_file)
+        inputs, outputs = self.__check_tensor_args(inputs, outputs)
+        try:
+            super().set_model_from_file(
+                key,
+                m_file,
+                backend,
+                device,
+                batch_size,
+                min_batch_size,
+                tag,
+                inputs,
+                outputs,
+            )
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "set_model_from_file") from None
+
+    def run_model(self, key, inputs=None, outputs=None):
+        """Execute a stored model
+
+        :param key: key for stored model
+        :type key: str
+        :param inputs: keys of stored inputs to provide model, defaults to None
+        :type inputs: list[str], optional
+        :param outputs: keys to store outputs under, defaults to None
+        :type outputs: list[str], optional
+        :raises RedisReplyError: if model execution fails
+        """
+        inputs, outputs = self.__check_tensor_args(inputs, outputs)
+        try:
+            super().run_model(key, inputs, outputs)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "run_model")
+
+    # ---- helpers --------------------------------------------------------
+
+    @staticmethod
+    def __check_tensor_args(inputs, outputs):
+        inputs = init_default([], inputs, (list, str))
+        outputs = init_default([], outputs, (list, str))
+        if isinstance(inputs, str):
+            inputs = [inputs]
+        if isinstance(outputs, str):
+            outputs = [outputs]
+        return inputs, outputs
+
+    @staticmethod
+    def __check_backend(backend):
+        backend = backend.upper()
+        if backend in ["TF", "TFLITE", "TORCH", "ONNX"]:
+            return backend
+        else:
+            raise TypeError(f"Backend type {backend} unsupported")
 
     @staticmethod
     def __check_file(file):

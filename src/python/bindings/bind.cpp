@@ -16,7 +16,11 @@ PYBIND11_MODULE(silcPy, m) {
         .def("set_script_from_file", &PyClient::set_script_from_file)
         .def("set_script", &PyClient::set_script)
         .def("get_script", &PyClient::get_script)
-        .def("run_script", &PyClient::run_script);
+        .def("run_script", &PyClient::run_script)
+        .def("set_model", &PyClient::set_model)
+        .def("set_model_from_file", &PyClient::set_model_from_file)
+        .def("get_model", &PyClient::get_model)
+        .def("run_model", &PyClient::run_model);
 
     // Python Dataset class
     py::class_<PyDataset>(m, "PyDataset")
