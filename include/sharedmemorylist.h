@@ -3,6 +3,7 @@
 
 #include <forward_list>
 #include <cstring>
+#include <memory>
 
 namespace SILC {
 
@@ -41,7 +42,7 @@ class SharedMemoryList {
     private:
 
     //! Forward list to track allocation sizes and locations in memory
-    std::forward_list<std::shared_ptr<T>> _inventory;
+    typename std::forward_list<std::shared_ptr<T>> _inventory;
 
 };
 
