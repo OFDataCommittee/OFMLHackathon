@@ -63,6 +63,9 @@ set(CLIENT_SRC
 	 ../../../src/cpp/tensorpack.cpp
 	 ../../../src/cpp/dbnode.cpp
 	 ../../../src/cpp/commandreply.cpp
+     ../../../src/cpp/redisserver.cpp
+     ../../../src/cpp/rediscluster.cpp
+     ../../../src/cpp/redis.cpp
 	 ../../utils/protobuf/silc.pb.cc)
 
 # Build executables

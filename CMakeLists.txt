@@ -65,6 +65,9 @@ add_library( silc STATIC
 	 src/cpp/tensorpack.cpp
 	 src/cpp/dbnode.cpp
 	 src/cpp/commandreply.cpp
+     src/cpp/redisserver.cpp
+     src/cpp/rediscluster.cpp
+     src/cpp/redis.cpp
 	 utils/protobuf/silc.pb.cc
    src/fortran/fortran_c_interop.F90
    src/fortran/dataset.F90

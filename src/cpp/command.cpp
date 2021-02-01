@@ -6,6 +6,41 @@ Command::Command()
 {
 }
 
+/*
+Command::Command(const Command& cmd) {
+
+    std::vector<std::string_view>::const_iterator cmd_field_it =
+        cmd._fields.cbegin();
+    std::vector<std::string_view>::const_iterator cmd_field_it_end =
+        cmd._fields.cend();
+
+    size_t field_size;
+    while(cmd_field_it!=cmd_field_it_end) {
+
+        field_size = cmd_field_it->size();
+
+        char* f = (char*) malloc(sizeof(char)*(field_size+1));
+        cmd_field_it->copy(f, field_size);
+        f[field_size]=0;
+        this->_local_fields.push_back(f);
+
+        std::string_view copied_sv =
+            std::string_view(f, field_size);
+        this->_fields.push_back(std::string_view(f, field_size));
+
+        cmd_field_it++;
+
+        if(cmd._cmd_keys.count(*cmd_field_it)>0) {
+            std::cout<<"Found cmd key"<<std::endl;
+            this->_cmd_keys[copied_sv] =
+                cmd._cmd_keys.at(*cmd_field_it);
+        }
+    }
+    std::cout<<"Command copied "<<this->to_string()<<std::endl;
+    return;
+}
+*/
+
 Command::~Command()
 {
     std::vector<char*>::iterator it = this->_local_fields.begin();
@@ -17,12 +52,14 @@ Command::~Command()
     return;
 }
 
-void Command::add_field(std::string field)
+void Command::add_field(std::string field, bool is_key)
 {
     /* Copy the field string into a char* that is stored
     locally in the Command object.  The new string is not
     null terminated because the fields vector is of type
-    string_view which stores the length of the string
+    string_view which stores the length of the string.
+    If is_key is true, the key will be added to the command
+    keys.
     */
 
     int field_size = field.size();
@@ -31,15 +68,22 @@ void Command::add_field(std::string field)
     f[field_size]=0;
     this->_local_fields.push_back(f);
     this->_fields.push_back(std::string_view(f, field_size));
+
+    if(is_key)
+        this->_cmd_keys[std::string_view(f, field_size)] =
+            this->_fields.size()-1;
+
     return;
 }
 
-void Command::add_field(char* field)
+void Command::add_field(char* field, bool is_key)
 {
     /* Copy the field char* into a char* that is stored
     locally in the Command object.  The new string is not
     null terminated because the fields vector is of type
-    string_view which stores the length of the string
+    string_view which stores the length of the string.
+    If is_key is true, the key will be added to the command
+    keys.
     */
 
     int field_size = std::strlen(field);
@@ -47,19 +91,25 @@ void Command::add_field(char* field)
     std::memcpy(f, field, sizeof(char)*field_size);
     this->_local_fields.push_back(f);
     this->_fields.push_back(std::string_view(f, field_size));
+
+    if(is_key)
+        this->_cmd_keys[std::string_view(f, field_size)] =
+            this->_fields.size()-1;
+
     return;
 }
 
-void Command::add_field_ptr(char* field, unsigned long long field_size)
+void Command::add_field_ptr(char* field, size_t field_size)
 {
     /* This function adds a field to the fields data
     structure without copying the data.  This means
     that the memory needs to be valid when it is later
     accessed.  This function should be used for very large
-    fields.
+    fields.  Field pointers cannot act as Command keys.
     */
 
     this->_fields.push_back(std::string_view(field, field_size));
+
     return;
 }
 
@@ -69,7 +119,8 @@ void Command::add_field_ptr(std::string_view field)
     structure without copying the data.  This means
     that the memory needs to be valid when it is later
     accessed.  This function should be used for very large
-    fields.
+    fields.  If is_key is true, the key will be added to the
+    command keys.  Field pointers cannot act as Command keys.
     */
 
     this->_fields.push_back(field);
@@ -77,7 +128,7 @@ void Command::add_field_ptr(std::string_view field)
 }
 
 
-void Command::add_fields(const std::vector<std::string>& fields)
+void Command::add_fields(const std::vector<std::string>& fields, bool is_key)
 {
     /* Copy field strings into a char* that is stored
     locally in the Command object.  The new string is not
@@ -85,7 +136,7 @@ void Command::add_fields(const std::vector<std::string>& fields)
     string_view which stores the length of the string
     */
     for(int i=0; i<fields.size(); i++)
-        this->add_field(fields[i]);
+        this->add_field(fields[i], is_key);
     return;
 }
 
@@ -138,4 +189,63 @@ Command::const_iterator Command::cend()
     field in the command
     */
     return this->_fields.cend();
+}
+
+bool Command::has_keys()
+{
+    /* Return true if the Command has any keys
+    associated with it.
+    */
+    if(this->_cmd_keys.size()>0)
+        return true;
+
+    return false;
+}
+
+std::vector<std::string> Command::get_keys() {
+    /* This function returns a vector of key copies
+    to the user.  Original keys are not returned
+    to the user because memory management
+    becomes complicated for std::string_view that
+    may need to grow or decrease in size.
+    */
+    std::vector<std::string> keys;
+
+    std::unordered_map<std::string_view,size_t>::iterator it =
+        this->_cmd_keys.begin();
+    std::unordered_map<std::string_view,size_t>::iterator it_end;
+        this->_cmd_keys.end();
+
+    while(it!=it_end) {
+        keys.push_back(std::string(it->first.data(), it->first.length()));
+        it++;
+    }
+    return keys;
+
+}
+
+void Command::update_key(std::string old_key,
+                         std::string new_key)
+{
+    /* This function will change a value of a
+    key in the command.  This function will preserve
+    the order of the command fields.
+    */
+    std::string_view old_key_sv(old_key.data(), old_key.length());
+    size_t key_index = this->_cmd_keys.at(old_key_sv);
+
+    //Allocated memory and copy new_key
+    int new_key_size = new_key.size();
+    char* f = (char*) malloc(sizeof(char)*(new_key_size+1));
+    new_key.copy(f, new_key_size, 0);
+    f[new_key_size]=0;
+    std::string_view new_key_sv(f, new_key_size);
+
+    //Swap string_view, dellaocate old memory and
+    //track new memory
+    this->_fields[key_index].swap(new_key_sv);
+    free(this->_local_fields[key_index]);
+    this->_local_fields[key_index] = f;
+    return;
+
 }
