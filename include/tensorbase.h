@@ -1,5 +1,5 @@
-#ifndef SMARTSIM_TENSORBASE_H
-#define SMARTSIM_TENSORBASE_H
+#ifndef SILC_TENSORBASE_H
+#define SILC_TENSORBASE_H
 
 #include "stdlib.h"
 #include <vector>
@@ -10,7 +10,6 @@
 #include "enums/cpp_memory_layout.h"
 
 ///@file
-///\brief The TensorBase class giving access to common Tensor methods and attributes
 
 namespace SILC {
 
@@ -52,76 +51,144 @@ static const std::unordered_map<TensorType, std::string>
 
 class TensorBase;
 
+/*!
+*   \brief  The TensorBase class is a base class that
+*           defines an interface for templated classes
+*           that inherit from TensorBase.
+*/
 class TensorBase{
 
     public:
-        //! TensorBase constructor
-        TensorBase(const std::string& name /*!< The name used to reference the tensor*/,
-                   void* data /*!< A c_ptr to the source data for the tensor*/,
-                   const std::vector<size_t>& dims /*! The dimensions of the tensor*/,
-                   const TensorType type /*!< The data type of the tensor*/,
-                   const MemoryLayout mem_layout /*! The memory layout of the source data*/
-                   );
 
-        //! Copy contrustor for TensorBase
+        /*!
+        *   \brief TensorBase constructor
+        *   \param name The name used to reference the tensor
+        *   \param data c_ptr to the source data for the tensor
+        *   \param dims The dimensions of the tensor
+        *   \param type The data type of the tensor
+        *   \param mem_layout The memory layout of the source data
+        */
+        TensorBase(const std::string& name,
+                   void* data,
+                   const std::vector<size_t>& dims,
+                   const TensorType type,
+                   const MemoryLayout mem_layout);
+
+        /*!
+        *   \brief TensorBase copy constructor
+        *   \param tb The TensorBase to copy for construction
+        */
         TensorBase(const TensorBase& tb);
 
-        //! Move constructor for TensorBase
+        /*!
+        *   \brief TensorBase move constructor
+        *   \param tb The TensorBase to move for construction
+        */
         TensorBase(TensorBase&& tb);
 
-        //! TensorBase destructor
+        /*!
+        *   \brief TensorBase destructor
+        */
         virtual ~TensorBase();
 
-        //! Copy assignment operator for TensorBase
+        /*!
+        *   \brief TensorBase copy assignment operator
+        *   \param tb The TensorBase to copy for assignment
+        */
         TensorBase& operator=(const TensorBase& tb);
 
-        //! Move assignment operator for TensorBase
+        /*!
+        *   \brief TensorBase move assignment operator
+        *   \param tb The TensorBase to move for assignment
+        */
         TensorBase& operator=(TensorBase&& tb);
 
-        //! Retrive the tensor name
+        /*!
+        *   \brief Retrieve the name of the TensorBase
+        *   \returns The name of the TensorBase
+        */
         std::string name();
 
-        //! Retreive the TensorType of the tensor
+        /*!
+        *   \brief Retrieve the type of the TensorBase
+        *   \returns The type of the TensorBase
+        */
         TensorType type();
 
-        //! Return a string representation of the TensorType
+        /*!
+        *   \brief Retrieve a string representation of
+        *          the TensorBase
+        *   \returns A string representation of the TensorBase
+        */
         std::string type_str();
 
-        //! Retrieve the tensor dims
+        /*!
+        *   \brief Retrieve the dimensions of the TensorBase
+        *   \returns TensorBase dimensions
+        */
         std::vector<size_t> dims();
 
-        //! Get the total number of values in the tensor
+        /*!
+        *   \brief Retrieve number of values in the TensorBase
+        *   \returns The number values in the TensorBase
+        */
         size_t num_values();
 
-        //! Get the tensor data pointer
+        /*!
+        *   \brief Retrieve a pointer to the TensorBase data
+        *          memory
+        *   \returns A pointer to the TenorBase data memory
+        */
         void* data();
 
-        //! Get the tensor data as a buf
+        /*!
+        *   \brief Get a serialized buffer of the TensorBase
+        *          data
+        *   \returns A std::string_view buffer of TensorBase
+        *          data
+        */
         virtual std::string_view buf();
 
-        //! Get pointer to the tensor memory space in the specific layout
-        virtual void* data_view(const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of data view*/
-                                ) = 0;
+        /*!
+        *   \brief Get a pointer to a specificed memory
+        *          view of the TensorBase data
+        *   \param mem_layout The MemoryLayout enum describing
+        *          the layout of data view
+        */
+        virtual void* data_view(const MemoryLayout mem_layout) = 0;
 
-        //! Fill a user provided memory space with values from tensor data
-        virtual void fill_mem_space(void* data /*!< Pointer to the allocated memory space*/,
-                                    std::vector<size_t> dims /*!< The dimensions of the memory space*/,
-                                    MemoryLayout mem_layout /*!< The memory layout of the provided memory space*/
-                                    ) = 0;
+        /*!
+        *   \brief Fill a user provided memory space with
+        *          values from tensor data
+        *   \param data Pointer to the allocated memory space
+        *   \param dims The dimensions of the memory space
+        *   \param mem_layout The memory layout of the provided memory space
+        */
+        virtual void fill_mem_space(void* data,
+                                    std::vector<size_t> dims,
+                                    MemoryLayout mem_layout) = 0;
 
 
         protected:
 
-        //! Tensor name
+        /*!
+        *   \brief TensorBase name
+        */
         std::string _name;
 
-        //! Tensor type
+        /*!
+        *   \brief TensorBase type
+        */
         TensorType _type;
 
-        //! Tensor dims
+        /*!
+        *   \brief TensorBase dims
+        */
         std::vector<size_t> _dims;
 
-        //! Pointer to the data memory space
+        /*!
+        *   \brief Pointer to the data memory space
+        */
         void* _data;
 
         //TODO implement this
@@ -132,21 +199,33 @@ class TensorBase{
 
         private:
 
-        //! Function to check for errors in constructor inputs
-        inline void _check_inputs(const void* src_data /*!< A pointer to the data source for the tensor*/,
-                                  const std::string& name /*!< The name used to reference the tensor*/,
-                                  const std::vector<size_t>& dims /*! The dimensions of the data*/
-                                  );
+        /*!
+        *   \brief Pointer to the data memory space
+        *   \param src_data A pointer to the data source for the tensor
+        *   \param name The name used to reference the tensor
+        *   \param dims The dimensions of the data
+        */
+        inline void _check_inputs(const void* src_data,
+                                  const std::string& name,
+                                  const std::vector<size_t>& dims);
 
-        //! Set the tensor data from a src memory location
+        /*!
+        *   \brief Set the tensor data from a src memory location
+        *   \param src_data A pointer to the data source for the tensor
+        *   \param dims The dimensions of the data
+        *   \param mem_layout The memory layout of the source data
+        */
         virtual void _set_tensor_data(void* src_data,
                                       const std::vector<size_t>& dims,
                                       const MemoryLayout mem_layout) = 0;
 
-        //! Get the total number of bytes of the Tensor data
+        /*!
+        *   \brief Get the total number of bytes of the data
+        *   \returns Total number of bytes of the data
+        */
         virtual size_t _n_data_bytes() = 0;
 };
 
 } //namespace SILC
 
-#endif //SMARTSIM_TENSORBASE_H
+#endif //SILC_TENSORBASE_H

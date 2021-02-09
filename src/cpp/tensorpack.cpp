@@ -3,8 +3,6 @@
 using namespace SILC;
 
 TensorPack::TensorPack(const TensorPack& tp) {
-    /* Copy constructor for TensorPack
-    */
     this->_tensors_double = tp._tensors_double;
     this->_tensors_float = tp._tensors_float;
     this->_tensors_int64 = tp._tensors_int64;
@@ -17,8 +15,6 @@ TensorPack::TensorPack(const TensorPack& tp) {
 }
 
 TensorPack& TensorPack::operator=(const TensorPack& tp) {
-    /* Copy assignment operator
-    */
     if(this!=&tp) {
         this->_tensors_double = tp._tensors_double;
         this->_tensors_float = tp._tensors_float;
@@ -39,9 +35,6 @@ void TensorPack::add_tensor(const std::string& name,
                             const TensorType type,
                             const MemoryLayout mem_layout)
 {
-    /* This function adds a Tensor to the TensorPack.
-    */
-
     if(name.size()==0)
         throw std::runtime_error("The tensor name must "\
                                  "be greater than 0.");
@@ -93,13 +86,6 @@ void TensorPack::add_tensor(const std::string& name,
 
 void TensorPack::add_tensor(TensorBase* tensor)
 {
-    /* This function will add a tensor that was allocated
-    on the heap to the TensorPack inventories to track.
-    Note that the TensorBase pointer will be cast
-    to Tensor<T> based on the type string in the TensorBase
-    object.
-    */
-
     std::string name = tensor->name();
 
     if(name.size()==0)
@@ -141,59 +127,43 @@ void TensorPack::add_tensor(TensorBase* tensor)
 
 TensorBase* TensorPack::get_tensor(const std::string& name)
 {
-    /* Returns a pointer to the tensor by name
-    */
     TensorBase* ptr = this->_tensorbase_inventory.at(name);
     return ptr;
 }
 
 void* TensorPack::get_tensor_data(const std::string& name)
 {
-    /* Returns a pointer to the tensor data
-    memory space.
-    */
     TensorBase* ptr = this->_tensorbase_inventory.at(name);
     return ptr->data();
 }
 
 bool TensorPack::tensor_exists(const std::string& name)
 {
-    /* Check if a tensor exists by name
-    */
     return (this->_tensorbase_inventory.count(name)>0);
 }
 
 TensorPack::tensorbase_iterator TensorPack::tensor_begin()
 {
-    /* Return an iterator to the beginning of the tensors
-    */
     return this->_all_tensors.begin();
 }
 
 TensorPack::tensorbase_iterator TensorPack::tensor_end()
 {
-    /* Return an iterator to the past the end tensor
-    */
     return this->_all_tensors.end();
 }
 
 TensorPack::const_tensorbase_iterator TensorPack::tensor_cbegin()
 {
-    /* Return a constant iterator to the beginning of tensors
-    */
     return this->_all_tensors.cbegin();
 }
 
 TensorPack::const_tensorbase_iterator TensorPack::tensor_cend()
 {
-    /* return a constant iterator to the past the end tensor
-    */
     return this->_all_tensors.cend();
 }
 
-void TensorPack::_rebuild_tensor_inventory() {
-    /* This function will rebuild the tensor inventories.
-    */
+void TensorPack::_rebuild_tensor_inventory()
+{
     this->_all_tensors.clear();
     this->_tensorbase_inventory.clear();
     this->_add_tensorlist_to_inventory<double>(this->_tensors_double);
@@ -208,10 +178,8 @@ void TensorPack::_rebuild_tensor_inventory() {
 }
 
 template <typename T>
-void TensorPack::_add_tensorlist_to_inventory(TensorList<T>& t_list) {
-    /* This function will add a TensorList<T> to the
-    tensor inventory.
-    */
+void TensorPack::_add_tensorlist_to_inventory(TensorList<T>& t_list)
+{
     typename TensorList<T>::iterator it =
         t_list.begin();
     typename TensorList<T>::iterator it_end =
@@ -223,6 +191,5 @@ void TensorPack::_add_tensorlist_to_inventory(TensorList<T>& t_list) {
         it++;
     }
     return;
-
 }
 

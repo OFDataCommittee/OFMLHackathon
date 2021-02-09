@@ -1,5 +1,5 @@
-#ifndef SMARTSIM_CPP_CLUSTER_H
-#define SMARTSIM_CPP_CLUSTER_H
+#ifndef SILC_CPP_CLUSTER_H
+#define SILC_CPP_CLUSTER_H
 
 #include <unordered_set>
 #include "redisserver.h"
@@ -8,180 +8,396 @@
 namespace SILC {
 
 ///@file
-///\brief A class to manage a cluster connection and assist with cluster commands.
 
 class RedisCluster;
 
+/*!
+*   \brief  The RedisCluster class executes RedisServer
+*           commands on a redis cluster.
+*/
 class RedisCluster : public RedisServer
 {
     public:
-        //! RedisCluster constructor.  Initializes default values but does not connect.
+
+        /*!
+        *   \brief RedisCluster constructor.
+        *          Initializes default values but does not connect.
+        */
         RedisCluster();
 
-        //! RedisCluster constructor.  Uses address provided to constructor.
-        RedisCluster(std::string address_port /*!< The address and port string*/
-                     );
+        /*!
+        *   \brief RedisCluster constructor.
+        *          Uses address provided to constructor instead
+        *          of environment variables.
+        *   \param address_port The address and port in the form of
+        *                       "tcp://address:port"
+        */
+        RedisCluster(std::string address_port);
 
-        //! RedisCluster copy constructor
+        /*!
+        *   \brief RedisCluster copy constructor is not allowed
+        *   \param cluster The RedisCluster to copy for construction
+        */
         RedisCluster(const RedisCluster& cluster) = delete;
 
-        //! RedisCluster copy assignment operator
+        /*!
+        *   \brief RedisCluster copy assignment is not allowed
+        *   \param cluster The RedisCluster to copy for assignment
+        */
         RedisCluster& operator=(const RedisCluster& cluster) = delete;
 
-        //! Client destructor
+        /*!
+        *   \brief RedisCluster destructor
+        */
         ~RedisCluster();
 
-        //! Run a Command on the RedisCluster and return the CommandReply.
-        virtual CommandReply run(Command& cmd /*!< The Command to run*/
-                                 );
+        /*!
+        *   \brief RedisCluster move constructor
+        *   \param cluster The RedisCluster to move for construction
+        */
+        RedisCluster(RedisCluster&& cluster) = default;
 
-        //! Run a CommandList on the RedisCluster and return the last CommandReply.
-        virtual CommandReply run(CommandList& /*!< The CommandList to run*/
-                                 );
+        /*!
+        *   \brief RedisCluster move assignment
+        *   \param cluster The RedisCluster to move for assignment
+        */
+        RedisCluster& operator=(RedisCluster&& cluster) = default;
 
-        //! Check if a key exists
-        virtual bool key_exists(const std::string& key /*!< The key to check*/
-                                );
+        /*!
+        *   \brief Run a single-key or single-hash slot
+        *          Command on the server
+        *   \param cmd The single-key or single-hash
+        *              slot Comand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(Command& cmd);
 
-        //! Put the RedisAI tensor on the server
-        virtual CommandReply put_tensor(TensorBase& tensor /*!< The Tensor to put*/
-                                        );
+        /*!
+        *   \brief Run multiple single-key or single-hash slot
+        *          Command on the server.  Each Command in the
+        *          CommandList is run sequentially.
+        *   \param cmd The CommandList containing multiple
+        *              single-key or single-hash
+        *              slot Comand to run
+        *   \returns The CommandReply from the last
+        *            command execution
+        */
+        virtual CommandReply run(CommandList& cmd);
 
-        //! Get the RedisAI tensor on the server
-        virtual CommandReply get_tensor(const std::string& key /*!< The key of the Tensor*/
-                                        );
+        /*!
+        *   \brief Check if a key exists in the database
+        *   \param key The key to check
+        *   \returns True if the key exists, otherwise False
+        */
+        virtual bool key_exists(const std::string& key);
 
-        //! Rename a tensor
-        virtual CommandReply rename_tensor(const std::string& key /*!< The original tensor key*/,
-                                           const std::string& new_key /*!< The new tensor key*/
-                                           );
+        /*!
+        *   \brief Put a Tensor on the server
+        *   \param tensor The Tensor to put on the server
+        *   \returns The CommandReply from the put tensor
+        *            command execution
+        */
+        virtual CommandReply put_tensor(TensorBase& tensor);
 
-        //! Delete a tensor
-        virtual CommandReply delete_tensor(const std::string& key /*!< The key of tensor to delete*/
-                                           );
+        /*!
+        *   \brief Get a Tensor from the server
+        *   \param key The name of the tensor to retrieve
+        *   \returns The CommandReply from the get tensor server
+        *            command execution
+        */
+        virtual CommandReply get_tensor(const std::string& key);
 
-        //! This method will copy a tensor to the destination key
-        virtual CommandReply copy_tensor(const std::string& src_key /*!< The source tensor key*/,
-                                         const std::string& dest_key /*!< The destination tensor key*/
-                                         );
+        /*!
+        *   \brief Rename a tensor in the database
+        *   \param key The original key for the tensor
+        *   \param new_key The new key for the tensor
+        *   \returns The CommandReply from the last Command
+        *            execution in the renaming of the tensor.
+        *            In the case of RedisCluster, this is
+        *            the reply for the final delete_tensor call.
+        */
+        virtual CommandReply rename_tensor(const std::string& key,
+                                           const std::string& new_key);
 
-        //! Copy a vector of tensors
-        virtual CommandReply copy_tensors(const std::vector<std::string>& src /*!< The source tensor keys*/,
-                                          const std::vector<std::string>& dest /*!< The destination tensor keys*/
-                                          );
+        /*!
+        *   \brief Delete a tensor in the database
+        *   \param key The database key for the tensor
+        *   \returns The CommandReply from delete command
+        *            executed on the server
+        */
+        virtual CommandReply delete_tensor(const std::string& key);
 
-        //! Set a model on the server
-        virtual CommandReply set_model(const std::string& key /*!< The key to use to place the model*/,
-                                       std::string_view model /*!< The model content*/,
-                                       const std::string& backend /*!< The name of the backend (TF, TFLITE, TORCH, ONNX)*/,
-                                       const std::string& device /*!< The name of the device (CPU, GPU, GPU:0, GPU:1...)*/,
-                                       int batch_size = 0 /*!< The batch size for model execution*/,
-                                       int min_batch_size = 0 /*!< The minimum batch size for model execution*/,
-                                       const std::string& tag = "" /*!< A tag to attach to the model for information purposes*/,
+        /*!
+        *   \brief Copy a tensor from the source key to
+        *          the destination key
+        *   \param src_key The source key for the tensor copy
+        *   \param dest_key The destination key for the tensor copy
+        *   \returns The CommandReply from the last Command
+        *            execution in the copying of the tensor.
+        *            In the case of RedisCluster, this is
+        *            the CommandReply from a put_tensor commands.
+        */
+        virtual CommandReply copy_tensor(const std::string& src_key,
+                                         const std::string& dest_key);
+
+        /*!
+        *   \brief Copy a vector of tensors from source keys
+        *          to destination keys
+        *   \param src_key Vector of source keys
+        *   \param dest_key Vector of destination keys
+        *   \returns The CommandReply from the last Command
+        *            execution in the copying of the tensor.
+        *            Different implementations may have different
+        *            sequences of commands.
+        */
+        virtual CommandReply copy_tensors(const std::vector<std::string>& src,
+                                          const std::vector<std::string>& dest);
+
+        /*!
+        *   \brief Set a model from std::string_view buffer in the
+        *          database for future execution
+        *   \param key The key to associate with the model
+        *   \param model The model as a continuous buffer string_view
+        *   \param backend The name of the backend
+        *                  (TF, TFLITE, TORCH, ONNX)
+        *   \param device The name of the device for execution
+        *                 (e.g. CPU or GPU)
+        *   \param batch_size The batch size for model execution
+        *   \param min_batch_size The minimum batch size for model
+        *                         execution
+        *   \param tag A tag to attach to the model for
+        *              information purposes
+        *   \param inputs One or more names of model input nodes
+        *                 (TF models only)
+        *   \param outputs One or more names of model output nodes
+        *                 (TF models only)
+        *   \returns The CommandReply from the set_model Command
+        */
+        virtual CommandReply set_model(const std::string& key,
+                                       std::string_view model,
+                                       const std::string& backend,
+                                       const std::string& device,
+                                       int batch_size = 0,
+                                       int min_batch_size = 0,
+                                       const std::string& tag = "",
                                        const std::vector<std::string>& inputs
-                                            = std::vector<std::string>() /*!< One or more names of model input nodes (TF models)*/,
+                                            = std::vector<std::string>(),
                                        const std::vector<std::string>& outputs
-                                            = std::vector<std::string>() /*!< One or more names of model output nodes (TF models)*/
-                                       );
+                                            = std::vector<std::string>());
 
-        // Set a script using the provided string_view of the script
-        virtual CommandReply set_script(const std::string& key /*!< The key to use to place the script*/,
-                                        const std::string& device /*!< The device to run the script*/,
-                                        std::string_view script /*!< The script content*/
-                                        );
+        /*!
+        *   \brief Set a script from std::string_view buffer in the
+        *          database for future execution
+        *   \param key The key to associate with the script
+        *   \param device The name of the device for execution
+        *                 (e.g. CPU or GPU)
+        *   \param script The script source in a std::string_view
+        *   \returns The CommandReply from set_script Command
+        */
+        virtual CommandReply set_script(const std::string& key,
+                                        const std::string& device,
+                                        std::string_view script);
 
-        //! Run a model in the database
-        virtual CommandReply run_model(const std::string& key /*!< The key of the model to run*/,
-                                       std::vector<std::string> inputs /*!< The keys of the input tensors*/,
-                                       std::vector<std::string> outputs /*!< The keys of the output tensors*/
-                                       );
+        /*!
+        *   \brief Run a model in the database using the
+        *          specificed input and output tensors
+        *   \param key The key associated with the model
+        *   \param inputs The keys of inputs tensors to use
+        *                 in the model
+        *   \param outputs The keys of output tensors that
+        *                 will be used to save model results
+        *   \returns The CommandReply from the run model server
+        *            Command
+        */
+        virtual CommandReply run_model(const std::string& key,
+                                       std::vector<std::string> inputs,
+                                       std::vector<std::string> outputs);
 
-        //! Run a script in the database
-        virtual CommandReply run_script(const std::string& key /*!< The key of the script to run*/,
-                                        const std::string& function /*!< The name of the function to run in the script*/,
-                                        std::vector<std::string> inputs /*!< The keys of the input tensors*/,
-                                        std::vector<std::string> outputs /*!< The keys of the output tensors*/
-                                        );
+        /*!
+        *   \brief Run a script function in the database using the
+        *          specificed input and output tensors
+        *   \param key The key associated with the script
+        *   \param function The name of the function in the script to run
+        *   \param inputs The keys of inputs tensors to use
+        *                 in the script
+        *   \param outputs The keys of output tensors that
+        *                 will be used to save script results
+        *   \returns The CommandReply from script run Command
+        *            execution
+        */
+        virtual CommandReply run_script(const std::string& key,
+                                        const std::string& function,
+                                        std::vector<std::string> inputs,
+                                        std::vector<std::string> outputs);
 
-        //! Get a model in the database
-        virtual CommandReply get_model(const std::string& key /*!< The key to use to retrieve the model*/
-                                       );
+        /*!
+        *   \brief Retrieve the model from the database
+        *   \param key The key associated with the model
+        *   \returns The CommandReply that contains the result
+        *            of the get model execution on the server
+        */
+        virtual CommandReply get_model(const std::string& key);
 
-        //! Get the script from the database
-        virtual CommandReply get_script(const std::string& key /*!< The key to use to retrieve the script*/
-                                        );
+        /*!
+        *   \brief Retrieve the script from the database
+        *   \param key The key associated with the script
+        *   \returns The CommandReply that contains the result
+        *            of the get script execution on the server
+        */
+        virtual CommandReply get_script(const std::string& key);
 
     private:
 
-        //! Redis cluster object pointer
+        /*!
+        *   \brief sw::redis::RedisCluster object pointer
+        */
         sw::redis::RedisCluster* _redis_cluster;
 
-        //! Vector of database nodes that make up the cluster
+        /*!
+        *   \brief Vector of DBNodes in the cluster
+        */
         std::vector<DBNode> _db_nodes;
 
-        //! Connect to Redis cluster using a single address
-        inline void _connect(std::string address_port /*!< A string formatted as tcp:://address:port for redis connection*/
-                             );
+        /*!
+        *   \brief Connect to the cluster at the address and port
+        *   \param address_port A string formatted as
+        *                       tcp:://address:port
+        *                       for redis connection
+        */
+        inline void _connect(std::string address_port);
 
-        //! Map the RedisCluster via the CLUSTER SLOTS command
+        /*!
+        *   \brief Map the RedisCluster via the CLUSTER SLOTS
+        *          command.
+        */
         inline void _map_cluster();
 
-        //! Get the prefix that can be used to address the correct database for a given command
-        std::string _get_db_node_prefix(Command& cmd /*!< The Command to analyze for database prefix*/
-                                        );
+        /*!
+        *   \brief Get the prefix that can be used to address
+        *          the correct database for a given command
+        *   \param cmd The Command to analyze for DBNode prefix
+        *   \returns The DBNode prefix as a string
+        *   \throw std::runtime_error if the Command does not have
+        *          keys or if multiple keys have different prefixes
+        */
+        std::string _get_db_node_prefix(Command& cmd);
 
-        //! This command parses the CommandReply for the DBNode information
-        inline void _parse_reply_for_slots(CommandReply& reply /*!< The CLUSTER INFO CommandReply*/
-                                           );
+        /*!
+        *   \brief Processes the CommandReply for CLUSTER SLOTS
+        *          to build DBNode information
+        *   \param reply The CommandReply for CLUSTER SLOTS
+        *   \throw std::runtime_error if there is an error
+        *          creating a prefix for a particular DBNode
+        */
+        inline void _parse_reply_for_slots(CommandReply& reply);
 
-        //! Get a DBNode prefix for the provided hash slot
-        std::string _get_crc16_prefix(uint64_t hash_slot /*!< The hash slot*/
-                                      );
+        /*!
+        *   \brief Get a DBNode prefix for the provided hash slot
+        *   \param hash_slot The hash slot to get a prefix for
+        *   \throw std::runtime_error if there is an error
+        *          creating a prefix for a particular DBNode
+        */
+        std::string _get_crc16_prefix(uint64_t hash_slot);
 
-        //! Perform an inverse CRC16 calculation
-        uint64_t _crc16_inverse(uint64_t remainder /*!< The remainder of the CRC16 calculation*/
-                                );
+        /*!
+        *   \brief Perform an inverse CRC16 calculation.
+        *   \details Given a remainder, this function will
+        *            calculate a number that when divded by
+        *            the CRC16 polynomial, yields the remainder.
+        *   \param remainder The polynomial remainder
+        *   \returns A 64-bit number that when divided by the
+        *            CRC16 polynomial yields the remainder.
+        */
+        uint64_t _crc16_inverse(uint64_t remainder);
 
-        //! Determine if the key has a hash tag ("{" and "}") in it
-        bool _has_hash_tag(const std::string& key /*!< The key to inspect for hash tag*/
-                           );
+        /*!
+        *   \brief Determine if the key has a substring
+        *          enclosed by "{" and "}" characters
+        *   \param key The key to examine
+        *   \returns True if the key contains a substring
+        *            enclosed by "{" and "}" characters
+        */
+        bool _has_hash_tag(const std::string& key);
 
-        //! Return the hash key set by the hash tag
-        std::string _get_hash_tag(const std::string& key /*!< The key containing a hash tag*/
-                                  );
+        /*!
+        *   \brief  Return the key enclosed by "{" and "}"
+        *           characters
+        *   \param key The key to examine
+        *   \returns The first substring enclosed by "{" and "}"
+        *           characters
+        */
+        std::string _get_hash_tag(const std::string& key);
 
-        //! Get the hash slot of a key
-        uint16_t _get_hash_slot(const std::string& key /*!< Get the key to process into hash slot*/)
-                                ;
+        /*!
+        *   \brief  Get the hash slot for a key
+        *   \param key The key to examine
+        *   \returns The hash slot of the key
+        */
+        uint16_t _get_hash_slot(const std::string& key);
 
-        //! Get DBNode (by index) that is responsible for the hash slot
-        uint16_t _get_dbnode_index(uint16_t hash_slot /*!< The hash slot to search for*/,
-                                   unsigned lhs /*!< Left search boundary DBNode*/,
-                                   unsigned rhs /*!< Right search bondary DBNode*/
-                                   );
+        /*!
+        *   \brief  Get the index of the DBNode responsible
+        *           for the hash slot
+        *   \param hash_slot The hash slot to search for
+        *   \param lhs The lower bound of the DBNode array to
+        *              search (inclusive)
+        *   \param rhs The upper bound of the DBNode array to
+        *              search (inclusive)
+        *   \returns DBNode index responsible for the hash slot
+        */
+        uint16_t _get_dbnode_index(uint16_t hash_slot,
+                                   unsigned lhs,
+                                   unsigned rhs);
 
-        //! Gets a mapping between original names and temporary names for identical hash slot requirement
+        /*!
+        *   \brief  Attaches a prefix and constant suffix to keys to
+        *           enforce identical hash slot constraint
+        *   \param names The keys that need to be updated for identical
+        *                hash slot constraint
+        *   \param prefix The prefix to attach
+        *   \returns A vector of updated names
+        */
         std::vector<std::string>  _get_tmp_names(std::vector<std::string> names,
                                                  std::string db_prefix);
 
-        //! Delete a list of keys
+        /*!
+        *   \brief  Delete multiple keys with the assumption that all
+        *           keys use the same hash slot
+        *   \param names The keys that need to be updated for identical
+        *                hash slot constraint
+        *   \param prefix The prefix to attach
+        *   \returns A vector of updated names
+        */
         void _delete_keys(std::vector<std::string> key
                           );
 
-        //! Run a model in the database that uses dagrun instead of modelrun
-        void __run_model_dagrun(const std::string& key /*!< The key of the model to run*/,
-                                std::vector<std::string> inputs /*!< The keys of the input tensors*/,
-                                std::vector<std::string> outputs /*!< The keys of the output tensors*/
-                                );
+        /*!
+        *   \brief  Run a model in the database that uses dagrun
+        *   \param key The key associated with the model
+        *   \param inputs The keys of inputs tensors to use
+        *                 in the model
+        *   \param outputs The keys of output tensors that
+        *                 will be used to save model results
+        */
+        void __run_model_dagrun(const std::string& key,
+                                std::vector<std::string> inputs,
+                                std::vector<std::string> outputs);
 
-        //! Retrieve the optimum model prefix for the set of inputs
+        /*!
+        *   \brief  Retrieve the optimum model prefix for
+        *           the set of inputs
+        *   \param name The name of the model
+        *   \param inputs The keys of inputs tensors to use
+        *                 in the model
+        *   \param outputs The keys of output tensors that
+        *                 will be used to save model results
+        */
         DBNode* _get_model_script_db(const std::string& name,
                                      std::vector<std::string>& inputs,
                                      std::vector<std::string>& outputs);
-
-
 };
 
 } //namespace SILC
 
-#endif //SMARTSIM_CPP_CLUSTER_H
+#endif //SILC_CPP_CLUSTER_H

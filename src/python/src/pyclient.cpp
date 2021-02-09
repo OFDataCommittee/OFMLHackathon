@@ -4,9 +4,9 @@ using namespace SILC;
 
 namespace py = pybind11;
 
-PyClient::PyClient(bool cluster, bool fortran_array)
+PyClient::PyClient(bool cluster)
 {
-  Client* client = new Client(cluster, fortran_array);
+  Client* client = new Client(cluster);
   this->_client = client;
 }
 
@@ -26,7 +26,8 @@ void PyClient::put_tensor(std::string& key, std::string& type, py::array data) {
   }
 
   TensorType ttype = TENSOR_TYPE_MAP.at(type);
-  this->_client->put_tensor(key, ptr, dims, ttype, MemoryLayout::contiguous);
+  this->_client->put_tensor(key, ptr, dims, ttype,
+                            MemoryLayout::contiguous);
   return;
 }
 
@@ -38,7 +39,8 @@ py::array PyClient::get_tensor(std::string& key) {
   void* ptr;
 
   // call C++ client
-  this->_client->get_tensor(key, ptr, dims, type, MemoryLayout::contiguous);
+  this->_client->get_tensor(key, ptr, dims, type,
+                            MemoryLayout::contiguous);
 
   // detect data type
   switch(type) {
@@ -125,7 +127,6 @@ void PyClient::set_script(const std::string& key,
   return;
 }
 
-  //! Get the script from the database
 std::string_view PyClient::get_script(const std::string& key) {
   return this->_client->get_script(key);
 }
@@ -139,14 +140,12 @@ void PyClient::run_script(const std::string& key,
   return;
 }
 
-//! Get a model in the database
 py::bytes PyClient::get_model(const std::string& key) {
   std::string model = std::string(this->_client->get_model(key));
   model = py::bytes(model);
   return model;
 }
 
-//! Set a model (from buffer) in the database for future execution
 void PyClient::set_model(const std::string& key,
                  const std::string_view& model,
                  const std::string& backend,
@@ -163,7 +162,6 @@ void PyClient::set_model(const std::string& key,
   return;
 }
 
-//! Set a model (from buffer) in the database for future execution
 void PyClient::set_model_from_file(const std::string& key,
                                    const std::string& model_file,
                                    const std::string& backend,
@@ -179,11 +177,9 @@ void PyClient::set_model_from_file(const std::string& key,
                                      inputs, outputs);
   return;
 }
-
-//! Run a model in the database
 void PyClient::run_model(const std::string& key,
-                std::vector<std::string> inputs,
-                std::vector<std::string> outputs)
+                         std::vector<std::string> inputs,
+                         std::vector<std::string> outputs)
 {
   this->_client->run_model(key, inputs, outputs);
   return;

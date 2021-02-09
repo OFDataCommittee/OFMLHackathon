@@ -1,5 +1,5 @@
-#ifndef SMARTSIM_COMMAND_TCC
-#define SMARTSIM_COMMAND_TCC
+#ifndef SILC_COMMAND_TCC
+#define SILC_COMMAND_TCC
 
 template <class T>
 void Command::add_fields(const std::vector<T>& fields, bool is_key)
@@ -10,4 +10,4 @@ void Command::add_fields(const std::vector<T>& fields, bool is_key)
     return;
 }
 
-#endif //SMARTSIM_COMMAND_TCC
+#endif //SILC_COMMAND_TCC

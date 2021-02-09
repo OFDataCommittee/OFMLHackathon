@@ -1,5 +1,5 @@
-#ifndef SMARTSIM_METADATA_H
-#define SMARTSIM_METADATA_H
+#ifndef SILC_METADATA_H
+#define SILC_METADATA_H
 
 #include "stdlib.h"
 #include <string>
@@ -9,17 +9,12 @@
 #include "sharedmemorylist.h"
 #include "enums/cpp_metadata_type.h"
 
+///@file
+
 namespace gpb = google::protobuf;
 namespace spb = SILCProtobuf;
 
-//Typedef protobuf message names in case proto file changes
-typedef spb::RepeatedStringMeta StringMsg;
-typedef spb::RepeatedDoubleMeta DoubleMsg;
-typedef spb::RepeatedFloatMeta FloatMsg;
-typedef spb::RepeatedSInt64Meta Int64Msg;
-typedef spb::RepeatedUInt64Meta UInt64Msg;
-typedef spb::RepeatedSInt32Meta Int32Msg;
-typedef spb::RepeatedUInt32Meta UInt32Msg;
+namespace SILC {
 
 //Declare the top level container names in the
 //protobuf message so that they are not constant
@@ -32,141 +27,377 @@ static const char* top_uint64_msg = "repeated_uint64_meta";
 static const char* top_int32_msg = "repeated_sint32_meta";
 static const char* top_uint32_msg = "repeated_uint32_meta";
 
-///@file
-///\brief The Command class for constructing meta data messages
-
-namespace SILC {
-
 class MetaData;
 
+/*!
+*   \brief The MetaData class stages metadata fields and
+           values.  Memory associated with metadata
+           retrieval from the MetaData object is valid
+           until the MetaData object is destroyed.
+*/
 class MetaData
 {
     public:
 
-        //! MetaData constructor
+        /*!
+        *   \brief Default MetaData constructor
+        */
         MetaData() = default;
 
-        //! MetaData copy constructor
+        /*!
+        *   \brief MetaData copy constructor
+        *   \param metadata The MetaData object
+        *                   to copy for construction
+        */
         MetaData(const MetaData& metadata);
 
-        //! MetaData move constructor
+        /*!
+        *   \brief MetaData default move constructor
+        *   \param metadata The MetaData object
+        *                   to move for construction
+        */
         MetaData(MetaData&& metadata) = default;
 
-        //! MetaData copy assignment operator
+        /*!
+        *   \brief MetaData copy assignment operator
+        *   \param metadata The MetaData object
+        *                   to copy for assignment
+        *   \returns MetaData object reference that has
+        *            been assigned the values
+        */
         MetaData& operator=(const MetaData&);
 
-        //! MetaData move assignment operator
+        /*!
+        *   \brief MetaData move assignment operator
+        *   \param metadata The MetaData object
+        *                   to move for assignment
+        *   \returns MetaData object reference that has
+        *            been assigned the values
+        */
         MetaData& operator=(MetaData&& metadata) = default;
 
-        //! Reconstruct metadata from buffer
-        void fill_from_buffer(const char* buf /*!< The buffer used to fill the metadata object*/,
-                              unsigned long long buf_size /*!< The length of the buffer*/
-                              );
+        /*!
+        *   \brief Reconstruct metadata from buffer
+        *   \details This function initializes the top level
+        *            protobuf message with the buffer.
+        *            The repeated field metadata messages
+        *            in the top level message are then unpacked
+        *            (i.e pointers to each metadata protobuf
+        *            message are placed in the message map).
+        *   \param buf The buffer used to fill the metadata object
+        *   \param buf_size The length of the buffer
+        */
+        void fill_from_buffer(const char* buf,
+                              unsigned long long buf_size);
 
-        //! Add a value to a metadata field (non-string)
-        void add_scalar(const std::string& field_name /*!< The name of the metadata field*/,
-                        const void* value /*!< The value of the metadata field*/,
-                        const MetaDataType type /*!< The data type of the field*/
-                        );
+        /*!
+        *   \brief Add metadata scalar field (non-string) with value.
+        *          If the field does not exist, it will be created.
+        *          If the field exists, the value
+        *          will be appended to existing field.
+        *   \param field_name The name of the field in which to
+        *                     place the value
+        *   \param value A pointer to the value
+        *   \param type The MetaDataType of the value
+        */
+        void add_scalar(const std::string& field_name,
+                        const void* value,
+                        const MetaDataType type);
 
-        //! Add a value to a metadata field (non-string)
-        void add_string(const std::string& field_name /*!< The name of the metadata field*/,
-                        const std::string& value /*!< The value of the metadata field*/
-                        );
+        /*!
+        *   \brief Add string to a metadata field.
+        *          If the field does not exist, it will be created.
+        *          If the field exists, the value
+        *          will be appended to existing field.
+        *   \param field_name The name of the field in which to
+        *                     place the value
+        *   \param value The string value to add to the field
+        */
+        void add_string(const std::string& field_name,
+                        const std::string& value);
 
-        //! Get metadata values from field that are scalars (non-string)
-        void get_scalar_values(const std::string& name /*!< The name of the metadata field*/,
-                               void*& data /*!< The pointer that will be pointed to the metadata*/,
-                               size_t& length /*!< An integer that will be set to the number of values in the metadata field*/,
-                               MetaDataType& type /*!< The data type of the field*/
-                               );
+        /*!
+        *   \brief  Get metadata values from field
+        *           that are scalars (non-string)
+        *   \details This function allocates memory to
+        *            return a pointer (via pointer reference "data")
+        *            to the user and sets the value of "length" to
+        *            the number of values in data.  The MetaDataType
+        *            reference is also set to the type of the metadata
+        *            field because it is assumed this user is unaware
+        *            of type.  The allocated memory is valid
+        *            until the MetaData object is destroyed.
+        *   \param name The name of the field to retrieve
+        *   \param data A c-ptr pointed to newly allocated memory
+        *               for the metadata field.
+        *   \param length The number of elements in the field
+        *   \param type The MetaDataType of the retrieved field
+        */
+        void get_scalar_values(const std::string& name,
+                               void*& data,
+                               size_t& length,
+                               MetaDataType& type);
 
-        //! Get metadata values from field that are strings
-        std::vector<std::string> get_string_values(const std::string& name /*!< The name of the metadata field*/
-                                                   );
+        /*!
+        *   \brief  Get metadata values string field
+        *   \details The string field is returned as a std::vector
+        *            of std::string which means that the memory
+        *            for the field is managed by the returned object.
+        *   \param name The name of the string field to retrieve
+        *   \returns A vector of the strings in the field
+        */
+        std::vector<std::string> get_string_values(const std::string& name);
 
-        //! Get metadata values from field that are strings using a c-style interface
-        void get_string_values(const std::string& name /*!< The name of the metadata field*/,
-                               char**& data /*!< The pointer that will be pointed to the metadata*/,
-                               size_t& n_strings /*!< An integer that will be set to the number of values in the metadata field*/,
-                               size_t*& lengths /*!< An array of string lengths provided to the user for iterating over the c-strings*/
-                               );
+        /*!
+        *   \brief  Get metadata string field using a c-style
+        *           interface.
+        *   \details This function allocates memory to
+        *            return a pointer (via pointer reference "data")
+        *            to the user and sets the value of n_strings to
+        *            the number of strings in the field.  Memory is also
+        *            allocated to store the length of each string in the
+        *            field, and the provided lengths pointer is pointed
+        *            to this new memory.  The memory for the strings and
+        *            string lengths is valid until the MetaData object is
+        *            destroyed.
+        *   \param name The name of the field to retrieve
+        *   \param data A c-ptr pointed to newly allocated memory
+        *               for the metadata field.
+        *   \param n_strings The number of strings in the field
+        *   \param lengths A size_t pointer pointed to newly allocated
+        *                  memory that stores the length of each string
+        */
+        void get_string_values(const std::string& name,
+                               char**& data,
+                               size_t& n_strings,
+                               size_t*& lengths);
 
-        //! Get the metadata fields as a buffer
+        /*!
+        *   \brief  Get a serialized buffer of the MetaData
+        *           fields that can be sent to the database.
+        *   \returns A std::string_view of the MetaData contents
+        *            serialized
+        */
         std::string_view get_metadata_buf();
+
+        /*!
+        *   \typedef The Protobuf message holding string fields
+        */
+        typedef spb::RepeatedStringMeta StringMsg;
+
+        /*!
+        *   \typedef The Protobuf message holding double fields
+        */
+        typedef spb::RepeatedDoubleMeta DoubleMsg;
+
+        /*!
+        *   \typedef The Protobuf message holding float fields
+        */
+        typedef spb::RepeatedFloatMeta FloatMsg;
+
+        /*!
+        *   \typedef The Protobuf message holding int64 fields
+        */
+        typedef spb::RepeatedSInt64Meta Int64Msg;
+
+        /*!
+        *   \typedef The Protobuf message holding uint64 fields
+        */
+        typedef spb::RepeatedUInt64Meta UInt64Msg;
+
+        /*!
+        *   \typedef The Protobuf message holding int32 fields
+        */
+        typedef spb::RepeatedSInt32Meta Int32Msg;
+
+        /*!
+        *   \typedef The Protobuf message holding uint32 fields
+        */
+        typedef spb::RepeatedUInt32Meta UInt32Msg;
 
     private:
 
-        //! The protobuf message holding all metadata
+        /*!
+        *   \brief The protobuf message that holds all fields
+        */
         spb::MetaData _pb_metadata_msg;
 
-        //! Maps meta data field name to the protobuf metadata message.
-        //! This map does not need to manage memory because all of these
-        //! fields will be added ot the top level message and that
-        //! top level message will handle memory.
+        /*!
+        *   \brief Maps meta data field name to the
+        *          protobuf metadata message.
+        *   \details This map does not need to manage
+        *            memory because all of these
+        *            fields will be added to the top
+        *            level message and that top level
+        *            message will handle memory.
+        */
         std::unordered_map<std::string, gpb::Message*> _meta_msg_map;
 
-        //! SharedMemoryList objects for each metadata type for managing
-        //! memory allocations associated with retrieving metadata
+        /*!
+        *   \brief SharedMemoryList for arrays of c-str
+        *          memory allocation associated with retrieving
+        *          metadata
+        */
         SharedMemoryList<char*>_char_array_mem_mgr;
+
+        /*!
+        *   \brief SharedMemoryList for c-str memory
+        *          allocation associated with retrieving metadata
+        */
         SharedMemoryList<char> _char_mem_mgr;
+
+        /*!
+        *   \brief SharedMemoryList for double memory
+        *          allocation associated with retrieving metadata
+        */
         SharedMemoryList<double> _double_mem_mgr;
+
+        /*!
+        *   \brief SharedMemoryList for float memory
+        *          allocation associated with retrieving metadata
+        */
         SharedMemoryList<float> _float_mem_mgr;
+
+        /*!
+        *   \brief SharedMemoryList for int64 memory
+        *          allocation associated with retrieving metadata
+        */
         SharedMemoryList<int64_t> _int64_mem_mgr;
+
+        /*!
+        *   \brief SharedMemoryList for uint64 memory
+        *          allocation associated with retrieving metadata
+        */
         SharedMemoryList<uint64_t> _uint64_mem_mgr;
+
+        /*!
+        *   \brief SharedMemoryList for int32 memory
+        *          allocation associated with retrieving metadata
+        */
         SharedMemoryList<int32_t> _int32_mem_mgr;
+
+        /*!
+        *   \brief SharedMemoryList for uint32 memory
+        *          allocation associated with retrieving metadata
+        */
         SharedMemoryList<uint32_t> _uint32_mem_mgr;
+
+        /*!
+        *   \brief SharedMemoryList for size_t memory
+        *          allocation associated with retrieving
+        *          string field sting lengths
+        */
         SharedMemoryList<size_t> _str_len_mem_mgr;
 
-        //! The metadata buffer
+        /*!
+        *   \brief The serialized MetaData buffer
+        */
         std::string _buf;
 
-        //! Unpacks the meta data repeated field in the top
-        //! level message and puts message pointers into _meta_msg_map
-        void _unpack_metadata(const std::string& field_name /*!< The name of the metadata field*/
-                              );
+        /*!
+        *   \brief Unpacks the all fields for a metadata type
+        *          (e.g. string, float, int) that are in the
+        *          top level protobuf message and puts pointers
+        *          to the sub messages into _meta_msg_map
+        *   \param field_name The name of the metadata
+        *                     field type message in the top
+        *                     level message
+        */
+        void _unpack_metadata(const std::string& field_name);
 
-        //! Create a metadata message for the field and type
-        void _create_message(const std::string& field_name /*!< The name of the metadata field*/,
-                             const MetaDataType type /*!< The data type of the field*/
-                             );
+        /*!
+        *   \brief Create a new metadata message for the field
+        *          and type
+        *   \param field_name The name of the metadata field
+        *   \param type The data type of the field
+        */
+        void _create_message(const std::string& field_name,
+                             const MetaDataType type);
 
-        //! Templated function for creating metadata field
+
+        /*!
+        *   \brief This function creates a protobuf message for the
+        *          metadata field, adds the protobuf message to the map
+        *          holding all metadata messages, and sets the internal
+        *          id field of the message to field_name.  In this case,
+        *          the top level message is the repeated field that
+        *          holds all metadata fields for a specific type.
+        *   \tparam PB The protobuf message type to create
+        *   \param field_name The name of the metadata field
+        *   \param container_name The name of the top level message
+        *                         container
+        */
         template <typename PB>
-        void _create_message_by_type(const std::string& field_name /*!< The name of the metadata field*/,
-                                     const std::string& container_name /*!< The name of the top level message container*/
-                                     );
+        void _create_message_by_type(const std::string& field_name,
+                                     const std::string& container_name);
 
+        /*!
+        *   \brief Set a string value to a string field
+        *          (non-repeated field)
+        *   \param msg Protobuf message containing the string field
+        *   \param field_name The name of the metadata field
+        *   \param value The field value
+        */
+        void _set_string_in_message(gpb::Message* msg,
+                                    const std::string& field_name,
+                                    std::string value);
 
-        //! Set a string value to a string field (non-repeated field)
-        void _set_string_in_message(gpb::Message* msg /*!< Protobuf message containing the string field*/,
-                                    const std::string& field_name /*!< The name of the metadata field*/,
-                                    std::string value /*!< The field value*/
-                                    );
+        /*!
+        *   \brief Get an array of string metadata values
+        *   \param msg Protobuf message containing the string field
+        *   \returns The strings in the protobuf message
+        */
+        std::vector<std::string> _get_string_field_values(gpb::Message* msg);
 
-        //! Get an array of string metadata values
-        std::vector<std::string> _get_string_field_values(gpb::Message* msg /*!< Protobuf message containing the string field*/
-                                                          );
-
-        //! Get non-string numeric field values
+        /*!
+        *   \brief This funcition retrieves all of the metadata
+        *          "data" non-string fields from the message.  A copy
+        *          of the protobuf values is made using the
+        *          MemoryList objects in the MetaData class,
+        *          and as a result, the metadata values passed back
+        *          to the user will live as long as the MetaData object
+        *          persists.
+        *   \tparam T the type associated with the metdata (e.g. double, float)
+        *   \param msg Protobuf message containing the scalar field
+        *   \param data The pointer that will be pointed to the metadata
+        *   \param n_Values An size_t variable that will be set to the
+        *                   number of values in the metadata field
+        *   \param mem_list Memory manager for the metadata heap allocations
+        *                   associated with copying fetched metadata
+        */
         template <typename T>
-        void _get_numeric_field_values(gpb::Message* msg /*!< Protobuf message containing the string field*/,
-                                       void*& data /*!< The pointer that will be pointed to the metadata*/,
-                                       size_t& n_values /*!< An integer that will be set to the number of values in the metadata field*/,
-                                       SharedMemoryList<T>& mem_list /*!< Memory manager for the metadata heap allocations*/
-                                       );
+        void _get_numeric_field_values(gpb::Message* msg,
+                                       void*& data,
+                                       size_t& n_values,
+                                       SharedMemoryList<T>& mem_list);
 
-        //! Check if a metadata field already exists by the name
-        bool _field_exists(const std::string& field_name /*!< The name of the metadata field*/
-                           );
+        /*!
+        *   \brief Return true if the field name is already in use
+        *          for a protobuf messsage, otherwise false.
+        *   \param field_name The name of the metadata field
+        *   \returns True if the field name is already in use,
+        *            otherwise false
+        */
+        bool _field_exists(const std::string& field_name);
 
-        //! Gets the metadata type for a particular field
+        /*!
+        *   \brief Gets the metadata type for a particular field
+        *   \param name The name of the metadata field
+        *   \returns The MetaDataType of the field
+        */
         MetaDataType _get_meta_value_type(const std::string& name);
 
-        //! Rebuild the protobuf message map
+        /*!
+        *   \brief Rebuild the message map that maps
+        *          field name to protobuf message
+        *   \details This function should be invoked if
+        *            the location of messages in the map changes.
+        *            The message map is rebuilt by looping through
+        *            all fields in the main protobuf message.
+        */
         void _rebuild_message_map();
 };
 
 } //namespace SILC
 
-#endif //SMARTSIM_METADATA_H
+#endif //SILC_METADATA_H

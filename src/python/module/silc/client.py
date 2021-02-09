@@ -11,7 +11,7 @@ from .util import Dtypes, init_default
 
 
 class Client(PyClient):
-    def __init__(self, address=None, cluster=False, fortran=False):
+    def __init__(self, address=None, cluster=False):
         """Initialize a RedisAI client.
 
         For clusters, the address can be a single tcp/ip address and port
@@ -24,8 +24,6 @@ class Client(PyClient):
         :param address: Address of the database
         :param cluster: True if connecting to a redis cluster, defaults to False
         :type cluster: bool, optional
-        :param fortran: True if using Fortran arrays, defaults to False
-        :type fortran: bool, optional
         :raises RedisConnectionError: if connection initialization fails
         """
         if address:
@@ -33,7 +31,7 @@ class Client(PyClient):
         if "SSDB" not in os.environ:
             raise RedisConnectionError()
         try:
-            super().__init__(cluster, fortran)
+            super().__init__(cluster)
         except RuntimeError as e:
             raise RedisConnectionError(str(e)) from None
 

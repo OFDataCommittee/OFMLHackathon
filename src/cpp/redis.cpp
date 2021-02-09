@@ -4,12 +4,6 @@ using namespace SILC;
 
 Redis::Redis() : RedisServer()
 {
-    /* Default Redis constructor that
-    manages a connection to a single
-    Redis database.  This default constructor
-    will get the database address from
-    the environment variable.
-    */
     std::string address_port = this->_get_ssdb();
     this->_connect(address_port);
     return;
@@ -17,38 +11,23 @@ Redis::Redis() : RedisServer()
 
 Redis::Redis(std::string address_port) : RedisServer()
 {
-    /* Redis constructor that will not use
-    environment variable addresses to connect,
-    but the provided address_port string.
-    The address_port string should be formatted as:
-    tcp://address:port
-    */
     this->_connect(address_port);
     return;
 }
 
 Redis::~Redis()
 {
-    /* Redis destructor
-    */
     if(this->_redis)
         delete this->_redis;
 }
 
 CommandReply Redis::run(Command& cmd)
 {
-    /* Runs a Command on the non-cluster
-    Redis database and returns the CommandReply.
-    */
     return this->_run(this->_redis, cmd);
 }
 
 CommandReply Redis::run(CommandList& cmds)
 {
-    /* This function executes a series of Command objects
-    contained in a CommandList
-    */
-
     CommandList::iterator cmd = cmds.begin();
     CommandList::iterator cmd_end = cmds.end();
     CommandReply reply;
@@ -61,8 +40,6 @@ CommandReply Redis::run(CommandList& cmds)
 
 bool Redis::key_exists(const std::string& key)
 {
-    /* Return true if the key exists.
-    */
     Command cmd;
     cmd.add_field("EXISTS");
     cmd.add_field(key);
@@ -72,8 +49,6 @@ bool Redis::key_exists(const std::string& key)
 
 CommandReply Redis::put_tensor(TensorBase& tensor)
 {
-    /* Put a Tensor on the Redis database.
-    */
     Command cmd;
     cmd.add_field("AI.TENSORSET");
     cmd.add_field(tensor.name());
@@ -86,8 +61,6 @@ CommandReply Redis::put_tensor(TensorBase& tensor)
 
 CommandReply Redis::get_tensor(const std::string& key)
 {
-    /* Get a Tensor on from the Redis database.
-    */
     Command cmd;
     cmd.add_field("AI.TENSORGET");
     cmd.add_field(key);
@@ -99,8 +72,6 @@ CommandReply Redis::get_tensor(const std::string& key)
 CommandReply Redis::rename_tensor(const std::string& key,
                                   const std::string& new_key)
 {
-    /* Rename a Tensor in the Redis database.
-    */
     Command cmd;
     cmd.add_field("RENAME");
     cmd.add_field(key);
@@ -110,8 +81,6 @@ CommandReply Redis::rename_tensor(const std::string& key,
 
 CommandReply Redis::delete_tensor(const std::string& key)
 {
-    /* Delete a Tensor in the Redis cluster.
-    */
     Command cmd;
     cmd.add_field("DEL");
     cmd.add_field(key, true);
@@ -121,8 +90,6 @@ CommandReply Redis::delete_tensor(const std::string& key)
 CommandReply Redis::copy_tensor(const std::string& src_key,
                                 const std::string& dest_key)
 {
-    /*Copy a Tensor from the src_key to the dest_key.
-    */
     Command cmd;
     cmd.add_field("COPY");
     cmd.add_field(src_key);
@@ -133,9 +100,6 @@ CommandReply Redis::copy_tensor(const std::string& src_key,
 CommandReply Redis::copy_tensors(const std::vector<std::string>& src,
                                  const std::vector<std::string>& dest)
 {
-    /* This function will copy a list of tensors from
-    src to dest.
-    */
     std::vector<std::string>::const_iterator src_it = src.cbegin();
     std::vector<std::string>::const_iterator src_it_end = src.cend();
 
@@ -165,9 +129,6 @@ CommandReply Redis::set_model(const std::string& model_name,
                               const std::vector<std::string>& outputs
                               )
 {
-    /*This function will set the provided model into the database
-    */
-
     Command cmd;
     cmd.add_field("AI.MODELSET");
     cmd.add_field(model_name);
@@ -202,8 +163,6 @@ CommandReply Redis::set_script(const std::string& key,
                                const std::string& device,
                                std::string_view script)
 {
-    /*This function will set a script from the provided buffer.
-    */
     Command cmd;
     cmd.add_field("AI.SCRIPTSET");
     cmd.add_field(key, true);
@@ -217,8 +176,6 @@ CommandReply Redis::run_model(const std::string& key,
                               std::vector<std::string> inputs,
                               std::vector<std::string> outputs)
 {
-    /*This function will run a RedisAI model.
-    */
     Command cmd;
     cmd.add_field("AI.MODELRUN");
     cmd.add_field(key);
@@ -234,8 +191,6 @@ CommandReply Redis::run_script(const std::string& key,
                               std::vector<std::string> inputs,
                               std::vector<std::string> outputs)
 {
-    /*This function will run a RedisAI model.
-    */
     Command cmd;
     cmd.add_field("AI.SCRIPTRUN");
     cmd.add_field(key);
@@ -249,9 +204,6 @@ CommandReply Redis::run_script(const std::string& key,
 
 CommandReply Redis::get_model(const std::string& key)
 {
-    /* This function returns the CommandReply
-    from the AI.MODELGET command.
-    */
     Command cmd;
     cmd.add_field("AI.MODELGET");
     cmd.add_field(key);
@@ -261,9 +213,6 @@ CommandReply Redis::get_model(const std::string& key)
 
 CommandReply Redis::get_script(const std::string& key)
 {
-    /* This function returns the CommandReply
-    from the AI.SCRIPTGET command.
-    */
     Command cmd;
     cmd.add_field("AI.SCRIPTGET");
     cmd.add_field(key, true);
@@ -273,10 +222,6 @@ CommandReply Redis::get_script(const std::string& key)
 
 inline void Redis::_connect(std::string address_port)
 {
-    /* Connects to cluster using the provided string.
-    The string should be formated as:
-    tcp://address:port .
-    */
     int n_connection_trials = 10;
 
     while(n_connection_trials > 0) {

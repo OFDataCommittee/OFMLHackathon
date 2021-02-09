@@ -2,10 +2,8 @@
 
 using namespace SILC;
 
-Client::Client(bool cluster, bool fortran_array)
+Client::Client(bool cluster)
 {
-    /* Client constructor
-    */
     if(cluster) {
         this->_redis_cluster = new RedisCluster();
         this->_redis = 0;
@@ -21,8 +19,6 @@ Client::Client(bool cluster, bool fortran_array)
 }
 
 Client::~Client() {
-    /* Client destructor
-    */
     if(this->_redis_cluster)
         delete this->_redis_cluster;
     if(this->_redis)
@@ -31,118 +27,108 @@ Client::~Client() {
 
 void Client::put_dataset(DataSet& dataset)
 {
-  /* This function will place a DataSet into the database
-  */
-  CommandList cmds;
-  Command* cmd;
 
-  std::string key;
+    CommandList cmds;
+    Command* cmd;
 
-  // Send the metadata message
-  cmd = cmds.add_command();
+    std::string key;
 
-  key = this->_put_prefix() + "{" +
-        dataset.name + "}" + ".meta";
-
-  cmd->add_field("SET");
-  cmd->add_field(key, true);
-  cmd->add_field_ptr(dataset.get_metadata_buf());
-
-  // Send the tensor data
-  DataSet::tensor_iterator it = dataset.tensor_begin();
-  DataSet::tensor_iterator it_end = dataset.tensor_end();
-  TensorBase* tensor = 0;
-  while(it != it_end) {
-    tensor = *it;
-    key = this->_put_prefix() + "{"
-          + dataset.name + "}."
-          + tensor->name();
+    // Send the metadata message
     cmd = cmds.add_command();
-    cmd->add_field("AI.TENSORSET");
+
+    key = this->_put_prefix() + "{" +
+            dataset.name + "}" + ".meta";
+
+    cmd->add_field("SET");
     cmd->add_field(key, true);
-    cmd->add_field(tensor->type_str());
-    cmd->add_fields(tensor->dims());
-    cmd->add_field("BLOB");
-    cmd->add_field_ptr(tensor->buf());
-    it++;
-  }
-  this->_redis_cluster->run(cmds);
-  return;
+    cmd->add_field_ptr(dataset.get_metadata_buf());
+
+    // Send the tensor data
+    DataSet::tensor_iterator it = dataset.tensor_begin();
+    DataSet::tensor_iterator it_end = dataset.tensor_end();
+    TensorBase* tensor = 0;
+    while(it != it_end) {
+        tensor = *it;
+        key = this->_put_prefix() + "{"
+            + dataset.name + "}."
+            + tensor->name();
+        cmd = cmds.add_command();
+        cmd->add_field("AI.TENSORSET");
+        cmd->add_field(key, true);
+        cmd->add_field(tensor->type_str());
+        cmd->add_fields(tensor->dims());
+        cmd->add_field("BLOB");
+        cmd->add_field_ptr(tensor->buf());
+        it++;
+    }
+    this->_redis_cluster->run(cmds);
+    return;
 }
 
 DataSet Client::get_dataset(const std::string& name)
 {
-  /* This function will retrieve a dataset from the database
-  */
-
-  // Get the metadata message and construct DataSet
-  CommandReply reply;
-  Command cmd;
-
-  std::string key;
-
-  cmd.add_field("GET");
-  key  = this->_get_prefix() +
-         "{" + std::string(name) +
-          "}" + ".meta";
-  cmd.add_field(key, true);
-  reply =  this->_redis_server->run(cmd);
-
-  DataSet dataset = DataSet(name, reply.str(), reply.str_len());
-
-  // Loop through and add each tensor to the dataset
-  std::vector<std::string> tensor_names =
-    dataset.get_meta_strings(".tensors");
-
-  for(size_t i=0; i<tensor_names.size(); i++) {
-    key = this->_get_prefix() +
-          "{" + dataset.name + "}."
-          + tensor_names[i];
-    Command cmd;
-    cmd.add_field("AI.TENSORGET");
-    cmd.add_field(key, true);
-    cmd.add_field("META");
-    cmd.add_field("BLOB");
+    // Get the metadata message and construct DataSet
     CommandReply reply;
-    reply = this->_redis_server->run(cmd);
+    Command cmd;
 
-    std::vector<size_t> reply_dims = CommandReplyParser::get_tensor_dims(reply);
-    std::string_view blob = CommandReplyParser::get_tensor_data_blob(reply);
-    TensorType type = CommandReplyParser::get_tensor_data_type(reply);
-    dataset._add_to_tensorpack(tensor_names[i],
-                               (void*)blob.data(), reply_dims,
-                               type, MemoryLayout::contiguous);
-  }
-  return dataset;
+    std::string key;
+
+    cmd.add_field("GET");
+    key  = this->_get_prefix() +
+            "{" + std::string(name) +
+            "}" + ".meta";
+    cmd.add_field(key, true);
+    reply =  this->_redis_server->run(cmd);
+
+    DataSet dataset = DataSet(name, reply.str(), reply.str_len());
+
+    // Loop through and add each tensor to the dataset
+    std::vector<std::string> tensor_names =
+        dataset.get_meta_strings(".tensors");
+
+    for(size_t i=0; i<tensor_names.size(); i++) {
+        key = this->_get_prefix() +
+            "{" + dataset.name + "}."
+            + tensor_names[i];
+        Command cmd;
+        cmd.add_field("AI.TENSORGET");
+        cmd.add_field(key, true);
+        cmd.add_field("META");
+        cmd.add_field("BLOB");
+        CommandReply reply;
+        reply = this->_redis_server->run(cmd);
+
+        std::vector<size_t> reply_dims =
+            CommandReplyParser::get_tensor_dims(reply);
+        std::string_view blob =
+            CommandReplyParser::get_tensor_data_blob(reply);
+        TensorType type =
+            CommandReplyParser::get_tensor_data_type(reply);
+        dataset._add_to_tensorpack(tensor_names[i],
+                                (void*)blob.data(), reply_dims,
+                                type, MemoryLayout::contiguous);
+    }
+    return dataset;
 }
 
 void Client::rename_dataset(const std::string& name,
                             const std::string& new_name)
 {
-  /* This function will rename a dataset (all tensors
-  and metadata).
-  */
-  throw std::runtime_error("rename_dataset is incomplete");
-  return;
+    throw std::runtime_error("rename_dataset is incomplete");
+    return;
 }
 
 void Client::copy_dataset(const std::string& src_name,
                           const std::string& dest_name)
 {
-  /* This function will copy a dataset (all tensors
-  and metadata).
-  */
-  throw std::runtime_error("copy_dataset is incomplete");
-  return;
+    throw std::runtime_error("copy_dataset is incomplete");
+    return;
 }
 
 void Client::delete_dataset(const std::string& name)
 {
-  /* This function will delete a dataset (all tensors
-  and metadata).
-  */
-  throw std::runtime_error("delete_dataset is incomplete");
-  return;
+    throw std::runtime_error("delete_dataset is incomplete");
+    return;
 }
 
 void Client::put_tensor(const std::string& key,
@@ -151,8 +137,6 @@ void Client::put_tensor(const std::string& key,
                         const TensorType type,
                         const MemoryLayout mem_layout)
 {
-    /* This function puts a tensor into the datastore
-    */
     std::string p_key = this->_put_prefix() + key;
 
     TensorBase* tensor;
@@ -202,19 +186,15 @@ void Client::get_tensor(const std::string& key,
                         TensorType& type,
                         const MemoryLayout mem_layout)
 {
-    /* This function gets a tensor from the database,
-    allocates memory in the specified format for the
-    user, sets the dimensions of the dims vector
-    for the user, and points the data pointer to
-    the allocated memory space.
-    */
+
 
     std::string g_key = this->_get_prefix() + key;
     CommandReply reply = this->_redis_server->get_tensor(g_key);
 
     dims = CommandReplyParser::get_tensor_dims(reply);
     type = CommandReplyParser::get_tensor_data_type(reply);
-    std::string_view blob = CommandReplyParser::get_tensor_data_blob(reply);
+    std::string_view blob =
+        CommandReplyParser::get_tensor_data_blob(reply);
 
     if(dims.size()<=0)
         throw std::runtime_error("The number of dimensions of the "\
@@ -282,15 +262,7 @@ void Client::get_tensor(const std::string& key,
                                 TensorType& type,
                                 const MemoryLayout mem_layout)
 {
-    /* This function will retrieve tensor data
-    pointer to the user.  This interface is a c-style
-    interface for the dimensions and type for the
-    c-interface because memory mamange for
-    the dimensions needs to be handled within
-    the client.  The retrieved tensor data and
-    dimensions will be freed when the client
-    is destroyed.
-    */
+
     std::vector<size_t> dims_vec;
     this->get_tensor(key, data, dims_vec,
                     type, mem_layout);
@@ -317,22 +289,19 @@ void Client::unpack_tensor(const std::string& key,
                           const TensorType type,
                           const MemoryLayout mem_layout)
 {
-    /* This function gets a tensor from the database and
-    copies the data to the data pointer location.
-    */
-
     if(mem_layout == MemoryLayout::contiguous &&
         dims.size()>1) {
         throw std::runtime_error("The destination memory space "\
-                                    "dimension vector should only "\
-                                    "be of size one if the memory "\
-                                    "layout is contiguous.");
+                                "dimension vector should only "\
+                                "be of size one if the memory "\
+                                "layout is contiguous.");
         }
 
     std::string g_key = this->_get_prefix() + key;
     CommandReply reply = this->_redis_server->get_tensor(g_key);
 
-    std::vector<size_t> reply_dims = CommandReplyParser::get_tensor_dims(reply);
+    std::vector<size_t> reply_dims =
+        CommandReplyParser::get_tensor_dims(reply);
 
     if(mem_layout == MemoryLayout::contiguous ||
         mem_layout == MemoryLayout::fortran_contiguous) {
@@ -341,10 +310,11 @@ void Client::unpack_tensor(const std::string& key,
         for(size_t i=0; i<reply_dims.size(); i++) {
         total_dims *= reply_dims[i];
         }
-        if( (total_dims != dims[0]) && (mem_layout == MemoryLayout::contiguous) )
-        throw std::runtime_error("The dimensions of the fetched tensor "\
-                                "do not match the length of the "\
-                                "contiguous memory space.");
+        if( (total_dims != dims[0]) &&
+            (mem_layout == MemoryLayout::contiguous) )
+        throw std::runtime_error("The dimensions of the fetched "\
+                                "tensor do not match the length of "\
+                                "the contiguous memory space.");
     }
 
     if(mem_layout == MemoryLayout::nested) {
@@ -352,16 +322,16 @@ void Client::unpack_tensor(const std::string& key,
         throw std::runtime_error("The number of dimensions of the  "\
                                 "fetched tensor, " +
                                 std::to_string(reply_dims.size()) + " "\
-                                "does not match the number of dimensions "\
-                                "of the user memory space, " +
+                                "does not match the number of "\
+                                "dimensions of the user memory space, " +
                                 std::to_string(dims.size()));
 
         for(size_t i=0; i<reply_dims.size(); i++) {
-        if(dims[i]!=reply_dims[i]) {
-            throw std::runtime_error("The dimensions of the fetched tensor "\
-                                    "do not match the provided dimensions "\
-                                    "of the user memory space.");
-        }
+            if(dims[i]!=reply_dims[i]) {
+                throw std::runtime_error("The dimensions of the fetched tensor "\
+                                        "do not match the provided "\
+                                        "dimensions of the user memory space.");
+            }
         }
     }
 
@@ -423,10 +393,6 @@ void Client::unpack_tensor(const std::string& key,
 void Client::rename_tensor(const std::string& key,
                            const std::string& new_key)
 {
-    /* This function moves a tensor from the key to the new_key.
-    Currently both cluster and non-cluster configurations first
-    copy the tensor and then delete it.
-    */
     CommandReply reply =
         this->_redis_server->rename_tensor(key, new_key);
     return;
@@ -434,8 +400,6 @@ void Client::rename_tensor(const std::string& key,
 
 void Client::delete_tensor(const std::string& key)
 {
-    /* This function will delete a tensor from the database
-    */
     CommandReply reply =
             this->_redis_server->delete_tensor(key);
     return;
@@ -444,9 +408,6 @@ void Client::delete_tensor(const std::string& key)
 void Client::copy_tensor(const std::string& src_key,
                          const std::string& dest_key)
 {
-  /* This function copies a tensor from the src_key to the
-  dest_key.
-  */
   CommandReply reply =
         this->_redis_server->copy_tensor(src_key, dest_key);
   return;
@@ -462,9 +423,6 @@ void Client::set_model_from_file(const std::string& key,
                                  const std::vector<std::string>& inputs,
                                  const std::vector<std::string>& outputs)
 {
-    /*This function will set a model from the database that is saved
-    in a file.  It is assumed that the file is a binary file.
-    */
     if(model_file.size()==0)
         throw std::runtime_error("model_file is a required  "
                                 "parameter of set_model.");
@@ -491,8 +449,6 @@ void Client::set_model(const std::string& key,
                        const std::vector<std::string>& inputs,
                        const std::vector<std::string>& outputs)
 {
-    /*This function will set a model from the provided buffer.
-    */
     if(key.size()==0)
         throw std::runtime_error("key is a required parameter "
                                  "of set_model.");
@@ -535,10 +491,6 @@ void Client::set_model(const std::string& key,
 
 std::string_view Client::get_model(const std::string& key)
 {
-    /* This function returns the model via a string_view.
-    The memory associated with the string_view will
-    remain valid for the lifetime of the Client.
-    */
     CommandReply reply = this->_redis_server->get_model(key);
     char* model = this->_model_queries.allocate(reply.str_len());
     std::memcpy(model, reply.str(), reply.str_len());
@@ -549,9 +501,6 @@ void Client::set_script_from_file(const std::string& key,
                                   const std::string& device,
                                   const std::string& script_file)
 {
-    /*This function will set a script that is saved in a file.
-    It is assumed it is an ascii file.
-    */
     std::ifstream fin(script_file);
     std::ostringstream ostream;
     ostream << fin.rdbuf();
@@ -568,18 +517,12 @@ void Client::set_script(const std::string& key,
                         const std::string& device,
                         const std::string_view& script)
 {
-    /* This function will set a script from the provided buffer.
-    */
     this->_redis_server->set_script(key, device, script);
     return;
 }
 
 std::string_view Client::get_script(const std::string& key)
 {
-    /* This function returns the script via a string_view.
-    The memory associated with the string_view will
-    remain valid for the lifetime of the Client.
-    */
     CommandReply reply = this->_redis_server->get_script(key);
     char* script = this->_model_queries.allocate(reply.str_len());
     std::memcpy(script, reply.str(), reply.str_len());
@@ -590,8 +533,6 @@ void Client::run_model(const std::string& key,
                        std::vector<std::string> inputs,
                        std::vector<std::string> outputs)
 {
-    /*This function will run a RedisAI model.
-    */
     this->_append_with_get_prefix(inputs);
     this->_append_with_put_prefix(outputs);
     this->_redis_server->run_model(key, inputs, outputs);
@@ -603,8 +544,6 @@ void Client::run_script(const std::string& key,
                         std::vector<std::string> inputs,
                         std::vector<std::string> outputs)
 {
-    /*This function will run a RedisAI model.
-    */
     this->_append_with_get_prefix(inputs);
     this->_append_with_put_prefix(outputs);
     this->_redis_server->run_script(key, function, inputs, outputs);
@@ -613,8 +552,7 @@ void Client::run_script(const std::string& key,
 
 bool Client::key_exists(const std::string& key)
 {
-    /* Return if true if the key is in the database.
-    */
+
     return this->_redis_server->key_exists(key);
 }
 
@@ -642,26 +580,23 @@ bool Client::poll_key(const std::string& key,
 
 void Client::set_data_source(std::string source_id)
 {
-  /* This function sets the prefix for fetching keys
-  from the database
-  */
-  bool valid_prefix = false;
-  int num_prefix = _get_key_prefixes.size();
-  int i = 0;
-  for (i=0; i<num_prefix; i++) {
-    if (this->_get_key_prefixes[i].compare(source_id)==0) {
-      valid_prefix = true;
-      break;
+    bool valid_prefix = false;
+    int num_prefix = _get_key_prefixes.size();
+    int i = 0;
+    for (i=0; i<num_prefix; i++) {
+        if (this->_get_key_prefixes[i].compare(source_id)==0) {
+        valid_prefix = true;
+        break;
+        }
     }
-  }
 
-  if (valid_prefix)
-    this->_get_key_prefix = this->_get_key_prefixes[i];
-  else
-    throw std::runtime_error("Client error: data source " +
-			     std::string(source_id) +
-			     "could not be found during client "+
-			     "initialization.");
+    if (valid_prefix)
+        this->_get_key_prefix = this->_get_key_prefixes[i];
+    else
+        throw std::runtime_error("Client error: data source " +
+                    std::string(source_id) +
+                    "could not be found during client "+
+                    "initialization.");
 }
 
 void Client::_set_prefixes_from_env()
@@ -713,9 +648,6 @@ inline std::string Client::_get_prefix()
 inline void Client::_append_with_get_prefix(
                      std::vector<std::string>& keys)
 {
-    /* This function will append each key with the
-    get prefix.
-    */
     std::vector<std::string>::iterator prefix_it;
     std::vector<std::string>::iterator prefix_it_end;
     prefix_it = keys.begin();
@@ -730,9 +662,6 @@ inline void Client::_append_with_get_prefix(
 inline void Client::_append_with_put_prefix(
                      std::vector<std::string>& keys)
 {
-    /* This function will append each key with the
-    put prefix.
-    */
     std::vector<std::string>::iterator prefix_it;
     std::vector<std::string>::iterator prefix_it_end;
     prefix_it = keys.begin();

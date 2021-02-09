@@ -11,7 +11,7 @@ file_path = osp.dirname(osp.abspath(__file__))
 
 
 def test_set_get_function():
-    c = Client(None, CLUSTER, False)
+    c = Client(None, CLUSTER)
     c.set_function("test-set-function", one_to_one)
     script = c.get_script("test-set-function")
     sent_script = inspect.getsource(one_to_one)
@@ -19,7 +19,7 @@ def test_set_get_function():
 
 
 def test_set_get_script():
-    c = Client(None, CLUSTER, False)
+    c = Client(None, CLUSTER)
     sent_script = read_script_from_file()
     c.set_script("test-set-script", sent_script)
     script = c.get_script("test-set-script")
@@ -28,7 +28,7 @@ def test_set_get_script():
 
 def test_set_script_from_file():
     sent_script = read_script_from_file()
-    c = Client(None, CLUSTER, False)
+    c = Client(None, CLUSTER)
     c.set_script_from_file(
         "test-script-file", osp.join(file_path, "./data_processing_script.txt")
     )
@@ -39,7 +39,7 @@ def test_set_script_from_file():
 def test_run_script():
     data = np.array([[1, 2, 3, 4, 5]])
 
-    c = Client(None, CLUSTER, False)
+    c = Client(None, CLUSTER)
     c.put_tensor("script-test-data", data)
     c.set_function("one-to-one", one_to_one)
     c.run_script("one-to-one", "one_to_one", ["script-test-data"], ["script-test-out"])
@@ -51,7 +51,7 @@ def test_run_script_multi():
     data = np.array([[1, 2, 3, 4]])
     data_2 = np.array([[5, 6, 7, 8]])
 
-    c = Client(None, CLUSTER, False)
+    c = Client(None, CLUSTER)
     c.put_tensor("srpt-multi-out-data-1", data)
     c.put_tensor("srpt-multi-out-data-2", data_2)
     c.set_function("two-to-one", two_to_one)

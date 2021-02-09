@@ -2,45 +2,6 @@
 
 using namespace SILC;
 
-Command::Command()
-{
-}
-
-/*
-Command::Command(const Command& cmd) {
-
-    std::vector<std::string_view>::const_iterator cmd_field_it =
-        cmd._fields.cbegin();
-    std::vector<std::string_view>::const_iterator cmd_field_it_end =
-        cmd._fields.cend();
-
-    size_t field_size;
-    while(cmd_field_it!=cmd_field_it_end) {
-
-        field_size = cmd_field_it->size();
-
-        char* f = (char*) malloc(sizeof(char)*(field_size+1));
-        cmd_field_it->copy(f, field_size);
-        f[field_size]=0;
-        this->_local_fields.push_back(f);
-
-        std::string_view copied_sv =
-            std::string_view(f, field_size);
-        this->_fields.push_back(std::string_view(f, field_size));
-
-        cmd_field_it++;
-
-        if(cmd._cmd_keys.count(*cmd_field_it)>0) {
-            std::cout<<"Found cmd key"<<std::endl;
-            this->_cmd_keys[copied_sv] =
-                cmd._cmd_keys.at(*cmd_field_it);
-        }
-    }
-    std::cout<<"Command copied "<<this->to_string()<<std::endl;
-    return;
-}
-*/
-
 Command::~Command()
 {
     std::vector<char*>::iterator it = this->_local_fields.begin();
@@ -107,9 +68,7 @@ void Command::add_field_ptr(char* field, size_t field_size)
     accessed.  This function should be used for very large
     fields.  Field pointers cannot act as Command keys.
     */
-
     this->_fields.push_back(std::string_view(field, field_size));
-
     return;
 }
 
@@ -122,11 +81,9 @@ void Command::add_field_ptr(std::string_view field)
     fields.  If is_key is true, the key will be added to the
     command keys.  Field pointers cannot act as Command keys.
     */
-
     this->_fields.push_back(field);
     return;
 }
-
 
 void Command::add_fields(const std::vector<std::string>& fields, bool is_key)
 {
@@ -161,45 +118,27 @@ std::string Command::to_string()
 
 Command::iterator Command::begin()
 {
-    /* Returns a iterator pointing to the first
-    field in the command
-    */
     return this->_fields.begin();
 }
 
 Command::const_iterator Command::cbegin()
 {
-    /* Returns a const_iterator pointing to the first
-    field in the command
-    */
     return this->_fields.cbegin();
 }
 
 Command::iterator Command::end()
 {
-    /* Returns a iterator pointing to the past-the-end
-    field in the command
-    */
     return this->_fields.end();
 }
 
 Command::const_iterator Command::cend()
 {
-    /* Returns a const_iterator pointing to the past-the-end
-    field in the command
-    */
     return this->_fields.cend();
 }
 
 bool Command::has_keys()
 {
-    /* Return true if the Command has any keys
-    associated with it.
-    */
-    if(this->_cmd_keys.size()>0)
-        return true;
-
-    return false;
+    return (this->_cmd_keys.size()>0);
 }
 
 std::vector<std::string> Command::get_keys() {
@@ -247,5 +186,4 @@ void Command::update_key(std::string old_key,
     free(this->_local_fields[key_index]);
     this->_local_fields[key_index] = f;
     return;
-
 }

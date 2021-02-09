@@ -2,25 +2,14 @@
 
 using namespace SILC;
 
-CommandReply::CommandReply()
-{
-}
-
 CommandReply::CommandReply(redisReply* reply)
 {
-
   this->_uptr_reply = 0;
   this->_reply = reply;
 }
 
-CommandReply::~CommandReply()
-{
-}
-
 CommandReply::CommandReply(RedisReplyUPtr&& reply)
 {
-  /* Move constructor with redisReply unique_ptr
-  */
   this->_uptr_reply = std::move(reply);
   this->_reply = this->_uptr_reply.get();
   return;
@@ -28,8 +17,6 @@ CommandReply::CommandReply(RedisReplyUPtr&& reply)
 
 CommandReply::CommandReply(redisReply*&& reply)
 {
-  /* Move constructor with redisReply ptr
-  */
   this->_uptr_reply = 0;
   this->_reply = std::move(reply);
   return;
@@ -37,8 +24,6 @@ CommandReply::CommandReply(redisReply*&& reply)
 
 CommandReply::CommandReply(CommandReply&& reply)
 {
-  /* Move constructor with CommandReply
-  */
   this->_uptr_reply = std::move(reply._uptr_reply);
   this->_reply = this->_uptr_reply.get();
   return;
@@ -46,8 +31,6 @@ CommandReply::CommandReply(CommandReply&& reply)
 
 CommandReply& CommandReply::operator=(RedisReplyUPtr&& reply)
 {
-    /* Move assignment operator with redisReply unique_ptr
-    */
     this->_uptr_reply = std::move(reply);
     this->_reply = this->_uptr_reply.get();
     return *this;
@@ -55,8 +38,6 @@ CommandReply& CommandReply::operator=(RedisReplyUPtr&& reply)
 
 CommandReply& CommandReply::operator=(redisReply*&& reply)
 {
-    /* Move assignment operator with redisReply ptr
-    */
     this->_uptr_reply = 0;
     this->_reply = std::move(reply);
     return *this;
@@ -64,8 +45,6 @@ CommandReply& CommandReply::operator=(redisReply*&& reply)
 
 CommandReply& CommandReply::operator=(CommandReply&& reply)
 {
-  /* Move assignment operator with CommandReply
-  */
   if(this!=&reply) {
     this->_uptr_reply = std::move(reply._uptr_reply);
     this->_reply = this->_uptr_reply.get();
@@ -75,10 +54,6 @@ CommandReply& CommandReply::operator=(CommandReply&& reply)
 
 char* CommandReply::str()
 {
-  /* This function returns a pointer to the
-  str reply.  If the reply is not a string
-  type, an error will be thrown.
-  */
   if(this->_reply->type!=REDIS_REPLY_STRING)
     throw std::runtime_error("A pointer to the reply str "\
                              "cannot be returned because the "\
@@ -89,10 +64,6 @@ char* CommandReply::str()
 
 long long CommandReply::integer()
 {
-  /* This function returns a pointer to the
-  str reply.  If the reply is not a string
-  type, an error will be thrown.
-  */
   if(this->_reply->type!=REDIS_REPLY_INTEGER)
     throw std::runtime_error("The reply integer "\
                              "cannot be returned because the "\
@@ -103,10 +74,6 @@ long long CommandReply::integer()
 
 double CommandReply::dbl()
 {
-  /* This function returns a pointer to the
-  str reply.  If the reply is not a string
-  type, an error will be thrown.
-  */
   if(this->_reply->type!=REDIS_REPLY_DOUBLE)
     throw std::runtime_error("The reply double "\
                              "cannot be returned because the "\
@@ -117,9 +84,6 @@ double CommandReply::dbl()
 
 CommandReply CommandReply::operator[](int index)
 {
-  /* This function returns the redisReply in the
-  index position of the elements array.
-  */
   if(this->_reply->type!=REDIS_REPLY_ARRAY)
     throw std::runtime_error("The reply cannot be indexed "\
                              "because the reply type is " +
@@ -129,10 +93,6 @@ CommandReply CommandReply::operator[](int index)
 
 size_t CommandReply::str_len()
 {
-  /* This function returns the len of the
-  str reply.  If the reply is not a string
-  type, an error will be thrown.
-  */
   if(this->_reply->type!=REDIS_REPLY_STRING)
     throw std::runtime_error("The length of the reply str "\
                              "cannot be returned because the "\
@@ -143,9 +103,6 @@ size_t CommandReply::str_len()
 
 size_t CommandReply::n_elements()
 {
-  /* This function returns the number of elements
-  in the redis reply
-  */
   if(this->_reply->type!=REDIS_REPLY_ARRAY)
     throw std::runtime_error("The number of elements "\
                              "cannot be returned because the "\
@@ -156,10 +113,6 @@ size_t CommandReply::n_elements()
 
 int CommandReply::has_error()
 {
-    /* This function checks to see if the reply or any
-    of the sub replies contains an error.  The number
-    of errors is returned.
-    */
     int num_errors = 0;
     if(this->_reply->type == REDIS_REPLY_ERROR)
         num_errors++;
@@ -174,9 +127,6 @@ int CommandReply::has_error()
 
 void CommandReply::print_reply_error()
 {
-    /* This function will print error replies
-    and sub element error replies to std::cout
-    */
     if(this->_reply->type == REDIS_REPLY_ERROR) {
         std::string_view error(this->_reply->str,
                                this->_reply->len);
@@ -193,8 +143,6 @@ void CommandReply::print_reply_error()
 
 std::string CommandReply::redis_reply_type()
 {
-  /* This function returns the redis reply type as a string
-  */
   switch (this->_reply->type) {
     case REDIS_REPLY_STRING:
       return "REDIS_REPLY_STRING";
@@ -245,8 +193,6 @@ std::string CommandReply::redis_reply_type()
 
 void CommandReply::print_reply_structure(std::string index_tracker)
 {
-  /* This function prints out the nested reply structure
-  */
   //TODO these recursive functions can't use 'this' unless
   //we have a constructor that takes redisReply*
   std::cout<<index_tracker + " type: "
@@ -260,7 +206,8 @@ void CommandReply::print_reply_structure(std::string index_tracker)
       break;
     case REDIS_REPLY_ARRAY:
       for(size_t i=0; i<this->n_elements(); i++) {
-        std::string r_prefix = index_tracker + "[" + std::to_string(i) + "]";
+        std::string r_prefix = index_tracker + "[" +
+                               std::to_string(i) + "]";
         CommandReply tmp = (*this)[i];
         tmp.print_reply_structure(r_prefix);
       }

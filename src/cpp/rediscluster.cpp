@@ -3,8 +3,6 @@
 using namespace SILC;
 
 RedisCluster::RedisCluster() : RedisServer() {
-    /* Default RedisCluster constructor.
-    */
     std::string address_port = this->_get_ssdb();
     this->_connect(address_port);
     this->_map_cluster();
@@ -14,12 +12,6 @@ RedisCluster::RedisCluster() : RedisServer() {
 RedisCluster::RedisCluster(std::string address_port) :
     RedisServer()
 {
-    /* RedisCluster constructor that will not use
-    environment variable addresses to connect, but the
-    provided address_port string.  The address_port string
-    should be formatted as:
-    tcp://address:port
-    */
     this->_connect(address_port);
     this->_map_cluster();
     return;
@@ -27,18 +19,12 @@ RedisCluster::RedisCluster(std::string address_port) :
 
 RedisCluster::~RedisCluster()
 {
-    /* RedisCluster destructor.
-    */
     if(this->_redis_cluster)
         delete this->_redis_cluster;
 }
 
 CommandReply RedisCluster::run(Command& cmd)
 {
-    /* Runs a Command on the RedisCluster.
-    and returns the CommandReply.
-    */
-
     std::string db_prefix = this->_get_db_node_prefix(cmd);
     std::string_view sv_prefix(db_prefix.data(), db_prefix.size());
     sw::redis::Redis db = this->_redis_cluster->redis(sv_prefix, false);
@@ -48,10 +34,6 @@ CommandReply RedisCluster::run(Command& cmd)
 
 CommandReply RedisCluster::run(CommandList& cmds)
 {
-    /* This function executes a series of Command objects
-    contained in a CommandList
-    */
-
     CommandList::iterator cmd = cmds.begin();
     CommandList::iterator cmd_end = cmds.end();
     CommandReply reply;
@@ -64,8 +46,6 @@ CommandReply RedisCluster::run(CommandList& cmds)
 
 bool RedisCluster::key_exists(const std::string& key)
 {
-    /* Return true if the key exists.
-    */
     Command cmd;
     cmd.add_field("EXISTS");
     cmd.add_field(key);
@@ -75,8 +55,6 @@ bool RedisCluster::key_exists(const std::string& key)
 
 CommandReply RedisCluster::put_tensor(TensorBase& tensor)
 {
-    /* Put a Tensor on the Redis cluster.
-    */
     Command cmd;
     cmd.add_field("AI.TENSORSET");
     cmd.add_field(tensor.name(), true);
@@ -89,8 +67,6 @@ CommandReply RedisCluster::put_tensor(TensorBase& tensor)
 
 CommandReply RedisCluster::get_tensor(const std::string& key)
 {
-    /* Get a Tensor on from the Redis cluster.
-    */
     Command cmd;
     cmd.add_field("AI.TENSORGET");
     cmd.add_field(key, true);
@@ -102,9 +78,6 @@ CommandReply RedisCluster::get_tensor(const std::string& key)
 CommandReply RedisCluster::rename_tensor(const std::string& key,
                                          const std::string& new_key)
 {
-    /* Rename a Tensor in the Redis cluster.
-    */
-
     CommandReply reply;
 
     uint16_t key_hash_slot = this->_get_hash_slot(key);
@@ -126,10 +99,8 @@ CommandReply RedisCluster::rename_tensor(const std::string& key,
 
 CommandReply RedisCluster::delete_tensor(const std::string& key)
 {
-    /* Delete a Tensor in the Redis cluster.
-    */
     Command cmd;
-    cmd.add_field("DEL");
+    cmd.add_field("UNLINK");
     cmd.add_field(key, true);
     return this->run(cmd);
 }
@@ -137,9 +108,6 @@ CommandReply RedisCluster::delete_tensor(const std::string& key)
 CommandReply RedisCluster::copy_tensor(const std::string& src_key,
                                        const std::string& dest_key)
 {
-    /*Copy a Tensor from the src_key to the dest_key.
-    */
-
     //TODO can we do COPY for same hash slot or database?
     CommandReply cmd_get_reply;
     Command cmd_get;
@@ -174,9 +142,6 @@ CommandReply RedisCluster::copy_tensor(const std::string& src_key,
 CommandReply RedisCluster::copy_tensors(const std::vector<std::string>& src,
                                         const std::vector<std::string>& dest)
 {
-    /* This function will copy a list of tensors from
-    src to dest.
-    */
     std::vector<std::string>::const_iterator src_it = src.cbegin();
     std::vector<std::string>::const_iterator src_it_end = src.cend();
 
@@ -205,9 +170,6 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
                                      const std::vector<std::string>& outputs
                                      )
 {
-    /*This function will set the provided model into the database
-    */
-
     std::string prefixed_key;
     std::vector<DBNode>::const_iterator node =
       this->_db_nodes.cbegin();
@@ -257,8 +219,6 @@ CommandReply RedisCluster::set_script(const std::string& key,
                                       const std::string& device,
                                       std::string_view script)
 {
-    /*This function will set a script from the provided buffer.
-    */
     std::string prefixed_key;
     CommandReply reply;
 
@@ -288,14 +248,12 @@ CommandReply RedisCluster::run_model(const std::string& key,
                                      std::vector<std::string> inputs,
                                      std::vector<std::string> outputs)
 {
-    /*This function will run a RedisAI model.
+    /*  For this version of run model, we have to copy all
+        input and output tensors, so we will randomly select
+        a model.  We can't use rand, because MPI would then
+        have the same random number across all ranks.  Instead
+        We will choose it based on the db of the first input tensor.
     */
-
-    //For this version of run model, we have to copy all
-    //input and output tensors, so we will randomly select
-    //a model.  We can't use rand, because MPI would then
-    //have the same random number across all ranks.  Instead
-    //We will choose it based on the db of the first input tensor.
 
     uint16_t hash_slot = this->_get_hash_slot(inputs[0]);
     uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
@@ -324,7 +282,6 @@ CommandReply RedisCluster::run_model(const std::string& key,
     cmd.add_fields(tmp_outputs);
     reply = this->run(cmd);
 
-
     this->copy_tensors(tmp_outputs, outputs);
 
     std::vector<std::string> keys_to_delete;
@@ -345,9 +302,6 @@ CommandReply RedisCluster::run_script(const std::string& key,
                                       std::vector<std::string> inputs,
                                       std::vector<std::string> outputs)
 {
-    /*This function will run a RedisAI script.
-    */
-
     uint16_t hash_slot = this->_get_hash_slot(inputs[0]);
     uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
                                                 this->_db_nodes.size()-1);
@@ -391,11 +345,6 @@ CommandReply RedisCluster::run_script(const std::string& key,
 
 CommandReply RedisCluster::get_model(const std::string& key)
 {
-    /* This function returns the CommandReply
-    from the AI.MODELGET command.  The command
-    is executed on the first DBNode in the cluster.
-    */
-
     std::string prefixed_str =
         "{" + this->_db_nodes[0].prefix +
         "}." + key;
@@ -409,11 +358,6 @@ CommandReply RedisCluster::get_model(const std::string& key)
 
 CommandReply RedisCluster::get_script(const std::string& key)
 {
-    /* This function returns the CommandReply
-    from the AI.SCRIPTGET command.  The command
-    is executed on the first DBNode in the cluster.
-    */
-
     std::string prefixed_str =
         "{" + this->_db_nodes[0].prefix +
         "}." + std::string(key);
@@ -428,10 +372,6 @@ CommandReply RedisCluster::get_script(const std::string& key)
 
 inline void RedisCluster::_connect(std::string address_port)
 {
-    /* Connects to cluster using the provided string.
-    The string should be formated as:
-    tcp://address:port .
-    */
     int n_connection_trials = 10;
 
     while(n_connection_trials > 0) {
@@ -459,12 +399,6 @@ inline void RedisCluster::_connect(std::string address_port)
 
 inline void RedisCluster::_map_cluster()
 {
-    /* This function maps the database cluster via the
-    CLUSTER SLOTS command.  This function also
-    initializes the DBNode vector to store the cluster
-    information.
-    */
-
     this->_db_nodes.clear();
 
     Command cmd;
@@ -478,12 +412,6 @@ inline void RedisCluster::_map_cluster()
 
 std::string RedisCluster::_get_db_node_prefix(Command& cmd)
 {
-    /* Returns the db node prefix that can be used
-    to address the correct redis instance in a
-    redis cluster.  An exception is thrown if
-    all keys do not yield the same prefix.
-    */
-
     std::vector<std::string> keys = cmd.get_keys();
 
     if(keys.size()==0)
@@ -569,10 +497,6 @@ inline void RedisCluster::_parse_reply_for_slots(CommandReply& reply)
 
 std::string RedisCluster::_get_crc16_prefix(uint64_t hash_slot)
 {
-    /* This takes a hash slot and returns a two character
-    prefix (potentially with null, "{", "}" characters).
-    */
-
     uint64_t byte_filter = 255;
     uint64_t crc_out = this->_crc16_inverse(hash_slot);
     crc_out = crc_out >> 16;
@@ -589,117 +513,90 @@ std::string RedisCluster::_get_crc16_prefix(uint64_t hash_slot)
 
 uint64_t RedisCluster::_crc16_inverse(uint64_t remainder)
 {
-  /* This function inverts the CRC16 process
-  to return a message that will result in the
-  provided crc16 remainder after applying
-  the CRC16 algorithm.
-  */
+    uint64_t digit = 1;
+    uint64_t poly = 69665; //x^16 + x^12 + x^5 + 1
 
-  uint64_t digit = 1;
-  uint64_t poly = 69665; //x^16 + x^12 + x^5 + 1
-
-  for(int i=0; i<16; i++) {
-    if(remainder&digit)
-      remainder = remainder^poly;
-    digit=digit<<1;
-    poly=poly<<1;
-  }
-  return remainder;
+    for(int i=0; i<16; i++) {
+        if(remainder&digit)
+        remainder = remainder^poly;
+        digit=digit<<1;
+        poly=poly<<1;
+    }
+    return remainder;
 }
 
 bool RedisCluster::_has_hash_tag(const std::string& key)
 {
-  /* This function determines if the key has "{}"
-  characters indicating a hash tag.
-  */
-
-  size_t first = key.find('{');
-  size_t second = key.find('}');
-  if(first == std::string::npos ||
-     second == std::string::npos)
-    return false;
-  else if(second < first)
-    return false;
-  else
-    return true;
+    size_t first = key.find('{');
+    size_t second = key.find('}');
+    if(first == std::string::npos ||
+        second == std::string::npos)
+        return false;
+    else if(second < first)
+        return false;
+    else
+        return true;
 }
 
 std::string RedisCluster::_get_hash_tag(const std::string& key)
 {
-  /* This function returns the hash tag WITHOUT the
-  enclosing "{" and "}" characters.
-  */
-
-  size_t first = key.find('{');
-  size_t second = key.find('}');
-  if(first == std::string::npos ||
-     second == std::string::npos)
-    return key;
-  else if(second < first)
-    return key;
-  else
-    return key.substr(first+1,second-first-1);
+    size_t first = key.find('{');
+    size_t second = key.find('}');
+    if(first == std::string::npos ||
+        second == std::string::npos)
+        return key;
+    else if(second < first)
+        return key;
+    else
+        return key.substr(first+1,second-first-1);
 }
 
 uint16_t RedisCluster::_get_hash_slot(const std::string& key)
 {
-  /* This function returns the hash slot of the key.
-  */
-  std::string hash_key;
-  if(this->_has_hash_tag(key))
-    hash_key = this->_get_hash_tag(key);
+    std::string hash_key;
+    if(this->_has_hash_tag(key))
+        hash_key = this->_get_hash_tag(key);
 
-  else
-    hash_key = key;
-  return sw::redis::crc16(hash_key.c_str(),
-                          hash_key.size()) % 16384;
+    else
+        hash_key = key;
+    return sw::redis::crc16(hash_key.c_str(),
+                            hash_key.size()) % 16384;
 }
 
 uint16_t RedisCluster::_get_dbnode_index(uint16_t hash_slot,
                                    unsigned lhs, unsigned rhs)
 {
-  /*  This is a binomial search to determine the
-  DBNode that is responsible for the hash slot.
-  */
-  uint16_t m = (lhs + rhs)/2;
-  if(this->_db_nodes[m].lower_hash_slot<=hash_slot &&
-     this->_db_nodes[m].upper_hash_slot>=hash_slot) {
-       return m;
-     }
-  else {
-    if(this->_db_nodes[m].lower_hash_slot > hash_slot)
-      return this->_get_dbnode_index(hash_slot, lhs, m-1);
-    else
-      return this->_get_dbnode_index(hash_slot, m+1, rhs);
-  }
+    uint16_t m = (lhs + rhs)/2;
+    if(this->_db_nodes[m].lower_hash_slot<=hash_slot &&
+        this->_db_nodes[m].upper_hash_slot>=hash_slot) {
+        return m;
+        }
+    else {
+        if(this->_db_nodes[m].lower_hash_slot > hash_slot)
+        return this->_get_dbnode_index(hash_slot, lhs, m-1);
+        else
+        return this->_get_dbnode_index(hash_slot, m+1, rhs);
+    }
 }
 
 std::vector<std::string>
 RedisCluster::_get_tmp_names(std::vector<std::string> names,
                              std::string db_prefix)
 {
-  /* This function returns a map between the original
-  names and temporary names that are needed to make sure
-  keys hash to the same hash slot.
-  */
-  std::vector<std::string> tmp;
-  std::vector<std::string>::iterator it = names.begin();
-  std::vector<std::string>::iterator it_end = names.end();
-  while(it!=it_end) {
-    std::string new_key = "{" + db_prefix + "}." +
-                          *it + ".TMP";
-    tmp.push_back(new_key);
-    it++;
-  }
-  return tmp;
+    std::vector<std::string> tmp;
+    std::vector<std::string>::iterator it = names.begin();
+    std::vector<std::string>::iterator it_end = names.end();
+    while(it!=it_end) {
+        std::string new_key = "{" + db_prefix + "}." +
+                            *it + ".TMP";
+        tmp.push_back(new_key);
+        it++;
+    }
+    return tmp;
 }
 
 void RedisCluster::_delete_keys(std::vector<std::string> keys)
 {
-    /* This function will delete a list of tensor names
-    in a single command.  This assumes they are all in
-    the same hash slot.
-    */
     CommandReply reply;
     Command cmd;
     cmd.add_field("DEL");
@@ -810,38 +707,38 @@ DBNode* RedisCluster::_get_model_script_db(const std::string& name,
                                            std::vector<std::string>& inputs,
                                            std::vector<std::string>& outputs)
 {
-  /* This function calculates the optimal model name to use
-  to run the provided inputs.  If a cluster is not being used,
-  the model name is returned, else a prefixed model name is returned.
-  */
+    /* This function calculates the optimal model name to use
+    to run the provided inputs.  If a cluster is not being used,
+    the model name is returned, else a prefixed model name is returned.
+    */
 
-  //TODO we should randomly choose the max if there are multiple
-  //maxes
+    //TODO we should randomly choose the max if there are multiple
+    //maxes
 
-  std::vector<int> hash_slot_tally(this->_db_nodes.size(), 0);
+    std::vector<int> hash_slot_tally(this->_db_nodes.size(), 0);
 
-  for(int i=0; i<inputs.size(); i++) {
-    uint16_t hash_slot = this->_get_hash_slot(inputs[i]);
-    uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
-                                                this->_db_nodes.size());
-    hash_slot_tally[db_index]++;
-  }
-
-  for(int i=0; i<outputs.size(); i++) {
-    uint16_t hash_slot = this->_get_hash_slot(outputs[i]);
-    uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
-                                                this->_db_nodes.size());
-    hash_slot_tally[db_index]++;
-  }
-
-  //Determine which DBNode has the most hashes
-  int max_hash = -1;
-  DBNode* db = 0;
-  for(int i=0; i<this->_db_nodes.size(); i++) {
-    if(hash_slot_tally[i] > max_hash) {
-      max_hash = hash_slot_tally[i];
-      db = &(this->_db_nodes[i]);
+    for(int i=0; i<inputs.size(); i++) {
+        uint16_t hash_slot = this->_get_hash_slot(inputs[i]);
+        uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
+                                                    this->_db_nodes.size());
+        hash_slot_tally[db_index]++;
     }
-  }
-  return db;
+
+    for(int i=0; i<outputs.size(); i++) {
+        uint16_t hash_slot = this->_get_hash_slot(outputs[i]);
+        uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
+                                                    this->_db_nodes.size());
+        hash_slot_tally[db_index]++;
+    }
+
+    //Determine which DBNode has the most hashes
+    int max_hash = -1;
+    DBNode* db = 0;
+    for(int i=0; i<this->_db_nodes.size(); i++) {
+        if(hash_slot_tally[i] > max_hash) {
+        max_hash = hash_slot_tally[i];
+        db = &(this->_db_nodes[i]);
+        }
+    }
+    return db;
 }
