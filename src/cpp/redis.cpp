@@ -90,11 +90,35 @@ CommandReply Redis::delete_tensor(const std::string& key)
 CommandReply Redis::copy_tensor(const std::string& src_key,
                                 const std::string& dest_key)
 {
-    Command cmd;
-    cmd.add_field("COPY");
-    cmd.add_field(src_key);
-    cmd.add_field(dest_key);
-    return this->run(cmd);
+    //TODO can we do COPY for same hash slot or database?
+    CommandReply cmd_get_reply;
+    Command cmd_get;
+
+    cmd_get.add_field("AI.TENSORGET");
+    cmd_get.add_field(src_key, true);
+    cmd_get.add_field("META");
+    cmd_get.add_field("BLOB");
+    cmd_get_reply = this->run(cmd_get);
+
+    std::vector<size_t> dims =
+        CommandReplyParser::get_tensor_dims(cmd_get_reply);
+    std::string_view blob =
+        CommandReplyParser::get_tensor_data_blob(cmd_get_reply);
+    TensorType type =
+        CommandReplyParser::get_tensor_data_type(cmd_get_reply);
+
+    CommandReply cmd_put_reply;
+    Command cmd_put;
+
+    cmd_put.add_field("AI.TENSORSET");
+    cmd_put.add_field(dest_key, true);
+    cmd_put.add_field(TENSOR_STR_MAP.at(type));
+    cmd_put.add_fields(dims);
+    cmd_put.add_field("BLOB");
+    cmd_put.add_field_ptr(blob);
+    cmd_put_reply = this->run(cmd_put);
+
+    return cmd_put_reply;
 }
 
 CommandReply Redis::copy_tensors(const std::vector<std::string>& src,

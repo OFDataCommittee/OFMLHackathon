@@ -139,8 +139,8 @@ class Redis : public RedisServer
         *          to destination keys
         *   \param src_key Vector of source keys
         *   \param dest_key Vector of destination keys
-        *   \returns The CommandReply from the last COPY
-        *            command
+        *   \returns The CommandReply from the last put command
+        *            associated with the tensor copy
         */
         virtual CommandReply copy_tensors(const std::vector<std::string>& src,
                                           const std::vector<std::string>& dest);

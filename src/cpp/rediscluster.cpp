@@ -108,7 +108,7 @@ CommandReply RedisCluster::delete_tensor(const std::string& key)
 CommandReply RedisCluster::copy_tensor(const std::string& src_key,
                                        const std::string& dest_key)
 {
-    //TODO can we do COPY for same hash slot or database?
+    //TODO can we do COPY for same hash slot or database (only for redis 6.2)?
     CommandReply cmd_get_reply;
     Command cmd_get;
 
