@@ -5,7 +5,6 @@ set(CMAKE_BUILD_TYPE DEBUG)
 cmake_minimum_required(VERSION 3.10)
 
 SET(CMAKE_CXX_STANDARD 17)
-SET(CMAKE_Fortran_COMPILER "gfortran")
 enable_language(Fortran)
 
 #TODO put in output warnings
