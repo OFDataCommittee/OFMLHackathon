@@ -747,9 +747,8 @@ void Client::run_model(const std::string& key,
 
   //For this version of run model, we have to copy all
   //input and output tensors, so we will randomly select
-  //a model.  We can't use rand, because MPI would then
-  //have the same random number across all ranks.  Instead
-  //We will choose it based on the db of the firs tinput tensor.
+  //a model.
+  //We will choose it based on the db of the first input tensor.
 
   //Update input and output tensor names for ensembling prefix
   this->_append_with_get_prefix(inputs);

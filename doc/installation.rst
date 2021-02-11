@@ -149,7 +149,6 @@ the following
 .. note::
 
   The tests require
-   - MPI to be installed
    - GCC > 5
    - CMake > 3
 
