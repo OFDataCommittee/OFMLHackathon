@@ -1,6 +1,5 @@
 #include "client.h"
 #include "client_test_utils.h"
-#include <mpi.h>
 #include <vector>
 #include <string>
 
@@ -45,7 +44,6 @@ void put_get_3D_array(
   fill_array(array, dims[0]*dims[1]*dims[2]);
 
   int rank = 0;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   std::string key = "3d_tensor_transpose_test_rank_" +
                     std::to_string(rank) + key_suffix;
@@ -173,8 +171,6 @@ int main(int argc, char* argv[]) {
   it has been implemented correctly.
   */
 
-  MPI_Init(&argc, &argv);
-
   size_t dim1 = 4;
   size_t dim2 = 3;
   size_t dim3 = 2;
@@ -283,7 +279,6 @@ int main(int argc, char* argv[]) {
 
   std::cout<<"3D put and get to test matrix "\
              "transpose complete."<<std::endl;
-  MPI_Finalize();
 
   return 0;
 }

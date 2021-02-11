@@ -1,6 +1,5 @@
 #include "client.h"
 #include "client_test_utils.h"
-#include <mpi.h>
 #include <vector>
 #include <string>
 
@@ -20,8 +19,6 @@ void put_get_2D_array(
   fill_array(array, dims[0], dims[1]);
 
   int rank = 0;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
   std::string key = "2D_tensor_test_rank_" +
                     std::to_string(rank) + key_suffix;
 
@@ -96,8 +93,6 @@ void put_get_2D_array(
 
 int main(int argc, char* argv[]) {
 
-  MPI_Init(&argc, &argv);
-
   size_t dim1 = 10;
   size_t dim2 = 5;
   std::vector<size_t> dims = {dim1, dim2};
@@ -135,7 +130,6 @@ int main(int argc, char* argv[]) {
 				      dims, SILC::TensorType::uint8, "_ui8");
 
   std::cout<<"2D put and get test complete."<<std::endl;
-  MPI_Finalize();
 
   return 0;
 }

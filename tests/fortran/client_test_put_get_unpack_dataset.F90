@@ -1,6 +1,5 @@
 program main
 
-  use mpi
   use iso_c_binding
   use silc_client, only : client_type
   use silc_dataset, only : dataset_type
@@ -32,9 +31,7 @@ program main
 
   integer :: err_code, pe_id
 
-  call MPI_init( err_code )
-  call MPI_comm_rank( MPI_COMM_WORLD, pe_id, err_code)
-  write(key_prefix, "(A,I6.6)") "pe_",pe_id
+  write(key_prefix, "(A,I6.6)") "pe_",0
 
   call client%initialize(.true.)
 
@@ -81,7 +78,6 @@ program main
   call recv_dataset%unpack_dataset_tensor("true_array_integer_64", recv_array_integer_64, shape(recv_array_integer_64))
   if (.not. all(true_array_integer_64 == recv_array_integer_64)) stop 'true_array_integer_64: FAILED'
 
-  call MPI_finalize(err_code)
   print *, "Fortran Client put/get/unpack dataset: passed"
 
 end program

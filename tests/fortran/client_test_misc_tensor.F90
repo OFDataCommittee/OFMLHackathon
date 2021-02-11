@@ -1,7 +1,6 @@
 !> Tests a variety of client
 program main
 
-  use mpi
   use iso_c_binding
   use silc_client, only : client_type
   use silc_dataset, only : dataset_type
@@ -16,9 +15,7 @@ program main
 
   integer :: err_code, pe_id
 
-  call MPI_init( err_code )
-  call MPI_comm_rank( MPI_COMM_WORLD, pe_id, err_code)
-  write(key_prefix, "(A,I6.6)") "pe_",pe_id
+  write(key_prefix, "(A,I6.6)") "pe_",0
 
   call client%initialize(.true.)
   call client%put_tensor( key_prefix//"test", array, shape(array) )
@@ -32,7 +29,6 @@ program main
   call client%delete_tensor( key_prefix//"test_copy" )
   if (client%key_exists( key_prefix//"test_copy" )) stop 'Copied tensor incorrectly exists'
 
-  call MPI_finalize(err_code)
   print *, "Fortran Client misc tensor: passed"
 
 end program

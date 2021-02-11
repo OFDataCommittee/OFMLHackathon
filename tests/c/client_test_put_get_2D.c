@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <mpi.h>
 #include "stdint.h"
 
 bool cluster = true;
@@ -24,11 +23,6 @@ int put_get_2D_tensor(void* client,
   */
 
   int rank = 0;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-  if(rank > 9)
-    printf("%s", "C test does not support MPI ranks "\
-                 "greater than 9.\n");
 
   char* prefix_str = "2D_tensor_test_rank_";
   char* rank_str = malloc(2*sizeof(char));
@@ -472,9 +466,6 @@ int put_get_2D_tensor_ui16(size_t* dims, int n_dims,
 }
 
 int main(int argc, char* argv[]) {
-
-  MPI_Init(&argc, &argv);
-
   size_t* dims = malloc(2*sizeof(int));
   dims[0] = 10;
   dims[1] = 26;
@@ -522,7 +513,6 @@ int main(int argc, char* argv[]) {
                       ui16_suffix, strlen(ui16_suffix));
 
   free(dims);
-  MPI_Finalize();
   printf("%s","Test passed: ");
   if(result==0)
     printf("%s", "YES\n");

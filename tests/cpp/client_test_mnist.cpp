@@ -1,6 +1,5 @@
 #include "client.h"
 #include "client_test_utils.h"
-#include <mpi.h>
 
 void load_mnist_image_to_array(float**** img)
 {
@@ -32,8 +31,7 @@ void run_mnist(const std::string& model_name,
 
   load_mnist_image_to_array(array);
 
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  int rank = 0;
 
   std::string in_key = "mnist_input_rank_" + std::to_string(rank);
   std::string script_out_key = "mnist_processed_input_rank_" + std::to_string(rank);
@@ -56,11 +54,7 @@ void run_mnist(const std::string& model_name,
 }
 
 int main(int argc, char* argv[]) {
-
-  MPI_Init(&argc, &argv);
-
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  int rank = 0;
   if(rank==0) {
     SILC::Client client(true);
     std::string model_key = "mnist_model";
@@ -76,14 +70,11 @@ int main(int argc, char* argv[]) {
     std::string_view script = client.get_script(script_key);
 
   }
-  MPI_Barrier(MPI_COMM_WORLD);
 
   run_mnist("mnist_model", "mnist_script");
 
   if(rank==0)
     std::cout<<"Finished MNIST test."<<std::endl;
-
-  MPI_Finalize();
 
   return 0;
 }

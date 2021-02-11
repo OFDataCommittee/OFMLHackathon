@@ -1,6 +1,5 @@
 program mnist_test
 
-  use mpi
   use silc_client, only : client_type
 
   implicit none
@@ -14,11 +13,10 @@ program mnist_test
   integer :: err_code, pe_id
   character(len=2) :: key_suffix
 
-  ! Initialize MPI and get the rank of the processor
-  call MPI_init(err_code)
-  call MPI_comm_rank( MPI_COMM_WORLD, pe_id, err_code)
-
-  ! Format the suffix for a key as a zero-padded version of the rank
+  ! In a parallel run, we would format the suffix for a key as
+  ! a zero-padded version of the rank. This test runs serially,
+  ! thus we just set it to 0.
+  pe_id = 0
   write(key_suffix, "(A,I1.1)") "_",pe_id
   call client%initialize(.true.)
 
@@ -28,8 +26,6 @@ program mnist_test
   endif
 
   call run_mnist(client, key_suffix, model_key, script_key)
-
-  call MPI_finalize(err_code)
 
 contains
 
