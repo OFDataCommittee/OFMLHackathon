@@ -6,7 +6,6 @@ cmake_minimum_required(VERSION 3.10)
 
 SET(CMAKE_CXX_STANDARD 17)
 enable_language(Fortran)
-SET(CMAKE_Fortran_COMPILER "gfortran")
 
 #TODO put in output warnings
 # Determine where the hiredis library is based on if an environment variable

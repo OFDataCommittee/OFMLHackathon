@@ -168,7 +168,7 @@ int main(int argc, char* argv[]) {
   run_mnist("mnist_model", "mnist_script", timing_file);
 
   if(rank==0)
-    std::cout<<"Finished MNIST test."<<std::endl;
+    std::cout<<"Finished SILC MNIST example."<<std::endl;
 
   double main_end = MPI_Wtime();
   double delta_t = main_end - main_start;

@@ -39,3 +39,4 @@ def example_put_get_dataset(mock_data):
 
 if __name__ == "__main__":
     example_put_get_dataset(MockData())
+    print("SILC put get dataset example complete.") 

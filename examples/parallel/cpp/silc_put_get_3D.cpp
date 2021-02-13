@@ -139,7 +139,7 @@ int main(int argc, char* argv[]) {
 				      &set_3D_array_integral_values<uint8_t>,
 				      dims, SILC::TensorType::uint8, "_ui8");
 
-  std::cout<<"3D put and get test complete."<<std::endl;
+  std::cout<<"SILC 3D put and get example complete."<<std::endl;
   MPI_Finalize();
 
   return 0;

@@ -596,5 +596,7 @@ int main(int argc, char* argv[]) {
   result += put_get_3D_tensor_ui16(dims, n_dims,
                       ui16_suffix, strlen(ui16_suffix));
 
+  printf("SILC put get 3D example completed without errors.\n");
+
   return result;
 }

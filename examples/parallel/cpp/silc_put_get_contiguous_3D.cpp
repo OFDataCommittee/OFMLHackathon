@@ -208,8 +208,8 @@ int main(int argc, char* argv[]) {
 				      &set_1D_array_integral_values<uint8_t>,
 				      dims, SILC::TensorType::uint8, "_ui8");
 
-  std::cout<<"3D put and get with contiguous "\
-             "data test complete."<<std::endl;
+  std::cout<<"SILC 3D put and get with contiguous "\
+             "data example complete."<<std::endl;
   MPI_Finalize();
 
   return 0;

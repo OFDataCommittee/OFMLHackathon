@@ -116,7 +116,7 @@ program main
   call dataset%get_meta_scalars(meta_int64, meta_int64_recv)
   if (.not. all(meta_int64_recv == meta_int64_vec)) stop 'meta_int64: FAILED'
 
-  write(*,*) "Fortran Dataset: passed"
+  write(*,*) "SILC Fortran MPI Dataset example finished without errors."
   call mpi_finalize(err_code)
 
 end program main

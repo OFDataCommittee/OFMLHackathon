@@ -33,6 +33,6 @@ program main
   if (client%key_exists( key_prefix//"test_copy" )) stop 'Copied tensor incorrectly exists'
 
   call MPI_finalize(err_code)
-  print *, "Fortran Client misc tensor: passed"
+  print *, "SILC Fortran MPI misc tensor example finished without errors."
 
 end program

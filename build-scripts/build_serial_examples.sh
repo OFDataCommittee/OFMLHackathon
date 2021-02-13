@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ./tests/cpp/
+cd ./examples/serial/c/
 
 if [ -z "$HIREDIS_INSTALL_PATH" ]; then
     echo "WARNING: HIREDIS_INSTALL_PATH is not set"
@@ -32,7 +32,7 @@ cd ./build
 cmake ..
 
 if [ $? != 0 ]; then
-    echo "ERROR: cmake for CPP tests failed"
+    echo "ERROR: cmake for C serial examples failed"
     cd ..
     exit 1
 fi
@@ -40,7 +40,7 @@ fi
 make -j 4
 
 if [ $? != 0 ]; then
-    echo "ERROR: failed to make CPP tests"
+    echo "ERROR: failed to make C serial examples"
     cd ..
     exit 1
 fi

@@ -351,6 +351,7 @@ int main(int argc, char* argv[]) {
                       ui16_suffix, strlen(ui16_suffix));
 
   free(dims);
+  printf("SILC put unpack example completed without errors.\n");
 
   return result;
 }

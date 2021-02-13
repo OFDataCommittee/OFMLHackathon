@@ -73,7 +73,7 @@ subroutine run_mnist( client, key_suffix, model_name, script_name )
   call client%unpack_tensor(out_key, result, shape(result))
 
   print *, "Result: ", result
-  print *, "Fortran test mnist: passed"
+  print *, "SILC Fortran MPI MNIST example finished without errors."
 
 end subroutine run_mnist
 

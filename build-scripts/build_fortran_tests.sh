@@ -45,7 +45,7 @@ if [[ $DO_FORTRAN == "yes" ]]; then
         exit 1
     fi
 
-    make -j 4
+    make
 
     if [ $? != 0 ]; then
         echo "ERROR: failed to make Fortran tests"

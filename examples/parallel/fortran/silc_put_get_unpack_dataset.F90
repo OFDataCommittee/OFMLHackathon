@@ -83,6 +83,6 @@ program main
   if (.not. all(true_array_integer_64 == recv_array_integer_64)) stop 'true_array_integer_64: FAILED'
 
   call MPI_finalize(err_code)
-  print *, "Fortran Client put/get/unpack dataset: passed"
+  print *, "SILC Fortran MPI put/get/unpack dataset example finished without errorrs."
 
 end program

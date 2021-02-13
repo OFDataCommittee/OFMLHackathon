@@ -63,7 +63,7 @@ def create_cluster(nodes, port, dpn):
             node_ip = get_ip_from_host(node)
             node_ip += ":" + str(port+i)
             cluster_str += node_ip + " "
-            ssdb_str += node_ip +  ";"
+            ssdb_str += node_ip +  ","
     ssdb_str = ssdb_str[0:-1]
 
     # call cluster command

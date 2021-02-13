@@ -175,11 +175,3 @@ add_executable(client_test_mnist_dataset
 target_link_libraries(client_test_mnist_dataset
 	${CLIENT_LIBRARIES}
 )
-
-add_executable(client_test_mnist_scaling
-	client_test_mnist_scaling.cpp
-	${CLIENT_SRC}
-)
-target_link_libraries(client_test_mnist_scaling
-	${CLIENT_LIBRARIES}
-)

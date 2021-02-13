@@ -50,3 +50,4 @@ if __name__ == "__main__":
     example_set_model(MockModel())
     example_set_model_from_file(MockModel())
     example_torch_inference(MockModel())
+    print("SILC model methods and Torch example complete.") 

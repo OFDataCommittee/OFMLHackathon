@@ -4,6 +4,18 @@ import torch
 import torch.nn as nn
 import io
 
+dtypes = [
+    np.float64,
+    np.float32,
+    np.int8,
+    np.int16,
+    np.int32,
+    np.int64,
+    np.uint8,
+    np.uint16,
+]
+
+
 class MockData:
 
     @staticmethod
@@ -15,6 +27,16 @@ class MockData:
             array = np.random.randint(-10, 10, size=shape).astype(dtype)
             data.append(array)
         return data
+
+
+# taken from https://pytorch.org/docs/master/generated/torch.jit.trace.html
+class Net(nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        self.conv = nn.Conv2d(1, 1, 3)
+
+    def forward(self, x):
+        return self.conv(x)
 
 
 class MockModel:

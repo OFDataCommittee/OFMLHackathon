@@ -27,7 +27,7 @@ if(DEFINED ENV{REDISPP_INSTALL_PATH})
 	   find_library(REDISPP_LIB redis++ PATHS ${REDISPP_LIB_PATH} )
 	   string(CONCAT REDISPP_INCLUDE_PATH $ENV{REDISPP_INSTALL_PATH} "/include/")
 else()
-     	   find_library(REDISPP_LIB redis++ PATH_SUFFIXES "/lib")
+     find_library(REDISPP_LIB redis++ PATH_SUFFIXES "/lib")
 	   find_path(REDISPP_INCLUDE_PATH redis++ PATH_SUFFIXES "/include")
 endif()
 
@@ -38,11 +38,15 @@ if(DEFINED ENV{PROTOBUF_INSTALL_PATH})
 	   find_library(PROTOBUF_LIB protobuf PATHS ${PROTOBUF_LIB_PATH} NO_DEFAULT_PATH)
 	   string(CONCAT PROTOBUF_INCLUDE_PATH $ENV{PROTOBUF_INSTALL_PATH} "/include/")
 else()
-     	   find_library(PROTOBUF_LIB protobuf PATH_SUFFIXES "/lib")
+     find_library(PROTOBUF_LIB protobuf PATH_SUFFIXES "/lib")
 	   find_path(PROTOBUF_INCLUDE_PATH protobuf PATH_SUFFIXES "/include")
 endif()
 
 find_package(MPI)
+if(${MPI_Fortran_FOUND})
+else()
+    message(FATAL_ERROR "Could not find working MPI for Fortran parallel examples. CMake will exit.")
+endif()
 
 include_directories(SYSTEM
     ${MPI_INCLUDE_PATH}

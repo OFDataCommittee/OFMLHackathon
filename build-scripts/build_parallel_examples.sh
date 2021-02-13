@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ./tests/cpp/
+cd ./examples/parallel/fortran/
 
 if [ -z "$HIREDIS_INSTALL_PATH" ]; then
     echo "WARNING: HIREDIS_INSTALL_PATH is not set"
@@ -24,6 +24,44 @@ else
 fi
 
 
+
+# setup build dirs
+mkdir build
+cd ./build
+
+DO_FORTRAN="yes"
+
+if [ "$(uname)" == "Darwin" ]; then
+    DO_FORTRAN="no"
+fi
+
+if [[ $DO_FORTRAN == "yes" ]]; then
+    # TODO add platform dependent build step here
+    cmake ..
+
+    if [ $? != 0 ]; then
+        echo "ERROR: cmake for parallel Fortran examples failed"
+        cd ..
+        exit 1
+    fi
+
+    make
+
+    if [ $? != 0 ]; then
+        echo "ERROR: failed to make Fortran parallel examples"
+        cd ..
+        exit 1
+    fi
+
+    cd ../
+    echo "Fortran parallel examples built"
+else
+    echo "Skipping Fortran parallel example build"
+fi
+
+
+cd ../cpp
+
 # setup build dirs
 mkdir build
 cd ./build
@@ -32,7 +70,7 @@ cd ./build
 cmake ..
 
 if [ $? != 0 ]; then
-    echo "ERROR: cmake for CPP tests failed"
+    echo "ERROR: cmake for CPP parallel examples failed"
     cd ..
     exit 1
 fi
@@ -40,11 +78,7 @@ fi
 make -j 4
 
 if [ $? != 0 ]; then
-    echo "ERROR: failed to make CPP tests"
+    echo "ERROR: failed to make CPP parallel examples"
     cd ..
     exit 1
 fi
-
-cd ../
-
-echo

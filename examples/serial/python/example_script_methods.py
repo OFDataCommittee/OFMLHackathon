@@ -72,3 +72,4 @@ def read_script_from_file():
 if __name__ == "__main__":
     example_run_script()
     example_run_script_multi()
+    print("SILC run script method example complete.")

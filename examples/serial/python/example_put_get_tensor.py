@@ -55,3 +55,4 @@ if __name__ == "__main__":
     example_1D_put_get(mock_data)
     example_2D_put_get(mock_data)
     example_3D_put_get(mock_data)
+    print("SILC put get tensor example complete.") 
