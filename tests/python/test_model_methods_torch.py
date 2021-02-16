@@ -3,8 +3,9 @@ import os
 import torch
 
 from silc import Client
+import get_cluster_env
 
-CLUSTER = True
+CLUSTER = get_cluster_env.cluster()
 
 
 def test_set_model(mock_model):

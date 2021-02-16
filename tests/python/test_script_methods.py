@@ -5,8 +5,9 @@ import numpy as np
 import torch
 
 from silc import Client
+import get_cluster_env
 
-CLUSTER = True
+CLUSTER = get_cluster_env.cluster()
 file_path = osp.dirname(osp.abspath(__file__))
 
 

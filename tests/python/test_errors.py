@@ -5,9 +5,9 @@ import pytest
 
 from silc import Client, Dataset
 from silc.error import RedisConnectionError, RedisReplyError
+import get_cluster_env
 
-CLUSTER = True
-
+CLUSTER = get_cluster_env.cluster()
 
 def test_SSDB_not_set():
     ssdb = os.environ["SSDB"]

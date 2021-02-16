@@ -1,10 +1,11 @@
 import numpy as np
 
 from silc import Client
+import get_cluster_env
 
 # ----- Tests -----------------------------------------------------------
 
-CLUSTER = True
+CLUSTER = get_cluster_env.cluster()
 
 
 def test_1D_put_get(mock_data):

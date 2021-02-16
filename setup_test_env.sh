@@ -9,5 +9,5 @@ echo "Setting up SILC environment for testing"
 
 source ./setup_env.sh
 
-export SILC_TEST_CLUSTER=False
+export SILC_TEST_CLUSTER=True
 echo SILC_TEST_CLUSTER set to $SILC_TEST_CLUSTER
