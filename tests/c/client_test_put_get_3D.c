@@ -1,4 +1,5 @@
 #include "c_client.h"
+#include "c_client_test_utils.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -101,7 +102,7 @@ int put_get_3D_tensor_double(size_t* dims, size_t n_dims,
   a non-zero value is returned.
   */
 
-  void* client = SmartSimCClient(cluster);
+  void* client = SmartSimCClient(use_cluster());
 
   double*** tensor = (double***)malloc(dims[0]*sizeof(double**));
   double*** result = 0;
@@ -156,7 +157,7 @@ int put_get_3D_tensor_float(size_t* dims, size_t n_dims,
   a non-zero value is returned.
   */
 
-  void* client = SmartSimCClient(cluster);
+  void* client = SmartSimCClient(use_cluster());
 
   float*** tensor = (float***)malloc(dims[0]*sizeof(float**));
   float*** result = 0;
@@ -210,7 +211,7 @@ int put_get_3D_tensor_i8(size_t* dims, size_t n_dims,
   a non-zero value is returned.
   */
 
-  void* client = SmartSimCClient(cluster);
+  void* client = SmartSimCClient(use_cluster());
 
   int8_t*** tensor = (int8_t***)malloc(dims[0]*sizeof(int8_t**));
   int8_t*** result = 0;
@@ -268,7 +269,7 @@ int put_get_3D_tensor_i16(size_t* dims, size_t n_dims,
   a non-zero value is returned.
   */
 
-  void* client = SmartSimCClient(cluster);
+  void* client = SmartSimCClient(use_cluster());
 
   int16_t*** tensor = (int16_t***)malloc(dims[0]*sizeof(int16_t**));
   int16_t*** result = 0;
@@ -327,7 +328,7 @@ int put_get_3D_tensor_i32(size_t* dims, size_t n_dims,
   a non-zero value is returned.
   */
 
-  void* client = SmartSimCClient(cluster);
+  void* client = SmartSimCClient(use_cluster());
 
   int32_t*** tensor = (int32_t***)malloc(dims[0]*sizeof(int32_t**));
   int32_t*** result = 0;
@@ -386,7 +387,7 @@ int put_get_3D_tensor_i64(size_t* dims, size_t n_dims,
   a non-zero value is returned.
   */
 
-  void* client = SmartSimCClient(cluster);
+  void* client = SmartSimCClient(use_cluster());
 
   int64_t*** tensor = (int64_t***)malloc(dims[0]*sizeof(int64_t**));
   int64_t*** result = 0;
@@ -445,7 +446,7 @@ int put_get_3D_tensor_ui8(size_t* dims, size_t n_dims,
   a non-zero value is returned.
   */
 
-  void* client = SmartSimCClient(cluster);
+  void* client = SmartSimCClient(use_cluster());
 
   uint8_t*** tensor = (uint8_t***)malloc(dims[0]*sizeof(uint8_t**));
   uint8_t*** result = 0;
@@ -504,7 +505,7 @@ int put_get_3D_tensor_ui16(size_t* dims, size_t n_dims,
   a non-zero value is returned.
   */
 
-  void* client = SmartSimCClient(cluster);
+  void* client = SmartSimCClient(use_cluster());
 
   uint16_t*** tensor = (uint16_t***)malloc(dims[0]*sizeof(uint16_t**));
   uint16_t*** result = 0;

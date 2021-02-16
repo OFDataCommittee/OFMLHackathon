@@ -1,9 +1,26 @@
-#ifndef SMARTSIM_CTEST_INT32_UTILS_H
-#define SMARTSIM_CTEST_INT32_UTILS_H
+#ifndef SILC_CTEST_INT32_UTILS_H
+#define SILC_CTEST_INT32_UTILS_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+
+bool use_cluster()
+{
+    /* This function determines if a cluster
+    configuration should be used in the test
+    when creating a Client.
+    */
+    char* silc_test_cluster = getenv("SILC_TEST_CLUSTER");
+    bool cluster = false;
+    if(silc_test_cluster) {
+        if( strcmp(silc_test_cluster, "true")==0 ||
+            strcmp(silc_test_cluster, "TRUE")==0 ||
+            strcmp(silc_test_cluster, "True")==0 )
+            cluster = true;
+    }
+    return cluster;
+}
 
 void test_result(int result, char *test){
     if (result) {
@@ -109,4 +126,4 @@ bool is_equal_3D_tensors_dbl(double*** a, double*** b,
     return true;
 }
 
-#endif //SMARTSIM_CTEST_UTILS_H
+#endif //SILC_CTEST_INT32_UTILS_H

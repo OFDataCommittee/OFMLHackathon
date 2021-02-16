@@ -19,7 +19,7 @@ void put_unpack_1D_tensor(void* tensor, size_t* dims, size_t n_dims,
   the type is not known.
   */
 
-  void* client = SmartSimCClient(true);
+  void* client = SmartSimCClient(use_cluster());
 
   int rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
