@@ -61,7 +61,7 @@ void Client::put_dataset(DataSet& dataset)
         cmd->add_field_ptr(tensor->buf());
         it++;
     }
-    this->_redis_cluster->run(cmds);
+    this->_redis_server->run(cmds);
     return;
 }
 

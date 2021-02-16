@@ -33,7 +33,7 @@ void run_mnist(const std::string& model_name,
     std::cout<<"Connecting clients"<<std::endl<<std::flush;
 
   double constructor_start = MPI_Wtime();
-  SILC::Client client(true);
+  SILC::Client client(use_cluster());
   double constructor_end = MPI_Wtime();
   double delta_t = constructor_end - constructor_start;
   timing_file << rank << "," << "client()" << ","
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
   if(rank==0) {
 
     double constructor_start = MPI_Wtime();
-    SILC::Client client(true);
+    SILC::Client client(use_cluster());
     double constructor_end = MPI_Wtime();
     double delta_t = constructor_end - constructor_start;
     timing_file << rank << "," << "client()" << ","

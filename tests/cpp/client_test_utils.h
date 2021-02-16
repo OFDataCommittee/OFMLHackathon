@@ -1,8 +1,25 @@
-#ifndef SMARTSIM_TEST_UTILS_H
-#define SMARTSIM_TEST_UTILS_H
+#ifndef SILC_TEST_UTILS_H
+#define SILC_TEST_UTILS_H
 
 #include <typeinfo>
 #include <random>
+
+bool use_cluster()
+{
+    /* This function determines if a cluster
+    configuration should be used in the test
+    when creating a Client.
+    */
+    char* silc_test_cluster = std::getenv("SILC_TEST_CLUSTER");
+    bool cluster = false;
+    if(silc_test_cluster) {
+        if( std::strcmp(silc_test_cluster, "true")==0 ||
+            std::strcmp(silc_test_cluster, "TRUE")==0 ||
+            std::strcmp(silc_test_cluster, "True")==0 )
+            cluster = true;
+    }
+    return cluster;
+}
 
 template <typename T>
 T** allocate_2D_array(int dim_1, int dim_2)
@@ -225,4 +242,4 @@ T get_floating_point_scalar()
   return distribution(generator);
 }
 
-#endif //SMARTSIM_TEST_UTILS_H
+#endif //SILC_TEST_UTILS_H

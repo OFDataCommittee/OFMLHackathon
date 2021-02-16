@@ -99,7 +99,7 @@ void put_get_3D_array(
   std::string str_meta_3 = std::string("test_meta_string_3");
 
   //Create Client and DataSet
-  SILC::Client client(true);
+  SILC::Client client(use_cluster());
   SILC::DataSet MyDataSet(dataset_name);
 
   //Add tensors to the DataSet

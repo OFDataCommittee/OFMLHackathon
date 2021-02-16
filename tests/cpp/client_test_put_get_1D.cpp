@@ -11,7 +11,7 @@ void put_get_1D_array(
         SILC::TensorType type,
         std::string key_suffix="")
 {
-  SILC::Client client(true);
+  SILC::Client client(use_cluster());
 
   //Allocate and fill arrays
   T_send* array = (T_send*)malloc(dims[0]*sizeof(T_send));
