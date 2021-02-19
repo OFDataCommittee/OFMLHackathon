@@ -48,7 +48,7 @@ bool RedisCluster::key_exists(const std::string& key)
 {
     Command cmd;
     cmd.add_field("EXISTS");
-    cmd.add_field(key);
+    cmd.add_field(key, true);
     CommandReply reply = this->run(cmd);
     return reply.integer();
 }

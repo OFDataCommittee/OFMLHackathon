@@ -2,8 +2,9 @@ program main
 
   use mpi
   use iso_c_binding
-  use silc_client, only : client_type
+  use silc_client,  only : client_type
   use silc_dataset, only : dataset_type
+  use test_utils,   only : use_cluster
 
   implicit none
 
@@ -36,7 +37,7 @@ program main
   call MPI_comm_rank( MPI_COMM_WORLD, pe_id, err_code)
   write(key_prefix, "(A,I6.6)") "pe_",pe_id
 
-  call client%initialize(.true.)
+  call client%initialize(use_cluster())
 
   call random_number(true_array_real_32)
   call random_number(true_array_real_64)

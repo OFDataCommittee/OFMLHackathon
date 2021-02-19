@@ -2,7 +2,7 @@ program main
 
   use mpi
   use silc_client, only : client_type
-  use test_utils,  only : irand
+  use test_utils,  only : irand, use_cluster
 
   implicit none
 
@@ -51,7 +51,7 @@ program main
     recv_array_integer_64(i,j) = irand()
   enddo; enddo
 
-  call client%initialize(cluster=.true.)
+  call client%initialize(use_cluster())
 
   call client%put_tensor(key_prefix//"true_array_real_32", true_array_real_32, shape(true_array_real_32))
   call client%unpack_tensor(key_prefix//"true_array_real_32", recv_array_real_32, shape(recv_array_real_32))

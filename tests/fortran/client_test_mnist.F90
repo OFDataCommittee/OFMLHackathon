@@ -2,6 +2,7 @@ program mnist_test
 
   use mpi
   use silc_client, only : client_type
+  use test_utils,  only : use_cluster
 
   implicit none
 
@@ -20,7 +21,7 @@ program mnist_test
 
   ! Format the suffix for a key as a zero-padded version of the rank
   write(key_suffix, "(A,I1.1)") "_",pe_id
-  call client%initialize(.true.)
+  call client%initialize(use_cluster())
 
   if (pe_id == 0) then
     call client%set_model_from_file(model_key, model_file, "TORCH", "CPU")
