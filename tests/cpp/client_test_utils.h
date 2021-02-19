@@ -4,6 +4,22 @@
 #include <typeinfo>
 #include <random>
 
+void to_lower(char* s) {
+    /* This will turn each character in the
+    c-str into the lowercase value.
+    This assumes the c-str is null terminated.
+    */
+    if(!s)
+        return;
+
+    while((*s)!=0) {
+        if( *s>='A' && *s<='Z')
+            *s = *s - 'A' + 'a';
+        s++;
+    }
+    return;
+}
+
 bool use_cluster()
 {
     /* This function determines if a cluster
@@ -11,14 +27,13 @@ bool use_cluster()
     when creating a Client.
     */
     char* silc_test_cluster = std::getenv("SILC_TEST_CLUSTER");
-    bool cluster = false;
+    to_lower(silc_test_cluster);
+
     if(silc_test_cluster) {
-        if( std::strcmp(silc_test_cluster, "true")==0 ||
-            std::strcmp(silc_test_cluster, "TRUE")==0 ||
-            std::strcmp(silc_test_cluster, "True")==0 )
-            cluster = true;
+        if(std::strcmp(silc_test_cluster, "true")==0)
+            return true;
     }
-    return cluster;
+    return false;
 }
 
 template <typename T>
