@@ -359,12 +359,12 @@ class DataSet
         *   \param mem_layout The memory layout of the provided
         *                     tensor data
         */
-        inline void _add_to_tensorpack(const std::string& name /*!< The name used to reference the tensor*/,
-                                       void* data /*!< A c_ptr to the data of the tensor*/,
-                                       const std::vector<size_t>& dims /*! The dimensions of the data*/,
-                                       const TensorType type /*! The type of the tensor*/,
-                                       const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
-                                       );
+        void _add_to_tensorpack(const std::string& name /*!< The name used to reference the tensor*/,
+                                void* data /*!< A c_ptr to the data of the tensor*/,
+                                const std::vector<size_t>& dims /*! The dimensions of the data*/,
+                                const TensorType type /*! The type of the tensor*/,
+                                const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
+                                );
     private:
 
 

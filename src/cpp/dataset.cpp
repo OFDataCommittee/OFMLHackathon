@@ -132,11 +132,11 @@ std::string DataSet::get_tensor_type(const std::string& name)
     return this->_tensorpack.get_tensor(name)->name();
 }
 
-inline void DataSet::_add_to_tensorpack(const std::string& name,
-                                        void* data,
-                                        const std::vector<size_t>& dims,
-                                        const TensorType type,
-                                        const MemoryLayout mem_layout)
+void DataSet::_add_to_tensorpack(const std::string& name,
+                                 void* data,
+                                 const std::vector<size_t>& dims,
+                                 const TensorType type,
+                                 const MemoryLayout mem_layout)
 {
     this->_tensorpack.add_tensor(name, data, dims,
                                  type, mem_layout);
