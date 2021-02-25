@@ -24,7 +24,7 @@ class Tensor : public TensorBase
         /*!
         *   \brief Tensor constructor
         *   \param name The name used to reference the tensor
-        *   \param data c_ptr to the source data for the tensor
+        *   \param data c-ptr to the source data for the tensor
         *   \param dims The dimensions of the tensor
         *   \param type The data type of the tensor
         *   \param mem_layout The memory layout of the source data

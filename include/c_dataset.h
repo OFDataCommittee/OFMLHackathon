@@ -23,7 +23,7 @@ void* CDataSet(const char* name,
 
 /*!
 *   \brief Add a tensor to the DataSet.
-*   \param dataset A c_ptr to the dataset object
+*   \param dataset A c-ptr to the dataset object
 *   \param name The name used to reference the tensor
 *               within the DataSet
 *   \param name_length The length of the tensor
@@ -52,7 +52,7 @@ void add_tensor(void* dataset,
 *          field does not exist, it will be created.
 *          If the field exists, the value
 *          will be appended to existing field.
-*   \param dataset A c_ptr to the dataset object
+*   \param dataset A c-ptr to the dataset object
 *   \param name The name used to reference the metadata
 *               field
 *   \param name_length The length of the metadata
@@ -74,7 +74,7 @@ void add_meta_scalar(void* dataset,
 *          does not exist, it will be created.
 *          If the field exists the value will
 *          be appended to existing field.
-*   \param dataset A c_ptr to the dataset object
+*   \param dataset A c-ptr to the dataset object
 *   \param name The name used to reference the metadata
 *               field
 *   \param name_length The length of the metadata
@@ -108,7 +108,7 @@ void add_meta_string(void* dataset,
 *            data.  Instead  it is recommended that the user
 *            use unpack_tensor() for large tensor data and
 *            to limit memory use by the dataset.
-*   \param dataset A c_ptr to the dataset object
+*   \param dataset A c-ptr to the dataset object
 *   \param name The name used to reference the tensor in
 *               the dataset
 *   \param name_length The length of the tensor name
@@ -143,7 +143,7 @@ void get_dataset_tensor(void* dataset,
 *          the provided memory space is sufficient.  This
 *          method is the most memory efficient way
 *          to retrieve tensor data from a dataset.
-*   \param dataset A c_ptr to the dataset object
+*   \param dataset A c-ptr to the dataset object
 *   \param name The name used to reference the tensor
 *               in the dataset
 *   \param name_length The length of the tensor name
@@ -180,7 +180,7 @@ void unpack_dataset_tensor(void* dataset,
 *          the values.  The TensorType enum
 *          will be set to the type of the MetaData
 *          field.
-*   \param dataset A c_ptr to the dataset object
+*   \param dataset A c-ptr to the dataset object
 *   \param name The name used to reference the metadata
 *               field in the DataSet
 *   \param name_length The length of the metadata field
@@ -190,7 +190,7 @@ void unpack_dataset_tensor(void* dataset,
 *                 field
 *   \param type The MetadataType enum describing
 *               the data type of the metadata field
-*   \returns A c_ptr to newly allocated memory containing
+*   \returns A c-ptr to newly allocated memory containing
 *            the metadata
 */
 void* get_meta_scalars(void* dataset,
@@ -215,13 +215,13 @@ void* get_meta_scalars(void* dataset,
 *          will be managed by the DataSet object
 *          and remain valid until the DataSet
 *          object is destroyed.
-*   \param dataset A c_ptr to the dataset object
+*   \param dataset A c-ptr to the dataset object
 *   \param name The name used to reference the metadata
 *               field in the DataSet
 *   \param name_length The length of the metadata field
 *                      name c-string, excluding null
 *                      terminating character
-*   \param data A c_ptr to the char** pointer that will
+*   \param data A c-ptr to the char** pointer that will
 *               be redirected to the string values
 *   \param n_strings A reference to a size_t variable
 *                    that will be set to the number of

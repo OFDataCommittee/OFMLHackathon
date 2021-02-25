@@ -66,7 +66,7 @@ class TensorPack
         /*!
         *   \brief Add a tensor to the dataset
         *   \param name The name used to reference the tensor
-        *   \param data A c_ptr to the data of the tensor
+        *   \param data A c-ptr to the data of the tensor
         *   \param dims The dimensions of the data
         *   \param type The data type of the tensor
         *   \param mem_layout The memory layout of the data
