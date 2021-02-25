@@ -60,6 +60,29 @@ void Command::add_field(char* field, bool is_key)
     return;
 }
 
+void Command::add_field(const char* field, bool is_key)
+{
+    /* Copy the field char* into a char* that is stored
+    locally in the Command object.  The new string is not
+    null terminated because the fields vector is of type
+    string_view which stores the length of the string.
+    If is_key is true, the key will be added to the command
+    keys.
+    */
+
+    int field_size = std::strlen(field);
+    char* f = (char*) malloc(sizeof(char)*(field_size));
+    std::memcpy(f, field, sizeof(char)*field_size);
+    this->_local_fields.push_back(f);
+    this->_fields.push_back(std::string_view(f, field_size));
+
+    if(is_key)
+        this->_cmd_keys[std::string_view(f, field_size)] =
+            this->_fields.size()-1;
+
+    return;
+}
+
 void Command::add_field_ptr(char* field, size_t field_size)
 {
     /* This function adds a field to the fields data

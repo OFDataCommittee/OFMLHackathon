@@ -82,6 +82,17 @@ class Command
         void add_field(char* field, bool is_key=false);
 
         /*!
+        *   \brief Add a field to the Command from a const c-string.
+        *   \details The const c-string field value is copied
+        *            to the Command.
+        *   \param field The field to add to the Command
+        *   \param is_key Boolean indicating if the field
+        *                 should be treated as a key for the
+        *                 Command.
+        */
+        void add_field(const char* field, bool is_key=false);
+
+        /*!
         *   \brief Add a field to the Command from a c-string.
         *   \details The c-string will not be copied to the
         *            Command object.  A pointer is kept that
