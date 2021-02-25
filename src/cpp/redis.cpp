@@ -23,7 +23,59 @@ Redis::~Redis()
 
 CommandReply Redis::run(Command& cmd)
 {
-    return this->_run(this->_redis, cmd);
+    Command::iterator cmd_fields_start = cmd.begin();
+    Command::iterator cmd_fields_end = cmd.end();
+    CommandReply reply;
+
+    int n_trials = 100;
+    bool success = true;
+
+    while (n_trials > 0 && success) {
+
+        try {
+            reply = this->_redis->command(cmd_fields_start, cmd_fields_end);
+
+            if(reply.has_error()==0)
+                n_trials = -1;
+            else
+                n_trials = 0;
+        }
+        catch (sw::redis::TimeoutError &e) {
+            n_trials--;
+            std::cout << "WARNING: Caught redis TimeoutError: " << e.what() << std::endl;
+            std::cout << "WARNING: Could not execute command " << cmd.first_field()
+                      << " and " << n_trials << " more trials will be made."
+                      << std::endl << std::flush;
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+        }
+        catch (sw::redis::IoError &e) {
+            n_trials--;
+            std::cout << "WARNING: Caught redis IOError: " << e.what() << std::endl;
+            std::cout << "WARNING: Could not execute command " << cmd.first_field()
+                        << " and " << n_trials << " more trials will be made."
+                        << std::endl << std::flush;
+        }
+        catch (...) {
+            n_trials--;
+            std::cout << "WARNING: Could not execute command " << cmd.first_field()
+                        << " and " << n_trials << " more trials will be made."
+                        << std::endl << std::flush;
+            std::cout << "Error command = "<<cmd.to_string()<<std::endl;
+            throw;
+        }
+    }
+
+    if (n_trials == 0)
+        success = false;
+
+    if (!success) {
+        if(reply.has_error()>0)
+            reply.print_reply_error();
+        throw std::runtime_error("Redis failed to execute command: " +
+                                 cmd.to_string());
+    }
+
+    return reply;
 }
 
 CommandReply Redis::run(CommandList& cmds)

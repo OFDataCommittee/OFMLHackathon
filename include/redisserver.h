@@ -231,20 +231,6 @@ class RedisServer {
     protected:
 
         /*!
-        *   \brief Run a single-key or single-hash slot
-        *          Command using a provided sw::redis::Redis
-        *          object.
-        *   \param redis A pointer to a redis sever that
-        *                will execute the command
-        *   \param cmd A single-key or single-hash slot
-        *              Command to execute
-        *   \returns The CommandReply that contains the result
-        *            of the Command execution
-        */
-        CommandReply _run(sw::redis::Redis* redis,
-                          Command& cmd);
-
-        /*!
         *   \brief Retrieve a single address, randomly
         *          chosen from a list of addresses if
         *          applicable, from the SSDB environment
