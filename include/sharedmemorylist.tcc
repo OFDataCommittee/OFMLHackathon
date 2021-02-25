@@ -1,5 +1,5 @@
-#ifndef SILC_SHAREMEMORYLIST_TCC
-#define SILC_SHAREMEMORYLIST_TCC
+#ifndef SILC_SHAREDMEMORYLIST_TCC
+#define SILC_SHAREDMEMORYLIST_TCC
 
 template <class T>
 void SharedMemoryList<T>::add_allocation(size_t bytes, T* ptr)
@@ -24,4 +24,4 @@ T* SharedMemoryList<T>::allocate(size_t n_values)
     return this->allocate_bytes(bytes);
 }
 
-#endif //SILC_SHAREMEMORYLIST_TCC
+#endif //SILC_SHAREDMEMORYLIST_TCC

@@ -67,7 +67,7 @@ class RedisCluster : public RedisServer
         *   \brief Run a single-key or single-hash slot
         *          Command on the server
         *   \param cmd The single-key or single-hash
-        *              slot Comand to run
+        *              slot Command to run
         *   \returns The CommandReply from the
         *            command execution
         */
@@ -79,7 +79,7 @@ class RedisCluster : public RedisServer
         *          CommandList is run sequentially.
         *   \param cmd The CommandList containing multiple
         *              single-key or single-hash
-        *              slot Comand to run
+        *              slot Command to run
         *   \returns The CommandReply from the last
         *            command execution
         */

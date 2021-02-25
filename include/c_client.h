@@ -54,7 +54,7 @@ void* get_dataset(void* c_client,
 *   \param name The name of the dataset object
 *   \param name_length The length of the name c-string,
 *                      excluding null terminating character
-*   \param new_name The name of the dataset object
+*   \param new_name The new name of the dataset object
 *   \param new_name_length The length of the new name
 *                          c-string, excluding null
 *                          terminating character
@@ -400,7 +400,7 @@ void set_script_from_file(void* c_client,
 *                        terminating character
 *   \param script The script as a c-string buffer
 *   \param script_length The length of the script
-*                        c-string name c-string, excluding
+*                        c-string, excluding
 *                        null terminating character
 */
 void set_script(void* c_client,

@@ -83,7 +83,7 @@ class DataSet
         *   \param dims The dimensions of the tensor
         *   \param type The data type of the tensor data
         *   \param mem_layout The MemoryLayout enum describing the
-        *                     layout of the provide tensor
+        *                     layout of the provided tensor
         *                     data
         */
         void add_tensor(const std::string& name,
