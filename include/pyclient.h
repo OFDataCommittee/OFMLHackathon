@@ -213,6 +213,24 @@ class PyClient
         */
         py::bytes get_model(const std::string& key);
 
+        /*!
+        *   \brief Check if the key exists in the database at a
+        *          specified frequency for a specified number
+        *          of times
+        *   \param key The key that will be checked in the database
+        *   \param poll_frequency_ms The frequency of checks for the
+        *                            key in milliseconds
+        *   \param num_tries The total number of times to check for
+        *                    the specified number of keys.  If the
+        *                    value is set to -1, the key will be
+        *                    polled indefinitely.
+        *   \returns Returns true if the key is found within the
+        *            specified number of tries, otherwise false.
+        */
+        bool poll_key(const std::string& key,
+                        int poll_frequency_ms,
+                        int num_tries);
+
 
     private:
 

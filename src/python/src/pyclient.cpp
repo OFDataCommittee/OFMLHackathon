@@ -177,10 +177,19 @@ void PyClient::set_model_from_file(const std::string& key,
                                      inputs, outputs);
   return;
 }
+
 void PyClient::run_model(const std::string& key,
                          std::vector<std::string> inputs,
                          std::vector<std::string> outputs)
 {
   this->_client->run_model(key, inputs, outputs);
   return;
+}
+
+bool PyClient::poll_key(const std::string& key,
+                        int poll_frequency_ms,
+                        int num_tries)
+{
+  std::cout << "Polling key: " << key << std::endl;
+  return this->_client->poll_key(key, poll_frequency_ms, num_tries);
 }

@@ -20,7 +20,8 @@ PYBIND11_MODULE(silcPy, m) {
         .def("set_model", &PyClient::set_model)
         .def("set_model_from_file", &PyClient::set_model_from_file)
         .def("get_model", &PyClient::get_model)
-        .def("run_model", &PyClient::run_model);
+        .def("run_model", &PyClient::run_model)
+        .def("poll_key", &PyClient::poll_key);
 
     // Python Dataset class
     py::class_<PyDataset>(m, "PyDataset")

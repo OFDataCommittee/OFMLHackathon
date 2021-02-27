@@ -336,6 +336,31 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "run_model")
 
+    def poll_key(self, key, poll_frequency_ms, num_tries):
+        """Check if the key exists in the database at a
+           specified frequency for a specified number
+           of times
+           
+        :param key: The key that will be checked in the database
+        :type key: int
+        :param poll_frequency_ms: The frequency of checks for the
+                                  key in milliseconds
+        :type poll_frequency_ms: int
+        :param num_tries: The total number of times to check for
+                          the specified number of keys.  If the
+                          value is set to -1, the key will be
+                          polled indefinitely.
+        :type num_tries: int
+        :returns: Returns true if the key is found within the
+                 specified number of tries, otherwise false.
+        :rtype: bool
+        """
+        try:
+            return super().poll_key(key, poll_frequency_ms, num_tries)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "poll_key")
+
+
     # ---- helpers --------------------------------------------------------
 
     @staticmethod

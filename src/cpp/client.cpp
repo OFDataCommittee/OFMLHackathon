@@ -552,8 +552,8 @@ void Client::run_script(const std::string& key,
 
 bool Client::key_exists(const std::string& key)
 {
-
-    return this->_redis_server->key_exists(key);
+    std::string g_key = this->_get_prefix() + key;
+    return this->_redis_server->key_exists(g_key);
 }
 
 bool Client::poll_key(const std::string& key,
@@ -611,7 +611,7 @@ void Client::_set_prefixes_from_env()
     if(keyin_p) {
         char* a = &keyin_p[0];
         char* b = a;
-        char parse_char = ';';
+        char parse_char = ',';
         while (*b) {
         if(*b==parse_char) {
         if(a!=b)
