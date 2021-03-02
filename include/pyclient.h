@@ -228,9 +228,22 @@ class PyClient
         *            specified number of tries, otherwise false.
         */
         bool poll_key(const std::string& key,
-                        int poll_frequency_ms,
-                        int num_tries);
+                      int poll_frequency_ms,
+                      int num_tries);
 
+        /*!
+        *   \brief Check if the key exists in the database
+        *   \param key The key that will be checked in the database
+        *   \returns Returns true if the key exists in the database
+        */
+        bool key_exists(const std::string& key);
+
+        /*!
+        *   \brief Set the data source (i.e. key prefix for
+        *          get functions)
+        *   \param source_id The prefix for retrieval commands
+        */
+        void set_data_source(const std::string& source_id);
 
     private:
 

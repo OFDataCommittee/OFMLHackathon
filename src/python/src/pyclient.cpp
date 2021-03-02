@@ -186,10 +186,20 @@ void PyClient::run_model(const std::string& key,
   return;
 }
 
+void PyClient::set_data_source(const std::string& source_id)
+{
+  this->_client->set_data_source(source_id);
+  return;
+}
+
+bool PyClient::key_exists(const std::string& key)
+{
+  return this->_client->key_exists(key);
+}
+
 bool PyClient::poll_key(const std::string& key,
                         int poll_frequency_ms,
                         int num_tries)
 {
-  std::cout << "Polling key: " << key << std::endl;
   return this->_client->poll_key(key, poll_frequency_ms, num_tries);
 }
