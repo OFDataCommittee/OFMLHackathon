@@ -43,6 +43,7 @@ class PyClient
         *              in the database
         *   \param type The data type of the tensor
         *   \param data Numpy array with Pybind*
+        *   \throw std::runtime_error for all client errors
         */
         void put_tensor(std::string& key,
                         std::string& type,
@@ -61,6 +62,7 @@ class PyClient
         *            use PyClient.unpack_tensor() for large tensor
         *            data and to limit memory use by the PyClient.
         *   \param key The name used to reference the tensor
+        *   \throw std::runtime_error for all client errors
         */
         py::array get_tensor(std::string& key);
 
@@ -68,6 +70,7 @@ class PyClient
         /*!
         *   \brief Send a PyDataSet object to the database
         *   \param dataset The PyDataSet object to send to the database
+        *   \throw std::runtime_error for all client errors
         */
         void put_dataset(PyDataset& dataset);
 
@@ -77,6 +80,7 @@ class PyClient
         *   \param name The name of the dataset to retrieve
         *   \returns Pointer to the PyDataSet
         *            object retrieved from the database
+        *   \throw std::runtime_error for all client errors
         */
         PyDataset* get_dataset(const std::string& name);
 
@@ -88,6 +92,7 @@ class PyClient
         *   \param device The name of the device for execution
         *                 (e.g. CPU or GPU)
         *   \param script_file The source file for the script
+        *   \throw std::runtime_error for all client errors
         */
         void set_script_from_file(const std::string& key,
                                 const std::string& device,
@@ -100,6 +105,7 @@ class PyClient
         *   \param device The name of the device for execution
         *                 (e.g. CPU or GPU)
         *   \param script The script source in a std::string_view
+        *   \throw std::runtime_error for all client errors
         */
         void set_script(const std::string& key,
                         const std::string& device,
@@ -112,6 +118,7 @@ class PyClient
         *            The memory associated with the script
         *            is managed by the PyClient and is valid
         *            until the destruction of the PyClient.
+        *   \throw std::runtime_error for all client errors
         */
         std::string_view get_script(const std::string& key);
 
@@ -125,6 +132,7 @@ class PyClient
         *                 in the script
         *   \param outputs The keys of output tensors that
         *                 will be used to save script results
+        *   \throw std::runtime_error for all client errors
         */
         void run_script(const std::string& key,
                         const std::string& function,
@@ -149,6 +157,7 @@ class PyClient
         *                 (TF models only)
         *   \param outputs One or more names of model output nodes
         *                 (TF models only)
+        *   \throw std::runtime_error for all client errors
         */
         void set_model(const std::string& key,
                         const std::string_view& model,
@@ -180,6 +189,7 @@ class PyClient
         *                 (TF models only)
         *   \param outputs One or more names of model output nodes
         *                 (TF models only)
+        *   \throw std::runtime_error for all client errors
         */
         void set_model_from_file(const std::string& key,
                                 const std::string& model_file,
@@ -201,6 +211,7 @@ class PyClient
         *                 in the model
         *   \param outputs The keys of output tensors that
         *                 will be used to save model results
+        *   \throw std::runtime_error for all client errors
         */
         void run_model(const std::string& key,
                         std::vector<std::string> inputs,
@@ -210,6 +221,7 @@ class PyClient
         *   \brief Retrieve the model from the database
         *   \param key The key associated with the model
         *   \returns A py:bytes object containing the model
+        *   \throw std::runtime_error for all client errors
         */
         py::bytes get_model(const std::string& key);
 
