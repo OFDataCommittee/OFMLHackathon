@@ -107,6 +107,19 @@ def test_missing_script_function(use_cluster):
     with pytest.raises(RedisReplyError):
         c.run_script("bad-function", "not-a-function-in-script", ["bad-func-tensor"], ["output"])
 
+def test_wrong_model_name(mock_data, mock_model):
+    """User requests to run a model that is not there"""
+
+    data = mock_data.create_data(1)
+
+    model = mock_model.create_torch_cnn()
+    c = Client(None, CLUSTER)
+    c.set_model("simple_cnn", model, "TORCH", "CPU")
+    c.put_tensor("input", data[0])
+    with pytest.raises(RedisReplyError):
+        c.run_model(
+            "wrong_cnn", ["input"], ["output"]
+        )
 
 def bad_function(data):
     """Bad function which only raises an exception"""
