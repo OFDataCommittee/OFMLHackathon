@@ -443,8 +443,8 @@ class Client
          *        e.g. in an ensemble. Prefixes will only be
          *        used if they were previously set through
          *        environment variables SSKEYIN and SSKEYOUT.
-         *        By default, the client prefixes models when a prefix
-         *        are available.
+         *        By default, the client prefixes tensor keys
+         *        when a prefix is available.
          *
          * \param use_prefix If set to true, all future operations
          *                   on tensors will use a prefix, if 
@@ -458,10 +458,10 @@ class Client
          *        e.g. in an ensemble. Prefixes will only be
          *        used if they were previously set through
          *        environment variables SSKEYIN and SSKEYOUT.
-         *        By default, the client does not prefix models.
+         *        By default, the client does not prefix model keys.
          *
          * \param use_prefix If set to true, all future operations
-         *                   on tensors will use a prefix, if 
+         *                   on models will use a prefix, if 
          *                   available.
          */
         void use_model_ensemble_prefix(bool use_prefix);
@@ -472,10 +472,11 @@ class Client
          *        e.g. in an ensemble. Prefixes will only be
          *        used if they were previously set through
          *        environment variables SSKEYIN and SSKEYOUT.
-         *        By default, the client, does not prefix datasets.
+         *        By default, the client, does not prefix dataset
+         *        keys.
          *
          * \param use_prefix If set to true, all future operations
-         *                   on tensors will use a prefix, if 
+         *                   on datasets will use a prefix, if 
          *                   available.
          */
         void use_dataset_ensemble_prefix(bool use_prefix);

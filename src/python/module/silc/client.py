@@ -395,6 +395,66 @@ class Client(PyClient):
             raise RuntimeError(str(e), "set_data_source")
 
 
+    def use_tensor_ensemble_prefix(self, use_prefix):
+        """Set whether tensor keys should be prefixed
+           e.g. in an ensemble. Prefixes will only be
+           used if they were previously set through
+           environment variables SSKEYIN and SSKEYOUT.
+           By default, the client prefixes tensor
+           keys when a prefix is available.
+         
+        :param use_prefix: If set to true, all future operations
+                           on tensors will use a prefix, if 
+                           available.
+        :type use_prefix: bool
+
+        """
+        try:
+            return super().use_tensor_ensemble_prefix(use_prefix)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "use_tensor_ensemble_prefix")
+
+
+    def use_model_ensemble_prefix(self, use_prefix):
+        """Set whether tensor keys should be prefixed
+           e.g. in an ensemble. Prefixes will only be
+           used if they were previously set through
+           environment variables SSKEYIN and SSKEYOUT.
+           By default, the client does not prefix
+           model keys.
+         
+        :param use_prefix: If set to true, all future operations
+                           on models will use a prefix, if 
+                           available.
+        :type use_prefix: bool
+
+        """
+        try:
+            return super().use_model_ensemble_prefix(use_prefix)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "use_model_ensemble_prefix")
+
+
+    def use_dataset_ensemble_prefix(self, use_prefix):
+        """Set whether dataset keys should be prefixed
+           e.g. in an ensemble. Prefixes will only be
+           used if they were previously set through
+           environment variables SSKEYIN and SSKEYOUT.
+           By default, the client does not prefix
+           dataset keys.
+         
+        :param use_prefix: If set to true, all future operations
+                           on datasets will use a prefix, if 
+                           available.
+        :type use_prefix: bool
+
+        """
+        try:
+            return super().use_dataset_ensemble_prefix(use_prefix)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "use_dataset_ensemble_prefix")
+
+
     # ---- helpers --------------------------------------------------------
 
     @staticmethod
