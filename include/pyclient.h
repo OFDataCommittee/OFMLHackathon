@@ -218,6 +218,8 @@ class PyClient
         *          specified frequency for a specified number
         *          of times
         *   \param key The key that will be checked in the database
+        *   \param use_prefix Whether the key should be prefixed with
+        *                     the client's data source prefix.
         *   \param poll_frequency_ms The frequency of checks for the
         *                            key in milliseconds
         *   \param num_tries The total number of times to check for
@@ -228,15 +230,18 @@ class PyClient
         *            specified number of tries, otherwise false.
         */
         bool poll_key(const std::string& key,
+                      bool use_prefix,
                       int poll_frequency_ms,
                       int num_tries);
 
         /*!
         *   \brief Check if the key exists in the database
         *   \param key The key that will be checked in the database
+        *   \param use_prefix Whether the key should be prefixed with
+        *                     the client's data source prefix.
         *   \returns Returns true if the key exists in the database
         */
-        bool key_exists(const std::string& key);
+        bool key_exists(const std::string& key, bool use_prefix);
 
         /*!
         *   \brief Set the data source (i.e. key prefix for
@@ -244,6 +249,48 @@ class PyClient
         *   \param source_id The prefix for retrieval commands
         */
         void set_data_source(const std::string& source_id);
+
+        /*!
+         * \brief Set whether tensor keys should be prefixed
+         *        e.g. in an ensemble. Prefixes will only be
+         *        used if they were previously set through
+         *        environment variables SSKEYIN and SSKEYOUT.
+         *        By default, the client prefixes models when a prefix
+         *        are available.
+         *
+         * \param use_prefix If set to true, all future operations
+         *                   on tensors will use a prefix, if 
+         *                   available.
+         */
+        void use_tensor_ensemble_prefix(bool use_prefix);
+        
+       
+        /*!
+         * \brief Set whether model and script keys should be prefixed
+         *        e.g. in an ensemble. Prefixes will only be
+         *        used if they were previously set through
+         *        environment variables SSKEYIN and SSKEYOUT.
+         *        By default, the client does not prefix models.
+         *
+         * \param use_prefix If set to true, all future operations
+         *                   on tensors will use a prefix, if 
+         *                   available.
+         */
+        void use_model_ensemble_prefix(bool use_prefix);
+
+
+        /*!
+         * \brief Set whether dataset keys should be prefixed
+         *        e.g. in an ensemble. Prefixes will only be
+         *        used if they were previously set through
+         *        environment variables SSKEYIN and SSKEYOUT.
+         *        By default, the client, does not prefix datasets.
+         *
+         * \param use_prefix If set to true, all future operations
+         *                   on tensors will use a prefix, if 
+         *                   available.
+         */
+        void use_dataset_ensemble_prefix(bool use_prefix);
 
     private:
 

@@ -336,11 +336,14 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "run_model")
 
-    def key_exists(self, key):
+    def key_exists(self, key, use_prefix):
         """Check if the key exists in the database
 
         :param key: The key that will be checked in the database
         :type key: str
+        :param use_prefix: Whether the key should be prefixed with
+                           the client's data source prefix.
+        :type use_prefix: bool
         :returns: Returns true if the key exists in the database
         :rtype: bool
         :raises RedisReplyError: if `key exists` fails (i.e. causes an error) 
@@ -351,13 +354,16 @@ class Client(PyClient):
             raise RedisReplyError(str(e), "key_exists")
 
 
-    def poll_key(self, key, poll_frequency_ms, num_tries):
+    def poll_key(self, key, use_prefix, poll_frequency_ms, num_tries):
         """Check if the key exists in the database at a
            specified frequency for a specified number
            of times
            
         :param key: The key that will be checked in the database
         :type key: int
+        :param use_prefix: Whether the key should be prefixed with
+                           the client's data source prefix.
+        :type use_prefix: bool
         :param poll_frequency_ms: The frequency of checks for the
                                   key in milliseconds
         :type poll_frequency_ms: int

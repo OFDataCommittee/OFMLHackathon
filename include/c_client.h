@@ -511,7 +511,8 @@ void run_model(void* c_client,
 */
 bool key_exists(void* c_client,
                 const char* key,
-                const size_t key_length);
+                const size_t key_length,
+                bool use_prefix);
 
 /*!
 *   \brief Check if the key exists in the database at a
@@ -520,6 +521,10 @@ bool key_exists(void* c_client,
 *   \param c_client A pointer to c client
 *                   to use for communication
 *   \param key The key that will be checked in the database
+*   \param key_length The length of the key c-string,
+*                     excluding null terminating character
+*   \param use_prefix Whether the key should be prefixed with
+*                     the client's data source prefix.
 *   \param poll_frequency_ms The frequency of checks for the
 *                            key in milliseconds
 *   \param num_tries The total number of times to check for
@@ -532,6 +537,7 @@ bool key_exists(void* c_client,
 bool poll_key(void* c_client,
               const char* key,
               const size_t key_length,
+              const bool use_prefix,
               const int poll_frequency_ms,
               const int num_tries);
 

@@ -434,19 +434,19 @@ void run_model(void* c_client,
 
 extern "C"
 bool key_exists(void* c_client, const char* key,
-                const size_t key_length)
+                const size_t key_length, bool use_prefix)
 {
   Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
-  return s->key_exists(key_str);
+  return s->key_exists(key_str, use_prefix);
 }
 
 extern "C"
 bool poll_key(void* c_client,
-              const char* key, const size_t key_length,
+              const char* key, const size_t key_length, bool use_prefix,
               const int poll_frequency_ms, const int num_tries)
 {
   Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
-  return s->poll_key(key_str, poll_frequency_ms, num_tries);
+  return s->poll_key(key_str, use_prefix, poll_frequency_ms, num_tries);
 }

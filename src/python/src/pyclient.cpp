@@ -192,14 +192,15 @@ void PyClient::set_data_source(const std::string& source_id)
   return;
 }
 
-bool PyClient::key_exists(const std::string& key)
+bool PyClient::key_exists(const std::string& key, bool use_prefix)
 {
-  return this->_client->key_exists(key);
+  return this->_client->key_exists(key, use_prefix);
 }
 
 bool PyClient::poll_key(const std::string& key,
+                        bool use_prefix,
                         int poll_frequency_ms,
                         int num_tries)
 {
-  return this->_client->poll_key(key, poll_frequency_ms, num_tries);
+  return this->_client->poll_key(key, use_prefix, poll_frequency_ms, num_tries);
 }
