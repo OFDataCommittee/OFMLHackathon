@@ -10,7 +10,7 @@ void put_get_1D_array(
         SILC::TensorType type,
         std::string key_suffix="")
 {
-  SILC::Client client(true);
+  SILC::Client client(use_cluster());
 
   //Allocate and fill arrays
   T_send* array = (T_send*)malloc(dims[0]*sizeof(T_send));
@@ -32,6 +32,10 @@ void put_get_1D_array(
   */
   client.put_tensor(key, (void*)array, dims,
                     type, SILC::MemoryLayout::nested);
+
+  if(!client.key_exists(key))
+    std::runtime_error("The key does not exist in the database.");
+
   client.unpack_tensor(key, u_result, dims,
                        type, SILC::MemoryLayout::nested);
   /*

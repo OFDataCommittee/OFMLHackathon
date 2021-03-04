@@ -1,5 +1,5 @@
-#ifndef SMARTSIM_C_CLIENT_H
-#define SMARTSIM_C_CLIENT_H
+#ifndef SILC_C_CLIENT_H
+#define SILC_C_CLIENT_H
 ///@file
 ///\brief C-wrappers for the C++ Client class
 #include <stdlib.h>
@@ -12,223 +12,531 @@
 extern "C" {
 #endif
 
-//! Client C-client constructor
-void* SmartSimCClient(bool cluster /*!< Flag to indicate if a database cluster is being used*/
-                     );
+/*!
+*   \brief C-client constructor
+*   \param cluster Flag to indicate if a
+*                  database cluster is being used
+*/
+void* SmartSimCClient(bool cluster);
 
-//! Client C-client destructor
-void DeleteCClient(void* c_client /*!< The c client to use for communication*/
-                   );
+/*!
+*   \brief C-client destructor
+*   \param c_client A pointer to the c-client
+*                   to destroy
+*/
+void DeleteCClient(void* c_client);
 
-//! Put a DataSet object into the database
-void put_dataset(void* c_client /*!< The c client to use for communication*/,
-                 const void* dataset /*!< The DataSet object to send*/
-                 );
+/*!
+*   \brief Put a DataSet object into the database
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param dataset The DataSet object to send
+*/
+void put_dataset(void* c_client,
+                 const void* dataset);
 
-//! Get a DataSet object from the database
-void* get_dataset(void* c_client /*!< The c client to use for communication*/,
-                  const char* name /*!< The name of the dataset object to fetch*/,
-                  const size_t name_length /*!< The length of the name c-string, excluding null terminating character */
-                  );
+/*!
+*   \brief Get a DataSet object from the database
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param name The name of the dataset object to fetch
+*   \param name_length The length of the name c-string,
+*                      excluding null terminating character
+*/
+void* get_dataset(void* c_client,
+                  const char* name,
+                  const size_t name_length);
 
-//! Move a DataSet to a new key
-void rename_dataset(void* c_client /*!< The c client to use for communication*/,
-                    const char* name /*!< The name of the dataset object*/,
-                    const size_t name_length /*!< The length of the name c-string, excluding null terminating character */,
-                    const char* new_name /*!< The name of the dataset object*/,
-                    const size_t new_name_length /*!< The length of the new name c-string, excluding null terminating character */
-                    );
+/*!
+*   \brief Move a DataSet to a new key
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param name The name of the dataset object
+*   \param name_length The length of the name c-string,
+*                      excluding null terminating character
+*   \param new_name The new name of the dataset object
+*   \param new_name_length The length of the new name
+*                          c-string, excluding null
+*                          terminating character
+*/
+void rename_dataset(void* c_client,
+                    const char* name,
+                    const size_t name_length,
+                    const char* new_name,
+                    const size_t new_name_length);
 
-//! Copy a DataSet to a new key
-void copy_dataset(void* c_client /*!< The c client to use for communication*/,
-                  const char* src_name /*!< The source name of the dataset object*/,
-                  const size_t src_name_length /*!< The length of the src_name c-string, excluding null terminating character */,
-                  const char* dest_name /*!< The destination name of the dataset object*/,
-                  const size_t dest_name_length /*!< The length of the dest_name c-string, excluding null terminating character */
-                  );
+/*!
+*   \brief Copy a DataSet to a new key
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param src_name The source name of the dataset object
+*   \param src_name_length The length of the src_name c-string,
+*                          excluding null terminating character
+*   \param dest_name The destination name of the dataset object
+*   \param dest_name_length The length of the dest_name c-string,
+*                           excluding null terminating character
+*/
+void copy_dataset(void* c_client,
+                  const char* src_name,
+                  const size_t src_name_length,
+                  const char* dest_name,
+                  const size_t dest_name_length);
 
-//! Delete a DataSet
-void delete_dataset(void* c_client /*!< The c client to use for communication*/,
-                    const char* name /*!< The name of the dataset object*/,
-                    const size_t name_length /*!< The length of the name c-string, excluding null terminating character */
-                    );
+/*!
+*   \brief Delete a DataSet
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param name The name of the dataset object
+*   \param name_length The length of the name c-string,
+*                      excluding null terminating character
+*/
+void delete_dataset(void* c_client,
+                    const char* name,
+                    const size_t name_length);
 
-//! Put a tensor into the database
-void put_tensor(void* c_client /*!< The c client to use for communication*/,
-                const char* key /*!< The key to use to place the tensor*/,
-                const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-                void* data /*!< A c ptr to the beginning of the data*/,
-                const size_t* dims /*!< Length along each dimension of the tensor*/,
-                const size_t n_dims /*!< The number of dimensions of the tensor*/,
-                CTensorType type /*!< The data type of the tensor*/,
-                CMemoryLayout mem_layout /*! The memory layout of the data*/
-                );
+/*!
+*   \brief Put a tensor into the database
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param key The key to use to place the tensor
+*   \param key_length The length of the key c-string,
+*                     excluding null terminating character
+*   \param data A c ptr to the beginning of the data
+*   \param dims Length along each dimension of the tensor
+*   \param n_dims The number of dimensions of the tensor
+*   \param type The data type of the tensor
+*   \param mem_layout The memory layout of the data
+*/
+void put_tensor(void* c_client,
+                const char* key,
+                const size_t key_length,
+                void* data,
+                const size_t* dims,
+                const size_t n_dims,
+                CTensorType type,
+                CMemoryLayout mem_layout);
 
-//! Get a tensor from the database and fill the provided memory space (result) that is layed out as defined by dims
-void get_tensor(void* c_client /*!< The c client to use for communication*/,
-                const char* key /*!< The key to use to fetch the tensor*/,
-                const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-                void** data /*!< A c ptr to the beginning of the result array to fill*/,
-                size_t** dims /*!< The dimensions of the tensor*/,
-                size_t* n_dims /*!< The number of dimensions of the tensor*/,
-                CTensorType* type /*!< The data type of the tensor*/,
-                CMemoryLayout mem_layout /*! The memory layout of the data*/
-                );
+/*!
+*   \brief Get a tensor from the database.  This method
+*          will allocate memory for the tensor data and
+*          dimensions.  This memory will be valid until
+*          the c-client is destroyed.  The number
+*          of dimensions and the tensor type will be
+*          set based on the tensor retrieved from the
+*          database.  The requested memory layout
+*          will be used to shape the returned memory
+*          space pointed to by the data pointer.
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param key The key to use to fetch the tensor
+*   \param key_length The length of the key c-string,
+*                     excluding null terminating character
+*   \param data A pointer to a c-ptr that will be set
+*               to the newly allocated memory space.
+*   \param dims A pointer to a size_t pointer that will
+*                be pointed to newly allocated memory
+*                that holds the dimensions of the tensor.
+*   \param n_dims The number of dimensions of the tensor
+*   \param type The data type of the tensor that is set
+*               by the c-client
+*   \param mem_layout The memory layout requested for the
+*                     allocated memory space
+*/
+void get_tensor(void* c_client,
+                const char* key,
+                const size_t key_length,
+                void** data,
+                size_t** dims,
+                size_t* n_dims,
+                CTensorType* type,
+                CMemoryLayout mem_layout);
+/*!
+*   \brief Get a tensor from the database and
+*          fill the provided memory space
+*          (result) that is layed out as defined by
+*          dims
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param key The key to use to fetch the tensor
+*   \param key_length The length of the key c-string,
+*                     excluding null terminating character
+*   \param result A c ptr to the beginning of the
+*                 memory space to fill.
+*   \param dims The dimensions of the provided memory
+*               space.
+*   \param n_dims The number of dimensions of the tensor
+*   \param type The data type of the provided memory
+*               space.
+*   \param mem_layout The memory layout of the provided
+*                     memory space.
+*/
+void unpack_tensor(void* c_client,
+                  const char* key,
+                  const size_t key_length,
+                  void* result,
+                  const size_t* dims,
+                  const size_t n_dims,
+                  CTensorType type,
+                  CMemoryLayout mem_layout);
 
-//! Get a tensor from the database and fill the provided memory space (result) that is layed out as defined by dims
-void unpack_tensor(void* c_client /*!< The c client to use for communication*/,
-                  const char* key /*!< The key to use to fetch the tensor*/,
-                  const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-                  void* result /*!< A c ptr to the beginning of the result array to fill*/,
-                  const size_t* dims /*!< The dimensions of the tensor*/,
-                  const size_t n_dims /*!< The number of dimensions of the tensor*/,
-                  CTensorType type /*!< The data type of the tensor*/,
-                  CMemoryLayout mem_layout /*! The memory layout of the data*/
-                  );
+/*!
+*   \brief Move a tensor to a new key
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param key The key to use to fetch the tensor
+*   \param key_length The length of the key c-string,
+*                     excluding null terminating character
+*   \param new_key The new tensor key
+*   \param new_key_length The length of the new_key c-string,
+                          excluding null terminating characters
+*/
+void rename_tensor(void* c_client,
+                   const char* key,
+                   const size_t key_length,
+                   const char* new_key,
+                   const size_t new_key_length);
 
-//! Move a tensor to a new key
-void rename_tensor(void* c_client /*!< The c client to use for communication*/,
-                   const char* key /*!< The key to use to fetch the tensor*/,
-                   const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-                   const char* new_key /*!< The new tensor key*/,
-                   const size_t new_key_length /*!< The length of the new_key c-string, excluding null terminating character */
-                   );
+/*!
+*   \brief Delete a tensor
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param key The key of the tensor to delete
+*   \param key_length The length of the key c-string,
+*                     excluding null terminating character
+*/
+void delete_tensor(void* c_client,
+                   const char* key,
+                   const size_t key_length);
 
-//! Delete a tensor
-void delete_tensor(void* c_client /*!< The c client to use for communication*/,
-                   const char* key /*!< The key to use to fetch the tensor*/,
-                   const size_t key_length /*!< The length of the key c-string, excluding null terminating character */
-                   );
+/*!
+*   \brief  This method will copy a
+*           tensor to the destination key
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param src_name The source name of the tensor
+*   \param src_name_length The length of the src_name
+*                          c-string, excluding null
+*                          terminating character
+*   \param dest_name The destination name of the tensor
+*   \param dest_name_length The length of the dest_name
+*                           c-string, excluding null
+*                           terminating character
+*/
+void copy_tensor(void* c_client,
+                 const char* src_name,
+                 const size_t src_name_length,
+                 const char* dest_name,
+                 const size_t dest_name_length);
 
-//! This method will copy a tensor to the destination key
-void copy_tensor(void* c_client /*!< The c client to use for communication*/,
-                 const char* src_name /*!< The source name of the tensor*/,
-                 const size_t src_name_length /*!< The length of the src_name c-string, excluding null terminating character */,
-                 const char* dest_name /*!< The destination name of the tensor*/,
-                 const size_t dest_name_length /*!< The length of the dest_name c-string, excluding null terminating character */
-                 );
+/*!
+*   \brief  Set a model (from file)
+*           in the database for future execution
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param key The key to associate with the model
+*   \param key_length The length of the key c-string,
+*                     excluding null terminating character
+*   \param model_file The source file for the model
+*   \param model_file_length The length of the model_file c-string,
+*                            excluding null terminating character
+*   \param backend The name of the backend
+*                  (TF, TFLITE, TORCH, ONNX)
+*   \param backed_length The length of the backend c-string,
+*                        excluding null terminating character
+*   \param device The name of the device for execution
+*                 (e.g. CPU or GPU)
+*   \param device_length The length of the device c-string,
+*                        excluding null terminating character
+*   \param batch_size The batch size for model execution
+*   \param min_batch_size The minimum batch size for model
+*                         execution
+*   \param tag A tag to attach to the model for
+*              information purposes
+*   \param tag_length The length of the tag c-string,
+*                     excluding null terminating character
+*   \param inputs One or more names of model input nodes
+*                 (TF models only)
+*   \param input_lengths The length of each input name
+*                        c-string, excluding null
+*                        terminating character
+*   \param n_inputs The number of inputs
+*   \param outputs One or more names of model output nodes
+*                 (TF models only)
+*   \param output_lengths The length of each output name
+*                         c-string, excluding null terminating
+*                         character
+*   \param n_outputs The number of outputs
+*/
+void set_model_from_file(void* c_client,
+                         const char* key,
+                         const size_t key_length,
+                         const char* model_file,
+                         const size_t model_file_length,
+                         const char* backend,
+                         const size_t backend_length,
+                         const char* device,
+                         const size_t device_length,
+                         const int batch_size,
+                         const int min_batch_size,
+                         const char* tag,
+                         const size_t tag_length,
+                         const char** inputs,
+                         const size_t* input_lengths,
+                         const size_t n_inputs,
+                         const char** outputs,
+                         const size_t* output_lengths,
+                         const size_t n_outputs);
 
-//! Set a model (from file) in the database for future execution
-void set_model_from_file(void* c_client /*!< The c client to use for communication*/,
-                         const char* key /*!< The key to use to place the model*/,
-                         const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-                         const char* model_file /*!< The file storing the model*/,
-                         const size_t model_file_length /*!< The length of the file name c-string, excluding null terminating character*/,
-                         const char* backend /*!< The name of the backend (TF, TFLITE, TORCH, ONNX)*/,
-                         const size_t backend_length /*!< The length of the backend name c-string, excluding null terminating character*/,
-                         const char* device /*!< The name of the device (CPU, GPU, GPU:0, GPU:1...)*/,
-                         const size_t device_length  /*!< The length of the device name c-string, excluding null terminating character*/,
-                         const int batch_size /*!< The batch size for model execution*/,
-                         const int min_batch_size /*!< The minimum batch size for model execution*/,
-                         const char* tag /*!< A tag to attach to the model for information purposes*/,
-                         const size_t tag_length /*!< The length of the tag c-string, excluding null terminating character */,
-                         const char** inputs /*!< One or more names of model input nodes (TF models) */,
-                         const size_t* input_lengths /*!< The length of each input name c-string, excluding null terminating character*/,
-                         const size_t n_inputs /*!< The number of inputs*/,
-                         const char** outputs /*!< One or more names of model output nodes (TF models) */,
-                         const size_t* output_lengths /*!< The length of each output name c-string, excluding null terminating character*/,
-                         const size_t n_outputs /*!< The number of outputs*/
-                         );
+/*!
+*   \brief  Set a model (from buffer)
+*           in the database for future execution
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param key The key to associate with the model
+*   \param key_length The length of the key c-string,
+*                     excluding null terminating character
+*   \param model The model as a continuous buffer
+*   \param model_length The length of the model c-string,
+*                            excluding null terminating character
+*   \param backend The name of the backend
+*                  (TF, TFLITE, TORCH, ONNX)
+*   \param backed_length The length of the backend c-string,
+*                        excluding null terminating character
+*   \param device The name of the device for execution
+*                 (e.g. CPU or GPU)
+*   \param device_length The length of the device c-string,
+*                        excluding null terminating character
+*   \param batch_size The batch size for model execution
+*   \param min_batch_size The minimum batch size for model
+*                         execution
+*   \param tag A tag to attach to the model for
+*              information purposes
+*   \param tag_length The length of the tag c-string,
+*                     excluding null terminating character
+*   \param inputs One or more names of model input nodes
+*                 (TF models only)
+*   \param input_lengths The length of each input name
+*                        c-string, excluding null
+*                        terminating character
+*   \param n_inputs The number of inputs
+*   \param outputs One or more names of model output nodes
+*                 (TF models only)
+*   \param output_lengths The length of each output name
+*                         c-string, excluding null terminating
+*                         character
+*   \param n_outputs The number of outputs
+*/
+void set_model(void* c_client,
+               const char* key,
+               const size_t key_length,
+               const char* model,
+               const size_t model_length,
+               const char* backend,
+               const size_t backend_length,
+               const char* device,
+               const size_t device_length,
+               const int batch_size,
+               const int min_batch_size,
+               const char* tag,
+               const size_t tag_length,
+               const char** inputs,
+               const size_t* input_lengths,
+               const size_t n_inputs,
+               const char** outputs,
+               const size_t* output_lengths,
+               const size_t n_outputs);
 
-//! Set a model (from buffer) in the database for future execution
-void set_model(void* c_client /*!< The c client to use for communication*/,
-               const char* key /*!< The key to use to place the model*/,
-               const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-               const char* model /*!< The model as a continuous buffer*/,
-               const size_t model_length /*!< The length of the model buffer c-string, excluding null terminating character*/,
-               const char* backend /*!< The name of the backend (TF, TFLITE, TORCH, ONNX)*/,
-               const size_t backend_length /*!< The length of the backend name c-string, excluding null terminating character*/,
-               const char* device /*!< The name of the device (CPU, GPU, GPU:0, GPU:1...)*/,
-               const size_t device_length  /*!< The length of the device name c-string, excluding null terminating character*/,
-               const int batch_size /*!< The batch size for model execution*/,
-               const int min_batch_size /*!< The minimum batch size for model execution*/,
-               const char* tag /*!< A tag to attach to the model for information purposes*/,
-               const size_t tag_length /*!< The length of the tag c-string, excluding null terminating character */,
-               const char** inputs /*!< One or more names of model input nodes (TF models) */,
-               const size_t* input_lengths /*!< The length of each input name c-string, excluding null terminating character*/,
-               const size_t n_inputs /*!< The number of inputs*/,
-               const char** outputs /*!< One or more names of model output nodes (TF models) */,
-               const size_t* output_lengths /*!< The length of each output name c-string, excluding null terminating character*/,
-               const size_t n_outputs /*!< The number of outputs*/
-               );
+/*!
+*   \brief Get a model in the database
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param key The key to use to get the model
+*   \param key_length The length of the key c-string,
+*                     excluding null terminating character
+*   \param model_length The length of the model buffer
+*                       c-string, excluding null
+*                       terminating character
+*   \returns The model as a c-string
+*/
+const char* get_model(void* c_client,
+                     const char* key,
+                     const size_t key_length,
+                     size_t* model_length);
 
-//! Get a model in the database
-const char* get_model(void* c_client /*!< The c c lient to use for communication*/,
-               const char* key /*!< The key to use to get the model*/,
-               const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-               size_t* model_length /*!< The length of the model buffer c-string, excluding null terminating character*/
-               );
+/*!
+*   \brief Set a script from file in the
+*          database for future execution
+*   \param key The key to associate with the script
+*   \param key_length The length of the key c-string,
+*                     excluding null terminating character
+*   \param device The name of the device for execution
+*                 (e.g. CPU or GPU)
+*   \param device_length The length of the device name
+*                        c-string, excluding null
+*                        terminating character
+*   \param script_file The source file for the script
+*   \param script_file_length The length of the script
+*                             file name c-string, excluding
+*                             null terminating character
+*/
+void set_script_from_file(void* c_client,
+                          const char* key,
+                          const size_t key_length,
+                          const char* device,
+                          const size_t device_length,
+                          const char* script_file,
+                          const size_t script_file_length);
 
-//! Set a script (from file) in the database for future execution
-void set_script_from_file(void* c_client /*!< The c client to use for communication*/,
-                          const char* key /*!< The key to use to place the script*/,
-                          const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-                          const char* device /*!< The name of the device (CPU, GPU, GPU:0, GPU:1...)*/,
-                          const size_t device_length  /*!< The length of the device name c-string, excluding null terminating character*/,
-                          const char* script_file /*!< The name of the script file*/,
-                          const size_t script_file_length  /*!< The length of the script file name c-string, excluding null terminating character*/
-                          );
+/*!
+*   \brief Set a script (from buffer)
+*          in the database for future execution
+*   \param key The key to associate with the script
+*   \param key_length The length of the key c-string,
+*                     excluding null terminating character
+*   \param device The name of the device for execution
+*                 (e.g. CPU or GPU)
+*   \param device_length The length of the device name
+*                        c-string, excluding null
+*                        terminating character
+*   \param script The script as a c-string buffer
+*   \param script_length The length of the script
+*                        c-string, excluding
+*                        null terminating character
+*/
+void set_script(void* c_client,
+                const char* key,
+                const size_t key_length,
+                const char* device,
+                const size_t device_length,
+                const char* script,
+                const size_t script_length);
 
-//! Set a script (from buffer) in the database for future execution
-void set_script(void* c_client /*!< The c client to use for communication*/,
-                const char* key /*!< The key to use to place the script*/,
-                const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-                const char* device /*!< The name of the device (CPU, GPU, GPU:0, GPU:1...)*/,
-                const size_t device_length  /*!< The length of the device name c-string, excluding null terminating character*/,
-                const char* script /*!< The script as a c-string buffer*/,
-                const size_t script_length  /*!< The length of the script c-string, excluding null terminating character*/
-                );
+/*!
+*   \brief Get a script in the database.  The
+*          memory associated with the script
+*          c-str is valid until the client is
+*          destroyed.
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param key The key to use to get the script
+*   \param key_length The length of the key c-string,
+*                     excluding null terminating character
+*   \param script A pointer that is pointed to newly
+*                 allocated memory containing the script
+*   \param script_length The length of the script buffer
+*                        c-string, excluding null
+*                        terminating character
+*/
+void get_script(void* c_client,
+                const char* key,
+                const size_t key_length,
+                const char** script,
+                size_t* script_length);
 
-//! Get the script from the database
-void get_script(void* c_client /*!< The c client to use for communication*/,
-                const char* key /*!< The key to use to get the model*/,
-                const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-                const char** script /*!< The script as a continuous buffer*/,
-                size_t* script_length /*!< The length of the script buffer c-string, excluding null terminating character*/
-                );
+/*!
+*   \brief Run a script function in the database using the
+*          specificed input and output tensors
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param key The key associated with the script
+*   \param key_length The length of the key c-string,
+*                     excluding null terminating character
+*   \param function The name of the function in the script to run
+*   \param function_length The length of the function name c-string,
+*                          excluding null terminating character
+*   \param inputs The keys of inputs tensors to use
+*                 in the script
+*   \param input_lengths The length of each input name
+*                        c-string, excluding null terminating
+*                        character
+*   \param n_inputs The number of inputs
+*   \param outputs The keys of output tensors that
+*                  will be used to save script results
+*   \param output_lengths The length of each output name
+*                         c-string, excluding null terminating
+*                         character
+*   \param n_outputs The number of outputs
+*/
+void run_script(void* c_client,
+                const char* key,
+                const size_t key_length,
+                const char* function,
+                const size_t function_length,
+                const char** inputs,
+                const size_t* input_lengths,
+                const size_t n_inputs,
+                const char** outputs,
+                const size_t* output_lengths,
+                const size_t n_outputs);
 
-//! Run a script in the database
-void run_script(void* c_client /*!< The c client to use for communication*/,
-                const char* key /*!< The key to use to place the script*/,
-                const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-                const char* function /*!< The name of the function in the script to call*/,
-                const size_t function_length /*!< The length of the function name c-string, excluding null terminating character */,
-                const char** inputs /*!< One or more names of model input nodes (TF models) */,
-                const size_t* input_lengths /*!< The length of each input name c-string, excluding null terminating character*/,
-                const size_t n_inputs /*!< The number of inputs*/,
-                const char** outputs /*!< One or more names of model output nodes (TF models) */,
-                const size_t* output_lengths /*!< The length of each output name c-string, excluding null terminating character*/,
-                const size_t n_outputs /*!< The number of outputs*/
-                );
+/*!
+*   \brief Run a model in the database using the
+*          specificed input and output tensors
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param key The key associated with the model
+*   \param key_length The length of the key c-string,
+*                     excluding null terminating character
+*   \param inputs The keys of inputs tensors to use
+*                 in the script
+*   \param input_lengths The length of each input name
+*                        c-string, excluding null terminating
+*                        character
+*   \param n_inputs The number of inputs
+*   \param outputs The keys of output tensors that
+*                  will be used to save script results
+*   \param output_lengths The length of each output name
+*                         c-string, excluding null terminating
+*                         character
+*   \param n_outputs The number of outputs
+*/
+void run_model(void* c_client,
+               const char* key,
+               const size_t key_length,
+               const char** inputs,
+               const size_t* input_lengths,
+               const size_t n_inputs,
+               const char** outputs,
+               const size_t* output_lengths,
+               const size_t n_outputs);
 
-//! Run a model in the database
-void run_model(void* c_client /*!< The c client to use for communication*/,
-               const char* key /*!< The key to use to run the model*/,
-               const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-               const char** inputs /*!< One or more names of model input nodes (TF models) */,
-               const size_t* input_lengths /*!< The length of each input name c-string, excluding null terminating character*/,
-               const size_t n_inputs /*!< The number of inputs*/,
-               const char** outputs /*!< One or more names of model output nodes (TF models) */,
-               const size_t* output_lengths /*!< The length of each output name c-string, excluding null terminating character*/,
-               const size_t n_outputs /*!< The number of outputs*/
-               );
+/*!
+*   \brief Check if the key exists in the database
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param key The key that will be checked in the database
+*   \param key_length The length of the key c-string,
+*                     excluding null terminating character
+*   \returns Returns true if the key exists in the database
+*/
+bool key_exists(void* c_client,
+                const char* key,
+                const size_t key_length);
 
-//! Check if a key exists
-bool key_exists(void* c_client /*!< The c client to use for communication*/,
-                const char* key /*!< The key to check*/,
-                const size_t key_length /*!< The length of the key c-string, excluding null terminating character */
-                );
-
-//! Poll database until key exists or number of tries is exceeded
-bool poll_key(void* c_client /*!< The c client to use for communication*/,
-              const char* key /*!< The key to check*/,
-              const size_t key_length /*!< The length of the key c-string, excluding null terminating character */,
-              const int poll_frequency_ms /*!< The frequency of polls*/,
-              const int num_tries /*!< The total number of tries*/
-              );
+/*!
+*   \brief Check if the key exists in the database at a
+*          specified frequency for a specified number
+*          of times
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param key The key that will be checked in the database
+*   \param poll_frequency_ms The frequency of checks for the
+*                            key in milliseconds
+*   \param num_tries The total number of times to check for
+*                    the specified number of keys.  If the
+*                    value is set to -1, the key will be
+*                    polled indefinitely.
+*   \returns Returns true if the key is found within the
+*            specified number of tries, otherwise false.
+*/
+bool poll_key(void* c_client,
+              const char* key,
+              const size_t key_length,
+              const int poll_frequency_ms,
+              const int num_tries);
 
 #ifdef __cplusplus
 }
 
 #endif
-#endif // SMARTSIM_C_CLIENT_H
+#endif // SILC_C_CLIENT_H

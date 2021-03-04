@@ -9,7 +9,7 @@ void put_get_3D_array(
         SILC::TensorType type,
         std::string key_suffix="")
 {
-  SILC::Client client(true);
+  SILC::Client client(use_cluster());
 
   //Allocate and fill arrays
   T_send*** array = allocate_3D_array<T_send>(dims[0], dims[1], dims[2]);

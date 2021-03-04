@@ -40,14 +40,7 @@ MetaData& MetaData::operator=(const MetaData& metadata) {
 
 void MetaData::fill_from_buffer(const char* buf, unsigned long long buf_size)
 {
-    /* This function initializes the top level protobuf message
-    with the buffer.  The repeated field metadata messages
-    in the top level message are then unpacked (i.e pointers
-    to each metadata protobuf message are placed in the
-    message map).
-    */
-
-    //TODO there doesn't seem to be a way around casting the buf
+    //TODO There doesn't seem to be a way around casting the buf
     //as a std::string which means that the buffer will be copied
     _pb_metadata_msg.ParseFromString(std::string(buf,buf_size));
     this->_unpack_metadata(top_string_msg);
@@ -64,11 +57,6 @@ void MetaData::add_scalar(const std::string& field_name,
                           const void* value,
                           MetaDataType type)
 {
-    /* This functions adds a meta data value to the metadata
-    field given by fieldname.  The default behavior is to append
-    the field if it exists, and if it does not exist, create the
-    field.
-    */
     if(!(this->_field_exists(field_name))) {
          this->_create_message(field_name, type);
     }
@@ -77,8 +65,6 @@ void MetaData::add_scalar(const std::string& field_name,
     const gpb::Reflection* refl = msg->GetReflection();
     const gpb::FieldDescriptor* field =
         msg->GetDescriptor()->FindFieldByName("data");
-
-
 
     //TODO add try catch for protobuf errors
     switch(type) {
@@ -116,11 +102,6 @@ void MetaData::add_scalar(const std::string& field_name,
 void MetaData::add_string(const std::string& field_name,
                           const std::string& value)
 {
-    /* This functions adds a meta data value to the metadata
-    field given by fieldname.  The default behavior is to append
-    the field if it exists, and if it does not exist, create the
-    field.
-    */
     if(!(this->_field_exists(field_name)))
          this->_create_message(field_name, MetaDataType::string);
 
@@ -139,12 +120,6 @@ void MetaData::get_scalar_values(const std::string& name,
                                 size_t& length,
                                 MetaDataType& type)
 {
-    /* This function allocates the memory to
-    return a pointer (via pointer reference "data")
-    to the user and sets the value of "length" to
-    the number of values in data.
-    */
-
     if(!this->_field_exists(name))
         throw std::runtime_error("The metadata field "
                                  + name +
@@ -191,14 +166,6 @@ void MetaData::get_string_values(const std::string& name,
                                  size_t*& lengths)
 
 {
-    /* This function allocates the memory to
-    return a pointer (via pointer reference "data")
-    to the user that points to an array of c-style
-    strings.  The variable n_strings is set to
-    the length of that array and the array lengths
-    is the length of each c-style string.
-    */
-
     std::vector<std::string> field_strings =
         this->get_string_values(name);
 
@@ -222,10 +189,6 @@ std::vector<std::string>
 MetaData::get_string_values(const std::string& name)
 
 {
-    /* This function returns a vector of strings
-    that are stored in the metadata field
-    */
-
     if(!this->_field_exists(name))
         throw std::runtime_error("The metadata field "
                                  + name +
@@ -245,19 +208,12 @@ MetaData::get_string_values(const std::string& name)
 
 std::string_view MetaData::get_metadata_buf()
 {
-    /* This function will return a string_view of the
-    protobuf metadata messages that have been constructed.
-    */
     this->_pb_metadata_msg.SerializeToString(&(this->_buf));
     return std::string_view(this->_buf.c_str(), this->_buf.length());
 }
 
 void MetaData::_unpack_metadata(const std::string& field_name)
 {
-    /* This function unpacks the top level meta data
-    repeated fields that contain protobuf messages of
-    the metadata values.
-    */
     gpb::Message* top_msg = &(this->_pb_metadata_msg);
 
     const gpb::Reflection* refl = top_msg->GetReflection();
@@ -293,9 +249,6 @@ void MetaData::_unpack_metadata(const std::string& field_name)
 void MetaData::_create_message(const std::string& field_name,
                                const MetaDataType type)
 {
-    /* This function will create a new protobuf message to
-    hold the metadata of the specified type.
-    */
     switch(type) {
         case MetaDataType::string :
             this->_create_message_by_type
@@ -333,12 +286,6 @@ template <typename PB>
 void MetaData::_create_message_by_type(const std::string& field_name,
                                        const std::string& container_name)
 {
-    /* This funcation creates a protobuf message for the
-    metadata field, adds the protobuf message to the map
-    holding all metadata messages, and sets the internal
-    id field of the message to field_name.
-    */
-
     // Create a new message
     PB* msg = new PB();
     this->_meta_msg_map[field_name] = msg;
@@ -362,8 +309,6 @@ void MetaData::_set_string_in_message(gpb::Message* msg,
                                       const std::string& field_name,
                                       std::string value)
 {
-    /* This function sets a string in a string message field
-    */
     //TODO add check to make sure the field is a string field
     const gpb::Reflection* refl = msg->GetReflection();
     const gpb::FieldDescriptor* field_desc =
@@ -372,16 +317,8 @@ void MetaData::_set_string_in_message(gpb::Message* msg,
     return;
 }
 
-
-std::vector<std::string> MetaData::_get_string_field_values(gpb::Message* msg) {
-    /* This funcition retrieves all of the metadata
-    "data" string fields from the message.  A copy
-    of the protobuf values is made using the
-    MemoryList objects in the MetaData class,
-    and as a result, the metadata values passed back
-    to the user will live as long as the MetaData object
-    persists.
-    */
+std::vector<std::string> MetaData::_get_string_field_values(gpb::Message* msg)
+{
     const gpb::Reflection* refl = msg->GetReflection();
     const gpb::FieldDescriptor* field_desc =
         msg->GetDescriptor()->FindFieldByName("data");
@@ -404,14 +341,6 @@ void MetaData::_get_numeric_field_values(gpb::Message* msg,
                                          size_t& n_values,
                                          SharedMemoryList<T>& mem_list)
 {
-    /* This funcition retrieves all of the metadata
-    "data" non-string fields from the message.  A copy
-    of the protobuf values is made using the
-    MemoryList objects in the MetaData class,
-    and as a result, the metadata values passed back
-    to the user will live as long as the MetaData object
-    persists.
-    */
     const gpb::Reflection* refl = msg->GetReflection();
     const gpb::FieldDescriptor* field_desc =
         msg->GetDescriptor()->FindFieldByName("data");
@@ -433,17 +362,11 @@ void MetaData::_get_numeric_field_values(gpb::Message* msg,
 
 bool MetaData::_field_exists(const std::string& field_name)
 {
-    /* Return true if the field name is already in use
-    for a protobuf messsage, otherwise false.
-    */
    return (_meta_msg_map.count(field_name)>0);
 }
 
 inline MetaDataType MetaData::_get_meta_value_type(const std::string& name)
 {
-    /* This function returns the metadata field type
-    string for the metadata field.
-    */
     gpb::Message* msg = this->_meta_msg_map[name];
     const gpb::Reflection* refl = msg->GetReflection();
     const gpb::FieldDescriptor* field_desc =
@@ -479,13 +402,8 @@ inline MetaDataType MetaData::_get_meta_value_type(const std::string& name)
     return type;
 }
 
-void MetaData::_rebuild_message_map() {
-    /* This function rebuilds the protobuf message
-    map.  This function should be invoked if
-    the location of messages in the map changes.
-    The message map is rebuilt by looping through
-    all fields in the main protobuf message.
-    */
+void MetaData::_rebuild_message_map()
+{
     this->_meta_msg_map.clear();
 
     const gpb::Reflection* refl = this->_pb_metadata_msg.GetReflection();
@@ -511,5 +429,4 @@ void MetaData::_rebuild_message_map() {
         it++;
     }
     return;
-
 }

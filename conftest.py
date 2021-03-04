@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import io
+import os
 
 dtypes = [
     np.float64,
@@ -15,6 +16,14 @@ dtypes = [
     np.uint16,
 ]
 
+@pytest.fixture
+def cluster_env():
+    return Cluster
+
+class Cluster:
+    @staticmethod
+    def get_cluster_env():
+        return os.environ['SILC_TEST_CLUSTER']
 
 @pytest.fixture
 def mock_data():

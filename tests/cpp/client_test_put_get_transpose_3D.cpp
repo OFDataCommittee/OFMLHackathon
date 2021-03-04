@@ -32,7 +32,7 @@ void put_get_3D_array(
         SILC::MemoryLayout send_direction=SILC::MemoryLayout::contiguous,
         SILC::MemoryLayout recv_direction=SILC::MemoryLayout::contiguous)
 {
-  SILC::Client client(true);
+  SILC::Client client(use_cluster());
 
   //Allocate and fill arrays
   T_send* array =

@@ -1,48 +1,93 @@
-#ifndef SMARTSIM_COMMANDLIST_H
-#define SMARTSIM_COMMANDLIST_H
+#ifndef SILC_COMMANDLIST_H
+#define SILC_COMMANDLIST_H
 
 #include "stdlib.h"
 #include <vector>
 #include "command.h"
 
-///@file
-///\brief The CommandList class for constructing data transfer commands
-
 namespace SILC {
 
 class CommandList;
 
+//@file
+/*!
+*   \brief The CommandList class constructs multiple Client
+*          Command.
+*   \details CommandList handles the dynamic allocation of a new
+*            message in the list and provides iterators
+*            for iterating over Command.
+*/
 class CommandList
 {
-    private:
-
-        std::vector<Command*> _commands;
-
     public:
 
-        typedef std::vector<Command*>::iterator iterator;
-        typedef std::vector<Command*>::const_iterator const_iterator;
+        /*!
+        *   \brief Default CommandList constructor
+        */
+        CommandList() = default;
 
-        //! CommandList constructor
-        CommandList();
-
-        //! CommandList destructor
+        /*!
+        *   \brief Default CommandList destructor
+        */
         ~CommandList();
 
-        //! Returns a pointer to a new command
+        /*!
+        *   \brief Dynamically allocate a new Command
+        *          and return a pointer to the new Command
+        *   \returns Pointer to a new Command
+        */
         Command* add_command();
 
-        //! Returns an iterator pointing to the first command
+        /*!
+        *   \typedef An iterator type for iterating
+        *            over all Commands
+        */
+        typedef std::vector<Command*>::iterator iterator;
+
+        /*!
+        *   \typedef A const iterator type for iterating
+        *            over all Commands
+        */
+        typedef std::vector<Command*>::const_iterator const_iterator;
+
+        /*!
+        *   \brief Returns an iterator pointing to the
+        *          first Command
+        *   \returns CommandList iterator to the first Command
+        */
         iterator begin();
-        //! Returns an const_iterator pointing to the first command
+
+        /*!
+        *   \brief Returns a const iterator pointing to the
+        *          first Command
+        *   \returns Const CommandList iterator to the first Command
+        */
         const_iterator cbegin();
-        //! Returns an iterator pointing to the past-the-end command
+
+        /*!
+        *   \brief Returns an iterator pointing to the
+        *          past-the-end Command
+        *   \returns CommandList iterator to the past-the-end Command
+        */
         iterator end();
-        //! Returns an const_iterator pointing to the past-the-end command
+
+        /*!
+        *   \brief Returns a const iterator pointing to the
+        *          past-the-end Command
+        *   \returns Const CommandList iterator to the past-the-end Command
+        */
         const_iterator cend();
+
+    private:
+
+        /*!
+        *   \brief A vector container a pointer to all Command
+        */
+        std::vector<Command*> _commands;
+
 
 };
 
 } //namespace SILC
 
-#endif //SMARTSIM_COMMANDLIST_H
+#endif //SILC_COMMANDLIST_H

@@ -1,6 +1,6 @@
 project(SILC)
 
-set(CMAKE_BUILD_TYPE DEBUG)
+set(CMAKE_BUILD_TYPE Release)
 
 cmake_minimum_required(VERSION 3.10)
 
@@ -65,6 +65,9 @@ add_library( silc STATIC
 	 src/cpp/tensorpack.cpp
 	 src/cpp/dbnode.cpp
 	 src/cpp/commandreply.cpp
+     src/cpp/redisserver.cpp
+     src/cpp/rediscluster.cpp
+     src/cpp/redis.cpp
 	 utils/protobuf/silc.pb.cc
    src/fortran/fortran_c_interop.F90
    src/fortran/dataset.F90

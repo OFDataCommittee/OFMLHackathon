@@ -65,6 +65,9 @@ set(CLIENT_SRC
 	 ../../../src/cpp/dbnode.cpp
 	 ../../../src/cpp/commandreply.cpp
 	 ../../../utils/protobuf/silc.pb.cc
+	 ../../../src/cpp/redis.cpp
+	 ../../../src/cpp/rediscluster.cpp
+	 ../../../src/cpp/redisserver.cpp
 	 ../src/pyclient.cpp
 	 ../src/pydataset.cpp)
 

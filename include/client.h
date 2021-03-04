@@ -1,28 +1,29 @@
-//#ifndef SMARTSIM_CPP_CLIENT_H
-#define SMARTSIM_CPP_CLIENT_H
+//#ifndef SILC_CPP_CLIENT_H
+#define SILC_CPP_CLIENT_H
 #ifdef __cplusplus
 #include "string.h"
 #include "stdlib.h"
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <chrono>
 #include <thread>
 #include <algorithm>
-#include <sw/redis++/redis++.h>
-#include <fstream>
+#include "redisserver.h"
+#include "rediscluster.h"
+#include "redis.h"
 #include "dataset.h"
 #include "sharedmemorylist.h"
 #include "command.h"
 #include "commandlist.h"
+#include "commandreply.h"
+#include "commandreplyparser.h"
 #include "tensorbase.h"
 #include "tensor.h"
-#include "dbnode.h"
-#include "commandreply.h"
 #include "enums/cpp_tensor_type.h"
 #include "enums/cpp_memory_layout.h"
 
 ///@file
-///\brief The C++ Client class
 
 namespace SILC {
 
@@ -30,303 +31,496 @@ class Client;
 
 typedef redisReply ReplyElem;
 
+///@file
+/*!
+*   \brief The Client class is the primary user-facing
+*          class for executing server commands.
+*/
 class Client
 {
-public:
-  //! Client constructor
-  Client(
-      bool cluster /*!< Flag to indicate if a database cluster is being used*/,
-      bool fortran_array = false /*!< Flag to indicate if fortran arrays are being used*/
-      );
+    public:
 
-  //! Client destructor
-  ~Client();
+        /*!
+        *   \brief Client constructor
+        *   \param cluster Flag to indicate if a database cluster
+        *                  is being used
+        */
+        Client(bool cluster);
 
-  //! Put a DataSet object into the database
-  void put_dataset(DataSet& dataset /*!< The DataSet object to send*/
-                   );
+        /*!
+        *   \brief Client copy constructor is not available
+        */
+        Client(const Client& client) = delete;
 
-  //! Get a DataSet object from the database
-  DataSet get_dataset(const std::string& name /*!< The name of the dataset object to fetch*/
-                      );
+        /*!
+        *   \brief Client move constructor
+        */
+        Client(Client&& client) = default;
 
-  //! Move a DataSet to a new key
-  void rename_dataset(const std::string& name /*!< The name of the dataset object*/,
-                      const std::string& new_name /*!< The name of the dataset object*/);
+        /*!
+        *   \brief Client copy assignment operator
+        *          is not available.
+        */
+        Client& operator=(const Client& client) = delete;
 
-  //! Copy a DataSet to a new key
-  void copy_dataset(const std::string& src_name /*!< The source name of the dataset object*/,
-                    const std::string& dest_name /*!< The destination name of the dataset object*/
-                    );
+        /*!
+        *   \brief Client move assignment operator
+        */
+        Client& operator=(Client&& client) = default;
 
-  //! Delete a DataSet
-  void delete_dataset(const std::string& name /*!< The name of the dataset object*/
-                      );
+        /*!
+        *   \brief Client destructor
+        */
+        ~Client();
 
-  //! Put a tensor into the database
-  void put_tensor(const std::string& key /*!< The key to use to place the tensor*/,
-                  void* data /*!< A c ptr to the beginning of the data*/,
-                  const std::vector<size_t>& dims /*!< The dimensions of the tensor*/,
-                  const TensorType type /*!< The data type of the tensor*/,
-                  const MemoryLayout mem_layout /*! The memory layout of the data*/
-                  );
+        /*!
+        *   \brief Send a DataSet object to the database
+        *   \param dataset The DataSet object to send to the database
+        */
+        void put_dataset(DataSet& dataset);
 
-  //! Get tensor data and return an allocated multi-dimensional array
-  void get_tensor(const std::string& key /*!< The name used to reference the tensor*/,
-                  void*& data /*!< A c_ptr to the tensor data */,
-                  std::vector<size_t>& dims /*!< The dimensions of the provided array which should match the tensor*/,
-                  TensorType& type /*!< The data type of the tensor*/,
-                  const MemoryLayout mem_layout /*! The memory layout of the data*/
-                  );
+        /*!
+        *   \brief Get a DataSet object from the database
+        *   \param name The name of the dataset to retrieve
+        *   \returns DataSet object retrieved from the database
+        */
+        DataSet get_dataset(const std::string& name);
 
-  //! Get tensor data and return an allocated multi-dimensional array (c-style interface for type and dimensions)
-  void get_tensor(const std::string& key /*!< The name used to reference the tensor*/,
-                  void*& data /*!< A c_ptr to the tensor data */,
-                  size_t*& dims /*! The dimensions of the tensor retrieved*/,
-                  size_t& n_dims /*! The number of dimensions retrieved*/,
-                  TensorType& type /*! The number of dimensions retrieved*/,
-                  const MemoryLayout mem_layout /*! The memory layout of the data*/
-                  );
+        /*!
+        *   \brief Move a DataSet to a new key.  A tensors
+        *          and metdata in the DataSet will be moved.
+        *   \param name The original key associated with the
+        *               DataSet in the database
+        *   \param new_name The new key to assign to the
+        *                   DataSet object
+        */
+        void rename_dataset(const std::string& name,
+                            const std::string& new_name);
 
-  //! Get tensor data and fill an already allocated array memory space
-  void unpack_tensor(const std::string& key /*!< The key to use to fetch the tensor*/,
-                     void* data /*!< A c ptr to the beginning of the result array to fill*/,
-                     const std::vector<size_t>& dims /*!< The dimensions of the provided array which should match the tensor*/,
-                     const TensorType type /*!< The data type corresponding the the user provided memory space*/,
-                     const MemoryLayout mem_layout /*! The memory layout of the data*/
-                     );
-
-  //! Move a tensor to a new key
-  void rename_tensor(const std::string& key /*!< The original tensor key*/,
-                     const std::string& new_key /*!< The new tensor key*/);
-
-  //! Delete a tensor
-  void delete_tensor(const std::string& key /*!< The key of tensor to delete*/);
-
-  //! This method will copy a tensor to the destination key
-  void copy_tensor(const std::string& src_key /*!< The source tensor key*/,
-                   const std::string& dest_key /*!< The destination tensor key*/
-                   );
-
-  //! Set a model (from file) in the database for future execution
-  void set_model_from_file(const std::string& key /*!< The key to use to place the model*/,
-                           const std::string& model_file /*!< The file storing the model*/,
-                           const std::string& backend /*!< The name of the backend (TF, TFLITE, TORCH, ONNX)*/,
-                           const std::string& device /*!< The name of the device (CPU, GPU, GPU:0, GPU:1...)*/,
-                           int batch_size = 0 /*!< The batch size for model execution*/,
-                           int min_batch_size = 0 /*!< The minimum batch size for model execution*/,
-                           const std::string& tag = "" /*!< A tag to attach to the model for information purposes*/,
-                           const std::vector<std::string>& inputs
-                            = std::vector<std::string>() /*!< One or more names of model input nodes (TF models)*/,
-                           const std::vector<std::string>& outputs
-                            = std::vector<std::string>() /*!< One or more names of model output nodes (TF models)*/
-                           );
-
-  //! Set a model (from buffer) in the database for future execution
-  void set_model(const std::string& key /*!< The key to use to place the model*/,
-                 const std::string_view& model /*!< The model as a continuous buffer string_view*/,
-                 const std::string& backend /*!< The name of the backend (TF, TFLITE, TORCH, ONNX)*/,
-                 const std::string& device /*!< The name of the device (CPU, GPU, GPU:0, GPU:1...)*/,
-                 int batch_size = 0 /*!< The batch size for model execution*/,
-                 int min_batch_size = 0 /*!< The minimum batch size for model execution*/,
-                 const std::string& tag = "" /*!< A tag to attach to the model for information purposes*/,
-                 const std::vector<std::string>& inputs
-                  = std::vector<std::string>() /*!< One or more names of model input nodes (TF models)*/,
-                 const std::vector<std::string>& outputs
-                  = std::vector<std::string>() /*!< One or more names of model output nodes (TF models)*/
-                 );
-
-  //! Get a model in the database
-  std::string_view get_model(const std::string& key /*!< The key to use to retrieve the model*/
-                             );
-
-  //! Set a script (from file) in the database for future execution
-  void set_script_from_file(const std::string& key /*!< The key to use to place the script*/,
-                            const std::string& device /*!< The device to run the script*/,
-                            const std::string& script_file /*!< The name of the script file*/
-                            );
-
-  //! Set a script (from buffer) in the database for future execution
-  void set_script(const std::string& key /*!< The key to use to place the script*/,
-                  const std::string& device /*!< The device to run the script*/,
-                  const std::string_view& script /*!< The name of the script file*/
-                  );
-
-  //! Get the script from the database
-  std::string_view get_script(const std::string& key /*!< The key to use to retrieve the script*/
-                              );
-
-  //! Run a model in the database
-  void run_model(const std::string& key /*!< The key of the model to run*/,
-                         std::vector<std::string> inputs /*!< The keys of the input tensors*/,
-                         std::vector<std::string> outputs /*!< The keys of the output tensors*/
-                         );
-
-  //! Run a script in the database
-  void run_script(const std::string& key /*!< The key of the script to run*/,
-                  const std::string& function /*!< The name of the function to run in the script*/,
-                  std::vector<std::string> inputs /*!< The keys of the input tensors*/,
-                  std::vector<std::string> outputs /*!< The keys of the output tensors*/
-                  );
-
-  //! Check if a key exists
-  bool key_exists(const std::string& key /*!< The key to check*/
-                  );
-
-  //! Poll database until key exists or number of tries is exceeded
-  bool poll_key(const std::string& key /*!< The key to check*/,
-                int poll_frequency_ms /*!< The frequency of polls*/,
-                int num_tries /*!< The total number of tries*/);
-
-  //! Set the data source (i.e. key prefix for get functions)
-  void set_data_source(std::string source_id /*!< The prefix for retrieval commands*/
-                       );
-
-protected:
-  //! Should this client treat tensors as fortran arrays
-  bool _fortran_array;
-
-  //! Array of database nodes
-  std::vector<DBNode> _db_nodes;
-
-  //! Number of database nodes
-  unsigned _n_db_nodes;
-
-  //! Retrieve environment variable SSDB
-  std::string _get_ssdb();
-
-  //! Check that the SSDB environment string conforms to permissable characters
-  void _check_ssdb_string(const std::string& env_str);
-
-  //! Populate hash slot and db node information
-  void _populate_db_node_data(bool cluster);
-
-  //! Parse the CommandReply for cluster slot information
-  void _parse_reply_for_slots(CommandReply& reply);
-
-  // Set a model using the provided string_view of the model
-  inline void _set_model(const std::string& key /*!< The key to use to place the mdoel*/,
-                         std::string_view model /*!< The model content*/,
-                         const std::string& backend /*!< The name of the backend (TF, TFLITE, TORCH, ONNX)*/,
-                         const std::string& device /*!< The name of the device (CPU, GPU, GPU:0, GPU:1...)*/,
-                         int batch_size = 0 /*!< The batch size for model execution*/,
-                         int min_batch_size = 0 /*!< The minimum batch size for model execution*/,
-                         const std::string& tag = "" /*!< A tag to attach to the model for information purposes*/,
-                         const std::vector<std::string>& inputs
-                          = std::vector<std::string>() /*!< One or more names of model input nodes (TF models)*/,
-                         const std::vector<std::string>& outputs
-                          = std::vector<std::string>() /*!< One or more names of model output nodes (TF models)*/
-                         );
-
-  // Set a script using the provided string_view of the script
-  inline void _set_script(const std::string& key /*!< The key to use to place the script*/,
-                          const std::string& device /*!< The device to run the script*/,
-                          std::string_view script /*!< The script content*/
-                          );
-
-  // Copy a tensor from src_key to dest_key
-  inline void _copy_tensor(const std::string& src_key,
-                           const std::string& dest_key);
-
-  //! Execute a database command
-  CommandReply _execute_command(Command& cmd /*!< The command to execute*/,
-                                std::string prefix="" /*!< Prefix to specifically address cluster node*/
-                                );
-
-  void _execute_commands(CommandList& cmds /*!< The list of commands to execute*/,
-                         std::string prefix="" /*!< The option server to process commands*/
-                         );
-
-  //! Parse tensor dimensions from a database reply
-  std::vector<size_t> _get_tensor_dims(CommandReply& reply /*!< The database reply*/
-                                    );
-
-  //! Retrieve a string_view of data buffer string from the database reply
-  std::string_view _get_tensor_data_blob(CommandReply& reply /*!< The database reply*/
-                                         );
-
-  //! Get tensor data type from the database reply
-  TensorType _get_tensor_data_type(CommandReply& reply /*!< The database reply*/
-                                    );
-
-  //! Get a prefix for a model or script based on the hash slot
-  std::string _get_crc16_prefix(uint64_t hash_slot /*!< The hash slot*/
-                                );
-
-  //! Perform an inverse CRC16 calculation
-  uint64_t _crc16_inverse(uint64_t remainder /*!< The remainder of the CRC16 calculation*/
-                          );
-
-  //! Retrieve the optimum model prefix for the set of inputs
-  DBNode* _get_model_script_db(const std::string& name,
-                               std::vector<std::string>& inputs,
-                               std::vector<std::string>& outputs);
+        /*!
+        *   \brief Copy a DataSet to a new key in the database.
+        *          All tensors and metdata in the DataSet will
+        *          be copied.
+        *   \param src_name The key associated with the DataSet
+        *                   that is to be copied
+        *   \param dest_name The key in the database that will
+        *                    store the copied database.
+        */
+        void copy_dataset(const std::string& src_name,
+                        const std::string& dest_name);
 
 
-  //! Determine if the key has a hash tag ("{" and "}") in it
-  bool _has_hash_tag(const std::string& key);
+        /*!
+        *   \brief Delete a DataSet from the database.  All
+        *          tensors and metdata in the DataSet will be
+        *          deleted.
+        *   \param name The name of the DataSet that should be
+        *               deleted.
+        */
+        void delete_dataset(const std::string& name);
 
-  //! Get the hash slot of a key
-  uint16_t _get_hash_slot(const std::string& key);
 
-  //! Return the hash key set by the hash tag
-  std::string _get_hash_tag(const std::string& key);
+        /*!
+        *   \brief Put a tensor into the database
+        *   \param key The key to associate with this tensor
+        *              in the database
+        *   \param data A c-ptr to the beginning of the tensor data
+        *   \param dims The dimensions of the tensor
+        *   \param type The data type of the tensor
+        *   \param mem_layout The memory layout of the provided
+        *                     tensor data
+        */
+        void put_tensor(const std::string& key,
+                        void* data,
+                        const std::vector<size_t>& dims,
+                        const TensorType type,
+                        const MemoryLayout mem_layout
+                        );
 
-  //! Get DBNode (by index) that is responsible for the hash slot
-  uint16_t _get_dbnode_index(uint16_t hash_slot,
-                             unsigned lhs,
-                             unsigned rhs);
+        /*!
+        *   \brief Get the tensor data, dimensions,
+        *          and type for the provided tensor key.
+        *          This function will allocate and retain
+        *          management of the memory for the tensor
+        *          data.
+        *   \details The memory of the data pointer is valid
+        *            until the Client is destroyed. This method
+        *            is meant to be used when the dimensions and
+        *            type of the tensor are unknown or the user does
+        *            not want to manage memory.  However, given that
+        *            the memory associated with the return data is
+        *            valid until Client destruction, this method
+        *            should not be used repeatedly for large tensor
+        *            data.  Instead  it is recommended that the user
+        *            use unpack_tensor() for large tensor data and
+        *            to limit memory use by the Client.
+        *   \param key  The name used to reference the tensor
+        *   \param data A c-ptr reference that will be pointed to
+        *               newly allocated memory
+        *   \param dims A reference to a dimensions vector
+        *               that will be filled with the retrieved
+        *               tensor dimensions
+        *   \param type A reference to a TensorType enum that will
+        *               be set to the value of the retrieved
+        *               tensor type
+        *   \param mem_layout The MemoryLayout that the newly
+        *                     allocated memory should conform to
+        */
+        void get_tensor(const std::string& key,
+                        void*& data,
+                        std::vector<size_t>& dims,
+                        TensorType& type,
+                        const MemoryLayout mem_layout
+                        );
 
-  //! Set the prefixes for put and get for C++ client.
-  void _set_prefixes_from_env();
 
-  //! Return the put prefix
-  inline std::string _put_prefix();
+        /*!
+        *   \brief Get the tensor data, dimensions,
+        *          and type for the provided tensor key.
+        *          This function will allocate and retain
+        *          management of the memory for the tensor
+        *          data and dimensions.  This is a c-style
+        *          interface for the tensor dimensions.  Another
+        *          function exists for std::vector dimensions.
+        *   \details The memory of the data pointer is valid
+        *            until the Client is destroyed. This method
+        *            is meant to be used when the dimensions and
+        *            type of the tensor are unknown or the user does
+        *            not want to manage memory.  However, given that the
+        *            memory associated with the return data is valid
+        *            until Client destruction, this method should not
+        *            be used repeatedly for large tensor data.  Instead
+        *            it is recommended that the user use unpack_tensor()
+        *            for large tensor data and to limit memory use by
+        *            the Client.
+        *   \param key  The name used to reference the tensor
+        *   \param data A c-ptr reference that will be pointed to
+        *               newly allocated memory
+        *   \param dims A reference to a c-ptr that will be
+        *               pointed newly allocated memory
+        *               that will be filled with the tensor dimensions
+        *   \param n_dims A reference to type size_t variable
+        *                 that will be set to the number
+        *                 of tensor dimensions
+        *   \param type A reference to a TensorType enum that will
+        *               be set to the value of the retrieved
+        *               tensor type
+        *   \param mem_layout The MemoryLayout that the newly
+        *                     allocated memory should conform to
+        */
+        void get_tensor(const std::string& key,
+                        void*& data,
+                        size_t*& dims,
+                        size_t& n_dims,
+                        TensorType& type,
+                        const MemoryLayout mem_layout
+                        );
 
-  //! Return the get prefix
-  inline std::string _get_prefix();
+        /*!
+        *   \brief Get tensor data and fill an already allocated
+        *          array memory space that has the specified
+        *          MemoryLayout.  The provided type and dimensions
+        *          are checked against retrieved values to ensure
+        *          the provided memory space is sufficient.  This
+        *          method is the most memory efficient way
+        *          to retrieve tensor data.
+        *   \param key  The name used to reference the tensor
+        *   \param data A c-ptr to the memory space to be filled
+        *               with tensor data
+        *   \param dims The dimensions of the memory space
+        *   \param type The TensorType matching the data
+        *               type of the memory space
+        *   \param mem_layout The MemoryLayout of the provided
+        *               memory space.
+        */
+        void unpack_tensor(const std::string& key,
+                        void* data,
+                        const std::vector<size_t>& dims,
+                        const TensorType type,
+                        const MemoryLayout mem_layout
+                        );
 
-  //! Run a model in the database that uses dagrun instead of modelrun
-  void __run_model_dagrun(const std::string& key /*!< The key of the model to run*/,
-                          std::vector<std::string> inputs /*!< The keys of the input tensors*/,
-                          std::vector<std::string> outputs /*!< The keys of the output tensors*/
-                          );
+        /*!
+        *   \brief Move a tensor from one key to another key
+        *   \param key The original tensor key
+        *   \param new_key The new tensor key
+        */
+        void rename_tensor(const std::string& key,
+                        const std::string& new_key);
 
-  //! Append vector of keys with get prefixes
-  void _append_with_get_prefix(std::vector<std::string>& keys);
+        /*!
+        *   \brief Delete a tensor from the database
+        *   \param key The key of tensor to delete
+        */
+        void delete_tensor(const std::string& key);
 
-  //! Append vector of keys with put prefixes
-  void _append_with_put_prefix(std::vector<std::string>& keys);
+        /*!
+        *   \brief Copy the tensor from the source
+        *          key to the destination key
+        *   \param src_key The key of the tensor to copy
+        *   \param dest_key The destination key of the tensor
+        */
+        void copy_tensor(const std::string& src_key,
+                        const std::string& dest_key);
 
-  //! Gets a mapping between original names and temporary names for identical hash slot requirement
-  std::vector<std::string>  _get_tmp_names(std::vector<std::string> names,
-                                           std::string db_prefix);
+        /*!
+        *   \brief Set a model from file in the
+        *          database for future execution
+        *   \param key The key to associate with the model
+        *   \param model_file The source file for the model
+        *   \param backend The name of the backend
+        *                  (TF, TFLITE, TORCH, ONNX)
+        *   \param device The name of the device for execution
+        *                 (e.g. CPU or GPU)
+        *   \param batch_size The batch size for model execution
+        *   \param min_batch_size The minimum batch size for model
+        *                         execution
+        *   \param tag A tag to attach to the model for
+        *              information purposes
+        *   \param inputs One or more names of model input nodes
+        *                 (TF models only)
+        *   \param outputs One or more names of model output nodes
+        *                 (TF models only)
+        */
+        void set_model_from_file(const std::string& key,
+                                const std::string& model_file,
+                                const std::string& backend,
+                                const std::string& device,
+                                int batch_size = 0,
+                                int min_batch_size = 0,
+                                const std::string& tag = "",
+                                const std::vector<std::string>& inputs
+                                    = std::vector<std::string>(),
+                                const std::vector<std::string>& outputs
+                                    = std::vector<std::string>());
 
-  //! Copy a list of tensor names
-  void _copy_tensors(std::vector<std::string> src,
-                     std::vector<std::string> dest);
+        /*!
+        *   \brief Set a model from std::string_view buffer in the
+        *          database for future execution
+        *   \param key The key to associate with the model
+        *   \param model The model as a continuous buffer string_view
+        *   \param backend The name of the backend
+        *                  (TF, TFLITE, TORCH, ONNX)
+        *   \param device The name of the device for execution
+        *                 (e.g. CPU or GPU)
+        *   \param batch_size The batch size for model execution
+        *   \param min_batch_size The minimum batch size for model
+        *                         execution
+        *   \param tag A tag to attach to the model for
+        *              information purposes
+        *   \param inputs One or more names of model input nodes
+        *                 (TF models only)
+        *   \param outputs One or more names of model output nodes
+        *                 (TF models only)
+        */
+        void set_model(const std::string& key,
+                        const std::string_view& model,
+                        const std::string& backend,
+                        const std::string& device,
+                        int batch_size = 0,
+                        int min_batch_size = 0,
+                        const std::string& tag = "",
+                        const std::vector<std::string>& inputs
+                        = std::vector<std::string>(),
+                        const std::vector<std::string>& outputs
+                        = std::vector<std::string>());
 
-  //! Delete a list of keys
-  void _delete_keys(std::vector<std::string> key,
-                    std::string db_prefix="");
+        /*!
+        *   \brief Retrieve the model from the database
+        *   \param key The key associated with the model
+        *   \returns A std::string_view containing the model.
+        *            The memory associated with the model
+        *            is managed by the Client and is valid
+        *            until the destruction of the Client.
+        */
+        std::string_view get_model(const std::string& key);
 
-private:
-  sw::redis::RedisCluster* redis_cluster;
-  sw::redis::Redis* redis;
+        /*!
+        *   \brief Set a script from file in the
+        *          database for future execution
+        *   \param key The key to associate with the script
+        *   \param device The name of the device for execution
+        *                 (e.g. CPU or GPU)
+        *   \param script_file The source file for the script
+        */
+        void set_script_from_file(const std::string& key,
+                                const std::string& device,
+                                const std::string& script_file);
 
-  //! SharedMemoryList to handle get_model commands to return model string
-  SharedMemoryList<char> _model_queries;
-  //! SharedMemoryList to handle dimensions that are returned to the user
-  SharedMemoryList<size_t> _dim_queries;
+        /*!
+        *   \brief Set a script from std::string_view buffer in the
+        *          database for future execution
+        *   \param key The key to associate with the script
+        *   \param device The name of the device for execution
+        *                 (e.g. CPU or GPU)
+        *   \param script The script source in a std::string_view
+        */
+        void set_script(const std::string& key,
+                        const std::string& device,
+                        const std::string_view& script);
 
-  //! //! The _tensor_pack memory is not for querying by name, but is used
-  //! to manage memory.
-  TensorPack _tensor_memory;
-  std::string _put_key_prefix;
-  std::string _get_key_prefix;
-  std::vector<std::string> _get_key_prefixes;
+        /*!
+        *   \brief Retrieve the script from the database
+        *   \param key The key associated with the script
+        *   \returns A std::string_view containing the script.
+        *            The memory associated with the script
+        *            is managed by the Client and is valid
+        *            until the destruction of the Client.
+        */
+        std::string_view get_script(const std::string& key);
+
+        /*!
+        *   \brief Run a model in the database using the
+        *          specificed input and output tensors
+        *   \param key The key associated with the model
+        *   \param inputs The keys of inputs tensors to use
+        *                 in the model
+        *   \param outputs The keys of output tensors that
+        *                 will be used to save model results
+        */
+        void run_model(const std::string& key,
+                        std::vector<std::string> inputs,
+                        std::vector<std::string> outputs);
+
+        /*!
+        *   \brief Run a script function in the database using the
+        *          specificed input and output tensors
+        *   \param key The key associated with the script
+        *   \param function The name of the function in the script to run
+        *   \param inputs The keys of inputs tensors to use
+        *                 in the script
+        *   \param outputs The keys of output tensors that
+        *                 will be used to save script results
+        */
+        void run_script(const std::string& key,
+                        const std::string& function,
+                        std::vector<std::string> inputs,
+                        std::vector<std::string> outputs);
+
+        /*!
+        *   \brief Check if the key exists in the database
+        *   \param key The key that will be checked in the database
+        *   \returns Returns true if the key exists in the database
+        */
+        bool key_exists(const std::string& key);
+
+        /*!
+        *   \brief Check if the key exists in the database at a
+        *          specified frequency for a specified number
+        *          of times
+        *   \param key The key that will be checked in the database
+        *   \param poll_frequency_ms The frequency of checks for the
+        *                            key in milliseconds
+        *   \param num_tries The total number of times to check for
+        *                    the specified number of keys.  If the
+        *                    value is set to -1, the key will be
+        *                    polled indefinitely.
+        *   \returns Returns true if the key is found within the
+        *            specified number of tries, otherwise false.
+        */
+        bool poll_key(const std::string& key,
+                        int poll_frequency_ms,
+                        int num_tries);
+
+
+        /*!
+        *   \brief Set the data source (i.e. key prefix for
+        *          get functions)
+        *   \param source_id The prefix for retrieval commands
+        */
+        void set_data_source(std::string source_id);
+
+    protected:
+
+        /*!
+        *  \brief Abstract base class used to generalized
+        *         running with cluster or non-cluster
+        */
+        RedisServer* _redis_server;
+
+        /*!
+        *  \brief A pointer to a dynamically allocated
+        *         RedisCluster object if the Client is
+        *         being run in cluster mode.  This
+        *         object will be destroyed with the Client.
+        */
+        RedisCluster* _redis_cluster;
+
+        /*!
+        *  \brief A pointer to a dynamically allocated
+        *         Redis object if the Client is
+        *         being run in cluster mode.  This
+        *         object will be destroyed with the Client.
+        */
+        Redis* _redis;
+
+        /*!
+        *  \brief Set the prefixes that are used for
+        *         set and get methods using SSKEYIN and
+        *         SSKEYOUT environment variables.
+        */
+        void _set_prefixes_from_env();
+
+        /*!
+        *  \brief Get the key prefix for placement methods
+        *  \returns std::string container the placement prefix
+        */
+        inline std::string _put_prefix();
+
+        /*!
+        *  \brief Get the key prefix for retrieval methods
+        *  \returns std::string container the retrieval prefix
+        */
+        inline std::string _get_prefix();
+
+        /*!
+        *  \brief Append a vector of keys with the retrieval prefix
+        *  \param keys The vector of keys to prefix for retrieval
+        */
+        inline void _append_with_get_prefix(std::vector<std::string>& keys);
+
+        /*!
+        *  \brief Append a vector of keys with the placement prefix
+        *  \param keys The vector of keys to prefix for placement
+        */
+        inline void _append_with_put_prefix(std::vector<std::string>& keys);
+
+    private:
+
+        /*!
+        *  \brief SharedMemoryList to manage memory associated
+        *         with model retrieval requests
+        */
+        SharedMemoryList<char> _model_queries;
+
+        /*!
+        *  \brief SharedMemoryList to manage memory associated
+        *         with tensor dimensions from tensor retrieval
+        */
+        SharedMemoryList<size_t> _dim_queries;
+
+        /*!
+        *  \brief The _tensor_pack memory is not for querying
+        *         by name, but is used to manage memory.
+        */
+        TensorPack _tensor_memory;
+
+        /*!
+        *  \brief The prefix for keys during placement
+        */
+        std::string _put_key_prefix;
+
+        /*!
+        *  \brief The prefix for keys during retrieval
+        */
+        std::string _get_key_prefix;
+
+        /*!
+        *  \brief Vector of all potential retrieval prefixes
+        */
+        std::vector<std::string> _get_key_prefixes;
 };
 
 } //namespace SILC
 
-#endif //SMARTSIM_CPP_CLIENT_H
+#endif //SILC_CPP_CLIENT_H

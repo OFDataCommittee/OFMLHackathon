@@ -2,8 +2,9 @@
 program main
 
   use iso_c_binding
-  use silc_client, only : client_type
+  use silc_client,  only : client_type
   use silc_dataset, only : dataset_type
+  use test_utils,   only : use_cluster
 
   implicit none
 
@@ -17,7 +18,7 @@ program main
 
   write(key_prefix, "(A,I6.6)") "pe_",0
 
-  call client%initialize(.true.)
+  call client%initialize(use_cluster())
   call client%put_tensor( key_prefix//"test", array, shape(array) )
 
   call client%rename_tensor( key_prefix//"test", key_prefix//"test_rename" )

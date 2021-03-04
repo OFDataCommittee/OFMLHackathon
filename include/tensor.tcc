@@ -1,5 +1,5 @@
-#ifndef SMARTSIM_TENSOR_TCC
-#define SMARTSIM_TENSOR_TCC
+#ifndef SILC_TENSOR_TCC
+#define SILC_TENSOR_TCC
 
 template <class T>
 Tensor<T>::Tensor(const std::string& name,
@@ -9,16 +9,12 @@ Tensor<T>::Tensor(const std::string& name,
                   const MemoryLayout mem_layout) :
                   TensorBase(name, data, dims, type, mem_layout)
 {
-    /* Constructor for the Tensor class.
-    */
     this->_set_tensor_data(data, dims, mem_layout);
 }
 
 template <class T>
 Tensor<T>::Tensor(const Tensor<T>& tensor) : TensorBase(tensor)
 {
-    /* Copy constructor for Tensor.
-    */
     this->_set_tensor_data(tensor._data, tensor._dims,
                            MemoryLayout::contiguous);
     this->_c_mem_views = tensor._c_mem_views;
@@ -28,24 +24,13 @@ Tensor<T>::Tensor(const Tensor<T>& tensor) : TensorBase(tensor)
 template <class T>
 Tensor<T>::Tensor(Tensor<T>&& tensor) : TensorBase(tensor)
 {
-    /* Move constructor for Tensor.
-    */
     this->_c_mem_views = std::move(tensor._c_mem_views);
     this->_f_mem_views = std::move(tensor._f_mem_views);
 }
 
 template <class T>
-Tensor<T>::~Tensor()
-{
-    /* Destructor for the Tensor class.
-    */
-}
-
-template <class T>
 Tensor<T>& Tensor<T>::operator=(const Tensor<T>& tensor)
 {
-    /* Copy assignment operator for Tensor.
-    */
     if(this!=&tensor) {
         this->TensorBase::operator=(tensor);
         this->_set_tensor_data(tensor._data, tensor._dims,
@@ -59,10 +44,6 @@ Tensor<T>& Tensor<T>::operator=(const Tensor<T>& tensor)
 template <class T>
 Tensor<T>& Tensor<T>::operator=(Tensor<T>&& tensor)
 {
-    /* Move assignment operator for Tensor.  The data
-    and allocated ptrs are moved and old data
-    is left in a safe, but empty state.
-    */
     if(this!=&tensor) {
         this->TensorBase::operator=(tensor);
         this->_c_mem_views = std::move(tensor._c_mem_views);
@@ -127,9 +108,6 @@ void Tensor<T>::fill_mem_space(void* data,
                                std::vector<size_t> dims,
                                MemoryLayout mem_layout)
 {
-    /* This function will fill a supplied memory space
-    (data) with the values in the tensor data array.
-    */
     if(!this->_data)
         throw std::runtime_error("The tensor does not have "\
                                  "a data array to fill with.");
@@ -153,8 +131,6 @@ void Tensor<T>::fill_mem_space(void* data,
         throw std::runtime_error("The provided dimensions do "\
                                   "not match the size of the "\
                                   "tensor data array");
-
-
 
     switch(mem_layout) {
         case MemoryLayout::fortran_contiguous :
@@ -181,15 +157,6 @@ void* Tensor<T>::_copy_nested_to_contiguous(void* src_data,
                                             const size_t n_dims,
                                             void* dest_data)
 {
-    /* This function will copy the src_data, which is in a nested
-    memory structure, to the dest_data memory space which is flat
-    and contiguous.  The value returned by the first execution
-    of this function will change the copy of dest_data and return
-    a value that is not equal to the original source data value.
-    As a result, the initial call of this function SHOULD NOT
-    use the returned value.
-    */
-
     if(n_dims > 1) {
         T** current = (T**)src_data;
         for(size_t i = 0; i < dims[0]; i++) {
@@ -213,10 +180,6 @@ void Tensor<T>::_fill_nested_mem_with_data(void* data,
                                            size_t& data_position,
                                            void* tensor_data)
 {
-    /* This recursive function copies the tensor_data
-    into the nested data memory space.  The caller
-    should provide an initial value of 0 for data_position.
-    */
     if(n_dims > 1) {
         T** current = (T**) data;
         for(size_t i = 0; i < dims[0]; i++) {
@@ -240,12 +203,6 @@ T* Tensor<T>::_build_nested_memory(void** data,
                                    size_t n_dims,
                                    T* contiguous_mem)
 {
-    /* This function creates a nested tensor data
-    structure that points to the underlying contiguous
-    memory allocation of the data.  The initial caller
-    SHOULD NOT use the return value.  The return value
-    is for recursive value passing only.
-    */
     if(n_dims>1) {
         T** new_data = this->_c_mem_views.allocate(dims[0]);
         (*data) = (void*)new_data;
@@ -262,16 +219,11 @@ T* Tensor<T>::_build_nested_memory(void** data,
     return contiguous_mem;
 }
 
-//! Set the tensor data from a src memory location
 template <class T>
 void Tensor<T>::_set_tensor_data(void* src_data,
                                  const std::vector<size_t>& dims,
                                  const MemoryLayout mem_layout)
 {
-    /* Set the tensor data from the src_data.  This involves
-    a memcpy to a contiguous array.
-    */
-
     size_t n_values = this->num_values();
     size_t n_bytes = n_values * sizeof(T);
     this->_data = malloc(n_bytes);
@@ -296,9 +248,6 @@ void Tensor<T>::_set_tensor_data(void* src_data,
 template <class T>
 size_t Tensor<T>::_n_data_bytes()
 {
-    /* This function returns the total number
-    of bytes in memory occupied by this->_data.
-    */
     return this->num_values()*sizeof(T);
 }
 
@@ -307,10 +256,6 @@ void Tensor<T>::_f_to_c_memcpy(T* c_data,
                                T* f_data,
                                const std::vector<size_t>& dims)
 {
-    /* This function will copy a tensor
-    memory space from a column major
-    layout to a row major layout.
-    */
     std::vector<size_t> dim_positions(dims.size(), 0);
     _f_to_c(c_data, f_data, dims, dim_positions, 0);
 }
@@ -320,10 +265,6 @@ void Tensor<T>::_c_to_f_memcpy(T* f_data,
                                T* c_data,
                                const std::vector<size_t>& dims)
 {
-    /* This function will copy a tensor
-    memory space from a row major
-    layout to a column major layout.
-    */
     std::vector<size_t> dim_positions(dims.size(), 0);
     _c_to_f(f_data, c_data, dims, dim_positions, 0);
 }
@@ -335,10 +276,6 @@ void Tensor<T>::_f_to_c(T* c_data,
                         std::vector<size_t> dim_positions,
                         size_t current_dim)
 {
-    /* This function will recursively copy the fortran
-    column major memory to the c-style row major memory.
-    */
-
     size_t start = dim_positions[current_dim];
     size_t end = dims[current_dim];
     size_t f_index;
@@ -371,10 +308,6 @@ void Tensor<T>::_c_to_f(T* f_data,
                         std::vector<size_t> dim_positions,
                         size_t current_dim)
 {
-    /* This function will recursively copy the c-style
-    row major memory to the fortran row major memory.
-    */
-
     size_t start = dim_positions[current_dim];
     size_t end = dims[current_dim];
     size_t f_index;
@@ -404,11 +337,6 @@ template <class T>
 inline size_t Tensor<T>::_f_index(const std::vector<size_t>& dims,
                                   const std::vector<size_t>& dim_positions)
 {
-    /* This function will return the column major
-    index in a contiguous memory array corresponding
-    to the dimensions and dimension positions.
-    */
-
     size_t position = 0;
     size_t sum_product;
 
@@ -426,10 +354,6 @@ template <class T>
 inline size_t Tensor<T>::_c_index(const std::vector<size_t>& dims,
                                   const std::vector<size_t>& dim_positions)
 {
-    /* This function will return the row major
-    index in a contiguous memory array corresponding
-    to the dimensions and dimension positions.
-    */
     size_t position = 0;
     size_t sum_product;
     for(size_t k = 0; k < dims.size(); k++) {
@@ -442,4 +366,4 @@ inline size_t Tensor<T>::_c_index(const std::vector<size_t>& dims,
     return position;
 }
 
-#endif //SMARTSIM_TENSOR_TCC
+#endif //SILC_TENSOR_TCC

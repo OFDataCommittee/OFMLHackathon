@@ -21,10 +21,6 @@ void DataSet::add_tensor(const std::string& name,
                          const TensorType type,
                          MemoryLayout mem_layout)
 {
-    /* Creates a tensor with the provided information and adds
-    the tensor name to the .tensors metadata
-    */
-
     this->_add_to_tensorpack(name, data, dims,
                              type, mem_layout);
     this->_metadata.add_string(".tensors", name);
@@ -35,9 +31,6 @@ void DataSet::add_meta_scalar(const std::string& name,
                               const void* data,
                               const MetaDataType type)
 {
-    /* This function will add a metadata scalar
-    values that are not strings.
-    */
     this->_metadata.add_scalar(name, data, type);
     return;
 }
@@ -45,9 +38,6 @@ void DataSet::add_meta_scalar(const std::string& name,
 void DataSet::add_meta_string(const std::string& name,
                               const std::string& data)
 {
-    /* This function will add a metadata string
-    to the field
-    */
     this->_metadata.add_string(name, data);
     return;
 }
@@ -58,12 +48,6 @@ void DataSet::get_tensor(const std::string& name,
                          TensorType& type,
                          MemoryLayout mem_layout)
 {
-    /* This function gets a tensor from the database,
-    allocates memory in the specified format for the
-    user, sets the dimensions of the dims vector
-    for the user, and points the data pointer to
-    the allocated memory space.
-    */
     if(!(this->_tensorpack.tensor_exists(name)))
         throw std::runtime_error("The tensor " +
                                  std::string(name) +
@@ -83,15 +67,6 @@ void DataSet::get_tensor(const std::string&  name,
                          TensorType& type,
                          MemoryLayout mem_layout)
 {
-    /* This function will retrieve tensor data
-    pointer to the user.  If the pointer does not
-    exist (e.g. it is a tensor with buffer data only),
-    memory will be allocated and the buffer will be
-    copied into the new memory.  This memory will be
-    freed when the dataset is destroyed.  If the data
-    pointer in the tensor already points to a memory
-    space, that c_ptr will be returned.
-    */
     std::vector<size_t> dims_vec;
     this->get_tensor(name, data, dims_vec,
                      type, mem_layout);
@@ -118,10 +93,6 @@ void DataSet::unpack_tensor(const std::string& name,
                             const TensorType type,
                             MemoryLayout mem_layout)
 {
-    /* This function will take the tensor data buffer and put it into
-    the provided memory space (data).
-    */
-
    if(!(this->_tensorpack.tensor_exists(name)))
         throw std::runtime_error("The tensor " + std::string(name)
                                                + " does not exist in "
@@ -136,14 +107,6 @@ void DataSet::get_meta_scalars(const std::string& name,
                                size_t& length,
                                MetaDataType& type)
 {
-    /* This function points the data pointer to a
-    dynamically allocated array of the metadata
-    and sets the length pointer value to the number
-    of elements in the array.  The parameter type
-    is set to the return type so that the user
-    knows how to use the values if they are
-    unsure of the type.
-    */
     this->_metadata.get_scalar_values(name, data,
                                       length, type);
     return;
@@ -154,14 +117,6 @@ void DataSet::get_meta_strings(const std::string& name,
                                size_t& n_strings,
                                size_t*& lengths)
 {
-    /* This function points the data pointer to a
-    dynamically allocated array of the metadata
-    strings and sets the lengths pointer to an
-    a dynamically allocated array of string lengths.
-    The reference variable n_strings is set
-    to the length of the data array (i.e.
-    number of strings).
-    */
     this->_metadata.get_string_values(name, data,
                                       n_strings, lengths);
     return;
@@ -169,28 +124,20 @@ void DataSet::get_meta_strings(const std::string& name,
 
 std::vector<std::string> DataSet::get_meta_strings(const std::string& name)
 {
-    /* This function returns a vector of strings for the
-    string metadata field.
-    */
     return this->_metadata.get_string_values(name);
 }
 
 std::string DataSet::get_tensor_type(const std::string& name)
 {
-    /* Returns the tensor data type
-    */
     return this->_tensorpack.get_tensor(name)->name();
 }
 
-inline void DataSet::_add_to_tensorpack(const std::string& name,
-                                        void* data,
-                                        const std::vector<size_t>& dims,
-                                        const TensorType type,
-                                        const MemoryLayout mem_layout)
+void DataSet::_add_to_tensorpack(const std::string& name,
+                                 void* data,
+                                 const std::vector<size_t>& dims,
+                                 const TensorType type,
+                                 const MemoryLayout mem_layout)
 {
-    /* This function adds the tensor to the
-    internal TensorPack object.
-    */
     this->_tensorpack.add_tensor(name, data, dims,
                                  type, mem_layout);
     return;
@@ -198,39 +145,25 @@ inline void DataSet::_add_to_tensorpack(const std::string& name,
 
 DataSet::tensor_iterator DataSet::tensor_begin()
 {
-    /* Returns a iterator pointing to the first
-    tensor
-    */
     return this->_tensorpack.tensor_begin();
 }
 
 DataSet::const_tensor_iterator DataSet::tensor_cbegin()
 {
-    /* Returns a const_iterator pointing to the first
-    tensor
-    */
     return this->_tensorpack.tensor_cbegin();
 }
 
 DataSet::tensor_iterator DataSet::tensor_end()
 {
-    /* Returns a iterator pointing to the past-the-end
-    tensor
-    */
     return this->_tensorpack.tensor_end();
 }
 
 DataSet::const_tensor_iterator DataSet::tensor_cend()
 {
-    /* Returns a const_iterator pointing to the past-the-end
-    tensor
-    */
     return this->_tensorpack.tensor_cend();
 }
 
 std::string_view DataSet::get_metadata_buf()
 {
-    /* Returns a std::string_view of the metadata serialized
-    */
    return this->_metadata.get_metadata_buf();
 }

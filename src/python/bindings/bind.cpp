@@ -8,7 +8,7 @@ PYBIND11_MODULE(silcPy, m) {
 
     // Python client bindings
     py::class_<PyClient>(m, "PyClient")
-        .def(py::init<bool, bool>())
+        .def(py::init<bool>())
         .def("put_tensor", &PyClient::put_tensor)
         .def("get_tensor", &PyClient::get_tensor)
         .def("put_dataset", &PyClient::put_dataset)

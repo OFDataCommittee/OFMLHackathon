@@ -24,7 +24,7 @@ void load_mnist_image_to_array(float**** img)
 void run_mnist(const std::string& model_name,
                const std::string& script_name)
 {
-  SILC::Client client(true);
+  SILC::Client client(use_cluster());
 
   float**** array = allocate_4D_array<float>(1,1,28,28);
   float** result = allocate_2D_array<float>(1, 10);
@@ -56,7 +56,7 @@ void run_mnist(const std::string& model_name,
 int main(int argc, char* argv[]) {
   int rank = 0;
   if(rank==0) {
-    SILC::Client client(true);
+    SILC::Client client(use_cluster());
     std::string model_key = "mnist_model";
     std::string model_file = "./../mnist_data/mnist_cnn.pt";
     client.set_model_from_file(model_key, model_file, "TORCH", "CPU");

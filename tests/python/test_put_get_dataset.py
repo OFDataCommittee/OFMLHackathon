@@ -3,8 +3,9 @@ import time
 import numpy as np
 
 from silc import Client, Dataset
+import get_cluster_env
 
-CLUSTER = True
+CLUSTER = get_cluster_env.cluster()
 
 
 def test_put_get_dataset(mock_data):
@@ -20,7 +21,7 @@ def test_put_get_dataset(mock_data):
         key = f"tensor_{str(index)}"
         dataset.add_tensor(key, tensor)
 
-    client = Client(None, CLUSTER, False)
+    client = Client(None, CLUSTER)
 
     client.put_dataset(dataset)
 
