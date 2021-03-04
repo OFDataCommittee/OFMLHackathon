@@ -164,8 +164,6 @@ void put_get_3D_array(
 
 int main(int argc, char* argv[]) {
 
-  //MPI_Init(&argc, &argv);
-
   size_t dim1 = 3;
   size_t dim2 = 2;
   size_t dim3 = 5;
@@ -206,7 +204,6 @@ int main(int argc, char* argv[]) {
 
   std::cout<<"3D put and get with contiguous "\
              "data test complete."<<std::endl;
-  //MPI_Finalize();
 
   return 0;
 }

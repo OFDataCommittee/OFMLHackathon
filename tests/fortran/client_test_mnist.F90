@@ -14,9 +14,6 @@ program mnist_test
   integer :: err_code
   character(len=2) :: key_suffix
 
-  ! In a parallel run, we would format the suffix for a key as
-  ! a zero-padded version of the rank. This test runs serially,
-  ! thus we just set it to 0.
   call client%initialize(use_cluster())
 
   call client%set_model_from_file(model_key, model_file, "TORCH", "CPU")
