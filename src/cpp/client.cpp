@@ -68,7 +68,7 @@ void Client::put_dataset(DataSet& dataset)
     cmd->add_field(dataset_indicator_key, true);
     cmd->add_field("1");
 
-    this->_redis_server->run(cmds);
+    this->_run(cmds);
     return;
 }
 
@@ -95,7 +95,7 @@ DataSet Client::get_dataset(const std::string& name)
         cmd.add_field(tensor_key, true);
         cmd.add_field("META");
         cmd.add_field("BLOB");
-        reply = this->_redis_server->run(cmd);
+        reply = this->_run(cmd);
         reply_dims = CommandReplyParser::get_tensor_dims(reply);
         blob = CommandReplyParser::get_tensor_data_blob(reply);
         type = CommandReplyParser::get_tensor_data_type(reply);
@@ -128,7 +128,7 @@ void Client::copy_dataset(const std::string& src_name,
     put_meta_cmd.add_field(put_meta_key, true);
     put_meta_cmd.add_field_ptr(std::string_view(reply.str(),
                                                 reply.str_len()));
-    put_meta_reply = this->_redis_server->run(put_meta_cmd);
+    put_meta_reply = this->_run(put_meta_cmd);
 
 
     std::vector<std::string> tensor_src_names;
@@ -164,7 +164,7 @@ void Client::delete_dataset(const std::string& name)
         cmd.add_field(key, true);
         it++;
     }
-    reply = this->_redis_server->run(cmd);
+    reply = this->_run(cmd);
     return;
 }
 
@@ -696,6 +696,7 @@ void Client::set_data_source(std::string source_id)
                     "initialization.");
 }
 
+
 void Client::use_model_ensemble_prefix(bool use_prefix)
 {
     this->_use_model_prefix = use_prefix;
@@ -704,6 +705,15 @@ void Client::use_model_ensemble_prefix(bool use_prefix)
 void Client::use_tensor_ensemble_prefix(bool use_prefix)
 {
     this->_use_tensor_prefix = use_prefix;
+
+CommandReply Client::_run(Command& cmd)
+{
+    return this->_run(cmd);
+}
+
+CommandReply Client::_run(CommandList& cmds)
+{
+    return this->_run(cmds);
 }
 
 void Client::_set_prefixes_from_env()
@@ -817,7 +827,7 @@ inline CommandReply Client::_get_dataset_metadata(const std::string& name)
     Command cmd;
     cmd.add_field("GET");
     cmd.add_field(this->_dataset_metadata_get_key(name), true);
-    return this->_redis_server->run(cmd);
+    return this->_run(cmd);
 }
 
 inline std::string Client::_dataset_tensor_get_key(const std::string& dataset_name,

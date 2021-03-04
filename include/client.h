@@ -545,6 +545,21 @@ class Client
         Redis* _redis;
 
         /*!
+        *   \brief Execute a Command
+        *   \param cmd The Command to execute
+        *   \returns The CommandReply after execution
+        */
+        CommandReply _run(Command& cmd);
+
+        /*!
+        *   \brief Execute a list of commands
+        *   \param cmds The CommandList to execute
+        *   \returns The CommandReply from the last
+        *            command execution
+        */
+        CommandReply _run(CommandList& cmd_list);
+
+        /*!
         *  \brief Set the prefixes that are used for
         *         set and get methods using SSKEYIN and
         *         SSKEYOUT environment variables.
