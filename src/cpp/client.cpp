@@ -39,7 +39,7 @@ void Client::put_dataset(DataSet& dataset)
 
     std::string ds_prefix = this->_build_dataset_key(dataset.name, false);
     std::string meta_key = ds_prefix + ".meta";
-    
+
     cmd->add_field("SET");
     cmd->add_field(meta_key, true);
     cmd->add_field_ptr(dataset.get_metadata_buf());
@@ -75,22 +75,19 @@ void Client::put_dataset(DataSet& dataset)
 DataSet Client::get_dataset(const std::string& name)
 {
     // Get the metadata message and construct DataSet
-    CommandReply reply;
-    Command cmd;
-
     std::string ds_prefix = this->_build_dataset_key(name, true);
-    std::string meta_key = ds_prefix + ".meta";
-
-    cmd.add_field ("GET");
-    cmd.add_field(meta_key, true);
-    reply =  this->_redis_server->run(cmd);
+    CommandReply reply = this->_get_dataset_metadata(ds_prefix);
 
     DataSet dataset = DataSet(name, reply.str(), reply.str_len());
 
-    // Loop through and add each tensor to the dataset
     std::vector<std::string> tensor_names =
         dataset.get_meta_strings(".tensors");
 
+    std::vector<size_t> reply_dims;
+    std::string_view blob;
+    TensorType type;
+    Command reply;
+    std::string key;
     for(size_t i=0; i<tensor_names.size(); i++) {
         std::string tensor_key = ds_prefix + '.' + tensor_names[i];
         Command cmd;
@@ -98,18 +95,13 @@ DataSet Client::get_dataset(const std::string& name)
         cmd.add_field(tensor_key, true);
         cmd.add_field("META");
         cmd.add_field("BLOB");
-        CommandReply reply;
         reply = this->_redis_server->run(cmd);
-
-        std::vector<size_t> reply_dims =
-            CommandReplyParser::get_tensor_dims(reply);
-        std::string_view blob =
-            CommandReplyParser::get_tensor_data_blob(reply);
-        TensorType type =
-            CommandReplyParser::get_tensor_data_type(reply);
+        reply_dims = CommandReplyParser::get_tensor_dims(reply);
+        blob = CommandReplyParser::get_tensor_data_blob(reply);
+        type = CommandReplyParser::get_tensor_data_type(reply);
         dataset._add_to_tensorpack(tensor_names[i],
-                                (void*)blob.data(), reply_dims,
-                                type, MemoryLayout::contiguous);
+                                   (void*)blob.data(), reply_dims,
+                                   type, MemoryLayout::contiguous);
     }
     return dataset;
 }
@@ -117,20 +109,62 @@ DataSet Client::get_dataset(const std::string& name)
 void Client::rename_dataset(const std::string& name,
                             const std::string& new_name)
 {
-    throw std::runtime_error("rename_dataset is incomplete");
+    this->copy_dataset(name, new_name);
+    this->delete_dataset(name);
     return;
 }
 
 void Client::copy_dataset(const std::string& src_name,
                           const std::string& dest_name)
 {
-    throw std::runtime_error("copy_dataset is incomplete");
+    CommandReply reply = this->_get_dataset_metadata(src_name);
+    DataSet dataset = DataSet(src_name, reply.str(), reply.str_len());
+
+    Command put_meta_cmd;
+    CommandReply put_meta_reply;
+    std::string put_meta_key;
+    put_meta_key = this->_dataset_metadata_put_key(dataset.name);
+    put_meta_cmd.add_field("PUT");
+    put_meta_cmd.add_field(put_meta_key, true);
+    put_meta_cmd.add_field_ptr(std::string_view(reply.str(),
+                                                reply.str_len()));
+    put_meta_reply = this->_redis_server->run(put_meta_cmd);
+
+
+    std::vector<std::string> tensor_src_names;
+    std::vector<std::string> tensor_dest_names;
+    DataSet::tensor_iterator it = dataset.tensor_begin();
+    DataSet::tensor_iterator it_end = dataset.tensor_end();
+    while(it != it_end) {
+        tensor_src_names.push_back(
+            this->_dataset_tensor_get_key(src_name, (*it)->name));
+        tensor_dest_names.push_back(
+            this->_dataset_tensor_put_key(dest_name, (*it)->name));
+        it++;
+    }
+    this->_redis_server->copy_tensors(tensor_src_names,
+                                      tensor_dest_names);
     return;
 }
 
 void Client::delete_dataset(const std::string& name)
 {
-    throw std::runtime_error("delete_dataset is incomplete");
+    CommandReply reply = this->_get_dataset_metadata(name);
+    DataSet dataset = DataSet(name, reply.str(), reply.str_len());
+
+    Command cmd;
+    cmd.add_field("DEL");
+    cmd.add_field(this->_dataset_metadata_get_key(dataset.name),true);
+
+    DataSet::tensor_iterator it = dataset.tensor_begin();
+    DataSet::tensor_iterator it_end = dataset.tensor_end();
+    std::string key;
+    while(it != it_end) {
+        key = this->_dataset_tensor_get_key(dataset.name, (*it)->name);
+        cmd.add_field(key, true);
+        it++;
+    }
+    reply = this->_redis_server->run(cmd);
     return;
 }
 
@@ -577,7 +611,7 @@ bool Client::tensor_exists(const std::string& name)
 
 bool Client::model_exists(const std::string& name)
 {
-    std::string g_key = this->_build_model_key(name, true); 
+    std::string g_key = this->_build_model_key(name, true);
     return this->_redis_server->model_key_exists(g_key);
 }
 
@@ -723,7 +757,7 @@ inline std::string Client::_build_tensor_key(const std::string& key, bool on_db)
     std::string prefix;
     if (this->_use_tensor_prefix)
         prefix = on_db ? this->_get_prefix() : this->_put_prefix();
-        
+
     return prefix + key;
 }
 
@@ -732,7 +766,7 @@ inline std::string Client::_build_model_key(const std::string& key, bool on_db)
     std::string prefix;
     if (this->_use_model_prefix)
         prefix = on_db ? this->_get_prefix() : this->_put_prefix();
-        
+
     return prefix + key;
 }
 
@@ -743,7 +777,7 @@ inline std::string Client::_build_dataset_key(const std::string& dataset_name, b
     if (this->_use_tensor_prefix)
         prefix = on_db ? this->_get_prefix() : this->_put_prefix();
 
-    key = prefix + 
+    key = prefix +
           "{" + dataset_name + "}";
     return key;
 }
@@ -776,4 +810,34 @@ inline void Client::_append_with_put_prefix(
       prefix_it++;
     }
     return;
+}
+
+inline CommandReply Client::_get_dataset_metadata(const std::string& name)
+{
+    Command cmd;
+    cmd.add_field("GET");
+    cmd.add_field(this->_dataset_metadata_get_key(name), true);
+    return this->_redis_server->run(cmd);
+}
+
+inline std::string Client::_dataset_tensor_get_key(const std::string& dataset_name,
+                                                   const std::string& tensor_name)
+{
+    return this->_get_prefix() + "{" + dataset_name + "}."+ tensor_name;
+}
+
+inline std::string Client::_dataset_tensor_put_key(const std::string& dataset_name,
+                                                   const std::string& tensor_name)
+{
+    return this->_put_prefix() + "{" + dataset_name + "}."+ tensor_name;
+}
+
+inline std::string Client::_dataset_metadata_get_key(const std::string& dataset_name)
+{
+    return this->_get_prefix() + "{" + dataset_name + "}" + ".meta";
+}
+
+inline std::string Client::_dataset_metadata_put_key(const std::string& dataset_name)
+{
+    return this->_put_prefix() + "{" + dataset_name + "}" + ".meta";
 }

@@ -575,6 +575,47 @@ class Client
         */
         inline void _append_with_put_prefix(std::vector<std::string>& keys);
 
+        /*!
+        *  \brief Execute the command to retrieve the DataSet metadata portion
+        *         of the DataSet.
+        *   \param name The name of the DataSet, not prefixed.
+        *   \returns The CommandReply for the command to retrieve the DataSet
+        *             metadata
+        */
+        inline CommandReply _get_dataset_metadata(const std::string& name);
+
+        /*!
+        *  \brief Create the key for retrieving a DataSet tensor in the database
+        *  \param dataset_name The name of the dataset
+        *  \param tensor_name The name of the tensor
+        *  \returns A string of the key for the tensor
+        */
+        inline std::string _dataset_tensor_get_key(const std::string& dataset_name,
+                                                   const std::string& tensor_name);
+
+        /*!
+        *  \brief Create the key for sending a DataSet tensor to the database
+        *  \param dataset_name The name of the dataset
+        *  \param tensor_name The name of the tensor
+        *  \returns A string of the key for the tensor
+        */
+        inline std::string _dataset_tensor_put_key(const std::string& dataset_name,
+                                                   const std::string& tensor_name);
+
+        /*!
+        *  \brief Create the key for retrieving a DataSet metadata message
+        *  \param dataset_name The name of the dataset
+        *  \returns A string of the key for the dataset metadata
+        */
+        inline std::string _dataset_metadata_get_key(const std::string& dataset_name);
+
+        /*!
+        *  \brief Create the key for sending a DataSet metadata message
+        *  \param dataset_name The name of the dataset
+        *  \returns A string of the key for the dataset metadata
+        */
+        inline std::string _dataset_metadata_put_key(const std::string& dataset_name);
+
     private:
 
         /*!
