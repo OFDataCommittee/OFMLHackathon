@@ -39,7 +39,6 @@ void Client::put_dataset(DataSet& dataset)
 
     std::string ds_prefix = this->_build_dataset_key(dataset.name, false);
     std::string meta_key = ds_prefix + ".meta";
-
     cmd->add_field("SET");
     cmd->add_field(meta_key, true);
     cmd->add_field_ptr(dataset.get_metadata_buf());
