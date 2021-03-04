@@ -76,6 +76,9 @@ set(CLIENT_SRC
    ../../../../src/fortran/fortran_c_interop.F90
    ../../../../src/fortran/dataset.F90
    ../../../../src/fortran/client.F90
+   ../../../../src/cpp/redisserver.cpp
+   ../../../../src/cpp/rediscluster.cpp
+   ../../../../src/cpp/redis.cpp
 	 example_utils.F90)
 
 # ld executables

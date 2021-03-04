@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "stdint.h"
+#include "c_client_example_utils.h"
 
 int put_get_3D_tensor(void* client,
                       void* tensor,

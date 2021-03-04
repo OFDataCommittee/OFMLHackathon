@@ -66,7 +66,10 @@ set(CLIENT_SRC
 	 ../../../../src/cpp/tensorpack.cpp
 	 ../../../../src/cpp/dbnode.cpp
 	 ../../../../src/cpp/commandreply.cpp
-	 ../../../utils/protobuf/silc.pb.cc)
+	 ../../../utils/protobuf/silc.pb.cc
+   ../../../../src/cpp/redisserver.cpp
+   ../../../../src/cpp/redis.cpp
+   ../../../../src/cpp/rediscluster.cpp)
 
 
 add_executable(example_put_unpack_1D

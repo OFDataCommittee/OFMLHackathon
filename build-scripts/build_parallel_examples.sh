@@ -25,9 +25,6 @@ fi
 
 
 
-# setup build dirs
-mkdir build
-cd ./build
 
 DO_FORTRAN="yes"
 
@@ -36,6 +33,11 @@ if [ "$(uname)" == "Darwin" ]; then
 fi
 
 if [[ $DO_FORTRAN == "yes" ]]; then
+
+    # setup build dirs
+    mkdir build
+    cd ./build
+  
     # TODO add platform dependent build step here
     cmake ..
 
@@ -53,14 +55,14 @@ if [[ $DO_FORTRAN == "yes" ]]; then
         exit 1
     fi
 
-    cd ../
+    cd ../../cpp
+
     echo "Fortran parallel examples built"
 else
     echo "Skipping Fortran parallel example build"
 fi
 
 
-cd ../cpp
 
 # setup build dirs
 mkdir build

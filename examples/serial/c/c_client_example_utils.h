@@ -1,5 +1,5 @@
-#ifndef SMARTSIM_CTEST_INT32_UTILS_H
-#define SMARTSIM_CTEST_INT32_UTILS_H
+#ifndef SILC_C_EXAMPLES_UTILS_H
+#define SILC_C_EXAMPLES_UTILS_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,17 +16,33 @@ void test_result(int result, char *test){
     }
 }
 
+void to_lower(char* s) {
+    /* This will turn each character in the
+    c-str into the lowercase value.
+    This assumes the c-str is null terminated.
+    */
+    if(!s)
+        return;
+
+    while((*s)!=0) {
+        if( *s>='A' && *s<='Z')
+            *s = *s - 'A' + 'a';
+        s++;
+    }
+    return;
+}
+
 bool use_cluster()
 {
     /* This function determines if a cluster
     configuration should be used in the test
     when creating a Client.
     */
-    char* silc_test_cluster = std::getenv("SILC_TEST_CLUSTER");
+    char* silc_test_cluster = getenv("SILC_TEST_CLUSTER");
     to_lower(silc_test_cluster);
 
     if(silc_test_cluster) {
-        if(std::strcmp(silc_test_cluster, "true")==0)
+        if(strcmp(silc_test_cluster, "true")==0)
             return true;
     }
     return false;
@@ -125,4 +141,4 @@ bool is_equal_3D_tensors_dbl(double*** a, double*** b,
     return true;
 }
 
-#endif //SMARTSIM_CTEST_UTILS_H
+#endif //SILC_C_EXAMPLES_UTILS_H

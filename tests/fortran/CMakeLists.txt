@@ -65,12 +65,12 @@ set(CLIENT_SRC
 	 ../../../src/cpp/dbnode.cpp
 	 ../../../src/cpp/commandreply.cpp
 	 ../../../utils/protobuf/silc.pb.cc
-         ../../../src/fortran/fortran_c_interop.F90
-         ../../../src/fortran/dataset.F90
-         ../../../src/fortran/client.F90
-         ../../../src/cpp/redisserver.cpp
-         ../../../src/cpp/rediscluster.cpp
-         ../../../src/cpp/redis.cpp
+   ../../../src/fortran/fortran_c_interop.F90
+   ../../../src/fortran/dataset.F90
+   ../../../src/fortran/client.F90
+   ../../../src/cpp/redisserver.cpp
+   ../../../src/cpp/rediscluster.cpp
+   ../../../src/cpp/redis.cpp
 	 ../../utils/protobuf/silc.pb.cc
 	 test_utils.F90)
 
