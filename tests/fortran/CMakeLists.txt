@@ -1,4 +1,4 @@
-project(CppClientTester)
+project(FortranClientTester)
 
 set(CMAKE_BUILD_TYPE DEBUG)
 

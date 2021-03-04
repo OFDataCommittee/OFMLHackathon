@@ -11,28 +11,23 @@ program mnist_test
   character(len=*), parameter :: script_file = "../../cpp/mnist_data/data_processing_script.txt"
 
   type(client_type) :: client
-  integer :: err_code, pe_id
+  integer :: err_code
   character(len=2) :: key_suffix
 
   ! In a parallel run, we would format the suffix for a key as
   ! a zero-padded version of the rank. This test runs serially,
   ! thus we just set it to 0.
-  pe_id = 0
-  write(key_suffix, "(A,I1.1)") "_",pe_id
   call client%initialize(use_cluster())
 
-  if (pe_id == 0) then
-    call client%set_model_from_file(model_key, model_file, "TORCH", "CPU")
-    call client%set_script_from_file(script_key, "CPU", script_file)
-  endif
+  call client%set_model_from_file(model_key, model_file, "TORCH", "CPU")
+  call client%set_script_from_file(script_key, "CPU", script_file)
 
-  call run_mnist(client, key_suffix, model_key, script_key)
+  call run_mnist(client, model_key, script_key)
 
 contains
 
-subroutine run_mnist( client, key_suffix, model_name, script_name )
+subroutine run_mnist( client, model_name, script_name )
   type(client_type), intent(in) :: client
-  character(len=*),  intent(in) :: key_suffix
   character(len=*),  intent(in) :: model_name
   character(len=*),  intent(in) :: script_name
 
@@ -51,9 +46,9 @@ subroutine run_mnist( client, key_suffix, model_name, script_name )
   character(len=255), dimension(1) :: outputs
 
   ! Construct the keys used for the specifiying inputs and outputs
-  in_key = "mnist_input_rank"//trim(key_suffix)
-  script_out_key = "mnist_processed_input_rank"//trim(key_suffix)
-  out_key = "mnist_processed_input_rank"//trim(key_suffix)
+  in_key = "mnist_input"
+  script_out_key = "mnist_processed_input"
+  out_key = "mnist_processed_input"
 
   ! Generate some fake data for inference
   call random_number(array)

@@ -10,7 +10,7 @@ CLUSTER = True
 
 
 def example_put_get_dataset(mock_data):
-    """test sending and recieving a dataset with 2D tensors
+    """send and receive a dataset with 2D tensors
     of every datatype
     """
 
@@ -22,7 +22,7 @@ def example_put_get_dataset(mock_data):
         key = f"tensor_{str(index)}"
         dataset.add_tensor(key, tensor)
 
-    client = Client(None, CLUSTER, False)
+    client = Client(None, CLUSTER)
 
     client.put_dataset(dataset)
 

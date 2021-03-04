@@ -17,10 +17,8 @@ void put_get_3D_array(
   T_recv*** u_result = allocate_3D_array<T_recv>(dims[0], dims[1], dims[2]);
   fill_array(array, dims[0], dims[1], dims[2]);
 
-  int rank = 0;
-
-  std::string key = "3d_tensor_test_rank_" +
-                    std::to_string(rank) + key_suffix;
+  std::string key = "3d_tensor_test" +
+                    key_suffix;
 
   /*
   for(int i = 0; i < dims[0]; i++) {

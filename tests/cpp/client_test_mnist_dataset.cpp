@@ -31,11 +31,9 @@ void run_mnist(const std::string& model_name,
 
   load_mnist_image_to_array(array);
 
-  int rank = 0;
-
-  std::string in_key = "mnist_input_rank_" + std::to_string(rank);
-  std::string script_out_key = "mnist_processed_input_rank_" + std::to_string(rank);
-  std::string out_key = "mnist_output_rank_" + std::to_string(rank);
+  std::string in_key = "mnist_input";
+  std::string script_out_key = "mnist_processed_input";
+  std::string out_key = "mnist_output";
 
   std::string dataset_name = "mnist_input_dataset";
   SILC::DataSet dataset = SILC::DataSet(dataset_name);
@@ -61,27 +59,23 @@ void run_mnist(const std::string& model_name,
 
 int main(int argc, char* argv[]) {
 
-  int rank = 0;
-  if(rank==0) {
-    SILC::Client client(use_cluster());
-    std::string model_key = "mnist_model";
-    std::string model_file = "./../mnist_data/mnist_cnn.pt";
-    client.set_model_from_file(model_key, model_file, "TORCH", "CPU");
+  SILC::Client client(use_cluster());
+  std::string model_key = "mnist_model";
+  std::string model_file = "./../mnist_data/mnist_cnn.pt";
+  client.set_model_from_file(model_key, model_file, "TORCH", "CPU");
 
-    std::string script_key = "mnist_script";
-    std::string script_file = "./../mnist_data/data_processing_script.txt";
-    client.set_script_from_file(script_key, "CPU", script_file);
+  std::string script_key = "mnist_script";
+  std::string script_file = "./../mnist_data/data_processing_script.txt";
+  client.set_script_from_file(script_key, "CPU", script_file);
 
-    std::string_view model = client.get_model(model_key);
+  std::string_view model = client.get_model(model_key);
 
-    std::string_view script = client.get_script(script_key);
+  std::string_view script = client.get_script(script_key);
 
-  }
 
   run_mnist("mnist_model", "mnist_script");
 
-  if(rank==0)
-    std::cout<<"Finished MNIST test."<<std::endl;
+  std::cout<<"Finished MNIST test."<<std::endl;
 
   return 0;
 }

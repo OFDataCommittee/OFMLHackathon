@@ -23,7 +23,7 @@ void to_lower(char* s) {
 bool use_cluster()
 {
     /* This function determines if a cluster
-    configuration should be used in the test
+    configuration should be used in the examples
     when creating a Client.
     */
     char* silc_test_cluster = std::getenv("SILC_TEST_CLUSTER");

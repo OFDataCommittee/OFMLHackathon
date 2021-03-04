@@ -169,6 +169,8 @@ void put_get_3D_array(
 int main(int argc, char* argv[]) {
 
   MPI_Init(&argc, &argv);
+  int rank = 0;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   size_t dim1 = 3;
   size_t dim2 = 2;
@@ -208,8 +210,9 @@ int main(int argc, char* argv[]) {
 				      &set_1D_array_integral_values<uint8_t>,
 				      dims, SILC::TensorType::uint8, "_ui8");
 
-  std::cout<<"SILC 3D put and get with contiguous "\
-             "data example complete."<<std::endl;
+  if (rank == 0)
+    std::cout<<"SILC 3D put and get with contiguous "\
+               "data example complete."<<std::endl;
   MPI_Finalize();
 
   return 0;

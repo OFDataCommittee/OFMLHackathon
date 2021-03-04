@@ -21,7 +21,7 @@ void put_get_3D_array(
   int rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  std::string key = "3d_tensor_test_rank_" +
+  std::string key = "3d_tensor_rank_" +
                     std::to_string(rank) + key_suffix;
 
   /*
@@ -56,7 +56,7 @@ void put_get_3D_array(
   if (!is_equal_3D_array<T_send, T_recv>(array, u_result,
                                          dims[0], dims[1], dims[2]))
 	  throw std::runtime_error("The results do not match for "\
-				                     "the 3d put and get test!");
+				                     "the 3d put and get!");
 
   SILC::TensorType g_type;
   std::vector<size_t> g_dims;
@@ -89,7 +89,7 @@ void put_get_3D_array(
   if (!is_equal_3D_array<T_send, T_recv>(array, g_type_result,
                                          dims[0], dims[1], dims[2]))
 	  throw std::runtime_error("The results do not match for "\
-				                     "the 3D put and get test!");
+				                     "the 3D put and get!");
 
   free_3D_array(array, dims[0], dims[1]);
   free_3D_array(u_result, dims[0], dims[1]);
@@ -100,6 +100,8 @@ void put_get_3D_array(
 int main(int argc, char* argv[]) {
 
   MPI_Init(&argc, &argv);
+  int rank = 0;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   size_t dim1 = 10;
   size_t dim2 = 5;
@@ -139,7 +141,8 @@ int main(int argc, char* argv[]) {
 				      &set_3D_array_integral_values<uint8_t>,
 				      dims, SILC::TensorType::uint8, "_ui8");
 
-  std::cout<<"SILC 3D put and get example complete."<<std::endl;
+  if (rank == 0)
+    std::cout<<"SILC 3D put and get example complete."<<std::endl;
   MPI_Finalize();
 
   return 0;

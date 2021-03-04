@@ -25,10 +25,9 @@ void put_get_3D_array(
     }
   }
 
-  int rank = 0;
 
-  std::string key = "3d_tensor_test_rank_" +
-                    std::to_string(rank) + key_suffix;
+  std::string key = "3d_tensor_test" +
+                    key_suffix;
 
   /*
   for(int i = 0; i < dims[0]; i++) {

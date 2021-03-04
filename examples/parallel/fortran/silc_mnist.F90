@@ -1,7 +1,8 @@
-program mnist_test
+program mnist_example
 
   use mpi
   use silc_client, only : client_type
+  use example_utils, only : use_cluster
 
   implicit none
 
@@ -20,16 +21,23 @@ program mnist_test
 
   ! Format the suffix for a key as a zero-padded version of the rank
   write(key_suffix, "(A,I1.1)") "_",pe_id
-  call client%initialize(.true.)
+  call client%initialize(use_cluster())
+
 
   if (pe_id == 0) then
     call client%set_model_from_file(model_key, model_file, "TORCH", "CPU")
     call client%set_script_from_file(script_key, "CPU", script_file)
   endif
 
+  call MPI_barrier(MPI_COMM_WORLD, err_code)
+
   call run_mnist(client, key_suffix, model_key, script_key)
 
   call MPI_finalize(err_code)
+
+  if (pe_id == 0) then
+    print *, "SILC Fortran MPI MNIST example finished without errors."
+  endif
 
 contains
 
@@ -72,9 +80,6 @@ subroutine run_mnist( client, key_suffix, model_name, script_name )
   result(:,:) = 0.
   call client%unpack_tensor(out_key, result, shape(result))
 
-  print *, "Result: ", result
-  print *, "SILC Fortran MPI MNIST example finished without errors."
-
 end subroutine run_mnist
 
-end program mnist_test
+end program mnist_example

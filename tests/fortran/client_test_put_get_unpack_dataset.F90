@@ -28,11 +28,8 @@ program main
   integer :: i, j, k
   type(client_type)  :: client
   type(dataset_type) :: send_dataset, recv_dataset
-  character(len=9) :: key_prefix
 
-  integer :: err_code, pe_id
-
-  write(key_prefix, "(A,I6.6)") "pe_",0
+  integer :: err_code
 
   call client%initialize(use_cluster())
 
@@ -54,7 +51,7 @@ program main
     recv_array_integer_64(i,j,k) = irand()
   enddo; enddo; enddo
 
-  call send_dataset%initialize( key_prefix//"test" )
+  call send_dataset%initialize( "test" )
 
   call send_dataset%add_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))
   call send_dataset%add_tensor("true_array_real_64", true_array_real_64, shape(true_array_real_64))
@@ -64,7 +61,7 @@ program main
   call send_dataset%add_tensor("true_array_integer_64", true_array_integer_64, shape(true_array_integer_64))
 
   call client%put_dataset( send_dataset )
-  recv_dataset = client%get_dataset( key_prefix//"test")
+  recv_dataset = client%get_dataset( "test" )
 
   call recv_dataset%unpack_dataset_tensor("true_array_real_32", recv_array_real_32, shape(recv_array_real_32))
   if (.not. all(true_array_real_32 == recv_array_real_32)) stop 'true_array_real_32: FAILED'

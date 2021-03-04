@@ -19,18 +19,11 @@ void put_unpack_1D_tensor(void* tensor, size_t* dims, size_t n_dims,
   */
 
   void* client = SmartSimCClient(use_cluster());
-
-  int rank = 0;
-
-  char* prefix_str = "1D_tensor_test_rank_";
-  char* rank_str = malloc(2*sizeof(char));
-  rank_str[0] = rank + (int)'0';
-  rank_str[1] = 0;
+  char* prefix_str = "1D_tensor_test";
 
   size_t prefix_str_length = strlen(prefix_str);
-  size_t rank_str_length = strlen(rank_str);
 
-  size_t key_length = prefix_str_length + rank_str_length +
+  size_t key_length = prefix_str_length + 
                       key_suffix_length;
   char* key = (char*)malloc((key_length+1)*sizeof(char));
 
@@ -38,8 +31,6 @@ void put_unpack_1D_tensor(void* tensor, size_t* dims, size_t n_dims,
   pos = 0;
   memcpy(&key[pos], prefix_str, prefix_str_length);
   pos += prefix_str_length;
-  memcpy(&key[pos], rank_str, rank_str_length);
-  pos += rank_str_length;
   memcpy(&key[pos], key_suffix, key_suffix_length);
   pos += key_suffix_length;
   key[pos] = 0;
@@ -51,7 +42,6 @@ void put_unpack_1D_tensor(void* tensor, size_t* dims, size_t n_dims,
                 result, dims, n_dims,
                 type, layout);
 
-  free(rank_str);
   free(key);
   DeleteCClient(client);
 }

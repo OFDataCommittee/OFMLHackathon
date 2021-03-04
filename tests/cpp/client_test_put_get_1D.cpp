@@ -18,10 +18,8 @@ void put_get_1D_array(
 
   fill_array(array, dims[0]);
 
-  int rank = 0;
-
-  std::string key = "1D_tensor_test_rank_" +
-                    std::to_string(rank) + key_suffix;
+  std::string key = "1D_tensor_test" +
+                     key_suffix;
 
   /*
   for(int i = 0; i < dims[0]; i++) {

@@ -118,12 +118,3 @@ target_link_libraries(silc_put_get_unpack_dataset
 	MPI::MPI_Fortran
 	${CLIENT_LIBRARIES}
 )
-
-add_executable(silc_misc_tensor
-	silc_misc_tensor.F90
-	${CLIENT_SRC}
-)
-target_link_libraries(silc_misc_tensor
-	MPI::MPI_Fortran
-	${CLIENT_LIBRARIES}
-)

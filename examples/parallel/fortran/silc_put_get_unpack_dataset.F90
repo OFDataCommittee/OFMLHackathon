@@ -4,7 +4,7 @@ program main
   use iso_c_binding
   use silc_client, only : client_type
   use silc_dataset, only : dataset_type
-  use example_utils
+  use example_utils, only : use_cluster, irand
 
   implicit none
 
@@ -37,7 +37,7 @@ program main
   call MPI_comm_rank( MPI_COMM_WORLD, pe_id, err_code)
   write(key_prefix, "(A,I6.6)") "pe_",pe_id
 
-  call client%initialize(.true.)
+  call client%initialize(use_cluster())
 
   call random_number(true_array_real_32)
   call random_number(true_array_real_64)
@@ -83,6 +83,6 @@ program main
   if (.not. all(true_array_integer_64 == recv_array_integer_64)) stop 'true_array_integer_64: FAILED'
 
   call MPI_finalize(err_code)
-  print *, "SILC Fortran MPI put/get/unpack dataset example finished without errorrs."
+  if (pe_id==0) print *, "SILC Fortran MPI put/get/unpack dataset example finished without errorrs."
 
 end program

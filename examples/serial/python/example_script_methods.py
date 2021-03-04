@@ -13,7 +13,7 @@ file_path = osp.dirname(osp.abspath(__file__))
 def example_run_script():
     data = np.array([[1, 2, 3, 4, 5]])
 
-    c = Client(None, CLUSTER, False)
+    c = Client(None, CLUSTER)
     c.put_tensor("script-test-data", data)
     c.set_function("one-to-one", one_to_one)
     c.run_script("one-to-one", "one_to_one", ["script-test-data"], ["script-test-out"])
@@ -25,7 +25,7 @@ def example_run_script_multi():
     data = np.array([[1, 2, 3, 4]])
     data_2 = np.array([[5, 6, 7, 8]])
 
-    c = Client(None, CLUSTER, False)
+    c = Client(None, CLUSTER)
     c.put_tensor("srpt-multi-out-data-1", data)
     c.put_tensor("srpt-multi-out-data-2", data_2)
     c.set_function("two-to-one", two_to_one)

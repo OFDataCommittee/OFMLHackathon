@@ -24,11 +24,8 @@ void put_get_3D_array(
 
   fill_array(array, dims[0]*dims[1]*dims[2]);
 
-  int rank = 0;
-  //MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-  std::string key = "3d_tensor_contig_test_rank_" +
-                    std::to_string(rank) + key_suffix;
+  std::string key = "3d_tensor_contig_test" +
+                    key_suffix;
 
   /*
   int c=0;

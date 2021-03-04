@@ -5,17 +5,6 @@
 #include <string.h>
 #include <stdint.h>
 
-void test_result(int result, char *test){
-    if (result) {
-        fprintf(stdout, "SUCCESS: %c", *test);
-        return;
-    }
-    else {
-        fprintf(stderr, "FAILED: %c", *test);
-        exit(-1);
-    }
-}
-
 void to_lower(char* s) {
     /* This will turn each character in the
     c-str into the lowercase value.
