@@ -18,7 +18,7 @@ void put_unpack_1D_tensor(void* tensor, size_t* dims, size_t n_dims,
   the type is not known.
   */
 
-  void* client = SmartSimCClient(true);
+  void* client = SmartSimCClient(use_cluster());
 
   char* prefix_str = "1D_tensor_test_rank_";
   char* rank_str = malloc(2*sizeof(char));

@@ -16,6 +16,22 @@ void test_result(int result, char *test){
     }
 }
 
+bool use_cluster()
+{
+    /* This function determines if a cluster
+    configuration should be used in the test
+    when creating a Client.
+    */
+    char* silc_test_cluster = std::getenv("SILC_TEST_CLUSTER");
+    to_lower(silc_test_cluster);
+
+    if(silc_test_cluster) {
+        if(std::strcmp(silc_test_cluster, "true")==0)
+            return true;
+    }
+    return false;
+}
+
 unsigned safe_rand(){
     unsigned random = (rand() % 254) + 1;
     return random;

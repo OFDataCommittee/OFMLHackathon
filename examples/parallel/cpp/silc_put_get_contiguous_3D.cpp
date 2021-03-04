@@ -11,7 +11,7 @@ void put_get_3D_array(
         SILC::TensorType type,
         std::string key_suffix="")
 {
-  SILC::Client client(true);
+  SILC::Client client(use_client());
 
   //Allocate and fill arrays
   T_send* array =
