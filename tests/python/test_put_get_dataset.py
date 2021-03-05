@@ -3,10 +3,8 @@ import time
 import numpy as np
 
 from silc import Client, Dataset
-import get_cluster_env
 
-CLUSTER = get_cluster_env.cluster()
-
+from utils import use_cluster
 
 def test_put_get_dataset(mock_data):
     """test sending and recieving a dataset with 2D tensors
@@ -21,7 +19,7 @@ def test_put_get_dataset(mock_data):
         key = f"tensor_{str(index)}"
         dataset.add_tensor(key, tensor)
 
-    client = Client(None, CLUSTER)
+    client = Client(None, use_cluster())
 
     client.put_dataset(dataset)
 

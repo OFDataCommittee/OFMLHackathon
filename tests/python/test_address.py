@@ -1,9 +1,8 @@
 import os
 
 from silc import Client
-import get_cluster_env
 
-CLUSTER = get_cluster_env.cluster()
+from utils import use_cluster
 
 def test_address():
     # get env var to set through client init
@@ -11,7 +10,7 @@ def test_address():
     del os.environ["SSDB"]
 
     # client init should fail if SSDB not set
-    c = Client(address=ssdb, cluster=CLUSTER)
+    c = Client(address=ssdb, cluster=use_cluster())
 
     # check if SSDB was set anyway
     assert os.environ["SSDB"] == ssdb

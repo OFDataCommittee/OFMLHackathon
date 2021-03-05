@@ -4,9 +4,7 @@ import numpy as np
 
 from silc import Client, Dataset
 
-from utils import MockData
-
-CLUSTER = True
+from utils import MockData, use_cluster
 
 
 def example_put_get_dataset(mock_data):
@@ -22,7 +20,7 @@ def example_put_get_dataset(mock_data):
         key = f"tensor_{str(index)}"
         dataset.add_tensor(key, tensor)
 
-    client = Client(None, CLUSTER)
+    client = Client(None, use_cluster())
 
     client.put_dataset(dataset)
 

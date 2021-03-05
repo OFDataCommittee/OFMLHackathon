@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import io
+import os
 
 dtypes = [
     np.float64,
@@ -64,3 +65,14 @@ class MockModel:
             torch.jit.save(module, buffer)
             str_model = buffer.getvalue()
             return str_model
+
+
+def use_cluster():
+    """Return True if SILC_TEST_CLUSTER environment variable
+    is set to `true`.
+
+    :returns: True if SILC_TEST_CLUSTER env variable is set to `true`.
+    :rtype: bool
+    """
+
+    return os.getenv("SILC_TEST_CLUSTER", "").lower() == 'true'
