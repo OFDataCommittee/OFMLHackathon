@@ -115,6 +115,7 @@ if __name__ == "__main__":
     parser.add_argument('--nodes', type=str)
     parser.add_argument('--port', type=int, default=6379)
     parser.add_argument('--dpn', type=int, default=1)
+    # node string paraqmeters
     parser.add_argument('--node-prefix', type=str, default='nid')
     parser.add_argument('--node-pad', type=int, default=5)
     args = parser.parse_args()
