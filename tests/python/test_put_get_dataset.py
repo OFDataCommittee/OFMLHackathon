@@ -4,9 +4,8 @@ import numpy as np
 
 from silc import Client, Dataset
 
-from utils import use_cluster
 
-def test_put_get_dataset(mock_data):
+def test_put_get_dataset(mock_data, use_cluster):
     """test sending and recieving a dataset with 2D tensors
     of every datatype
     """
@@ -19,7 +18,7 @@ def test_put_get_dataset(mock_data):
         key = f"tensor_{str(index)}"
         dataset.add_tensor(key, tensor)
 
-    client = Client(None, use_cluster())
+    client = Client(None, use_cluster)
 
     client.put_dataset(dataset)
 

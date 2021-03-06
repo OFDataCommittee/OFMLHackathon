@@ -4,20 +4,19 @@ import torch
 
 from silc import Client
 
-from utils import use_cluster
 
-def test_set_model(mock_model):
+def test_set_model(mock_model, use_cluster):
     model = mock_model.create_torch_cnn()
-    c = Client(None, use_cluster())
+    c = Client(None, use_cluster)
     c.set_model("simple_cnn", model, "TORCH", "CPU")
     returned_model = c.get_model("simple_cnn")
     assert model == returned_model
 
 
-def test_set_model_from_file(mock_model):
+def test_set_model_from_file(mock_model, use_cluster):
     try:
         mock_model.create_torch_cnn(filepath="./torch_cnn.pt")
-        c = Client(None, use_cluster())
+        c = Client(None, use_cluster)
         c.set_model_from_file("file_cnn", "./torch_cnn.pt", "TORCH", "CPU")
         returned_model = c.get_model("file_cnn")
         with open("./torch_cnn.pt", "rb") as f:
@@ -27,10 +26,10 @@ def test_set_model_from_file(mock_model):
         os.remove("torch_cnn.pt")
 
 
-def test_torch_inference(mock_model):
+def test_torch_inference(mock_model, use_cluster):
     # get model and set into database
     model = mock_model.create_torch_cnn()
-    c = Client(None, use_cluster())
+    c = Client(None, use_cluster)
     c.set_model("torch_cnn", model, "TORCH")
 
     # setup input tensor

@@ -2,33 +2,32 @@ import numpy as np
 
 from silc import Client
 
-from utils import use_cluster()
 
 # ----- Tests -----------------------------------------------------------
 
 
-def test_1D_put_get(mock_data):
+def test_1D_put_get(mock_data, use_cluster):
     """Test put/get_tensor for 1D numpy arrays"""
 
-    client = Client(None, use_cluster())
+    client = Client(None, use_cluster)
 
     data = mock_data.create_data(10)
     send_get_arrays(client, data)
 
 
-def test_2D_put_get(mock_data):
+def test_2D_put_get(mock_data, use_cluster):
     """Test put/get_tensor for 2D numpy arrays"""
 
-    client = Client(None, use_cluster())
+    client = Client(None, use_cluster)
 
     data = mock_data.create_data((10, 10))
     send_get_arrays(client, data)
 
 
-def test_3D_put_get(mock_data):
+def test_3D_put_get(mock_data, use_cluster):
     """Test put/get_tensor for 3D numpy arrays"""
 
-    client = Client(None, use_cluster())
+    client = Client(None, use_cluster)
 
     data = mock_data.create_data((10, 10, 10))
     send_get_arrays(client, data)

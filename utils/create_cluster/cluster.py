@@ -99,11 +99,11 @@ def create_node_string(nodes):
         end = int(split[1]) + 1
         for node_num in range(start, end):
             if node_num > 99:
-                node_string += "nid00" + str(node_num) + ","
+                node_string += "prod-0" + str(node_num) + ","
             elif node_num < 10:
-                node_string += "nid0000" + str(node_num) + ","
+                node_string += "prod-000" + str(node_num) + ","
             else:
-                node_string += "nid000" + str(node_num) + ","
+                node_string += "prod-00" + str(node_num) + ","
     return node_string.strip(",")
 
 if __name__ == "__main__":

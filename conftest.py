@@ -16,18 +16,10 @@ dtypes = [
     np.uint16,
 ]
 
-@pytest.fixture
-def cluster_env():
-    return Cluster
 
 @pytest.fixture
 def use_cluster():
     return os.getenv('SILC_TEST_CLUSTER').lower() == 'true'
-
-class Cluster:
-    @staticmethod
-    def use_cluster():
-        return os.getenv('SILC_TEST_CLUSTER').lower() == 'true'
 
 @pytest.fixture
 def mock_data():
