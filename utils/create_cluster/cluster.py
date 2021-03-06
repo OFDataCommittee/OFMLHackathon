@@ -90,7 +90,7 @@ def ping_host(hostname):
         output, errs = proc.communicate()
 
 
-def create_node_string(nodes):
+def create_node_string(nodes, node_prefix, node_pad):
     """'30-40, 80-90'"""
     node_string = ""
     for nodepair in nodes.split(","):
@@ -98,12 +98,13 @@ def create_node_string(nodes):
         start = int(split[0])
         end = int(split[1]) + 1
         for node_num in range(start, end):
-            if node_num > 99:
-                node_string += "prod-0" + str(node_num) + ","
-            elif node_num < 10:
-                node_string += "prod-000" + str(node_num) + ","
-            else:
-                node_string += "prod-00" + str(node_num) + ","
+            node_string += node_prefix + str(node_num).zfill(node_pad) + ','
+            #if node_num > 99:
+            #    node_string += "nid00" + str(node_num) + ","
+            #elif node_num < 10:
+            #    node_string += "nid0000" + str(node_num) + ","
+            #else:
+            #    node_string += "nid000" + str(node_num) + ","
     return node_string.strip(",")
 
 if __name__ == "__main__":
@@ -114,9 +115,11 @@ if __name__ == "__main__":
     parser.add_argument('--nodes', type=str)
     parser.add_argument('--port', type=int, default=6379)
     parser.add_argument('--dpn', type=int, default=1)
+    parser.add_argument('--node-prefix', type=str, default='nid')
+    parser.add_argument('--node-pad', type=int, default=5)
     args = parser.parse_args()
 
-    nodes = create_node_string(args.nodes)
+    nodes = create_node_string(args.nodes, args.node_prefix, args.node_pad)
     for node in nodes.split(","):
         pid = launch_db(node, args.port, args.dpn)
     time.sleep(5)
