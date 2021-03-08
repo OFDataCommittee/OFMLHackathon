@@ -252,7 +252,7 @@ class PyClient
 
         /*!
          * \brief Set whether tensor keys should be prefixed
-         *        e.g. in an ensemble. Prefixes will only be
+         *        (e.g. in an ensemble). Prefixes will only be
          *        used if they were previously set through
          *        environment variables SSKEYIN and SSKEYOUT.
          *        By default, the client prefixes tensor keys
@@ -267,7 +267,7 @@ class PyClient
        
         /*!
          * \brief Set whether model and script keys should be prefixed
-         *        e.g. in an ensemble. Prefixes will only be
+         *        (e.g. in an ensemble). Prefixes will only be
          *        used if they were previously set through
          *        environment variables SSKEYIN and SSKEYOUT.
          *        By default, the client does not prefix model keys.
@@ -281,7 +281,7 @@ class PyClient
 
         /*!
          * \brief Set whether dataset keys should be prefixed
-         *        e.g. in an ensemble. Prefixes will only be
+         *        (e.g. in an ensemble). Prefixes will only be
          *        used if they were previously set through
          *        environment variables SSKEYIN and SSKEYOUT.
          *        By default, the client does not prefix dataset keys.

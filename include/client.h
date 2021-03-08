@@ -107,7 +107,7 @@ class Client
         *                    store the copied database.
         */
         void copy_dataset(const std::string& src_name,
-                        const std::string& dest_name);
+                          const std::string& dest_name);
 
 
         /*!
@@ -134,8 +134,7 @@ class Client
                         void* data,
                         const std::vector<size_t>& dims,
                         const TensorType type,
-                        const MemoryLayout mem_layout
-                        );
+                        const MemoryLayout mem_layout);
 
         /*!
         *   \brief Get the tensor data, dimensions,
@@ -170,8 +169,7 @@ class Client
                         void*& data,
                         std::vector<size_t>& dims,
                         TensorType& type,
-                        const MemoryLayout mem_layout
-                        );
+                        const MemoryLayout mem_layout);
 
 
         /*!
@@ -213,8 +211,7 @@ class Client
                         size_t*& dims,
                         size_t& n_dims,
                         TensorType& type,
-                        const MemoryLayout mem_layout
-                        );
+                        const MemoryLayout mem_layout);
 
         /*!
         *   \brief Get tensor data and fill an already allocated
@@ -234,11 +231,10 @@ class Client
         *               memory space.
         */
         void unpack_tensor(const std::string& key,
-                        void* data,
-                        const std::vector<size_t>& dims,
-                        const TensorType type,
-                        const MemoryLayout mem_layout
-                        );
+                           void* data,
+                           const std::vector<size_t>& dims,
+                           const TensorType type,
+                           const MemoryLayout mem_layout);
 
         /*!
         *   \brief Move a tensor from one key to another key
@@ -246,7 +242,7 @@ class Client
         *   \param new_key The new tensor key
         */
         void rename_tensor(const std::string& key,
-                        const std::string& new_key);
+                           const std::string& new_key);
 
         /*!
         *   \brief Delete a tensor from the database
@@ -261,7 +257,7 @@ class Client
         *   \param dest_key The destination key of the tensor
         */
         void copy_tensor(const std::string& src_key,
-                        const std::string& dest_key);
+                         const std::string& dest_key);
 
         /*!
         *   \brief Set a model from file in the
@@ -283,16 +279,16 @@ class Client
         *                 (TF models only)
         */
         void set_model_from_file(const std::string& key,
-                                const std::string& model_file,
-                                const std::string& backend,
-                                const std::string& device,
-                                int batch_size = 0,
-                                int min_batch_size = 0,
-                                const std::string& tag = "",
-                                const std::vector<std::string>& inputs
-                                    = std::vector<std::string>(),
-                                const std::vector<std::string>& outputs
-                                    = std::vector<std::string>());
+                                 const std::string& model_file,
+                                 const std::string& backend,
+                                 const std::string& device,
+                                 int batch_size = 0,
+                                 int min_batch_size = 0,
+                                 const std::string& tag = "",
+                                 const std::vector<std::string>& inputs
+                                     = std::vector<std::string>(),
+                                 const std::vector<std::string>& outputs
+                                     = std::vector<std::string>());
 
         /*!
         *   \brief Set a model from std::string_view buffer in the
@@ -314,16 +310,16 @@ class Client
         *                 (TF models only)
         */
         void set_model(const std::string& key,
-                        const std::string_view& model,
-                        const std::string& backend,
-                        const std::string& device,
-                        int batch_size = 0,
-                        int min_batch_size = 0,
-                        const std::string& tag = "",
-                        const std::vector<std::string>& inputs
-                        = std::vector<std::string>(),
-                        const std::vector<std::string>& outputs
-                        = std::vector<std::string>());
+                       const std::string_view& model,
+                       const std::string& backend,
+                       const std::string& device,
+                       int batch_size = 0,
+                       int min_batch_size = 0,
+                       const std::string& tag = "",
+                       const std::vector<std::string>& inputs
+                           = std::vector<std::string>(),
+                       const std::vector<std::string>& outputs
+                           = std::vector<std::string>());
 
         /*!
         *   \brief Retrieve the model from the database
@@ -344,8 +340,8 @@ class Client
         *   \param script_file The source file for the script
         */
         void set_script_from_file(const std::string& key,
-                                const std::string& device,
-                                const std::string& script_file);
+                                  const std::string& device,
+                                  const std::string& script_file);
 
         /*!
         *   \brief Set a script from std::string_view buffer in the
@@ -379,8 +375,8 @@ class Client
         *                 will be used to save model results
         */
         void run_model(const std::string& key,
-                        std::vector<std::string> inputs,
-                        std::vector<std::string> outputs);
+                       std::vector<std::string> inputs,
+                       std::vector<std::string> outputs);
 
         /*!
         *   \brief Run a script function in the database using the
@@ -405,7 +401,7 @@ class Client
         *   \returns Returns true if the key exists in the database
         */
         bool key_exists(const std::string& key,
-                         bool use_prefix);
+                        bool use_prefix);
 
 
         /*!
@@ -425,9 +421,9 @@ class Client
         *            specified number of tries, otherwise false.
         */
         bool poll_key(const std::string& key,
-                       bool use_prefix,
-                        int poll_frequency_ms,
-                        int num_tries);
+                      bool use_prefix,
+                      int poll_frequency_ms,
+                      int num_tries);
 
 
         /*!
@@ -444,7 +440,8 @@ class Client
          *        used if they were previously set through
          *        environment variables SSKEYIN and SSKEYOUT.
          *        By default, the client prefixes tensor keys
-         *        when a prefix is available.
+         *        with the first prefix specified with the SSKEYIN
+         *        and SSKEYOUT environment variables.
          *
          * \param use_prefix If set to true, all future operations
          *                   on tensors will use a prefix, if 
@@ -455,7 +452,7 @@ class Client
        
         /*!
          * \brief Set whether model and script keys should be prefixed
-         *        e.g. in an ensemble. Prefixes will only be
+         *        (e.g. in an ensemble). Prefixes will only be
          *        used if they were previously set through
          *        environment variables SSKEYIN and SSKEYOUT.
          *        By default, the client does not prefix model keys.
@@ -469,11 +466,12 @@ class Client
 
         /*!
          * \brief Set whether dataset keys should be prefixed
-         *        e.g. in an ensemble. Prefixes will only be
+         *        (e.g. in an ensemble). Prefixes will only be
          *        used if they were previously set through
          *        environment variables SSKEYIN and SSKEYOUT.
-         *        By default, the client, does not prefix dataset
-         *        keys.
+         *        By default, the client prefixes dataset keys
+         *        with the first prefix specified with the SSKEYIN
+         *        and SSKEYOUT environment variables.
          *
          * \param use_prefix If set to true, all future operations
          *                   on datasets will use a prefix, if 

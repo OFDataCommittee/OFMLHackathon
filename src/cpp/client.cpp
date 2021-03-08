@@ -18,7 +18,7 @@ Client::Client(bool cluster)
 
     this->_use_tensor_prefix = true;
     this->_use_model_prefix = false;
-    this->_use_dataset_prefix = false;
+    this->_use_dataset_prefix = true;
 
     return;
 }
@@ -44,8 +44,9 @@ void Client::put_dataset(DataSet& dataset)
     if (this->_use_dataset_prefix)
         prefix = this->_put_prefix();
 
-    key = prefix + "{" +
-          dataset.name + "}" + ".meta";
+    key = "{" + prefix + 
+          "}.{" + dataset.name +
+          "}" + ".meta";
 
     cmd->add_field("SET");
     cmd->add_field(key, true);
@@ -57,9 +58,9 @@ void Client::put_dataset(DataSet& dataset)
     TensorBase* tensor = 0;
     while(it != it_end) {
         tensor = *it;
-        key = prefix + "{"
-            + dataset.name + "}."
-            + tensor->name();
+        key = "{" + prefix + 
+              "}.{" + dataset.name +
+              "}." + tensor->name();
         cmd = cmds.add_command();
         cmd->add_field("AI.TENSORSET");
         cmd->add_field(key, true);
@@ -82,12 +83,12 @@ DataSet Client::get_dataset(const std::string& name)
     std::string key;
     std::string prefix;
 
+    cmd.add_field("GET");
     if (this->_use_dataset_prefix)
         prefix = this->_get_prefix();
 
-    cmd.add_field("GET");
-    key  = prefix +
-           "{" + std::string(name) +
+    key  = "{" + prefix + 
+           "}.{" + std::string(name) +
            "}" + ".meta";
     cmd.add_field(key, true);
     reply =  this->_redis_server->run(cmd);
@@ -99,9 +100,9 @@ DataSet Client::get_dataset(const std::string& name)
         dataset.get_meta_strings(".tensors");
 
     for(size_t i=0; i<tensor_names.size(); i++) {
-        key = prefix +
-            "{" + dataset.name + "}."
-            + tensor_names[i];
+        key = "{" + prefix +
+              "}.{" + dataset.name + 
+              "}." + tensor_names[i];
         Command cmd;
         cmd.add_field("AI.TENSORGET");
         cmd.add_field(key, true);
@@ -153,7 +154,7 @@ void Client::put_tensor(const std::string& key,
     if (this->_use_tensor_prefix)
         prefix = this->_put_prefix();
 
-    std::string p_key = prefix + key;
+    std::string p_key = prefix + '.' + key;
 
     TensorBase* tensor;
     switch(type) {
@@ -208,7 +209,7 @@ void Client::get_tensor(const std::string& key,
         prefix = this->_get_prefix();
 
 
-    std::string g_key = prefix + key;
+    std::string g_key = prefix + '.' + key;
     CommandReply reply = this->_redis_server->get_tensor(g_key);
 
     dims = CommandReplyParser::get_tensor_dims(reply);
@@ -321,7 +322,7 @@ void Client::unpack_tensor(const std::string& key,
     if (this->_use_tensor_prefix)
         prefix = this->_get_prefix();
 
-    std::string g_key = prefix + key;
+    std::string g_key = prefix + '.' + key;
     CommandReply reply = this->_redis_server->get_tensor(g_key);
 
     std::vector<size_t> reply_dims =
@@ -565,10 +566,11 @@ void Client::run_model(const std::string& key,
     if (this->_use_model_prefix)
         model_prefix = this->_get_prefix();
 
-    if (this->_use_tensor_prefix)
+    if (this->_use_tensor_prefix) {
         this->_append_with_get_prefix(inputs);
         this->_append_with_put_prefix(outputs);
-    this->_redis_server->run_model(model_prefix+key, inputs, outputs);
+    }
+    this->_redis_server->run_model(model_prefix+'.'+key, inputs, outputs);
     return;
 }
 
@@ -581,10 +583,11 @@ void Client::run_script(const std::string& key,
     if (this->_use_model_prefix)
         script_prefix = this->_get_prefix();
 
-    if (this->_use_tensor_prefix)
+    if (this->_use_tensor_prefix) {
         this->_append_with_get_prefix(inputs);
         this->_append_with_put_prefix(outputs);
-    this->_redis_server->run_script(script_prefix+key, function, inputs, outputs);
+    }
+    this->_redis_server->run_script(script_prefix+'.'+key, function, inputs, outputs);
     return;
 }
 
@@ -593,7 +596,7 @@ bool Client::key_exists(const std::string& key, bool use_prefix)
     std::string prefix;
     if (use_prefix)
       prefix = this->_get_prefix();
-    std::string g_key = prefix + key;
+    std::string g_key = prefix + '.' + key;
     return this->_redis_server->key_exists(g_key);
 }
 
@@ -690,7 +693,7 @@ inline std::string Client::_put_prefix()
 {
     std::string prefix;
     if(this->_put_key_prefix.size()>0)
-        prefix =  this->_put_key_prefix + ".";
+        prefix =  this->_put_key_prefix;
     return prefix;
 }
 
@@ -698,8 +701,52 @@ inline std::string Client::_get_prefix()
 {
     std::string prefix;
     if(this->_get_key_prefix.size()>0)
-        prefix =  this->_get_key_prefix + ".";
+        prefix =  this->_get_key_prefix;
     return prefix;
+}
+
+inline std::string Client::_build_tensor_full_key(const std::string& key)
+{
+    std::string prefix;
+    if (this->_use_tensor_prefix)
+        prefix = this->_get_prefix();
+
+    return  prefix + '.' + key;
+}
+
+inline std::string Client::_build_model_full_key(const std::string& key)
+{
+    std::string prefix;
+    if (this->_use_model_prefix)
+        prefix = this->_get_prefix();
+
+    return  prefix + '.' + key;
+}
+
+inline std::string Client::_build_dataset_meta_full_key(const std::string& dataset_name)
+{
+    if (this->_use_dataset_prefix)
+        prefix = this->_get_prefix();
+
+    key  = "{" + prefix + 
+           "}.{" + std::string(name) +
+           "}" + ".meta";
+
+    return key;
+}
+
+inline std::string Client::_build_dataset_tensor_full_key(const std::string& dataset_name,
+                                                          const std::string& tensor_name)
+
+{
+    if (this->_use_dataset_prefix)
+        prefix = this->_get_prefix();
+
+    key = "{" + prefix +
+      "}.{" + dataset_name + 
+      "}." + tensor_name;
+
+    return key;
 }
 
 inline void Client::_append_with_get_prefix(
@@ -710,7 +757,7 @@ inline void Client::_append_with_get_prefix(
     prefix_it = keys.begin();
     prefix_it_end = keys.end();
     while(prefix_it != prefix_it_end) {
-        *prefix_it = this->_get_prefix() + *prefix_it;
+        *prefix_it = this->_get_prefix() + '.' + *prefix_it;
         prefix_it++;
     }
     return;
@@ -724,7 +771,7 @@ inline void Client::_append_with_put_prefix(
     prefix_it = keys.begin();
     prefix_it_end = keys.end();
     while(prefix_it != prefix_it_end) {
-        *prefix_it = this->_put_prefix() + *prefix_it;
+        *prefix_it = this->_put_prefix() + '.' + *prefix_it;
         prefix_it++;
     }
     return;
