@@ -181,6 +181,13 @@ class MetaData
         std::string_view get_metadata_buf();
 
         /*!
+        *   \brief This function clears all entries in a
+        *          DataSet field.
+        *   \param field_name The name of the field to clear
+        */
+        void clear_field(const std::string& field_name);
+
+        /*!
         *   \typedef The Protobuf message holding string fields
         */
         typedef spb::RepeatedStringMeta StringMsg;

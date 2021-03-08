@@ -23,7 +23,7 @@ void DataSet::add_tensor(const std::string& name,
 {
     this->_add_to_tensorpack(name, data, dims,
                              type, mem_layout);
-    this->_metadata.add_string(".tensors", name);
+    this->_metadata.add_string(".tensor_names", name);
     return;
 }
 
@@ -120,6 +120,16 @@ void DataSet::get_meta_strings(const std::string& name,
     this->_metadata.get_string_values(name, data,
                                       n_strings, lengths);
     return;
+}
+
+void DataSet::clear_field(const std::string& field_name)
+{
+    this->_metadata.clear_field(field_name);
+}
+
+std::vector<std::string> DataSet::get_tensor_names()
+{
+    return this->_metadata.get_string_values(".tensor_names");
 }
 
 std::vector<std::string> DataSet::get_meta_strings(const std::string& name)

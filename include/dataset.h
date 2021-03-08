@@ -281,11 +281,24 @@ class DataSet
         *                  memory space that contains the length
         *                  of each field string
         */
-        //! Get metadata string field from the DataSet using c-style interface
         void get_meta_strings(const std::string& name,
                               char**& data,
                               size_t& n_strings,
                               size_t*& lengths);
+
+        /*!
+        *   \brief This function clears all entries in a
+        *          DataSet field.
+        *   \param field_name The name of the field to clear
+        */
+        void clear_field(const std::string& field_name);
+
+        /*!
+        *   \brief Retrieve the names of the tensors in the
+        *          DataSet
+        *   \returns The name of the tensors in the DataSet
+        */
+        std::vector<std::string> get_tensor_names();
 
         /*!
         *  \brief The name of the DataSet

@@ -85,6 +85,30 @@ target_link_libraries(client_test_dataset
 	${CLIENT_LIBRARIES}
 )
 
+add_executable(client_test_delete_dataset
+	client_test_delete_dataset.cpp
+	${CLIENT_SRC}
+)
+target_link_libraries(client_test_delete_dataset
+	${CLIENT_LIBRARIES}
+)
+
+add_executable(client_test_rename_dataset
+	client_test_rename_dataset.cpp
+	${CLIENT_SRC}
+)
+target_link_libraries(client_test_rename_dataset
+	${CLIENT_LIBRARIES}
+)
+
+add_executable(client_test_copy_dataset
+	client_test_copy_dataset.cpp
+	${CLIENT_SRC}
+)
+target_link_libraries(client_test_copy_dataset
+	${CLIENT_LIBRARIES}
+)
+
 add_executable(client_test_dataset_copy_constructor
 	client_test_dataset_copy_constructor.cpp
 	${CLIENT_SRC}

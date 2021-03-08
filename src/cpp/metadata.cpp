@@ -212,6 +212,13 @@ std::string_view MetaData::get_metadata_buf()
     return std::string_view(this->_buf.c_str(), this->_buf.length());
 }
 
+void MetaData::clear_field(const std::string& field_name)
+{
+    if(this->_field_exists(field_name))
+        this->_meta_msg_map[field_name]->Clear();
+    return;
+}
+
 void MetaData::_unpack_metadata(const std::string& field_name)
 {
     gpb::Message* top_msg = &(this->_pb_metadata_msg);
