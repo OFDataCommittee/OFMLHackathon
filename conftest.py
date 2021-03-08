@@ -19,7 +19,7 @@ dtypes = [
 
 @pytest.fixture
 def use_cluster():
-    return os.getenv('SILC_TEST_CLUSTER').lower() == 'true'
+    return os.getenv('SILC_TEST_CLUSTER', "").lower() == 'true'
 
 @pytest.fixture
 def mock_data():

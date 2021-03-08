@@ -98,7 +98,7 @@ def create_node_string(nodes, node_prefix, node_pad):
         start = int(split[0])
         end = int(split[1]) + 1
         for node_num in range(start, end):
-            node_string += node_prefix + str(node_num).zfill(node_pad) + ','
+            node_string += node_prefix + f'{node_num:0{node_pad}}' + ','
             #if node_num > 99:
             #    node_string += "nid00" + str(node_num) + ","
             #elif node_num < 10:
