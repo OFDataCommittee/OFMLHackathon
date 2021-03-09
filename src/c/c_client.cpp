@@ -434,19 +434,39 @@ void run_model(void* c_client,
 
 extern "C"
 bool key_exists(void* c_client, const char* key,
-                const size_t key_length, bool use_prefix)
+                const size_t key_length)
 {
   Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
-  return s->key_exists(key_str, use_prefix);
+  return s->key_exists(key_str);
+}
+
+extern "C"
+bool entity_exists(void* c_client, const char* name,
+                const size_t name_length, CEntityType type)
+{
+  Client* s = (Client *)c_client;
+  std::string name_str = std::string(name, name_length);
+  return s->entity_exists(name_str, convert_entity_type(type));
 }
 
 extern "C"
 bool poll_key(void* c_client,
-              const char* key, const size_t key_length, bool use_prefix,
+              const char* key, const size_t key_length,
               const int poll_frequency_ms, const int num_tries)
 {
   Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
-  return s->poll_key(key_str, use_prefix, poll_frequency_ms, num_tries);
+  return s->poll_key(key_str, poll_frequency_ms, num_tries);
+}
+
+extern "C"
+bool poll_entity(void* c_client,
+                 const char* name, const size_t name_length, CEntityType type,
+                 const int poll_frequency_ms, const int num_tries)
+{
+  Client* s = (Client *)c_client;
+  std::string name_str = std::string(name, name_length);
+  return s->poll_entity(name_str, convert_entity_type(type),
+                        poll_frequency_ms, num_tries);
 }

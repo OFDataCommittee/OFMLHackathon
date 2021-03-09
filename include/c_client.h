@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include "client.h"
 #include "enums/c_memory_layout.h"
+#include "enums/c_entity_type.h"
 #include "enums/c_tensor_type.h"
 
 #ifdef __cplusplus
@@ -511,8 +512,27 @@ void run_model(void* c_client,
 */
 bool key_exists(void* c_client,
                 const char* key,
-                const size_t key_length,
-                bool use_prefix);
+                const size_t key_length);
+
+/*!
+*   \brief Check if the entity exists in the database
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param name The name of the entity that will be checked 
+*               in the database. The full key associated to
+*               \p name will formed according to the
+*               prefixing behavior for the entity type \p type
+*   \param name_length The length of the name c-string,
+*                     excluding null terminating character
+*   \param type The type of the entity associated to
+*               \p name. Used to determine the full
+*               database key.
+*   \returns Returns true if the key exists in the database
+*/
+bool entity_exists(void* c_client,
+                   const char* key,
+                   const size_t key_length,
+                   CEntityType type);
 
 /*!
 *   \brief Check if the key exists in the database at a
@@ -523,8 +543,6 @@ bool key_exists(void* c_client,
 *   \param key The key that will be checked in the database
 *   \param key_length The length of the key c-string,
 *                     excluding null terminating character
-*   \param use_prefix Whether the key should be prefixed with
-*                     the client's data source prefix.
 *   \param poll_frequency_ms The frequency of checks for the
 *                            key in milliseconds
 *   \param num_tries The total number of times to check for
@@ -537,9 +555,39 @@ bool key_exists(void* c_client,
 bool poll_key(void* c_client,
               const char* key,
               const size_t key_length,
-              const bool use_prefix,
               const int poll_frequency_ms,
               const int num_tries);
+
+/*!
+*   \brief Check if the entity exists in the database at a
+*          specified frequency for a specified number
+*          of times
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param name The name of the entity that will be checked 
+*               in the database. The full key associated to
+*               \p name will formed according to the
+*               prefixing behavior for the entity type \p type
+*   \param name_length The length of the name c-string,
+*                     excluding null terminating character
+*   \param type The type of the entity associated to
+*               \p name. Used to determine the full
+*               database key.
+*   \param poll_frequency_ms The frequency of checks for the
+*                            key in milliseconds
+*   \param num_tries The total number of times to check for
+*                    the specified number of keys.  If the
+*                    value is set to -1, the key will be
+*                    polled indefinitely.
+*   \returns Returns true if the key is found within the
+*            specified number of tries, otherwise false.
+*/
+bool poll_entity(void* c_client,
+                 const char* name,
+                 const size_t name_length,
+                 const CEntityType type,
+                 const int poll_frequency_ms,
+                 const int num_tries);
 
 #ifdef __cplusplus
 }

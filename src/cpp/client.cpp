@@ -36,17 +36,11 @@ void Client::put_dataset(DataSet& dataset)
     CommandList cmds;
     Command* cmd;
 
-    std::string prefix, key;
 
     // Send the metadata message
     cmd = cmds.add_command();
 
-    if (this->_use_dataset_prefix)
-        prefix = this->_put_prefix();
-
-    key = "{" + prefix + 
-          "}.{" + dataset.name +
-          "}" + ".meta";
+    std::string key = this->build_dataset_meta_key(dataset.name, false);
 
     cmd->add_field("SET");
     cmd->add_field(key, true);
@@ -58,9 +52,8 @@ void Client::put_dataset(DataSet& dataset)
     TensorBase* tensor = 0;
     while(it != it_end) {
         tensor = *it;
-        key = "{" + prefix + 
-              "}.{" + dataset.name +
-              "}." + tensor->name();
+        key = this->build_dataset_tensor_key(dataset.name,
+                                             tensor->name(), false);
         cmd = cmds.add_command();
         cmd->add_field("AI.TENSORSET");
         cmd->add_field(key, true);
@@ -80,16 +73,9 @@ DataSet Client::get_dataset(const std::string& name)
     CommandReply reply;
     Command cmd;
 
-    std::string key;
-    std::string prefix;
+    std::string key = this->build_dataset_meta_key(name, true);
 
-    cmd.add_field("GET");
-    if (this->_use_dataset_prefix)
-        prefix = this->_get_prefix();
-
-    key  = "{" + prefix + 
-           "}.{" + std::string(name) +
-           "}" + ".meta";
+    cmd.add_field ("GET");
     cmd.add_field(key, true);
     reply =  this->_redis_server->run(cmd);
 
@@ -100,9 +86,9 @@ DataSet Client::get_dataset(const std::string& name)
         dataset.get_meta_strings(".tensors");
 
     for(size_t i=0; i<tensor_names.size(); i++) {
-        key = "{" + prefix +
-              "}.{" + dataset.name + 
-              "}." + tensor_names[i];
+        key = this->build_dataset_tensor_key(dataset.name,
+                                             tensor_names[i], 
+                                             true);
         Command cmd;
         cmd.add_field("AI.TENSORGET");
         cmd.add_field(key, true);
@@ -150,11 +136,7 @@ void Client::put_tensor(const std::string& key,
                         const TensorType type,
                         const MemoryLayout mem_layout)
 {
-    std::string prefix;
-    if (this->_use_tensor_prefix)
-        prefix = this->_put_prefix();
-
-    std::string p_key = prefix + '.' + key;
+    std::string p_key = this->build_tensor_key(key, false);
 
     TensorBase* tensor;
     switch(type) {
@@ -204,12 +186,7 @@ void Client::get_tensor(const std::string& key,
                         const MemoryLayout mem_layout)
 {
 
-    std::string prefix;
-    if (this->_use_tensor_prefix)
-        prefix = this->_get_prefix();
-
-
-    std::string g_key = prefix + '.' + key;
+    std::string g_key = this->build_tensor_key(key, true);
     CommandReply reply = this->_redis_server->get_tensor(g_key);
 
     dims = CommandReplyParser::get_tensor_dims(reply);
@@ -268,7 +245,7 @@ void Client::get_tensor(const std::string& key,
             break;
         default :
             throw std::runtime_error("The tensor could not be "\
-                                    "retrieved in client.get_tensor().");
+                                     "retrieved in client.get_tensor().");
             break;
     }
     this->_tensor_memory.add_tensor(ptr);
@@ -318,11 +295,7 @@ void Client::unpack_tensor(const std::string& key,
                                 "layout is contiguous.");
         }
 
-    std::string prefix;
-    if (this->_use_tensor_prefix)
-        prefix = this->_get_prefix();
-
-    std::string g_key = prefix + '.' + key;
+    std::string g_key = this->build_tensor_key(key, true);
     CommandReply reply = this->_redis_server->get_tensor(g_key);
 
     std::vector<size_t> reply_dims =
@@ -507,7 +480,8 @@ void Client::set_model(const std::string& key,
                                  " is not a valid backend.");
     }
 
-    this->_redis_server->set_model(key, model, backend, device,
+    std::string p_key = this->build_model_key(key, false);
+    this->_redis_server->set_model(p_key, model, backend, device,
                                    batch_size, min_batch_size,
                                    tag, inputs, outputs);
 
@@ -516,7 +490,8 @@ void Client::set_model(const std::string& key,
 
 std::string_view Client::get_model(const std::string& key)
 {
-    CommandReply reply = this->_redis_server->get_model(key);
+    std::string g_key = this->build_model_key(key, true);
+    CommandReply reply = this->_redis_server->get_model(g_key);
     char* model = this->_model_queries.allocate(reply.str_len());
     std::memcpy(model, reply.str(), reply.str_len());
     return std::string_view(model, reply.str_len());
@@ -542,17 +517,15 @@ void Client::set_script(const std::string& key,
                         const std::string& device,
                         const std::string_view& script)
 {
-    this->_redis_server->set_script(key, device, script);
+    std::string s_key = this->build_model_key(key, false);
+    this->_redis_server->set_script(s_key, device, script);
     return;
 }
 
 std::string_view Client::get_script(const std::string& key)
 {
-    std::string prefix; 
-    if (this->_use_model_prefix)
-        prefix = this->_get_prefix();
-
-    CommandReply reply = this->_redis_server->get_script(prefix+key);
+    std::string g_key = this->build_model_key(key, true);
+    CommandReply reply = this->_redis_server->get_script(g_key);
     char* script = this->_model_queries.allocate(reply.str_len());
     std::memcpy(script, reply.str(), reply.str_len());
     return std::string_view(script, reply.str_len());
@@ -562,15 +535,13 @@ void Client::run_model(const std::string& key,
                        std::vector<std::string> inputs,
                        std::vector<std::string> outputs)
 {
-    std::string model_prefix;
-    if (this->_use_model_prefix)
-        model_prefix = this->_get_prefix();
+    std::string g_key = this->build_model_key(key, true);
 
     if (this->_use_tensor_prefix) {
         this->_append_with_get_prefix(inputs);
         this->_append_with_put_prefix(outputs);
     }
-    this->_redis_server->run_model(model_prefix+'.'+key, inputs, outputs);
+    this->_redis_server->run_model(g_key, inputs, outputs);
     return;
 }
 
@@ -579,36 +550,74 @@ void Client::run_script(const std::string& key,
                         std::vector<std::string> inputs,
                         std::vector<std::string> outputs)
 {
-    std::string script_prefix;
-    if (this->_use_model_prefix)
-        script_prefix = this->_get_prefix();
+    std::string g_key = this->build_model_key(key, true);
 
     if (this->_use_tensor_prefix) {
         this->_append_with_get_prefix(inputs);
         this->_append_with_put_prefix(outputs);
     }
-    this->_redis_server->run_script(script_prefix+'.'+key, function, inputs, outputs);
+    this->_redis_server->run_script(g_key, function, inputs, outputs);
     return;
 }
 
-bool Client::key_exists(const std::string& key, bool use_prefix)
+bool Client::key_exists(const std::string& key)
 {
-    std::string prefix;
-    if (use_prefix)
-      prefix = this->_get_prefix();
-    std::string g_key = prefix + '.' + key;
+    return this->_redis_server->key_exists(key);
+}
+
+bool Client::entity_exists(const std::string& name, const EntityType type)
+{
+    std::string g_key;
+    switch (type)
+    {
+        case EntityType::tensor:
+            g_key = this->build_tensor_key(name, true);
+            break;
+        case EntityType::model:
+            g_key = this->build_model_key(name, true);
+            break;
+        case EntityType::dataset:
+            g_key = this->build_dataset_meta_key(name, true);
+            break;
+        default:
+            throw std::runtime_error("Unknown EntityType in "\
+                                     "client.entity_exists().");
+            break;
+    }
     return this->_redis_server->key_exists(g_key);
 }
 
 bool Client::poll_key(const std::string& key,
-                      bool use_prefix,
                       int poll_frequency_ms,
                       int num_tries)
 {
     bool key_exists = false;
 
     while(!(num_tries==0)) {
-        if(this->key_exists(key, use_prefix)) {
+        if(this->key_exists(key)) {
+        key_exists = true;
+        break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
+        if(num_tries>0)
+        num_tries--;
+    }
+
+    if(key_exists)
+        return true;
+    else
+        return false;
+}
+
+bool Client::poll_entity(const std::string& name,
+                         EntityType type,
+                         int poll_frequency_ms,
+                         int num_tries)
+{
+    bool key_exists = false;
+
+    while(!(num_tries==0)) {
+        if(this->entity_exists(name, type)) {
         key_exists = true;
         break;
         }
@@ -644,19 +653,23 @@ void Client::set_data_source(std::string source_id)
                     "initialization.");
 }
 
-void Client::use_tensor_ensemble_prefix(bool use_prefix)
+void Client::use_ensemble_prefix(bool use_prefix, EntityType type)
 {
-    this->_use_tensor_prefix = use_prefix;
-}
-
-void Client::use_model_ensemble_prefix(bool use_prefix)
-{
-    this->_use_model_prefix = use_prefix;
-}
-
-void Client::use_dataset_ensemble_prefix(bool use_prefix)
-{
-    this->_use_dataset_prefix = use_prefix;
+    switch (type) {
+        case EntityType::tensor:
+            this->_use_tensor_prefix = use_prefix;
+            break;
+        case EntityType::model:
+            this->_use_model_prefix = use_prefix;
+            break;
+        case EntityType::dataset:
+            this->_use_dataset_prefix = use_prefix;
+            break;
+        default:
+            throw std::runtime_error("Unknown EntityType in "\
+                                     "client.use_ensemble_prefix().");
+            break;
+    }
 }
 
 void Client::_set_prefixes_from_env()
@@ -705,47 +718,59 @@ inline std::string Client::_get_prefix()
     return prefix;
 }
 
-inline std::string Client::_build_tensor_full_key(const std::string& key)
+inline std::string Client::build_tensor_key(const std::string& key, bool on_db)
 {
-    std::string prefix;
-    if (this->_use_tensor_prefix)
-        prefix = this->_get_prefix();
-
-    return  prefix + '.' + key;
+    if (!this->_use_tensor_prefix) {
+      return key;
+    } else {
+        std::string prefix = on_db ? this->_get_prefix() : this->_put_prefix();
+        return  prefix + '.' + key;
+    }
 }
 
-inline std::string Client::_build_model_full_key(const std::string& key)
+inline std::string Client::build_model_key(const std::string& key, bool on_db)
 {
-    std::string prefix;
-    if (this->_use_model_prefix)
-        prefix = this->_get_prefix();
-
-    return  prefix + '.' + key;
+    if (!this->_use_model_prefix) {
+      return key;
+    } else {
+        std::string prefix = on_db ? this->_get_prefix() : this->_put_prefix();
+        return  prefix + '.' + key;
+    }
 }
 
-inline std::string Client::_build_dataset_meta_full_key(const std::string& dataset_name)
+inline std::string Client::build_dataset_meta_key(const std::string& dataset_name, bool on_db)
 {
-    if (this->_use_dataset_prefix)
-        prefix = this->_get_prefix();
+    std::string key;
+    if (this->_use_dataset_prefix) {
+        std::string prefix = on_db ? this->_get_prefix() : this->_put_prefix();
 
-    key  = "{" + prefix + 
-           "}.{" + std::string(name) +
-           "}" + ".meta";
-
+        key = "{" + prefix + 
+              "}.{" + dataset_name +
+              "}" + ".meta";
+    } else
+    {
+        key = "{" + dataset_name +
+              "}" + ".meta";
+    }
     return key;
 }
 
-inline std::string Client::_build_dataset_tensor_full_key(const std::string& dataset_name,
-                                                          const std::string& tensor_name)
+inline std::string Client::build_dataset_tensor_key(const std::string& dataset_name,
+                                                    const std::string& tensor_name,
+                                                    bool on_db)
 
 {
-    if (this->_use_dataset_prefix)
-        prefix = this->_get_prefix();
+    std::string key;
+    if (this->_use_dataset_prefix) {
+        std::string prefix = on_db ? this->_get_prefix() : this->_put_prefix();
 
-    key = "{" + prefix +
-      "}.{" + dataset_name + 
-      "}." + tensor_name;
-
+        key = "{" + prefix +
+              "}.{" + dataset_name + 
+              "}." + tensor_name;
+    } else {
+        key = "{" + dataset_name +
+              "}." + tensor_name;
+    }
     return key;
 }
 

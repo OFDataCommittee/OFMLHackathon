@@ -1,4 +1,4 @@
-//#ifndef SILC_CPP_CLIENT_H
+#ifndef SILC_CPP_CLIENT_H
 #define SILC_CPP_CLIENT_H
 #ifdef __cplusplus
 #include "string.h"
@@ -20,6 +20,7 @@
 #include "commandreplyparser.h"
 #include "tensorbase.h"
 #include "tensor.h"
+#include "enums/cpp_entity_type.h"
 #include "enums/cpp_tensor_type.h"
 #include "enums/cpp_memory_layout.h"
 
@@ -395,14 +396,23 @@ class Client
 
         /*!
         *   \brief Check if the key exists in the database
-        *   \param key The key that will be checked in the database
-        *   \param use_prefix Whether the key should be prefixed with
-        *                     the client's data source prefix.
+        *   \param key The key that will be checked in the database.
+        *              No prefix will be added to \p key.
         *   \returns Returns true if the key exists in the database
         */
-        bool key_exists(const std::string& key,
-                        bool use_prefix);
+        bool key_exists(const std::string& key);
 
+        /*!
+        *   \brief Check if the key exists in the database
+        *   \param name The name that will be checked in the database
+        *               Depending on \p type and the current prefixing
+        *               behavior, the name could be automatically prefixed 
+        *               to form the corresponding key.
+        *   \param type The type of the entity associated to \p name
+        *   \returns Returns true if the key exists in the database
+        */
+        bool entity_exists(const std::string& name,
+                           EntityType type);
 
         /*!
         *   \brief Check if the key exists in the database at a
@@ -411,8 +421,6 @@ class Client
         *   \param key The key that will be checked in the database
         *   \param poll_frequency_ms The frequency of checks for the
         *                            key in milliseconds
-        *   \param use_prefix Whether the key should be prefixed with
-        *                     the client's data source prefix.
         *   \param num_tries The total number of times to check for
         *                    the specified number of keys.  If the
         *                    value is set to -1, the key will be
@@ -421,10 +429,28 @@ class Client
         *            specified number of tries, otherwise false.
         */
         bool poll_key(const std::string& key,
-                      bool use_prefix,
                       int poll_frequency_ms,
                       int num_tries);
 
+        /*!
+        *   \brief Check if the key exists in the database at a
+        *          specified frequency for a specified number
+        *          of times
+        *   \param name The key that will be checked in the database
+        *   \param type The type of the entity associated to \p name
+        *   \param poll_frequency_ms The frequency of checks for the
+        *                            key in milliseconds
+        *   \param num_tries The total number of times to check for
+        *                    the specified number of keys.  If the
+        *                    value is set to -1, the key will be
+        *                    polled indefinitely.
+        *   \returns Returns true if the key is found within the
+        *            specified number of tries, otherwise false.
+        */
+        bool poll_entity(const std::string& name,
+                         EntityType type,
+                         int poll_frequency_ms,
+                         int num_tries);
 
         /*!
         *   \brief Set the data source (i.e. key prefix for
@@ -433,51 +459,57 @@ class Client
         */
         void set_data_source(std::string source_id);
 
-
         /*!
-         * \brief Set whether tensor keys should be prefixed
-         *        e.g. in an ensemble. Prefixes will only be
-         *        used if they were previously set through
-         *        environment variables SSKEYIN and SSKEYOUT.
-         *        By default, the client prefixes tensor keys
-         *        with the first prefix specified with the SSKEYIN
-         *        and SSKEYOUT environment variables.
-         *
-         * \param use_prefix If set to true, all future operations
-         *                   on tensors will use a prefix, if 
-         *                   available.
-         */
-        void use_tensor_ensemble_prefix(bool use_prefix);
+        * \brief Set whether names of entities of type \p type should be
+        *        prefixed (e.g. in an ensemble) to form database keys.
+        *        Prefixes will only be used if they were previously set through
+        *        the environment variables SSKEYOUT and SSKEYIN.
+        *        Keys formed before this function is called will not be affected.
+        *        By default, the client prefixes tensor and dataset keys
+        *        with the first prefix specified with the SSKEYIN
+        *        and SSKEYOUT environment variables.
+        *
+        * \param use_prefix If set to true, all future operations
+        *                   on entities of type \p type will use 
+        *                   a prefix, if available.
+        * \param type Type of entity to which \p use_prefix will apply.
+        */
+        void use_ensemble_prefix(bool use_prefix, EntityType type);
         
-       
         /*!
-         * \brief Set whether model and script keys should be prefixed
-         *        (e.g. in an ensemble). Prefixes will only be
-         *        used if they were previously set through
-         *        environment variables SSKEYIN and SSKEYOUT.
-         *        By default, the client does not prefix model keys.
-         *
-         * \param use_prefix If set to true, all future operations
-         *                   on models will use a prefix, if 
-         *                   available.
-         */
-        void use_model_ensemble_prefix(bool use_prefix);
-
+        * \brief Build full formatted key of a tensor, based on current prefix settings.
+        * \param key Tensor key
+        * \param on_db Indicates whether the key refers to an entity which is already in the database.yy
+        */
+        inline std::string build_tensor_key(const std::string& key, bool on_db);
+        
+        /*!
+        * \brief Build full formatted key of a model or a script, based on current prefix settings.
+        * \param key Model or script key
+        * \param on_db Indicates whether the key refers to an entity which is already in the database.yy
+        */
+        inline std::string build_model_key(const std::string& key, bool on_db);
 
         /*!
-         * \brief Set whether dataset keys should be prefixed
-         *        (e.g. in an ensemble). Prefixes will only be
-         *        used if they were previously set through
-         *        environment variables SSKEYIN and SSKEYOUT.
-         *        By default, the client prefixes dataset keys
-         *        with the first prefix specified with the SSKEYIN
-         *        and SSKEYOUT environment variables.
-         *
-         * \param use_prefix If set to true, all future operations
-         *                   on datasets will use a prefix, if 
-         *                   available.
-         */
-        void use_dataset_ensemble_prefix(bool use_prefix);
+        *  \brief Build full formatted key of a dataset tensor, based
+        *  on current prefix settings.
+        *  \param dataset_name Name of dataset to which the tensor belongs
+        *  \param tenor_name Name of tensor
+        *  \param on_db Indicates whether the key refers to an entity which is already in the database.yy
+        *  \returns Formatted key.
+        */
+        inline std::string build_dataset_tensor_key(const std::string& dataset_name,
+                                                          const std::string& tensor_name,
+                                                          bool on_db);
+
+        /*!
+        *  \brief Build full formatted key of a dataset, based
+        *         on current prefix settings.
+        *  \param dataset_name Name of dataset
+        *  \param on_db Indicates whether the key refers to an entity which is already in the database.yy
+        *  \returns Formatted key.
+        */
+        inline std::string build_dataset_meta_key(const std::string& dataset_name, bool on_db);
 
 
     protected:
@@ -591,4 +623,5 @@ class Client
 
 } //namespace SILC
 
+#endif //__cplusplus
 #endif //SILC_CPP_CLIENT_H

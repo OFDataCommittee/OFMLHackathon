@@ -336,6 +336,7 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "run_model")
 
+
     def key_exists(self, key, use_prefix):
         """Check if the key exists in the database
 
@@ -354,7 +355,7 @@ class Client(PyClient):
             raise RedisReplyError(str(e), "key_exists")
 
 
-    def poll_key(self, key, use_prefix, poll_frequency_ms, num_tries):
+    def poll_key(self, key, poll_frequency_ms, num_tries):
         """Check if the key exists in the database at a
            specified frequency for a specified number
            of times
@@ -363,9 +364,6 @@ class Client(PyClient):
         :type key: int
         :param use_prefix: Whether the key should be prefixed with
                            the client's data source prefix.
-        :type use_prefix: bool
-        :param poll_frequency_ms: The frequency of checks for the
-                                  key in milliseconds
         :type poll_frequency_ms: int
         :param num_tries: The total number of times to check for
                           the specified number of keys.  If the
@@ -382,6 +380,37 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "poll_key")
 
+
+    def poll_entity(self, name, entity_type, poll_frequency_ms, num_tries):
+        """Check if the entity exists in the database at a
+           specified frequency for a specified number
+           of times. The key associated to the entity will be
+           computed internally based on the current prefix behavior
+           for the specific entity type.
+           
+        :param key: The key that will be checked in the database
+        :type key: int
+        :param entity_type: The type of the entity being polled.
+        :type entity_type: EntityType
+        :param poll_frequency_ms: The frequency of checks for the
+                                  key in milliseconds
+        :type poll_frequency_ms: int
+        :param num_tries: The total number of times to check for
+                          the specified number of keys.  If the
+                          value is set to -1, the key will be
+                          polled indefinitely.
+        :type num_tries: int
+        :returns: Returns true if the key is found within the
+                 specified number of tries, otherwise false.
+        :rtype: bool
+        :raises RedisReplyError: if key poll fails
+        """
+        try:
+            return super().poll_entity(name, entity_type, poll_frequency_ms, num_tries)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "poll_name")
+
+
     def set_data_source(self, source_id):
         """Set the data source (i.e. key prefix for get functions)
         :param source_id: The prefix for retrieval commands
@@ -395,7 +424,7 @@ class Client(PyClient):
             raise RuntimeError(str(e), "set_data_source")
 
 
-    def use_tensor_ensemble_prefix(self, use_prefix):
+    def use_ensemble_prefix(self, use_prefix, entity_type):
         """Set whether tensor keys should be prefixed
            e.g. in an ensemble. Prefixes will only be
            used if they were previously set through
@@ -407,52 +436,15 @@ class Client(PyClient):
                            on tensors will use a prefix, if 
                            available.
         :type use_prefix: bool
+        :param entity_type: The type of the entities to which `use_prefix`
+                            will apply.
+        :type entity_type: EntityType
 
         """
         try:
-            return super().use_tensor_ensemble_prefix(use_prefix)
+            return super().use_ensemble_prefix(use_prefix, entity_type)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "use_tensor_ensemble_prefix")
-
-
-    def use_model_ensemble_prefix(self, use_prefix):
-        """Set whether tensor keys should be prefixed
-           e.g. in an ensemble. Prefixes will only be
-           used if they were previously set through
-           environment variables SSKEYIN and SSKEYOUT.
-           By default, the client does not prefix
-           model keys.
-         
-        :param use_prefix: If set to true, all future operations
-                           on models will use a prefix, if 
-                           available.
-        :type use_prefix: bool
-
-        """
-        try:
-            return super().use_model_ensemble_prefix(use_prefix)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "use_model_ensemble_prefix")
-
-
-    def use_dataset_ensemble_prefix(self, use_prefix):
-        """Set whether dataset keys should be prefixed
-           e.g. in an ensemble. Prefixes will only be
-           used if they were previously set through
-           environment variables SSKEYIN and SSKEYOUT.
-           By default, the client does not prefix
-           dataset keys.
-         
-        :param use_prefix: If set to true, all future operations
-                           on datasets will use a prefix, if 
-                           available.
-        :type use_prefix: bool
-
-        """
-        try:
-            return super().use_dataset_ensemble_prefix(use_prefix)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "use_dataset_ensemble_prefix")
 
 
     # ---- helpers --------------------------------------------------------
