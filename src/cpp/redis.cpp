@@ -90,6 +90,11 @@ CommandReply Redis::run(CommandList& cmds)
     return reply;
 }
 
+bool Redis::model_key_exists(const std::string& key)
+{
+    return this->key_exists(key);
+}
+
 bool Redis::key_exists(const std::string& key)
 {
     Command cmd;

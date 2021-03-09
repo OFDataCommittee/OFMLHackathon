@@ -86,11 +86,21 @@ class RedisCluster : public RedisServer
         virtual CommandReply run(CommandList& cmd);
 
         /*!
-        *   \brief Check if a key exists in the database
+        *   \brief Check if a key exists in the database. This
+        *          function does not work for models and scripts.
+        *          For models and scripts, model_key_exists should
+        *          be used.
         *   \param key The key to check
         *   \returns True if the key exists, otherwise False
         */
         virtual bool key_exists(const std::string& key);
+
+        /*!
+        *   \brief Check if a model or script key exists in the database
+        *   \param key The key to check
+        *   \returns True if the key exists, otherwise False
+        */
+        virtual bool model_key_exists(const std::string& key);
 
         /*!
         *   \brief Put a Tensor on the server
