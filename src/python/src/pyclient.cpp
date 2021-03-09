@@ -204,45 +204,36 @@ bool PyClient::poll_key(const std::string& key,
   return this->_client->poll_key(key, poll_frequency_ms, num_tries);
 }
 
-bool PyClient::entity_exists(const std::string& name, EntityType type)
+bool PyClient::model_exists(const std::string& name)
 {
-  return this->_client->entity_exists(name, type);
+  return this->_client->model_exists(name);
 }
 
-bool PyClient::poll_entity(const std::string& name,
-                           EntityType type,
+bool PyClient::tensor_exists(const std::string& name)
+{
+  return this->_client->tensor_exists(name);
+}
+
+bool PyClient::poll_tensor(const std::string& name,
                            int poll_frequency_ms,
                            int num_tries)
 {
-  return this->_client->poll_entity(name, type, poll_frequency_ms, num_tries);
+  return this->_client->poll_tensor(name, poll_frequency_ms, num_tries);
 }
 
-void PyClient::use_ensemble_prefix(bool use_prefix, EntityType type)
+bool PyClient::poll_model(const std::string& name,
+                          int poll_frequency_ms,
+                          int num_tries)
 {
-  this->_client->use_ensemble_prefix(use_prefix, type);
+  return this->_client->poll_model(name, poll_frequency_ms, num_tries);
 }
 
-std::string PyClient::build_tensor_key(const std::string& name,
-                                       bool on_db)
+void PyClient::use_tensor_ensemble_prefix(bool use_prefix)
 {
-  return this->_client->build_tensor_key(name, on_db);
+  this->_client->use_tensor_ensemble_prefix(use_prefix);
 }
 
-std::string PyClient::build_model_key(const std::string& name,
-                                      bool on_db)
+void PyClient::use_model_ensemble_prefix(bool use_prefix)
 {
-  return this->_client->build_model_key(name, on_db);
-}
-
-std::string PyClient::build_dataset_meta_key(const std::string& name,
-                                             bool on_db)
-{
-  return this->_client->build_dataset_meta_key(name, on_db);
-}
-
-std::string PyClient::build_dataset_tensor_key(const std::string& dataset_name,
-                                               const std::string& tensor_name,
-                                               bool on_db)
-{
-  return this->_client->build_dataset_tensor_key(dataset_name, tensor_name, on_db);
+  this->_client->use_model_ensemble_prefix(use_prefix);
 }

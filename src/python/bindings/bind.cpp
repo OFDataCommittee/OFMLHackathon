@@ -23,21 +23,13 @@ PYBIND11_MODULE(silcPy, m) {
         .def("run_model", &PyClient::run_model)
         .def("key_exists", &PyClient::key_exists)
         .def("poll_key", &PyClient::poll_key)
-        .def("entity_exists", &PyClient::entity_exists)
-        .def("poll_entity", &PyClient::poll_entity)
+        .def("model_exists", &PyClient::model_exists)
+        .def("tensor_exists", &PyClient::tensor_exists)
+        .def("poll_model", &PyClient::poll_model)
+        .def("poll_tensor", &PyClient::poll_tensor)
         .def("set_data_source", &PyClient::set_data_source)
-        .def("use_ensemble_prefix", &PyClient::use_ensemble_prefix);
-        //.def("build_tensor_key", &PyClient::build_tensor_key)
-        //.def("build_model_key", &PyClient::build_model_key)
-        //.def("build_dataset_meta_key", &PyClient::build_dataset_meta_key)
-        //.def("build_dataset_tensor_key", &PyClient::build_dataset_tensor_key);
-
-    // Python EntityType enum
-    py::enum_<EntityType> (m, "EntityType")
-        .value("tensor", EntityType::tensor)
-        .value("dataset", EntityType::dataset)
-        .value("model", EntityType::model)
-        .export_values();
+        .def("use_tensor_ensemble_prefix", &PyClient::use_tensor_ensemble_prefix)
+        .def("use_model_ensemble_prefix", &PyClient::use_model_ensemble_prefix);
 
     // Python Dataset class
     py::class_<PyDataset>(m, "PyDataset")

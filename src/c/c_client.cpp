@@ -442,12 +442,21 @@ bool key_exists(void* c_client, const char* key,
 }
 
 extern "C"
-bool entity_exists(void* c_client, const char* name,
-                const size_t name_length, CEntityType type)
+bool model_exists(void* c_client, const char* name,
+                  const size_t name_length)
 {
   Client* s = (Client *)c_client;
   std::string name_str = std::string(name, name_length);
-  return s->entity_exists(name_str, convert_entity_type(type));
+  return s->model_exists(name_str);
+}
+
+extern "C"
+bool tensor_exists(void* c_client, const char* name,
+                   const size_t name_length)
+{
+  Client* s = (Client *)c_client;
+  std::string name_str = std::string(name, name_length);
+  return s->tensor_exists(name_str);
 }
 
 extern "C"
@@ -461,12 +470,21 @@ bool poll_key(void* c_client,
 }
 
 extern "C"
-bool poll_entity(void* c_client,
-                 const char* name, const size_t name_length, CEntityType type,
+bool poll_tensor(void* c_client,
+                 const char* name, const size_t name_length,
                  const int poll_frequency_ms, const int num_tries)
 {
   Client* s = (Client *)c_client;
   std::string name_str = std::string(name, name_length);
-  return s->poll_entity(name_str, convert_entity_type(type),
-                        poll_frequency_ms, num_tries);
+  return s->poll_tensor(name_str, poll_frequency_ms, num_tries);
+}
+
+extern "C"
+bool poll_model(void* c_client,
+                 const char* name, const size_t name_length,
+                 const int poll_frequency_ms, const int num_tries)
+{
+  Client* s = (Client *)c_client;
+  std::string name_str = std::string(name, name_length);
+  return s->poll_model(name_str, poll_frequency_ms, num_tries);
 }

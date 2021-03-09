@@ -222,16 +222,24 @@ class PyClient
         bool key_exists(const std::string& key);
 
         /*!
-        *   \brief Check if the key exists in the database
+        *   \brief Check if the tensor or dataset exists in the database
         *   \param name The name that will be checked in the database
-        *               Depending on \p type and the current prefixing
-        *               behavior, the name could be automatically prefixed 
+        *               Depending on the current prefixing
+        *               behavior, the name will be automatically prefixed 
         *               to form the corresponding key.
-        *   \param type The type of the entity associated to \p name
-        *   \returns Returns true if the key exists in the database
+        *   \returns Returns true if the tensor or dataset exists in the database
         */
-        bool entity_exists(const std::string& name,
-                           EntityType type);
+        bool tensor_exists(const std::string& name);
+
+        /*!
+        *   \brief Check if the model or script exists in the database
+        *   \param name The name that will be checked in the database
+        *               Depending on the current prefixing
+        *               behavior, the name will be automatically prefixed 
+        *               to form the corresponding key.
+        *   \returns Returns true if the model or script exists in the database
+        */
+        bool model_exists(const std::string& name);
 
         /*!
         *   \brief Check if the key exists in the database at a
@@ -252,11 +260,11 @@ class PyClient
                       int num_tries);
 
         /*!
-        *   \brief Check if the key exists in the database at a
+        *   \brief Check if a tensor or dataset exists in the database at a
         *          specified frequency for a specified number
-        *          of times
+        *          of times. The name will be automatically prefixed
+        *          base on prefixing behavior.
         *   \param name The key that will be checked in the database
-        *   \param type The type of the entity associated to \p name
         *   \param poll_frequency_ms The frequency of checks for the
         *                            key in milliseconds
         *   \param num_tries The total number of times to check for
@@ -266,10 +274,28 @@ class PyClient
         *   \returns Returns true if the key is found within the
         *            specified number of tries, otherwise false.
         */
-        bool poll_entity(const std::string& name,
-                         EntityType type,
+        bool poll_tensor(const std::string& name,
                          int poll_frequency_ms,
                          int num_tries);
+
+        /*!
+        *   \brief Check if a model or script exists in the database at a
+        *          specified frequency for a specified number
+        *          of times. The name will be automatically prefixed
+        *          base on prefixing behavior.
+        *   \param name The key that will be checked in the database
+        *   \param poll_frequency_ms The frequency of checks for the
+        *                            key in milliseconds
+        *   \param num_tries The total number of times to check for
+        *                    the specified number of keys.  If the
+        *                    value is set to -1, the key will be
+        *                    polled indefinitely.
+        *   \returns Returns true if the key is found within the
+        *            specified number of tries, otherwise false.
+        */
+        bool poll_model(const std::string& name,
+                        int poll_frequency_ms,
+                        int num_tries);
 
         /*!
         *   \brief Set the data source (i.e. key prefix for
@@ -279,7 +305,21 @@ class PyClient
         void set_data_source(const std::string& source_id);
 
         /*!
-        * \brief Set whether names of entities of type \p type should be
+        * \brief Set whether names of model or scripts should be
+        *        prefixed (e.g. in an ensemble) to form database keys.
+        *        Prefixes will only be used if they were previously set through
+        *        the environment variables SSKEYOUT and SSKEYIN.
+        *        Keys formed before this function is called will not be affected.
+        *        By default, the client does not prefix model and script keys.
+        *
+        * \param use_prefix If set to true, all future operations
+        *                   on model and scripts will add 
+        *                   a prefix to the entity names, if available.
+        */
+        void use_model_ensemble_prefix(bool use_prefix);
+
+        /*!
+        * \brief Set whether names of tensors or datasets should be
         *        prefixed (e.g. in an ensemble) to form database keys.
         *        Prefixes will only be used if they were previously set through
         *        the environment variables SSKEYOUT and SSKEYIN.
@@ -289,46 +329,10 @@ class PyClient
         *        and SSKEYOUT environment variables.
         *
         * \param use_prefix If set to true, all future operations
-        *                   on entities of type \p type will use 
-        *                   a prefix, if available.
-        * \param type Type of entity to which \p use_prefix will apply.
+        *                   on tensors and datasets will add 
+        *                   a prefix to the entity names, if available.
         */
-        void use_ensemble_prefix(bool use_prefix, EntityType);
-
-        /*!
-        * \brief Build full formatted key of a tensor, based on current prefix settings.
-        * \param key Tensor key
-        * \param on_db Indicates whether the key refers to an entity which is already in the database.yy
-        */
-        inline std::string build_tensor_key(const std::string& key, bool on_db);
-        
-        /*!
-        * \brief Build full formatted key of a model or a script, based on current prefix settings.
-        * \param key Model or script key
-        * \param on_db Indicates whether the key refers to an entity which is already in the database.yy
-        */
-        inline std::string build_model_key(const std::string& key, bool on_db);
-
-        /*!
-        *  \brief Build full formatted key of a dataset tensor, based
-        *  on current prefix settings.
-        *  \param dataset_name Name of dataset to which the tensor belongs
-        *  \param tenor_name Name of tensor
-        *  \param on_db Indicates whether the key refers to an entity which is already in the database.yy
-        *  \returns Formatted key.
-        */
-        inline std::string build_dataset_tensor_key(const std::string& dataset_name,
-                                                    const std::string& tensor_name,
-                                                    bool on_db);
-
-        /*!
-        *  \brief Build full formatted key of a dataset, based
-        *         on current prefix settings.
-        *  \param dataset_name Name of dataset
-        *  \param on_db Indicates whether the key refers to an entity which is already in the database.yy
-        *  \returns Formatted key.
-        */
-        inline std::string build_dataset_meta_key(const std::string& dataset_name, bool on_db);
+        void use_tensor_ensemble_prefix(bool use_prefix);
 
     private:
 
