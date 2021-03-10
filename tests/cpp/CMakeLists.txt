@@ -40,10 +40,7 @@ else()
 	   find_path(PROTOBUF_INCLUDE_PATH protobuf PATH_SUFFIXES "/include")
 endif()
 
-find_package(MPI)
-
 include_directories(SYSTEM
-    ${MPI_INCLUDE_PATH}
     ../../include
 	../../utils/protobuf
     /usr/local/include
@@ -75,7 +72,6 @@ add_executable(crc_inverse
 	${CLIENT_SRC}
 )
 target_link_libraries(crc_inverse
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )
 
@@ -84,7 +80,6 @@ add_executable(client_test_dataset
 	${CLIENT_SRC}
 )
 target_link_libraries(client_test_dataset
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )
 
@@ -93,7 +88,6 @@ add_executable(client_test_dataset_copy_constructor
 	${CLIENT_SRC}
 )
 target_link_libraries(client_test_dataset_copy_constructor
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )
 
@@ -102,7 +96,6 @@ add_executable(client_test_dataset_move_constructor
 	${CLIENT_SRC}
 )
 target_link_libraries(client_test_dataset_move_constructor
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )
 
@@ -111,7 +104,6 @@ add_executable(client_test_dataset_copy_assignment
 	${CLIENT_SRC}
 )
 target_link_libraries(client_test_dataset_copy_assignment
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )
 
@@ -120,7 +112,6 @@ add_executable(client_test_dataset_move_assignment
 	${CLIENT_SRC}
 )
 target_link_libraries(client_test_dataset_move_assignment
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )
 
@@ -129,7 +120,6 @@ add_executable(client_test_put_get_3D
 	${CLIENT_SRC}
 )
 target_link_libraries(client_test_put_get_3D
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )
 
@@ -138,7 +128,6 @@ add_executable(client_test_put_get_3D_static_values
 	${CLIENT_SRC}
 )
 target_link_libraries(client_test_put_get_3D_static_values
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )
 
@@ -147,7 +136,6 @@ add_executable(client_test_put_get_contiguous_3D
 	${CLIENT_SRC}
 )
 target_link_libraries(client_test_put_get_contiguous_3D
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )
 
@@ -156,7 +144,6 @@ add_executable(client_test_put_get_transpose_3D
 	${CLIENT_SRC}
 )
 target_link_libraries(client_test_put_get_transpose_3D
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )
 
@@ -165,7 +152,6 @@ add_executable(client_test_put_get_2D
 	${CLIENT_SRC}
 )
 target_link_libraries(client_test_put_get_2D
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )
 
@@ -174,7 +160,6 @@ add_executable(client_test_put_get_1D
 	${CLIENT_SRC}
 )
 target_link_libraries(client_test_put_get_1D
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )
 
@@ -183,7 +168,6 @@ add_executable(client_test_mnist
 	${CLIENT_SRC}
 )
 target_link_libraries(client_test_mnist
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )
 
@@ -192,15 +176,5 @@ add_executable(client_test_mnist_dataset
 	${CLIENT_SRC}
 )
 target_link_libraries(client_test_mnist_dataset
-	MPI::MPI_CXX
-	${CLIENT_LIBRARIES}
-)
-
-add_executable(client_test_mnist_scaling
-	client_test_mnist_scaling.cpp
-	${CLIENT_SRC}
-)
-target_link_libraries(client_test_mnist_scaling
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )

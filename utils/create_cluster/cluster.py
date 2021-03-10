@@ -63,7 +63,7 @@ def create_cluster(nodes, port, dpn):
             node_ip = get_ip_from_host(node)
             node_ip += ":" + str(port+i)
             cluster_str += node_ip + " "
-            ssdb_str += node_ip +  ";"
+            ssdb_str += node_ip +  ","
     ssdb_str = ssdb_str[0:-1]
 
     # call cluster command
@@ -90,7 +90,7 @@ def ping_host(hostname):
         output, errs = proc.communicate()
 
 
-def create_node_string(nodes):
+def create_node_string(nodes, node_prefix, node_pad):
     """'30-40, 80-90'"""
     node_string = ""
     for nodepair in nodes.split(","):
@@ -98,12 +98,13 @@ def create_node_string(nodes):
         start = int(split[0])
         end = int(split[1]) + 1
         for node_num in range(start, end):
-            if node_num > 99:
-                node_string += "nid00" + str(node_num) + ","
-            elif node_num < 10:
-                node_string += "nid0000" + str(node_num) + ","
-            else:
-                node_string += "nid000" + str(node_num) + ","
+            node_string += node_prefix + f'{node_num:0{node_pad}}' + ','
+            #if node_num > 99:
+            #    node_string += "nid00" + str(node_num) + ","
+            #elif node_num < 10:
+            #    node_string += "nid0000" + str(node_num) + ","
+            #else:
+            #    node_string += "nid000" + str(node_num) + ","
     return node_string.strip(",")
 
 if __name__ == "__main__":
@@ -114,9 +115,12 @@ if __name__ == "__main__":
     parser.add_argument('--nodes', type=str)
     parser.add_argument('--port', type=int, default=6379)
     parser.add_argument('--dpn', type=int, default=1)
+    # node string parameters
+    parser.add_argument('--node-prefix', type=str, default='nid')
+    parser.add_argument('--node-pad', type=int, default=5)
     args = parser.parse_args()
 
-    nodes = create_node_string(args.nodes)
+    nodes = create_node_string(args.nodes, args.node_prefix, args.node_pad)
     for node in nodes.split(","):
         pid = launch_db(node, args.port, args.dpn)
     time.sleep(5)

@@ -1,6 +1,5 @@
 #include "client.h"
 #include "client_test_utils.h"
-#include <mpi.h>
 #include <vector>
 #include <string>
 
@@ -18,11 +17,8 @@ void put_get_3D_array(
   T_recv*** u_result = allocate_3D_array<T_recv>(dims[0], dims[1], dims[2]);
   fill_array(array, dims[0], dims[1], dims[2]);
 
-  int rank = 0;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-  std::string key = "3d_tensor_test_rank_" +
-                    std::to_string(rank) + key_suffix;
+  std::string key = "3d_tensor_test" +
+                    key_suffix;
 
   /*
   for(int i = 0; i < dims[0]; i++) {
@@ -99,8 +95,6 @@ void put_get_3D_array(
 
 int main(int argc, char* argv[]) {
 
-  MPI_Init(&argc, &argv);
-
   size_t dim1 = 10;
   size_t dim2 = 5;
   size_t dim3 = 8;
@@ -140,7 +134,6 @@ int main(int argc, char* argv[]) {
 				      dims, SILC::TensorType::uint8, "_ui8");
 
   std::cout<<"3D put and get test complete."<<std::endl;
-  MPI_Finalize();
 
   return 0;
 }

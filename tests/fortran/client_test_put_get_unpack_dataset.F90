@@ -1,10 +1,9 @@
 program main
 
-  use mpi
   use iso_c_binding
   use silc_client,  only : client_type
   use silc_dataset, only : dataset_type
-  use test_utils,   only : use_cluster
+  use test_utils,   only : use_cluster, irand
 
   implicit none
 
@@ -29,13 +28,8 @@ program main
   integer :: i, j, k
   type(client_type)  :: client
   type(dataset_type) :: send_dataset, recv_dataset
-  character(len=9) :: key_prefix
 
-  integer :: err_code, pe_id
-
-  call MPI_init( err_code )
-  call MPI_comm_rank( MPI_COMM_WORLD, pe_id, err_code)
-  write(key_prefix, "(A,I6.6)") "pe_",pe_id
+  integer :: err_code
 
   call client%initialize(use_cluster())
 
@@ -57,7 +51,7 @@ program main
     recv_array_integer_64(i,j,k) = irand()
   enddo; enddo; enddo
 
-  call send_dataset%initialize( key_prefix//"test" )
+  call send_dataset%initialize( "test" )
 
   call send_dataset%add_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))
   call send_dataset%add_tensor("true_array_real_64", true_array_real_64, shape(true_array_real_64))
@@ -67,7 +61,7 @@ program main
   call send_dataset%add_tensor("true_array_integer_64", true_array_integer_64, shape(true_array_integer_64))
 
   call client%put_dataset( send_dataset )
-  recv_dataset = client%get_dataset( key_prefix//"test")
+  recv_dataset = client%get_dataset( "test" )
 
   call recv_dataset%unpack_dataset_tensor("true_array_real_32", recv_array_real_32, shape(recv_array_real_32))
   if (.not. all(true_array_real_32 == recv_array_real_32)) stop 'true_array_real_32: FAILED'
@@ -82,7 +76,6 @@ program main
   call recv_dataset%unpack_dataset_tensor("true_array_integer_64", recv_array_integer_64, shape(recv_array_integer_64))
   if (.not. all(true_array_integer_64 == recv_array_integer_64)) stop 'true_array_integer_64: FAILED'
 
-  call MPI_finalize(err_code)
   print *, "Fortran Client put/get/unpack dataset: passed"
 
 end program

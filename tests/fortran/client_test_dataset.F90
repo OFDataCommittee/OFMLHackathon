@@ -1,8 +1,8 @@
 program main
 
-  use mpi
   use iso_c_binding
   use silc_dataset, only : dataset_type
+  use test_utils,   only : irand
 
   implicit none
 
@@ -41,12 +41,7 @@ program main
   integer :: i, j, k
   type(dataset_type) :: dataset
 
-  integer :: err_code, pe_id
-  character(len=9) :: key_prefix
-
-  call MPI_init( err_code )
-  call MPI_comm_rank( MPI_COMM_WORLD, pe_id, err_code)
-  write(key_prefix, "(A,I6.6)") "pe_",pe_id
+  integer :: err_code 
 
   call random_number(true_array_real_32)
   call random_number(true_array_real_64)
@@ -66,7 +61,7 @@ program main
     recv_array_integer_64(i,j,k) = irand()
   enddo; enddo; enddo
 
-  call dataset%initialize(key_prefix//"test")
+  call dataset%initialize( "test" )
 
   ! Test adding and retrieving a tensor of every supported type
   call dataset%add_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))
@@ -116,6 +111,5 @@ program main
   if (.not. all(meta_int64_recv == meta_int64_vec)) stop 'meta_int64: FAILED'
 
   write(*,*) "Fortran Dataset: passed"
-  call mpi_finalize(err_code)
 
 end program main

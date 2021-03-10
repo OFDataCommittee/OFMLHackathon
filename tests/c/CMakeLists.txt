@@ -41,10 +41,7 @@ else()
 	   find_path(REDISPP_INCLUDE_PATH redis++ PATH_SUFFIXES "/include")
 endif()
 
-find_package(MPI)
-
 include_directories(SYSTEM
-    ${MPI_INCLUDE_PATH}
     ../../include
     ../../utils/protobuf
     /usr/local/include
@@ -78,7 +75,6 @@ add_executable(client_test_put_unpack_1D
 )
 
 target_link_libraries(client_test_put_unpack_1D
-	MPI::MPI_C
 	${CLIENT_LIBRARIES}
 )
 
@@ -88,7 +84,6 @@ add_executable(client_test_put_get_1D
 )
 
 target_link_libraries(client_test_put_get_1D
-        MPI::MPI_C
         ${CLIENT_LIBRARIES}
 )
 
@@ -98,7 +93,6 @@ add_executable(client_test_put_get_2D
 )
 
 target_link_libraries(client_test_put_get_2D
-        MPI::MPI_C
         ${CLIENT_LIBRARIES}
 )
 
@@ -108,7 +102,6 @@ add_executable(client_test_put_get_3D
 )
 
 target_link_libraries(client_test_put_get_3D
-        MPI::MPI_C
         ${CLIENT_LIBRARIES}
 )
 
