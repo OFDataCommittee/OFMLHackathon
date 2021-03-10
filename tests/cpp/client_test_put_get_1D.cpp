@@ -31,7 +31,7 @@ void put_get_1D_array(
   client.put_tensor(key, (void*)array, dims,
                     type, SILC::MemoryLayout::nested);
 
-  if(!client.key_exists(key, false))
+  if(!client.key_exists(key))
     std::runtime_error("The key does not exist in the database.");
 
   client.unpack_tensor(key, u_result, dims,

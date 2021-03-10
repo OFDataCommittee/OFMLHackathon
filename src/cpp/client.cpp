@@ -16,7 +16,7 @@ Client::Client(bool cluster)
     }
     this->_set_prefixes_from_env();
 
-    this->_use_tensor_prefix = true;
+    this->_use_tensor_prefix = this->_put_key_prefix.size()>0;
     this->_use_model_prefix = false;
 
     return;
@@ -39,7 +39,7 @@ void Client::put_dataset(DataSet& dataset)
 
     std::string ds_prefix = this->_build_dataset_key(dataset.name, false);
     std::string meta_key = ds_prefix + ".meta";
-
+    
     cmd->add_field("SET");
     cmd->add_field(meta_key, true);
     cmd->add_field_ptr(dataset.get_metadata_buf());
@@ -50,7 +50,7 @@ void Client::put_dataset(DataSet& dataset)
     TensorBase* tensor = 0;
     while(it != it_end) {
         tensor = *it;
-        std::string tensor_key = ds_prefix + tensor->name();
+        std::string tensor_key = ds_prefix + '.' + tensor->name();
         cmd = cmds.add_command();
         cmd->add_field("AI.TENSORSET");
         cmd->add_field(tensor_key, true);
@@ -65,7 +65,7 @@ void Client::put_dataset(DataSet& dataset)
     cmd = cmds.add_command();
     cmd->add_field("SET");
     std::string dataset_indicator_key = this->_build_tensor_key(dataset.name, false);
-    cmd->add_field(dataset_indicator_key);
+    cmd->add_field(dataset_indicator_key, true);
     cmd->add_field("1");
 
     this->_redis_server->run(cmds);
@@ -92,7 +92,7 @@ DataSet Client::get_dataset(const std::string& name)
         dataset.get_meta_strings(".tensors");
 
     for(size_t i=0; i<tensor_names.size(); i++) {
-        std::string tensor_key = ds_prefix + tensor_names[i];
+        std::string tensor_key = ds_prefix + '.' + tensor_names[i];
         Command cmd;
         cmd.add_field("AI.TENSORGET");
         cmd.add_field(tensor_key, true);
@@ -178,6 +178,7 @@ void Client::put_tensor(const std::string& key,
             break;
     }
 
+    std::cout << p_key << std::endl;
     CommandReply reply = this->_redis_server->put_tensor(*tensor);
 
     delete tensor;

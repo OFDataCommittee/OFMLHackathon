@@ -16,8 +16,10 @@ program main
   integer :: err_code
 
   call client%initialize(use_cluster())
+  print *, "Putting tensor"
   call client%put_tensor( "test", array, shape(array) )
 
+  print *, "Renaming tensor"
   call client%rename_tensor( "test", "test_rename" )
   if (.not. client%key_exists( "test_rename" )) stop 'Renamed tensor does not exist'
 

@@ -188,6 +188,7 @@ subroutine put_tensor_float(this, key, data, dims)
   include 'client/put_tensor_methods_common.inc'
   ! Define the type and call the C-interface
   data_type = tensor_flt
+  print *, "PUT_FOLAT"
   call put_tensor_c(this%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, data_type, c_fortran_contiguous)
 end subroutine put_tensor_float
 
