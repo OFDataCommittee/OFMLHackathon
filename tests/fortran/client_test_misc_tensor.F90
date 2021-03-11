@@ -17,10 +17,10 @@ program main
 
   call client%initialize(use_cluster())
   print *, "Putting tensor"
-  call client%put_tensor( "test", array, shape(array) )
+  call client%put_tensor( "test_initial", array, shape(array) )
 
   print *, "Renaming tensor"
-  call client%rename_tensor( "test", "test_rename" )
+  call client%rename_tensor( "test_initial", "test_rename" )
   if (.not. client%key_exists( "test_rename" )) stop 'Renamed tensor does not exist'
 
   call client%copy_tensor( "test_rename", "test_copy" )
