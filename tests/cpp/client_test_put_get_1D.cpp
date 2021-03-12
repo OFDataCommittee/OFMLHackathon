@@ -32,7 +32,7 @@ void put_get_1D_array(
                     type, SILC::MemoryLayout::nested);
 
   if(!client.key_exists(key))
-    std::runtime_error("The key does not exist in the database.");
+    throw std::runtime_error("The key does not exist in the database.");
 
   client.unpack_tensor(key, u_result, dims,
                        type, SILC::MemoryLayout::nested);

@@ -578,7 +578,7 @@ bool Client::tensor_exists(const std::string& name)
 bool Client::model_exists(const std::string& name)
 {
     std::string g_key = this->_build_model_key(name, true); 
-    return this->_redis_server->key_exists(g_key);
+    return this->_redis_server->model_key_exists(g_key);
 }
 
 bool Client::poll_key(const std::string& key,
