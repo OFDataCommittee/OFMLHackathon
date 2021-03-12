@@ -49,6 +49,10 @@ void put_and_copy_dataset(
     std::string dest_dataset_name = "copy_" + dataset_name;
     client.copy_dataset(dataset_name, dest_dataset_name);
 
+    if(!client.tensor_exists(dest_dataset_name))
+        throw std::runtime_error("The DataSet confirmation "\
+                                 "key is not set.");
+
     //Retrieving a dataset
     SILC::DataSet DestDataSet = client.get_dataset(dest_dataset_name);
 

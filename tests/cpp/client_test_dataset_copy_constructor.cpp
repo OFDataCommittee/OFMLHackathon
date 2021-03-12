@@ -116,6 +116,10 @@ void copy_constructor(
 
     client.put_dataset(*dataset);
 
+    if(!client.tensor_exists(dataset_name))
+        throw std::runtime_error("The first DataSet confirmation "\
+                                 "key is not set.");
+
     //Check that the meta fields we added to CopiedDataSet do not show up
     //in MyDataSet if we put MyDataSet in the repo.
     //Check that the metadata values are correct for ui32
@@ -135,6 +139,11 @@ void copy_constructor(
     delete dataset;
 
     client.put_dataset(copied_dataset);
+
+    if(!client.tensor_exists(dataset_name))
+        throw std::runtime_error("The copy-constructed DataSet "\
+                                 "confirmation key is not set.");
+
     SILC::DataSet full_dataset = client.get_dataset(dataset_name);
 
     DATASET_TEST_UTILS::check_tensor_names(full_dataset,

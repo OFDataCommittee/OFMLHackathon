@@ -114,6 +114,10 @@ void copy_assignment(
 
     client.put_dataset(*dataset);
 
+    if(!client.tensor_exists(dataset_name))
+        throw std::runtime_error("The first DataSet confirmation "\
+                                 "key is not set.");
+
     //Check that the meta fields we added to CopiedDataSet do not show up
     //in MyDataSet if we put MyDataSet in the repo.
     //Check that the metadata values are correct for ui32
@@ -133,6 +137,10 @@ void copy_assignment(
 
     client.put_dataset(copied_dataset);
     SILC::DataSet full_dataset = client.get_dataset(dataset_name);
+
+    if(!client.tensor_exists(dataset_name))
+        throw std::runtime_error("The copy assigned DataSet "\
+                                 "confirmation key is not set.");
 
     DATASET_TEST_UTILS::check_tensor_names(full_dataset,
                                     {t_name_1, t_name_2, t_name_3});

@@ -71,7 +71,16 @@ void rename_dataset(
         throw std::runtime_error("The DataSet metadata "\
                                  "was not deleted.");
 
+    if(client.tensor_exists(dataset_name))
+        throw std::runtime_error("The DataSet confirmation "\
+                                 "key was not deleted.");
+
+    if(!client.tensor_exists(new_dataset_name))
+        throw std::runtime_error("The renamed DataSet "\
+                                 "confirmation key is not set.");
+
     SILC::DataSet retrieved_dataset = client.get_dataset(new_dataset_name);
+
 
     DATASET_TEST_UTILS::check_tensor_names(retrieved_dataset,
                                     {t_name_1, t_name_2, t_name_3});

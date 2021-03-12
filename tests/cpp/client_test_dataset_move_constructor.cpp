@@ -118,6 +118,10 @@ void move_constructor(
     delete dataset;
     client.put_dataset(moved_dataset);
 
+    if(!client.tensor_exists(dataset_name))
+        throw std::runtime_error("The moved constructed DataSet "\
+                                 "confirmation key is not set.");
+
     SILC::DataSet full_dataset = client.get_dataset(dataset_name);
 
     DATASET_TEST_UTILS::check_tensor_names(full_dataset,

@@ -90,6 +90,10 @@ void dataset_delete(
         throw std::runtime_error("The DataSet tensor " + key +
                                  " was not deleted.");
 
+    if(client.tensor_exists(dataset_name))
+        throw std::runtime_error("The DataSet confirmation "\
+                                 "key was not deleted.");
+
     return;
 }
 

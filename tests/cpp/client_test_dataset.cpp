@@ -45,6 +45,10 @@ void put_get_dataset(
     //Put the DataSet into the database
     client.put_dataset(sent_dataset);
 
+    if(!client.tensor_exists(dataset_name))
+        throw std::runtime_error("The DataSet "\
+                                 "confirmation key is not set.");
+
     SILC::DataSet retrieved_dataset = client.get_dataset(dataset_name);
 
     DATASET_TEST_UTILS::check_tensor_names(retrieved_dataset,
