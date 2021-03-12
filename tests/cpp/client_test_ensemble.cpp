@@ -90,6 +90,9 @@ void produce(
                      SILC::TensorType::flt,
                      SILC::MemoryLayout::nested);
   client.put_dataset(dataset);
+  
+  if(!client.tensor_exists(dataset_name))
+    throw std::runtime_error("The dataset key does not exist in the database.");
 
   std::string dataset_in_key = "{" + dataset_name + "}." + in_key_ds;
   client.run_script(script_name, "pre_process", {dataset_in_key}, {script_out_key_ds});
