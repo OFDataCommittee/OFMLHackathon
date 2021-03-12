@@ -178,7 +178,6 @@ void Client::put_tensor(const std::string& key,
             break;
     }
 
-    std::cout << p_key << std::endl;
     CommandReply reply = this->_redis_server->put_tensor(*tensor);
 
     delete tensor;

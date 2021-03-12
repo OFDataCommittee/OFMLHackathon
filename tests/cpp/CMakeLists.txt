@@ -180,3 +180,11 @@ add_executable(client_test_mnist_dataset
 target_link_libraries(client_test_mnist_dataset
 	${CLIENT_LIBRARIES}
 )
+
+add_executable(client_test_ensemble
+	client_test_ensemble.cpp
+	${CLIENT_SRC}
+)
+target_link_libraries(client_test_ensemble
+	${CLIENT_LIBRARIES}
+)

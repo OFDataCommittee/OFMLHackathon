@@ -101,7 +101,7 @@ bool RedisCluster::model_key_exists(const std::string& key)
 {
     DBNode* node = &(this->_db_nodes[0]);
     std::string prefixed_key = '{' + node->prefix +
-                               '}' + key;
+                               "}." + key;
 
     return this->key_exists(prefixed_key);
 }

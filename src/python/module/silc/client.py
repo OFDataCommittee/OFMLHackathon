@@ -393,8 +393,8 @@ class Client(PyClient):
            
         :param key: The key that will be checked in the database
         :type key: int
-        :param use_prefix: Whether the key should be prefixed with
-                           the client's data source prefix.
+        :param poll_frequency_ms: The frequency of checks for the
+                                  key in milliseconds
         :type poll_frequency_ms: int
         :param num_tries: The total number of times to check for
                           the specified number of keys.  If the
