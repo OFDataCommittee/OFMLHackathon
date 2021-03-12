@@ -79,6 +79,22 @@ void produce(
   client.run_model(model_name, {script_out_key}, {out_key});
   free_4D_array(mnist_array, 1, 1, 28);
 
+  // Setup mnist with dataset
+  std::string in_key_ds = "mnist_input_ds";
+  std::string script_out_key_ds = "mnist_processed_input_ds";
+  std::string out_key_ds = "mnist_output_ds";
+
+  std::string dataset_name = "mnist_input_dataset_ds";
+  SILC::DataSet dataset = SILC::DataSet(dataset_name);
+  dataset.add_tensor(in_key_ds, mnist_array, {1,1,28,28},
+                     SILC::TensorType::flt,
+                     SILC::MemoryLayout::nested);
+  client.put_dataset(dataset);
+
+  std::string dataset_in_key = "{" + dataset_name + "}." + in_key_ds;
+  client.run_script(script_name, "pre_process", {dataset_in_key}, {script_out_key_ds});
+  client.run_model(model_name, {script_out_key_ds}, {out_key_ds});
+
   return;
 }
 
@@ -156,9 +172,13 @@ void consume(std::vector<size_t> dims,
   float** mnist_result = allocate_2D_array<float>(1, 10);
 
   std::string out_key = "mnist_output";
-  client.unpack_tensor("mnist_output", mnist_result, {1,10}, SILC::TensorType::flt,
+  client.unpack_tensor(out_key, mnist_result, {1,10}, SILC::TensorType::flt,
                        SILC::MemoryLayout::nested);
 
+  std::string out_key_ds = "mnist_output_ds";
+  client.unpack_tensor(out_key_ds, mnist_result, {1,10},
+                       SILC::TensorType::flt,
+                       SILC::MemoryLayout::nested);
   free_2D_array(mnist_result, 1);
 
   return;
