@@ -39,9 +39,17 @@ type, public :: client_type
   procedure :: initialize
   !> Destructs a new instance of the SILC client
   procedure :: destructor
+  !> Check the database for the existence of a specific model
+  procedure :: model_exists
+  !> Check the database for the existence of a specific tensor
+  procedure :: tensor_exists
   !> Check the database for the existence of a specific key
   procedure :: key_exists
-  !> Poll the database and return if the key exisdts
+  !> Poll the database and return if the model exists
+  procedure :: poll_model
+  !> Poll the database and return if the tensor exists
+  procedure :: poll_tensor
+  !> Poll the database and return if the key exists
   procedure :: poll_key
   !> Rename a tensor within the database
   procedure :: rename_tensor
@@ -125,6 +133,76 @@ logical function key_exists(this, key)
   key_exists = key_exists_c( this%client_ptr, c_key, c_key_length)
 
 end function key_exists
+
+!> Check if the specified model exists in the database
+logical function model_exists(this, model_name)
+  class(client_type)    :: this
+  character(len=*)      :: model_name
+
+  character(kind=c_char, len=len_trim(model_name)) :: c_model_name
+  integer(kind=c_size_t) :: c_model_name_length
+
+  c_model_name = trim(model_name)
+  c_model_name_length = len_trim(model_name)
+
+  model_exists = model_exists_c( this%client_ptr, c_model_name, c_model_name_length)
+
+end function model_exists
+
+!> Check if the specified tensor exists in the database
+logical function tensor_exists(this, tensor_name)
+  class(client_type)    :: this
+  character(len=*)      :: tensor_name
+
+  character(kind=c_char, len=len_trim(tensor_name)) :: c_tensor_name
+  integer(kind=c_size_t) :: c_tensor_name_length
+
+  c_tensor_name = trim(tensor_name)
+  c_tensor_name_length = len_trim(tensor_name)
+
+  tensor_exists = tensor_exists_c( this%client_ptr, c_tensor_name, c_tensor_name_length)
+
+end function tensor_exists
+
+!> Repeatedly poll the database until the tensor exists or the number of tries is exceeded
+logical function poll_tensor( this, tensor_name, poll_frequency_ms, num_tries )
+  class(client_type)    :: this
+  character(len=*) :: tensor_name !< Key in the database to poll
+  integer          :: poll_frequency_ms !< Frequency at which to poll the database (ms)
+  integer          :: num_tries !< Number of times to poll the database before failing
+
+  character(kind=c_char,len=len_trim(tensor_name)) :: c_tensor_name
+  integer(kind=c_size_t) :: c_tensor_name_length
+  integer(kind=c_int) :: c_poll_frequency, c_num_tries
+
+  c_tensor_name = trim(tensor_name)
+  c_tensor_name_length = len_trim(tensor_name)
+  c_num_tries = num_tries
+  c_poll_frequency = poll_frequency_ms
+
+  poll_tensor = poll_tensor_c(this%client_ptr, c_tensor_name, c_tensor_name_length, c_poll_frequency, c_num_tries)
+
+end function poll_tensor
+
+!> Repeatedly poll the database until the model exists or the number of tries is exceeded
+logical function poll_model( this, model_name, poll_frequency_ms, num_tries )
+  class(client_type)    :: this
+  character(len=*) :: model_name !< Key in the database to poll
+  integer          :: poll_frequency_ms !< Frequency at which to poll the database (ms)
+  integer          :: num_tries !< Number of times to poll the database before failing
+
+  character(kind=c_char,len=len_trim(model_name)) :: c_model_name
+  integer(kind=c_size_t) :: c_model_name_length
+  integer(kind=c_int) :: c_poll_frequency, c_num_tries
+
+  c_model_name = trim(model_name)
+  c_model_name_length = len_trim(model_name)
+  c_num_tries = num_tries
+  c_poll_frequency = poll_frequency_ms
+
+  poll_model = poll_model_c(this%client_ptr, c_model_name, c_model_name_length, c_poll_frequency, c_num_tries)
+
+end function poll_model
 
 !> Repeatedly poll the database until the key exists or the number of tries is exceeded
 logical function poll_key( this, key, poll_frequency_ms, num_tries )
