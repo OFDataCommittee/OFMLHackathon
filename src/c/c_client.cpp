@@ -488,3 +488,31 @@ bool poll_model(void* c_client,
   std::string name_str = std::string(name, name_length);
   return s->poll_model(name_str, poll_frequency_ms, num_tries);
 }
+
+extern "C"
+void use_model_ensemble_prefix(void* c_client,
+                               bool use_prefix)
+{
+  Client* s = (Client *)c_client;
+  s->use_model_ensemble_prefix(use_prefix);
+  return;
+}
+
+extern "C"
+void use_tensor_ensemble_prefix(void* c_client,
+                                bool use_prefix)
+{
+  Client* s = (Client *)c_client;
+  s->use_tensor_ensemble_prefix(use_prefix);
+  return;
+}
+
+extern "C"
+void set_data_source(void* c_client,
+                     const char* source_id, const size_t source_id_length)
+{
+  Client* s = (Client *)c_client;
+  std::string source_id_str = std::string(source_id, source_id_length);
+  s->set_data_source(source_id_str);
+  return;
+}

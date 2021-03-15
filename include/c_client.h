@@ -623,6 +623,49 @@ bool poll_tensor(void* c_client,
                  const int poll_frequency_ms,
                  const int num_tries);
 
+/*!
+*   \brief Set the data source (i.e. key prefix for
+*          get functions)
+*   \param source_id The prefix for retrieval commands
+*   \param source_id_length The length of the source_id c-string,
+*                           excluding null terminating character
+*/
+void set_data_source(void* c_client,
+                     const char* source_id,
+                     const size_t source_id_length);
+
+/*!
+* \brief Set whether names of tensor and dataset entities should be
+*        prefixed (e.g. in an ensemble) to form database keys.
+*        Prefixes will only be used if they were previously set through
+*        the environment variables SSKEYOUT and SSKEYIN.
+*        Keys of entities created before this function is called 
+*        will not be affected.
+*        By default, the client prefixes tensor and dataset keys
+*        with the first prefix specified with the SSKEYIN
+*        and SSKEYOUT environment variables.
+*
+* \param use_prefix If set to true, all future operations
+*                   on tensors and datasets will use 
+*                   a prefix, if available.
+*/
+void use_tensor_ensemble_prefix(void* c_client, bool use_prefix);
+
+/*!
+* \brief Set whether names of model and script entities should be
+*        prefixed (e.g. in an ensemble) to form database keys.
+*        Prefixes will only be used if they were previously set through
+*        the environment variables SSKEYOUT and SSKEYIN.
+*        Keys of entities created before this function is called 
+*        will not be affected.
+*        By default, the client does not prefix model and script keys.
+*
+* \param use_prefix If set to true, all future operations
+*                   on models and scripts will use 
+*                   a prefix, if available.
+*/
+void use_model_ensemble_prefix(void* c_client, bool use_prefix);
+
 #ifdef __cplusplus
 }
 
