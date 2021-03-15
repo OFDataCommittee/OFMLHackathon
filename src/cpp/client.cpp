@@ -844,7 +844,6 @@ inline std::string Client::_build_dataset_key(const std::string& dataset_name, b
     return key;
 }
 
-//_dataset_tensor_get_key
 inline std::string Client::_build_dataset_tensor_key(const std::string& dataset_name,
                                                      const std::string& tensor_name,
                                                      bool on_db)
