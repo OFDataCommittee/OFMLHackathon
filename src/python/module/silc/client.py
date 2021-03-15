@@ -336,6 +336,189 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "run_model")
 
+
+    def tensor_exists(self, name):
+        """Check if a tensor or dataset exists in the database.
+           The key associated to the entity will be
+           computed internally based on the current prefix behavior.
+
+        :param key: The tensor or dataset name that will be checked in the database
+        :type key: str
+        :returns: Returns true if the tensor or dataset exists in the database
+        :rtype: bool
+        :raises RedisReplyError: if `tensor_exists` fails (i.e. causes an error) 
+        """
+        try:
+            super().tensor_exists(name)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "tensor_exists")
+
+
+    def model_exists(self, name):
+        """Check if a model or script exists in the database.
+           The key associated to the entity will be
+           computed internally based on the current prefix behavior.
+
+        :param key: The model or script name that will be checked in the database
+        :type key: str
+        :returns: Returns true if the model exists in the database
+        :rtype: bool
+        :raises RedisReplyError: if `model_exists` fails (i.e. causes an error) 
+        """
+        try:
+            super().model_exists(name)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "model_exists")
+
+
+    def key_exists(self, key):
+        """Check if the key exists in the database
+
+        :param key: The key that will be checked in the database
+        :type key: str
+        :returns: Returns true if the key exists in the database
+        :rtype: bool
+        :raises RedisReplyError: if `key_exists` fails
+        """
+        try:
+            super().key_exists(key)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "key_exists")
+
+
+    def poll_key(self, key, poll_frequency_ms, num_tries):
+        """Check if the key exists in the database at a
+           specified frequency for a specified number
+           of times
+           
+        :param key: The key that will be checked in the database
+        :type key: int
+        :param poll_frequency_ms: The frequency of checks for the
+                                  key in milliseconds
+        :type poll_frequency_ms: int
+        :param num_tries: The total number of times to check for
+                          the specified number of keys.  If the
+                          value is set to -1, the key will be
+                          polled indefinitely.
+        :type num_tries: int
+        :returns: Returns true if the key is found within the
+                 specified number of tries, otherwise false.
+        :rtype: bool
+        :raises RedisReplyError: if key poll fails
+        """
+        try:
+            return super().poll_key(key, poll_frequency_ms, num_tries)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "poll_key")
+
+
+    def poll_tensor(self, name, poll_frequency_ms, num_tries):
+        """Check if a tensor or dataset exists in the database at a
+           specified frequency for a specified number
+           of times. The key associated to the entity will be
+           computed internally based on the current prefix behavior.
+           
+        :param key: The key that will be checked in the database
+        :type key: int
+        :param poll_frequency_ms: The frequency of checks for the
+                                  key in milliseconds
+        :type poll_frequency_ms: int
+        :param num_tries: The total number of times to check for
+                          the specified number of keys.  If the
+                          value is set to -1, the key will be
+                          polled indefinitely.
+        :type num_tries: int
+        :returns: Returns true if the key is found within the
+                 specified number of tries, otherwise false.
+        :rtype: bool
+        :raises RedisReplyError: if `poll_tensor` fails
+        """
+        try:
+            return super().poll_tensor(name, poll_frequency_ms, num_tries)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "poll_tensor")
+
+
+    def poll_model(self, name, poll_frequency_ms, num_tries):
+        """Check if a model or script exists in the database at a
+           specified frequency for a specified number
+           of times. The key associated to the entity will be
+           computed internally based on the current prefix behavior.
+           
+        :param key: The key that will be checked in the database
+        :type key: int
+        :param poll_frequency_ms: The frequency of checks for the
+                                  key in milliseconds
+        :type poll_frequency_ms: int
+        :param num_tries: The total number of times to check for
+                          the specified number of keys.  If the
+                          value is set to -1, the key will be
+                          polled indefinitely.
+        :type num_tries: int
+        :returns: Returns true if the key is found within the
+                 specified number of tries, otherwise false.
+        :rtype: bool
+        :raises RedisReplyError: if `poll_model` fails
+        """
+        try:
+            return super().poll_model(name, poll_frequency_ms, num_tries)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "poll_model")
+
+
+    def set_data_source(self, source_id):
+        """Set the data source (i.e. key prefix for get functions)
+        :param source_id: The prefix for retrieval commands
+        :type source_id: str
+        :raises RedisReplyError: if set data
+
+        """
+        try:
+            return super().set_data_source(source_id)
+        except RuntimeError as e:
+            raise RuntimeError(str(e), "set_data_source")
+
+
+    def use_model_ensemble_prefix(self, use_prefix):
+        """Set whether model and script keys should be prefixed
+           e.g. in an ensemble. Prefixes will only be
+           used if they were previously set through
+           environment variables SSKEYIN and SSKEYOUT.
+           By default, the client does not prefix model and script
+           keys.
+         
+        :param use_prefix: If set to true, all future operations
+                           on models and scripts will use a prefix, if 
+                           available.
+        :type use_prefix: bool
+
+        """
+        try:
+            return super().use_model_ensemble_prefix(use_prefix)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "use_model_ensemble_prefix")
+
+
+    def use_tensor_ensemble_prefix(self, use_prefix):
+        """Set whether tensor and dataset keys should be prefixed
+           e.g. in an ensemble. Prefixes will only be
+           used if they were previously set through
+           environment variables SSKEYIN and SSKEYOUT.
+           By default, the client prefixes tensor and dataset
+           keys when a prefix is available.
+         
+        :param use_prefix: If set to true, all future operations
+                           on tensors and datasets will use a prefix, if 
+                           available.
+        :type use_prefix: bool
+
+        """
+        try:
+            return super().use_tensor_ensemble_prefix(use_prefix)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "use_tensor_ensemble_prefix")
+
+
     # ---- helpers --------------------------------------------------------
 
     @staticmethod

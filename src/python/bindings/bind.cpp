@@ -20,7 +20,16 @@ PYBIND11_MODULE(silcPy, m) {
         .def("set_model", &PyClient::set_model)
         .def("set_model_from_file", &PyClient::set_model_from_file)
         .def("get_model", &PyClient::get_model)
-        .def("run_model", &PyClient::run_model);
+        .def("run_model", &PyClient::run_model)
+        .def("key_exists", &PyClient::key_exists)
+        .def("poll_key", &PyClient::poll_key)
+        .def("model_exists", &PyClient::model_exists)
+        .def("tensor_exists", &PyClient::tensor_exists)
+        .def("poll_model", &PyClient::poll_model)
+        .def("poll_tensor", &PyClient::poll_tensor)
+        .def("set_data_source", &PyClient::set_data_source)
+        .def("use_tensor_ensemble_prefix", &PyClient::use_tensor_ensemble_prefix)
+        .def("use_model_ensemble_prefix", &PyClient::use_model_ensemble_prefix);
 
     // Python Dataset class
     py::class_<PyDataset>(m, "PyDataset")

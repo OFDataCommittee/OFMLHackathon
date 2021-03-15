@@ -15,6 +15,10 @@ Client::Client(bool cluster)
         this->_redis_server = this->_redis;
     }
     this->_set_prefixes_from_env();
+
+    this->_use_tensor_prefix = true;
+    this->_use_model_prefix = false;
+
     return;
 }
 
@@ -27,20 +31,17 @@ Client::~Client() {
 
 void Client::put_dataset(DataSet& dataset)
 {
-
     CommandList cmds;
     Command* cmd;
-
-    std::string key;
 
     // Send the metadata message
     cmd = cmds.add_command();
 
-    key = this->_put_prefix() + "{" +
-            dataset.name + "}" + ".meta";
-
+    std::string ds_prefix = this->_build_dataset_key(dataset.name, false);
+    std::string meta_key = ds_prefix + ".meta";
+    
     cmd->add_field("SET");
-    cmd->add_field(key, true);
+    cmd->add_field(meta_key, true);
     cmd->add_field_ptr(dataset.get_metadata_buf());
 
     // Send the tensor data
@@ -49,18 +50,24 @@ void Client::put_dataset(DataSet& dataset)
     TensorBase* tensor = 0;
     while(it != it_end) {
         tensor = *it;
-        key = this->_put_prefix() + "{"
-            + dataset.name + "}."
-            + tensor->name();
+        std::string tensor_key = ds_prefix + '.' + tensor->name();
         cmd = cmds.add_command();
         cmd->add_field("AI.TENSORSET");
-        cmd->add_field(key, true);
+        cmd->add_field(tensor_key, true);
         cmd->add_field(tensor->type_str());
         cmd->add_fields(tensor->dims());
         cmd->add_field("BLOB");
         cmd->add_field_ptr(tensor->buf());
         it++;
     }
+
+    // Add variable to indicate dataset was correctly set.
+    cmd = cmds.add_command();
+    cmd->add_field("SET");
+    std::string dataset_indicator_key = this->_build_tensor_key(dataset.name, false);
+    cmd->add_field(dataset_indicator_key, true);
+    cmd->add_field("1");
+
     this->_redis_server->run(cmds);
     return;
 }
@@ -71,13 +78,11 @@ DataSet Client::get_dataset(const std::string& name)
     CommandReply reply;
     Command cmd;
 
-    std::string key;
+    std::string ds_prefix = this->_build_dataset_key(name, true);
+    std::string meta_key = ds_prefix + ".meta";
 
-    cmd.add_field("GET");
-    key  = this->_get_prefix() +
-            "{" + std::string(name) +
-            "}" + ".meta";
-    cmd.add_field(key, true);
+    cmd.add_field ("GET");
+    cmd.add_field(meta_key, true);
     reply =  this->_redis_server->run(cmd);
 
     DataSet dataset = DataSet(name, reply.str(), reply.str_len());
@@ -87,12 +92,10 @@ DataSet Client::get_dataset(const std::string& name)
         dataset.get_meta_strings(".tensors");
 
     for(size_t i=0; i<tensor_names.size(); i++) {
-        key = this->_get_prefix() +
-            "{" + dataset.name + "}."
-            + tensor_names[i];
+        std::string tensor_key = ds_prefix + '.' + tensor_names[i];
         Command cmd;
         cmd.add_field("AI.TENSORGET");
-        cmd.add_field(key, true);
+        cmd.add_field(tensor_key, true);
         cmd.add_field("META");
         cmd.add_field("BLOB");
         CommandReply reply;
@@ -137,7 +140,7 @@ void Client::put_tensor(const std::string& key,
                         const TensorType type,
                         const MemoryLayout mem_layout)
 {
-    std::string p_key = this->_put_prefix() + key;
+    std::string p_key = this->_build_tensor_key(key, false);
 
     TensorBase* tensor;
     switch(type) {
@@ -187,8 +190,7 @@ void Client::get_tensor(const std::string& key,
                         const MemoryLayout mem_layout)
 {
 
-
-    std::string g_key = this->_get_prefix() + key;
+    std::string g_key = this->_build_tensor_key(key, true);
     CommandReply reply = this->_redis_server->get_tensor(g_key);
 
     dims = CommandReplyParser::get_tensor_dims(reply);
@@ -247,7 +249,7 @@ void Client::get_tensor(const std::string& key,
             break;
         default :
             throw std::runtime_error("The tensor could not be "\
-                                    "retrieved in client.get_tensor().");
+                                     "retrieved in client.get_tensor().");
             break;
     }
     this->_tensor_memory.add_tensor(ptr);
@@ -297,7 +299,7 @@ void Client::unpack_tensor(const std::string& key,
                                 "layout is contiguous.");
         }
 
-    std::string g_key = this->_get_prefix() + key;
+    std::string g_key = this->_build_tensor_key(key, true);
     CommandReply reply = this->_redis_server->get_tensor(g_key);
 
     std::vector<size_t> reply_dims =
@@ -308,7 +310,7 @@ void Client::unpack_tensor(const std::string& key,
 
         int total_dims = 1;
         for(size_t i=0; i<reply_dims.size(); i++) {
-        total_dims *= reply_dims[i];
+            total_dims *= reply_dims[i];
         }
         if( (total_dims != dims[0]) &&
             (mem_layout == MemoryLayout::contiguous) )
@@ -482,7 +484,8 @@ void Client::set_model(const std::string& key,
                                  " is not a valid backend.");
     }
 
-    this->_redis_server->set_model(key, model, backend, device,
+    std::string p_key = this->_build_model_key(key, false);
+    this->_redis_server->set_model(p_key, model, backend, device,
                                    batch_size, min_batch_size,
                                    tag, inputs, outputs);
 
@@ -491,7 +494,8 @@ void Client::set_model(const std::string& key,
 
 std::string_view Client::get_model(const std::string& key)
 {
-    CommandReply reply = this->_redis_server->get_model(key);
+    std::string g_key = this->_build_model_key(key, true);
+    CommandReply reply = this->_redis_server->get_model(g_key);
     char* model = this->_model_queries.allocate(reply.str_len());
     std::memcpy(model, reply.str(), reply.str_len());
     return std::string_view(model, reply.str_len());
@@ -517,13 +521,15 @@ void Client::set_script(const std::string& key,
                         const std::string& device,
                         const std::string_view& script)
 {
-    this->_redis_server->set_script(key, device, script);
+    std::string s_key = this->_build_model_key(key, false);
+    this->_redis_server->set_script(s_key, device, script);
     return;
 }
 
 std::string_view Client::get_script(const std::string& key)
 {
-    CommandReply reply = this->_redis_server->get_script(key);
+    std::string g_key = this->_build_model_key(key, true);
+    CommandReply reply = this->_redis_server->get_script(g_key);
     char* script = this->_model_queries.allocate(reply.str_len());
     std::memcpy(script, reply.str(), reply.str_len());
     return std::string_view(script, reply.str_len());
@@ -533,9 +539,13 @@ void Client::run_model(const std::string& key,
                        std::vector<std::string> inputs,
                        std::vector<std::string> outputs)
 {
-    this->_append_with_get_prefix(inputs);
-    this->_append_with_put_prefix(outputs);
-    this->_redis_server->run_model(key, inputs, outputs);
+    std::string g_key = this->_build_model_key(key, true);
+
+    if (this->_use_tensor_prefix) {
+        this->_append_with_get_prefix(inputs);
+        this->_append_with_put_prefix(outputs);
+    }
+    this->_redis_server->run_model(g_key, inputs, outputs);
     return;
 }
 
@@ -544,16 +554,31 @@ void Client::run_script(const std::string& key,
                         std::vector<std::string> inputs,
                         std::vector<std::string> outputs)
 {
-    this->_append_with_get_prefix(inputs);
-    this->_append_with_put_prefix(outputs);
-    this->_redis_server->run_script(key, function, inputs, outputs);
+    std::string g_key = this->_build_model_key(key, true);
+
+    if (this->_use_tensor_prefix) {
+        this->_append_with_get_prefix(inputs);
+        this->_append_with_put_prefix(outputs);
+    }
+    this->_redis_server->run_script(g_key, function, inputs, outputs);
     return;
 }
 
 bool Client::key_exists(const std::string& key)
 {
-
     return this->_redis_server->key_exists(key);
+}
+
+bool Client::tensor_exists(const std::string& name)
+{
+    std::string g_key = this->_build_tensor_key(name, true);
+    return this->_redis_server->key_exists(g_key);
+}
+
+bool Client::model_exists(const std::string& name)
+{
+    std::string g_key = this->_build_model_key(name, true); 
+    return this->_redis_server->model_key_exists(g_key);
 }
 
 bool Client::poll_key(const std::string& key,
@@ -564,8 +589,46 @@ bool Client::poll_key(const std::string& key,
 
     while(!(num_tries==0)) {
         if(this->key_exists(key)) {
-        key_exists = true;
-        break;
+            key_exists = true;
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
+        if(num_tries>0)
+        num_tries--;
+    }
+
+    return key_exists;
+}
+
+bool Client::poll_model(const std::string& name,
+                        int poll_frequency_ms,
+                        int num_tries)
+{
+    bool key_exists = false;
+
+    while(!(num_tries==0)) {
+        if(this->model_exists(name)) {
+            key_exists = true;
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
+        if(num_tries>0)
+        num_tries--;
+    }
+
+    return key_exists;
+}
+
+bool Client::poll_tensor(const std::string& name,
+                         int poll_frequency_ms,
+                         int num_tries)
+{
+    bool key_exists = false;
+
+    while(!(num_tries==0)) {
+        if(this->tensor_exists(name)) {
+            key_exists = true;
+            break;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
         if(num_tries>0)
@@ -585,8 +648,8 @@ void Client::set_data_source(std::string source_id)
     int i = 0;
     for (i=0; i<num_prefix; i++) {
         if (this->_get_key_prefixes[i].compare(source_id)==0) {
-        valid_prefix = true;
-        break;
+            valid_prefix = true;
+            break;
         }
     }
 
@@ -597,6 +660,16 @@ void Client::set_data_source(std::string source_id)
                     std::string(source_id) +
                     "could not be found during client "+
                     "initialization.");
+}
+
+void Client::use_model_ensemble_prefix(bool use_prefix)
+{
+    this->_use_model_prefix = use_prefix;
+}
+
+void Client::use_tensor_ensemble_prefix(bool use_prefix)
+{
+    this->_use_tensor_prefix = use_prefix;
 }
 
 void Client::_set_prefixes_from_env()
@@ -611,18 +684,18 @@ void Client::_set_prefixes_from_env()
     if(keyin_p) {
         char* a = &keyin_p[0];
         char* b = a;
-        char parse_char = ';';
+        char parse_char = ',';
         while (*b) {
-        if(*b==parse_char) {
-        if(a!=b)
-        this->_get_key_prefixes.push_back(std::string(a, b-a));
-        a=++b;
+            if(*b==parse_char) {
+                if(a!=b)
+                    this->_get_key_prefixes.push_back(std::string(a, b-a));
+                a=++b;
+            }
+            else
+                b++;
         }
-        else
-        b++;
-        }
         if(a!=b)
-        this->_get_key_prefixes.push_back(std::string(a, b-a));
+            this->_get_key_prefixes.push_back(std::string(a, b-a));
     }
 
     if (this->_get_key_prefixes.size() > 0)
@@ -633,7 +706,7 @@ inline std::string Client::_put_prefix()
 {
     std::string prefix;
     if(this->_put_key_prefix.size()>0)
-        prefix =  this->_put_key_prefix + ".";
+        prefix =  this->_put_key_prefix + '.';
     return prefix;
 }
 
@@ -641,8 +714,38 @@ inline std::string Client::_get_prefix()
 {
     std::string prefix;
     if(this->_get_key_prefix.size()>0)
-        prefix =  this->_get_key_prefix + ".";
+        prefix =  this->_get_key_prefix + '.';
     return prefix;
+}
+
+inline std::string Client::_build_tensor_key(const std::string& key, bool on_db)
+{
+    std::string prefix;
+    if (this->_use_tensor_prefix)
+        prefix = on_db ? this->_get_prefix() : this->_put_prefix();
+        
+    return prefix + key;
+}
+
+inline std::string Client::_build_model_key(const std::string& key, bool on_db)
+{
+    std::string prefix;
+    if (this->_use_model_prefix)
+        prefix = on_db ? this->_get_prefix() : this->_put_prefix();
+        
+    return prefix + key;
+}
+
+inline std::string Client::_build_dataset_key(const std::string& dataset_name, bool on_db)
+{
+    std::string key;
+    std::string prefix;
+    if (this->_use_tensor_prefix)
+        prefix = on_db ? this->_get_prefix() : this->_put_prefix();
+
+    key = prefix + 
+          "{" + dataset_name + "}";
+    return key;
 }
 
 inline void Client::_append_with_get_prefix(
@@ -653,8 +756,9 @@ inline void Client::_append_with_get_prefix(
     prefix_it = keys.begin();
     prefix_it_end = keys.end();
     while(prefix_it != prefix_it_end) {
-        *prefix_it = this->_get_prefix() + *prefix_it;
-        prefix_it++;
+      std::string prefix = this->_get_prefix();
+      *prefix_it = prefix + *prefix_it;
+      prefix_it++;
     }
     return;
 }
@@ -667,8 +771,9 @@ inline void Client::_append_with_put_prefix(
     prefix_it = keys.begin();
     prefix_it_end = keys.end();
     while(prefix_it != prefix_it_end) {
-        *prefix_it = this->_put_prefix() + *prefix_it;
-        prefix_it++;
+      std::string prefix = this->_put_prefix();
+      *prefix_it = prefix + *prefix_it;
+      prefix_it++;
     }
     return;
 }

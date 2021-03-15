@@ -514,12 +514,46 @@ bool key_exists(void* c_client,
                 const size_t key_length);
 
 /*!
+*   \brief Check if a tensor or dataset exists in the database
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param name The name of the entity that will be checked 
+*               in the database. The full key associated to
+*               \p name will formed according to the
+*               prefixing behavior
+*   \param name_length The length of the name c-string,
+*                      excluding null terminating character
+*   \returns Returns true if the key exists in the database
+*/
+bool tensor_exists(void* c_client,
+                   const char* name,
+                   const size_t name_length);
+
+/*!
+*   \brief Check if a model or script exists in the database
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param name The name of the entity that will be checked 
+*               in the database. The full key associated to
+*               \p name will formed according to the
+*               prefixing behavior
+*   \param name_length The length of the name c-string,
+*                      excluding null terminating character
+*   \returns Returns true if the key exists in the database
+*/
+bool model_exists(void* c_client,
+                  const char* name,
+                  const size_t name_length);
+
+/*!
 *   \brief Check if the key exists in the database at a
 *          specified frequency for a specified number
 *          of times
 *   \param c_client A pointer to c client
 *                   to use for communication
 *   \param key The key that will be checked in the database
+*   \param key_length The length of the key c-string,
+*                     excluding null terminating character
 *   \param poll_frequency_ms The frequency of checks for the
 *                            key in milliseconds
 *   \param num_tries The total number of times to check for
@@ -534,6 +568,103 @@ bool poll_key(void* c_client,
               const size_t key_length,
               const int poll_frequency_ms,
               const int num_tries);
+
+/*!
+*   \brief Check if a model or script exists in the database at a
+*          specified frequency for a specified number
+*          of times
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param name The name of the entity that will be checked 
+*               in the database. The full key associated to
+*               \p name will formed according to the
+*               prefixing behavior
+*   \param name_length The length of the name c-string,
+*                     excluding null terminating character
+*   \param poll_frequency_ms The frequency of checks for the
+*                            key in milliseconds
+*   \param num_tries The total number of times to check for
+*                    the specified number of keys.  If the
+*                    value is set to -1, the key will be
+*                    polled indefinitely.
+*   \returns Returns true if the key is found within the
+*            specified number of tries, otherwise false.
+*/
+bool poll_model(void* c_client,
+                const char* name,
+                const size_t name_length,
+                const int poll_frequency_ms,
+                const int num_tries);
+
+/*!
+*   \brief Check if a tensor or dataset exists in the database at a
+*          specified frequency for a specified number
+*          of times
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param name The name of the entity that will be checked 
+*               in the database. The full key associated to
+*               \p name will formed according to the
+*               prefixing behavior
+*   \param name_length The length of the name c-string,
+*                     excluding null terminating character
+*   \param poll_frequency_ms The frequency of checks for the
+*                            key in milliseconds
+*   \param num_tries The total number of times to check for
+*                    the specified number of keys.  If the
+*                    value is set to -1, the key will be
+*                    polled indefinitely.
+*   \returns Returns true if the key is found within the
+*            specified number of tries, otherwise false.
+*/
+bool poll_tensor(void* c_client,
+                 const char* name,
+                 const size_t name_length,
+                 const int poll_frequency_ms,
+                 const int num_tries);
+
+/*!
+*   \brief Set the data source (i.e. key prefix for
+*          get functions)
+*   \param source_id The prefix for retrieval commands
+*   \param source_id_length The length of the source_id c-string,
+*                           excluding null terminating character
+*/
+void set_data_source(void* c_client,
+                     const char* source_id,
+                     const size_t source_id_length);
+
+/*!
+* \brief Set whether names of tensor and dataset entities should be
+*        prefixed (e.g. in an ensemble) to form database keys.
+*        Prefixes will only be used if they were previously set through
+*        the environment variables SSKEYOUT and SSKEYIN.
+*        Keys of entities created before this function is called 
+*        will not be affected.
+*        By default, the client prefixes tensor and dataset keys
+*        with the first prefix specified with the SSKEYIN
+*        and SSKEYOUT environment variables.
+*
+* \param use_prefix If set to true, all future operations
+*                   on tensors and datasets will use 
+*                   a prefix, if available.
+*/
+void use_tensor_ensemble_prefix(void* c_client, bool use_prefix);
+
+/*!
+* \brief Set whether names of model and script entities should be
+*        prefixed (e.g. in an ensemble) to form database keys.
+*        Prefixes will only be used if they were previously set through
+*        the environment variables SSKEYOUT and SSKEYIN.
+*        Keys of entities created before this function is called 
+*        will not be affected.
+*        By default, the client does not prefix model and script keys.
+*
+* \param use_prefix If set to true, all future operations
+*                   on models and scripts will use 
+*                   a prefix, if available.
+*/
+void use_model_ensemble_prefix(void* c_client, bool use_prefix);
 
 #ifdef __cplusplus
 }

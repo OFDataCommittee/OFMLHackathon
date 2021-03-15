@@ -1,4 +1,4 @@
-//#ifndef SILC_CPP_CLIENT_H
+#ifndef SILC_CPP_CLIENT_H
 #define SILC_CPP_CLIENT_H
 #ifdef __cplusplus
 #include "string.h"
@@ -107,7 +107,7 @@ class Client
         *                    store the copied database.
         */
         void copy_dataset(const std::string& src_name,
-                        const std::string& dest_name);
+                          const std::string& dest_name);
 
 
         /*!
@@ -134,8 +134,7 @@ class Client
                         void* data,
                         const std::vector<size_t>& dims,
                         const TensorType type,
-                        const MemoryLayout mem_layout
-                        );
+                        const MemoryLayout mem_layout);
 
         /*!
         *   \brief Get the tensor data, dimensions,
@@ -170,8 +169,7 @@ class Client
                         void*& data,
                         std::vector<size_t>& dims,
                         TensorType& type,
-                        const MemoryLayout mem_layout
-                        );
+                        const MemoryLayout mem_layout);
 
 
         /*!
@@ -213,8 +211,7 @@ class Client
                         size_t*& dims,
                         size_t& n_dims,
                         TensorType& type,
-                        const MemoryLayout mem_layout
-                        );
+                        const MemoryLayout mem_layout);
 
         /*!
         *   \brief Get tensor data and fill an already allocated
@@ -234,11 +231,10 @@ class Client
         *               memory space.
         */
         void unpack_tensor(const std::string& key,
-                        void* data,
-                        const std::vector<size_t>& dims,
-                        const TensorType type,
-                        const MemoryLayout mem_layout
-                        );
+                           void* data,
+                           const std::vector<size_t>& dims,
+                           const TensorType type,
+                           const MemoryLayout mem_layout);
 
         /*!
         *   \brief Move a tensor from one key to another key
@@ -246,7 +242,7 @@ class Client
         *   \param new_key The new tensor key
         */
         void rename_tensor(const std::string& key,
-                        const std::string& new_key);
+                           const std::string& new_key);
 
         /*!
         *   \brief Delete a tensor from the database
@@ -261,7 +257,7 @@ class Client
         *   \param dest_key The destination key of the tensor
         */
         void copy_tensor(const std::string& src_key,
-                        const std::string& dest_key);
+                         const std::string& dest_key);
 
         /*!
         *   \brief Set a model from file in the
@@ -283,16 +279,16 @@ class Client
         *                 (TF models only)
         */
         void set_model_from_file(const std::string& key,
-                                const std::string& model_file,
-                                const std::string& backend,
-                                const std::string& device,
-                                int batch_size = 0,
-                                int min_batch_size = 0,
-                                const std::string& tag = "",
-                                const std::vector<std::string>& inputs
-                                    = std::vector<std::string>(),
-                                const std::vector<std::string>& outputs
-                                    = std::vector<std::string>());
+                                 const std::string& model_file,
+                                 const std::string& backend,
+                                 const std::string& device,
+                                 int batch_size = 0,
+                                 int min_batch_size = 0,
+                                 const std::string& tag = "",
+                                 const std::vector<std::string>& inputs
+                                     = std::vector<std::string>(),
+                                 const std::vector<std::string>& outputs
+                                     = std::vector<std::string>());
 
         /*!
         *   \brief Set a model from std::string_view buffer in the
@@ -314,16 +310,16 @@ class Client
         *                 (TF models only)
         */
         void set_model(const std::string& key,
-                        const std::string_view& model,
-                        const std::string& backend,
-                        const std::string& device,
-                        int batch_size = 0,
-                        int min_batch_size = 0,
-                        const std::string& tag = "",
-                        const std::vector<std::string>& inputs
-                        = std::vector<std::string>(),
-                        const std::vector<std::string>& outputs
-                        = std::vector<std::string>());
+                       const std::string_view& model,
+                       const std::string& backend,
+                       const std::string& device,
+                       int batch_size = 0,
+                       int min_batch_size = 0,
+                       const std::string& tag = "",
+                       const std::vector<std::string>& inputs
+                           = std::vector<std::string>(),
+                       const std::vector<std::string>& outputs
+                           = std::vector<std::string>());
 
         /*!
         *   \brief Retrieve the model from the database
@@ -344,8 +340,8 @@ class Client
         *   \param script_file The source file for the script
         */
         void set_script_from_file(const std::string& key,
-                                const std::string& device,
-                                const std::string& script_file);
+                                  const std::string& device,
+                                  const std::string& script_file);
 
         /*!
         *   \brief Set a script from std::string_view buffer in the
@@ -379,8 +375,8 @@ class Client
         *                 will be used to save model results
         */
         void run_model(const std::string& key,
-                        std::vector<std::string> inputs,
-                        std::vector<std::string> outputs);
+                       std::vector<std::string> inputs,
+                       std::vector<std::string> outputs);
 
         /*!
         *   \brief Run a script function in the database using the
@@ -399,10 +395,31 @@ class Client
 
         /*!
         *   \brief Check if the key exists in the database
-        *   \param key The key that will be checked in the database
+        *   \param key The key that will be checked in the database.
+        *              No prefix will be added to \p key.
         *   \returns Returns true if the key exists in the database
         */
         bool key_exists(const std::string& key);
+
+        /*!
+        *   \brief Check if the model (or the script) exists in the database
+        *   \param name The name that will be checked in the database
+        *               Depending on the current prefixing behavior,
+        *               the name could be automatically prefixed 
+        *               to form the corresponding key.
+        *   \returns Returns true if the key exists in the database
+        */
+        bool model_exists(const std::string& name);
+
+        /*!
+        *   \brief Check if the model (or the script) exists in the database
+        *   \param name The name that will be checked in the database
+        *               Depending on the current prefixing behavior,
+        *               the name could be automatically prefixed 
+        *               to form the corresponding key.
+        *   \returns Returns true if the key exists in the database
+        */
+        bool tensor_exists(const std::string& name);
 
         /*!
         *   \brief Check if the key exists in the database at a
@@ -419,9 +436,50 @@ class Client
         *            specified number of tries, otherwise false.
         */
         bool poll_key(const std::string& key,
+                      int poll_frequency_ms,
+                      int num_tries);
+
+        /*!
+        *   \brief Check if the tensor (or dataset) exists in the database
+        *          at a specified frequency for a specified number
+        *          of times
+        *   \param name The key that will be checked in the database
+        *               Depending on the current prefixing behavior,
+        *               the name could be automatically prefixed 
+        *               to form the corresponding key.
+        *   \param poll_frequency_ms The frequency of checks for the
+        *                            key in milliseconds
+        *   \param num_tries The total number of times to check for
+        *                    the specified number of keys.  If the
+        *                    value is set to -1, the key will be
+        *                    polled indefinitely.
+        *   \returns Returns true if the key is found within the
+        *            specified number of tries, otherwise false.
+        */
+        bool poll_tensor(const std::string& name,
+                         int poll_frequency_ms,
+                         int num_tries);
+        
+        /*!
+        *   \brief Check if the model (or script) exists in the database
+        *          at a specified frequency for a specified number
+        *          of times. 
+        *   \param name The name that will be checked in the database
+        *               Depending on the current prefixing behavior,
+        *               the name could be automatically prefixed 
+        *               to form the corresponding key.
+        *   \param poll_frequency_ms The frequency of checks for the
+        *                            key in milliseconds
+        *   \param num_tries The total number of times to check for
+        *                    the specified number of keys.  If the
+        *                    value is set to -1, the key will be
+        *                    polled indefinitely.
+        *   \returns Returns true if the key is found within the
+        *            specified number of tries, otherwise false.
+        */
+        bool poll_model(const std::string& name,
                         int poll_frequency_ms,
                         int num_tries);
-
 
         /*!
         *   \brief Set the data source (i.e. key prefix for
@@ -430,6 +488,38 @@ class Client
         */
         void set_data_source(std::string source_id);
 
+        /*!
+        * \brief Set whether names of tensor and dataset entities should be
+        *        prefixed (e.g. in an ensemble) to form database keys.
+        *        Prefixes will only be used if they were previously set through
+        *        the environment variables SSKEYOUT and SSKEYIN.
+        *        Keys of entities created before this function is called 
+        *        will not be affected.
+        *        By default, the client prefixes tensor and dataset keys
+        *        with the first prefix specified with the SSKEYIN
+        *        and SSKEYOUT environment variables.
+        *
+        * \param use_prefix If set to true, all future operations
+        *                   on tensors and datasets will use 
+        *                   a prefix, if available.
+        */
+        void use_tensor_ensemble_prefix(bool use_prefix);
+
+        /*!
+        * \brief Set whether names of model and script entities should be
+        *        prefixed (e.g. in an ensemble) to form database keys.
+        *        Prefixes will only be used if they were previously set through
+        *        the environment variables SSKEYOUT and SSKEYIN.
+        *        Keys of entities created before this function is called 
+        *        will not be affected.
+        *        By default, the client does not prefix model and script keys.
+        *
+        * \param use_prefix If set to true, all future operations
+        *                   on models and scripts will use 
+        *                   a prefix, if available.
+        */
+        void use_model_ensemble_prefix(bool use_prefix);
+        
     protected:
 
         /*!
@@ -519,8 +609,44 @@ class Client
         *  \brief Vector of all potential retrieval prefixes
         */
         std::vector<std::string> _get_key_prefixes;
+
+        /*!
+        * \brief Flag determining whether prefixes should be used
+        *        for tensor keys.
+        */ 
+        bool _use_tensor_prefix;
+
+        /*!
+        * \brief Flag determining whether prefixes should be used
+        *        for model and script keys.
+        */ 
+        bool _use_model_prefix;
+
+        /*!
+        * \brief Build full formatted key of a tensor, based on current prefix settings.
+        * \param key Tensor key
+        * \param on_db Indicates whether the key refers to an entity which is already in the database.yy
+        */
+        inline std::string _build_tensor_key(const std::string& key, bool on_db);
+        
+        /*!
+        * \brief Build full formatted key of a model or a script, based on current prefix settings.
+        * \param key Model or script key
+        * \param on_db Indicates whether the key refers to an entity which is already in the database.yy
+        */
+        inline std::string _build_model_key(const std::string& key, bool on_db);
+
+        /*!
+        *  \brief Build full formatted key of a dataset, based
+        *         on current prefix settings.
+        *  \param dataset_name Name of dataset
+        *  \param on_db Indicates whether the key refers to an entity which is already in the database.yy
+        *  \returns Formatted key.
+        */
+        inline std::string _build_dataset_key(const std::string& dataset_name, bool on_db);
 };
 
 } //namespace SILC
 
+#endif //__cplusplus
 #endif //SILC_CPP_CLIENT_H

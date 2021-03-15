@@ -25,7 +25,7 @@ def get_run_command():
     return [which("mpirun"),"-np", f"{RANKS}"]
 
 @pytest.mark.parametrize("test", get_test_names())
-def test_c_client(test, cluster_env):
+def test_c_client(test, use_cluster):
     """This function actually runs the tests using the parameterization
     function provided in Pytest
 
@@ -36,7 +36,7 @@ def test_c_client(test, cluster_env):
     cmd.append(test)
     print(f"Running test: {osp.basename(test)}")
     print(f"Test command {' '.join(cmd)}")
-    print(f"Using cluster: {cluster_env.get_cluster_env()}")
+    print(f"Using cluster: {use_cluster}")
     execute_cmd(cmd)
     time.sleep(2)
 

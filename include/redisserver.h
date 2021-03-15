@@ -65,6 +65,13 @@ class RedisServer {
         virtual bool key_exists(const std::string& key) = 0;
 
         /*!
+         *  \brief Check if a model or script exists in the database
+         *  \param key The script or model key
+         *  \return True if the model or script exists
+         */
+        virtual bool model_key_exists(const std::string& key) = 0;
+
+        /*!
         *   \brief Put a Tensor on the server
         *   \param tensor The Tensor to put on the server
         *   \returns The CommandReply from the put tensor

@@ -6,6 +6,8 @@ cmake_minimum_required(VERSION 3.10)
 
 SET(CMAKE_CXX_STANDARD 17)
 
+SET(CMAKE_EXE_LINKER_FLAGS "-lpthread")
+
 #TODO put in output warnings
 # Determine where the hiredis library is based on if an environment variable
 # is set, and if not, it can be found in the $PATH directory
@@ -176,5 +178,13 @@ add_executable(client_test_mnist_dataset
 	${CLIENT_SRC}
 )
 target_link_libraries(client_test_mnist_dataset
+	${CLIENT_LIBRARIES}
+)
+
+add_executable(client_test_ensemble
+	client_test_ensemble.cpp
+	${CLIENT_SRC}
+)
+target_link_libraries(client_test_ensemble
 	${CLIENT_LIBRARIES}
 )

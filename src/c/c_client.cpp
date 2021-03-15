@@ -442,6 +442,24 @@ bool key_exists(void* c_client, const char* key,
 }
 
 extern "C"
+bool model_exists(void* c_client, const char* name,
+                  const size_t name_length)
+{
+  Client* s = (Client *)c_client;
+  std::string name_str = std::string(name, name_length);
+  return s->model_exists(name_str);
+}
+
+extern "C"
+bool tensor_exists(void* c_client, const char* name,
+                   const size_t name_length)
+{
+  Client* s = (Client *)c_client;
+  std::string name_str = std::string(name, name_length);
+  return s->tensor_exists(name_str);
+}
+
+extern "C"
 bool poll_key(void* c_client,
               const char* key, const size_t key_length,
               const int poll_frequency_ms, const int num_tries)
@@ -449,4 +467,52 @@ bool poll_key(void* c_client,
   Client* s = (Client *)c_client;
   std::string key_str = std::string(key, key_length);
   return s->poll_key(key_str, poll_frequency_ms, num_tries);
+}
+
+extern "C"
+bool poll_tensor(void* c_client,
+                 const char* name, const size_t name_length,
+                 const int poll_frequency_ms, const int num_tries)
+{
+  Client* s = (Client *)c_client;
+  std::string name_str = std::string(name, name_length);
+  return s->poll_tensor(name_str, poll_frequency_ms, num_tries);
+}
+
+extern "C"
+bool poll_model(void* c_client,
+                 const char* name, const size_t name_length,
+                 const int poll_frequency_ms, const int num_tries)
+{
+  Client* s = (Client *)c_client;
+  std::string name_str = std::string(name, name_length);
+  return s->poll_model(name_str, poll_frequency_ms, num_tries);
+}
+
+extern "C"
+void use_model_ensemble_prefix(void* c_client,
+                               bool use_prefix)
+{
+  Client* s = (Client *)c_client;
+  s->use_model_ensemble_prefix(use_prefix);
+  return;
+}
+
+extern "C"
+void use_tensor_ensemble_prefix(void* c_client,
+                                bool use_prefix)
+{
+  Client* s = (Client *)c_client;
+  s->use_tensor_ensemble_prefix(use_prefix);
+  return;
+}
+
+extern "C"
+void set_data_source(void* c_client,
+                     const char* source_id, const size_t source_id_length)
+{
+  Client* s = (Client *)c_client;
+  std::string source_id_str = std::string(source_id, source_id_length);
+  s->set_data_source(source_id_str);
+  return;
 }
