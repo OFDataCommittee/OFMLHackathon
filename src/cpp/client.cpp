@@ -444,24 +444,29 @@ void Client::unpack_tensor(const std::string& key,
 void Client::rename_tensor(const std::string& key,
                            const std::string& new_key)
 {
+    std::string p_key = this->_build_tensor_key(key, true);
+    std::string p_new_key = this->_build_tensor_key(key, false);
     CommandReply reply =
-        this->_redis_server->rename_tensor(key, new_key);
+        this->_redis_server->rename_tensor(p_key, p_new_key);
     return;
 }
 
 void Client::delete_tensor(const std::string& key)
 {
+    std::string p_key = this->_build_tensor_key(key, true);
     CommandReply reply =
-            this->_redis_server->delete_tensor(key);
+            this->_redis_server->delete_tensor(p_key);
     return;
 }
 
 void Client::copy_tensor(const std::string& src_key,
                          const std::string& dest_key)
 {
-  CommandReply reply =
-        this->_redis_server->copy_tensor(src_key, dest_key);
-  return;
+    std::string p_src_key = this->_build_tensor_key(src_key, true);
+    std::string p_dest_key = this->_build_tensor_key(dest_key, false);
+    CommandReply reply =
+            this->_redis_server->copy_tensor(p_src_key, p_dest_key);
+    return;
 }
 
 void Client::set_model_from_file(const std::string& key,
