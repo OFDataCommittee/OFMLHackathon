@@ -861,5 +861,5 @@ inline std::string Client::_build_dataset_meta_key(const std::string& dataset_na
 inline std::string Client::_build_dataset_ack_key(const std::string& dataset_name,
                                                   bool on_db)
 {
-    return this->_build_dataset_key(dataset_name, on_db);
+    return this->_build_tensor_key(dataset_name, on_db);
 }
