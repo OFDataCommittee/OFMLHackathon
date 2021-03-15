@@ -16,7 +16,7 @@ Client::Client(bool cluster)
     }
     this->_set_prefixes_from_env();
 
-    this->_use_tensor_prefix = this->_put_key_prefix.size()>0;
+    this->_use_tensor_prefix = true;
     this->_use_model_prefix = false;
 
     return;
@@ -706,7 +706,7 @@ inline std::string Client::_put_prefix()
 {
     std::string prefix;
     if(this->_put_key_prefix.size()>0)
-        prefix =  this->_put_key_prefix;
+        prefix =  this->_put_key_prefix + '.';
     return prefix;
 }
 
@@ -714,44 +714,37 @@ inline std::string Client::_get_prefix()
 {
     std::string prefix;
     if(this->_get_key_prefix.size()>0)
-        prefix =  this->_get_key_prefix;
+        prefix =  this->_get_key_prefix + '.';
     return prefix;
 }
 
 inline std::string Client::_build_tensor_key(const std::string& key, bool on_db)
 {
-    if (!this->_use_tensor_prefix) {
-      return key;
-    } else {
-        std::string prefix = on_db ? this->_get_prefix() : this->_put_prefix();
-        return prefix + '.' + key;
-    }
+    std::string prefix;
+    if (this->_use_tensor_prefix)
+        prefix = on_db ? this->_get_prefix() : this->_put_prefix();
+        
+    return prefix + key;
 }
 
 inline std::string Client::_build_model_key(const std::string& key, bool on_db)
 {
-    if (!this->_use_model_prefix) {
-      return key;
-    } else {
-        std::string prefix = on_db ? this->_get_prefix() : this->_put_prefix();
-        return prefix + '.' + key;
-    }
+    std::string prefix;
+    if (this->_use_model_prefix)
+        prefix = on_db ? this->_get_prefix() : this->_put_prefix();
+        
+    return prefix + key;
 }
 
 inline std::string Client::_build_dataset_key(const std::string& dataset_name, bool on_db)
 {
     std::string key;
-    if (this->_use_tensor_prefix) {
-        std::string prefix = on_db ? this->_get_prefix() : this->_put_prefix();
+    std::string prefix;
+    if (this->_use_tensor_prefix)
+        prefix = on_db ? this->_get_prefix() : this->_put_prefix();
 
-        key = prefix + 
-              ".{" + dataset_name +
-              "}";
-    } else
-    {
-        key = "{" + dataset_name +
-              "}";
-    }
+    key = prefix + 
+          "{" + dataset_name + "}";
     return key;
 }
 
@@ -763,8 +756,9 @@ inline void Client::_append_with_get_prefix(
     prefix_it = keys.begin();
     prefix_it_end = keys.end();
     while(prefix_it != prefix_it_end) {
-        *prefix_it = this->_get_prefix() + '.' + *prefix_it;
-        prefix_it++;
+      std::string prefix = this->_get_prefix();
+      *prefix_it = prefix + *prefix_it;
+      prefix_it++;
     }
     return;
 }
@@ -777,8 +771,9 @@ inline void Client::_append_with_put_prefix(
     prefix_it = keys.begin();
     prefix_it_end = keys.end();
     while(prefix_it != prefix_it_end) {
-        *prefix_it = this->_put_prefix() + '.' + *prefix_it;
-        prefix_it++;
+      std::string prefix = this->_put_prefix();
+      *prefix_it = prefix + *prefix_it;
+      prefix_it++;
     }
     return;
 }
