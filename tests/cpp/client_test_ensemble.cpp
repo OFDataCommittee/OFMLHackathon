@@ -2,6 +2,7 @@
 #include "client_test_utils.h"
 #include <vector>
 #include <string>
+#include <cstdlib>
 #include "stdlib.h"
 
 void load_mnist_image_to_array(float**** img)
@@ -77,7 +78,6 @@ void produce(
                     SILC::MemoryLayout::nested);
   client.run_script(script_name, "pre_process", {in_key}, {script_out_key});
   client.run_model(model_name, {script_out_key}, {out_key});
-  free_4D_array(mnist_array, 1, 1, 28);
 
   // Setup mnist with dataset
   std::string in_key_ds = "mnist_input_ds";
@@ -98,6 +98,7 @@ void produce(
   client.run_script(script_name, "pre_process", {dataset_in_key}, {script_out_key_ds});
   client.run_model(model_name, {script_out_key_ds}, {out_key_ds});
 
+  free_4D_array(mnist_array, 1, 1, 28);
   return;
 }
 
@@ -189,6 +190,8 @@ void consume(std::vector<size_t> dims,
 
 int main(int argc, char* argv[]) {
 
+  const char* old_keyin = std::getenv("SSKEYIN");
+  const char* old_keyout = std::getenv("SSKEYOUT");
   char keyin_env_put[] = "SSKEYIN=producer_0,producer_1";
   char keyout_env_put[] = "SSKEYOUT=producer_0";
   putenv( keyin_env_put ); 
@@ -207,6 +210,30 @@ int main(int argc, char* argv[]) {
   consume(dims,
           std::string("producer_1"),
           std::string("producer_0"));
+
+  if (old_keyin != nullptr) {
+    std::string reset_keyin = std::string("SSKEYIN=") + std::string(old_keyin);
+    char* reset_keyin_c = new char[reset_keyin.size() + 1];
+    std::copy(reset_keyin.begin(), reset_keyin.end(), reset_keyin_c);
+    reset_keyin_c[reset_keyin.size()] = '\0';
+    putenv( reset_keyin_c); 
+    delete [] reset_keyin_c;
+  }
+  else {
+    unsetenv("SSKEYIN");
+  }
+  if (old_keyout != nullptr) {
+    std::string reset_keyout = std::string("SSKEYOUT=") + std::string(old_keyout);
+    char* reset_keyout_c = new char[reset_keyout.size() + 1];
+    std::copy(reset_keyout.begin(), reset_keyout.end(), reset_keyout_c);
+    reset_keyout_c[reset_keyout.size()] = '\0';
+    putenv( reset_keyout_c); 
+    delete [] reset_keyout_c;
+  }
+  else {
+    unsetenv("SSKEYOUT");
+  }
+
 
   std::cout<<"Ensemble test complete"<<std::endl;
 
