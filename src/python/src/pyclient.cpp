@@ -259,25 +259,47 @@ void PyClient::run_model(const std::string& key,
 
 void PyClient::set_data_source(const std::string& source_id)
 {
-  this->_client->set_data_source(source_id);
-  return;
+    this->_client->set_data_source(source_id);
+    return;
 }
 
 bool PyClient::key_exists(const std::string& key)
 {
-  return this->_client->key_exists(key);
+    bool result;
+    try {
+        result = this->_client->key_exists(key);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return result;
 }
 
 bool PyClient::poll_key(const std::string& key,
                         int poll_frequency_ms,
                         int num_tries)
 {
-  return this->_client->poll_key(key, poll_frequency_ms, num_tries);
+    bool result;
+    try {
+        result = this->_client->poll_key(key, poll_frequency_ms,
+                                         num_tries);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return result;
 }
 
 bool PyClient::model_exists(const std::string& name)
 {
-  return this->_client->model_exists(name);
+    bool result;
+    try {
+        result = this->_client->model_exists(name);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return result;
 }
 
 bool PyClient::tensor_exists(const std::string& name)
@@ -289,14 +311,30 @@ bool PyClient::poll_tensor(const std::string& name,
                            int poll_frequency_ms,
                            int num_tries)
 {
-  return this->_client->poll_tensor(name, poll_frequency_ms, num_tries);
+    bool result;
+    try {
+        result = this->_client->poll_tensor(name, poll_frequency_ms,
+                                            num_tries);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return result;
 }
 
 bool PyClient::poll_model(const std::string& name,
                           int poll_frequency_ms,
                           int num_tries)
 {
-  return this->_client->poll_model(name, poll_frequency_ms, num_tries);
+    bool result;
+    try {
+        result = this->_client->poll_model(name, poll_frequency_ms,
+                                           num_tries);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return result;
 }
 
 void PyClient::use_tensor_ensemble_prefix(bool use_prefix)
