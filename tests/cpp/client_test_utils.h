@@ -160,8 +160,8 @@ bool is_equal_3D_array(T*** a, U*** b, int dim_1, int dim_2, int dim_3)
   for(int i=0; i<dim_1; i++)
     for(int j=0; j<dim_2; j++)
       for(int k=0; k<dim_3; k++)
-	if(!(a[i][j][k] == b[i][j][k]))
-	  return false;
+    	if(!(a[i][j][k] == b[i][j][k]))
+    	  return false;
   return true;
 }
 

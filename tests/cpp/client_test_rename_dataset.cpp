@@ -4,7 +4,7 @@
 #include "dataset_test_utils.h"
 
 template <typename T_send, typename T_recv>
-void put_get_dataset(
+void rename_dataset(
 		    void (*fill_array)(T_send***, int, int, int),
 		    std::vector<size_t> dims,
             SILC::TensorType type,
@@ -45,11 +45,42 @@ void put_get_dataset(
     //Put the DataSet into the database
     client.put_dataset(sent_dataset);
 
-    if(!client.tensor_exists(dataset_name))
-        throw std::runtime_error("The DataSet "\
+    //Rename the DataSet to a new name
+    std::string new_dataset_name = "renamed_" + dataset_name;
+    client.rename_dataset(dataset_name, new_dataset_name);
+
+    //Check that the old keys have been removed
+    std::string key;
+    key = "{"+dataset_name+"}."+t_name_1;
+    if(client.key_exists(key))
+        throw std::runtime_error("The DataSet tensor " + key +
+                                 "was not deleted.");
+
+    key = "{"+dataset_name+"}."+t_name_2;
+    if(client.key_exists(key))
+        throw std::runtime_error("The DataSet tensor " + key +
+                                 "was not deleted.");
+
+    key = "{"+dataset_name+"}."+t_name_3;
+    if(client.key_exists(key))
+        throw std::runtime_error("The DataSet tensor " + key +
+                                 "was not deleted.");
+
+    key = "{"+dataset_name+"}.meta";
+    if(client.key_exists(key))
+        throw std::runtime_error("The DataSet metadata "\
+                                 "was not deleted.");
+
+    if(client.tensor_exists(dataset_name))
+        throw std::runtime_error("The DataSet confirmation "\
+                                 "key was not deleted.");
+
+    if(!client.tensor_exists(new_dataset_name))
+        throw std::runtime_error("The renamed DataSet "\
                                  "confirmation key is not set.");
 
-    SILC::DataSet retrieved_dataset = client.get_dataset(dataset_name);
+    SILC::DataSet retrieved_dataset = client.get_dataset(new_dataset_name);
+
 
     DATASET_TEST_UTILS::check_tensor_names(retrieved_dataset,
                                     {t_name_1, t_name_2, t_name_3});
@@ -73,58 +104,15 @@ void put_get_dataset(
 
 int main(int argc, char* argv[]) {
 
-    //Declare the dimensions for the 3D arrays
-    std::vector<size_t> dims{5,4,17};
+  //Declare the dimensions for the 3D arrays
+  std::vector<size_t> dims{5,4,17};
 
-    std::string dataset_name;
+  std::string dataset_name;
 
-    dataset_name = "3D_dbl_dataset_put_get";
-    put_get_dataset<double,double>(
-                    &set_3D_array_floating_point_values<double>,
-                    dims, SILC::TensorType::dbl,
-                    "_dbl", dataset_name);
+  dataset_name = "3D_dbl_dataset_rank";
+  rename_dataset<double,double>(
+				  &set_3D_array_floating_point_values<double>,
+				  dims, SILC::TensorType::dbl, "_dbl", dataset_name);
 
-    dataset_name = "3D_flt_dataset_put_get";
-    put_get_dataset<float,float>(
-                    &set_3D_array_floating_point_values<float>,
-                    dims, SILC::TensorType::flt,
-                    "_flt", dataset_name);
-
-    dataset_name = "3D_i64_dataset_put_get";
-    put_get_dataset<int64_t,int64_t>(
-                        &set_3D_array_integral_values<int64_t>,
-                        dims, SILC::TensorType::int64,
-                        "_i64", dataset_name);
-
-    dataset_name = "3D_i32_dataset_put_get";
-    put_get_dataset<int32_t,int32_t>(
-                        &set_3D_array_integral_values<int32_t>,
-                        dims, SILC::TensorType::int32,
-                        "_i32", dataset_name);
-
-    dataset_name = "3D_i16_dataset_put_get";
-    put_get_dataset<int16_t,int16_t>(
-                        &set_3D_array_integral_values<int16_t>,
-                        dims, SILC::TensorType::int16,
-                        "_i16", dataset_name);
-
-    dataset_name = "3D_i8_dataset_put_get";
-    put_get_dataset<int8_t,int8_t>(
-                        &set_3D_array_integral_values<int8_t>,
-                        dims, SILC::TensorType::int8,
-                        "_i8", dataset_name);
-
-    dataset_name = "3D_ui16_dataset_put_get";
-    put_get_dataset<uint16_t,uint16_t>(
-                        &set_3D_array_integral_values<uint16_t>,
-                        dims, SILC::TensorType::uint16,
-                        "_ui16", dataset_name);
-
-    dataset_name = "3D_ui8_dataset_put_get";
-    put_get_dataset<uint8_t,uint8_t>(
-                        &set_3D_array_integral_values<uint8_t>,
-                        dims, SILC::TensorType::uint8,
-                        "_ui8", dataset_name);
-
-    return 0;
+  return 0;
 }

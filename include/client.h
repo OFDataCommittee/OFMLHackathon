@@ -405,17 +405,17 @@ class Client
         *   \brief Check if the model (or the script) exists in the database
         *   \param name The name that will be checked in the database
         *               Depending on the current prefixing behavior,
-        *               the name could be automatically prefixed 
+        *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the key exists in the database
         */
         bool model_exists(const std::string& name);
 
         /*!
-        *   \brief Check if the model (or the script) exists in the database
+        *   \brief Check if the tensor (or the dataset) exists in the database
         *   \param name The name that will be checked in the database
         *               Depending on the current prefixing behavior,
-        *               the name could be automatically prefixed 
+        *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the key exists in the database
         */
@@ -445,7 +445,7 @@ class Client
         *          of times
         *   \param name The key that will be checked in the database
         *               Depending on the current prefixing behavior,
-        *               the name could be automatically prefixed 
+        *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \param poll_frequency_ms The frequency of checks for the
         *                            key in milliseconds
@@ -459,14 +459,14 @@ class Client
         bool poll_tensor(const std::string& name,
                          int poll_frequency_ms,
                          int num_tries);
-        
+
         /*!
         *   \brief Check if the model (or script) exists in the database
         *          at a specified frequency for a specified number
-        *          of times. 
+        *          of times.
         *   \param name The name that will be checked in the database
         *               Depending on the current prefixing behavior,
-        *               the name could be automatically prefixed 
+        *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \param poll_frequency_ms The frequency of checks for the
         *                            key in milliseconds
@@ -493,14 +493,14 @@ class Client
         *        prefixed (e.g. in an ensemble) to form database keys.
         *        Prefixes will only be used if they were previously set through
         *        the environment variables SSKEYOUT and SSKEYIN.
-        *        Keys of entities created before this function is called 
+        *        Keys of entities created before this function is called
         *        will not be affected.
         *        By default, the client prefixes tensor and dataset keys
         *        with the first prefix specified with the SSKEYIN
         *        and SSKEYOUT environment variables.
         *
         * \param use_prefix If set to true, all future operations
-        *                   on tensors and datasets will use 
+        *                   on tensors and datasets will use
         *                   a prefix, if available.
         */
         void use_tensor_ensemble_prefix(bool use_prefix);
@@ -510,16 +510,16 @@ class Client
         *        prefixed (e.g. in an ensemble) to form database keys.
         *        Prefixes will only be used if they were previously set through
         *        the environment variables SSKEYOUT and SSKEYIN.
-        *        Keys of entities created before this function is called 
+        *        Keys of entities created before this function is called
         *        will not be affected.
         *        By default, the client does not prefix model and script keys.
         *
         * \param use_prefix If set to true, all future operations
-        *                   on models and scripts will use 
+        *                   on models and scripts will use
         *                   a prefix, if available.
         */
         void use_model_ensemble_prefix(bool use_prefix);
-        
+
     protected:
 
         /*!
@@ -543,6 +543,21 @@ class Client
         *         object will be destroyed with the Client.
         */
         Redis* _redis;
+
+        /*!
+        *   \brief Execute a Command
+        *   \param cmd The Command to execute
+        *   \returns The CommandReply after execution
+        */
+        CommandReply _run(Command& cmd);
+
+        /*!
+        *   \brief Execute a list of commands
+        *   \param cmds The CommandList to execute
+        *   \returns The CommandReply from the last
+        *            command execution
+        */
+        CommandReply _run(CommandList& cmd_list);
 
         /*!
         *  \brief Set the prefixes that are used for
@@ -574,6 +589,15 @@ class Client
         *  \param keys The vector of keys to prefix for placement
         */
         inline void _append_with_put_prefix(std::vector<std::string>& keys);
+
+        /*!
+        *  \brief Execute the command to retrieve the DataSet metadata portion
+        *         of the DataSet.
+        *   \param name The name of the DataSet, not prefixed.
+        *   \returns The CommandReply for the command to retrieve the DataSet
+        *             metadata
+        */
+        inline CommandReply _get_dataset_metadata(const std::string& name);
 
     private:
 
@@ -613,26 +637,26 @@ class Client
         /*!
         * \brief Flag determining whether prefixes should be used
         *        for tensor keys.
-        */ 
+        */
         bool _use_tensor_prefix;
 
         /*!
         * \brief Flag determining whether prefixes should be used
         *        for model and script keys.
-        */ 
+        */
         bool _use_model_prefix;
 
         /*!
         * \brief Build full formatted key of a tensor, based on current prefix settings.
         * \param key Tensor key
-        * \param on_db Indicates whether the key refers to an entity which is already in the database.yy
+        * \param on_db Indicates whether the key refers to an entity which is already in the database.
         */
         inline std::string _build_tensor_key(const std::string& key, bool on_db);
-        
+
         /*!
         * \brief Build full formatted key of a model or a script, based on current prefix settings.
         * \param key Model or script key
-        * \param on_db Indicates whether the key refers to an entity which is already in the database.yy
+        * \param on_db Indicates whether the key refers to an entity which is already in the database.
         */
         inline std::string _build_model_key(const std::string& key, bool on_db);
 
@@ -640,10 +664,41 @@ class Client
         *  \brief Build full formatted key of a dataset, based
         *         on current prefix settings.
         *  \param dataset_name Name of dataset
-        *  \param on_db Indicates whether the key refers to an entity which is already in the database.yy
+        *  \param on_db Indicates whether the key refers to an entity which is already in the database.
         *  \returns Formatted key.
         */
         inline std::string _build_dataset_key(const std::string& dataset_name, bool on_db);
+
+        /*!
+        *  \brief Create the key for putting or getting a DataSet tensor in the database
+        *  \param dataset_name The name of the dataset
+        *  \param tensor_name The name of the tensor
+        *  \param on_db Indicates whether the key refers to an entity which is already in the database.
+        *  \returns A string of the key for the tensor
+        */
+        inline std::string _build_dataset_tensor_key(const std::string& dataset_name,
+                                                     const std::string& tensor_name,
+                                                     bool on_db);
+
+        /*!
+        *  \brief Create the key for putting or getting DataSet metadata in the database
+        *  \param dataset_name The name of the dataset
+        *  \param on_db Indicates whether the key refers to an entity which is already in the database.
+        *  \returns A string of the key for the metadata
+        */
+        inline std::string _build_dataset_meta_key(const std::string& dataset_name,
+                                                   bool on_db);
+
+        /*!
+        *  \brief Create the key to place an indicator in the database that the dataset has been
+        *         successfully stored.
+        *  \param dataset_name The name of the dataset
+        *  \param on_db Indicates whether the key refers to an entity which is already in the database.
+        *  \returns A string of the key for the ack key
+        */
+        inline std::string _build_dataset_ack_key(const std::string& dataset_name,
+                                                  bool on_db);
+
 };
 
 } //namespace SILC
