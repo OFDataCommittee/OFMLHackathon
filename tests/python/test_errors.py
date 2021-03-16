@@ -107,6 +107,33 @@ def test_missing_script_function(use_cluster):
     with pytest.raises(RedisReplyError):
         c.run_script("bad-function", "not-a-function-in-script", ["bad-func-tensor"], ["output"])
 
+def test_wrong_model_name(mock_data, mock_model, use_cluster):
+    """User requests to run a model that is not there"""
+
+    data = mock_data.create_data(1)
+
+    model = mock_model.create_torch_cnn()
+    c = Client(None, use_cluster)
+    c.set_model("simple_cnn", model, "TORCH", "CPU")
+    c.put_tensor("input", data[0])
+    with pytest.raises(RedisReplyError):
+        c.run_model("wrong_cnn", ["input"], ["output"])
+
+def test_wrong_model_name_from_file(mock_data, mock_model, use_cluster):
+    """User requests to run a model that is not there
+       that was loaded from file."""
+
+    try:
+        data = mock_data.create_data(1)
+        mock_model.create_torch_cnn(filepath="./torch_cnn.pt")
+        c = Client(None, use_cluster)
+        c.set_model_from_file("simple_cnn_from_file", "./torch_cnn.pt",
+                              "TORCH", "CPU")
+        c.put_tensor("input", data[0])
+        with pytest.raises(RedisReplyError):
+            c.run_model("wrong_cnn", ["input"], ["output"])
+    finally:
+        os.remove("torch_cnn.pt")
 
 def bad_function(data):
     """Bad function which only raises an exception"""
