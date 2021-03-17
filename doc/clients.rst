@@ -6,20 +6,40 @@ SILC
 Client Overview
 ===============
 
-The SmartSim Infrastructure Library Clients are essentially
-Redis clients with additional functionality. In particular,
-the SILC clients allow a user to send and receive n-dimensional
-``Tensors`` with metadata, a crucial data format for data
-analysis and machine learning.
+The SmartSim Infrastructure Library Clients (SILC) are a set of
+Redis clients that support RedisAI capabilities with additional
+features for high performance computing (HPC) applications.
+Key features of RedisAI that are supported by SILC include:
 
-Each client in SILC has distributed support for Redis clusters
-and can work with both Redis and KeyDB.
+-   A tensor data type in Redis
+-   TensorFlow, TensorFlow Lite, Torch,
+    and ONNXRuntime backends for model evaluations
+-   TorchScript storage and evaluation
 
-Furthermore, the client implementations in SILC are all
-RedisAI compatable meaning that they can directly set
-and run Machine Learning and Deep Learning models stored
-within a Redis database.
+In additional to the RedisAI capabilities above,
+SILC includes the following features developed for
+large, distributed architectures:
 
+-   Redis cluster support for distributed data storage
+    and model serving
+-   Distributed model and script placement for parallel
+    evaluation to maximize hardware utilization and throughput
+-   A ``DataSet`` storage format to aggregate multiple tensors
+    and metadata into a single Redis cluster hash slot
+    to prevent data scatter on Redis clusters.  This is useful
+    when clients produce tensors and metadata that are
+    referenced or utilized together.
+-   Compatibility with SmartSim ensemble capabilities to
+    prevent key collisions with
+    tensors, ``DataSet``, models, and scripts when
+    clients are part of an ensemble of applications
+
+SILC provides clients in Python, C++, C, and Fortran.
+These clients have been written to provide a
+consistent API experience across languages, within
+the constraints of language capabilities.  The table
+below summarizes the language standards required to build
+the clients.
 
 .. list-table:: Supported Languages
    :widths: 25 25 25
@@ -30,56 +50,163 @@ within a Redis database.
      - Version/Standard
      - Status
    * - Python
-     - 3.7+
-     - In Development
+     - 3.7
+     - Stable
    * - C++
-     - C++11
+     - C++17
      - Stable
    * - C
      - C99
      - Stable
    * - Fortran
-     - Fortran 2003 +
-     - In Development
+     - Fortran 2018
+     - Stable
 
-Data Formats
-============
+Data Structures
+===============
 
-There are two data formats within SILC: Tensor and Dataset.
+RedisAI defines three new data structures to be used in redis databases: tensor, model, and script.
+In addition, SILC defines an additional data structure ``DataSet``.  In this section, the SILC
+API for interacting with these data structures will be described, and when applicable,
+comments on performance and best practices will be made.
 
-Tensors
+In general, concepts and capabilities will be demonstrated for the Python and C++ API
+because of noticeable differences in function signatures.  The C and Fortran function
+signatures closely resemble the C++ API, and as a result, they are not discussed in detail
+in the interest of brevity.  For more detailed explanations of the C and Fortran API,
+refer to the documentation pages for those clients.
+
+Tensor
 -------
 
-The fundamental data format of the SILC clients is an n-dimensional tensor. This
-data structure, however, is opaque to the user in that n-dimensional arrays in the
-host language (C, C++, Fortran, Python) are transformed into the tensor format at runtime.
-Another way to say this is that tensors are not a user-space data structure, but rather
-work directly with the data format already present in the program the SILC clients are
-embedded into.
+An n-dimensional tensor is used by RedisAI to store and manipulate numerical data. SILC
+provides functions to put a key and tensor pair into the Redis database and retrieve
+a tensor associated with a key from the database.
 
-For example, in Python, the SILC client works directly with NumPy arrays.
-For C and C++, both nested and contiguous memory arrays are supported.
+.. note::
+    When utilizing SILC with SmartSim ensemble functionality,
+    the key provided to SILC tensor functions may be
+    manipulated before placement in or retrieval from the database in order to
+    avoid key collisions between ensemble members.  Therefore, when using
+    SmartSim ensemble functionality, retrieval of a tensor using the Redis
+    command line interface (CLI) will require an adapting the expected
+    key.
 
+**Putting a tensor into the database**
+
+In Python, the ``Client`` infers the type and dimensions of the tensor from the
+NumPy array data structure, and as a result, only the key and NumPy array are needed to
+place a key and tensor pair in the database.  Currently, only NumPy arrays
+are supported as inputs and outputs of Python ``Client`` tensor functions.
+
+.. code-block:: python
+
+    # Python put_tensor() interface
+    put_tensor(self, key, data)
+
+In the compiled clients, more information is needed to inform the ``Client`` about
+the tensor properties.  In the C++ API, the dimensions of the tensor are provided
+via a ``std::vector<size_t>`` input parameter.  Additionally, the type associated
+with the tensor data (e.g. ``double``, ``float``) is specified with a
+``SILC::TensorType`` enum.  Finally, the ``Client`` must know the memory
+layout of the provided tensor data in order to generate a tensor data buffer.
+In C++, tensor data can either be in a contiguous memory layout or in a nested,
+non-contiguous (i.e. nested pointer arrays to underlying allocated memory) memory
+layout.  The memory layout of the tensor data to place in the database is specified
+with a ``SILC::MemoryLayout`` enum input parameter.
+
+.. code-block:: cpp
+
+    // C++ put_tensor interface
+    void put_tensor(const std::string& key,
+                    void* data,
+                    const std::vector<size_t>& dims,
+                    const TensorType type,
+                    const MemoryLayout mem_layout);
+
+C and Fortran have similar function prototypes compared to the C++ client,
+except the C client uses only C data types and the Fortran client does
+not require the specification of the tensor memory layout because it is assumed
+that Fortran array memory is allocated in a column-major, contiguous manner.
+
+**Retrieving a tensor from the database**
+
+The C++, C, and Fortran clients provide two methods for retrieving
+tensors from the Redis database. The first method is referred to as *unpacking* a
+tensor.  When a tensor is retrieved via ``unpack_tensor()``, the memory space to
+store the retrieved tensor data is provided by the user.
+This has the advantage of giving the user the ability to manage the scope of the
+retrieved tensor allocated memory.
+
+The C++ function signature for ``unpack_tensor()`` is shown below.  In the case
+of ``unpack_tensor()`` the parameters ``dims``, ``type``, and ``mem_layout``
+are used to specify the characteristics of the user-provided memory space.
+The type and dimensions are compared to the tensor that is retrieved
+from the database, and if the dimensions and type do not match, an error
+will be thrown.  Otherwise, the memory space pointed to by the ``data``
+pointer will be filled consistent with the specified memory layout.
+
+.. code-block:: cpp
+
+    // C++ unpack_tensor() interface
+    void unpack_tensor(const std::string& key,
+                       void* data,
+                       const std::vector<size_t>& dims,
+                       const TensorType type,
+                       const MemoryLayout mem_layout);
+
+The other option for retrieving a tensor with the
+C++, C, and Fortran clients is ``get_tensor()``.  With ``get_tensor()``,
+it is assumed that the user does not know the dimensions or type of the tensor,
+and as a result, the ``Client`` allocates and manages memory necessary for the
+retrieved tensor data.  The C++ function signature for ``get_tensor()`` is shown
+below.  Note that a pointer to the newly allocated data, tensor dimensions, and
+tensor type are returned to the user via modifying referenced variables that the
+user declares before the ``get_tensor()`` call.  This is done to provide a similar
+experience across the C++, C, and Fortran clients.
+
+.. code-block:: cpp
+
+    // C++ get_tensor interface
+    void get_tensor(const std::string& key,
+                    void*& data,
+                    std::vector<size_t>& dims,
+                    TensorType& type,
+                    const MemoryLayout mem_layout);
+
+.. note::
+    Memory allocated by ``Client`` during a ``get_tensor()`` call will be valid
+    and not freed until the ``Client`` object is destroyed.  Therefore, if the
+    type and dimensions of the tensor are known, it is recommended that
+    ``unpack_tensor()`` is used in memory-constrained situations.
+
+The Python client currently only offers a ``get_tensor()`` option for
+retrieving tensors.  In this methodology, a NumPy array is returned
+to the user, and the only required input to the function is the
+name of the tensor to retrieve because all the type and dimensions
+information are embedded in the NumPy array object.
+The Python interface for ``get_tensor()`` is shown below.
+
+.. code-block:: python
+
+    # Python get_tensor() interface
+    get_tensor(self, key):
+
+Note that all of the client ``get_tensor()`` functions will internally
+modify the provided tensor name if the client is being used with
+SmartSim ensemble capabilities.
 
 Dataset
 -------
 
-In many scientific applications, groups of n-dimensional tensors need to be grouped
-as they have some association. For example, an CFD modeler might want to send grid or
-coordinate information along with the value tensors. Similarly, a scientist might want
-to label the dimensions of a tensor. For this specific reason, we create a user-facing
-object called the Dataset.
+In many situations, a ``Client``  might be tasked with sending a group of tensors and
+metadata that are closely related and naturally grouped into a collection for
+future retrieval.  The ``DataSet`` object stages these items so that they
+can be more efficiently placed in the redis database and can later be retrieved with a
+single key.
 
-Datasets are groups of n-dimensional tensors that can also be supplied with metadata.
-The Dataset enables users to construct and send batches of tensors with metadata to the
-Orchestrator and receive them from the Orchestrator with only a single key. Users need
-not know where the tensors and metadata within the Dataset object are stored once they
-have been sent to the Orchestrator. Users only need to know the key of the dataset was
-stored in order to retrieve a Dataset.
-
-
-Supported Data Types
---------------------
+Listed below are the supported tensor and metadata types.  In the following sections,
+building, sending, and retrieving a ``DataSet`` will be described.
 
 .. list-table:: Supported Data Types
    :widths: 25 25 25
@@ -123,71 +250,256 @@ Supported Data Types
      -
      - X
 
+**Building and sending a DataSet**
 
-Inference API
-=============
+When building a ``DataSet`` to be stored in the database, a user can add
+any combination of tensors and metadata.  To add a tensor to the ``DataSet``,
+the user simply uses the ``DataSet.add_tensor()`` function defined in
+each language.  The ``DataSet.add_tensor()`` parameters are the same
+as ``Client.put_tensor()``, and as a result, details of the function
+signatures will not be reiterated here.
 
-The inference API refers to the scripting API with TorchScript and the Model API
-which supports ONNX, Pytorch, Tensorflow and Tensorflow-Lite placement and execution
-on CPU and GPU.
+.. note::
+    ``DataSet.add_tensor()`` copies the tensor data provided by the user to
+    eliminate errors from user-provided data being cleared or deallocated.
+    This additional memory will be freed when the DataSet
+    object is destroyed.
 
-TorchScript API
----------------
+Metadata can be added to the ``DataSet`` with the ``DataSet.add_meta_scalar()``
+and ``DataSet.add_meta_string()`` functions.  As the aforementioned function
+names suggest, there are separate functions to add metadata that is a scalar
+(e.g. double) and a string. For both functions, the first function input
+is the name of the metadata field.  This field name is an internal ``DataSet``
+identifier for the metadata value(s) that is used for future retrieval,
+and because it is an internal identifier, the user does not have to worry
+about any key conflicts in the database (i.e. multiple ``DataSet`` can have
+the same metadata field names).  To clarify these and future descriptions,
+the C++ interface for adding metadata is shown below:
 
-The ability to perform online data processing is essential to enabling online inference.
-Most machine learning algorithms will not perform unless the input data has been processed.
-Often this processing is as simple as a normalization. However, if there was an intermediate
-data processing step between a Model and the Orchestrator (where the ML model is hosted for
-inference), this would result in significant latency penalties. For this reason, the
-Orchestrator is capable of executing TorchScript programs inside of the Redis database.
+.. code-block:: cpp
 
-The SILC clients are capable of putting, getting, and executing TorchScript programs
-remotely. The scripts are JIT-traced python programs that can operate on any data stored
-within the Orchestrator. Scripts are executed and the result returned by the TorchScript
-program is stored within the database. Once the result is stored, it can be used in
-executions of ML models that also reside within the database. By co-locating script
-and models, the process of using a ML model in real-time becomes much more performant.
+    // C++ add_meta_scalar() interface
+    void add_meta_scalar(const std::string& name,
+                         const void* data,
+                         const MetaDataType type);
 
-Torchscript programs can be run on GPU or CPU. The API for script placement and execution
-can be found in the API documentation.
-
-
-Model API
----------
-
-In addition to supporting the transfer of n-dimensional tensors, SILC clients support the
-remote execution of Pytorch , TensorFlow, TensorFlow-Lite and ONNX models that are stored
-within the Orchestrator. SILC clients can be embedded into simulations with the goal of being
-able to augment simulations with machine learning models co-located in an in-memory database
-reachable by Unix socket on node or through TCP over the network.
-
-SILC clients support putting, retrieving and executing ML models in the aforementioned
-frameworks. When a call to ``client.set_model()`` is performed, a single copy of the
-model is placed on every node of the database. The reason for this is data locality.
-When performing the remote execution of a model through the SILC client, the model chosen
-for execution is the model closest to the node in the database where the input data to the
-model is stored. In the case where all of the requested data for a model execution is
-not on the same node of the database, SILC clients will move the requested data.
-When required, the data movement process is completely opaque to the user, which
-makes remote model execution simpler from an implementation standpoint.
-
-Design
-======
-
-Simulation and data analytics codes communicate with the database using
-SmartSim clients written in the native language of the codebase. These
-clients perform two essential tasks (both of which are opaque to the application):
-
- 1. Serialization/deserialization of data
- 2. Communication with the database
-
-The API for these clients are designed so that implementation within
-simulation and analysis codes requires minimal modification to the underlying
-codebase.
+    // C++ add_meta_string() interface
+    void add_meta_string(const std::string& name,
+                         const std::string& data);
 
 
-.. |SmartSim Clients| image:: images/Smartsim_Client_Communication.png
-  :width: 500
-  :alt: Alternative text
+When adding a scalar or string metadata value, the value is copied
+by the ``DataSet``, and as a result, the user does not need to ensure
+that the metadata values provided are still in memory after they have
+been added.  Additionally, multiple metadata values can be added to a
+single field, and the default behavior is to append the value to the
+existing field.  In this way, the ``DataSet`` metadata supports
+one-dimensional arrays, but the entries in the array must be added
+iteratively by the user.  Also, note that in the above C++ example,
+the metadata scalar type must be specified with a ``SILC::MetaDataType``
+enum value, and similar requirements exist for C and Fortran ``DataSet``
+implementations.
 
-|SmartSim Clients|
+Finally, the ``DataSet`` object is sent to the database using the
+``Client.put_dataset()`` function, which is uniform across all clients.
+
+**Retrieving a DataSet from the database**
+
+In all clients, the ``DataSet`` is retrieved with a single
+function call to ``Client.get_dataset()``, which requires
+only the name of the ``DataSet`` (i.e. the name used
+in the constructor of the ``DataSet`` when it was
+built and placed in the database).  ``Client.get_dataset()``
+returns to the user a DataSet object or a pointer to a
+DataSet object that can be used to access all of the
+dataset tensors and metadata.
+
+The functions for retrieving tensors from ``DataSet`` are identical
+to the functions provided by ``Client``, and the same return
+values and memory management paradigm is followed.  As a result,
+please refer to the previous section for details on tensor retrieve
+function calls.
+
+There are two functions for retrieving metadata: ``get_meta_scalars()``
+and ``get_meta_strings()``.  As the names suggest, the first function
+is used for retrieving numerical metadata values, and the second is
+for retrieving metadata string values.  The metadata retrieval function
+prototypes vary across the clients based on programming language constraints,
+and as a result, please refer to the ``DataSet`` API documentation
+for a description of input parameters and memory management.  It is
+important to note, however, that all functions require the name of the
+metadata field to be retrieved, and this name is the same name that
+was used when constructing the metadata field with ``add_meta_scalar()``
+and ``add_meta_string()`` functions.
+
+Model
+-----
+
+Like tensors, the RedisAI model data structure is exposed to users
+through ``Client`` function calls to place a model in the database,
+retrieve a model from the database, and run a model.  Note that
+RedisAI supports PyTorch, TensorFlow, TensorFlow Lite, and ONNX backends,
+and specifying the backend to be used is done through the ``Client``
+function calls.
+
+**Setting a model**
+
+A model is placed in the database through the ``Client.set_model()``
+function.  While data types may differ, the function parameters
+are uniform across all SILC clients, and as an example, the C++
+``set_model()`` function is shown below.
+
+.. code-block:: cpp
+
+    # C++ set_model interface
+    void set_model(const std::string& key,
+                   const std::string_view& model,
+                   const std::string& backend,
+                   const std::string& device,
+                   int batch_size = 0,
+                   int min_batch_size = 0,
+                   const std::string& tag = "",
+                   const std::vector<std::string>& inputs
+                       = std::vector<std::string>(),
+                   const std::vector<std::string>& outputs
+                       = std::vector<std::string>());
+
+All of the parameters in ``set_model()`` follow the RedisAI
+API for the the RedisAI ``AI.MODELSET`` command, and as a result,
+the reader is encouraged to read the SILC client code
+documentation or the RedisAI documentation for a description
+of each parameter.
+
+.. note::
+    With a Redis cluster configuration, ``Client.set_model()`` will distribute
+    a copy of the model to each database node in the
+    cluster.  As a result, the model that has been
+    placed in the cluster with ``Client.set_model()``
+    will not be addressable directly with the Redis CLI because
+    of key manipulation that is required to accomplish
+    this distribution.  Despite the internal key
+    manipulation, models in a Redis cluster that have been
+    set through the SILC ``Client`` can be accessed
+    and run through the SILC ``Client`` API
+    using the key provided to ``set_model()``.  The user
+    does not need any knowledge of the cluster model distribution
+    to perform RedisAI model actions.  Moreover,
+    a model set by one SILC client (e.g. Python) on a Redis
+    cluster is addressable with the same key through another
+    client (e.g. C++).
+
+Finally, there is a similar function in each client,
+``Client.set_model_from_file()``, that will read a
+model from file and set it in the database.
+
+**Retrieving a model**
+
+A model can be retrieved from the database using the
+```Client.get_model()``` function.  While the return
+type varies between languages, only the model key
+that was used with ``Client.set_model()`` is needed
+to reference the model in the database.  Note that
+in a Redis cluster configuration, only one copy of the
+model is returned to the user.
+
+.. note::
+
+    ``Client.get_model()`` will allocate memory to retrieve
+    the model from the database, and this memory will not
+    be freed until the Client object is destroyed.
+
+**Running a model**
+
+A model can be executed using the ``Client.run_model()`` function.
+The only required inputs to execute a model are the model key,
+a list of input tensor names, and a list of output tensor names.
+If using a Redis cluster configuration, a copy of the model
+referenced by the provided key will be chosen based on data locality.
+It is worth noting that the names of input and output tensor will be
+altered with ensemble member identifications if this SmartSim
+ensemble compatibility features are used.
+
+DataSet tensors can be used as ``run_model()`` input tensors,
+but the key provided to ``run_model()`` must be prefixed with
+the DataSet name in the pattern ``{dataset_name}.tensor_name``.
+
+Script
+------
+
+Data processing is an essential step in most machine
+learning workflows.  For this reason, RedisAI provides
+the ability to evaluate PyTorch programs using the hardware
+co-located with the Redis database (either CPU or GPU).
+The SILC ``Client`` provides functions for users to
+place a script in the database, retrieve a script from the
+database, and run a script.
+
+**Setting a script**
+
+A script is placed in the database through the ``Client.set_script()``
+function.  While data types may differ, the function parameters
+are uniform across all SILC clients, and as an example, the C++
+``set_script()`` function is shown below.  The function signature
+is quite simple for placing a script in the database, only
+a name for the script, hardware for execution, and the script text
+need to be provided by the user.
+
+.. code-block:: cpp
+
+    void set_script(const std::string& key,
+                    const std::string& device,
+                    const std::string_view& script);
+
+.. note::
+    With a Redis cluster configuration, ``Client.set_script()`` will distribute
+    a copy of the script to each database node in the
+    cluster.  As a result, the script that has been
+    placed in the cluster with ``Client.set_script()``
+    will not be addressable directly with the Redis CLI because
+    of key manipulation that is required to accomplish
+    this distribution.  Despite the internal key
+    manipulation, scripts in a Redis cluster that have been
+    set through the SILC ``Client`` can be accessed
+    and run through the SILC ``Client`` API
+    using the key provided to ``set_script()``.  The user
+    does not need any knowledge of the cluster script distribution
+    to perform RedisAI script actions.  Moreover,
+    a script set by one SILC client (e.g. Python) on a Redis
+    cluster is addressable with the same key through another
+    client (e.g. C++).
+
+Finally, there is a similar function in each client,
+``Client.set_script_from_file()``, that will read a
+script from file and set it in the database.
+
+**Retrieving a script**
+
+A script can be retrieved from the database using the
+```Client.get_script()``` function.  While the return
+type varies between languages, only the script key
+that was used with ``Client.set_script()`` is needed
+to reference the script in the database.  Note that
+in a Redis cluster configuration, only one copy of the
+script is returned to the user.
+
+.. note::
+
+    ``Client.get_script()`` will allocate memory to retrieve
+    the script from the database, and this memory will not
+    be freed until the Client object is destroyed.
+
+**Running a script**
+
+A script can be executed using the ``Client.run_script()`` function.
+The only required inputs to execute a script are the script key,
+the name of the function in the script to executive, a list of input
+tensor names, and a list of output tensor names.
+If using a Redis cluster configuration, a copy of the script
+referenced by the provided key will be chosen based on data locality.
+It is worth noting that the names of input and output tensor will be
+altered with ensemble member identifications if this SmartSim
+ensemble compatibility features are used.
+
+DataSet tensors can be used as ``run_script()`` input tensors,
+but the key provided to ``run_script()`` must be prefixed with
+the DataSet name in the pattern ``{dataset_name}.tensor_name``.
