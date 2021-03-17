@@ -7,7 +7,7 @@ else
     if [[ ! -d "./RedisAI" ]]; then
         git clone --recursive https://github.com/RedisAI/RedisAI.git RedisAI
         cd RedisAI
-        git checkout tags/v1.0.2
+	git checkout f1a05308e28ec307f064f1bb7e81886d8b711eb3
         cd ..
     else
         echo "RedisAI downloaded"
@@ -15,7 +15,7 @@ else
     cd RedisAI
     echo "Downloading RedisAI CPU dependencies"
     CC=gcc CXX=g++ bash get_deps.sh cpu
-    echo "Building RedisAI v1.0.2"
+    echo "Building RedisAI"
     CC=gcc CXX=g++ ALL=1 make -C opt clean build GPU=0 WITH_PT=$1 WITH_TF=$2 WITH_TFLITE=$3 WITH_ORT=$4
 
     if [ -f "./install-cpu/redisai.so" ]; then

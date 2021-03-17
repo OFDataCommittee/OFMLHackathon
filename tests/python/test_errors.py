@@ -137,4 +137,4 @@ def test_wrong_model_name_from_file(mock_data, mock_model, use_cluster):
 
 def bad_function(data):
     """Bad function which only raises an exception"""
-    raise Exception
+    return False
