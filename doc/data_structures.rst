@@ -1,69 +1,6 @@
-
-****
-SILC
-****
-
-Client Overview
-===============
-
-The SmartSim Infrastructure Library Clients (SILC) are a set of
-Redis clients that support RedisAI capabilities with additional
-features for high performance computing (HPC) applications.
-Key features of RedisAI that are supported by SILC include:
-
--   A tensor data type in Redis
--   TensorFlow, TensorFlow Lite, Torch,
-    and ONNXRuntime backends for model evaluations
--   TorchScript storage and evaluation
-
-In additional to the RedisAI capabilities above,
-SILC includes the following features developed for
-large, distributed architectures:
-
--   Redis cluster support for distributed data storage
-    and model serving
--   Distributed model and script placement for parallel
-    evaluation to maximize hardware utilization and throughput
--   A ``DataSet`` storage format to aggregate multiple tensors
-    and metadata into a single Redis cluster hash slot
-    to prevent data scatter on Redis clusters.  This is useful
-    when clients produce tensors and metadata that are
-    referenced or utilized together.
--   Compatibility with SmartSim ensemble capabilities to
-    prevent key collisions with
-    tensors, ``DataSet``, models, and scripts when
-    clients are part of an ensemble of applications
-
-SILC provides clients in Python, C++, C, and Fortran.
-These clients have been written to provide a
-consistent API experience across languages, within
-the constraints of language capabilities.  The table
-below summarizes the language standards required to build
-the clients.
-
-.. list-table:: Supported Languages
-   :widths: 25 25 25
-   :header-rows: 1
-   :align: center
-
-   * - Language
-     - Version/Standard
-     - Status
-   * - Python
-     - 3.7
-     - Stable
-   * - C++
-     - C++17
-     - Stable
-   * - C
-     - C99
-     - Stable
-   * - Fortran
-     - Fortran 2018
-     - Stable
-
+***************
 Data Structures
-===============
+***************
 
 RedisAI defines three new data structures to be used in redis databases: tensor, model, and script.
 In addition, SILC defines an additional data structure ``DataSet``.  In this section, the SILC
@@ -77,7 +14,7 @@ in the interest of brevity.  For more detailed explanations of the C and Fortran
 refer to the documentation pages for those clients.
 
 Tensor
--------
+======
 
 An n-dimensional tensor is used by RedisAI to store and manipulate numerical data. SILC
 provides functions to put a key and tensor pair into the Redis database and retrieve
@@ -92,7 +29,8 @@ a tensor associated with a key from the database.
     command line interface (CLI) will require an adapting the expected
     key.
 
-**Putting a tensor into the database**
+Sending
+-------
 
 In Python, the ``Client`` infers the type and dimensions of the tensor from the
 NumPy array data structure, and as a result, only the key and NumPy array are needed to
@@ -129,7 +67,8 @@ except the C client uses only C data types and the Fortran client does
 not require the specification of the tensor memory layout because it is assumed
 that Fortran array memory is allocated in a column-major, contiguous manner.
 
-**Retrieving a tensor from the database**
+Retrieving
+----------
 
 The C++, C, and Fortran clients provide two methods for retrieving
 tensors from the Redis database. The first method is referred to as *unpacking* a
@@ -197,7 +136,7 @@ modify the provided tensor name if the client is being used with
 SmartSim ensemble capabilities.
 
 Dataset
--------
+=======
 
 In many situations, a ``Client``  might be tasked with sending a group of tensors and
 metadata that are closely related and naturally grouped into a collection for
@@ -250,7 +189,8 @@ building, sending, and retrieving a ``DataSet`` will be described.
      -
      - X
 
-**Building and sending a DataSet**
+Sending
+-------
 
 When building a ``DataSet`` to be stored in the database, a user can add
 any combination of tensors and metadata.  To add a tensor to the ``DataSet``,
@@ -303,7 +243,8 @@ implementations.
 Finally, the ``DataSet`` object is sent to the database using the
 ``Client.put_dataset()`` function, which is uniform across all clients.
 
-**Retrieving a DataSet from the database**
+Retrieving
+----------
 
 In all clients, the ``DataSet`` is retrieved with a single
 function call to ``Client.get_dataset()``, which requires
@@ -333,7 +274,7 @@ was used when constructing the metadata field with ``add_meta_scalar()``
 and ``add_meta_string()`` functions.
 
 Model
------
+=====
 
 Like tensors, the RedisAI model data structure is exposed to users
 through ``Client`` function calls to place a model in the database,
@@ -342,7 +283,8 @@ RedisAI supports PyTorch, TensorFlow, TensorFlow Lite, and ONNX backends,
 and specifying the backend to be used is done through the ``Client``
 function calls.
 
-**Setting a model**
+Sending
+-------
 
 A model is placed in the database through the ``Client.set_model()``
 function.  While data types may differ, the function parameters
@@ -392,7 +334,8 @@ Finally, there is a similar function in each client,
 ``Client.set_model_from_file()``, that will read a
 model from file and set it in the database.
 
-**Retrieving a model**
+Retrieving
+----------
 
 A model can be retrieved from the database using the
 ```Client.get_model()``` function.  While the return
@@ -408,7 +351,8 @@ model is returned to the user.
     the model from the database, and this memory will not
     be freed until the Client object is destroyed.
 
-**Running a model**
+Executing
+---------
 
 A model can be executed using the ``Client.run_model()`` function.
 The only required inputs to execute a model are the model key,
@@ -424,7 +368,7 @@ but the key provided to ``run_model()`` must be prefixed with
 the DataSet name in the pattern ``{dataset_name}.tensor_name``.
 
 Script
-------
+======
 
 Data processing is an essential step in most machine
 learning workflows.  For this reason, RedisAI provides
@@ -434,7 +378,8 @@ The SILC ``Client`` provides functions for users to
 place a script in the database, retrieve a script from the
 database, and run a script.
 
-**Setting a script**
+Sending
+-------
 
 A script is placed in the database through the ``Client.set_script()``
 function.  While data types may differ, the function parameters
@@ -472,7 +417,8 @@ Finally, there is a similar function in each client,
 ``Client.set_script_from_file()``, that will read a
 script from file and set it in the database.
 
-**Retrieving a script**
+Retrieving
+----------
 
 A script can be retrieved from the database using the
 ```Client.get_script()``` function.  While the return
@@ -488,7 +434,8 @@ script is returned to the user.
     the script from the database, and this memory will not
     be freed until the Client object is destroyed.
 
-**Running a script**
+Execution
+---------
 
 A script can be executed using the ``Client.run_script()`` function.
 The only required inputs to execute a script are the script key,
