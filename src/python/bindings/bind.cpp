@@ -35,6 +35,8 @@ PYBIND11_MODULE(silcPy, m) {
     py::class_<PyDataset>(m, "PyDataset")
         .def(py::init<std::string&>())
         .def("add_tensor", &PyDataset::add_tensor)
-        .def("get_tensor", &PyDataset::get_tensor);
+        .def("get_tensor", &PyDataset::get_tensor)
+        .def("add_meta_scalar", &PyDataset::add_meta_scalar)
+        .def("add_meta_string", &PyDataset::add_meta_scalar);
 }
 

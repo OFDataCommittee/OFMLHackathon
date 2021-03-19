@@ -102,3 +102,17 @@ py::array PyDataset::get_tensor(const std::string& key) {
       break;
   }
 }
+
+void PyDataset::add_meta_scalar(const std::string& name, py::array data, std::string& type) {
+  
+  auto buffer = data.request();
+  void* ptr = buffer.ptr;
+
+  MetaDataType ttype = METADATA_TYPE_MAP.at(type);
+  this->_dataset->add_meta_scalar(name, ptr, ttype);
+}
+
+void PyDataset::add_meta_string(const std::string& name, const std::string& data) {
+  
+  this->_dataset->add_meta_string(name, data);
+}
