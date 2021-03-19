@@ -1,81 +1,79 @@
-
 ************
 Installation
 ************
 
-SILC is utilized as a library. For C, C++, and Fortran, the clients
-can be compiled directly. For Python, the clients are used just like
-any other pip library. However, all clients are compatible. Python
-clients can get arrays put by Fortran and vice versa.
+SILC clients are intended to be used as a library linked into other
+applications.  For C, C++, and Fortran, the clients
+can be compiled as a library that is linked with an application
+at compile time. For Python, the clients can be used just like
+any other pip library.
 
-Building SILC
-=============
-
-SILC has a makefile that automates the build process.
+SILC has a makefile that automates the build and install process.
+The makefile is shown below, and in the following sections,
+the process for building and install the SILC clients will
+be described.
 
 .. code-block:: text
 
-  SILC Makefile help
+    SILC Makefile help
 
-  help                           - display this makefile's help information
+    help                           - display this makefile's help information
 
-  Build
-  -------
-  pyclient                       - Build the python client bindings
-  deps                           - Make SILC dependencies
-  test-deps                      - Make SILC testing dependencies
-  test-deps-gpu                  - Make SILC GPU testing dependencies
-  build-tests                    - build all tests (C, C++, Fortran)
-  build-test-cpp                 - build the C++ tests
-  build-test-c                   - build the C tests
-  clean-deps                     - remove third-party deps
-  clean                          - remove builds, pyc files, .gitignore rules
-  clobber                        - clean, remove deps, builds, (be careful)
+    Build
+    -------
+    pyclient                       - Build the python client bindings
+    deps                           - Make SILC dependencies
+    lib                            - Build SILC clients into a static library
+    test-deps                      - Make SILC testing dependencies
+    test-deps-gpu                  - Make SILC GPU testing dependencies
+    build-tests                    - build all tests (C, C++, Fortran)
+    build-test-cpp                 - build the C++ tests
+    build-test-c                   - build the C tests
+    build-test-fortran             - build the Fortran tests
+    build-examples                 - build all examples (serial, parallel)
+    build-example-serial           - buld serial examples
+    build-example-parallel         - build parallel examples (requires MPI)
+    clean-deps                     - remove third-party deps
+    clean                          - remove builds, pyc files, .gitignore rules
+    clobber                        - clean, remove deps, builds, (be careful)
 
-  Style
-  -------
-  style                          - Sort imports and format with black
-  check-style                    - check code style compliance
-  format                         - perform code style format
-  check-format                   - check code format compliance
-  sort-imports                   - apply import sort ordering
-  check-sort-imports             - check imports are sorted
-  check-lint                     - run static analysis checks
+    Style
+    -------
+    style                          - Sort imports and format with black
+    check-style                    - check code style compliance
+    format                         - perform code style format
+    check-format                   - check code format compliance
+    sort-imports                   - apply import sort ordering
+    check-sort-imports             - check imports are sorted
+    check-lint                     - run static analysis checks
 
-  Documentation
-  -------
-  docs                           - generate project documentation
+    Documentation
+    -------
+    docs                           - generate project documentation
+    cov                            - generate html coverage report for Python client
 
-  Test
-  -------
-  test                           - Build and run all tests (C, C++, Fortran, Python)
-  test-verbose                   - Build and run all tests [verbosely]
-  test-c                         - Build and run all C tests
-  test-cpp                       - Build and run all C++ tests
-  test-py                        - run python tests
-  testpy-cov                     - run python tests with coverage
-
-This makefile contains all the functions necessary to build and utilize SILC
-in your workload.
-
+    Test
+    -------
+    test                           - Build and run all tests (C, C++, Fortran, Python)
+    test-verbose                   - Build and run all tests [verbosely]
+    test-c                         - Build and run all C tests
+    test-cpp                       - Build and run all C++ tests
+    test-py                        - run python tests
+    test-fortran                   - run fortran tests
+    testpy-cov                     - run python tests with coverage
 
 Installing Dependencies
 =======================
 
-SILC can utilize multiple sets of dependencies depending which database
-is being used, which hardware that database is running on, and which
-client is being used.
-
-For building all clients for use with Redis, use the following steps
+SILC has a base set of dependencies that are required to use the
+clients.  These dependencies include Hiredis, Redis-plus-plus,
+Google Protobuf, and pybind11.  The dependencies can be
+downloaded, built, and installed by executing the following
+command in the top-level directory of SILC:
 
 .. code-block:: bash
 
   make deps
-
-This will install Redis, Hiredis (an open source C client), Pybind11,
-and protobuf. All of these dependencies are needed for building all
-of the clients (C, C++, Fortran, Python)
-
 
 Setting up your Environment for Building
 ========================================
@@ -90,6 +88,56 @@ script in the top level of the SILC directory.
   source setup_env.sh
 
 After this step, the clients will be ready to compile as a library.
+
+Building SILC static library
+============================
+
+A static library of the SILC C++, C, and Fortran clients can be built with
+the command:
+
+.. code-block:: bash
+
+  make lib
+
+The SILC library will be installed in ``build/libsilc.a``.  This library
+can be used with the SILC environment variables set by ``setup_env.sh``
+to add SILC to existing CMAKE builds.  For example, the CMAKE
+instructions below illustrate how to use the environment variables
+to link in the SILC static library into a C++ application.
+
+.. code-block:: text
+
+    set(SILC_INSTALL_PATH "path/to/your/silc/install/dir")
+
+    string(CONCAT HIREDIS_LIB_PATH $ENV{HIREDIS_INSTALL_PATH} "/lib")
+    find_library(HIREDIS_LIB hiredis PATHS ${HIREDIS_LIB_PATH} NO_DEFAULT_PATH REQUIRED)
+    string(CONCAT HIREDIS_INCLUDE_PATH $ENV{HIREDIS_INSTALL_PATH} "/include/")
+
+    string(CONCAT PROTOBUF_LIB_PATH $ENV{PROTOBUF_INSTALL_PATH} "/lib")
+    find_library(PROTOBUF_LIB protobuf PATHS ${PROTOBUF_LIB_PATH} NO_DEFAULT_PATH REQUIRED)
+    string(CONCAT PROTOBUF_INCLUDE_PATH $ENV{PROTOBUF_INSTALL_PATH} "/include/")
+
+    string(CONCAT REDISPP_LIB_PATH $ENV{REDISPP_INSTALL_PATH} "/lib")
+    find_library(REDISPP_LIB redis++ PATHS ${REDISPP_LIB_PATH} REQUIRED)
+    string(CONCAT REDISPP_INCLUDE_PATH $ENV{REDISPP_INSTALL_PATH} "/include/")
+
+    string(CONCAT SILC_LIB_PATH ${SILC_INSTALL_PATH} "/build")
+    find_library(SILC_LIB silc PATHS ${SILC_LIB_PATH} REQUIRED)
+
+    include_directories(${HIREDIS_INCLUDE_PATH})
+    include_directories(${REDISPP_INCLUDE_PATH})
+    include_directories(${PROTOBUF_INCLUDE_PATH})
+    include_directories(${SILC_INSTALL_PATH}/include)
+    include_directories(${SILC_INSTALL_PATH}/utils/protobuf)
+
+    set(CLIENT_LIBRARIES ${REDISPP_LIB} ${HIREDIS_LIB} ${PROTOBUF_LIB} ${SILC_LIB})
+
+    add_executable(example
+        example.cpp
+    )
+    target_link_libraries(example
+        ${CLIENT_LIBRARIES}
+    )
 
 Building the Python Client
 ==========================
@@ -115,7 +163,7 @@ To install the Python client, follow the steps below:
   make pyclient
 
 
-After following the above steps, the python client should be
+After following the above steps, the python client is
 ready for use in any python program.
 
 .. code-block:: python
