@@ -4,6 +4,8 @@ import torch
 import torch.nn as nn
 import io
 import os
+import random
+import string
 
 dtypes = [
     np.float64,
@@ -16,6 +18,14 @@ dtypes = [
     np.uint16,
 ]
 
+metadata_scalar_dtypes = [
+    np.float32,
+    np.float64,
+    np.int32,
+    np.int64,
+    np.uint32,
+    np.uint64,
+]
 
 @pytest.fixture
 def use_cluster():
@@ -39,6 +49,26 @@ class MockTestData:
         for dtype in dtypes:
             array = np.random.randint(-10, 10, size=shape).astype(dtype)
             data.append(array)
+        return data
+
+    @staticmethod
+    def create_metadata_scalars(length):
+        """Helper for creating numpy data"""
+
+        data = []
+        for dtype in metadata_scalar_dtypes:
+            array = np.random.randint(-10, 10, size=length).astype(dtype)
+            data.append(array)
+        return data
+
+    @staticmethod
+    def create_metadata_strings(length):
+        """Helper for creating list of strings"""
+
+        data = []
+        for _ in range(length):
+            meta_string = ''.join(random.choices(string.ascii_uppercase + string.digits, k=20))
+            data.append(meta_string)
         return data
 
 

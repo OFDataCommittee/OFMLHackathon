@@ -90,4 +90,4 @@ class Dataset(PyDataset):
                         field in the DataSet
         :type name: str
         """
-        return super().get_meta_strings(self, name)
+        return super().get_meta_strings(name)
