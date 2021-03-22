@@ -74,3 +74,20 @@ class Dataset(PyDataset):
         """
         super().add_meta_string(name, data)
 
+    def get_meta_scalars(self, name):
+        """ Get the metadata scalar field values
+            from the DataSet.  
+        :param name: The name used to reference the metadata
+                     field in the DataSet
+        :type name: str
+        """
+        return super().get_meta_scalars(name)
+
+    def get_meta_strings(self, name):
+        """ Get the metadata scalar field values
+            from the DataSet.  
+        :param name: The name used to reference the metadata
+                        field in the DataSet
+        :type name: str
+        """
+        return super().get_meta_strings(self, name)
