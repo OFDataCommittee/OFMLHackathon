@@ -38,13 +38,13 @@ void PyDataset::add_tensor(const std::string& name, py::array data, std::string&
   return;
 }
 
-py::array PyDataset::get_tensor(const std::string& key) {
+py::array PyDataset::get_tensor(const std::string& name) {
 
   TensorType type;
   std::vector<size_t> dims;
   void* ptr;
 
-  this->_dataset->get_tensor(key, ptr, dims, type, MemoryLayout::contiguous);
+  this->_dataset->get_tensor(name, ptr, dims, type, MemoryLayout::contiguous);
 
   // detect data type
   switch(type) {
@@ -101,4 +101,81 @@ py::array PyDataset::get_tensor(const std::string& key) {
       throw std::runtime_error("Could not infer type");
       break;
   }
+}
+
+void PyDataset::add_meta_scalar(const std::string& name, py::array data, std::string& type) {
+  
+  auto buffer = data.request();
+  void* ptr = buffer.ptr;
+
+  MetaDataType ttype = METADATA_TYPE_MAP.at(type);
+  this->_dataset->add_meta_scalar(name, ptr, ttype);
+}
+
+void PyDataset::add_meta_string(const std::string& name, const std::string& data) {
+  
+  this->_dataset->add_meta_string(name, data);
+}
+
+py::array PyDataset::get_meta_scalars(const std::string& name) {
+
+  MetaDataType type;
+  size_t length;
+  void *ptr;
+
+  this->_dataset->get_meta_scalars(name, ptr, length, type);
+
+  // detect data type
+  switch(type) {
+    case MetaDataType::dbl : {
+      double* data;
+      data = (double*) ptr;
+      return py::array(length, data, py::none());
+      break;
+    }
+    case MetaDataType::flt : {
+      float* data;
+      data = (float*) ptr;
+      return py::array(length, data, py::none());
+      break;
+    }
+    case MetaDataType::int32 : {
+      int32_t* data;
+      data = (int32_t*) ptr;
+      return py::array(length, data, py::none());
+      break;
+    }
+    case MetaDataType::int64 : {
+      int64_t* data;
+      data = (int64_t*) ptr;
+      return py::array(length, data, py::none());
+      break;
+    }
+    case MetaDataType::uint32 : {
+      uint32_t* data;
+      data = (uint32_t*) ptr;
+      return py::array(length, data, py::none());
+      break;
+    }
+    case MetaDataType::uint64 : {
+      uint64_t* data;
+      data = (uint64_t*) ptr;
+      return py::array(length, data, py::none());
+      break;
+    }
+    case MetaDataType::string : {
+      throw std::runtime_error("MetaData is of type string. Use get_meta_strings method.");
+    }
+    default :
+      // TODO throw python exception here
+      throw std::runtime_error("Could not infer type");
+      break;
+  }
+
+}
+
+py::list PyDataset::get_meta_strings(const std::string& name) {
+  
+  // We return a copy
+  return py::cast(this->_dataset->get_meta_strings(name));
 }

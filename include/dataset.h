@@ -360,8 +360,7 @@ class DataSet
         *   \param name The name of the Tensor
         *   \returns std::string representing the Tensor type
         */
-        std::string get_tensor_type(const std::string& name /*!< The name used to reference the tensor*/
-                                    );
+        std::string get_tensor_type(const std::string& name);
 
         /*!
         *   \brief Add a Tensor (not yet allocated) to the TensorPack
