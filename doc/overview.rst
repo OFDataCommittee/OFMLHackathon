@@ -15,7 +15,7 @@ Key features of RedisAI that are supported by SILC include:
 
 In additional to the RedisAI capabilities above,
 SILC includes the following features developed for
-large, distributed architectures:
+large, distributed HPC architectures:
 
 -   Redis cluster support for distributed data storage
     and model serving
@@ -23,9 +23,10 @@ large, distributed architectures:
     evaluation to maximize hardware utilization and throughput
 -   A ``DataSet`` storage format to aggregate multiple tensors
     and metadata into a single Redis cluster hash slot
-    to prevent data scatter on Redis clusters.  This is useful
-    when clients produce tensors and metadata that are
-    referenced or utilized together.
+    to prevent data scatter on Redis clusters and
+    maintain contextual relationships between tensors.
+    This is useful when clients produce tensors and
+    metadata that are referenced or utilized together.
 -   Compatibility with SmartSim ensemble capabilities to
     prevent key collisions with
     tensors, ``DataSet``, models, and scripts when

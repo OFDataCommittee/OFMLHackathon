@@ -7,11 +7,11 @@ In addition, SILC defines an additional data structure ``DataSet``.  In this sec
 API for interacting with these data structures will be described, and when applicable,
 comments on performance and best practices will be made.
 
-In general, concepts and capabilities will be demonstrated for the Python and C++ API
-because of noticeable differences in function signatures.  The C and Fortran function
-signatures closely resemble the C++ API, and as a result, they are not discussed in detail
-in the interest of brevity.  For more detailed explanations of the C and Fortran API,
-refer to the documentation pages for those clients.
+In general, concepts and capabilities will be demonstrated for the Python and C++ API.
+The C and Fortran function signatures closely resemble the C++ API, and as a result,
+they are not discussed in detail in the interest of brevity.
+For more detailed explanations of the C and Fortran API, refer to the documentation
+pages for those clients.
 
 Tensor
 ======
@@ -22,7 +22,7 @@ a tensor associated with a key from the database.
 
 .. note::
     When utilizing SILC with SmartSim ensemble functionality,
-    the key provided to SILC tensor functions may be
+    the key provided by the user may be
     manipulated before placement in or retrieval from the database in order to
     avoid key collisions between ensemble members.  Therefore, when using
     SmartSim ensemble functionality, retrieval of a tensor using the Redis
@@ -49,8 +49,8 @@ with the tensor data (e.g. ``double``, ``float``) is specified with a
 ``SILC::TensorType`` enum.  Finally, the ``Client`` must know the memory
 layout of the provided tensor data in order to generate a tensor data buffer.
 In C++, tensor data can either be in a contiguous memory layout or in a nested,
-non-contiguous (i.e. nested pointer arrays to underlying allocated memory) memory
-layout.  The memory layout of the tensor data to place in the database is specified
+non-contiguous memory layout (i.e. nested pointer arrays to underlying allocated memory).
+The memory layout of the tensor data to place in the database is specified
 with a ``SILC::MemoryLayout`` enum input parameter.
 
 .. code-block:: cpp
@@ -75,7 +75,7 @@ tensors from the Redis database. The first method is referred to as *unpacking* 
 tensor.  When a tensor is retrieved via ``unpack_tensor()``, the memory space to
 store the retrieved tensor data is provided by the user.
 This has the advantage of giving the user the ability to manage the scope of the
-retrieved tensor allocated memory.
+retrieved tensor allocated memory and reuse application memory.
 
 The C++ function signature for ``unpack_tensor()`` is shown below.  In the case
 of ``unpack_tensor()`` the parameters ``dims``, ``type``, and ``mem_layout``
@@ -434,7 +434,7 @@ script is returned to the user.
     the script from the database, and this memory will not
     be freed until the Client object is destroyed.
 
-Execution
+Executing
 ---------
 
 A script can be executed using the ``Client.run_script()`` function.
