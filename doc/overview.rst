@@ -13,7 +13,7 @@ Key features of RedisAI that are supported by SILC include:
     and ONNXRuntime backends for model evaluations
 -   TorchScript storage and evaluation
 
-In additional to the RedisAI capabilities above,
+In addition to the RedisAI capabilities above,
 SILC includes the following features developed for
 large, distributed HPC architectures:
 

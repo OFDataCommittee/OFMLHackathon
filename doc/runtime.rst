@@ -42,7 +42,7 @@ The clients work with SmartSim ensemble functionality through
 environment variables.  There are two environment variables
 that are used for ensembles, ``SSKEYIN`` and ``SSKEYOUT``.
 
-``SSKEYOUT`` defines the prefix that is attached
+``SSKEYOUT`` defines the prefix that is attached to
 tensors, datasets, models, and scripts sent from the client
 to the database.  This prefixing prevents key collisions for
 objects sent from the client to the database.  ``SSKEYOUT``
@@ -85,7 +85,7 @@ user fine control of prefixing in advanced applications.
 The default is to use prefixes on tensors and datasets
 if ``SSKEYIN`` and ``SSKEYOUT`` are present.  The default
 is not to use prefixes on scripts and models.
-These functions for changing this default behavior are:
+The functions for changing this default behavior are:
 
 .. code-block:: cpp
 

@@ -8,8 +8,8 @@ can be compiled as a library that is linked with an application
 at compile time. For Python, the clients can be used just like
 any other pip library.
 
-SILC has a makefile that automates the build and install process.
-The makefile is shown below, and in the following sections,
+SILC has a Makefile that automates the build and install process.
+The Makefile is shown below, and in the following sections,
 the process for building and install the SILC clients will
 be described.
 
@@ -79,7 +79,7 @@ Setting up your Environment for Building
 ========================================
 
 To build a SILC client in any language, the dependencies downloaded above
-need to be found by CMAKE. An easy way to do this is through environment
+need to be found by CMake. An easy way to do this is through environment
 variables. To setup your environment for building, run the following
 script in the top level of the SILC directory.
 
@@ -101,7 +101,7 @@ the command:
 
 The SILC library will be installed in ``build/libsilc.a``.  This library
 can be used with the SILC environment variables set by ``setup_env.sh``
-to add SILC to existing CMAKE builds.  For example, the CMAKE
+to add SILC to existing CMake builds.  For example, the CMake
 instructions below illustrate how to use the environment variables
 to link in the SILC static library into a C++ application.
 
