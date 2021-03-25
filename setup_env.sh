@@ -60,3 +60,7 @@ if [[ ":$PYTHONPATH:" != *"$(pwd)/src/python/module/"* ]]; then
 else
     echo "SILC found in PYTHONPATH"
 fi
+
+# Set SILC_INSTALL_PATH for external application build assistance
+export SILC_INSTALL_PATH="$(pwd)"
+echo "Setting the SILC install path to $SILC_INSTALL_PATH"
