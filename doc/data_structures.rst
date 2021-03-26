@@ -135,6 +135,8 @@ Note that all of the client ``get_tensor()`` functions will internally
 modify the provided tensor name if the client is being used with
 SmartSim ensemble capabilities.
 
+.. _overview_dataset:
+
 Dataset
 =======
 
