@@ -7,8 +7,11 @@
    :maxdepth: 2
    :caption: General
 
-   clients
+   overview
+   data_structures
    installation
+   testing
+   runtime
 
 .. toctree::
    :maxdepth: 2

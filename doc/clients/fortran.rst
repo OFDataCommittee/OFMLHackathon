@@ -9,7 +9,7 @@ Overview
 The SILC Fortran interface is centered around two Fortran modules: ``silc_client`` and ``silc_dataset``. The only
 public element of these modules are, respectively, ``client_type`` and ``dataset_type``. These derived types take
 advantage of Fortran object-oriented features by having procedure-bound methods that implement most of the
-SILC functionality. (see :ref:`Unsupported SILC Features`). Other than these derived types, all inputs
+SILC functionality. (see :ref:`Unsupported SILC Features <unsupported_silc_features>`). Other than these derived types, all inputs
 and outputs from functions and subroutines are Fortran primitives (e.g. ``real``, ``integer``, ``character``).
 
 32-bit and 64-bit ``real`` and 8, 16, 32, and 64-bit signed ``integer`` arrays (tensors) are supported. All
@@ -30,6 +30,8 @@ Fortran compilers need to support the following features
 * Assumed rank (``dimension(..)``) arrays (Fortran 2018)
 
 These language features are supported by Intel 19, GNU 9, and Cray 8.6 and later versions.
+
+.. _unsupported_silc_features:
 
 Unsupported SILC features
 -------------------------
@@ -55,6 +57,7 @@ general functionality and suffixed by the type of code contained within.
 
 * ``<functionality>_interfaces.inc``: Define the C-bound interfaces to the SILC-C methods
 * ``<functionality>_methods_common.inc``: Represents the source code that is exactly the same for all methods which
+
 share the same functionality, but differ only by the type of variable
 
 For example, ``client/put_tensor_interfaces.inc`` define the Fortran-C interfaces to put a tensor into the database.

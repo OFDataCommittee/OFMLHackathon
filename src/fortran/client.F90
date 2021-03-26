@@ -17,6 +17,7 @@ implicit none; private
 #include "client/model_interfaces.inc"
 #include "client/script_interfaces.inc"
 #include "client/client_dataset_interfaces.inc"
+#include "client/ensemble_interfaces.inc"
 
 !> Stores all data and methods associated with the SILC client that is used to communicate with the database
 type, public :: client_type
@@ -83,6 +84,11 @@ type, public :: client_type
   procedure :: copy_dataset
   !> Delete the dataset from the database
   procedure :: delete_dataset
+
+  procedure :: use_tensor_ensemble_prefix
+  procedure :: use_model_ensemble_prefix
+  procedure :: set_data_source
+
 
   ! Private procedures
   procedure, private :: put_tensor_i8
@@ -778,5 +784,42 @@ subroutine delete_dataset( this, name )
   name_length = len_trim(name)
   call delete_dataset_c(this%client_ptr, c_name, name_length)
 end subroutine delete_dataset
+
+!> Set the data source (i.e. key prefix for get functions)
+subroutine set_data_source( this, source_id )
+  class(client_type), intent(in) :: this
+  character(len=*),   intent(in) :: source_id
+
+  character(kind=c_char, len=len_trim(source_id)) :: c_source_id
+  integer(kind=c_size_t) :: source_id_length
+  c_source_id = trim(source_id)
+  source_id_length = len_trim(source_id)
+
+  call set_data_source_c( this%client_ptr, c_source_id, source_id_length )
+
+end subroutine set_data_source
+
+!> Set whether names of model and script entities should be prefixed (e.g. in an ensemble) to form database keys.
+!! Prefixes will only be used if they were previously set through the environment variables SSKEYOUT and SSKEYIN.
+!! Keys of entities created before this function is called will not be affected. By default, the client does not
+!! prefix model and script keys.
+subroutine use_model_ensemble_prefix( this, use_prefix )
+  class(client_type),   intent(in) :: this
+  logical,              intent(in) :: use_prefix
+
+  call use_model_ensemble_prefix_c( this%client_ptr, logical(use_prefix,kind=c_bool) )
+end subroutine use_model_ensemble_prefix
+
+
+!> Set whether names of tensor and dataset entities should be prefixed (e.g. in an ensemble) to form database keys.
+!! Prefixes will only be used if they were previously set through the environment variables SSKEYOUT and SSKEYIN.
+!! Keys of entities created before this function is called will not be affected. By default, the client prefixes
+!! tensor and dataset keys with the first prefix specified with the SSKEYIN and SSKEYOUT environment variables.
+subroutine use_tensor_ensemble_prefix( this, use_prefix )
+  class(client_type),   intent(in) :: this
+  logical,              intent(in) :: use_prefix
+
+  call use_tensor_ensemble_prefix_c( this%client_ptr, logical(use_prefix,kind=c_bool) )
+end subroutine use_tensor_ensemble_prefix
 
 end module silc_client

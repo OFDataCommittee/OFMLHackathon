@@ -16,6 +16,21 @@ class Dtypes:
             return mapping[dtype]
         raise TypeError(f"Incompatible tensor type provided {dtype}")
 
+    @staticmethod
+    def metadata_from_numpy(array):
+        mapping = {
+            "float64": "DOUBLE",
+            "float32": "FLOAT",
+            "uint32": "UINT32",
+            "uint64": "UINT64",
+            "int32": "INT32",
+            "int64": "INT64",
+        }
+        dtype = str(array.dtype)
+        if dtype in mapping:
+            return mapping[dtype]
+        raise TypeError(f"Incompatible metadata type provided {dtype}")
+
 
 def init_default(default, init_value, expected_type=None):
     """Used for setting a mutable type to a default value.

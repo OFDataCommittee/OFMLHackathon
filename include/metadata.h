@@ -27,6 +27,34 @@ static const char* top_uint64_msg = "repeated_uint64_meta";
 static const char* top_int32_msg = "repeated_sint32_meta";
 static const char* top_uint32_msg = "repeated_uint32_meta";
 
+static std::string DATATYPE_METADATA_STR_DOUBLE = "DOUBLE";
+static std::string DATATYPE_METADATA_STR_FLOAT = "FLOAT";
+static std::string DATATYPE_METADATA_STR_INT32 = "INT32";
+static std::string DATATYPE_METADATA_STR_INT64 = "INT64";
+static std::string DATATYPE_METADATA_STR_UINT32 = "UINT32";
+static std::string DATATYPE_METADATA_STR_UINT64 = "UINT64";
+static std::string DATATYPE_METADATA_STR_STRING = "STRING";
+
+static const std::unordered_map<std::string, MetaDataType>
+    METADATA_TYPE_MAP{
+        {DATATYPE_METADATA_STR_DOUBLE, MetaDataType::dbl},
+        {DATATYPE_METADATA_STR_FLOAT, MetaDataType::flt},
+        {DATATYPE_METADATA_STR_INT32, MetaDataType::int32},
+        {DATATYPE_METADATA_STR_INT64, MetaDataType::int64},
+        {DATATYPE_METADATA_STR_UINT32, MetaDataType::uint32},
+        {DATATYPE_METADATA_STR_UINT64, MetaDataType::uint64},
+        {DATATYPE_METADATA_STR_STRING, MetaDataType::string} };
+
+static const std::unordered_map<MetaDataType, std::string>
+    METADATA_STR_MAP{
+        {MetaDataType::dbl, DATATYPE_METADATA_STR_DOUBLE},
+        {MetaDataType::flt, DATATYPE_METADATA_STR_FLOAT},
+        {MetaDataType::int32, DATATYPE_METADATA_STR_INT32},
+        {MetaDataType::int64, DATATYPE_METADATA_STR_INT64},
+        {MetaDataType::uint32, DATATYPE_METADATA_STR_UINT32},
+        {MetaDataType::uint64, DATATYPE_METADATA_STR_UINT64},
+        {MetaDataType::string, DATATYPE_METADATA_STR_STRING} };
+
 class MetaData;
 
 /*!
