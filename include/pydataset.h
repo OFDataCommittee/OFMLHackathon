@@ -21,7 +21,19 @@ public:
                   py::array data,
                   std::string& type);
 
-  py::array get_tensor(const std::string& key);
+  py::array get_tensor(const std::string& name);
+
+  void add_meta_scalar(const std::string& name,
+                       py::array data,
+                       std::string& type);
+
+  void add_meta_string(const std::string& name,
+                       const std::string& data);
+
+  py::array get_meta_scalars(const std::string& name);
+
+  py::list get_meta_strings(const std::string& name);
+
 
   DataSet* get();
 
