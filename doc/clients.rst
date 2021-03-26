@@ -61,6 +61,8 @@ For example, in Python, the SILC client works directly with NumPy arrays.
 For C and C++, both nested and contiguous memory arrays are supported.
 
 
+.. _silc_dataset:
+
 Dataset
 -------
 

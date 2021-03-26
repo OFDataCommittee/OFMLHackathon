@@ -11,23 +11,9 @@ the code required to send and receive data with the Python client. In the
 following subsections, general groups of functions that are provided by the
 Python client API will be described.
 
-.. code-block:: python
+.. literalinclude:: ../../examples/serial/python/example_put_get_tensor_simple.py
+  :language: python
   :linenos:
-
-  from silc import Client
-  import numpy as np
-
-  # initialize the client (keep connections alive)
-  db_address = "127.0.0.1:6379"
-  client = Client(address=db_address, cluster=False)
-
-  # Send a 2D Tensor
-  key = "2D_array"
-  array = np.random.randint(-10, 10, size=(10, 10))
-  client.put_tensor(key, array)
-
-  # Get the 2D Tensor
-  returned_array = client.get_tensor("2D_array")
 
 Client Initialization
 ---------------------
@@ -42,6 +28,44 @@ This address should be a string with an ip address and port separated
 by a colon. If an address is not provided, the client will search
 for the ``SSDB`` environment variable.
 
+Models
+------
+
+The Python client allows the user to set and use a PyTorch, ONNX, TensorFlow,
+or TensorFlow Lite model in the database. Models can be set from a file or directly
+from memory.
+
+As an example, the code below illustrates how a jit-traced PyTorch model can be used.
+
+.. literalinclude:: ../../examples/serial/python/example_model_methods_torch_simple.py
+  :language: python
+  :linenos:
+
+Scripts
+-------
+
+Scripts are a way to store python-executable code in the database. The Python
+client can send scripts to the dataset from a file, or directly from memory.
+
+As an example, the code below illustrates how a function can be defined and sent
+to the database on the fly, without storing it in an intermediate file.
+
+.. literalinclude:: ../../examples/serial/python/example_script_methods_simple.py
+  :language: python
+  :linenos:
+
+Datasets
+--------
+
+The Python client can access and store tensors in datasets. For further 
+information about datasets, please refer to the :ref:`Dataset <silc_dataset>`
+section of the main documentation page.
+
+The code below shows how to store and access tensors which belong to a dataset.
+
+.. literalinclude:: ../../examples/serial/python/example_put_get_dataset_simple.py
+  :language: python
+  :linenos:
 
 Python Client API
 =================

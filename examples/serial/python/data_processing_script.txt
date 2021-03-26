@@ -9,6 +9,7 @@ def pre_process_3ch(image):
     temp = image.float().div(28).permute(1, 0)
     return temp.sub(mean).div(std).unsqueeze(0)
 
+
 def post_process(output):
     return output.max(1)[1]
 
