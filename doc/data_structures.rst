@@ -13,6 +13,9 @@ they are not discussed in detail in the interest of brevity.
 For more detailed explanations of the C and Fortran API, refer to the documentation
 pages for those clients.
 
+
+.. _data_structures_tensor:
+
 Tensor
 ======
 
@@ -135,7 +138,7 @@ Note that all of the client ``get_tensor()`` functions will internally
 modify the provided tensor name if the client is being used with
 SmartSim ensemble capabilities.
 
-.. _overview_dataset:
+.. _data_structures_dataset:
 
 Dataset
 =======
@@ -244,6 +247,7 @@ implementations.
 
 Finally, the ``DataSet`` object is sent to the database using the
 ``Client.put_dataset()`` function, which is uniform across all clients.
+
 
 Retrieving
 ----------

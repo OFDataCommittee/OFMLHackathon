@@ -65,7 +65,7 @@ The code below shows how to set a script from a file.
   :linenos:
 
 The content of the script file has to be written
-in Python. For the example above, the file `data_processing_script.txt` could
+in Python. For the example above, the file ``data_processing_script.txt`` could
 look like this:
 
 .. literalinclude:: ../../examples/serial/python/data_processing_script.txt
@@ -75,11 +75,11 @@ look like this:
 Datasets
 --------
 
-The Python client can access and store tensors in datasets. For further 
-information about datasets, please refer to the :ref:`Dataset <overview_dataset>`
-section.
+The Python client can store and retrieve tensors in datasets. For further 
+information about datasets, please refer to the :ref:`Dataset section of 
+the Data Structures documentation page <data_structures_dataset>`.
 
-The code below shows how to store and access tensors which belong to a dataset.
+The code below shows how to store and retrieve tensors which belong to a dataset.
 
 .. literalinclude:: ../../examples/serial/python/example_put_get_dataset.py
   :language: python

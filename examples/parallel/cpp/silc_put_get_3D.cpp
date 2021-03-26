@@ -11,7 +11,7 @@ void put_get_3D_array(
         SILC::TensorType type,
         std::string key_suffix="")
 {
-  SILC::Client client(use_cluster());
+  SILC::Client client(false);
 
   //Allocate and fill arrays
   T_send*** array = allocate_3D_array<T_send>(dims[0], dims[1], dims[2]);
@@ -24,34 +24,11 @@ void put_get_3D_array(
   std::string key = "3d_tensor_rank_" +
                     std::to_string(rank) + key_suffix;
 
-  /*
-  for(int i = 0; i < dims[0]; i++) {
-    for(int j = 0; j < dims[1]; j++) {
-      for(int k = 0; k < dims[2]; k++) {
-        std::cout.precision(17);
-        std::cout<<"Sending value "<<i<<","<<j<<","<<k<<": "
-                 <<std::fixed<<array[i][j][k]<<std::endl;
-      }
-    }
-  }
-  */
-
-  client.put_tensor(key, (void*)array, dims,
+   client.put_tensor(key, (void*)array, dims,
                     type, SILC::MemoryLayout::nested);
   client.unpack_tensor(key, u_result, dims,
                        type, SILC::MemoryLayout::nested);
 
-  /*
-  for(int i = 0; i < dims[0]; i++) {
-    for(int j = 0; j < dims[1]; j++) {
-      for(int k = 0; k < dims[2]; k++) {
-        std::cout<< "Value " << i << "," << j << "," << k
-                 << " Sent: " << array[i][j][k] <<" Received: "
-                 << u_result[i][j][k] << std::endl;
-      }
-    }
-  }
-  */
 
   if (!is_equal_3D_array<T_send, T_recv>(array, u_result,
                                          dims[0], dims[1], dims[2]))
@@ -74,17 +51,6 @@ void put_get_3D_array(
     throw std::runtime_error("The tensor dimensions retrieved "\
                              "client.get_tensor() do not match "\
                              "the known tensor dimensions.");
-  /*
-  for(int i = 0; i < dims[0]; i++) {
-    for(int j = 0; j < dims[1]; j++) {
-      for(int k = 0; k < dims[2]; k++) {
-        std::cout<< "Value " << i << "," << j << "," << k
-                 << " Sent: " << array[i][j][k] <<" Received: "
-                 << g_result[i][j][k] << std::endl;
-      }
-    }
-  }
-  */
 
   if (!is_equal_3D_array<T_send, T_recv>(array, g_type_result,
                                          dims[0], dims[1], dims[2]))

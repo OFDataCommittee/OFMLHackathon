@@ -11,7 +11,7 @@ void put_get_3D_array(
         SILC::TensorType type,
         std::string key_suffix="")
 {
-  SILC::Client client(use_cluster());
+  SILC::Client client(false);
 
   //Allocate and fill arrays
   T_send* array =
@@ -31,19 +31,7 @@ void put_get_3D_array(
   std::string key = "3d_tensor_contig_rank_" +
                     std::to_string(rank) + key_suffix;
 
-  /*
-  int c=0;
-  for(int i = 0; i < dims[0]; i++) {
-    for(int j = 0; j < dims[1]; j++) {
-      for(int k = 0; k < dims[2]; k++) {
-        std::cout.precision(17);
-        std::cout<<"Sending value "<<c<<": "
-                 <<std::fixed<<array[c]<<std::endl;
-        c++;
-      }
-    }
-  }
-  */
+
 
   client.put_tensor(key, (void*)array, dims, type,
                     SILC::MemoryLayout::contiguous);
@@ -55,20 +43,6 @@ void put_get_3D_array(
   client.unpack_tensor(key, u_nested_result, dims, type,
                        SILC::MemoryLayout::nested);
 
-  /*
-  int d = 0;
-  for(int i = 0; i < dims[0]; i++) {
-    for(int j = 0; j < dims[1]; j++) {
-      for(int k = 0; k < dims[2]; k++) {
-        std::cout<< "Value " << d
-                 << " Sent: " << array[d]
-                 <<" Received: " << u_contig_result[d]
-                 << std::endl;
-        d++;
-      }
-    }
-  }
-  */
 
   if (!is_equal_1D_array<T_send, T_recv>(array, u_contig_result,
                                          dims[0]*dims[1]*dims[2]))
@@ -107,17 +81,6 @@ void put_get_3D_array(
                              "client.get_tensor() do not match "\
                              "the known tensor dimensions.");
 
-  /*
-  for(int i = 0; i < dims[0]; i++) {
-    for(int j = 0; j < dims[1]; j++) {
-      for(int k = 0; k < dims[2]; k++) {
-        std::cout<< "Value " << i << "," << j << "," << k
-                 << " Sent: " << array[i][j][k] <<" Received: "
-                 << g_result[i][j][k] << std::endl;
-      }
-    }
-  }
-  */
 
   int g = 0;
   for(int i = 0; i < dims[0]; i++) {
