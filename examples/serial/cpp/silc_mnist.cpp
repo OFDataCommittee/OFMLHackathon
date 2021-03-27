@@ -130,7 +130,7 @@ int main(int argc, char* argv[]) {
 
 
     std::string model_key = "mnist_model";
-    std::string model_file = "../../common/mnist_data/mnist_cnn.pt";
+    std::string model_file = "./../mnist_data/mnist_cnn.pt";
     double model_set_start = MPI_Wtime();
     client.set_model_from_file(model_key, model_file, "TORCH", "CPU", 20);
     double model_set_end = MPI_Wtime();
@@ -139,7 +139,7 @@ int main(int argc, char* argv[]) {
                 << delta_t << std::endl << std::flush;
 
     std::string script_key = "mnist_script";
-    std::string script_file = "../../common/mnist_data/data_processing_script.txt";
+    std::string script_file = "./../mnist_data/data_processing_script.txt";
 
     double script_set_start = MPI_Wtime();
     client.set_script_from_file(script_key, "CPU", script_file);

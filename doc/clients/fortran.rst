@@ -20,6 +20,12 @@ the C++ client. All transformations from Fortran constructs to C constructs are 
 (e.g enforcing Fortran/C types and column-major to row-major arrays). No conversions need to be done within the
 application.
 
+The example below shows the code required to send and receive data with the Fortran client.
+
+.. literalinclude:: ../../examples/serial/fortran/silc_put_get_3D.F90
+  :language: fortran
+  :linenos:
+
 Compiler Requirements
 ---------------------
 
@@ -41,7 +47,7 @@ been implemented. This includes
 * Retrieving metadata strings (Dataset: ``get_meta_strings``)
 * Returning a dataset tensor or tensor from the database as an opaque type (Dataset: ``get_dataset_tensor``, Client: ``get_tensor``)
 * Getting tensors from the database as an opaque type (Client:``get_tensor``) (note unpacking tensors into allocated
-  memory is supported)
+  memory is supported, see the :ref:`Fortran Client Examples section<fortran_client_examples>`)
 
 Source code organization
 ========================
@@ -95,3 +101,31 @@ Similarly the following interfaces are overloaded to support 32/64-bit ``real`` 
 * ``get_meta_scalar``
 
 .. f:automodule:: silc_dataset
+
+.. _fortran_client_examples:
+
+Fortran Client Examples
+=======================
+
+This section contains examples showing how the Fortran client can be used to interact with the database.
+
+Datasets
+--------
+
+The following code snippet shows how to use the Fortran Client to store and retrieve dataset tensors and
+dataset metadata scalars.
+
+.. literalinclude:: ../../examples/serial/fortran/silc_dataset.F90
+  :linenos:
+  :language: fortran
+
+
+Models
+------
+
+The following example shows how to store, retrieve, and use a pre-processing script and a DL model in the database with the Fortran Client. 
+The model and the script are stored as files in the ``../../../common/mnist_data/`` path relative to the compiled executable.
+
+.. literalinclude:: ../../examples/serial/fortran/silc_mnist.F90
+  :linenos:
+  :language: fortran

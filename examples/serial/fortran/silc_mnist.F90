@@ -1,8 +1,6 @@
 program mnist_example
 
-  use mpi
   use silc_client, only : client_type
-  use example_utils, only : use_cluster
 
   implicit none
 
@@ -13,37 +11,20 @@ program mnist_example
 
   type(client_type) :: client
   integer :: err_code, pe_id
-  character(len=2) :: key_suffix
 
-  ! Initialize MPI and get the rank of the processor
-  call MPI_init(err_code)
-  call MPI_comm_rank( MPI_COMM_WORLD, pe_id, err_code)
-
-  ! Format the suffix for a key as a zero-padded version of the rank
-  write(key_suffix, "(A,I1.1)") "_",pe_id
-  call client%initialize(use_cluster())
-
+  call client%initialize(.false.)
 
   if (pe_id == 0) then
     call client%set_model_from_file(model_key, model_file, "TORCH", "CPU")
     call client%set_script_from_file(script_key, "CPU", script_file)
   endif
 
-  call MPI_barrier(MPI_COMM_WORLD, err_code)
-
-  call run_mnist(client, key_suffix, model_key, script_key)
-
-  call MPI_finalize(err_code)
-
-  if (pe_id == 0) then
-    print *, "SILC Fortran MPI MNIST example finished without errors."
-  endif
+  call run_mnist(client, model_key, script_key)
 
 contains
 
-subroutine run_mnist( client, key_suffix, model_name, script_name )
+subroutine run_mnist( client, model_name, script_name )
   type(client_type), intent(in) :: client
-  character(len=*),  intent(in) :: key_suffix
   character(len=*),  intent(in) :: model_name
   character(len=*),  intent(in) :: script_name
 
@@ -62,9 +43,9 @@ subroutine run_mnist( client, key_suffix, model_name, script_name )
   character(len=255), dimension(1) :: outputs
 
   ! Construct the keys used for the specifiying inputs and outputs
-  in_key = "mnist_input_rank"//trim(key_suffix)
-  script_out_key = "mnist_processed_input_rank"//trim(key_suffix)
-  out_key = "mnist_processed_input_rank"//trim(key_suffix)
+  in_key = "mnist_input_rank"
+  script_out_key = "mnist_processed_input_rank"
+  out_key = "mnist_processed_input_rank"
 
   ! Generate some fake data for inference
   call random_number(array)
