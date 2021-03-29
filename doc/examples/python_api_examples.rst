@@ -1,9 +1,25 @@
 .. _python_client_examples:
 
 *************************
-Using the SILC Python API
+Python API
 *************************
 
+In this section, examples are presented for using the SILC Python
+API to interact with the RedisAI tensor, model, and script
+data types.  Additionally, an example of utilizing the
+SILC ``DataSet`` API is also provided.
+
+.. note::
+
+    The Python API examples are written to connect to a
+    database at ``127.0.0.1:6379``.  When running this example,
+    ensure that the address and port of your Redis instance are used.
+
+.. note::
+
+    The Python API examples are written
+    to connect to a non-cluster Redis database.  Update the
+    ``Client`` constructor call to connect to a Redis cluster.
 
 Models
 ======
@@ -23,19 +39,6 @@ Models can also be set from a file, as in the code below.
   :language: python
   :linenos:
 
-.. note::
-
-    The Python API examples for setting and running a model in the database
-    are written to connect to a database at ``127.0.0.1:6379``.  When
-    running this example, ensure that the address and port
-    of your Redis instance are used.
-
-.. note::
-
-    The Python API examples for setting and running a model are written
-    to connect to a non-cluster Redis database.  Update the
-    ``Client`` constructor call to connect to a Redis cluster.
-
 Scripts
 =======
 
@@ -49,7 +52,9 @@ to the database on the fly, without storing it in an intermediate file.
   :language: python
   :linenos:
 
-The code below shows how to set a script from a file.
+The code below shows how to set a script from a file.  Running the
+script set from file uses the same API calls as the example shown
+above.
 
 .. literalinclude:: ../../examples/serial/python/example_script_file.py
   :language: python
