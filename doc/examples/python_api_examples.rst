@@ -21,6 +21,19 @@ SILC ``DataSet`` API is also provided.
     to connect to a non-cluster Redis database.  Update the
     ``Client`` constructor call to connect to a Redis cluster.
 
+Tensors
+=======
+The Python client has the ability to send and receive tensors from
+the Redis database.  The tensors are stored in the Redis database
+as RedisAI data structures.  Additionally, Python client API
+functions involving tensor data are compatible with Numpy arrays
+and do not require any other data types.
+
+.. literalinclude:: ../../examples/serial/python/example_put_get_tensor.py
+  :language: python
+  :linenos:
+
+
 Datasets
 ========
 
