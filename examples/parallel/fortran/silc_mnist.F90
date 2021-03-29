@@ -2,7 +2,6 @@ program mnist_example
 
   use mpi
   use silc_client, only : client_type
-  use example_utils, only : use_cluster
 
   implicit none
 
@@ -21,7 +20,7 @@ program mnist_example
 
   ! Format the suffix for a key as a zero-padded version of the rank
   write(key_suffix, "(A,I1.1)") "_",pe_id
-  call client%initialize(use_cluster())
+  call client%initialize(.true.)
 
 
   if (pe_id == 0) then
