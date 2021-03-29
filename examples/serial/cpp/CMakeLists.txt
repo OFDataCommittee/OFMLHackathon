@@ -83,6 +83,15 @@ target_link_libraries(silc_put_get_3D
 	${CLIENT_LIBRARIES}
 )
 
+add_executable(silc_dataset
+	silc_dataset.cpp
+	${CLIENT_SRC}
+)
+target_link_libraries(silc_dataset
+	MPI::MPI_CXX
+	${CLIENT_LIBRARIES}
+)
+
 add_executable(silc_mnist
 	silc_mnist.cpp
 	${CLIENT_SRC}

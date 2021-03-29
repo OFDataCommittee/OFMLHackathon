@@ -1,8 +1,8 @@
 .. _cpp_client_examples:
 
-**********************
-Using the SILC C++ API
-**********************
+*******
+C++ API
+*******
 
 In this section, examples are presented for using the SILC C++
 API to interact with the RedisAI tensor, model, and script
@@ -30,6 +30,19 @@ SILC C++ client API.
   :linenos:
   :language: C++
 
+DataSets
+========
+
+The C++ client can store and retrieve tensors and metadata in datasets.
+For further information about datasets, please refer to the :ref:`Dataset
+section of the Data Structures documentation page <data_structures_dataset>`.
+
+The code below shows how to store and retrieve tensors and metadata
+which belong to a ``DataSet``.
+
+.. literalinclude:: ../../examples/serial/cpp/silc_dataset.cpp
+  :linenos:
+  :language: C++
 
 Models
 ======
