@@ -91,15 +91,6 @@ target_link_libraries(silc_put_get_3D
 	${CLIENT_LIBRARIES}
 )
 
-add_executable(silc_mnist
-	silc_mnist.F90
-	${CLIENT_SRC}
-)
-target_link_libraries(silc_mnist
-	MPI::MPI_Fortran
-	${CLIENT_LIBRARIES}
-)
-
 add_executable(silc_dataset
 	silc_dataset.F90
 	${CLIENT_SRC}
