@@ -21,6 +21,19 @@ SILC ``DataSet`` API is also provided.
     to connect to a non-cluster Redis database.  Update the
     ``Client`` constructor call to connect to a Redis cluster.
 
+Datasets
+========
+
+The Python client can store and retrieve tensors and metadata in datasets.
+For further information about datasets, please refer to the :ref:`Dataset
+section of the Data Structures documentation page <data_structures_dataset>`.
+
+The code below shows how to store and retrieve tensors which belong to a ``DataSet``.
+
+.. literalinclude:: ../../examples/serial/python/example_put_get_dataset.py
+  :language: python
+  :linenos:
+
 Models
 ======
 
@@ -65,18 +78,5 @@ in Python. For the example above, the file ``data_processing_script.txt``
 looks like this:
 
 .. literalinclude:: ../../examples/serial/python/data_processing_script.txt
-  :language: python
-  :linenos:
-
-Datasets
-========
-
-The Python client can store and retrieve tensors in datasets. For further
-information about datasets, please refer to the :ref:`Dataset section of
-the Data Structures documentation page <data_structures_dataset>`.
-
-The code below shows how to store and retrieve tensors which belong to a dataset.
-
-.. literalinclude:: ../../examples/serial/python/example_put_get_dataset.py
   :language: python
   :linenos:
