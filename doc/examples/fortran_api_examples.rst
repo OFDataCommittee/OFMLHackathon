@@ -1,8 +1,8 @@
 .. _fortran_client_examples:
 
-**************************
-Using the SILC Fortran API
-**************************
+***********
+Fortran API
+***********
 
 The SILC Fortran API is written using an object-oriented approach with two derived types ``client_type`` and
 ``dataset_type``. The examples shown here demonstrate the basic functionality and use of these SILC types by
@@ -68,11 +68,11 @@ Putting a Fortran array into the database
 -----------------------------------------
 
 After the SILC client has been initialized, a Fortran array of any dimension and shape and with a type of either 8, 16, 32, 64 bit
-``integer`` or 32 or 64-bit ``real`` can be put into the database using the type-bound procedure 
+``integer`` or 32 or 64-bit ``real`` can be put into the database using the type-bound procedure
 ``put_tensor``.
-In this example, as a proxy for model-generated data, the array ``send_array_real_64`` will be filled with 
+In this example, as a proxy for model-generated data, the array ``send_array_real_64`` will be filled with
 random numbers and stored in the database using ``put_tensor``. This subroutine requires the user
-to specify a string used as the 'key' (here: ``send_array``) identifying the tensor in the database, 
+to specify a string used as the 'key' (here: ``send_array``) identifying the tensor in the database,
 the array to be stored, and the shape of the array.
 
 .. literalinclude:: ../../examples/serial/fortran/silc_put_get_3D.F90
