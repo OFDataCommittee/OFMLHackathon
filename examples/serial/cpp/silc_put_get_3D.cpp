@@ -1,14 +1,10 @@
 #include "client.h"
-#include <mpi.h>
 #include <vector>
 #include <string>
 
 int main(int argc, char* argv[]) {
 
-    MPI_Init(&argc, &argv);
-
-
-     // Initialize tensor dimensions
+    // Initialize tensor dimensions
     size_t dim1 = 3;
     size_t dim2 = 2;
     size_t dim3 = 5;
@@ -26,9 +22,7 @@ int main(int argc, char* argv[]) {
     SILC::Client client(false);
 
     // Put the tensor in the database
-    int rank = 0;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    std::string key = "3d_tensor_" + std::to_string(rank);
+    std::string key = "3d_tensor";
     client.put_tensor(key, input_tensor.data(), dims,
                       SILC::TensorType::dbl,
                       SILC::MemoryLayout::contiguous);
@@ -64,8 +58,6 @@ int main(int argc, char* argv[]) {
                          <<"Received: "
                          <<((double***)get_tensor)[i][j][k]<<std::endl;
     }
-
-    MPI_Finalize();
 
     return 0;
 }

@@ -74,11 +74,11 @@ set(CLIENT_SRC
 
 # Build executables
 
-add_executable(silc_put_get_contiguous_3D
-	silc_put_get_contiguous_3D.cpp
+add_executable(silc_put_get_3D
+	silc_put_get_3D.cpp
 	${CLIENT_SRC}
 )
-target_link_libraries(silc_put_get_contiguous_3D
+target_link_libraries(silc_put_get_3D
 	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )

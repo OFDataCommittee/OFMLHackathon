@@ -83,15 +83,6 @@ target_link_libraries(silc_put_get_3D
 	${CLIENT_LIBRARIES}
 )
 
-add_executable(silc_put_get_contiguous_3D
-	silc_put_get_contiguous_3D.cpp
-	${CLIENT_SRC}
-)
-target_link_libraries(silc_put_get_contiguous_3D
-	MPI::MPI_CXX
-	${CLIENT_LIBRARIES}
-)
-
 add_executable(silc_mnist
 	silc_mnist.cpp
 	${CLIENT_SRC}
