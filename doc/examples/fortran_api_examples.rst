@@ -1,3 +1,5 @@
+.. _fortran_client_examples:
+
 **************************
 Using the SILC Fortran API
 **************************
@@ -59,51 +61,45 @@ database or ``.false.`` otherwise.
 
     type(client_type) :: client
 
-    call client%initialize(.true.) ! Change .true. to false if not using a clustered database
+    call client%initialize(.false.) ! Change .true. to false if using a clustered database
   end program example
 
 Putting a Fortran array into the database
 -----------------------------------------
 
-After the SILC client has been initialized, a Fortran array of any dimension and shape and with a type of either 8, 16, 32, 64 bit ``integer`` or 32 or 64-bit ``real`` can be put into the database using the type-bound procedure ``put_tensor``. In this example, as a proxy for model-generated data, the array ``state`` will be filled with random numbers and stored in the database using ``put_tensor``. This subroutine requires the user to specify a string used as the 'key' (here: ``example_array``) identifying the tensor in the database, the array to be stored, and the shape of the array.
+After the SILC client has been initialized, a Fortran array of any dimension and shape and with a type of either 8, 16, 32, 64 bit
+``integer`` or 32 or 64-bit ``real`` can be put into the database using the type-bound procedure 
+``put_tensor``.
+In this example, as a proxy for model-generated data, the array ``send_array_real_64`` will be filled with 
+random numbers and stored in the database using ``put_tensor``. This subroutine requires the user
+to specify a string used as the 'key' (here: ``send_array``) identifying the tensor in the database, 
+the array to be stored, and the shape of the array.
 
-.. code-block:: fortran
-
-  program example
-    use silc_client, only : client_type
-
-    type(client_type) :: client
-    real, dimension(10,20,30) :: state
-
-    call client%initialize(.true.) ! Change .true. to false if not using a clustered database
-
-    call random_number(state) ! Fill the array 'state' with random numbers
-    call client%put_tensor( "example_array", state, shape(state) )
-
-  end program example
+.. literalinclude:: ../../examples/serial/fortran/silc_put_get_3D.F90
+  :linenos:
+  :language: fortran
+  :lines: 1-11,13-24,26-27
 
 Unpacking an array stored in the database
 -----------------------------------------
 
 'Unpacking' an array in SILC refers to filling a Fortran array with the values of a tensor stored in the database.
 The dimensions and type of data of the incoming array and the pre-declared array are checked within the client to
-ensure that they match. Unpacking requires declaring an array and using the ``unpack_tensor`` procedure. This example generates an array of random numbers, puts that into the database, retrieves the values from the database into a different array, and then computes the summed, element-by-element difference (which should be zero).
+ensure that they match. Unpacking requires declaring an array and using the ``unpack_tensor`` procedure.
+This example generates an array of random numbers, puts that into the database, and
+retrieves the values from the database into a different array.
 
-.. code-block:: fortran
+.. literalinclude:: ../../examples/serial/fortran/silc_put_get_3D.F90
+  :linenos:
+  :language: fortran
 
-  program example
-    use silc_client, only : client_type
 
-    type(client_type) :: client
-    real, dimension(10,20,30) :: state, incoming
+Datasets
+========
 
-    call client%initialize(.true.) ! Change .true. to false if not using a clustered database
+The following code snippet shows how to use the Fortran Client to store and retrieve dataset tensors and
+dataset metadata scalars.
 
-    call random_number(state) ! Fill the array 'state' with random numbers
-    call client%put_tensor( "example_array", state, shape(state) ) ! Put the tensor into the database
-
-    call client%unpack_tensor( "example_array", incoming, shape(incoming) ) ! Retrieve the tensor
-
-    print *, SUM( state - incoming )
-
-  end program example
+.. literalinclude:: ../../examples/serial/fortran/silc_dataset.F90
+  :linenos:
+  :language: fortran

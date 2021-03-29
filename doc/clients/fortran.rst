@@ -104,30 +104,3 @@ Similarly the following interfaces are overloaded to support 32/64-bit ``real`` 
 
 .. f:automodule:: silc_dataset
 
-.. _fortran_client_examples:
-
-Fortran Client Examples
-=======================
-
-This section contains examples showing how the Fortran client can be used to interact with the database.
-
-Datasets
---------
-
-The following code snippet shows how to use the Fortran Client to store and retrieve dataset tensors and
-dataset metadata scalars.
-
-.. literalinclude:: ../../examples/serial/fortran/silc_dataset.F90
-  :linenos:
-  :language: fortran
-
-
-Models
-------
-
-The following example shows how to store, retrieve, and use a pre-processing script and a DL model in the database with the Fortran Client. 
-The model and the script are stored as files in the ``../../../common/mnist_data/`` path relative to the compiled executable.
-
-.. literalinclude:: ../../examples/serial/fortran/silc_mnist.F90
-  :linenos:
-  :language: fortran

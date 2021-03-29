@@ -33,7 +33,7 @@ void run_mnist(const std::string& model_name,
     std::cout<<"Connecting clients"<<std::endl<<std::flush;
 
   double constructor_start = MPI_Wtime();
-  SILC::Client client(false);
+  SILC::Client client(false); // Change to true if using a clustered database
   double constructor_end = MPI_Wtime();
   double delta_t = constructor_end - constructor_start;
   timing_file << rank << "," << "client()" << ","
@@ -53,7 +53,6 @@ void run_mnist(const std::string& model_name,
     pos+=28;
   }
 
-  //float**** array = allocate_4D_array<float>(1,1,28,28);
   float** result = allocate_2D_array<float>(1, 10);
 
   if(rank == 0)
