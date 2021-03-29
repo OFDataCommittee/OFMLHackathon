@@ -92,6 +92,15 @@ target_link_libraries(silc_dataset
 	${CLIENT_LIBRARIES}
 )
 
+add_executable(silc_model
+	silc_model.cpp
+	${CLIENT_SRC}
+)
+target_link_libraries(silc_model
+	MPI::MPI_CXX
+	${CLIENT_LIBRARIES}
+)
+
 add_executable(silc_mnist
 	silc_mnist.cpp
 	${CLIENT_SRC}

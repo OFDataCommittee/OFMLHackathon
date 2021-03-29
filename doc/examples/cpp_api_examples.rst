@@ -47,15 +47,21 @@ which belong to a ``DataSet``.
 Models
 ======
 
-The following example shows how to store, retrieve, and use a pre-processing script and a DL model in the database with the C++ Client.
-The model and the script are stored as files in the ``../../../common/mnist_data/`` path relative to the compiled executable.
+The following example shows how to store, and use a DL model
+in the database with the C++ Client.  The model is stored a file
+in the ``../../../common/mnist_data/`` path relative to the
+compiled executable.  Note that this example also sets and
+executes a preprocessing script.
 
-.. literalinclude:: ../../examples/serial/cpp/silc_mnist.cpp
+.. literalinclude:: ../../examples/serial/cpp/silc_model.cpp
   :linenos:
   :language: C++
-  :lines: 42-64
-  :lineno-start: 45
 
-The complete source code for this example is available in the `C++ example directory of the repository`_.
+Scripts
+=======
 
-.. _C++ example directory of the repository: https://github.com/CrayLabs/SILC/examples/serial/cpp/
+The example in `Models`_ shows how to store, and use a PyTorch script
+in the database with the C++ Client.  The script is stored a file
+in the ``../../../common/mnist_data/`` path relative to the
+compiled executable.  Note that this example also sets and
+executes a PyTorch model.
