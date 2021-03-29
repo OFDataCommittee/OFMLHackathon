@@ -1,10 +1,8 @@
 #include "client.h"
-#include "example_utils.h"
-#include <mpi.h>
 
 void load_mnist_image_to_array(float**** img)
 {
-  std::string image_file = "../mnist_data/one.raw";
+  std::string image_file = "../../../common/mnist_data/one.raw";
   std::ifstream fin(image_file, std::ios::binary);
   std::ostringstream ostream;
   ostream << fin.rdbuf();
@@ -22,28 +20,10 @@ void load_mnist_image_to_array(float**** img)
   }
 }
 
-void run_mnist(const std::string& model_name,
-               const std::string& script_name,
-               std::ofstream& timing_file)
-{
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+int main(int argc, char* argv[]) {
 
-  if(!rank)
-    std::cout<<"Connecting clients"<<std::endl<<std::flush;
-
-  double constructor_start = MPI_Wtime();
-  SILC::Client client(false);
-  double constructor_end = MPI_Wtime();
-  double delta_t = constructor_end - constructor_start;
-  timing_file << rank << "," << "client()" << ","
-              << delta_t << std::endl << std::flush;
-
-  MPI_Barrier(MPI_COMM_WORLD);
-
-  //Allocate a continugous memory to make bcast easier
+  //Allocate a continugous memory
   float* p = (float*)malloc(28*28*sizeof(float));
-
   float**** array = (float****)malloc(1*sizeof(float***));
   array[0] = (float***)malloc(1*sizeof(float**));
   array[0][0] = (float**)malloc(28*sizeof(float*));
@@ -53,129 +33,41 @@ void run_mnist(const std::string& model_name,
     pos+=28;
   }
 
-  //float**** array = allocate_4D_array<float>(1,1,28,28);
-  float** result = allocate_2D_array<float>(1, 10);
+  float **result = (float **)malloc(1*sizeof(float *));
+  for (int i=0; i<1; i++)
+    result[i] = (float *)malloc(10*sizeof(float));
 
-  if(rank == 0)
-    load_mnist_image_to_array(array);
+  load_mnist_image_to_array(array);
+  
+  SILC::Client client(false);
 
-  MPI_Bcast(&(p[0]), 28*28, MPI_FLOAT, 0, MPI_COMM_WORLD);
-  MPI_Barrier(MPI_COMM_WORLD);
-  if(!rank)
-    std::cout<<"All ranks have MNIST image"<<std::endl;
+  std::string model_key = "mnist_model";
+  std::string model_file = "../../../common/mnist_data/mnist_cnn.pt";
+  client.set_model_from_file(model_key, model_file, "TORCH", "CPU", 20);
 
-  std::string in_key = "mnist_input_rank_" + std::to_string(rank);
-  std::string script_out_key = "mnist_processed_input_rank_" + std::to_string(rank);
-  std::string out_key = "mnist_output_rank_" + std::to_string(rank);
+  std::string script_key = "mnist_script";
+  std::string script_file = "../../../common/mnist_data/data_processing_script.txt";
+  client.set_script_from_file(script_key, "CPU", script_file);
 
-  double put_tensor_start = MPI_Wtime();
+
+  std::string in_key = "mnist_input";
+  std::string script_out_key = "mnist_processed_input";
+  std::string out_key = "mnist_output";
   client.put_tensor(in_key, array, {1,1,28,28},
                     SILC::TensorType::flt,
                     SILC::MemoryLayout::nested);
-  double put_tensor_end = MPI_Wtime();
-  delta_t = put_tensor_end - put_tensor_start;
-  timing_file << rank << "," << "put_tensor" << ","
-              << delta_t << std::endl << std::flush;
 
-  double run_script_start = MPI_Wtime();
-  client.run_script(script_name, "pre_process", {in_key}, {script_out_key});
-  double run_script_end = MPI_Wtime();
-  delta_t = run_script_end - run_script_start;
-  timing_file << rank << "," << "run_script" << ","
-              << delta_t << std::endl << std::flush;
-
-  double run_model_start = MPI_Wtime();
-  client.run_model(model_name, {script_out_key}, {out_key});
-  double run_model_end = MPI_Wtime();
-  delta_t = run_model_end - run_model_start;
-  timing_file << rank << "," << "run_model" << ","
-              << delta_t << std::endl << std::flush;
-
-  double unpack_tensor_start = MPI_Wtime();
+  client.run_script("mnist_script", "pre_process", {in_key}, {script_out_key});
+  client.run_model("mnist_model", {script_out_key}, {out_key});
   client.unpack_tensor(out_key, result, {1,10},
                        SILC::TensorType::flt,
                        SILC::MemoryLayout::nested);
-  double unpack_tensor_end = MPI_Wtime();
-  delta_t = unpack_tensor_end - unpack_tensor_start;
-  timing_file << rank << "," << "unpack_tensor" << ","
-              << delta_t << std::endl << std::flush;
 
+  // Clean up
   free(p);
-  free_2D_array(result, 1);
-  return;
-}
-
-int main(int argc, char* argv[]) {
-
-  MPI_Init(&argc, &argv);
-
-  double main_start = MPI_Wtime();
-
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-  //Open Timing file
-  std::ofstream timing_file;
-  timing_file.open("rank_"+std::to_string(rank)+"_timing.csv");
-  MPI_Barrier(MPI_COMM_WORLD);
-
-  if(rank==0) {
-
-    double constructor_start = MPI_Wtime();
-    SILC::Client client(use_cluster());
-    double constructor_end = MPI_Wtime();
-    double delta_t = constructor_end - constructor_start;
-    timing_file << rank << "," << "client()" << ","
-                << delta_t << std::endl << std::flush;
-
-
-    std::string model_key = "mnist_model";
-    std::string model_file = "./../mnist_data/mnist_cnn.pt";
-    double model_set_start = MPI_Wtime();
-    client.set_model_from_file(model_key, model_file, "TORCH", "CPU", 20);
-    double model_set_end = MPI_Wtime();
-    delta_t = model_set_end - model_set_start;
-    timing_file << rank << "," << "model_set" << ","
-                << delta_t << std::endl << std::flush;
-
-    std::string script_key = "mnist_script";
-    std::string script_file = "./../mnist_data/data_processing_script.txt";
-
-    double script_set_start = MPI_Wtime();
-    client.set_script_from_file(script_key, "CPU", script_file);
-    double script_set_end = MPI_Wtime();
-    delta_t = script_set_end - script_set_start;
-    timing_file << rank << "," << "script_set" << ","
-                << delta_t << std::endl << std::flush;
-
-    double model_get_start = MPI_Wtime();
-    std::string_view model = client.get_model(model_key);
-    double model_get_end = MPI_Wtime();
-    delta_t = model_get_end - model_get_start;
-    timing_file << rank << "," << "model_get" << ","
-                << delta_t << std::endl << std::flush;
-
-    double script_get_start = MPI_Wtime();
-    std::string_view script = client.get_script(script_key);
-    double script_get_end = MPI_Wtime();
-    delta_t = script_get_end - script_get_start;
-    timing_file << rank << "," << "script_get" << ","
-                << delta_t << std::endl << std::flush;
-  }
-
-  MPI_Barrier(MPI_COMM_WORLD);
-
-  run_mnist("mnist_model", "mnist_script", timing_file);
-
-  if(rank==0)
-    std::cout<<"Finished SILC MNIST example."<<std::endl;
-
-  double main_end = MPI_Wtime();
-  double delta_t = main_end - main_start;
-  timing_file << rank << "," << "main()" << ","
-                << delta_t << std::endl << std::flush;
-
-  MPI_Finalize();
+  for(int i=0; i<1; i++)
+    free(result[i]);
+  free(result);
 
   return 0;
 }

@@ -3,8 +3,8 @@
 Fortran
 *******
 
-Overview
-========
+Using the Fortran Client
+========================
 
 The SILC Fortran interface is centered around two Fortran modules: ``silc_client`` and ``silc_dataset``. The only
 public element of these modules are, respectively, ``client_type`` and ``dataset_type``. These derived types take
@@ -25,6 +25,8 @@ The example below shows the code required to send and receive data with the Fort
 .. literalinclude:: ../../examples/serial/fortran/silc_put_get_3D.F90
   :language: fortran
   :linenos:
+
+Other examples are shown in the :ref:`Fortran Client Examples section<fortran_client_examples>`.
 
 Compiler Requirements
 ---------------------

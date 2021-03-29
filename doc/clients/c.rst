@@ -10,7 +10,7 @@ The SmartSim C client allows users to send and receive data from
 other SmartSim entities stored in the database. The code snippet below shows
 the code required to send and receive data with the C client. In the
 following subsections, general groups of functions that are provided by the
-Python client API will be described.
+C client API will be described.
 
 .. literalinclude:: ../../examples/serial/c/example_put_get_3D.c
   :language: C
