@@ -8,9 +8,10 @@ Using the SILC Python API
 Models
 ======
 
-The Python client allows the user to set and use a PyTorch, ONNX, TensorFlow,
+The SILC clients allow users to set and use a PyTorch, ONNX, TensorFlow,
 or TensorFlow Lite model in the database. Models can be sent to the database directly
-from memory or from a file. The code below illustrates how a jit-traced PyTorch model can be used.
+from memory or from a file. The code below illustrates how a
+jit-traced PyTorch model can be used with the Python client library.
 
 .. literalinclude:: ../../examples/serial/python/example_model_torch.py
   :language: python
@@ -21,6 +22,19 @@ Models can also be set from a file, as in the code below.
 .. literalinclude:: ../../examples/serial/python/example_model_file_torch.py
   :language: python
   :linenos:
+
+.. note::
+
+    The Python API examples for setting and running a model in the database
+    are written to connect to a database at ``127.0.0.1:6379``.  When
+    running this example, ensure that the address and port
+    of your Redis instance are used.
+
+.. note::
+
+    The Python API examples for setting and running a model are written
+    to connect to a non-cluster Redis database.  Update the
+    ``Client`` constructor call to connect to a Redis cluster.
 
 Scripts
 =======
@@ -52,8 +66,8 @@ looks like this:
 Datasets
 ========
 
-The Python client can store and retrieve tensors in datasets. For further 
-information about datasets, please refer to the :ref:`Dataset section of 
+The Python client can store and retrieve tensors in datasets. For further
+information about datasets, please refer to the :ref:`Dataset section of
 the Data Structures documentation page <data_structures_dataset>`.
 
 The code below shows how to store and retrieve tensors which belong to a dataset.
