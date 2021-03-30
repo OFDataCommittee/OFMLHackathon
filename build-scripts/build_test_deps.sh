@@ -9,14 +9,6 @@ RAI_ONNX=${5:-0}
 
 cd ./third-party
 
-# build KeyDB
-../build-scripts/build-keydb.sh
-if [ $? != 0 ]; then
-    echo "ERROR: KeyDB failed to build"
-    cd ..
-    exit 1
-fi
-
 # build redis
 ../build-scripts/build-redis.sh
 if [ $? != 0 ]; then
