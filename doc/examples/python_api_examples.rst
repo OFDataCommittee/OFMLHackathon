@@ -1,10 +1,10 @@
 .. _python_client_examples:
 
-*************************
-Python API
-*************************
+******
+Python
+******
 
-In this section, examples are presented for using the SILC Python
+In this section, examples are presented using the SILC Python
 API to interact with the RedisAI tensor, model, and script
 data types.  Additionally, an example of utilizing the
 SILC ``DataSet`` API is also provided.

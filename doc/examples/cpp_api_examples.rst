@@ -1,10 +1,10 @@
 .. _cpp_client_examples:
 
-*******
-C++ API
-*******
+***
+C++
+***
 
-In this section, examples are presented for using the SILC C++
+In this section, examples are presented using the SILC C++
 API to interact with the RedisAI tensor, model, and script
 data types.  Additionally, an example of utilizing the
 SILC ``DataSet`` API is also provided.

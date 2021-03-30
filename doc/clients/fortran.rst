@@ -104,3 +104,17 @@ Similarly the following interfaces are overloaded to support 32/64-bit ``real`` 
 
 .. f:automodule:: silc_dataset
 
+Importing SILC
+==============
+The public facing parts of SILC-Fortran are contained in two modules ``silc_client`` and ``silc_dataset``. These can be imported into Fortran code in the usual way:
+
+.. code-block:: fortran
+
+  program example
+    use silc_dataset, only : dataset_type
+    use silc_client,  only : client_type
+  end program example
+
+.. note::
+
+  ``dataset_type`` and ``client_type`` are the only public elements of these modules
