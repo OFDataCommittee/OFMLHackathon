@@ -1,18 +1,17 @@
 
-***
+*
 C
-***
+*
 
-
-C Client API
-============
+Client API
+==========
 
 .. doxygenfile:: c_client.h
    :project: c_client
 
 
-C Dataset API
-=============
+Dataset API
+===========
 
 .. doxygenfile:: c_dataset.h
    :project: c_client

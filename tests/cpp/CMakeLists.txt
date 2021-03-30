@@ -69,14 +69,6 @@ set(CLIENT_SRC
 
 # Build executables
 
-add_executable(crc_inverse
-	crc_inverse.cpp
-	${CLIENT_SRC}
-)
-target_link_libraries(crc_inverse
-	${CLIENT_LIBRARIES}
-)
-
 add_executable(client_test_dataset
 	client_test_dataset.cpp
 	${CLIENT_SRC}

@@ -55,14 +55,14 @@ if [[ $DO_FORTRAN == "yes" ]]; then
         exit 1
     fi
 
-    cd ../../cpp
+    cd ../
 
     echo "Fortran parallel examples built"
 else
     echo "Skipping Fortran parallel example build"
 fi
 
-
+cd ../cpp/
 
 # setup build dirs
 mkdir build

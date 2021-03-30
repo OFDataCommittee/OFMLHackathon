@@ -2,14 +2,13 @@ program mnist_example
 
   use mpi
   use silc_client, only : client_type
-  use example_utils, only : use_cluster
 
   implicit none
 
   character(len=*), parameter :: model_key = "mnist_model"
-  character(len=*), parameter :: model_file = "../../cpp/mnist_data/mnist_cnn.pt"
+  character(len=*), parameter :: model_file = "../../../common/mnist_data/mnist_cnn.pt"
   character(len=*), parameter :: script_key = "mnist_script"
-  character(len=*), parameter :: script_file = "../../cpp/mnist_data/data_processing_script.txt"
+  character(len=*), parameter :: script_file = "../../../common/mnist_data/data_processing_script.txt"
 
   type(client_type) :: client
   integer :: err_code, pe_id
@@ -21,7 +20,7 @@ program mnist_example
 
   ! Format the suffix for a key as a zero-padded version of the rank
   write(key_suffix, "(A,I1.1)") "_",pe_id
-  call client%initialize(use_cluster())
+  call client%initialize(.true.)
 
 
   if (pe_id == 0) then
