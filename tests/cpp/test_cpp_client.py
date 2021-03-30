@@ -14,7 +14,6 @@ def get_test_names():
     """
     glob_path = osp.join(TEST_PATH, "build/client_test*")
     test_names = glob(glob_path)
-    test_names.append(osp.join(TEST_PATH, "build/crc_inverse"))
     test_names = [(pytest.param(test,
                                 id=osp.basename(test))) for test in test_names]
     return test_names
