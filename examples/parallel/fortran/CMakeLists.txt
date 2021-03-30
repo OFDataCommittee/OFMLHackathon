@@ -109,12 +109,3 @@ target_link_libraries(silc_dataset
 	MPI::MPI_Fortran
 	${CLIENT_LIBRARIES}
 )
-
-add_executable(silc_put_get_unpack_dataset
-  silc_put_get_unpack_dataset.F90
-	${CLIENT_SRC}
-)
-target_link_libraries(silc_put_get_unpack_dataset
-	MPI::MPI_Fortran
-	${CLIENT_LIBRARIES}
-)
