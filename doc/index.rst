@@ -29,8 +29,6 @@
    examples/python_api_examples
    examples/cpp_api_examples
    examples/fortran_api_examples
-   examples/cpp_mnist
-   examples/fortran_mnist
 
 .. toctree::
    :maxdepth: 2

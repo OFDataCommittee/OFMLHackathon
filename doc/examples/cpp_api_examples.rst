@@ -65,3 +65,30 @@ in the database with the C++ Client.  The script is stored a file
 in the ``../../../common/mnist_data/`` path relative to the
 compiled executable.  Note that this example also sets and
 executes a PyTorch model.
+
+Parallel (MPI) execution
+========================
+
+In this example, the example shown in `Models`_ and
+`Scripts`_ is adapted to run in parallel using MPI.
+This example has the same functionality, however,
+it shows how keys can be prefixed to prevent key
+collisions across MPI ranks.  Note that only one
+model and script are set, which is shared across
+all ranks.
+
+For completeness, the pre-processing script
+source code is also shown.
+
+**C++ program**
+
+.. literalinclude:: ../../examples/parallel/cpp/silc_mnist.cpp
+  :linenos:
+  :language: C++
+
+**Python Pre-Processing**
+
+.. literalinclude:: ../../examples/common/mnist_data/data_processing_script.txt
+  :linenos:
+  :language: Python
+  :lines: 15-20
