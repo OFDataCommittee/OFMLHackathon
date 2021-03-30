@@ -264,7 +264,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 };
 
 const char descriptor_table_protodef_smartredis_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\nsmartredis.proto\022\014SILCProtobuf\".\n\022RepeatedSt"
+  "\n\nsmartredis.proto\022\014SmartRedisProtobuf\".\n\022RepeatedSt"
   "ringMeta\022\n\n\002id\030\001 \001(\t\022\014\n\004data\030\002 \003(\t\"2\n\022Re"
   "peatedDoubleMeta\022\n\n\002id\030\001 \001(\t\022\020\n\004data\030\002 \003"
   "(\001B\002\020\001\"1\n\021RepeatedFloatMeta\022\n\n\002id\030\001 \001(\t\022"
@@ -274,7 +274,7 @@ const char descriptor_table_protodef_smartredis_2eproto[] PROTOBUF_SECTION_VARIA
   "\001\"2\n\022RepeatedSInt32Meta\022\n\n\002id\030\001 \001(\t\022\020\n\004d"
   "ata\030\002 \003(\021B\002\020\001\"2\n\022RepeatedUInt32Meta\022\n\n\002i"
   "d\030\001 \001(\t\022\020\n\004data\030\002 \003(\rB\002\020\001\"\310\003\n\010MetaData\022>"
-  "\n\024repeated_string_meta\030\001 \003(\0132 .SILCProto"
+  "\n\024repeated_string_meta\030\001 \003(\0132 .SmartRedisProto"
   "buf.RepeatedStringMeta\022>\n\024repeated_doubl"
   "e_meta\030\002 \003(\0132 .SmartRedisProtobuf.RepeatedDoub"
   "leMeta\022<\n\023repeated_float_meta\030\003 \003(\0132\037.SI"
@@ -282,7 +282,7 @@ const char descriptor_table_protodef_smartredis_2eproto[] PROTOBUF_SECTION_VARIA
   "_sint64_meta\030\004 \003(\0132 .SmartRedisProtobuf.Repeat"
   "edSInt64Meta\022>\n\024repeated_uint64_meta\030\005 \003"
   "(\0132 .SmartRedisProtobuf.RepeatedUInt64Meta\022>\n\024"
-  "repeated_sint32_meta\030\006 \003(\0132 .SILCProtobu"
+  "repeated_sint32_meta\030\006 \003(\0132 .SmartRedisProtobu"
   "f.RepeatedSInt32Meta\022>\n\024repeated_uint32_"
   "meta\030\007 \003(\0132 .SmartRedisProtobuf.RepeatedUInt32"
   "Metab\006proto3"
