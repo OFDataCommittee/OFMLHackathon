@@ -1,8 +1,8 @@
 program main
 
   use iso_c_binding
-  use silc_client,  only : client_type
-  use silc_dataset, only : dataset_type
+  use smartredis_client,  only : client_type
+  use smartredis_dataset, only : dataset_type
   use test_utils,   only : use_cluster, irand
 
   implicit none

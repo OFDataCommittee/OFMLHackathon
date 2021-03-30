@@ -1,6 +1,6 @@
 import os
 
-from silc import Client
+from smartredis import Client
 
 
 def test_address(use_cluster):

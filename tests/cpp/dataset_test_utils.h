@@ -1,5 +1,5 @@
-#ifndef SILC_DATASET_TEST_UTILS_H
-#define SILC_DATASET_TEST_UTILS_H
+#ifndef SMARTREDIS_DATASET_TEST_UTILS_H
+#define SMARTREDIS_DATASET_TEST_UTILS_H
 
 #include <limits>
 #include "dataset.h"
@@ -400,4 +400,4 @@ void check_dataset_metadata(SmartRedis::DataSet& dataset)
 
 };  //Namespace DATASET_TEST_UTILS
 
-#endif //SILC_DATASET_TEST_UTILS_H
+#endif //SMARTREDIS_DATASET_TEST_UTILS_H

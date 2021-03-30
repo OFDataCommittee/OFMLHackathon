@@ -72,7 +72,7 @@ set(CLIENT_SRC
 	 ../../../../src/cpp/tensorpack.cpp
 	 ../../../../src/cpp/dbnode.cpp
 	 ../../../../src/cpp/commandreply.cpp
-	 ../../../../utils/protobuf/silc.pb.cc
+	 ../../../../utils/protobuf/smartredis.pb.cc
    ../../../../src/fortran/fortran_c_interop.F90
    ../../../../src/fortran/dataset.F90
    ../../../../src/fortran/client.F90
@@ -82,20 +82,20 @@ set(CLIENT_SRC
 
 # ld executables
 
-add_executable(silc_put_get_3D
-	silc_put_get_3D.F90
+add_executable(smartredis_put_get_3D
+	smartredis_put_get_3D.F90
 	${CLIENT_SRC}
 )
-target_link_libraries(silc_put_get_3D
+target_link_libraries(smartredis_put_get_3D
 	MPI::MPI_Fortran
 	${CLIENT_LIBRARIES}
 )
 
-add_executable(silc_dataset
-	silc_dataset.F90
+add_executable(smartredis_dataset
+	smartredis_dataset.F90
 	${CLIENT_SRC}
 )
-target_link_libraries(silc_dataset
+target_link_libraries(smartredis_dataset
 	MPI::MPI_Fortran
 	${CLIENT_LIBRARIES}
 )

@@ -26,35 +26,35 @@ int main(int argc, char* argv[]) {
     uint32_t meta_scalar_2 = 2;
     int64_t meta_scalar_3 = 3;
 
-    // Initialize a SILC client
-    SILC::Client client(false);
+    // Initialize a SmartRedis client
+    SmartRedis::Client client(false);
 
     // Create a DataSet
-    SILC::DataSet dataset("example_dataset");
+    SmartRedis::DataSet dataset("example_dataset");
 
     // Add tensors to the DataSet
     dataset.add_tensor("tensor_1", tensor_1.data(), dims,
-                       SILC::TensorType::dbl,
-                       SILC::MemoryLayout::contiguous);
+                       SmartRedis::TensorType::dbl,
+                       SmartRedis::MemoryLayout::contiguous);
 
     dataset.add_tensor("tensor_2", tensor_2.data(), dims,
-                       SILC::TensorType::int64,
-                       SILC::MemoryLayout::contiguous);
+                       SmartRedis::TensorType::int64,
+                       SmartRedis::MemoryLayout::contiguous);
 
     // Add metadata scalar values to the DataSet
     dataset.add_meta_scalar("meta_field_1", &meta_scalar_1,
-                            SILC::MetaDataType::uint32);
+                            SmartRedis::MetaDataType::uint32);
     dataset.add_meta_scalar("meta_field_1", &meta_scalar_2,
-                            SILC::MetaDataType::uint32);
+                            SmartRedis::MetaDataType::uint32);
     dataset.add_meta_scalar("meta_field_2", &meta_scalar_3,
-                            SILC::MetaDataType::int64);
+                            SmartRedis::MetaDataType::int64);
 
 
     // Put the DataSet in the database
     client.put_dataset(dataset);
 
     // Retrieve the DataSet from the database
-    SILC::DataSet retrieved_dataset =
+    SmartRedis::DataSet retrieved_dataset =
         client.get_dataset("example_dataset");
 
     // Retrieve one of the tensors
@@ -62,8 +62,8 @@ int main(int argc, char* argv[]) {
     retrieved_dataset.unpack_tensor("tensor_2",
                                     unpack_dataset_tensor.data(),
                                     {n_values},
-                                    SILC::TensorType::int64,
-                                    SILC::MemoryLayout::contiguous);
+                                    SmartRedis::TensorType::int64,
+                                    SmartRedis::MemoryLayout::contiguous);
 
     // Print out the retrieved values
     std::cout<<"Comparing sent and received "\
@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
     //Retrieve a metadata field
     size_t get_n_meta_values;
     void* get_meta_values;
-    SILC::MetaDataType get_type;
+    SmartRedis::MetaDataType get_type;
     dataset.get_meta_scalars("meta_field_1",
                              get_meta_values,
                              get_n_meta_values,

@@ -1,6 +1,6 @@
 import numpy as np
 
-from silc import Dataset
+from smartredis import Dataset
 
 
 def test_add_get_tensor(mock_data):

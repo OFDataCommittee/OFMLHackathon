@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
   for(size_t i=0; i<dims[0]; i++)
     tensor[i] = ((float)rand())/RAND_MAX;
 
-  void* client = SmartSimCClient(false);
+  void* client = SmartRedisCClient(false);
 
   char key[] = "1D_tensor_test";
 

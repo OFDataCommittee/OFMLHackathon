@@ -23,12 +23,12 @@ void run_mnist(const std::string& model_name,
     std::string out_key = "mnist_output";
 
     // Initialize a Client object
-    SILC::Client client(false);
+    SmartRedis::Client client(false);
 
     // Put the image tensor on the database
     client.put_tensor(in_key, img.data(), {1,1,28,28},
-                      SILC::TensorType::flt,
-                      SILC::MemoryLayout::contiguous);
+                      SmartRedis::TensorType::flt,
+                      SmartRedis::MemoryLayout::contiguous);
 
     // Run the preprocessing script
     client.run_script(script_name, "pre_process",
@@ -40,8 +40,8 @@ void run_mnist(const std::string& model_name,
     // Get the result of the model
     std::vector<float> result(1*10);
     client.unpack_tensor(out_key, result.data(), {10},
-                         SILC::TensorType::flt,
-                         SILC::MemoryLayout::contiguous);
+                         SmartRedis::TensorType::flt,
+                         SmartRedis::MemoryLayout::contiguous);
 
     // Print out the results of the model
     for(size_t i=0; i<result.size(); i++)
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
     // Initialize a client for setting the model and script.
     // In general, Client objects should be reused, but for this
     // small example, Client objects are not reused.
-    SILC::Client client(false);
+    SmartRedis::Client client(false);
 
     // Build model key, file name, and then set model
     // from file using client API
@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
 
     run_mnist("mnist_model", "mnist_script");
 
-    std::cout<<"Finished SILC MNIST example."<<std::endl;
+    std::cout<<"Finished SmartRedis MNIST example."<<std::endl;
 
     return 0;
 }

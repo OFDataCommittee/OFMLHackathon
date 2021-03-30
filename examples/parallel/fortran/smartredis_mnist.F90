@@ -1,7 +1,7 @@
 program mnist_example
 
   use mpi
-  use silc_client, only : client_type
+  use smartredis_client, only : client_type
 
   implicit none
 
@@ -35,7 +35,7 @@ program mnist_example
   call MPI_finalize(err_code)
 
   if (pe_id == 0) then
-    print *, "SILC Fortran MPI MNIST example finished without errors."
+    print *, "SmartRedis Fortran MPI MNIST example finished without errors."
   endif
 
 contains

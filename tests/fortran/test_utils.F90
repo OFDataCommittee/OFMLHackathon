@@ -33,12 +33,12 @@ module test_utils
 
   logical function use_cluster()
 
-    character(len=16) :: silc_test_cluster
+    character(len=16) :: smartredis_test_cluster
 
-    call get_environment_variable('SILC_TEST_CLUSTER', silc_test_cluster)
-    silc_test_cluster = to_lower(silc_test_cluster)
-    if (len_trim(silc_test_cluster)>0) then
-      select case (silc_test_cluster)
+    call get_environment_variable('SMARTREDIS_TEST_CLUSTER', smartredis_test_cluster)
+    smartredis_test_cluster = to_lower(smartredis_test_cluster)
+    if (len_trim(smartredis_test_cluster)>0) then
+      select case (smartredis_test_cluster)
         case ('true')
           use_cluster = .true.
         case ('false')

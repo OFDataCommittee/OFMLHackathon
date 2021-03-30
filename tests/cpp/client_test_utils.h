@@ -1,5 +1,5 @@
-#ifndef SILC_TEST_UTILS_H
-#define SILC_TEST_UTILS_H
+#ifndef SMARTREDIS_TEST_UTILS_H
+#define SMARTREDIS_TEST_UTILS_H
 
 #include <typeinfo>
 #include <random>
@@ -26,11 +26,11 @@ bool use_cluster()
     configuration should be used in the test
     when creating a Client.
     */
-    char* silc_test_cluster = std::getenv("SILC_TEST_CLUSTER");
-    to_lower(silc_test_cluster);
+    char* smartredis_test_cluster = std::getenv("SMARTREDIS_TEST_CLUSTER");
+    to_lower(smartredis_test_cluster);
 
-    if(silc_test_cluster) {
-        if(std::strcmp(silc_test_cluster, "true")==0)
+    if(smartredis_test_cluster) {
+        if(std::strcmp(smartredis_test_cluster, "true")==0)
             return true;
     }
     return false;
@@ -257,4 +257,4 @@ T get_floating_point_scalar()
   return distribution(generator);
 }
 
-#endif //SILC_TEST_UTILS_H
+#endif //SMARTREDIS_TEST_UTILS_H

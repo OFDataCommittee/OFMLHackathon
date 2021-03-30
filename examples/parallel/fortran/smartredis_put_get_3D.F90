@@ -2,7 +2,7 @@ program main
 
   use mpi
   use iso_c_binding
-  use silc_client, only : client_type
+  use smartredis_client, only : client_type
 
   implicit none
 
@@ -35,6 +35,6 @@ program main
   if (.not. all(true_array_real_64 == recv_array_real_64)) stop 'true_array_real_64: FAILED'
   
   call mpi_finalize(err_code)
-  if (pe_id == 0) write(*,*) "SILC MPI Fortran example 3D put/get finished."
+  if (pe_id == 0) write(*,*) "SmartRedis MPI Fortran example 3D put/get finished."
 
 end program main

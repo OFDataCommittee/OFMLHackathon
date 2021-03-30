@@ -1,6 +1,6 @@
 import numpy as np
 
-from silc import Client
+from smartredis import Client
 
 
 # ----- Tests -----------------------------------------------------------

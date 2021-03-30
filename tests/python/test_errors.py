@@ -3,8 +3,8 @@ import os
 import numpy as np
 import pytest
 
-from silc import Client, Dataset
-from silc.error import RedisConnectionError, RedisReplyError
+from smartredis import Client, Dataset
+from smartredis.error import RedisConnectionError, RedisReplyError
 
 
 def test_SSDB_not_set(use_cluster):

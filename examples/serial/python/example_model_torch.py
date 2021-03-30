@@ -3,7 +3,7 @@ import io
 import torch
 import torch.nn as nn
 
-from silc import Client
+from smartredis import Client
 
 # Taken from https://pytorch.org/docs/master/generated/torch.jit.trace.html
 class Net(nn.Module):
@@ -26,7 +26,7 @@ buffer = io.BytesIO()
 torch.jit.save(module, buffer)
 model = buffer.getvalue()
 
-# Connect a SILC client and set the model in the database
+# Connect a SmartRedis client and set the model in the database
 db_address = "127.0.0.1:6379"
 client = Client(address=db_address, cluster=False)
 client.set_model("torch_cnn", model, "TORCH", "CPU")

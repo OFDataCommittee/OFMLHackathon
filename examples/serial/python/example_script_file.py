@@ -1,5 +1,5 @@
 import os.path as osp
-from silc import Client
+from smartredis import Client
 
 # Construct a string holding the script file location
 file_path = osp.dirname(osp.abspath(__file__))

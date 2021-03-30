@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 
-from silc import Client, Dataset
+from smartredis import Client, Dataset
 
 
 def test_put_get_dataset(mock_data, use_cluster):

@@ -18,8 +18,8 @@ int main(int argc, char* argv[]) {
     const std::string tmp = ostream.str();
     std::memcpy(img.data(), tmp.data(), img.size()*sizeof(float));
 
-    // Initialize a SILC client to connect to the Redis database
-    SILC::Client client(false);
+    // Initialize a SmartRedis client to connect to the Redis database
+    SmartRedis::Client client(false);
 
     // Use the client to set a model in the database from a file
     std::string model_key = "mnist_model";
@@ -38,8 +38,8 @@ int main(int argc, char* argv[]) {
 
     // Put the tensor into the database that was loaded from file
     client.put_tensor(in_key, img.data(), {1,1,28,28},
-                        SILC::TensorType::flt,
-                        SILC::MemoryLayout::contiguous);
+                        SmartRedis::TensorType::flt,
+                        SmartRedis::MemoryLayout::contiguous);
 
     // Run the preprocessing script on the input tensor
     client.run_script("mnist_script", "pre_process", {in_key}, {script_out_key});
@@ -50,8 +50,8 @@ int main(int argc, char* argv[]) {
     // Retrieve the output of the model
     std::vector<float> result(10, 0);
     client.unpack_tensor(out_key, result.data(), {10},
-                        SILC::TensorType::flt,
-                        SILC::MemoryLayout::contiguous);
+                        SmartRedis::TensorType::flt,
+                        SmartRedis::MemoryLayout::contiguous);
 
     // Print out the results of the model evaluation
     for(size_t i=0; i<result.size(); i++) {

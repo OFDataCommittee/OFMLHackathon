@@ -2,7 +2,7 @@ program main
 
   use mpi
   use iso_c_binding
-  use silc_dataset, only : dataset_type
+  use smartredis_dataset, only : dataset_type
 
   implicit none
 
@@ -47,6 +47,6 @@ program main
   call dataset%get_meta_scalars(meta_flt, meta_flt_recv)
 
   call mpi_finalize(err_code)
-  if (pe_id == 0) write(*,*) "SILC Fortran MPI Dataset example finished without errors."
+  if (pe_id == 0) write(*,*) "SmartRedis Fortran MPI Dataset example finished without errors."
 
 end program main

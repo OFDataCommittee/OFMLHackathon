@@ -67,27 +67,27 @@ set(CLIENT_SRC
 	 ../../../../src/cpp/tensorpack.cpp
 	 ../../../../src/cpp/dbnode.cpp
 	 ../../../../src/cpp/commandreply.cpp
-	 ../../../utils/protobuf/silc.pb.cc
+	 ../../../utils/protobuf/smartredis.pb.cc
    ../../../../src/cpp/redisserver.cpp
    ../../../../src/cpp/redis.cpp
    ../../../../src/cpp/rediscluster.cpp)
 
 # Build executables
 
-add_executable(silc_put_get_3D
-	silc_put_get_3D.cpp
+add_executable(smartredis_put_get_3D
+	smartredis_put_get_3D.cpp
 	${CLIENT_SRC}
 )
-target_link_libraries(silc_put_get_3D
+target_link_libraries(smartredis_put_get_3D
 	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )
 
-add_executable(silc_mnist
-	silc_mnist.cpp
+add_executable(smartredis_mnist
+	smartredis_mnist.cpp
 	${CLIENT_SRC}
 )
-target_link_libraries(silc_mnist
+target_link_libraries(smartredis_mnist
 	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )

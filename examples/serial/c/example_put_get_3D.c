@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
   dims[1] = 26;
   dims[2] = 3;
 
-  void* client = SmartSimCClient(false);
+  void* client = SmartRedisCClient(false);
 
   // Allocate tensors
   double*** tensor = (double***)malloc(dims[0]*sizeof(double**));

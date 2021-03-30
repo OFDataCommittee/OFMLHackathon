@@ -2,7 +2,7 @@ import os
 
 import torch
 
-from silc import Client
+from smartredis import Client
 
 
 def test_set_model(mock_model, use_cluster):
