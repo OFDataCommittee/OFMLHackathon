@@ -1,73 +1,85 @@
 #include "client.h"
 
-void load_mnist_image_to_array(float**** img)
+void run_mnist(const std::string& model_name,
+               const std::string& script_name)
 {
-  std::string image_file = "../../../common/mnist_data/one.raw";
-  std::ifstream fin(image_file, std::ios::binary);
-  std::ostringstream ostream;
-  ostream << fin.rdbuf();
-  fin.close();
+    // Initialize a vector that will hold input image tensor
+    size_t n_values = 1*1*28*28;
+    std::vector<float> img(n_values, 0);
 
-  const std::string tmp = ostream.str();
-  const char *image_buf = tmp.data();
-  int image_buf_length = tmp.length();
+    // Load the MNIST image from a file
+    std::string image_file = "../../../common/mnist_data/one.raw";
+    std::ifstream fin(image_file, std::ios::binary);
+    std::ostringstream ostream;
+    ostream << fin.rdbuf();
+    fin.close();
 
-  int position = 0;
-  for(int i=0; i<28; i++) {
-    for(int j=0; j<28; j++) {
-      img[0][0][i][j] = ((float*)image_buf)[position++];
-    }
-  }
+    const std::string tmp = ostream.str();
+    std::memcpy(img.data(), tmp.data(), img.size()*sizeof(float));
+
+    // Declare keys that we will use in forthcoming client commands
+    std::string in_key = "mnist_input";
+    std::string script_out_key = "mnist_processed_input";
+    std::string out_key = "mnist_output";
+
+    // Initialize a Client object
+    SILC::Client client(false);
+
+    // Put the image tensor on the database
+    client.put_tensor(in_key, img.data(), {1,1,28,28},
+                      SILC::TensorType::flt,
+                      SILC::MemoryLayout::contiguous);
+
+    // Run the preprocessing script
+    client.run_script(script_name, "pre_process",
+                      {in_key}, {script_out_key});
+
+    // Run the model
+    client.run_model(model_name, {script_out_key}, {out_key});
+
+    // Get the result of the model
+    std::vector<float> result(1*10);
+    client.unpack_tensor(out_key, result.data(), {10},
+                         SILC::TensorType::flt,
+                         SILC::MemoryLayout::contiguous);
+
+    // Print out the results of the model
+    for(size_t i=0; i<result.size(); i++)
+        std::cout<<"Rank 0: Result["<<i<<"] = "<<result[i]<<std::endl;
+
+    return;
 }
 
 int main(int argc, char* argv[]) {
 
-  //Allocate a continugous memory
-  float* p = (float*)malloc(28*28*sizeof(float));
-  float**** array = (float****)malloc(1*sizeof(float***));
-  array[0] = (float***)malloc(1*sizeof(float**));
-  array[0][0] = (float**)malloc(28*sizeof(float*));
-  int pos = 0;
-  for(int i=0; i<28; i++) {
-    array[0][0][i] = &p[pos];
-    pos+=28;
-  }
+    // Initialize a client for setting the model and script.
+    // In general, Client objects should be reused, but for this
+    // small example, Client objects are not reused.
+    SILC::Client client(false);
 
-  float **result = (float **)malloc(1*sizeof(float *));
-  for (int i=0; i<1; i++)
-    result[i] = (float *)malloc(10*sizeof(float));
+    // Build model key, file name, and then set model
+    // from file using client API
+    std::string model_key = "mnist_model";
+    std::string model_file = "../../../"\
+                                "common/mnist_data/mnist_cnn.pt";
+    client.set_model_from_file(model_key, model_file,
+                            "TORCH", "CPU", 20);
 
-  load_mnist_image_to_array(array);
-  
-  SILC::Client client(false);
+    // Build script key, file name, and then set script
+    // from file using client API
+    std::string script_key = "mnist_script";
+    std::string script_file = "../../../common/mnist_data/"
+                            "data_processing_script.txt";
+    client.set_script_from_file(script_key, "CPU", script_file);
 
-  std::string model_key = "mnist_model";
-  std::string model_file = "../../../common/mnist_data/mnist_cnn.pt";
-  client.set_model_from_file(model_key, model_file, "TORCH", "CPU", 20);
+    // Get model and script to illustrate client API
+    // functionality, but this is not necessary for this example.
+    std::string_view model = client.get_model(model_key);
+    std::string_view script = client.get_script(script_key);
 
-  std::string script_key = "mnist_script";
-  std::string script_file = "../../../common/mnist_data/data_processing_script.txt";
-  client.set_script_from_file(script_key, "CPU", script_file);
+    run_mnist("mnist_model", "mnist_script");
 
+    std::cout<<"Finished SILC MNIST example."<<std::endl;
 
-  std::string in_key = "mnist_input";
-  std::string script_out_key = "mnist_processed_input";
-  std::string out_key = "mnist_output";
-  client.put_tensor(in_key, array, {1,1,28,28},
-                    SILC::TensorType::flt,
-                    SILC::MemoryLayout::nested);
-
-  client.run_script("mnist_script", "pre_process", {in_key}, {script_out_key});
-  client.run_model("mnist_model", {script_out_key}, {out_key});
-  client.unpack_tensor(out_key, result, {1,10},
-                       SILC::TensorType::flt,
-                       SILC::MemoryLayout::nested);
-
-  // Clean up
-  free(p);
-  for(int i=0; i<1; i++)
-    free(result[i]);
-  free(result);
-
-  return 0;
+    return 0;
 }

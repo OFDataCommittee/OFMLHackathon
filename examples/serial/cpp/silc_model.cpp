@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
     std::string script_file = "../../../common/mnist_data/data_processing_script.txt";
     client.set_script_from_file(script_key, "CPU", script_file);
 
-    // Declare key names that we will use in forthcoming client commands
+    // Declare keys that we will use in forthcoming client commands
     std::string in_key = "mnist_input";
     std::string script_out_key = "mnist_processed_input";
     std::string out_key = "mnist_output";
