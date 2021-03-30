@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'SILC'
+project = 'SmartRedis'
 copyright = '2020, Cray, a Hewlett Packard Enterprise company'
 author = 'HPE AI & Advanced Productivity'
 

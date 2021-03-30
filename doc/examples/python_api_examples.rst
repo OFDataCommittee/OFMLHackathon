@@ -4,10 +4,10 @@
 Python
 ******
 
-In this section, examples are presented using the SILC Python
+In this section, examples are presented using the SmartRedis Python
 API to interact with the RedisAI tensor, model, and script
 data types.  Additionally, an example of utilizing the
-SILC ``DataSet`` API is also provided.
+SmartRedis ``DataSet`` API is also provided.
 
 .. note::
 
@@ -50,7 +50,7 @@ The code below shows how to store and retrieve tensors which belong to a ``DataS
 Models
 ======
 
-The SILC clients allow users to set and use a PyTorch, ONNX, TensorFlow,
+The SmartRedis clients allow users to set and use a PyTorch, ONNX, TensorFlow,
 or TensorFlow Lite model in the database. Models can be sent to the database directly
 from memory or from a file. The code below illustrates how a
 jit-traced PyTorch model can be used with the Python client library.

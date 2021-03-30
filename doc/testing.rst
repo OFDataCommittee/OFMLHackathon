@@ -9,11 +9,11 @@ Building the Tests
 ==================
 
 Before building the tests, it is assumed that the base dependencies
-for SILC described in the installation instructions have already
+for SmartRedis described in the installation instructions have already
 been executed.
 
 To build the tests, you first need to install the dependencies for
-testing. To download SILC related testing dependencies, run
+testing. To download SmartRedis related testing dependencies, run
 the following:
 
 .. code-block:: bash
@@ -42,7 +42,7 @@ If you wish to run tests on GPU hardware, run the following command:
   for the user
 
 After installing dependencies and setting up your environment for
-building SILC, as stated above, all tests can be built with the
+building SmartRedis, as stated above, all tests can be built with the
 following command
 
 .. code-block:: bash
@@ -61,9 +61,9 @@ in ``utils/create_cluster`` as follows:
 
 .. code-block:: bash
 
-  cd /silc                       # navigate to the top level dir of silc
-  conda activate env             # activate python env with SILC requirements
-  source setup_env.sh            # Setup silc environment
+  cd /smartredis                       # navigate to the top level dir of smartredis
+  conda activate env             # activate python env with SmartRedis requirements
+  source setup_env.sh            # Setup smartredis environment
   cd utils/create_cluster
   python local_cluster.py        # spin up Redis cluster locally
   export SSDB="127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381"  # Set database location
@@ -82,7 +82,7 @@ Running the Tests
 =================
 
 To build and run all tests, run the following command in the top
-level of the silc repository.
+level of the smartredis repository.
 
 .. code-block:: bash
 

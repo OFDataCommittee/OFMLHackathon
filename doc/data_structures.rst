@@ -3,7 +3,7 @@ Data Structures
 ***************
 
 RedisAI defines three new data structures to be used in redis databases: tensor, model, and script.
-In addition, SILC defines an additional data structure ``DataSet``.  In this section, the SILC
+In addition, SmartRedis defines an additional data structure ``DataSet``.  In this section, the SmartRedis
 API for interacting with these data structures will be described, and when applicable,
 comments on performance and best practices will be made.
 
@@ -19,12 +19,12 @@ pages for those clients.
 Tensor
 ======
 
-An n-dimensional tensor is used by RedisAI to store and manipulate numerical data. SILC
+An n-dimensional tensor is used by RedisAI to store and manipulate numerical data. SmartRedis
 provides functions to put a key and tensor pair into the Redis database and retrieve
 a tensor associated with a key from the database.
 
 .. note::
-    When utilizing SILC with SmartSim ensemble functionality,
+    When utilizing SmartRedis with SmartSim ensemble functionality,
     the key provided by the user may be
     manipulated before placement in or retrieval from the database in order to
     avoid key collisions between ensemble members.  Therefore, when using
@@ -49,12 +49,12 @@ In the compiled clients, more information is needed to inform the ``Client`` abo
 the tensor properties.  In the C++ API, the dimensions of the tensor are provided
 via a ``std::vector<size_t>`` input parameter.  Additionally, the type associated
 with the tensor data (e.g. ``double``, ``float``) is specified with a
-``SILC::TensorType`` enum.  Finally, the ``Client`` must know the memory
+``SmartRedis::TensorType`` enum.  Finally, the ``Client`` must know the memory
 layout of the provided tensor data in order to generate a tensor data buffer.
 In C++, tensor data can either be in a contiguous memory layout or in a nested,
 non-contiguous memory layout (i.e. nested pointer arrays to underlying allocated memory).
 The memory layout of the tensor data to place in the database is specified
-with a ``SILC::MemoryLayout`` enum input parameter.
+with a ``SmartRedis::MemoryLayout`` enum input parameter.
 
 .. code-block:: cpp
 
@@ -241,7 +241,7 @@ single field, and the default behavior is to append the value to the
 existing field.  In this way, the ``DataSet`` metadata supports
 one-dimensional arrays, but the entries in the array must be added
 iteratively by the user.  Also, note that in the above C++ example,
-the metadata scalar type must be specified with a ``SILC::MetaDataType``
+the metadata scalar type must be specified with a ``SmartRedis::MetaDataType``
 enum value, and similar requirements exist for C and Fortran ``DataSet``
 implementations.
 
@@ -294,7 +294,7 @@ Sending
 
 A model is placed in the database through the ``Client.set_model()``
 function.  While data types may differ, the function parameters
-are uniform across all SILC clients, and as an example, the C++
+are uniform across all SmartRedis clients, and as an example, the C++
 ``set_model()`` function is shown below.
 
 .. code-block:: cpp
@@ -314,7 +314,7 @@ are uniform across all SILC clients, and as an example, the C++
 
 All of the parameters in ``set_model()`` follow the RedisAI
 API for the the RedisAI ``AI.MODELSET`` command, and as a result,
-the reader is encouraged to read the SILC client code
+the reader is encouraged to read the SmartRedis client code
 documentation or the RedisAI documentation for a description
 of each parameter.
 
@@ -327,12 +327,12 @@ of each parameter.
     of key manipulation that is required to accomplish
     this distribution.  Despite the internal key
     manipulation, models in a Redis cluster that have been
-    set through the SILC ``Client`` can be accessed
-    and run through the SILC ``Client`` API
+    set through the SmartRedis ``Client`` can be accessed
+    and run through the SmartRedis ``Client`` API
     using the key provided to ``set_model()``.  The user
     does not need any knowledge of the cluster model distribution
     to perform RedisAI model actions.  Moreover,
-    a model set by one SILC client (e.g. Python) on a Redis
+    a model set by one SmartRedis client (e.g. Python) on a Redis
     cluster is addressable with the same key through another
     client (e.g. C++).
 
@@ -380,7 +380,7 @@ Data processing is an essential step in most machine
 learning workflows.  For this reason, RedisAI provides
 the ability to evaluate PyTorch programs using the hardware
 co-located with the Redis database (either CPU or GPU).
-The SILC ``Client`` provides functions for users to
+The SmartRedis ``Client`` provides functions for users to
 place a script in the database, retrieve a script from the
 database, and run a script.
 
@@ -389,7 +389,7 @@ Sending
 
 A script is placed in the database through the ``Client.set_script()``
 function.  While data types may differ, the function parameters
-are uniform across all SILC clients, and as an example, the C++
+are uniform across all SmartRedis clients, and as an example, the C++
 ``set_script()`` function is shown below.  The function signature
 is quite simple for placing a script in the database, only
 a name for the script, hardware for execution, and the script text
@@ -410,12 +410,12 @@ need to be provided by the user.
     of key manipulation that is required to accomplish
     this distribution.  Despite the internal key
     manipulation, scripts in a Redis cluster that have been
-    set through the SILC ``Client`` can be accessed
-    and run through the SILC ``Client`` API
+    set through the SmartRedis ``Client`` can be accessed
+    and run through the SmartRedis ``Client`` API
     using the key provided to ``set_script()``.  The user
     does not need any knowledge of the cluster script distribution
     to perform RedisAI script actions.  Moreover,
-    a script set by one SILC client (e.g. Python) on a Redis
+    a script set by one SmartRedis client (e.g. Python) on a Redis
     cluster is addressable with the same key through another
     client (e.g. C++).
 

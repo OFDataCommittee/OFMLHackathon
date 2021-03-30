@@ -3,10 +3,10 @@
 Overview
 ********
 
-The SmartSim Infrastructure Library Clients (SILC) are a set of
+The SmartSim Infrastructure Library Clients (SmartRedis) are a set of
 Redis clients that support RedisAI capabilities with additional
 features for high performance computing (HPC) applications.
-Key features of RedisAI that are supported by SILC include:
+Key features of RedisAI that are supported by SmartRedis include:
 
 -   A tensor data type in Redis
 -   TensorFlow, TensorFlow Lite, Torch,
@@ -14,7 +14,7 @@ Key features of RedisAI that are supported by SILC include:
 -   TorchScript storage and evaluation
 
 In addition to the RedisAI capabilities above,
-SILC includes the following features developed for
+SmartRedis includes the following features developed for
 large, distributed HPC architectures:
 
 -   Redis cluster support for distributed data storage
@@ -32,7 +32,7 @@ large, distributed HPC architectures:
     tensors, ``DataSet``, models, and scripts when
     clients are part of an ensemble of applications
 
-SILC provides clients in Python, C++, C, and Fortran.
+SmartRedis provides clients in Python, C++, C, and Fortran.
 These clients have been written to provide a
 consistent API experience across languages, within
 the constraints of language capabilities.  The table

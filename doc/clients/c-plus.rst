@@ -5,7 +5,7 @@ C++
 Client API
 ==========
 
-.. doxygenclass:: SILC::Client
+.. doxygenclass:: SmartRedis::Client
    :project: cpp_client
    :members:
    :undoc-members:
@@ -14,7 +14,7 @@ Client API
 Dataset API
 ===========
 
-.. doxygenclass:: SILC::DataSet
+.. doxygenclass:: SmartRedis::DataSet
    :project: cpp_client
    :members:
    :undoc-members:

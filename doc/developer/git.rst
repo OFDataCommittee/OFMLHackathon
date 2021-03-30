@@ -6,7 +6,7 @@ Git Workflow
 Setup
 =====
 
-  - Fork the SmartSim repository
+  - Fork the SmartRedis repository
   - Set upstream as the main repository and set upstream push remote to ``no_push``
   - Follow installation instructions
 

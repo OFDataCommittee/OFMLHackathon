@@ -9,7 +9,7 @@ Client API
 
   The Python client documentation is incomplete.
 
-.. currentmodule::  silc
+.. currentmodule::  smartredis
 
 .. autosummary::
 
@@ -36,7 +36,7 @@ Client API
 DataSet API
 ===========
 
-.. currentmodule::  silc
+.. currentmodule::  smartredis
 
 .. autosummary::
 
