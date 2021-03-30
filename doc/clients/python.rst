@@ -5,10 +5,6 @@ Python
 Client API
 ==========
 
-.. note::
-
-  The Python client documentation is incomplete.
-
 .. currentmodule::  smartredis
 
 .. autosummary::
@@ -27,6 +23,14 @@ Client API
     Client.set_model_from_file
     Client.get_model
     Client.run_model
+    Client.model_exists
+    Client.key_exists
+    Client.poll_key
+    Client.poll_tensor
+    Client.poll_model
+    Client.set_data_source
+    Client.use_model_ensemble_prefix
+    Client.use_tensor_ensemble_prefix
 
 .. autoclass:: Client
    :members:

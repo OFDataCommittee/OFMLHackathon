@@ -338,7 +338,7 @@ class Client(PyClient):
 
     def tensor_exists(self, name):
         """Check if a tensor or dataset exists in the database
-           
+
         The key associated to the entity will be
         computed internally based on the current prefix behavior.
 
@@ -346,7 +346,7 @@ class Client(PyClient):
         :type key: str
         :returns: Returns true if the tensor or dataset exists in the database
         :rtype: bool
-        :raises RedisReplyError: if `tensor_exists` fails (i.e. causes an error) 
+        :raises RedisReplyError: if `tensor_exists` fails (i.e. causes an error)
         """
         try:
             super().tensor_exists(name)
@@ -364,7 +364,7 @@ class Client(PyClient):
         :type key: str
         :returns: Returns true if the model exists in the database
         :rtype: bool
-        :raises RedisReplyError: if `model_exists` fails (i.e. causes an error) 
+        :raises RedisReplyError: if `model_exists` fails (i.e. causes an error)
         """
         try:
             super().model_exists(name)
@@ -389,11 +389,11 @@ class Client(PyClient):
 
     def poll_key(self, key, poll_frequency_ms, num_tries):
         """Check if the key exists in the database
-        
+
         The check is performed repeatedly at a
         specified frequency for a specified number
         of times.
-           
+
         :param key: The key that will be checked in the database
         :type key: int
         :param poll_frequency_ms: The frequency of checks for the
@@ -417,12 +417,12 @@ class Client(PyClient):
 
     def poll_tensor(self, name, poll_frequency_ms, num_tries):
         """Check if a tensor or dataset exists in the database
-        
+
         The check will be performed at a
         specified frequency for a specified number
         of times. The key associated to the entity will be
         computed internally based on the current prefix behavior.
-           
+
         :param key: The key that will be checked in the database
         :type key: int
         :param poll_frequency_ms: The frequency of checks for the
@@ -446,12 +446,12 @@ class Client(PyClient):
 
     def poll_model(self, name, poll_frequency_ms, num_tries):
         """Check if a model or script exists in the database
-        
+
         The check will be performed at a
         specified frequency for a specified number
         of times. The key associated to the entity will be
         computed internally based on the current prefix behavior.
-           
+
         :param key: The key that will be checked in the database
         :type key: int
         :param poll_frequency_ms: The frequency of checks for the
@@ -495,9 +495,9 @@ class Client(PyClient):
         environment variables SSKEYIN and SSKEYOUT.
         By default, the client does not prefix model and script
         keys.
-         
+
         :param use_prefix: If set to true, all future operations
-                           on models and scripts will use a prefix, if 
+                           on models and scripts will use a prefix, if
                            available.
         :type use_prefix: bool
 
@@ -516,9 +516,9 @@ class Client(PyClient):
         environment variables SSKEYIN and SSKEYOUT.
         By default, the client prefixes tensor and dataset
         keys when a prefix is available.
-         
+
         :param use_prefix: If set to true, all future operations
-                           on tensors and datasets will use a prefix, if 
+                           on tensors and datasets will use a prefix, if
                            available.
         :type use_prefix: bool
 
