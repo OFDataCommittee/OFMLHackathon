@@ -2,9 +2,9 @@ include requirements.txt
 include requirements-dev.txt
 include setup_env.sh
 include Makefile
-include CmakeLists.txt
+include CMakeLists.txt
 graft src
 graft build-scripts
 graft include
-
+graft utils
 
