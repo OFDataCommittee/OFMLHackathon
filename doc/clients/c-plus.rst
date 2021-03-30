@@ -2,8 +2,8 @@
 C++
 ***
 
-C++ client API
-==============
+Client API
+==========
 
 .. doxygenclass:: SILC::Client
    :project: cpp_client
@@ -11,10 +11,11 @@ C++ client API
    :undoc-members:
 
 
-C++ Dataset API
-===============
+Dataset API
+===========
 
 .. doxygenclass:: SILC::DataSet
    :project: cpp_client
    :members:
    :undoc-members:
+

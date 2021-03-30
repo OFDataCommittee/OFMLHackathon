@@ -1,14 +1,10 @@
 #include "client.h"
-#include <mpi.h>
 #include <vector>
 #include <string>
 
 int main(int argc, char* argv[]) {
 
-    MPI_Init(&argc, &argv);
-
-
-     // Initialize tensor dimensions
+    // Initialize tensor dimensions
     size_t dim1 = 3;
     size_t dim2 = 2;
     size_t dim3 = 5;
@@ -22,22 +18,20 @@ int main(int argc, char* argv[]) {
     for(size_t i=0; i<n_values; i++)
         input_tensor[i] = 2.0*rand()/RAND_MAX - 1.0;
 
-    // Initialize a SmartRedis client
-    SmartRedis::Client client(false);
+    // Initialize a SILC client
+    SILC::Client client(false);
 
     // Put the tensor in the database
-    int rank = 0;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    std::string key = "3d_tensor_" + std::to_string(rank);
+    std::string key = "3d_tensor";
     client.put_tensor(key, input_tensor.data(), dims,
-                      SmartRedis::TensorType::dbl,
-                      SmartRedis::MemoryLayout::contiguous);
+                      SILC::TensorType::dbl,
+                      SILC::MemoryLayout::contiguous);
 
     // Retrieve the tensor from the database using the unpack feature.
     std::vector<double> unpack_tensor(n_values, 0);
     client.unpack_tensor(key, unpack_tensor.data(), {n_values},
-                        SmartRedis::TensorType::dbl,
-                        SmartRedis::MemoryLayout::contiguous);
+                        SILC::TensorType::dbl,
+                        SILC::MemoryLayout::contiguous);
 
     // Print the values retrieved with the unpack feature
     std::cout<<"Comparison of the sent and "\
@@ -48,11 +42,11 @@ int main(int argc, char* argv[]) {
 
 
     // Retrieve the tensor from the database using the get feature.
-    SmartRedis::TensorType get_type;
+    SILC::TensorType get_type;
     std::vector<size_t> get_dims;
     void* get_tensor;
     client.get_tensor(key, get_tensor, get_dims, get_type,
-                      SmartRedis::MemoryLayout::nested);
+                      SILC::MemoryLayout::nested);
 
     // Print the values retrieved with the unpack feature
     std::cout<<"Comparison of the sent and "\
@@ -64,8 +58,6 @@ int main(int argc, char* argv[]) {
                          <<"Received: "
                          <<((double***)get_tensor)[i][j][k]<<std::endl;
     }
-
-    MPI_Finalize();
 
     return 0;
 }

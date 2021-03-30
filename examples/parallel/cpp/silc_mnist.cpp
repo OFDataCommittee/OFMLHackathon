@@ -1,181 +1,117 @@
 #include "client.h"
-#include "example_utils.h"
 #include <mpi.h>
 
-void load_mnist_image_to_array(float**** img)
-{
-  std::string image_file = "../mnist_data/one.raw";
-  std::ifstream fin(image_file, std::ios::binary);
-  std::ostringstream ostream;
-  ostream << fin.rdbuf();
-  fin.close();
-
-  const std::string tmp = ostream.str();
-  const char *image_buf = tmp.data();
-  int image_buf_length = tmp.length();
-
-  int position = 0;
-  for(int i=0; i<28; i++) {
-    for(int j=0; j<28; j++) {
-      img[0][0][i][j] = ((float*)image_buf)[position++];
-    }
-  }
-}
-
 void run_mnist(const std::string& model_name,
-               const std::string& script_name,
-               std::ofstream& timing_file)
+               const std::string& script_name)
 {
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    // Get the MPI rank
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  if(!rank)
-    std::cout<<"Connecting clients"<<std::endl<<std::flush;
+    // Initialize a vector that will hold input image tensor
+    size_t n_values = 1*1*28*28;
+    std::vector<float> img(n_values, 0);
 
-  double constructor_start = MPI_Wtime();
-  SmartRedis::Client client(use_cluster());
-  double constructor_end = MPI_Wtime();
-  double delta_t = constructor_end - constructor_start;
-  timing_file << rank << "," << "client()" << ","
-              << delta_t << std::endl << std::flush;
+    // Load the mnist image from a file using MPI rank 0
+    if(rank==0) {
+        std::string image_file = "../../../common/mnist_data/one.raw";
+        std::ifstream fin(image_file, std::ios::binary);
+        std::ostringstream ostream;
+        ostream << fin.rdbuf();
+        fin.close();
 
-  MPI_Barrier(MPI_COMM_WORLD);
+        const std::string tmp = ostream.str();
+        std::memcpy(img.data(), tmp.data(), img.size()*sizeof(float));
+    }
 
-  //Allocate a continugous memory to make bcast easier
-  float* p = (float*)malloc(28*28*sizeof(float));
+    // Broadcast the image to all MPI ranks.  This is more efficient
+    // thank all ranks loading the same file.  This is specific
+    // to this example.
+    MPI_Bcast(img.data(), 28*28, MPI_FLOAT, 0, MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
-  float**** array = (float****)malloc(1*sizeof(float***));
-  array[0] = (float***)malloc(1*sizeof(float**));
-  array[0][0] = (float**)malloc(28*sizeof(float*));
-  int pos = 0;
-  for(int i=0; i<28; i++) {
-    array[0][0][i] = &p[pos];
-    pos+=28;
-  }
+    if(rank==0)
+        std::cout<<"All ranks have MNIST image"<<std::endl;
 
-  //float**** array = allocate_4D_array<float>(1,1,28,28);
-  float** result = allocate_2D_array<float>(1, 10);
+    // Declare keys that we will use in forthcoming client commands
+    std::string in_key = "mnist_input_rank_" + std::to_string(rank);
+    std::string script_out_key = "mnist_processed_input_rank_" +
+                                 std::to_string(rank);
+    std::string out_key = "mnist_output_rank_" + std::to_string(rank);
 
-  if(rank == 0)
-    load_mnist_image_to_array(array);
+    // Initialize a Client object
+    SmartRedis::Client client(false);
 
-  MPI_Bcast(&(p[0]), 28*28, MPI_FLOAT, 0, MPI_COMM_WORLD);
-  MPI_Barrier(MPI_COMM_WORLD);
-  if(!rank)
-    std::cout<<"All ranks have MNIST image"<<std::endl;
+    // Put the image tensor on the database
+    client.put_tensor(in_key, img.data(), {1,1,28,28},
+                      SmartRedis::TensorType::flt,
+                      SmartRedis::MemoryLayout::contiguous);
 
-  std::string in_key = "mnist_input_rank_" + std::to_string(rank);
-  std::string script_out_key = "mnist_processed_input_rank_" + std::to_string(rank);
-  std::string out_key = "mnist_output_rank_" + std::to_string(rank);
+    // Run the preprocessing script
+    client.run_script(script_name, "pre_process",
+                      {in_key}, {script_out_key});
 
-  double put_tensor_start = MPI_Wtime();
-  client.put_tensor(in_key, array, {1,1,28,28},
-                    SmartRedis::TensorType::flt,
-                    SmartRedis::MemoryLayout::nested);
-  double put_tensor_end = MPI_Wtime();
-  delta_t = put_tensor_end - put_tensor_start;
-  timing_file << rank << "," << "put_tensor" << ","
-              << delta_t << std::endl << std::flush;
+    // Run the model
+    client.run_model(model_name, {script_out_key}, {out_key});
 
-  double run_script_start = MPI_Wtime();
-  client.run_script(script_name, "pre_process", {in_key}, {script_out_key});
-  double run_script_end = MPI_Wtime();
-  delta_t = run_script_end - run_script_start;
-  timing_file << rank << "," << "run_script" << ","
-              << delta_t << std::endl << std::flush;
+    // Get the result of the model
+    std::vector<float> result(1*10);
+    client.unpack_tensor(out_key, result.data(), {10},
+                         SmartRedis::TensorType::flt,
+                         SmartRedis::MemoryLayout::contiguous);
 
-  double run_model_start = MPI_Wtime();
-  client.run_model(model_name, {script_out_key}, {out_key});
-  double run_model_end = MPI_Wtime();
-  delta_t = run_model_end - run_model_start;
-  timing_file << rank << "," << "run_model" << ","
-              << delta_t << std::endl << std::flush;
+    // Print out the results of the model for Rank 0
+    if(rank==0)
+        for(size_t i=0; i<result.size(); i++)
+            std::cout<<"Rank 0: Result["<<i<<"] = "<<result[i]<<std::endl;
 
-  double unpack_tensor_start = MPI_Wtime();
-  client.unpack_tensor(out_key, result, {1,10},
-                       SmartRedis::TensorType::flt,
-                       SmartRedis::MemoryLayout::nested);
-  double unpack_tensor_end = MPI_Wtime();
-  delta_t = unpack_tensor_end - unpack_tensor_start;
-  timing_file << rank << "," << "unpack_tensor" << ","
-              << delta_t << std::endl << std::flush;
-
-  free(p);
-  free_2D_array(result, 1);
-  return;
+    return;
 }
 
 int main(int argc, char* argv[]) {
 
-  MPI_Init(&argc, &argv);
+    // Initialize the MPI comm world
+    MPI_Init(&argc, &argv);
 
-  double main_start = MPI_Wtime();
+    // Retrieve the MPI rank
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    // Set the model and script that will be used by all ranks
+    // from MPI rank 0.
+    if(rank==0) {
+        SmartRedis::Client client(false);
 
-  //Open Timing file
-  std::ofstream timing_file;
-  timing_file.open("rank_"+std::to_string(rank)+"_timing.csv");
-  MPI_Barrier(MPI_COMM_WORLD);
+        // Build model key, file name, and then set model
+        // from file using client API
+        std::string model_key = "mnist_model";
+        std::string model_file = "../../../"\
+                                 "common/mnist_data/mnist_cnn.pt";
+        client.set_model_from_file(model_key, model_file,
+                                "TORCH", "CPU", 20);
 
-  if(rank==0) {
+        // Build script key, file name, and then set script
+        // from file using client API
+        std::string script_key = "mnist_script";
+        std::string script_file = "../../../common/mnist_data/"
+                                "data_processing_script.txt";
+        client.set_script_from_file(script_key, "CPU", script_file);
 
-    double constructor_start = MPI_Wtime();
-    SmartRedis::Client client(use_cluster());
-    double constructor_end = MPI_Wtime();
-    double delta_t = constructor_end - constructor_start;
-    timing_file << rank << "," << "client()" << ","
-                << delta_t << std::endl << std::flush;
+        // Get model and script to illustrate client API
+        // functionality, but this is not necessary for this example.
+        std::string_view model = client.get_model(model_key);
+        std::string_view script = client.get_script(script_key);
+    }
 
+    // Run the MNIST model
+    MPI_Barrier(MPI_COMM_WORLD);
+    run_mnist("mnist_model", "mnist_script");
 
-    std::string model_key = "mnist_model";
-    std::string model_file = "./../mnist_data/mnist_cnn.pt";
-    double model_set_start = MPI_Wtime();
-    client.set_model_from_file(model_key, model_file, "TORCH", "CPU", 20);
-    double model_set_end = MPI_Wtime();
-    delta_t = model_set_end - model_set_start;
-    timing_file << rank << "," << "model_set" << ","
-                << delta_t << std::endl << std::flush;
+    if(rank==0)
+        std::cout<<"Finished SmartRedis MNIST example."<<std::endl;
 
-    std::string script_key = "mnist_script";
-    std::string script_file = "./../mnist_data/data_processing_script.txt";
+    // Finalize MPI Comm World
+    MPI_Finalize();
 
-    double script_set_start = MPI_Wtime();
-    client.set_script_from_file(script_key, "CPU", script_file);
-    double script_set_end = MPI_Wtime();
-    delta_t = script_set_end - script_set_start;
-    timing_file << rank << "," << "script_set" << ","
-                << delta_t << std::endl << std::flush;
-
-    double model_get_start = MPI_Wtime();
-    std::string_view model = client.get_model(model_key);
-    double model_get_end = MPI_Wtime();
-    delta_t = model_get_end - model_get_start;
-    timing_file << rank << "," << "model_get" << ","
-                << delta_t << std::endl << std::flush;
-
-    double script_get_start = MPI_Wtime();
-    std::string_view script = client.get_script(script_key);
-    double script_get_end = MPI_Wtime();
-    delta_t = script_get_end - script_get_start;
-    timing_file << rank << "," << "script_get" << ","
-                << delta_t << std::endl << std::flush;
-  }
-
-  MPI_Barrier(MPI_COMM_WORLD);
-
-  run_mnist("mnist_model", "mnist_script", timing_file);
-
-  if(rank==0)
-    std::cout<<"Finished SILC MNIST example."<<std::endl;
-
-  double main_end = MPI_Wtime();
-  double delta_t = main_end - main_start;
-  timing_file << rank << "," << "main()" << ","
-                << delta_t << std::endl << std::flush;
-
-  MPI_Finalize();
-
-  return 0;
+    return 0;
 }

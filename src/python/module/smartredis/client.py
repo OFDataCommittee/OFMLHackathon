@@ -12,7 +12,7 @@ from .util import Dtypes, init_default
 
 class Client(PyClient):
     def __init__(self, address=None, cluster=False):
-        """Initialize a RedisAI client.
+        """Initialize a RedisAI client
 
         For clusters, the address can be a single tcp/ip address and port
         of a database node. The rest of the cluster will be discovered
@@ -70,7 +70,7 @@ class Client(PyClient):
         """Put a Dataset instance into the database
 
         All associated tensors and metadata within the Dataset
-        instance will also be stored
+        instance will also be stored.
 
         :param dataset: a Dataset instance
         :type dataset: Dataset
@@ -106,8 +106,7 @@ class Client(PyClient):
         one input and one output. Call the function with the Client.run_script
         method.
         Device selection is either "GPU" or "CPU". If many devices are
-
-        present, a number can be passed for specification e.g. "GPU:1"
+        present, a number can be passed for specification e.g. "GPU:1".
 
         :param key: key to store function at
         :type key: str
@@ -131,7 +130,7 @@ class Client(PyClient):
         """Store a TorchScript at key in database
 
         Device selection is either "GPU" or "CPU". If many devices are
-        present, a number can be passed for specification e.g. "GPU:1"
+        present, a number can be passed for specification e.g. "GPU:1".
 
         :param key: key to store script under
         :type key: str
@@ -338,9 +337,10 @@ class Client(PyClient):
 
 
     def tensor_exists(self, name):
-        """Check if a tensor or dataset exists in the database.
-           The key associated to the entity will be
-           computed internally based on the current prefix behavior.
+        """Check if a tensor or dataset exists in the database
+           
+        The key associated to the entity will be
+        computed internally based on the current prefix behavior.
 
         :param key: The tensor or dataset name that will be checked in the database
         :type key: str
@@ -355,9 +355,10 @@ class Client(PyClient):
 
 
     def model_exists(self, name):
-        """Check if a model or script exists in the database.
-           The key associated to the entity will be
-           computed internally based on the current prefix behavior.
+        """Check if a model or script exists in the database
+
+        The key associated to the entity will be
+        computed internally based on the current prefix behavior.
 
         :param key: The model or script name that will be checked in the database
         :type key: str
@@ -387,9 +388,11 @@ class Client(PyClient):
 
 
     def poll_key(self, key, poll_frequency_ms, num_tries):
-        """Check if the key exists in the database at a
-           specified frequency for a specified number
-           of times
+        """Check if the key exists in the database
+        
+        The check is performed repeatedly at a
+        specified frequency for a specified number
+        of times.
            
         :param key: The key that will be checked in the database
         :type key: int
@@ -413,10 +416,12 @@ class Client(PyClient):
 
 
     def poll_tensor(self, name, poll_frequency_ms, num_tries):
-        """Check if a tensor or dataset exists in the database at a
-           specified frequency for a specified number
-           of times. The key associated to the entity will be
-           computed internally based on the current prefix behavior.
+        """Check if a tensor or dataset exists in the database
+        
+        The check will be performed at a
+        specified frequency for a specified number
+        of times. The key associated to the entity will be
+        computed internally based on the current prefix behavior.
            
         :param key: The key that will be checked in the database
         :type key: int
@@ -440,10 +445,12 @@ class Client(PyClient):
 
 
     def poll_model(self, name, poll_frequency_ms, num_tries):
-        """Check if a model or script exists in the database at a
-           specified frequency for a specified number
-           of times. The key associated to the entity will be
-           computed internally based on the current prefix behavior.
+        """Check if a model or script exists in the database
+        
+        The check will be performed at a
+        specified frequency for a specified number
+        of times. The key associated to the entity will be
+        computed internally based on the current prefix behavior.
            
         :param key: The key that will be checked in the database
         :type key: int
@@ -468,6 +475,7 @@ class Client(PyClient):
 
     def set_data_source(self, source_id):
         """Set the data source (i.e. key prefix for get functions)
+
         :param source_id: The prefix for retrieval commands
         :type source_id: str
         :raises RedisReplyError: if set data
@@ -481,11 +489,12 @@ class Client(PyClient):
 
     def use_model_ensemble_prefix(self, use_prefix):
         """Set whether model and script keys should be prefixed
-           e.g. in an ensemble. Prefixes will only be
-           used if they were previously set through
-           environment variables SSKEYIN and SSKEYOUT.
-           By default, the client does not prefix model and script
-           keys.
+
+        This function can be used to avoid key collisions in an ensemble.
+        Prefixes will only be used if they were previously set through
+        environment variables SSKEYIN and SSKEYOUT.
+        By default, the client does not prefix model and script
+        keys.
          
         :param use_prefix: If set to true, all future operations
                            on models and scripts will use a prefix, if 
@@ -501,11 +510,12 @@ class Client(PyClient):
 
     def use_tensor_ensemble_prefix(self, use_prefix):
         """Set whether tensor and dataset keys should be prefixed
-           e.g. in an ensemble. Prefixes will only be
-           used if they were previously set through
-           environment variables SSKEYIN and SSKEYOUT.
-           By default, the client prefixes tensor and dataset
-           keys when a prefix is available.
+
+        This function can be used to avoid key collisions in an ensemble.
+        Prefixes will only be used if they were previously set through
+        environment variables SSKEYIN and SSKEYOUT.
+        By default, the client prefixes tensor and dataset
+        keys when a prefix is available.
          
         :param use_prefix: If set to true, all future operations
                            on tensors and datasets will use a prefix, if 

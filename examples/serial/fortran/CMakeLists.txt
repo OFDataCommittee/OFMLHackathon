@@ -1,10 +1,12 @@
-project(CppClientExamples)
+project(FortranClientExamples)
 
 set(CMAKE_BUILD_TYPE Release)
 
 cmake_minimum_required(VERSION 3.10)
 
 SET(CMAKE_CXX_STANDARD 17)
+#SET(CMAKE_Fortran_COMPILER "")
+enable_language(Fortran)
 
 #TODO put in output warnings
 # Determine where the hiredis library is based on if an environment variable
@@ -14,7 +16,7 @@ if(DEFINED ENV{HIREDIS_INSTALL_PATH})
 	   find_library(HIREDIS_LIB hiredis PATHS ${HIREDIS_LIB_PATH} NO_DEFAULT_PATH)
 	   string(CONCAT HIREDIS_INCLUDE_PATH $ENV{HIREDIS_INSTALL_PATH} "/include/")
 else()
-     find_library(HIREDIS_LIB hiredis PATH_SUFFIXES "/lib")
+     	   find_library(HIREDIS_LIB hiredis PATH_SUFFIXES "/lib")
 	   find_path(HIREDIS_INCLUDE_PATH hiredis PATH_SUFFIXES "/include")
 endif()
 
@@ -41,15 +43,16 @@ else()
 endif()
 
 find_package(MPI)
-if(${MPI_CXX_FOUND})
+if(${MPI_Fortran_FOUND})
 else()
-    message(FATAL_ERROR "Could not find working MPI for C++ parallel examples. CMake will exit.")
+    message(FATAL_ERROR "Could not find working MPI for Fortran parallel examples. CMake will exit.")
 endif()
 
 include_directories(SYSTEM
     ${MPI_INCLUDE_PATH}
     ../../../include
-	  ../../../utils/protobuf
+    ../../../utils/protobuf
+    ../../../src/fortran
     /usr/local/include
     ${HIREDIS_INCLUDE_PATH}
     ${REDISPP_INCLUDE_PATH}
@@ -58,6 +61,8 @@ include_directories(SYSTEM
 
 set(CLIENT_LIBRARIES ${REDISPP_LIB} ${HIREDIS_LIB} ${PROTOBUF_LIB})
 set(CLIENT_SRC
+	 ../../../../src/c/c_client.cpp
+	 ../../../../src/c/c_dataset.cpp
 	 ../../../../src/cpp/client.cpp
 	 ../../../../src/cpp/dataset.cpp
 	 ../../../../src/cpp/command.cpp
@@ -67,27 +72,30 @@ set(CLIENT_SRC
 	 ../../../../src/cpp/tensorpack.cpp
 	 ../../../../src/cpp/dbnode.cpp
 	 ../../../../src/cpp/commandreply.cpp
-	 ../../../utils/protobuf/silc.pb.cc
+	 ../../../../utils/protobuf/silc.pb.cc
+   ../../../../src/fortran/fortran_c_interop.F90
+   ../../../../src/fortran/dataset.F90
+   ../../../../src/fortran/client.F90
    ../../../../src/cpp/redisserver.cpp
-   ../../../../src/cpp/redis.cpp
-   ../../../../src/cpp/rediscluster.cpp)
+   ../../../../src/cpp/rediscluster.cpp
+   ../../../../src/cpp/redis.cpp)
 
-# Build executables
+# ld executables
 
 add_executable(silc_put_get_3D
-	silc_put_get_3D.cpp
+	silc_put_get_3D.F90
 	${CLIENT_SRC}
 )
 target_link_libraries(silc_put_get_3D
-	MPI::MPI_CXX
+	MPI::MPI_Fortran
 	${CLIENT_LIBRARIES}
 )
 
-add_executable(silc_mnist
-	silc_mnist.cpp
+add_executable(silc_dataset
+	silc_dataset.F90
 	${CLIENT_SRC}
 )
-target_link_libraries(silc_mnist
-	MPI::MPI_CXX
+target_link_libraries(silc_dataset
+	MPI::MPI_Fortran
 	${CLIENT_LIBRARIES}
 )

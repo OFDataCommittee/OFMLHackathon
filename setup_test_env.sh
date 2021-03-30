@@ -9,5 +9,6 @@ echo "Setting up SmartRedis environment for testing"
 
 source ./setup_env.sh
 
-export SMARTREDIS_TEST_CLUSTER=True
+export SMARTREDIS_TEST_CLUSTER=False
 echo SMARTREDIS_TEST_CLUSTER set to $SMARTREDIS_TEST_CLUSTER
+
