@@ -5,9 +5,9 @@
 # this must be *sourced* in the top level smartsim directory in the
 # shell that will be used for building.
 
-echo "Setting up SILC environment for testing"
+echo "Setting up SmartRedis environment for testing"
 
 source ./setup_env.sh
 
-export SILC_TEST_CLUSTER=True
-echo SILC_TEST_CLUSTER set to $SILC_TEST_CLUSTER
+export SMARTREDIS_TEST_CLUSTER=True
+echo SMARTREDIS_TEST_CLUSTER set to $SMARTREDIS_TEST_CLUSTER

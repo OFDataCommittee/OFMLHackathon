@@ -1,4 +1,4 @@
-project(SILC)
+project(SmartRedis)
 
 set(CMAKE_BUILD_TYPE Release)
 
@@ -54,7 +54,7 @@ include_directories(SYSTEM
 
 set(CLIENT_LIBRARIES ${REDISPP_LIB} ${HIREDIS_LIB} ${PROTOBUF_LIB})
 
-add_library( silc STATIC
+add_library( smartredis STATIC
 	 src/c/c_client.cpp
 	 src/c/c_dataset.cpp
 	 src/cpp/client.cpp
@@ -69,7 +69,7 @@ add_library( silc STATIC
      src/cpp/redisserver.cpp
      src/cpp/rediscluster.cpp
      src/cpp/redis.cpp
-	 utils/protobuf/silc.pb.cc
+	 utils/protobuf/smartredis.pb.cc
    src/fortran/fortran_c_interop.F90
    src/fortran/dataset.F90
    src/fortran/client.F90)

@@ -1,6 +1,6 @@
 #include "metadata.h"
 
-using namespace SILC;
+using namespace SmartRedis;
 
 MetaData::MetaData(const MetaData& metadata) {
     /* Copy constructor for Metadata

@@ -24,7 +24,7 @@ void load_mnist_image_to_array(float**** img)
 void run_mnist(const std::string& model_name,
                const std::string& script_name)
 {
-  SILC::Client client(use_cluster());
+  SmartRedis::Client client(use_cluster());
 
   float**** array = allocate_4D_array<float>(1,1,28,28);
   float** result = allocate_2D_array<float>(1, 10);
@@ -36,12 +36,12 @@ void run_mnist(const std::string& model_name,
   std::string out_key = "mnist_output";
 
 
-  client.put_tensor(in_key, array, {1,1,28,28}, SILC::TensorType::flt,
-                    SILC::MemoryLayout::nested);
+  client.put_tensor(in_key, array, {1,1,28,28}, SmartRedis::TensorType::flt,
+                    SmartRedis::MemoryLayout::nested);
   client.run_script(script_name, "pre_process", {in_key}, {script_out_key});
   client.run_model(model_name, {script_out_key}, {out_key});
-  client.unpack_tensor(out_key, result, {1,10}, SILC::TensorType::flt,
-                       SILC::MemoryLayout::nested);
+  client.unpack_tensor(out_key, result, {1,10}, SmartRedis::TensorType::flt,
+                       SmartRedis::MemoryLayout::nested);
 
   for(int i=0; i<10; i++)
     std::cout<<"result "<<result[0][i]<<std::endl;
@@ -53,7 +53,7 @@ void run_mnist(const std::string& model_name,
 
 int main(int argc, char* argv[]) {
 
-  SILC::Client client(use_cluster());
+  SmartRedis::Client client(use_cluster());
   std::string model_key = "mnist_model";
   std::string model_file = "./../mnist_data/mnist_cnn.pt";
   client.set_model_from_file(model_key, model_file, "TORCH", "CPU");

@@ -1,11 +1,11 @@
-#ifndef SILC_CPP_CLUSTER_H
-#define SILC_CPP_CLUSTER_H
+#ifndef SMARTREDIS_CPP_CLUSTER_H
+#define SMARTREDIS_CPP_CLUSTER_H
 
 #include <unordered_set>
 #include "redisserver.h"
 #include "dbnode.h"
 
-namespace SILC {
+namespace SmartRedis {
 
 ///@file
 
@@ -408,6 +408,6 @@ class RedisCluster : public RedisServer
                                      std::vector<std::string>& outputs);
 };
 
-} //namespace SILC
+} //namespace SmartRedis
 
-#endif //SILC_CPP_CLUSTER_H
+#endif //SMARTREDIS_CPP_CLUSTER_H

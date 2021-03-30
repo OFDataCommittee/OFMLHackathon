@@ -1,5 +1,5 @@
-#ifndef SILC_C_DATASET_H
-#define SILC_C_DATASET_H
+#ifndef SMARTREDIS_C_DATASET_H
+#define SMARTREDIS_C_DATASET_H
 ///@file
 ///\brief C-wrappers for the C++ DataSet class
 #include "dataset.h"
@@ -240,4 +240,4 @@ void get_meta_strings(void* dataset,
 #ifdef __cplusplus
 }
 #endif
-#endif //SILC_C_DATASET_H
+#endif //SMARTREDIS_C_DATASET_H

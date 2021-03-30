@@ -1,5 +1,5 @@
-#ifndef SILC_COMMAND_H
-#define SILC_COMMAND_H
+#ifndef SMARTREDIS_COMMAND_H
+#define SMARTREDIS_COMMAND_H
 
 #include "stdlib.h"
 #include <string>
@@ -10,7 +10,7 @@
 
 ///@file
 
-namespace SILC {
+namespace SmartRedis {
 
 class Command;
 
@@ -251,6 +251,6 @@ class Command
 
 #include "command.tcc"
 
-} //namespace SILC
+} //namespace SmartRedis
 
-#endif //SILC_COMMAND_H
+#endif //SMARTREDIS_COMMAND_H

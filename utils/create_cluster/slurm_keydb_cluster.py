@@ -8,7 +8,7 @@ def launch_db(host, port):
     """
     redis = "keydb-server "
     redisai = "--loadmodule " +  environ['REDISAI_CPU_INSTALL_PATH'] + "/redisai.so "
-    cmd = "srun -N 1 -n 1 " + redis + "./silcdb.conf " + redisai + "--cluster-enabled yes  "
+    cmd = "srun -N 1 -n 1 " + redis + "./smartredisdb.conf " + redisai + "--cluster-enabled yes  "
     log_file = "--logfile " + host + "-" + str(port) + ".log"
     cluster_file = "--cluster-config-file nodes-" + host + "-" + str(port) + ".conf"
     cmd += log_file + " "

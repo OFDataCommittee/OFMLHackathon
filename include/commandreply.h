@@ -1,11 +1,11 @@
-#ifndef SILC_COMMANDREPLY_H
-#define SILC_COMMANDREPLY_H
+#ifndef SMARTREDIS_COMMANDREPLY_H
+#define SMARTREDIS_COMMANDREPLY_H
 
 #include "stdlib.h"
 #include <sw/redis++/redis++.h>
 #include <iostream>
 
-namespace SILC {
+namespace SmartRedis {
 
 class CommandReply;
 
@@ -211,6 +211,6 @@ class CommandReply {
                                            std::string index_tracker);
 };
 
-} //namespace SILC
+} //namespace SmartRedis
 
-#endif //SILC_COMMANDREPLY_H
+#endif //SMARTREDIS_COMMANDREPLY_H

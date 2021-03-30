@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package SILCProtobuf;
+package SmartRedisProtobuf;
 
 message RepeatedStringMeta {
   string id = 1;

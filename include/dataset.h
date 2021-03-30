@@ -1,5 +1,5 @@
-#ifndef SILC_DATASET_H
-#define SILC_DATASET_H
+#ifndef SMARTREDIS_DATASET_H
+#define SMARTREDIS_DATASET_H
 #ifdef __cplusplus
 #include "stdlib.h"
 #include <string>
@@ -14,7 +14,7 @@
 
 ///@file
 
-namespace SILC{
+namespace SmartRedis{
 
 class DataSet;
 
@@ -398,7 +398,7 @@ class DataSet
         SharedMemoryList<size_t> _dim_queries;
 };
 
-} //namespace SILC
+} //namespace SmartRedis
 
 #endif
-#endif //SILC_DATASET_H
+#endif //SMARTREDIS_DATASET_H

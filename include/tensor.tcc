@@ -1,5 +1,5 @@
-#ifndef SILC_TENSOR_TCC
-#define SILC_TENSOR_TCC
+#ifndef SMARTREDIS_TENSOR_TCC
+#define SMARTREDIS_TENSOR_TCC
 
 template <class T>
 Tensor<T>::Tensor(const std::string& name,
@@ -366,4 +366,4 @@ inline size_t Tensor<T>::_c_index(const std::vector<size_t>& dims,
     return position;
 }
 
-#endif //SILC_TENSOR_TCC
+#endif //SMARTREDIS_TENSOR_TCC

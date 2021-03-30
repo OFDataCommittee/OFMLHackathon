@@ -1,6 +1,6 @@
 #include "rediscluster.h"
 
-using namespace SILC;
+using namespace SmartRedis;
 
 RedisCluster::RedisCluster() : RedisServer() {
     std::string address_port = this->_get_ssdb();

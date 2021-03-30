@@ -1,6 +1,6 @@
 #include "c_dataset.h"
 
-using namespace SILC;
+using namespace SmartRedis;
 
 extern "C"
 void* CDataSet(const char* name, const size_t name_length)

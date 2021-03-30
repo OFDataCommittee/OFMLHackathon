@@ -3,8 +3,8 @@ tensor data for c-clients to use
 as a specifier.
 */
 
-#ifndef SMARTSIM_CMEMORYLAYOUT_H
-#define SMARTSIM_CMEMORYLAYOUT_H
+#ifndef SMARTREDIS_CMEMORYLAYOUT_H
+#define SMARTREDIS_CMEMORYLAYOUT_H
 
 typedef enum{
     c_nested=1,
@@ -13,4 +13,4 @@ typedef enum{
     c_fortran_contiguous=4
 }CMemoryLayout;
 
-#endif //SMARTSIM_CMEMORYLAYOUT_H
+#endif //SMARTREDIS_CMEMORYLAYOUT_H

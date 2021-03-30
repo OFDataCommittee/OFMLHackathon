@@ -1,6 +1,6 @@
 #include "tensorbase.h"
 #include <iostream>
-using namespace SILC;
+using namespace SmartRedis;
 
 TensorBase::TensorBase(const std::string& name,
                        void* data,

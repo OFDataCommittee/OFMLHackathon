@@ -7,7 +7,7 @@ template <typename T_send, typename T_recv>
 void rename_dataset(
 		    void (*fill_array)(T_send***, int, int, int),
 		    std::vector<size_t> dims,
-            SILC::TensorType type,
+            SmartRedis::TensorType type,
             std::string key_suffix,
             std::string dataset_name)
 {
@@ -24,8 +24,8 @@ void rename_dataset(
     fill_array(t_send_3, dims[0], dims[1], dims[2]);
 
     //Create Client and DataSet
-    SILC::Client client(use_cluster());
-    SILC::DataSet sent_dataset(dataset_name);
+    SmartRedis::Client client(use_cluster());
+    SmartRedis::DataSet sent_dataset(dataset_name);
 
     //Add metadata to the DataSet
     DATASET_TEST_UTILS::fill_dataset_with_metadata(sent_dataset);
@@ -36,11 +36,11 @@ void rename_dataset(
     std::string t_name_3 = "tensor_3";
 
     sent_dataset.add_tensor(t_name_1, t_send_1,
-                        dims, type, SILC::MemoryLayout::nested);
+                        dims, type, SmartRedis::MemoryLayout::nested);
     sent_dataset.add_tensor(t_name_2, t_send_2,
-                        dims, type, SILC::MemoryLayout::nested);
+                        dims, type, SmartRedis::MemoryLayout::nested);
     sent_dataset.add_tensor(t_name_3, t_send_3,
-                        dims, type, SILC::MemoryLayout::nested);
+                        dims, type, SmartRedis::MemoryLayout::nested);
 
     //Put the DataSet into the database
     client.put_dataset(sent_dataset);
@@ -79,7 +79,7 @@ void rename_dataset(
         throw std::runtime_error("The renamed DataSet "\
                                  "confirmation key is not set.");
 
-    SILC::DataSet retrieved_dataset = client.get_dataset(new_dataset_name);
+    SmartRedis::DataSet retrieved_dataset = client.get_dataset(new_dataset_name);
 
 
     DATASET_TEST_UTILS::check_tensor_names(retrieved_dataset,
@@ -112,7 +112,7 @@ int main(int argc, char* argv[]) {
   dataset_name = "3D_dbl_dataset_rank";
   rename_dataset<double,double>(
 				  &set_3D_array_floating_point_values<double>,
-				  dims, SILC::TensorType::dbl, "_dbl", dataset_name);
+				  dims, SmartRedis::TensorType::dbl, "_dbl", dataset_name);
 
   return 0;
 }

@@ -4,7 +4,7 @@
 #include <pybind11/numpy.h>
 #include <string>
 
-using namespace SILC;
+using namespace SmartRedis;
 
 namespace py = pybind11;
 

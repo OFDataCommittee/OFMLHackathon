@@ -8,7 +8,7 @@ the layout of the memory space that
 is provided or requested by the user.
 */
 
-namespace SILC {
+namespace SmartRedis {
 
 enum class MemoryLayout{
     nested = 1,
@@ -39,6 +39,6 @@ inline MemoryLayout convert_layout(CMemoryLayout layout) {
   }
 }
 
-} // namespace SILC
+} // namespace SmartRedis
 
 #endif //SMARTSIM_MEMORYLAYOUT_H

@@ -3,8 +3,8 @@ for c-clients to use as a
 type specifier
 */
 
-#ifndef SMARTSIM_CTENSORTYPE_H
-#define SMARTSIM_CTENSORTYPE_H
+#ifndef SMARTREDIS_CTENSORTYPE_H
+#define SMARTREDIS_CTENSORTYPE_H
 
 typedef enum{
     c_dbl    = 1,
@@ -17,4 +17,4 @@ typedef enum{
     c_uint16 = 8
 }CTensorType;
 
-#endif //SMARTSIM_CTENSORTYPE_H
+#endif //SMARTREDIS_CTENSORTYPE_H

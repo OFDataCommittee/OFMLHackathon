@@ -1,5 +1,5 @@
-#ifndef SILC_C_CLIENT_H
-#define SILC_C_CLIENT_H
+#ifndef SMARTREDIS_C_CLIENT_H
+#define SMARTREDIS_C_CLIENT_H
 ///@file
 ///\brief C-wrappers for the C++ Client class
 #include <stdlib.h>
@@ -17,7 +17,7 @@ extern "C" {
 *   \param cluster Flag to indicate if a
 *                  database cluster is being used
 */
-void* SmartSimCClient(bool cluster);
+void* SmartRedisCClient(bool cluster);
 
 /*!
 *   \brief C-client destructor
@@ -670,4 +670,4 @@ void use_model_ensemble_prefix(void* c_client, bool use_prefix);
 }
 
 #endif
-#endif // SILC_C_CLIENT_H
+#endif // SMARTREDIS_C_CLIENT_H

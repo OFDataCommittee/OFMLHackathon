@@ -1,7 +1,7 @@
 import numpy as np
 from numbers import Number
 
-from .silcPy import PyDataset
+from .smartredisPy import PyDataset
 from .util import Dtypes
 
 

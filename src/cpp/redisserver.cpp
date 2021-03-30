@@ -1,6 +1,6 @@
 #include "redisserver.h"
 
-using namespace SILC;
+using namespace SmartRedis;
 
 std::string RedisServer::_get_ssdb()
 {

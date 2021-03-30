@@ -1,10 +1,10 @@
-module silc_client
+module smartredis_client
 
 use iso_c_binding, only : c_ptr, c_bool, c_null_ptr, c_char, c_int
 use iso_c_binding, only : c_int8_t, c_int16_t, c_int32_t, c_int64_t, c_float, c_double, c_size_t
 use iso_c_binding, only : c_loc, c_f_pointer
 
-use silc_dataset, only : dataset_type
+use smartredis_dataset, only : dataset_type
 use fortran_c_interop, only : convert_char_array_to_c
 
 implicit none; private
@@ -19,7 +19,7 @@ implicit none; private
 #include "client/client_dataset_interfaces.inc"
 #include "client/ensemble_interfaces.inc"
 
-!> Stores all data and methods associated with the SILC client that is used to communicate with the database
+!> Stores all data and methods associated with the SmartRedis client that is used to communicate with the database
 type, public :: client_type
   private
 
@@ -36,9 +36,9 @@ type, public :: client_type
   generic :: unpack_tensor => unpack_tensor_i8, unpack_tensor_i16, unpack_tensor_i32, unpack_tensor_i64, &
                               unpack_tensor_float, unpack_tensor_double
 
-  !> Initializes a new instance of the SILC client
+  !> Initializes a new instance of the SmartRedis client
   procedure :: initialize
-  !> Destructs a new instance of the SILC client
+  !> Destructs a new instance of the SmartRedis client
   procedure :: destructor
   !> Check the database for the existence of a specific model
   procedure :: model_exists
@@ -74,9 +74,9 @@ type, public :: client_type
   procedure :: run_script
   !> Run a model that has already been stored in the database
   procedure :: run_model
-  !> Put a SILC dataset into the database
+  !> Put a SmartRedis dataset into the database
   procedure :: put_dataset
-  !> Retrieve a SILC dataset from the database
+  !> Retrieve a SmartRedis dataset from the database
   procedure :: get_dataset
   !> Rename the dataset within the database
   procedure :: rename_dataset
@@ -108,7 +108,7 @@ end type client_type
 
 contains
 
-!> Initializes a new instance of a SILC client
+!> Initializes a new instance of a SmartRedis client
 subroutine initialize( this, cluster )
   class(client_type) :: this
   logical, optional :: cluster !< If true, client uses a database cluster (Default: .false.)
@@ -118,7 +118,7 @@ subroutine initialize( this, cluster )
 
 end subroutine initialize
 
-!> A destructor for the SILC client
+!> A destructor for the SmartRedis client
 subroutine destructor( this )
   class(client_type) :: this
 
@@ -340,7 +340,7 @@ end subroutine unpack_tensor_double
 
 !> Move a tensor to a new key
 subroutine rename_tensor(this, key, new_key)
-  class(client_type), intent(in) :: this    !< The initialized Fortran SILC client
+  class(client_type), intent(in) :: this    !< The initialized Fortran SmartRedis client
   character(len=*), intent(in) :: key     !< The key to use to place the tensor
                                           !! excluding null terminating character
   character(len=*), intent(in) :: new_key !< The new tensor key
@@ -361,7 +361,7 @@ end subroutine rename_tensor
 
 !> Delete a tensor
 subroutine delete_tensor(this, key)
-  class(client_type), intent(in) :: this !<  The initialized Fortran SILC client
+  class(client_type), intent(in) :: this !<  The initialized Fortran SmartRedis client
   character(len=*), intent(in) :: key  !< The key to use to place the tensor
 
   character(kind=c_char, len=len_trim(key)) :: c_key
@@ -375,7 +375,7 @@ end subroutine delete_tensor
 
 !> Copy a tensor to the destination key
 subroutine copy_tensor(this, src_name, dest_name)
-  class(client_type), intent(in) :: this      !< The initialized Fortran SILC client
+  class(client_type), intent(in) :: this      !< The initialized Fortran SmartRedis client
   character(len=*), intent(in) :: src_name  !< The key to use to place the tensor
                                             !! excluding null terminating character
   character(len=*), intent(in) :: dest_name !< The new tensor key
@@ -396,7 +396,7 @@ end subroutine copy_tensor
 
 !> Retrieve the model from the database
 subroutine get_model(this, key, model)
-  class(client_type),               intent(in   ) :: this  !< An initialized SILC client
+  class(client_type),               intent(in   ) :: this  !< An initialized SmartRedis client
   character(len=*),                 intent(in   ) :: key   !< The key to use to place the model
   character(len=*),                 intent(  out) :: model !< The model as a continuous buffer
 
@@ -422,7 +422,7 @@ end subroutine get_model
 !> Load the machine learning model from a file and set the configuration
 subroutine set_model_from_file( this, key, model_file, backend, device, batch_size, min_batch_size, tag, &
     inputs, outputs )
-  class(client_type),             intent(in) :: this           !< An initialized SILC client
+  class(client_type),             intent(in) :: this           !< An initialized SmartRedis client
   character(len=*),               intent(in) :: key            !< The key to use to place the model
   character(len=*),               intent(in) :: model_file     !< The file storing the model
   character(len=*),               intent(in) :: backend        !< The name of the backend (TF, TFLITE, TORCH, ONNX)
@@ -511,7 +511,7 @@ end subroutine set_model_from_file
 
 subroutine set_model( this, key, model, backend, device, batch_size, min_batch_size, tag, &
     inputs, outputs )
-  class(client_type),             intent(in) :: this           !< An initialized SILC client
+  class(client_type),             intent(in) :: this           !< An initialized SmartRedis client
   character(len=*),               intent(in) :: key            !< The key to use to place the model
   character(len=*),               intent(in) :: model          !< The binary representaiton o
   character(len=*),               intent(in) :: backend        !< The name of the backend (TF, TFLITE, TORCH, ONNX)
@@ -573,7 +573,7 @@ subroutine set_model( this, key, model, backend, device, batch_size, min_batch_s
 end subroutine set_model
 
 subroutine run_model(this, key, inputs, outputs)
-  class(client_type),             intent(in) :: this           !< An initialized SILC client
+  class(client_type),             intent(in) :: this           !< An initialized SmartRedis client
   character(len=*),               intent(in) :: key            !< The key to use to place the model
   character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of model input nodes (TF models)
   character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of model output nodes (TF models)
@@ -609,7 +609,7 @@ end subroutine run_model
 
 !> Retrieve the script from the database
 subroutine get_script(this, key, script)
-  class(client_type),               intent(in   ) :: this  !< An initialized SILC client
+  class(client_type),               intent(in   ) :: this  !< An initialized SmartRedis client
   character(len=*),                 intent(in   ) :: key   !< The key to use to place the script
   character(len=*),                 intent(  out) :: script !< The script as a continuous buffer
 
@@ -633,7 +633,7 @@ subroutine get_script(this, key, script)
 end subroutine get_script
 
 subroutine set_script_from_file( this, key, device, script_file )
-  class(client_type),             intent(in) :: this        !< An initialized SILC client
+  class(client_type),             intent(in) :: this        !< An initialized SmartRedis client
   character(len=*),               intent(in) :: key         !< The key to use to place the script
   character(len=*),               intent(in) :: device      !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
   character(len=*),               intent(in) :: script_file !< The file storing the script
@@ -656,7 +656,7 @@ subroutine set_script_from_file( this, key, device, script_file )
 end subroutine set_script_from_file
 
 subroutine set_script( this, key, device, script )
-  class(client_type),             intent(in) :: this   !< An initialized SILC client
+  class(client_type),             intent(in) :: this   !< An initialized SmartRedis client
   character(len=*),               intent(in) :: key    !< The key to use to place the script
   character(len=*),               intent(in) :: device !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
   character(len=*),               intent(in) :: script !< The file storing the script
@@ -678,7 +678,7 @@ subroutine set_script( this, key, device, script )
 end subroutine set_script
 
 subroutine run_script(this, key, func, inputs, outputs)
-  class(client_type),             intent(in) :: this           !< An initialized SILC client
+  class(client_type),             intent(in) :: this           !< An initialized SmartRedis client
   character(len=*),               intent(in) :: key            !< The key to use to place the script
   character(len=*),               intent(in) :: func           !< The name of the function in the script to call
   character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of script input nodes (TF scripts)
@@ -822,4 +822,4 @@ subroutine use_tensor_ensemble_prefix( this, use_prefix )
   call use_tensor_ensemble_prefix_c( this%client_ptr, logical(use_prefix,kind=c_bool) )
 end subroutine use_tensor_ensemble_prefix
 
-end module silc_client
+end module smartredis_client

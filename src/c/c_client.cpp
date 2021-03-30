@@ -1,9 +1,9 @@
 #include "c_client.h"
 
-using namespace SILC;
+using namespace SmartRedis;
 
 extern "C"
-void* SmartSimCClient(bool cluster)
+void* SmartRedisCClient(bool cluster)
 {
   /* Return a pointer to a new Client.
   The user is responsible for deleting the client.

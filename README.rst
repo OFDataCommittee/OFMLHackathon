@@ -1,8 +1,8 @@
-====
-SILC
-====
+==========
+SmartRedis
+==========
 
-The SmartSim Infrastructure Library Clients (SILC) are a library
+SmartRedis is a library
 of redis-based clients built primarily for use with SmartSim.
 
 .. list-table::
@@ -28,19 +28,19 @@ of redis-based clients built primarily for use with SmartSim.
 Project Status
 ==============
 
-Currently the C++, and C are the only full implementations of the SILC clients.
+Currently the C++, and C are the only full implementations of the SmartRedis clients.
 The Fortran and Python partially cover the API and will soon be feature-complete.
 
 
-Using SILC
-==========
+Using SmartRedis
+================
 
 Installation
 ------------
 
-To install SILC, follow the instructions in the documentation. To build
+To install SmartRedis, follow the instructions in the documentation. To build
 the documentation, install the python dependencies (including sphinx) and
-in the top level of the SILC directory execute the following
+in the top level of the SmartRedis directory execute the following
 
 .. code-block:: bash
 

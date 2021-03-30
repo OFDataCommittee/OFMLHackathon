@@ -1,5 +1,5 @@
-#ifndef SILC_TENSOR_H
-#define SILC_TENSOR_H
+#ifndef SMARTREDIS_TENSOR_H
+#define SMARTREDIS_TENSOR_H
 
 #include "stdlib.h"
 #include <string>
@@ -9,7 +9,7 @@
 
 ///@file
 
-namespace SILC {
+namespace SmartRedis {
 
 /*!
 *   \brief  The Tensor class stores, manages
@@ -266,6 +266,6 @@ class Tensor : public TensorBase
 
 #include "tensor.tcc"
 
-} //namespace SILC
+} //namespace SmartRedis
 
-#endif //SILC_TENSOR_H
+#endif //SMARTREDIS_TENSOR_H

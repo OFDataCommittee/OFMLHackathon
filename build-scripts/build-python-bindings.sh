@@ -14,4 +14,4 @@ cmake ..
 make
 
 # move python module to module directory
-cp silcPy.cpython-*.so ../module/silc/
+cp smartredisPy.cpython-*.so ../module/smartredis/

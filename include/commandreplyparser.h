@@ -1,12 +1,12 @@
-#ifndef SMARTSIM_CPP_COMMANDREPLYPARSER_H
-#define SMARTSIM_CPP_COMMANDREPLYPARSER_H
+#ifndef SMARTREDIS_CPP_COMMANDREPLYPARSER_H
+#define SMARTREDIS_CPP_COMMANDREPLYPARSER_H
 
 #include <vector>
 #include "commandreply.h"
 #include "tensorbase.h"
 #include "enums/cpp_tensor_type.h"
 
-namespace SILC {
+namespace SmartRedis {
 
 namespace CommandReplyParser {
 
@@ -66,6 +66,6 @@ inline TensorType get_tensor_data_type(CommandReply& reply)
 
 } //namespace CommandReplyParser
 
-} //namespace SILC
+} //namespace SmartRedis
 
-#endif //SMARTSIM_CPP_COMMANDREPLYPARSER_H
+#endif //SMARTREDIS_CPP_COMMANDREPLYPARSER_H

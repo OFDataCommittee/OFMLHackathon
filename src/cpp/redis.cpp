@@ -1,6 +1,6 @@
 #include "redis.h"
 
-using namespace SILC;
+using namespace SmartRedis;
 
 Redis::Redis() : RedisServer()
 {
