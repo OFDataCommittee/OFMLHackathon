@@ -3,30 +3,101 @@
 Fortran
 *******
 
+Client API
+==========
+
+The following are overloaded interfaces which support
+32/64-bit ``real`` and 8, 16, 32, and 64-bit ``integer`` tensors
+
+* ``put_tensor``
+* ``unpack_tensor``
+
+.. f:automodule:: silc_client
+
+Dataset API
+===========
+
+The following are overloaded interfaces which support
+32/64-bit ``real`` and 8, 16, 32, and 64-bit
+``integer`` tensors
+
+* ``add_tensor``
+* ``unpack_dataset_tensor``
+
+Similarly the following interfaces are overloaded to
+support 32/64-bit ``real`` and ``integer`` metadata
+
+* ``add_meta_scalar``
+* ``get_meta_scalar``
+
+.. f:automodule:: silc_dataset
+
+API Notes
+=========
+
+Fortran autodoc-ing in Sphinx is relatively primitive, however
+the code has been doxygenized and is built along with the rest
+of the documentation. They can be found in
+``silc/doc/fortran_client/html``.
+
+Importing SILC
+--------------
+The public facing parts of SILC-Fortran are contained in two
+modules ``silc_client`` and ``silc_dataset``. These can
+be imported into Fortran code in the usual way:
+
+.. code-block:: fortran
+
+  program example
+    use silc_dataset, only : dataset_type
+    use silc_client,  only : client_type
+  end program example
+
+.. note::
+
+  ``dataset_type`` and ``client_type`` are the
+  only public elements of these modules
+
 Using the Fortran Client
-========================
+------------------------
 
-The SILC Fortran interface is centered around two Fortran modules: ``silc_client`` and ``silc_dataset``. The only
-public element of these modules are, respectively, ``client_type`` and ``dataset_type``. These derived types take
-advantage of Fortran object-oriented features by having procedure-bound methods that implement most of the
-SILC functionality. (see :ref:`Unsupported SILC Features <unsupported_silc_features>`). Other than these derived types, all inputs
-and outputs from functions and subroutines are Fortran primitives (e.g. ``real``, ``integer``, ``character``).
+The SILC Fortran interface is centered around two Fortran
+modules: ``silc_client`` and ``silc_dataset``. The only
+public element of these modules are, respectively,
+``client_type`` and ``dataset_type``. These derived types take
+advantage of Fortran object-oriented features by
+having procedure-bound methods that implement most of the
+SILC functionality. (see :ref:`Unsupported SILC
+Features <unsupported_silc_features>`). Other than
+these derived types, all inputs
+and outputs from functions and subroutines are
+Fortran primitives (e.g. ``real``, ``integer``,
+``character``).
 
-32-bit and 64-bit ``real`` and 8, 16, 32, and 64-bit signed ``integer`` arrays (tensors) are supported. All
-procedures are overloaded to avoid needing to specify the type-specific subroutine.
+32-bit and 64-bit ``real`` and 8, 16, 32, and
+64-bit signed ``integer`` arrays (tensors) are
+supported. All procedures are overloaded
+to avoid needing to specify the type-specific subroutine.
 
-To communicate with the Redis client, SILC-Fortran relies on Fortran/C/C++ interoperability to wrap the methods of
-the C++ client. All transformations from Fortran constructs to C constructs are handled within the SILC client itself
-(e.g enforcing Fortran/C types and column-major to row-major arrays). No conversions need to be done within the
-application.
+To communicate with the Redis client,
+SILC-Fortran relies on Fortran/C/C++
+interoperability to wrap the methods of
+the C++ client. All transformations
+from Fortran constructs to C constructs
+are handled within the SILC client itself
+(e.g enforcing Fortran/C types and column-major
+to row-major arrays). No conversions need to be
+done within the application.
 
-The example below shows the code required to send and receive data with the Fortran client.
+The example below shows the code required to
+send and receive data with the Fortran client.
 
 .. literalinclude:: ../../examples/serial/fortran/silc_put_get_3D.F90
   :language: fortran
   :linenos:
 
-Other examples are shown in the :ref:`Fortran Client Examples section<fortran_client_examples>`.
+Other examples are shown in the
+:ref:`Fortran Client Examples section<fortran_client_examples>`.
 
 Compiler Requirements
 ---------------------
@@ -52,7 +123,7 @@ been implemented. This includes
   memory is supported, see the :ref:`Fortran Client Examples section<fortran_client_examples>`)
 
 Source code organization
-========================
+------------------------
 SILC-Fortran source code is contained within the following files
 
 * ``client.F90``: Contains the ``client_type`` and all associated methods
@@ -72,49 +143,3 @@ For example, ``client/put_tensor_interfaces.inc`` define the Fortran-C interface
 ``client/put_tensor_methods_common.inc`` form the main body of the source code that handles the conversion and
 calling of the Fortran-C interfaces.
 
-
-API Reference
-=============
-
-.. note ::
-   Fortran autodoc-ing in Sphinx is relatively primitive, however the code has been doxygenized and is built along with the rest of the documentation. They can be found in ``silc/doc/fortran_client/html``.
-
-Fortran Client API
-------------------
-
-The following are overloaded interfaces which support 32/64-bit ``real`` and 8, 16, 32, and 64-bit ``integer`` tensors
-
-* ``put_tensor``
-* ``unpack_tensor``
-
-.. f:automodule:: silc_client
-
-Fortran Dataset API
--------------------
-
-The following are overloaded interfaces which support 32/64-bit ``real`` and 8, 16, 32, and 64-bit ``integer`` tensors
-
-* ``add_tensor``
-* ``unpack_dataset_tensor``
-
-Similarly the following interfaces are overloaded to support 32/64-bit ``real`` and ``integer`` metadata
-
-* ``add_meta_scalar``
-* ``get_meta_scalar``
-
-.. f:automodule:: silc_dataset
-
-Importing SILC
-==============
-The public facing parts of SILC-Fortran are contained in two modules ``silc_client`` and ``silc_dataset``. These can be imported into Fortran code in the usual way:
-
-.. code-block:: fortran
-
-  program example
-    use silc_dataset, only : dataset_type
-    use silc_client,  only : client_type
-  end program example
-
-.. note::
-
-  ``dataset_type`` and ``client_type`` are the only public elements of these modules
