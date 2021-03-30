@@ -5,7 +5,7 @@ set(CMAKE_BUILD_TYPE Debug)
 cmake_minimum_required(VERSION 3.10)
 
 SET(CMAKE_CXX_STANDARD 17)
-SET(C_STANDARD 11)
+SET(CMAKE_C_STANDARD 99)
 
 #TODO put in output warnings
 # Determine where the hiredis library is based on if an environment variable
