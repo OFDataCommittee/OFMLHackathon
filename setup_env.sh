@@ -52,15 +52,6 @@ if [[ -f ./third-party/RedisAI/install-gpu/redisai.so ]]; then
     echo "Set RedisAI GPU install path to $REDISAI_GPU_INSTALL_PATH"
 fi
 
-# Update PYTHONPATH
-if [[ ":$PYTHONPATH:" != *"$(pwd)/src/python/module/"* ]]; then
-    echo "Adding SmartRedis to PYTHONPATH"
-    export PYTHONPATH="$(pwd)/src/python/module/:${PYTHONPATH}"
-    echo $PYTHONPATH
-else
-    echo "SmartRedis found in PYTHONPATH"
-fi
-
 # Set SMARTREDIS_INSTALL_PATH for external application build assistance
 export SMARTREDIS_INSTALL_PATH="$(pwd)"
 echo "Setting the SMARTREDIS install path to $SMARTREDIS_INSTALL_PATH"
