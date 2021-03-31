@@ -24,7 +24,7 @@ type, public :: client_type
   private
 
   logical(kind=c_bool) :: cluster = .false.        !< True if a database cluster is being used
-  type(c_ptr)          :: client_ptr = c_null_ptr !< Pointer to the initialized SmartSimClient
+  type(c_ptr)          :: client_ptr = c_null_ptr !< Pointer to the initialized SmartRedisClient
 
   contains
 
