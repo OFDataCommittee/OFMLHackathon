@@ -41,17 +41,16 @@ If you wish to run tests on GPU hardware, run the following command:
   Since these are usually system libraries we do not install them
   for the user
 
-After installing dependencies and setting up your environment for
-building SmartRedis, as stated above, all tests can be built with the
-following command
+After installing dependencies and setting up your environment with
+``setup_env.sh``, all tests can be built with the following command:
 
 .. code-block:: bash
 
   make build-tests
 
 
-Setup Testing Infrastructure
-============================
+Starting Redis
+==============
 
 Before running the tests, users will have to spin up a Redis
 cluster instance and set the ``SSDB`` environment variable.
@@ -61,9 +60,9 @@ in ``utils/create_cluster`` as follows:
 
 .. code-block:: bash
 
-  cd /smartredis                       # navigate to the top level dir of smartredis
+  cd /smartredis                 # navigate to the top level dir of smartredis
   conda activate env             # activate python env with SmartRedis requirements
-  source setup_env.sh            # Setup smartredis environment
+  source setup_test_env.sh       # Setup smartredis environment
   cd utils/create_cluster
   python local_cluster.py        # spin up Redis cluster locally
   export SSDB="127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381"  # Set database location
@@ -80,6 +79,14 @@ on a Cray XC, and it may not be portable to all machines.
 
 Running the Tests
 =================
+
+.. note::
+
+    If you are running the tests in a new terminal from the
+    one used to build the tests and run the Redis cluster,
+    remember to load your python environment with SmartRedis
+    dependencies, source the ``setup_test_env.sh`` file,
+    and set the ``SSDB`` environment variable.
 
 To build and run all tests, run the following command in the top
 level of the smartredis repository.

@@ -18,8 +18,8 @@
    :caption: API
 
    clients/python
-   clients/c
    clients/c-plus
+   clients/c
    clients/fortran
 
 .. toctree::
