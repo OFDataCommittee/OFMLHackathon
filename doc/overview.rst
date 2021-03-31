@@ -3,8 +3,8 @@
 Overview
 ********
 
-The SmartSim Infrastructure Library Clients (SmartRedis) are a set of
-Redis clients that support RedisAI capabilities with additional
+SmartRedis is a collection of Redis clients that support
+RedisAI capabilities and include additional
 features for high performance computing (HPC) applications.
 Key features of RedisAI that are supported by SmartRedis include:
 
@@ -17,10 +17,10 @@ In addition to the RedisAI capabilities above,
 SmartRedis includes the following features developed for
 large, distributed HPC architectures:
 
--   Redis cluster support for distributed data storage
-    and model serving
+-   Redis cluster support for RedisAI data types (tensors,
+    models, and scripts)
 -   Distributed model and script placement for parallel
-    evaluation to maximize hardware utilization and throughput
+    evaluation that maximizes hardware utilization and throughput
 -   A ``DataSet`` storage format to aggregate multiple tensors
     and metadata into a single Redis cluster hash slot
     to prevent data scatter on Redis clusters and
@@ -36,26 +36,20 @@ SmartRedis provides clients in Python, C++, C, and Fortran.
 These clients have been written to provide a
 consistent API experience across languages, within
 the constraints of language capabilities.  The table
-below summarizes the language standards required to build
-the clients.
+below summarizes the language standards for each client.
 
 .. list-table:: Supported Languages
-   :widths: 25 25 25
+   :widths: 35 35
    :header-rows: 1
    :align: center
 
    * - Language
      - Version/Standard
-     - Status
    * - Python
      - 3.7
-     - Stable
    * - C++
      - C++17
-     - Stable
    * - C
      - C99
-     - Stable
    * - Fortran
      - Fortran 2018
-     - Stable

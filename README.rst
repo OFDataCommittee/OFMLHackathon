@@ -2,55 +2,44 @@
 SmartRedis
 ==========
 
-SmartRedis is a library
-of redis-based clients built primarily for use with SmartSim.
+SmartRedis is a collection of Redis clients that support
+RedisAI capabilities and include additional
+features for high performance computing (HPC) applications.
+SmartRedis provides clients in the following languages:
 
 .. list-table::
-   :widths: 15 10 30
+   :widths: 20 20
    :header-rows: 1
 
    * - Language
      - Version/Standard
-     - Status
    * - Python
      - 3.7+
-     - In development
    * - C++
      - C++17
-     - Stable
    * - C
      - C99
-     - Stable
    * - Fortran
-     - Fortran 2003 +
-     - In development
-
-Project Status
-==============
-
-Currently the C++, and C are the only full implementations of the SmartRedis clients.
-The Fortran and Python partially cover the API and will soon be feature-complete.
-
+     - Fortran 2018
 
 Using SmartRedis
 ================
 
-Installation
-------------
+To install and run SmartRedis, follow the instructions in
+the documentation. To build the documentation, install
+the python dependencies (including sphinx) with the
+command:
 
-To install SmartRedis, follow the instructions in the documentation. To build
-the documentation, install the python dependencies (including sphinx) and
-in the top level of the SmartRedis directory execute the following
+.. code-block:: bash
+
+    pip install -r requirements-dev.txt
+
+In the top level of the SmartRedis directory, execute the
+following command to build the documentation:
 
 .. code-block:: bash
 
   make docs
 
-Then open ``doc/_build/html/index.html`` in a browser
-
-Examples
---------
-
-For examples of how to build and use the c++ client, refer to the c++ test
-directory in this repository.
-
+Open ``doc/_build/html/index.html`` in a browser to view
+the documentation.

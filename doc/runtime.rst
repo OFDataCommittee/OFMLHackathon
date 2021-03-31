@@ -74,10 +74,11 @@ API provides a function ``Client.set_data_source()``
 to select which ``SSKEYIN`` value is used.  The
 default is to use the first value of ``SSKEYIN``,
 and any value specified using ``Client.set_data_source()``
-must be present in ``SSKEYIN``.
+must be present in ``SSKEYIN`` when the ``Client``
+is created.
 
 
-The ``Client`` API gives functions to activate or
+The ``Client`` API provides functions to activate or
 deactivate the use of ``SSKEYIN`` and ``SSKEYOUT``.
 These functions are split by the data type
 that prefixes are applied to in order to give the
