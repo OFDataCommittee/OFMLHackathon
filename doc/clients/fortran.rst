@@ -12,7 +12,7 @@ The following are overloaded interfaces which support
 * ``put_tensor``
 * ``unpack_tensor``
 
-.. f:automodule:: silc_client
+.. f:automodule:: smartredis_client
 
 Dataset API
 ===========
@@ -30,7 +30,7 @@ support 32/64-bit ``real`` and ``integer`` metadata
 * ``add_meta_scalar``
 * ``get_meta_scalar``
 
-.. f:automodule:: silc_dataset
+.. f:automodule:: smartredis_dataset
 
 API Notes
 =========
@@ -38,19 +38,19 @@ API Notes
 Fortran autodoc-ing in Sphinx is relatively primitive, however
 the code has been doxygenized and is built along with the rest
 of the documentation. They can be found in
-``silc/doc/fortran_client/html``.
+``smartredis/doc/fortran_client/html``.
 
-Importing SILC
---------------
-The public facing parts of SILC-Fortran are contained in two
-modules ``silc_client`` and ``silc_dataset``. These can
+Importing SmartRedis
+--------------------
+The public facing parts of SmartRedis-Fortran are contained in two
+modules ``smartredis_client`` and ``smartredis_dataset``. These can
 be imported into Fortran code in the usual way:
 
 .. code-block:: fortran
 
   program example
-    use silc_dataset, only : dataset_type
-    use silc_client,  only : client_type
+    use smartredis_dataset, only : dataset_type
+    use smartredis_client,  only : client_type
   end program example
 
 .. note::
@@ -61,14 +61,14 @@ be imported into Fortran code in the usual way:
 Using the Fortran Client
 ------------------------
 
-The SILC Fortran interface is centered around two Fortran
-modules: ``silc_client`` and ``silc_dataset``. The only
+The SmartRedis Fortran interface is centered around two Fortran
+modules: ``smartredis_client`` and ``smartredis_dataset``. The only
 public element of these modules are, respectively,
 ``client_type`` and ``dataset_type``. These derived types take
 advantage of Fortran object-oriented features by
 having procedure-bound methods that implement most of the
-SILC functionality. (see :ref:`Unsupported SILC
-Features <unsupported_silc_features>`). Other than
+SmartRedis functionality. (see :ref:`Unsupported SmartRedis
+Features <unsupported_smartredis_features>`). Other than
 these derived types, all inputs
 and outputs from functions and subroutines are
 Fortran primitives (e.g. ``real``, ``integer``,
@@ -80,11 +80,11 @@ supported. All procedures are overloaded
 to avoid needing to specify the type-specific subroutine.
 
 To communicate with the Redis client,
-SILC-Fortran relies on Fortran/C/C++
+SmartRedis-Fortran relies on Fortran/C/C++
 interoperability to wrap the methods of
 the C++ client. All transformations
 from Fortran constructs to C constructs
-are handled within the SILC client itself
+are handled within the SmartRedis client itself
 (e.g enforcing Fortran/C types and column-major
 to row-major arrays). No conversions need to be
 done within the application.
@@ -92,7 +92,7 @@ done within the application.
 The example below shows the code required to
 send and receive data with the Fortran client.
 
-.. literalinclude:: ../../examples/serial/fortran/silc_put_get_3D.F90
+.. literalinclude:: ../../examples/serial/fortran/smartredis_put_get_3D.F90
   :language: fortran
   :linenos:
 
@@ -110,10 +110,10 @@ Fortran compilers need to support the following features
 
 These language features are supported by Intel 19, GNU 9, and Cray 8.6 and later versions.
 
-.. _unsupported_silc_features:
+.. _unsupported_smartredis_features:
 
-Unsupported SILC features
--------------------------
+Unsupported SmartRedis features
+-------------------------------
 Due to limitations of C/Fortran interoperability, some of the features in the Python, C, and C++ clients have not
 been implemented. This includes
 
@@ -124,7 +124,7 @@ been implemented. This includes
 
 Source code organization
 ------------------------
-SILC-Fortran source code is contained within the following files
+SmartRedis-Fortran source code is contained within the following files
 
 * ``client.F90``: Contains the ``client_type`` and all associated methods
 * ``dataset.F90`` Contains the ``dataset_type`` and all associated methods
@@ -134,7 +134,7 @@ The ``client.F90`` and ``dataset.F90`` files are further broken down into a numb
 duplicated code and organize the variety of methods included within each type. The naming conventions are prefixed by
 general functionality and suffixed by the type of code contained within.
 
-* ``<functionality>_interfaces.inc``: Define the C-bound interfaces to the SILC-C methods
+* ``<functionality>_interfaces.inc``: Define the C-bound interfaces to the SmartRedis-C methods
 * ``<functionality>_methods_common.inc``: Represents the source code that is exactly the same for all methods which
 
 share the same functionality, but differ only by the type of variable
@@ -142,4 +142,3 @@ share the same functionality, but differ only by the type of variable
 For example, ``client/put_tensor_interfaces.inc`` define the Fortran-C interfaces to put a tensor into the database.
 ``client/put_tensor_methods_common.inc`` form the main body of the source code that handles the conversion and
 calling of the Fortran-C interfaces.
-

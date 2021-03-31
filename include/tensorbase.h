@@ -1,5 +1,5 @@
-#ifndef SILC_TENSORBASE_H
-#define SILC_TENSORBASE_H
+#ifndef SMARTREDIS_TENSORBASE_H
+#define SMARTREDIS_TENSORBASE_H
 
 #include "stdlib.h"
 #include <vector>
@@ -11,7 +11,7 @@
 
 ///@file
 
-namespace SILC {
+namespace SmartRedis {
 
 /* The strings and unordered map below is used for
 fast conversion between RedisAI string and enum
@@ -226,6 +226,6 @@ class TensorBase{
         virtual size_t _n_data_bytes() = 0;
 };
 
-} //namespace SILC
+} //namespace SmartRedis
 
-#endif //SILC_TENSORBASE_H
+#endif //SMARTREDIS_TENSORBASE_H

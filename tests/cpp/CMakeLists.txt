@@ -65,7 +65,7 @@ set(CLIENT_SRC
      ../../../src/cpp/redisserver.cpp
      ../../../src/cpp/rediscluster.cpp
      ../../../src/cpp/redis.cpp
-	 ../../utils/protobuf/silc.pb.cc)
+	 ../../utils/protobuf/smartredis.pb.cc)
 
 # Build executables
 

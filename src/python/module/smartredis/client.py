@@ -6,7 +6,7 @@ import numpy as np
 
 from .dataset import Dataset
 from .error import RedisConnectionError, RedisReplyError
-from .silcPy import PyClient
+from .smartredisPy import PyClient
 from .util import Dtypes, init_default
 
 

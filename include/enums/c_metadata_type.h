@@ -1,5 +1,5 @@
-#ifndef SMARTSIM_CMETADATATYPE_H
-#define SMARTSIM_CMETADATATYPE_H
+#ifndef SMARTREDIS_CMETADATATYPE_H
+#define SMARTREDIS_CMETADATATYPE_H
 
 /* Defines the metadata types
 for c-clients to use as a
@@ -16,4 +16,4 @@ typedef enum{
     c_meta_string = 7
 }CMetaDataType;
 
-#endif //SMARTSIM_CMETADATATYPE_H
+#endif //SMARTREDIS_CMETADATATYPE_H

@@ -1,6 +1,6 @@
 #include "dataset.h"
 
-using namespace SILC;
+using namespace SmartRedis;
 
 DataSet::DataSet(const std::string& name)
 {

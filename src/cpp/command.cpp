@@ -1,6 +1,6 @@
 #include "command.h"
 
-using namespace SILC;
+using namespace SmartRedis;
 
 Command::~Command()
 {

@@ -1,9 +1,9 @@
-#ifndef SILC_CPP_REDIS_H
-#define SILC_CPP_REDIS_H
+#ifndef SMARTREDIS_CPP_REDIS_H
+#define SMARTREDIS_CPP_REDIS_H
 
 #include "redisserver.h"
 
-namespace SILC {
+namespace SmartRedis {
 
 ///@file
 
@@ -266,6 +266,6 @@ class Redis : public RedisServer
         inline void _connect(std::string address_port);
 };
 
-} //namespace SILC
+} //namespace SmartRedis
 
-#endif //SILC_CPP_REDIS_H
+#endif //SMARTREDIS_CPP_REDIS_H

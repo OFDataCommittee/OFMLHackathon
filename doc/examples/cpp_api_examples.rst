@@ -4,10 +4,10 @@
 C++
 ***
 
-In this section, examples are presented using the SILC C++
+In this section, examples are presented using the SmartRedis C++
 API to interact with the RedisAI tensor, model, and script
 data types.  Additionally, an example of utilizing the
-SILC ``DataSet`` API is also provided.
+SmartRedis ``DataSet`` API is also provided.
 
 .. note::
 
@@ -24,9 +24,9 @@ Tensors
 =======
 
 The following example shows how to send a receive a tensor using the
-SILC C++ client API.
+SmartRedis C++ client API.
 
-.. literalinclude:: ../../examples/serial/cpp/silc_put_get_3D.cpp
+.. literalinclude:: ../../examples/serial/cpp/smartredis_put_get_3D.cpp
   :linenos:
   :language: C++
 
@@ -40,7 +40,7 @@ section of the Data Structures documentation page <data_structures_dataset>`.
 The code below shows how to store and retrieve tensors and metadata
 which belong to a ``DataSet``.
 
-.. literalinclude:: ../../examples/serial/cpp/silc_dataset.cpp
+.. literalinclude:: ../../examples/serial/cpp/smartredis_dataset.cpp
   :linenos:
   :language: C++
 
@@ -53,7 +53,7 @@ in the ``../../../common/mnist_data/`` path relative to the
 compiled executable.  Note that this example also sets and
 executes a preprocessing script.
 
-.. literalinclude:: ../../examples/serial/cpp/silc_model.cpp
+.. literalinclude:: ../../examples/serial/cpp/smartredis_model.cpp
   :linenos:
   :language: C++
 
@@ -82,7 +82,7 @@ source code is also shown.
 
 **C++ program**
 
-.. literalinclude:: ../../examples/parallel/cpp/silc_mnist.cpp
+.. literalinclude:: ../../examples/parallel/cpp/smartredis_mnist.cpp
   :linenos:
   :language: C++
 

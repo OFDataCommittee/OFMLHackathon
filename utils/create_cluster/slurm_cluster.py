@@ -11,7 +11,7 @@ def launch_db(host, port, dpn):
     redis = environ['REDIS_INSTALL_PATH'] + '/redis-server '
     redisai = "--loadmodule " +  environ['REDISAI_CPU_INSTALL_PATH'] + "/redisai.so "
     if(dpn < 3):
-        cmd = "srun -N 1 -n 1 " + redis + "./silcdb.conf " + redisai + "--cluster-enabled yes  "
+        cmd = "srun -N 1 -n 1 " + redis + "./smartredisdb.conf " + redisai + "--cluster-enabled yes  "
         log_file = "--logfile " + host + "-" + str(port) + ".log"
         cluster_file = "--cluster-config-file nodes-" + host + "-" + str(port) + ".conf"
         cmd += log_file + " "
@@ -23,7 +23,7 @@ def launch_db(host, port, dpn):
         conf_file = open("run_orc.conf","w")
         for i in range(dpn):
             dir = os.getcwd()
-            cmd = redis + dir+"/silcdb.conf " + "--port " + str(port+i) + " " + redisai + "--cluster-enabled yes  "
+            cmd = redis + dir+"/smartredisdb.conf " + "--port " + str(port+i) + " " + redisai + "--cluster-enabled yes  "
             log_file = "--logfile " + host + "-" + str(port+i) + ".log"
             cluster_file = "--cluster-config-file nodes-" + host + "-" + str(port+i) + ".conf"
             cmd += log_file + " "

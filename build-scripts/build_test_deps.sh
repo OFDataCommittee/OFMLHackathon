@@ -38,7 +38,7 @@ else
     echo "Building RedisAI for CPU..."
     ../build-scripts/build-redisai-cpu.sh $RAI_PT $RAI_TF $RAI_TFL $RAI_ONNX
     if [ $? != 0 ]; then
-        echo "ERROR: RedisAI GPU failed to build"
+        echo "ERROR: RedisAI CPU failed to build"
         cd ..
         exit 1
     fi

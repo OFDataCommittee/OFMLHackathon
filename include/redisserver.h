@@ -1,5 +1,5 @@
-#ifndef SILC_CPP_REDISSERVER_H
-#define SILC_CPP_REDISSERVER_H
+#ifndef SMARTREDIS_CPP_REDISSERVER_H
+#define SMARTREDIS_CPP_REDISSERVER_H
 
 #include <thread>
 #include <iostream>
@@ -12,7 +12,7 @@
 
 ///@file
 
-namespace SILC {
+namespace SmartRedis {
 
 class RedisServer;
 
@@ -257,6 +257,6 @@ class RedisServer {
 
 };
 
-} // namespace SILC
+} // namespace SmartRedis
 
-#endif //SILC_CPP_REDISSERVER_H
+#endif //SMARTREDIS_CPP_REDISSERVER_H

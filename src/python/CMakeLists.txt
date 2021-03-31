@@ -3,7 +3,7 @@
 # Setup python bindings
 #-------------------------------------------------------------------------------------------------------------------
 
-project(silc-python)
+project(smartredis-python)
 cmake_minimum_required(VERSION 3.10)
 
 set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ version selection")  # or 11, 14, 17, 20
@@ -64,12 +64,12 @@ set(CLIENT_SRC
 	 ../../../src/cpp/tensorpack.cpp
 	 ../../../src/cpp/dbnode.cpp
 	 ../../../src/cpp/commandreply.cpp
-	 ../../../utils/protobuf/silc.pb.cc
+	 ../../../utils/protobuf/smartredis.pb.cc
 	 ../../../src/cpp/redis.cpp
 	 ../../../src/cpp/rediscluster.cpp
 	 ../../../src/cpp/redisserver.cpp
 	 ../src/pyclient.cpp
 	 ../src/pydataset.cpp)
 
-pybind11_add_module(silcPy ${CLIENT_SRC} ${CLIENT_LIBRARIES} ../bindings/bind.cpp)
-target_link_libraries(silcPy PUBLIC ${CLIENT_LIBRARIES})
+pybind11_add_module(smartredisPy ${CLIENT_SRC} ${CLIENT_LIBRARIES} ../bindings/bind.cpp)
+target_link_libraries(smartredisPy PUBLIC ${CLIENT_LIBRARIES})

@@ -1,5 +1,5 @@
-#ifndef SILC_DATASET_TEST_UTILS_H
-#define SILC_DATASET_TEST_UTILS_H
+#ifndef SMARTREDIS_DATASET_TEST_UTILS_H
+#define SMARTREDIS_DATASET_TEST_UTILS_H
 
 #include <limits>
 #include "dataset.h"
@@ -55,69 +55,69 @@ const static std::string str_meta_3 =
 *   metadata is working correctly.
 *   \param dataset The DataSet to fill with metadata
 */
-inline void fill_dataset_with_metadata(SILC::DataSet& dataset)
+inline void fill_dataset_with_metadata(SmartRedis::DataSet& dataset)
 {
     //Add metadata fields to the DataSet.  _meta_1 and _meta_2
     //values added to _field_1 and _meta_3 is added to _field_2.
     dataset.add_meta_scalar("dbl_field_1",
                             &dbl_meta_1,
-                            SILC::MetaDataType::dbl);
+                            SmartRedis::MetaDataType::dbl);
     dataset.add_meta_scalar("dbl_field_1",
                             &dbl_meta_2,
-                            SILC::MetaDataType::dbl);
+                            SmartRedis::MetaDataType::dbl);
     dataset.add_meta_scalar("dbl_field_2",
                             &dbl_meta_3,
-                            SILC::MetaDataType::dbl);
+                            SmartRedis::MetaDataType::dbl);
 
     dataset.add_meta_scalar("flt_field_1",
                             &flt_meta_1,
-                            SILC::MetaDataType::flt);
+                            SmartRedis::MetaDataType::flt);
     dataset.add_meta_scalar("flt_field_1",
                             &flt_meta_2,
-                            SILC::MetaDataType::flt);
+                            SmartRedis::MetaDataType::flt);
     dataset.add_meta_scalar("flt_field_2",
                             &flt_meta_3,
-                            SILC::MetaDataType::flt);
+                            SmartRedis::MetaDataType::flt);
 
     dataset.add_meta_scalar("i64_field_1",
                             &i64_meta_1,
-                            SILC::MetaDataType::int64);
+                            SmartRedis::MetaDataType::int64);
     dataset.add_meta_scalar("i64_field_1",
                             &i64_meta_2,
-                            SILC::MetaDataType::int64);
+                            SmartRedis::MetaDataType::int64);
     dataset.add_meta_scalar("i64_field_2",
                             &i64_meta_3,
-                            SILC::MetaDataType::int64);
+                            SmartRedis::MetaDataType::int64);
 
     dataset.add_meta_scalar("i32_field_1",
                             &i32_meta_1,
-                            SILC::MetaDataType::int32);
+                            SmartRedis::MetaDataType::int32);
     dataset.add_meta_scalar("i32_field_1",
                             &i32_meta_2,
-                            SILC::MetaDataType::int32);
+                            SmartRedis::MetaDataType::int32);
     dataset.add_meta_scalar("i32_field_2",
                             &i32_meta_3,
-                            SILC::MetaDataType::int32);
+                            SmartRedis::MetaDataType::int32);
 
     dataset.add_meta_scalar("ui64_field_1",
                             &ui64_meta_1,
-                            SILC::MetaDataType::uint64);
+                            SmartRedis::MetaDataType::uint64);
     dataset.add_meta_scalar("ui64_field_1",
                             &ui64_meta_2,
-                            SILC::MetaDataType::uint64);
+                            SmartRedis::MetaDataType::uint64);
     dataset.add_meta_scalar("ui64_field_2",
                             &ui64_meta_3,
-                            SILC::MetaDataType::uint64);
+                            SmartRedis::MetaDataType::uint64);
 
     dataset.add_meta_scalar("ui32_field_1",
                             &ui32_meta_1,
-                            SILC::MetaDataType::uint32);
+                            SmartRedis::MetaDataType::uint32);
     dataset.add_meta_scalar("ui32_field_1",
                             &ui32_meta_2,
-                            SILC::MetaDataType::uint32);
+                            SmartRedis::MetaDataType::uint32);
     dataset.add_meta_scalar("ui32_field_2",
                             &ui32_meta_3,
-                            SILC::MetaDataType::uint32);
+                            SmartRedis::MetaDataType::uint32);
 
     dataset.add_meta_string("str_field_1",
                             str_meta_1);
@@ -146,9 +146,9 @@ inline void fill_dataset_with_metadata(SILC::DataSet& dataset)
 *   \throw std::runtime_error if the values do not match
 */
 template <typename T>
-void check_nested_3D_tensor(SILC::DataSet& dataset,
+void check_nested_3D_tensor(SmartRedis::DataSet& dataset,
                             std::string tensor_name,
-                            SILC::TensorType type,
+                            SmartRedis::TensorType type,
                             T*** vals,
                             std::vector<size_t> dims
                             )
@@ -157,7 +157,7 @@ void check_nested_3D_tensor(SILC::DataSet& dataset,
     T*** t_unpack = allocate_3D_array<T>(dims[0], dims[1], dims[2]);
 
     dataset.unpack_tensor(tensor_name, t_unpack, dims, type,
-                          SILC::MemoryLayout::nested);
+                          SmartRedis::MemoryLayout::nested);
 
     //Check that the tensor values are correct
     if(is_equal_3D_array(vals, t_unpack, dims[0], dims[1], dims[2])) {
@@ -175,11 +175,11 @@ void check_nested_3D_tensor(SILC::DataSet& dataset,
     T*** t_get = allocate_3D_array<T>(dims[0], dims[1], dims[2]);
 
     std::vector<size_t> get_dims;
-    SILC::TensorType get_type;
+    SmartRedis::TensorType get_type;
 
     dataset.get_tensor(tensor_name, (void*&)t_get,
                        get_dims, get_type,
-                       SILC::MemoryLayout::nested);
+                       SmartRedis::MemoryLayout::nested);
 
     if(get_type!=type)
         throw std::runtime_error("Retrieved type for " +
@@ -216,14 +216,14 @@ void check_nested_3D_tensor(SILC::DataSet& dataset,
 *   \throw std::runtime_error if the values do not match
 */
 template <typename T>
-void check_meta_field(SILC::DataSet& dataset,
+void check_meta_field(SmartRedis::DataSet& dataset,
                       std::string field_name,
-                      SILC::MetaDataType type,
+                      SmartRedis::MetaDataType type,
                       std::vector<T> vals)
 {
     T* retrieved_vals;
     size_t retrieved_length;
-    SILC::MetaDataType retrieved_type;
+    SmartRedis::MetaDataType retrieved_type;
 
     dataset.get_meta_scalars(field_name,
                             (void*&)retrieved_vals,
@@ -272,7 +272,7 @@ void check_meta_field(SILC::DataSet& dataset,
 *   \throw std::runtime_error if the tensor names
 *          do not match.
 */
-void check_tensor_names(SILC::DataSet& dataset,
+void check_tensor_names(SmartRedis::DataSet& dataset,
                         std::vector<std::string> tensor_names)
 {
     std::vector<std::string> names = dataset.get_tensor_names();
@@ -300,76 +300,76 @@ void check_tensor_names(SILC::DataSet& dataset,
 *   \throw std::runtime_error if the metadata field
 *          does not match
 */
-void check_dataset_metadata(SILC::DataSet& dataset)
+void check_dataset_metadata(SmartRedis::DataSet& dataset)
 {
     //Check that the metadata values are correct for dbl
     check_meta_field<double>(dataset,
                             "dbl_field_1",
-                            SILC::MetaDataType::dbl,
+                            SmartRedis::MetaDataType::dbl,
                             {dbl_meta_1, dbl_meta_2});
 
     check_meta_field<double>(dataset,
                             "dbl_field_2",
-                            SILC::MetaDataType::dbl,
+                            SmartRedis::MetaDataType::dbl,
                             {dbl_meta_3});
 
     //Check that the metadata values are correct for flt
 
     check_meta_field<float>(dataset,
                             "flt_field_1",
-                            SILC::MetaDataType::flt,
+                            SmartRedis::MetaDataType::flt,
                             {flt_meta_1, flt_meta_2});
 
     check_meta_field<float>(dataset,
                             "flt_field_2",
-                            SILC::MetaDataType::flt,
+                            SmartRedis::MetaDataType::flt,
                             {flt_meta_3});
 
     //Check that the metadata values are correct for i64
 
     check_meta_field<int64_t>(dataset,
                                 "i64_field_1",
-                                SILC::MetaDataType::int64,
+                                SmartRedis::MetaDataType::int64,
                                 {i64_meta_1, i64_meta_2});
 
     check_meta_field<int64_t>(dataset,
                                 "i64_field_2",
-                                SILC::MetaDataType::int64,
+                                SmartRedis::MetaDataType::int64,
                                 {i64_meta_3});
 
     //Check that the metadata values are correct for i32
 
     check_meta_field<int32_t>(dataset,
                                 "i32_field_1",
-                                SILC::MetaDataType::int32,
+                                SmartRedis::MetaDataType::int32,
                                 {i32_meta_1, i32_meta_2});
 
     check_meta_field<int32_t>(dataset,
                                 "i32_field_2",
-                                SILC::MetaDataType::int32,
+                                SmartRedis::MetaDataType::int32,
                                 {i32_meta_3});
 
     //Check that the metadata values are correct for ui64
 
     check_meta_field<uint64_t>(dataset,
                                 "ui64_field_1",
-                                SILC::MetaDataType::uint64,
+                                SmartRedis::MetaDataType::uint64,
                                 {ui64_meta_1, ui64_meta_2});
 
     check_meta_field<uint64_t>(dataset,
                                 "ui64_field_2",
-                                SILC::MetaDataType::uint64,
+                                SmartRedis::MetaDataType::uint64,
                                 {ui64_meta_3});
 
     //Check that the metadata values are correct for ui32
     check_meta_field<uint32_t>(dataset,
                                 "ui32_field_1",
-                                SILC::MetaDataType::uint32,
+                                SmartRedis::MetaDataType::uint32,
                                 {ui32_meta_1, ui32_meta_2});
 
     check_meta_field<uint32_t>(dataset,
                                 "ui32_field_2",
-                                SILC::MetaDataType::uint32,
+                                SmartRedis::MetaDataType::uint32,
                                 {ui32_meta_3});
 
     std::vector<std::string> str_meta_field_1 =
@@ -400,4 +400,4 @@ void check_dataset_metadata(SILC::DataSet& dataset)
 
 };  //Namespace DATASET_TEST_UTILS
 
-#endif //SILC_DATASET_TEST_UTILS_H
+#endif //SMARTREDIS_DATASET_TEST_UTILS_H

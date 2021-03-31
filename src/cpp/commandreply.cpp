@@ -1,6 +1,6 @@
 #include "commandreply.h"
 
-using namespace SILC;
+using namespace SmartRedis;
 
 CommandReply::CommandReply(redisReply* reply)
 {

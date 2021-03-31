@@ -3,8 +3,8 @@
 namespace py = pybind11;
 
 
-PYBIND11_MODULE(silcPy, m) {
-    m.doc() = "silc client"; // optional module docstring
+PYBIND11_MODULE(smartredisPy, m) {
+    m.doc() = "smartredis client"; // optional module docstring
 
     // Python client bindings
     py::class_<PyClient>(m, "PyClient")

@@ -1,6 +1,6 @@
 #include "client.h"
 
-using namespace SILC;
+using namespace SmartRedis;
 
 Client::Client(bool cluster)
 {

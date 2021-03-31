@@ -1,11 +1,11 @@
-#ifndef SILC_COMMANDLIST_H
-#define SILC_COMMANDLIST_H
+#ifndef SMARTREDIS_COMMANDLIST_H
+#define SMARTREDIS_COMMANDLIST_H
 
 #include "stdlib.h"
 #include <vector>
 #include "command.h"
 
-namespace SILC {
+namespace SmartRedis {
 
 class CommandList;
 
@@ -88,6 +88,6 @@ class CommandList
 
 };
 
-} //namespace SILC
+} //namespace SmartRedis
 
-#endif //SILC_COMMANDLIST_H
+#endif //SMARTREDIS_COMMANDLIST_H

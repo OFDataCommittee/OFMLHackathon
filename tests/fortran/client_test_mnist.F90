@@ -1,6 +1,6 @@
 program mnist_test
 
-  use silc_client, only : client_type
+  use smartredis_client, only : client_type
   use test_utils,  only : use_cluster
 
   implicit none

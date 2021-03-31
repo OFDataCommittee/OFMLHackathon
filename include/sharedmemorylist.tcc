@@ -1,5 +1,5 @@
-#ifndef SILC_SHAREDMEMORYLIST_TCC
-#define SILC_SHAREDMEMORYLIST_TCC
+#ifndef SMARTREDIS_SHAREDMEMORYLIST_TCC
+#define SMARTREDIS_SHAREDMEMORYLIST_TCC
 
 template <class T>
 void SharedMemoryList<T>::add_allocation(size_t bytes, T* ptr)
@@ -24,4 +24,4 @@ T* SharedMemoryList<T>::allocate(size_t n_values)
     return this->allocate_bytes(bytes);
 }
 
-#endif //SILC_SHAREDMEMORYLIST_TCC
+#endif //SMARTREDIS_SHAREDMEMORYLIST_TCC

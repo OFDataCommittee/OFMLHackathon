@@ -1,6 +1,6 @@
 import numpy as np
 
-from silc import Client, Dataset
+from smartredis import Client, Dataset
 
 # Create two arrays to store in the DataSet
 data_1 = np.random.randint(-10, 10, size=(10,10))
@@ -11,7 +11,7 @@ dataset = Dataset("test-dataset")
 dataset.add_tensor("tensor_1", data_1)
 dataset.add_tensor("tensor_2", data_2)
 
-# Connect SILC client to Redis database
+# Connect SmartRedis client to Redis database
 db_address = "127.0.0.1:6379"
 client = Client(address=db_address, cluster=False)
 

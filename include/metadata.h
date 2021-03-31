@@ -1,9 +1,9 @@
-#ifndef SILC_METADATA_H
-#define SILC_METADATA_H
+#ifndef SMARTREDIS_METADATA_H
+#define SMARTREDIS_METADATA_H
 
 #include "stdlib.h"
 #include <string>
-#include "silc.pb.h"
+#include "smartredis.pb.h"
 #include <google/protobuf/reflection.h>
 #include <google/protobuf/stubs/port.h>
 #include "sharedmemorylist.h"
@@ -12,9 +12,9 @@
 ///@file
 
 namespace gpb = google::protobuf;
-namespace spb = SILCProtobuf;
+namespace spb = SmartRedisProtobuf;
 
-namespace SILC {
+namespace SmartRedis {
 
 //Declare the top level container names in the
 //protobuf message so that they are not constant
@@ -433,6 +433,6 @@ class MetaData
         void _rebuild_message_map();
 };
 
-} //namespace SILC
+} //namespace SmartRedis
 
-#endif //SILC_METADATA_H
+#endif //SMARTREDIS_METADATA_H

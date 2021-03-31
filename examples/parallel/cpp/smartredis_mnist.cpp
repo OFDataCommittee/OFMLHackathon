@@ -40,12 +40,12 @@ void run_mnist(const std::string& model_name,
     std::string out_key = "mnist_output_rank_" + std::to_string(rank);
 
     // Initialize a Client object
-    SILC::Client client(false);
+    SmartRedis::Client client(false);
 
     // Put the image tensor on the database
     client.put_tensor(in_key, img.data(), {1,1,28,28},
-                      SILC::TensorType::flt,
-                      SILC::MemoryLayout::contiguous);
+                      SmartRedis::TensorType::flt,
+                      SmartRedis::MemoryLayout::contiguous);
 
     // Run the preprocessing script
     client.run_script(script_name, "pre_process",
@@ -57,8 +57,8 @@ void run_mnist(const std::string& model_name,
     // Get the result of the model
     std::vector<float> result(1*10);
     client.unpack_tensor(out_key, result.data(), {10},
-                         SILC::TensorType::flt,
-                         SILC::MemoryLayout::contiguous);
+                         SmartRedis::TensorType::flt,
+                         SmartRedis::MemoryLayout::contiguous);
 
     // Print out the results of the model for Rank 0
     if(rank==0)
@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
     // Set the model and script that will be used by all ranks
     // from MPI rank 0.
     if(rank==0) {
-        SILC::Client client(false);
+        SmartRedis::Client client(false);
 
         // Build model key, file name, and then set model
         // from file using client API
@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
     run_mnist("mnist_model", "mnist_script");
 
     if(rank==0)
-        std::cout<<"Finished SILC MNIST example."<<std::endl;
+        std::cout<<"Finished SmartRedis MNIST example."<<std::endl;
 
     // Finalize MPI Comm World
     MPI_Finalize();

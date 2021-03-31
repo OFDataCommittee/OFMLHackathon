@@ -8,7 +8,7 @@ enum should be used by users.
 
 #include "enums/c_tensor_type.h"
 
-namespace SILC {
+namespace SmartRedis {
 
 enum class TensorType{
     dbl    = 1,
@@ -91,6 +91,6 @@ inline CTensorType convert_tensor_type(TensorType type) {
 
 }
 
-} //namespace SILC
+} //namespace SmartRedis
 
 #endif //SMARTSIM_TENSORTYPE_H

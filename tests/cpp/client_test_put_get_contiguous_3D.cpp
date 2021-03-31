@@ -7,10 +7,10 @@ template <typename T_send, typename T_recv>
 void put_get_3D_array(
 		    void (*fill_array)(T_send*, int),
 		    std::vector<size_t> dims,
-        SILC::TensorType type,
+        SmartRedis::TensorType type,
         std::string key_suffix="")
 {
-  SILC::Client client(use_cluster());
+  SmartRedis::Client client(use_cluster());
 
   //Allocate and fill arrays
   T_send* array =
@@ -42,14 +42,14 @@ void put_get_3D_array(
   */
 
   client.put_tensor(key, (void*)array, dims, type,
-                    SILC::MemoryLayout::contiguous);
+                    SmartRedis::MemoryLayout::contiguous);
 
   client.unpack_tensor(key, u_contig_result,
                        {dims[0]*dims[1]*dims[2]}, type,
-                       SILC::MemoryLayout::contiguous);
+                       SmartRedis::MemoryLayout::contiguous);
 
   client.unpack_tensor(key, u_nested_result, dims, type,
-                       SILC::MemoryLayout::nested);
+                       SmartRedis::MemoryLayout::nested);
 
   /*
   int d = 0;
@@ -86,12 +86,12 @@ void put_get_3D_array(
     }
   }
 
-  SILC::TensorType g_type_nested;
+  SmartRedis::TensorType g_type_nested;
   std::vector<size_t> g_dims_nested;
   void* g_nested_result;
   client.get_tensor(key, g_nested_result,
                     g_dims_nested, g_type_nested,
-                    SILC::MemoryLayout::nested);
+                    SmartRedis::MemoryLayout::nested);
   T_recv*** g_type_nested_result = (T_recv***)g_nested_result;
 
   if(type!=g_type_nested)
@@ -129,12 +129,12 @@ void put_get_3D_array(
     }
   }
 
-  SILC::TensorType g_type_contig;
+  SmartRedis::TensorType g_type_contig;
   std::vector<size_t> g_dims_contig;
   void* g_contig_result;
   client.get_tensor(key, g_contig_result,
                     g_dims_contig, g_type_contig,
-                    SILC::MemoryLayout::contiguous);
+                    SmartRedis::MemoryLayout::contiguous);
 
   if(g_dims_contig!=dims)
     throw std::runtime_error("The tensor dimensions retrieved "\
@@ -172,35 +172,35 @@ int main(int argc, char* argv[]) {
 
   put_get_3D_array<double,double>(
 				  &set_1D_array_floating_point_values<double>,
-				  dims, SILC::TensorType::dbl, "_dbl");
+				  dims, SmartRedis::TensorType::dbl, "_dbl");
 
   put_get_3D_array<float,float>(
 				&set_1D_array_floating_point_values<float>,
-				dims, SILC::TensorType::flt, "_flt");
+				dims, SmartRedis::TensorType::flt, "_flt");
 
   put_get_3D_array<int64_t,int64_t>(
 				    &set_1D_array_integral_values<int64_t>,
-				    dims, SILC::TensorType::int64, "_i64");
+				    dims, SmartRedis::TensorType::int64, "_i64");
 
   put_get_3D_array<int32_t,int32_t>(
 				    &set_1D_array_integral_values<int32_t>,
-				    dims, SILC::TensorType::int32, "_i32");
+				    dims, SmartRedis::TensorType::int32, "_i32");
 
   put_get_3D_array<int16_t,int16_t>(
 				      &set_1D_array_integral_values<int16_t>,
-				      dims, SILC::TensorType::int16, "_i16");
+				      dims, SmartRedis::TensorType::int16, "_i16");
 
   put_get_3D_array<int8_t,int8_t>(
 				      &set_1D_array_integral_values<int8_t>,
-				      dims, SILC::TensorType::int8, "_i8");
+				      dims, SmartRedis::TensorType::int8, "_i8");
 
   put_get_3D_array<uint16_t,uint16_t>(
 				      &set_1D_array_integral_values<uint16_t>,
-				      dims, SILC::TensorType::uint16, "_ui16");
+				      dims, SmartRedis::TensorType::uint16, "_ui16");
 
   put_get_3D_array<uint8_t,uint8_t>(
 				      &set_1D_array_integral_values<uint8_t>,
-				      dims, SILC::TensorType::uint8, "_ui8");
+				      dims, SmartRedis::TensorType::uint8, "_ui8");
 
   std::cout<<"3D put and get with contiguous "\
              "data test complete."<<std::endl;

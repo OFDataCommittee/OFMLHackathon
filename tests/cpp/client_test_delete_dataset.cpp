@@ -7,7 +7,7 @@ template <typename T_send, typename T_recv>
 void dataset_delete(
 		    void (*fill_array)(T_send***, int, int, int),
 		    std::vector<size_t> dims,
-            SILC::TensorType type,
+            SmartRedis::TensorType type,
             std::string key_suffix,
             std::string dataset_name)
 {
@@ -24,8 +24,8 @@ void dataset_delete(
     fill_array(t_send_3, dims[0], dims[1], dims[2]);
 
     //Create Client and DataSets
-    SILC::Client client(use_cluster());
-    SILC::DataSet* dataset = new SILC::DataSet(dataset_name);
+    SmartRedis::Client client(use_cluster());
+    SmartRedis::DataSet* dataset = new SmartRedis::DataSet(dataset_name);
 
     //Add tensors to the DataSet
     std::string t_name_1 = "tensor_1";
@@ -33,11 +33,11 @@ void dataset_delete(
     std::string t_name_3 = "tensor_3";
 
     dataset->add_tensor(t_name_1, t_send_1,
-                        dims, type, SILC::MemoryLayout::nested);
+                        dims, type, SmartRedis::MemoryLayout::nested);
     dataset->add_tensor(t_name_2, t_send_2,
-                        dims, type, SILC::MemoryLayout::nested);
+                        dims, type, SmartRedis::MemoryLayout::nested);
     dataset->add_tensor(t_name_3, t_send_3,
-                        dims, type, SILC::MemoryLayout::nested);
+                        dims, type, SmartRedis::MemoryLayout::nested);
 
     //Add metadata to the DataSet
     DATASET_TEST_UTILS::fill_dataset_with_metadata(*dataset);
@@ -48,7 +48,7 @@ void dataset_delete(
 
     //Check that the DataSet was actually properly set in the database
     //and can be retrieved.
-    SILC::DataSet retrieved_dataset = client.get_dataset(dataset_name);
+    SmartRedis::DataSet retrieved_dataset = client.get_dataset(dataset_name);
 
     DATASET_TEST_UTILS::check_tensor_names(retrieved_dataset,
                                     {t_name_1, t_name_2, t_name_3});
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
   dataset_name = "3D_dbl_dataset_delete";
   dataset_delete<double,double>(
 				  &set_3D_array_floating_point_values<double>,
-				  dims, SILC::TensorType::dbl, "_dbl", dataset_name);
+				  dims, SmartRedis::TensorType::dbl, "_dbl", dataset_name);
 
   return 0;
 }

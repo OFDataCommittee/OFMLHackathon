@@ -1,7 +1,7 @@
 
 #include "pydataset.h"
 
-using namespace SILC;
+using namespace SmartRedis;
 
 namespace py = pybind11;
 

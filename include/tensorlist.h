@@ -1,11 +1,11 @@
-#ifndef SILC_TENSORLIST_H
-#define SILC_TENSORLIST_H
+#ifndef SMARTREDIS_TENSORLIST_H
+#define SMARTREDIS_TENSORLIST_H
 
 #include <forward_list>
 #include "tensor.h"
 #include <iostream>
 
-namespace SILC {
+namespace SmartRedis {
 
 /*!
 *   \brief  The TensorList class stores Tensor objects
@@ -153,7 +153,7 @@ class TensorList {
 
 #include "tensorlist.tcc"
 
-} //namespace SILC
+} //namespace SmartRedis
 
-#endif //SILC_TENSORLIST_H
+#endif //SMARTREDIS_TENSORLIST_H
 

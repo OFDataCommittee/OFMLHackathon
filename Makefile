@@ -4,7 +4,7 @@ MAKEFLAGS += --no-print-directory
 # Do not remove this block. It is used by the 'help' rule when
 # constructing the help output.
 # help:
-# help: SILC Makefile help
+# help: SmartRedis Makefile help
 # help:
 
 # help: help                           - display this makefile's help information
@@ -23,25 +23,25 @@ pyclient:
 	@bash ./build-scripts/build-python-bindings.sh
 
 
-# help: deps                           - Make SILC dependencies
+# help: deps                           - Make SmartRedis dependencies
 .PHONY: deps
 deps: SHELL:=/bin/bash
 deps:
 	@bash ./build-scripts/build_deps.sh
 
-# help: lib                            - Build SILC clients into a static library
+# help: lib                            - Build SmartRedis clients into a static library
 .PHONY: lib
 lib: SHELL:=/bin/bash
 lib: deps
 	@mkdir -p build; (cd build; cmake ..; make)
 
-# help: test-deps                      - Make SILC testing dependencies
+# help: test-deps                      - Make SmartRedis testing dependencies
 .PHONY: test-deps
 test-deps: SHELL:=/bin/bash
 test-deps:
 	@bash ./build-scripts/build_test_deps.sh
 
-# help: test-deps-gpu                  - Make SILC GPU testing dependencies
+# help: test-deps-gpu                  - Make SmartRedis GPU testing dependencies
 .PHONY: test-deps
 test-deps-gpu: SHELL:=/bin/bash
 test-deps-gpu:
@@ -122,31 +122,31 @@ check-style: check-sort-imports check-format
 # help: format                         - perform code style format
 .PHONY: format
 format:
-	@black ./src/python/module/silc ./tests/python/
+	@black ./src/python/module/smartredis ./tests/python/
 
 
 # help: check-format                   - check code format compliance
 .PHONY: check-format
 check-format:
-	@black --check ./src/python/module/silc ./tests/python/
+	@black --check ./src/python/module/smartredis ./tests/python/
 
 
 # help: sort-imports                   - apply import sort ordering
 .PHONY: sort-imports
 sort-imports:
-	@isort ./src/python/module/silc ./tests/python/ --profile black
+	@isort ./src/python/module/smartredis ./tests/python/ --profile black
 
 
 # help: check-sort-imports             - check imports are sorted
 .PHONY: check-sort-imports
 check-sort-imports:
-	@isort  ./src/python/module/silc ./tests/python/ --check-only --profile black
+	@isort  ./src/python/module/smartredis ./tests/python/ --check-only --profile black
 
 
 # help: check-lint                     - run static analysis checks
 .PHONY: check-lint
 check-lint:
-	@pylint --rcfile=.pylintrc ./src/python/module/silc ./tests/python
+	@pylint --rcfile=.pylintrc ./src/python/module/smartredis ./tests/python
 
 
 # help:
@@ -207,5 +207,5 @@ test-fortran: build-test-fortran
 # help: testpy-cov                     - run python tests with coverage
 .PHONY: testpy-cov
 testpy-cov:
-	@python -m pytest --cov=./src/python/module/silc/ -vv ./tests/python/
+	@python -m pytest --cov=./src/python/module/smartredis/ -vv ./tests/python/
 

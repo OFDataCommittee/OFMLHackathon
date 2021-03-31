@@ -3,7 +3,7 @@ import os
 import torch
 import torch.nn as nn
 
-from silc import Client
+from smartredis import Client
 
 
 # taken from https://pytorch.org/docs/master/generated/torch.jit.trace.html
@@ -15,7 +15,7 @@ class Net(nn.Module):
     def forward(self, x):
         return self.conv(x)
 
-# Connect a SILC client
+# Connect a SmartRedis client
 db_address = "127.0.0.1:6379"
 client = Client(address=db_address, cluster=False)
 

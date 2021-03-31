@@ -1,7 +1,7 @@
 import numpy as np
-from silc import Client
+from smartredis import Client
 
-# Connect a SILC client to Redis database
+# Connect a SmartRedis client to Redis database
 db_address = "127.0.0.1:6379"
 client = Client(address=db_address, cluster=False)
 

@@ -1,6 +1,6 @@
 #include "commandlist.h"
 
-using namespace SILC;
+using namespace SmartRedis;
 
 CommandList::~CommandList()
 {

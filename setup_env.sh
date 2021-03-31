@@ -5,7 +5,7 @@
 # this must be *sourced* in the top level smartsim directory in the
 # shell that will be used for building.
 
-echo "Setting up SILC environment"
+echo "Setting up SmartRedis environment"
 
 if ls ./third-party/hiredis/install/lib/libhiredis* 1>/dev/null 2>&1; then
     export HIREDIS_INSTALL_PATH="$(pwd)/third-party/hiredis/install"
@@ -54,13 +54,13 @@ fi
 
 # Update PYTHONPATH
 if [[ ":$PYTHONPATH:" != *"$(pwd)/src/python/module/"* ]]; then
-    echo "Adding SILC to PYTHONPATH"
+    echo "Adding SmartRedis to PYTHONPATH"
     export PYTHONPATH="$(pwd)/src/python/module/:${PYTHONPATH}"
     echo $PYTHONPATH
 else
-    echo "SILC found in PYTHONPATH"
+    echo "SmartRedis found in PYTHONPATH"
 fi
 
-# Set SILC_INSTALL_PATH for external application build assistance
-export SILC_INSTALL_PATH="$(pwd)"
-echo "Setting the SILC install path to $SILC_INSTALL_PATH"
+# Set SMARTREDIS_INSTALL_PATH for external application build assistance
+export SMARTREDIS_INSTALL_PATH="$(pwd)"
+echo "Setting the SMARTREDIS install path to $SMARTREDIS_INSTALL_PATH"

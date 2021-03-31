@@ -1,5 +1,5 @@
-#ifndef SILC_COMMAND_TCC
-#define SILC_COMMAND_TCC
+#ifndef SMARTREDIS_COMMAND_TCC
+#define SMARTREDIS_COMMAND_TCC
 
 template <class T>
 void Command::add_fields(const std::vector<T>& fields, bool is_key)
@@ -10,4 +10,4 @@ void Command::add_fields(const std::vector<T>& fields, bool is_key)
     return;
 }
 
-#endif //SILC_COMMAND_TCC
+#endif //SMARTREDIS_COMMAND_TCC

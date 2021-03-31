@@ -1,11 +1,11 @@
-#ifndef SILC_SHAREDMEMORYLIST_H
-#define SILC_SHAREDMEMORYLIST_H
+#ifndef SMARTREDIS_SHAREDMEMORYLIST_H
+#define SMARTREDIS_SHAREDMEMORYLIST_H
 
 #include <forward_list>
 #include <cstring>
 #include <memory>
 
-namespace SILC {
+namespace SmartRedis {
 
 /*!
 *   \brief  The SharedMemoryList class allocates
@@ -95,7 +95,7 @@ class SharedMemoryList {
 
 #include "sharedmemorylist.tcc"
 
-} //namespace SILC
+} //namespace SmartRedis
 
-#endif //SILC_SHAREDMEMORYLIST_H
+#endif //SMARTREDIS_SHAREDMEMORYLIST_H
 

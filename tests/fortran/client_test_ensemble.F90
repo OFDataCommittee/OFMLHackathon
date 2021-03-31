@@ -1,6 +1,6 @@
 program main
 
-use silc_client, only : client_type
+use smartredis_client, only : client_type
 use test_utils,  only : setenv, use_cluster
 use iso_fortran_env, only : STDERR => error_unit
 

@@ -1,6 +1,6 @@
 #include "tensorpack.h"
 
-using namespace SILC;
+using namespace SmartRedis;
 
 TensorPack::TensorPack(const TensorPack& tp) {
     this->_tensors_double = tp._tensors_double;

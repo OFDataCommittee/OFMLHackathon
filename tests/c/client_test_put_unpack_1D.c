@@ -18,7 +18,7 @@ void put_unpack_1D_tensor(void* tensor, size_t* dims, size_t n_dims,
   the type is not known.
   */
 
-  void* client = SmartSimCClient(use_cluster());
+  void* client = SmartRedisCClient(use_cluster());
   char* prefix_str = "1D_tensor_test";
 
   size_t prefix_str_length = strlen(prefix_str);

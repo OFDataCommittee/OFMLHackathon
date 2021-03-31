@@ -1,12 +1,12 @@
-#ifndef SILC_DBNODE_H
-#define SILC_DBNODE_H
+#ifndef SMARTREDIS_DBNODE_H
+#define SMARTREDIS_DBNODE_H
 
 #include "stdlib.h"
 #include <string>
 
 ///@file
 
-namespace SILC {
+namespace SmartRedis {
 
 class DBNode;
 
@@ -121,6 +121,6 @@ class DBNode{
 
 };
 
-} //namespace SILC
+} //namespace SmartRedis
 
-#endif //SILC_DBNODE_H
+#endif //SMARTREDIS_DBNODE_H

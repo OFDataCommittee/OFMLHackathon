@@ -1,7 +1,7 @@
 program main
 
   use iso_c_binding
-  use silc_client, only : client_type
+  use smartredis_client, only : client_type
 
   implicit none
 

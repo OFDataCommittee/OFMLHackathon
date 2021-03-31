@@ -1,5 +1,5 @@
-#ifndef SILC_TENSORLIST_TCC
-#define SILC_TENSORLIST_TCC
+#ifndef SMARTREDIS_TENSORLIST_TCC
+#define SMARTREDIS_TENSORLIST_TCC
 
 template <class T>
 TensorList<T>::~TensorList()
@@ -115,4 +115,4 @@ inline void TensorList<T>::_free_tensors() {
     }
 }
 
-#endif //SILC_TENSORLIST_TCC
+#endif //SMARTREDIS_TENSORLIST_TCC

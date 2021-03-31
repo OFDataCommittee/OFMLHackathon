@@ -1,7 +1,7 @@
 program main
 
   use iso_c_binding
-  use silc_dataset, only : dataset_type
+  use smartredis_dataset, only : dataset_type
   use test_utils,   only : irand
 
   implicit none

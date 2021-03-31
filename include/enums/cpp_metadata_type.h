@@ -3,7 +3,7 @@
 
 #include "enums/c_metadata_type.h"
 
-namespace SILC {
+namespace SmartRedis {
 
 enum class MetaDataType {
     dbl     = 1,
@@ -79,6 +79,6 @@ inline MetaDataType convert_metadata_type(CMetaDataType type) {
     return t;
 }
 
-} //namespace SILC
+} //namespace SmartRedis
 
 #endif //SMARTSIM_METADATATYPE_H

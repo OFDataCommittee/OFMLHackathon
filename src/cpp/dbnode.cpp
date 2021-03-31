@@ -1,6 +1,6 @@
 #include "dbnode.h"
 
-using namespace SILC;
+using namespace SmartRedis;
 
 DBNode::DBNode()
 {

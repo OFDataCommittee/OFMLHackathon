@@ -1,5 +1,5 @@
-#ifndef SILC_TENSORPACK_H
-#define SILC_TENSORPACK_H
+#ifndef SMARTREDIS_TENSORPACK_H
+#define SMARTREDIS_TENSORPACK_H
 
 #include "stdlib.h"
 #include <string>
@@ -12,7 +12,7 @@
 
 ///@file
 
-namespace SILC {
+namespace SmartRedis {
 
 class TensorPack;
 
@@ -249,6 +249,6 @@ class TensorPack
         void _add_tensorlist_to_inventory(TensorList<T>& t_list);
 };
 
-} //namespace SILC
+} //namespace SmartRedis
 
-#endif //SILC_TENSORPACK_H
+#endif //SMARTREDIS_TENSORPACK_H

@@ -1,5 +1,5 @@
-#ifndef SILC_CTEST_INT32_UTILS_H
-#define SILC_CTEST_INT32_UTILS_H
+#ifndef SMARTREDIS_CTEST_INT32_UTILS_H
+#define SMARTREDIS_CTEST_INT32_UTILS_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,11 +27,11 @@ bool use_cluster()
     configuration should be used in the test
     when creating a Client.
     */
-    char* silc_test_cluster = getenv("SILC_TEST_CLUSTER");
-    to_lower(silc_test_cluster);
+    char* smartredis_test_cluster = getenv("SMARTREDIS_TEST_CLUSTER");
+    to_lower(smartredis_test_cluster);
 
-    if(silc_test_cluster) {
-        if(strcmp(silc_test_cluster, "true")==0)
+    if(smartredis_test_cluster) {
+        if(strcmp(smartredis_test_cluster, "true")==0)
             return true;
     }
     return false;
@@ -141,4 +141,4 @@ bool is_equal_3D_tensors_dbl(double*** a, double*** b,
     return true;
 }
 
-#endif //SILC_CTEST_INT32_UTILS_H
+#endif //SMARTREDIS_CTEST_INT32_UTILS_H

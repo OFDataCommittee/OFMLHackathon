@@ -1,5 +1,5 @@
 interface
-  type(c_ptr) function c_constructor( cluster ) bind(c, name="SmartSimCClient")
+  type(c_ptr) function c_constructor( cluster ) bind(c, name="SmartRedisCClient")
     use iso_c_binding, only : c_ptr, c_bool
     logical(kind=c_bool), value :: cluster !< True if a database cluster is being used
   end function c_constructor

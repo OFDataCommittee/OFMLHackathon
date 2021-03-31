@@ -1,5 +1,5 @@
-#ifndef SILC_CPP_CLIENT_H
-#define SILC_CPP_CLIENT_H
+#ifndef SMARTREDIS_CPP_CLIENT_H
+#define SMARTREDIS_CPP_CLIENT_H
 #ifdef __cplusplus
 #include "string.h"
 #include "stdlib.h"
@@ -25,7 +25,7 @@
 
 ///@file
 
-namespace SILC {
+namespace SmartRedis {
 
 class Client;
 
@@ -701,7 +701,7 @@ class Client
 
 };
 
-} //namespace SILC
+} //namespace SmartRedis
 
 #endif //__cplusplus
-#endif //SILC_CPP_CLIENT_H
+#endif //SMARTREDIS_CPP_CLIENT_H

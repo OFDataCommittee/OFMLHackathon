@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from silc import Client
+from smartredis import Client
 
 def two_to_one(data, data_2):
     """Sample torchscript script that returns the
@@ -13,7 +13,7 @@ def two_to_one(data, data_2):
     merged = torch.cat((data, data_2))
     return merged.max(1)[0]
 
-# Connect a SILC client to the Redis database
+# Connect a SmartRedis client to the Redis database
 db_address = "127.0.0.1:6379"
 client = Client(address=db_address, cluster=False)
 
