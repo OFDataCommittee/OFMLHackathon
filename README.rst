@@ -32,7 +32,7 @@ command:
 
 .. code-block:: bash
 
-    pip install -r requirements.txt
+    pip install -r requirements-dev.txt
 
 In the top level of the SmartRedis directory, execute the
 following command to build the documentation:
