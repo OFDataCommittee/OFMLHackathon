@@ -13,6 +13,9 @@ if ls ./hiredis/install/lib/libhiredis* 1>/dev/null 2>&1; then
 else
     if [[ ! -d "./hiredis" ]]; then
 	git clone https://github.com/redis/hiredis.git hiredis --branch master --depth=1
+	cd hiredis
+	git checkout tags/v1.0.0
+	cd ..
 	echo "Hiredis downloaded"
     fi
     cd hiredis
@@ -31,6 +34,9 @@ if ls ./redis-plus-plus/install/lib/libredis++* 1>/dev/null 2>&1; then
 else
     if [[ ! -d "./redis-plus-plus" ]]; then
         git clone https://github.com/sewenew/redis-plus-plus.git redis-plus-plus --branch master --depth=1
+	cd redis-plus-plus
+	git checkout tags/v1.2.3
+	cd ..
         echo "Redis-plus-plus downloaded"
     fi
     cd redis-plus-plus
@@ -62,8 +68,7 @@ else
     git submodule update --init --recursive
     ./autogen.sh
     ./configure --prefix="$(pwd)/install"
-    CC=gcc CXX=g++ make -j 8
-    CC=gcc CXX=g++ make check -j 8
+    CC=gcc CXX=g++ make -j 4
     CC=gcc CXX=g++ make install
     echo "Finished installing Protobuf"
     cd ../
