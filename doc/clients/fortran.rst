@@ -113,7 +113,7 @@ These language features are supported by Intel 19, GNU 9, and Cray 8.6 and later
 .. _unsupported_smartredis_features:
 
 Unsupported SmartRedis features
--------------------------
+-------------------------------
 Due to limitations of C/Fortran interoperability, some of the features in the Python, C, and C++ clients have not
 been implemented. This includes
 
@@ -142,4 +142,3 @@ share the same functionality, but differ only by the type of variable
 For example, ``client/put_tensor_interfaces.inc`` define the Fortran-C interfaces to put a tensor into the database.
 ``client/put_tensor_methods_common.inc`` form the main body of the source code that handles the conversion and
 calling of the Fortran-C interfaces.
-

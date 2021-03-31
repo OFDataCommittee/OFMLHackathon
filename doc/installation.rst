@@ -90,7 +90,7 @@ script in the top level of the SmartRedis directory.
 After this step, the clients will be ready to compile as a library.
 
 Building SmartRedis static library
-============================
+==================================
 
 A static library of the SmartRedis C++, C, and Fortran clients can be built with
 the command:
