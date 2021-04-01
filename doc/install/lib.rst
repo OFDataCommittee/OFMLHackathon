@@ -15,7 +15,9 @@ to link in the SmartRedis static library into a C++ application.
 
 .. code-block:: text
 
-    set(SMARTREDIS_INSTALL_PATH "path/to/your/smartredis/install/dir")
+    project(Example)
+    cmake_minimum_required(VERSION 3.10)
+    SET(CMAKE_CXX_STANDARD 17)
 
     string(CONCAT HIREDIS_LIB_PATH $ENV{HIREDIS_INSTALL_PATH} "/lib")
     find_library(HIREDIS_LIB hiredis PATHS ${HIREDIS_LIB_PATH} NO_DEFAULT_PATH REQUIRED)
@@ -29,14 +31,14 @@ to link in the SmartRedis static library into a C++ application.
     find_library(REDISPP_LIB redis++ PATHS ${REDISPP_LIB_PATH} REQUIRED)
     string(CONCAT REDISPP_INCLUDE_PATH $ENV{REDISPP_INSTALL_PATH} "/include/")
 
-    string(CONCAT SMARTREDIS_LIB_PATH ${SMARTREDIS_INSTALL_PATH} "/build")
+    string(CONCAT SMARTREDIS_LIB_PATH $ENV{SMARTREDIS_INSTALL_PATH} "/build")
     find_library(SMARTREDIS_LIB smartredis PATHS ${SMARTREDIS_LIB_PATH} REQUIRED)
 
     include_directories(${HIREDIS_INCLUDE_PATH})
     include_directories(${REDISPP_INCLUDE_PATH})
     include_directories(${PROTOBUF_INCLUDE_PATH})
-    include_directories(${SMARTREDIS_INSTALL_PATH}/include)
-    include_directories(${SMARTREDIS_INSTALL_PATH}/utils/protobuf)
+    include_directories($ENV{SMARTREDIS_INSTALL_PATH}/include)
+    include_directories($ENV{SMARTREDIS_INSTALL_PATH}/utils/protobuf)
 
     set(CLIENT_LIBRARIES ${REDISPP_LIB} ${HIREDIS_LIB} ${PROTOBUF_LIB} ${SMARTREDIS_LIB})
 

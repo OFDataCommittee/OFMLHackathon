@@ -1,20 +1,19 @@
 
 
-First, activate your Python virtual environment.
+First, activate your Python virtual environment:
 
 .. code-block:: bash
 
     conda activate <env name>
 
-Retrieve, and unpack the SmartRedis release tarball
+Retrieve and unpack the SmartRedis release tarball:
 
 .. code-block:: bash
 
     wget <tarball location>
     tar -xf smartredis-0.1.0
 
-Next, build the dependencies of SmartRedis. For more information
-on the dependencies of SmartRedis, see the ``From Source`` instructions.
+Next, build the dependencies of SmartRedis:
 
 .. code-block:: bash
 

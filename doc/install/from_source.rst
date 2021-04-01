@@ -4,7 +4,7 @@ Developer Makefile
 
 SmartRedis has a Makefile that automates the build and install process.
 The Makefile is shown below, and in the following sections,
-the process for building and install the SmartRedis clients from
+the process for building and installing the SmartRedis clients from
 source will be described.
 
 .. code-block:: text
@@ -59,7 +59,7 @@ source will be described.
 Clone and Install dependencies
 -------------------------------
 
-First, clone the SmartRedis repo
+First, clone the SmartRedis repo:
 
 .. code-block:: bash
 
@@ -70,16 +70,17 @@ SmartRedis has a base set of dependencies that are required to use the
 clients.  These dependencies include Hiredis, Redis-plus-plus,
 Google Protobuf, and pybind11.  The dependencies can be
 downloaded, built, and installed by executing the following
-command in the top-level directory of SmartRedis.
+command in the top-level directory of SmartRedis:
 
 .. code-block:: bash
 
   make deps
 
-To build a SmartRedis client in any language, the dependencies downloaded above
-need to be found by CMake. An easy way to do this is through environment
-variables. To setup your environment for building, run the following
-script in the top level of the SmartRedis directory.
+To build a SmartRedis client in any language, the dependencies
+downloaded above need to be found by CMake. An easy way to do
+this is through environment variables. To setup your environment
+for building, run the following script in the top level of the
+SmartRedis directory.
 
 .. code-block:: bash
 
@@ -93,10 +94,11 @@ built and installed. Make sure to be using the same terminal as
 the one where you installed the dependencies and sourced the
 ``setup_env.sh`` script.
 
-The Python client uses Pybind11 to wrap the C++ SmartRedis client and includes
-a native Python layer to make function calls simpler. By it's design,
-the Python client is meant to work directly with Numpy arrays and will
-return any data retrieved from a database as a Numpy type.
+The Python client uses Pybind11 to wrap the C++ SmartRedis client
+and includes a native Python layer to make function calls simpler.
+By it's design, the Python client is meant to work directly with
+Numpy arrays and will return any data retrieved from a database
+as a Numpy type.
 
 .. code-block:: bash
 
@@ -120,11 +122,11 @@ the ``Client`` from ``smartredis`` as follows
 Building SmartRedis static library from Source
 ----------------------------------------------
 
-Assuming the above steps have already been done, you are now ready to build
-SmartRedis as a static library.
+Assuming the above steps have already been done, you are now
+ready to build SmartRedis as a static library.
 
-A static library of the SmartRedis C++, C, and Fortran clients can be built with
-the command:
+A static library of the SmartRedis C++, C, and Fortran clients
+can be built with the command:
 
 .. code-block:: bash
 
