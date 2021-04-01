@@ -11,4 +11,3 @@ source ./setup_env.sh
 
 export SMARTREDIS_TEST_CLUSTER=True
 echo SMARTREDIS_TEST_CLUSTER set to $SMARTREDIS_TEST_CLUSTER
-
