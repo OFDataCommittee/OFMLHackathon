@@ -11,7 +11,7 @@ Retrieve and unpack the SmartRedis release tarball:
 .. code-block:: bash
 
     wget <tarball location>
-    tar -xf smartredis-0.1.0
+    tar -xf smartredis-0.1.0.tar.gz
 
 Next, build the dependencies of SmartRedis:
 

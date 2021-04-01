@@ -15,7 +15,7 @@ if(DEFINED ENV{HIREDIS_INSTALL_PATH})
 	   find_library(HIREDIS_LIB hiredis PATHS ${HIREDIS_LIB_PATH} NO_DEFAULT_PATH)
 	   string(CONCAT HIREDIS_INCLUDE_PATH $ENV{HIREDIS_INSTALL_PATH} "/include/")
 else()
-     	   find_library(HIREDIS_LIB hiredis PATH_SUFFIXES "/lib")
+       find_library(HIREDIS_LIB hiredis PATH_SUFFIXES "/lib")
 	   find_path(HIREDIS_INCLUDE_PATH hiredis PATH_SUFFIXES "/include")
 endif()
 
@@ -26,7 +26,7 @@ if(DEFINED ENV{PROTOBUF_INSTALL_PATH})
 	   find_library(PROTOBUF_LIB protobuf PATHS ${PROTOBUF_LIB_PATH} NO_DEFAULT_PATH)
 	   string(CONCAT PROTOBUF_INCLUDE_PATH $ENV{PROTOBUF_INSTALL_PATH} "/include/")
 else()
-     	   find_library(PROTOBUF_LIB protobuf PATH_SUFFIXES "/lib")
+       find_library(PROTOBUF_LIB protobuf PATH_SUFFIXES "/lib")
 	   find_path(PROTOBUF_INCLUDE_PATH protobuf PATH_SUFFIXES "/include")
 endif()
 
@@ -37,14 +37,11 @@ if(DEFINED ENV{REDISPP_INSTALL_PATH})
 	   find_library(REDISPP_LIB redis++ PATHS ${REDISPP_LIB_PATH} )
 	   string(CONCAT REDISPP_INCLUDE_PATH $ENV{REDISPP_INSTALL_PATH} "/include/")
 else()
-     	   find_library(REDISPP_LIB redis++ PATH_SUFFIXES "/lib")
+       find_library(REDISPP_LIB redis++ PATH_SUFFIXES "/lib")
 	   find_path(REDISPP_INCLUDE_PATH redis++ PATH_SUFFIXES "/include")
 endif()
 
-find_package(MPI)
-
 include_directories(SYSTEM
-    ${MPI_INCLUDE_PATH}
     ../../../include
     ../../../utils/protobuf
     /usr/local/include
@@ -67,9 +64,9 @@ set(CLIENT_SRC
 	 ../../../../src/cpp/dbnode.cpp
 	 ../../../../src/cpp/commandreply.cpp
 	 ../../../utils/protobuf/smartredis.pb.cc
-   ../../../../src/cpp/redisserver.cpp
-   ../../../../src/cpp/redis.cpp
-   ../../../../src/cpp/rediscluster.cpp)
+     ../../../../src/cpp/redisserver.cpp
+     ../../../../src/cpp/redis.cpp
+     ../../../../src/cpp/rediscluster.cpp)
 
 
 add_executable(example_put_unpack_1D
@@ -78,7 +75,6 @@ add_executable(example_put_unpack_1D
 )
 
 target_link_libraries(example_put_unpack_1D
-	MPI::MPI_C
 	${CLIENT_LIBRARIES}
 )
 
@@ -88,7 +84,6 @@ add_executable(example_put_get_3D
 )
 
 target_link_libraries(example_put_get_3D
-        MPI::MPI_C
         ${CLIENT_LIBRARIES}
 )
 
