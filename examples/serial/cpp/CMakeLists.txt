@@ -40,16 +40,9 @@ else()
 	   find_path(PROTOBUF_INCLUDE_PATH protobuf PATH_SUFFIXES "/include")
 endif()
 
-find_package(MPI)
-if(${MPI_CXX_FOUND})
-else()
-    message(FATAL_ERROR "Could not find working MPI for C++ parallel examples. CMake will exit.")
-endif()
-
 include_directories(SYSTEM
-    ${MPI_INCLUDE_PATH}
     ../../../include
-	  ../../../utils/protobuf
+	../../../utils/protobuf
     /usr/local/include
     ${HIREDIS_INCLUDE_PATH}
     ${REDISPP_INCLUDE_PATH}
@@ -68,9 +61,9 @@ set(CLIENT_SRC
 	 ../../../../src/cpp/dbnode.cpp
 	 ../../../../src/cpp/commandreply.cpp
 	 ../../../utils/protobuf/smartredis.pb.cc
-   ../../../../src/cpp/redisserver.cpp
-   ../../../../src/cpp/redis.cpp
-   ../../../../src/cpp/rediscluster.cpp)
+     ../../../../src/cpp/redisserver.cpp
+     ../../../../src/cpp/redis.cpp
+     ../../../../src/cpp/rediscluster.cpp)
 
 # Build executables
 
@@ -79,7 +72,6 @@ add_executable(smartredis_put_get_3D
 	${CLIENT_SRC}
 )
 target_link_libraries(smartredis_put_get_3D
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )
 
@@ -88,7 +80,6 @@ add_executable(smartredis_dataset
 	${CLIENT_SRC}
 )
 target_link_libraries(smartredis_dataset
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )
 
@@ -97,7 +88,6 @@ add_executable(smartredis_model
 	${CLIENT_SRC}
 )
 target_link_libraries(smartredis_model
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )
 
@@ -106,6 +96,5 @@ add_executable(smartredis_mnist
 	${CLIENT_SRC}
 )
 target_link_libraries(smartredis_mnist
-	MPI::MPI_CXX
 	${CLIENT_LIBRARIES}
 )

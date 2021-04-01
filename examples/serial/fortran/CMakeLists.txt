@@ -5,7 +5,6 @@ set(CMAKE_BUILD_TYPE Release)
 cmake_minimum_required(VERSION 3.10)
 
 SET(CMAKE_CXX_STANDARD 17)
-#SET(CMAKE_Fortran_COMPILER "")
 enable_language(Fortran)
 
 #TODO put in output warnings
@@ -42,14 +41,7 @@ else()
 	   find_path(PROTOBUF_INCLUDE_PATH protobuf PATH_SUFFIXES "/include")
 endif()
 
-find_package(MPI)
-if(${MPI_Fortran_FOUND})
-else()
-    message(FATAL_ERROR "Could not find working MPI for Fortran parallel examples. CMake will exit.")
-endif()
-
 include_directories(SYSTEM
-    ${MPI_INCLUDE_PATH}
     ../../../include
     ../../../utils/protobuf
     ../../../src/fortran
@@ -73,12 +65,12 @@ set(CLIENT_SRC
 	 ../../../../src/cpp/dbnode.cpp
 	 ../../../../src/cpp/commandreply.cpp
 	 ../../../../utils/protobuf/smartredis.pb.cc
-   ../../../../src/fortran/fortran_c_interop.F90
-   ../../../../src/fortran/dataset.F90
-   ../../../../src/fortran/client.F90
-   ../../../../src/cpp/redisserver.cpp
-   ../../../../src/cpp/rediscluster.cpp
-   ../../../../src/cpp/redis.cpp)
+	 ../../../../src/fortran/fortran_c_interop.F90
+	 ../../../../src/fortran/dataset.F90
+	 ../../../../src/fortran/client.F90
+	 ../../../../src/cpp/redisserver.cpp
+	 ../../../../src/cpp/rediscluster.cpp
+	 ../../../../src/cpp/redis.cpp)
 
 # ld executables
 
@@ -87,7 +79,6 @@ add_executable(smartredis_put_get_3D
 	${CLIENT_SRC}
 )
 target_link_libraries(smartredis_put_get_3D
-	MPI::MPI_Fortran
 	${CLIENT_LIBRARIES}
 )
 
@@ -96,6 +87,5 @@ add_executable(smartredis_dataset
 	${CLIENT_SRC}
 )
 target_link_libraries(smartredis_dataset
-	MPI::MPI_Fortran
 	${CLIENT_LIBRARIES}
 )
