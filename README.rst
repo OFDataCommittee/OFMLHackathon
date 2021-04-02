@@ -1,3 +1,37 @@
+
+.. raw:: html
+
+    <div align="center">
+        <a href="https://github.com/CrayLabs/SmartSim"><img src="https://github.com/CrayLabs/SmartSim/blob/develop/doc/images/SmartSim_Large.png" width="90%"><img></a>
+        <br />
+        <br />
+    <div display="inline-block">
+        <a href="https://github.com/CrayLabs/SmartRedis"><b>Home</b></a>&nbsp;&nbsp;&nbsp;
+        <a href="https://www.craylabs.org/build/html/installation.html"><b>Install</b></a>&nbsp;&nbsp;&nbsp;
+        <a href="https://www.craylabs.org/build/html/overview.html"><b>Documentation</b></a>&nbsp;&nbsp;&nbsp;
+        <a href="https://github.com/CrayLabs/SmartRedis/releases/download/v0.1.0/smartredis-0.1.0.tar.gz"><b>Download</b></a>&nbsp;&nbsp;&nbsp;
+        <a href="https://craylabs.slack.com/ssb/redirect"><b>Slack</b></a>&nbsp;&nbsp;&nbsp;
+        <a href="https://github.com/CrayLabs"><b>Cray Labs</b></a>&nbsp;&nbsp;&nbsp;
+      </div>
+        <br />
+        <br />
+    </div>
+
+.. |license| image:: https://img.shields.io/github/license/CrayLabs/SmartRedis
+    :target: https://github.com/CrayLabs/SmartRedis/blob/master/LICENSE.md
+    :alt: License
+    
+.. |language| image:: https://img.shields.io/github/languages/top/CrayLabs/SmartRedis
+    :alt: Language
+
+.. |tag| image:: https://img.shields.io/github/v/tag/CrayLabs/SmartRedis  
+    :alt: GitHub tag (latest by date)
+
+| |License|  |Language|  |tag| 
+
+----------
+
+
 ==========
 SmartRedis
 ==========
