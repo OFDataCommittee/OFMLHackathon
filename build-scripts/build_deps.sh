@@ -5,6 +5,8 @@ if [[ ! -d "./third-party" ]]; then
 fi
 cd ./third-party
 
+NPROC=$(python -c "import multiprocessing as mp; print(mp.cpu_count())")
+
 # Install Hiredis
 if ls ./hiredis/install/lib/libhiredis* 1>/dev/null 2>&1; then
     echo "Hiredis has already been downloaded and installed"
@@ -19,8 +21,13 @@ else
 	echo "Hiredis downloaded"
     fi
     cd hiredis
-    CC=gcc CXX=g++ make PREFIX="$(pwd)/install"
+    CC=gcc CXX=g++ make PREFIX="$(pwd)/install" static -j $NPROC
     CC=gcc CXX=g++ make PREFIX="$(pwd)/install" install
+    # delete shared libraries
+    rm *.so
+    rm *.dylib
+    rm install/lib/*.so
+    rm install/lib/*.dylib
     cd ../
     export HIREDIS_INSTALL_PATH="$(pwd)/hiredis/install"
     export LD_LIBRARY_PATH="$HIREDIS_INSTALL_PATH/lib":$LD_LIBRARY_PATH
@@ -40,11 +47,11 @@ else
         echo "Redis-plus-plus downloaded"
     fi
     cd redis-plus-plus
-    ex -s -c '2i|SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)' -c x CMakeLists.txt
+    #ex -s -c '2i|SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)' -c x CMakeLists.txt
     mkdir compile
     cd compile
-    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${HIREDIS_INSTALL_PATH}" -DCMAKE_INSTALL_PREFIX="$(pwd)/../install" -DCMAKE_CXX_STANDARD=17 ..
-    CC=gcc CXX=g++ make -j 2
+    cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="${HIREDIS_INSTALL_PATH}" -DCMAKE_INSTALL_PREFIX="$(pwd)/../install" -DCMAKE_CXX_STANDARD=17 ..
+    CC=gcc CXX=g++ make -j $NPROC
     CC=gcc CXX=g++ make install
     cd ../../
     echo "Finished installing Redis-plus-plus"
@@ -56,19 +63,16 @@ if [[ -f ./protobuf/install/bin/protoc ]]; then
     echo "Protobuf has already been downloaded and installed"
 else
     if [[ ! -d "./protobuf" ]]; then
-	git clone https://github.com/protocolbuffers/protobuf.git protobuf
-	cd protobuf
-	git checkout tags/v3.11.3
-	cd ..
-    else
+	git clone --depth 1 --branch v3.11.3 https://github.com/protocolbuffers/protobuf.git protobuf
+	  else
 	echo "Protobuf downloaded"
     fi
     cd protobuf
     echo "Downloading Protobuf dependencies"
     git submodule update --init --recursive
     ./autogen.sh
-    ./configure --prefix="$(pwd)/install"
-    CC=gcc CXX=g++ make -j 4
+    ./configure --disable-shared --prefix="$(pwd)/install"
+    CC=gcc CXX=g++ make -j $NPROC
     CC=gcc CXX=g++ make install
     echo "Finished installing Protobuf"
     cd ../
