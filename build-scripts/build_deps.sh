@@ -5,6 +5,7 @@ if [[ ! -d "./third-party" ]]; then
 fi
 cd ./third-party
 
+# get the number of processors
 NPROC=$(python -c "import multiprocessing as mp; print(mp.cpu_count())")
 
 # Install Hiredis
@@ -69,9 +70,8 @@ else
     fi
     cd protobuf
     echo "Downloading Protobuf dependencies"
-    git submodule update --init --recursive
     ./autogen.sh
-    ./configure --disable-shared --prefix="$(pwd)/install"
+    CFLAGS=-fPIC CXXFLAGS=-fPIC ./configure --disable-shared --prefix="$(pwd)/install"
     CC=gcc CXX=g++ make -j $NPROC
     CC=gcc CXX=g++ make install
     echo "Finished installing Protobuf"

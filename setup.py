@@ -14,6 +14,7 @@ from distutils.version import LooseVersion
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 
+# get number of processors
 NPROC = mp.cpu_count()
 
 class CMakeExtension(Extension):
@@ -35,21 +36,22 @@ class CMakeBuild(build_ext):
 
         cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]
+        build_args += ['--', f'-j{str(NPROC)}']
+        self.build_args = build_args
 
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
 
-        # Assuming Makefiles
-        build_args += ['--', f'-j{str(NPROC)}']
-
-        self.build_args = build_args
-
+        # setup build environment
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
             env.get('CXXFLAGS', ''),
             self.distribution.get_version())
+        build_env = get_build_env(self.build_temp)
+        env.update(build_env)
+
+        # make tmp dir
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        env.update(get_build_env(self.build_temp))
 
         print('-'*10, 'Building C dependencies', '-'*40)
         make_cmd = shutil.which("make")
@@ -64,8 +66,10 @@ class CMakeBuild(build_ext):
                               cwd=self.build_temp,
                               shell=True)
 
+        
         # run cmake prep step
         print('-'*10, 'Running CMake prepare', '-'*40)
+        print(f"Build Env: {build_env}")
         subprocess.check_call(['cmake', setup_path] + cmake_args,
                               cwd=self.build_temp,
                               env=env)
@@ -89,6 +93,8 @@ class CMakeBuild(build_ext):
         dest_directory.mkdir(parents=True, exist_ok=True)
         self.copy_file(source_path, dest_path)
 
+# check that certain dependencies are installed
+# TODO: Check versions for compatible versions
 def check_prereq(command):
     try:
         out = subprocess.check_output([command, '--version'])
@@ -96,26 +102,38 @@ def check_prereq(command):
         raise RuntimeError(
             f"{command} must be installed to build SmartRedis")
 
+# return env dict with dependency paths
 def get_build_env(base_path):
     build_env = {}
+    base_path = Path(base_path).resolve()
     hiredis = Path(base_path, "third-party/hiredis/install")
     build_env["HIREDIS_INSTALL_PATH"] = hiredis
     redis_pp = Path(base_path, "third-party/redis-plus-plus/install")
     build_env["REDISPP_INSTALL_PATH"] = redis_pp
     protobuf = Path(base_path, "third-party/protobuf/install")
     build_env["PROTOBUF_INSTALL_PATH"] = protobuf
+    build_env["LD_LIBRARY_PATH"] = update_env_var("LD_LIBRARY_PATH",
+                                                  protobuf.joinpath("lib"))
     pybind = Path(base_path, "third-party/pybind")
     build_env["PYBIND_INSTALL_PATH"] = pybind
     build_env["PYBIND_INCLUDE_PATH"] = pybind.joinpath("include/pybind11/")
     return build_env
 
+# update existing env var
+def update_env_var(var, new):
+    try:
+        value = os.environ[var]
+        value = ":".join((value, str(new)))
+        return value
+    except KeyError:
+        return new
 
 ext_modules = [
     CMakeExtension('smartredisPy'),
 ]
 
 setup(
- # ...
+ # ... in setup.cfg
     packages=find_packages(),
     ext_modules=ext_modules,
     cmdclass=dict(build_ext=CMakeBuild),
