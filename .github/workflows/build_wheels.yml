@@ -30,7 +30,7 @@ jobs:
         run: python -m pip install cibuildwheel==1.10.0
 
       - name: Set up common
-        run: pip install --upgrade cmake
+        run: python -m pip install --upgrade cmake
 
       - name: Install GFortran Linux
         if: contains(matrix.os, 'ubuntu')
