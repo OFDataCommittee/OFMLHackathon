@@ -10,6 +10,7 @@ import site
 from pathlib import Path
 import multiprocessing as mp
 
+import cmake
 from distutils.version import LooseVersion
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
@@ -22,9 +23,16 @@ class CMakeExtension(Extension):
         Extension.__init__(self, name, sources=[])
 
 class CMakeBuild(build_ext):
+
+    @property
+    def cmake(self):
+        """Find and use pip installed cmake"""
+        cmake_cmd = os.path.join(cmake.CMAKE_BIN_DIR, "cmake")
+        return cmake_cmd
+
     def run(self):
         check_prereq("make")
-        check_prereq("cmake")
+        # check_prereq("cmake") Use pip installed cmakew
         check_prereq("gcc")
         check_prereq("g++")
 
@@ -66,17 +74,17 @@ class CMakeBuild(build_ext):
                               cwd=self.build_temp,
                               shell=True)
 
-        
+
         # run cmake prep step
         print('-'*10, 'Running CMake prepare', '-'*40)
         print(f"Build Env: {build_env}")
-        subprocess.check_call(['cmake', setup_path] + cmake_args,
+        subprocess.check_call([self.cmake, setup_path] + cmake_args,
                               cwd=self.build_temp,
                               env=env)
 
 
         print('-'*10, 'Building extensions', '-'*40)
-        cmake_cmd = ['cmake', '--build', '.'] + self.build_args
+        cmake_cmd = [self.cmake, '--build', '.'] + self.build_args
         subprocess.check_call(cmake_cmd,
                               cwd=self.build_temp)
 
