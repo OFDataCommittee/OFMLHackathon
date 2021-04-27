@@ -45,7 +45,7 @@ else
     if [[ ! -d "./RedisAI" ]]; then
         git clone --recursive https://github.com/RedisAI/RedisAI.git RedisAI
         cd RedisAI
-	git checkout f1a05308e28ec307f064f1bb7e81886d8b711eb3
+    	git checkout f1a05308e28ec307f064f1bb7e81886d8b711eb3
         cd ..
     else
         echo "RedisAI downloaded"

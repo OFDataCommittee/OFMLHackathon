@@ -17,10 +17,7 @@ if ls ./hiredis/install/lib/libhiredis* 1>/dev/null 2>&1; then
     export LD_LIBRARY_PATH="$HIREDIS_INSTALL_PATH/lib":$LD_LIBRARY_PATH
 else
     if [[ ! -d "./hiredis" ]]; then
-	git clone https://github.com/redis/hiredis.git hiredis --branch master --depth=1
-	cd hiredis
-	git checkout tags/v1.0.0
-	cd ..
+	git clone https://github.com/redis/hiredis.git hiredis --branch v1.0.0 --depth=1
 	echo "Hiredis downloaded"
     fi
     cd hiredis
@@ -43,11 +40,8 @@ if ls ./redis-plus-plus/install/lib/libredis++* 1>/dev/null 2>&1; then
     echo "Redis-plus-plus has already been downloaded and installed"
 else
     if [[ ! -d "./redis-plus-plus" ]]; then
-        git clone https://github.com/sewenew/redis-plus-plus.git redis-plus-plus --branch master --depth=1
-	cd redis-plus-plus
-	git checkout tags/v1.2.3
-	cd ..
-        echo "Redis-plus-plus downloaded"
+        git clone https://github.com/sewenew/redis-plus-plus.git redis-plus-plus --branch 1.2.3 --depth=1
+	    echo "Redis-plus-plus downloaded"
     fi
     cd redis-plus-plus
     #ex -s -c '2i|SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)' -c x CMakeLists.txt

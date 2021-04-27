@@ -8,7 +8,7 @@ SET(CMAKE_CXX_STANDARD 17)
 enable_language(Fortran)
 SET(CMAKE_EXE_LINKER_FLAGS "-lpthread")
 
-add_subdirectory($ENV{PYBIND_INSTALL_PATH} $ENV{PYBIND_INSTALL_PATH}/build)
+option(BUILD_PYTHON "Build the python module" ON)
 
 #TODO put in output warnings
 # Determine where the hiredis library is based on if an environment variable
@@ -76,25 +76,32 @@ add_library( smartredis STATIC
    src/fortran/dataset.F90
    src/fortran/client.F90)
 
-set(CLIENT_SRC
-	 src/c/c_client.cpp
-	 src/c/c_dataset.cpp
-	 src/cpp/client.cpp
-	 src/cpp/dataset.cpp
-	 src/cpp/command.cpp
-	 src/cpp/commandlist.cpp
-	 src/cpp/metadata.cpp
-	 src/cpp/tensorbase.cpp
-	 src/cpp/tensorpack.cpp
-	 src/cpp/dbnode.cpp
-	 src/cpp/commandreply.cpp
-   src/cpp/redisserver.cpp
-   src/cpp/rediscluster.cpp
-   src/cpp/redis.cpp
-	 utils/protobuf/smartredis.pb.cc
-	 src/python/src/pyclient.cpp
-	 src/python/src/pydataset.cpp)
 
+if(BUILD_PYTHON)
+	message("-- Python client build enabled")
+	add_subdirectory($ENV{PYBIND_INSTALL_PATH} $ENV{PYBIND_INSTALL_PATH}/build)
 
-pybind11_add_module(smartredisPy ${CLIENT_SRC} ${CLIENT_LIBRARIES} src/python/bindings/bind.cpp)
-target_link_libraries(smartredisPy PUBLIC ${CLIENT_LIBRARIES})
+	set(CLIENT_SRC
+		src/c/c_client.cpp
+		src/c/c_dataset.cpp
+		src/cpp/client.cpp
+		src/cpp/dataset.cpp
+		src/cpp/command.cpp
+		src/cpp/commandlist.cpp
+		src/cpp/metadata.cpp
+		src/cpp/tensorbase.cpp
+		src/cpp/tensorpack.cpp
+		src/cpp/dbnode.cpp
+		src/cpp/commandreply.cpp
+		src/cpp/redisserver.cpp
+		src/cpp/rediscluster.cpp
+		src/cpp/redis.cpp
+		utils/protobuf/smartredis.pb.cc
+		src/python/src/pyclient.cpp
+		src/python/src/pydataset.cpp)
+
+	pybind11_add_module(smartredisPy ${CLIENT_SRC} ${CLIENT_LIBRARIES} src/python/bindings/bind.cpp)
+	target_link_libraries(smartredisPy PUBLIC ${CLIENT_LIBRARIES})
+else()
+	message("-- Skipping Python client build")
+endif()
