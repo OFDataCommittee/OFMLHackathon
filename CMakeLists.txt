@@ -7,7 +7,7 @@ option(BUILD_PYTHON "Build the python module" OFF)
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXE_LINKER_FLAGS "-lpthread")
-set(CMAKE_INSTALL_PREFIX ./install)
+set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
 
 find_library(REDISPP redis++ PATHS ./install/lib NO_DEFAULT_PATH REQUIRED)
 find_library(HIREDIS hiredis PATHS ./install/lib NO_DEFAULT_PATH REQUIRED)
