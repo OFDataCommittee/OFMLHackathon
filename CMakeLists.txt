@@ -9,9 +9,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXE_LINKER_FLAGS "-lpthread")
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
 
-find_library(REDISPP redis++ PATHS ./install/lib NO_DEFAULT_PATH REQUIRED)
-find_library(HIREDIS hiredis PATHS ./install/lib NO_DEFAULT_PATH REQUIRED)
-find_library(PROTOBUF protobuf PATHS ./install/lib NO_DEFAULT_PATH REQUIRED)
+find_library(REDISPP redis++ PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
+find_library(HIREDIS hiredis PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
+find_library(PROTOBUF protobuf PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
 
 set(EXT_CLIENT_LIBRARIES ${REDISPP} ${HIREDIS} ${PROTOBUF})
 
