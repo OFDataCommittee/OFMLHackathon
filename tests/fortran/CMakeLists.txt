@@ -23,15 +23,13 @@ include_directories(SYSTEM
     ../../include
 )
 
-set(CLIENT_LIBRARIES ${SR_LIB})
-
 add_executable(client_test_put_get_1D
 	client_test_put_get_1D.F90
 	${ftn_client_src}
 	test_utils.F90
 )
 target_link_libraries(client_test_put_get_1D
-	${CLIENT_LIBRARIES}
+	${SR_LIB}
 )
 
 add_executable(client_test_put_get_2D
@@ -40,7 +38,7 @@ add_executable(client_test_put_get_2D
         test_utils.F90
 )
 target_link_libraries(client_test_put_get_2D
-	${CLIENT_LIBRARIES}
+	${SR_LIB}
 )
 
 add_executable(client_test_put_get_3D
@@ -49,7 +47,7 @@ add_executable(client_test_put_get_3D
         test_utils.F90
 )
 target_link_libraries(client_test_put_get_3D
-	${CLIENT_LIBRARIES}
+	${SR_LIB}
 )
 
 add_executable(client_test_mnist
@@ -58,7 +56,7 @@ add_executable(client_test_mnist
         test_utils.F90
 )
 target_link_libraries(client_test_mnist
-	${CLIENT_LIBRARIES}
+	${SR_LIB}
 )
 
 add_executable(client_test_dataset
@@ -67,7 +65,7 @@ add_executable(client_test_dataset
         test_utils.F90
 )
 target_link_libraries(client_test_dataset
-	${CLIENT_LIBRARIES}
+	${SR_LIB}
 )
 
 add_executable(client_test_put_get_unpack_dataset
@@ -76,7 +74,7 @@ add_executable(client_test_put_get_unpack_dataset
         test_utils.F90
 )
 target_link_libraries(client_test_put_get_unpack_dataset
-	${CLIENT_LIBRARIES}
+	${SR_LIB}
 )
 
 add_executable(client_test_misc_tensor
@@ -85,7 +83,7 @@ add_executable(client_test_misc_tensor
         test_utils.F90
 )
 target_link_libraries(client_test_misc_tensor
-	${CLIENT_LIBRARIES}
+	${SR_LIB}
 )
 
 add_executable(client_test_ensemble
@@ -94,5 +92,5 @@ add_executable(client_test_ensemble
         test_utils.F90
 )
 target_link_libraries(client_test_ensemble
-	${CLIENT_LIBRARIES}
+	${SR_LIB}
 )
