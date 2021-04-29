@@ -7,26 +7,6 @@
 
 echo "Setting up SmartRedis environment"
 
-if ls ./third-party/hiredis/install/lib/libhiredis* 1>/dev/null 2>&1; then
-    export HIREDIS_INSTALL_PATH="$(pwd)/third-party/hiredis/install"
-    export LD_LIBRARY_PATH="$HIREDIS_INSTALL_PATH/lib":$LD_LIBRARY_PATH
-    echo "Set Hiredis install path to $HIREDIS_INSTALL_PATH"
-fi
-
-if ls ./third-party/redis-plus-plus/install/lib/libredis++* 1>/dev/null 2>&1; then
-    export REDISPP_INSTALL_PATH="$(pwd)/third-party/redis-plus-plus/install"
-    export LD_LIBRARY_PATH="$REDISPP_INSTALL_PATH/lib":$LD_LIBRARY_PATH
-    echo "Set RedisPP install path to $REDISPP_INSTALL_PATH"
-fi
-
-if [[ -f ./third-party/protobuf/install/bin/protoc ]]; then
-    export PROTOBUF_INSTALL_PATH="$(pwd)/third-party/protobuf/install"
-    export LD_LIBRARY_PATH="$PROTOBUF_INSTALL_PATH/lib":$LD_LIBRARY_PATH
-    export PATH="$PROTOBUF_INSTALL_PATH/bin":$PATH
-    echo "Set Protobuf install path to $PROTOBUF_INSTALL_PATH"
-    echo "Added protoc to PATH"
-fi
-
 if [[ -d "./third-party/pybind" ]]; then
     export PYBIND_INCLUDE_PATH="$(pwd)/third-party/pybind/include/pybind11/"
     export PYBIND_INSTALL_PATH="$(pwd)/third-party/pybind/"

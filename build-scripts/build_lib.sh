@@ -24,11 +24,12 @@ cd build
 #$CMAKE ..
 cmake ..
 make -j $NPROC
+make install
 
-if [ -f ./libsmartredis.a ]; then
-    echo "Finished building libsmartredis.a"
+if [ -f ./../install/lib/libsmartredis.so ]; then
+    echo "Finished building and installing libsmartredis.so"
 else
-    echo "ERROR: libsmartredis.a failed to compile"
+    echo "ERROR: libsmartredis.so failed to build and install"
     exit 1
 fi
 

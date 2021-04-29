@@ -49,18 +49,21 @@ build-tests: build-test-cpp build-test-c build-test-fortran
 # help: build-test-cpp                 - build the C++ tests
 .PHONY: build-test-cpp
 build-test-cpp:
+	make lib
 	./build-scripts/build_cpp_tests.sh
 
 
 # help: build-test-c                   - build the C tests
 .PHONY: build-test-c
 build-test-c:
+	make lib
 	./build-scripts/build_c_tests.sh
 
 
 # help: build-test-fortran             - build the Fortran tests
 .PHONY: build-test-fortran
 build-test-fortran:
+	make lib
 	./build-scripts/build_fortran_tests.sh
 
 
