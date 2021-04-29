@@ -3,12 +3,17 @@
 if [[ ! -d "./third-party" ]]; then
     mkdir ./third-party
 fi
+
+if [[ ! -d "./install" ]]; then
+    mkdir ./install
+fi
+
 cd ./third-party
 
 # Install Hiredis
-if ls ./hiredis/install/lib/libhiredis* 1>/dev/null 2>&1; then
+if ls ../install/lib/libhiredis* 1>/dev/null 2>&1; then
     echo "Hiredis has already been downloaded and installed"
-    export HIREDIS_INSTALL_PATH="$(pwd)/hiredis/install"
+    export HIREDIS_INSTALL_PATH="$(pwd)/../install/"
     export LD_LIBRARY_PATH="$HIREDIS_INSTALL_PATH/lib":$LD_LIBRARY_PATH
 else
     if [[ ! -d "./hiredis" ]]; then
@@ -19,17 +24,17 @@ else
 	echo "Hiredis downloaded"
     fi
     cd hiredis
-    CC=gcc CXX=g++ make PREFIX="$(pwd)/install"
-    CC=gcc CXX=g++ make PREFIX="$(pwd)/install" install
+    CC=gcc CXX=g++ make PREFIX="$(pwd)/../../install/"
+    CC=gcc CXX=g++ make PREFIX="$(pwd)/../../install/" install
     cd ../
-    export HIREDIS_INSTALL_PATH="$(pwd)/hiredis/install"
+    export HIREDIS_INSTALL_PATH="$(pwd)/../../install/"
     export LD_LIBRARY_PATH="$HIREDIS_INSTALL_PATH/lib":$LD_LIBRARY_PATH
     echo "Finished installing Hiredis"
 fi
 
 
 #Install Redis-plus-plus
-if ls ./redis-plus-plus/install/lib/libredis++* 1>/dev/null 2>&1; then
+if ls ../install/lib/libredis++* 1>/dev/null 2>&1; then
     echo "Redis-plus-plus has already been downloaded and installed"
 else
     if [[ ! -d "./redis-plus-plus" ]]; then
@@ -43,7 +48,7 @@ else
     ex -s -c '2i|SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)' -c x CMakeLists.txt
     mkdir compile
     cd compile
-    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${HIREDIS_INSTALL_PATH}" -DCMAKE_INSTALL_PREFIX="$(pwd)/../install" -DCMAKE_CXX_STANDARD=17 ..
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${HIREDIS_INSTALL_PATH}" -DCMAKE_INSTALL_PREFIX="$(pwd)/../../../install/" -DCMAKE_CXX_STANDARD=17 ..
     CC=gcc CXX=g++ make -j 2
     CC=gcc CXX=g++ make install
     cd ../../
@@ -52,7 +57,7 @@ fi
 
 
 # Install Protobuf
-if [[ -f ./protobuf/install/bin/protoc ]]; then
+if ls ../install/lib/libproto* 1>/dev/null 2>&1; then
     echo "Protobuf has already been downloaded and installed"
 else
     if [[ ! -d "./protobuf" ]]; then
@@ -67,7 +72,7 @@ else
     echo "Downloading Protobuf dependencies"
     git submodule update --init --recursive
     ./autogen.sh
-    ./configure --prefix="$(pwd)/install"
+    ./configure --prefix="$(pwd)/../../install/"
     CC=gcc CXX=g++ make -j 4
     CC=gcc CXX=g++ make install
     echo "Finished installing Protobuf"

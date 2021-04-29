@@ -33,7 +33,7 @@ deps:
 .PHONY: lib
 lib: SHELL:=/bin/bash
 lib: deps
-	@mkdir -p build; (cd build; cmake ..; make)
+	@mkdir -p build; (cd build; cmake ..; make; make install)
 
 # help: test-deps                      - Make SmartRedis testing dependencies
 .PHONY: test-deps
