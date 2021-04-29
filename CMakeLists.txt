@@ -64,9 +64,12 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/utils/protobuf/" # source directory
 
 if(BUILD_PYTHON)
 	message("-- Python client build enabled")
-	add_subdirectory($ENV{PYBIND_INSTALL_PATH} $ENV{PYBIND_INSTALL_PATH}/build)
-	pybind11_add_module(smartredisPy ${CLIENT_SRC} ${EXT_CLIENT_LIBRARIES} src/python/bindings/bind.cpp)
-	target_link_libraries(smartredisPy PUBLIC ${EXT_CLIENT_LIBRARIES})
+	add_subdirectory(${CMAKE_SOURCE_DIR}/third-party/pybind ${CMAKE_SOURCE_DIR}/third-party/pybind/build)
+	pybind11_add_module(smartredisPy
+	src/python/src/pyclient.cpp src/python/src/pydataset.cpp ${smartredis} src/python/bindings/bind.cpp)
+	target_link_libraries(smartredisPy PUBLIC smartredis)
+	install(TARGETS smartredisPy
+	        LIBRARY DESTINATION lib)
 else()
 	message("-- Skipping Python client build")
 endif()

@@ -113,18 +113,6 @@ def check_prereq(command):
 # return env dict with dependency paths
 def get_build_env(base_path):
     build_env = {}
-    base_path = Path(base_path).resolve()
-    hiredis = Path(base_path, "third-party/hiredis/install")
-    build_env["HIREDIS_INSTALL_PATH"] = hiredis
-    redis_pp = Path(base_path, "third-party/redis-plus-plus/install")
-    build_env["REDISPP_INSTALL_PATH"] = redis_pp
-    protobuf = Path(base_path, "third-party/protobuf/install")
-    build_env["PROTOBUF_INSTALL_PATH"] = protobuf
-    build_env["LD_LIBRARY_PATH"] = update_env_var("LD_LIBRARY_PATH",
-                                                  protobuf.joinpath("lib"))
-    pybind = Path(base_path, "third-party/pybind")
-    build_env["PYBIND_INSTALL_PATH"] = pybind
-    build_env["PYBIND_INCLUDE_PATH"] = pybind.joinpath("include/pybind11/")
     return build_env
 
 # update existing env var
