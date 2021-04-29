@@ -16,13 +16,6 @@ help:
 # help: Build
 # help: -------
 
-# help: pyclient                       - Build the python client bindings
-.PHONY: pyclient
-pyclient: SHELL:=/bin/bash
-pyclient:
-	@bash ./build-scripts/build-python-bindings.sh
-
-
 # help: deps                           - Make SmartRedis dependencies
 .PHONY: deps
 deps: SHELL:=/bin/bash
@@ -33,7 +26,7 @@ deps:
 .PHONY: lib
 lib: SHELL:=/bin/bash
 lib: deps
-	@mkdir -p build; (cd build; cmake ..; make)
+	@bash ./build-scripts/build_lib.sh
 
 # help: test-deps                      - Make SmartRedis testing dependencies
 .PHONY: test-deps
