@@ -31,30 +31,17 @@
 
 #include "stdlib.h"
 #include <string>
-#include "smartredis.pb.h"
-#include <google/protobuf/reflection.h>
-#include <google/protobuf/stubs/port.h>
+#include <vector>
 #include "sharedmemorylist.h"
 #include "enums/cpp_metadata_type.h"
 
 ///@file
 
-namespace gpb = google::protobuf;
-namespace spb = SmartRedisProtobuf;
-
 namespace SmartRedis {
 
-//Declare the top level container names in the
-//protobuf message so that they are not constant
-//strings scattered throughout code
-static const char* top_string_msg = "repeated_string_meta";
-static const char* top_double_msg = "repeated_double_meta";
-static const char* top_float_msg = "repeated_float_meta";
-static const char* top_int64_msg = "repeated_sint64_meta";
-static const char* top_uint64_msg = "repeated_uint64_meta";
-static const char* top_int32_msg = "repeated_sint32_meta";
-static const char* top_uint32_msg = "repeated_uint32_meta";
-
+/* These string and map are used by the Python client
+to avoid using enums.  This may need to change.
+*/
 static std::string DATATYPE_METADATA_STR_DOUBLE = "DOUBLE";
 static std::string DATATYPE_METADATA_STR_FLOAT = "FLOAT";
 static std::string DATATYPE_METADATA_STR_INT32 = "INT32";
@@ -72,16 +59,6 @@ static const std::unordered_map<std::string, MetaDataType>
         {DATATYPE_METADATA_STR_UINT32, MetaDataType::uint32},
         {DATATYPE_METADATA_STR_UINT64, MetaDataType::uint64},
         {DATATYPE_METADATA_STR_STRING, MetaDataType::string} };
-
-static const std::unordered_map<MetaDataType, std::string>
-    METADATA_STR_MAP{
-        {MetaDataType::dbl, DATATYPE_METADATA_STR_DOUBLE},
-        {MetaDataType::flt, DATATYPE_METADATA_STR_FLOAT},
-        {MetaDataType::int32, DATATYPE_METADATA_STR_INT32},
-        {MetaDataType::int64, DATATYPE_METADATA_STR_INT64},
-        {MetaDataType::uint32, DATATYPE_METADATA_STR_UINT32},
-        {MetaDataType::uint64, DATATYPE_METADATA_STR_UINT64},
-        {MetaDataType::string, DATATYPE_METADATA_STR_STRING} };
 
 class MetaData;
 
@@ -131,20 +108,6 @@ class MetaData
         *            been assigned the values
         */
         MetaData& operator=(MetaData&& metadata) = default;
-
-        /*!
-        *   \brief Reconstruct metadata from buffer
-        *   \details This function initializes the top level
-        *            protobuf message with the buffer.
-        *            The repeated field metadata messages
-        *            in the top level message are then unpacked
-        *            (i.e pointers to each metadata protobuf
-        *            message are placed in the message map).
-        *   \param buf The buffer used to fill the metadata object
-        *   \param buf_size The length of the buffer
-        */
-        void fill_from_buffer(const char* buf,
-                              unsigned long long buf_size);
 
         /*!
         *   \brief Add metadata scalar field (non-string) with value.
@@ -229,54 +192,11 @@ class MetaData
                                size_t*& lengths);
 
         /*!
-        *   \brief  Get a serialized buffer of the MetaData
-        *           fields that can be sent to the database.
-        *   \returns A std::string_view of the MetaData contents
-        *            serialized
-        */
-        std::string_view get_metadata_buf();
-
-        /*!
         *   \brief This function clears all entries in a
         *          DataSet field.
         *   \param field_name The name of the field to clear
         */
         void clear_field(const std::string& field_name);
-
-        /*!
-        *   \typedef The Protobuf message holding string fields
-        */
-        typedef spb::RepeatedStringMeta StringMsg;
-
-        /*!
-        *   \typedef The Protobuf message holding double fields
-        */
-        typedef spb::RepeatedDoubleMeta DoubleMsg;
-
-        /*!
-        *   \typedef The Protobuf message holding float fields
-        */
-        typedef spb::RepeatedFloatMeta FloatMsg;
-
-        /*!
-        *   \typedef The Protobuf message holding int64 fields
-        */
-        typedef spb::RepeatedSInt64Meta Int64Msg;
-
-        /*!
-        *   \typedef The Protobuf message holding uint64 fields
-        */
-        typedef spb::RepeatedUInt64Meta UInt64Msg;
-
-        /*!
-        *   \typedef The Protobuf message holding int32 fields
-        */
-        typedef spb::RepeatedSInt32Meta Int32Msg;
-
-        /*!
-        *   \typedef The Protobuf message holding uint32 fields
-        */
-        typedef spb::RepeatedUInt32Meta UInt32Msg;
 
     private:
 
