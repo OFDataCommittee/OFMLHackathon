@@ -49,22 +49,22 @@ include_directories(SYSTEM
 
 # Build dynamic library
 add_library(smartredis SHARED ${CLIENT_SRC})
-target_link_libraries(smartredis ${link_flag} ${EXT_CLIENT_LIBRARIES})
+target_link_libraries(smartredis PUBLIC ${link_flag} ${EXT_CLIENT_LIBRARIES})
 
 # Install dynamic library and headers
 install(TARGETS smartredis
 	LIBRARY DESTINATION lib)
-	
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/" # source directory
-        DESTINATION "include" # target directory
-        FILES_MATCHING # install only matched files
-        PATTERN "*.h" PATTERN "*.tcc" # select header files
+
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
+        DESTINATION "include"
+        FILES_MATCHING
+        PATTERN "*.h" PATTERN "*.tcc" PATTERN "*.inc"
 )
 
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/utils/protobuf/" # source directory
-        DESTINATION "include" # target directory
-        FILES_MATCHING # install only matched files
-        PATTERN "*.h" PATTERN "*.tcc" # select header files
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/utils/protobuf/"
+        DESTINATION "include"
+        FILES_MATCHING
+        PATTERN "*.h" PATTERN "*.tcc"
 )
 
 if(BUILD_PYTHON)

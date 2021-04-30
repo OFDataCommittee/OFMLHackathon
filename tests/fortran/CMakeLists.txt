@@ -20,7 +20,6 @@ find_library(SR_LIB smartredis PATHS ../../install/lib NO_DEFAULT_PATH REQUIRED)
 include_directories(SYSTEM
     /usr/local/include
     ../../install/include
-    ../../include
 )
 
 add_executable(client_test_put_get_1D

@@ -18,8 +18,6 @@ CMAKE=$(python -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_D
 # Install Hiredis
 if ls ../install/lib/libhiredis* 1>/dev/null 2>&1; then
     echo "Hiredis has already been downloaded and installed"
-    export HIREDIS_INSTALL_PATH="$(pwd)/../install/"
-    export LD_LIBRARY_PATH="$HIREDIS_INSTALL_PATH/lib":$LD_LIBRARY_PATH
 else
     if [[ ! -d "./hiredis" ]]; then
 	git clone https://github.com/redis/hiredis.git hiredis --branch v1.0.0 --depth=1
@@ -35,8 +33,6 @@ else
     rm install/lib/*.so
     rm install/lib/*.dylib
     cd ../
-    export HIREDIS_INSTALL_PATH="$(pwd)/../../install/"
-    export LD_LIBRARY_PATH="$HIREDIS_INSTALL_PATH/lib":$LD_LIBRARY_PATH
     echo "Finished installing Hiredis"
 fi
 
