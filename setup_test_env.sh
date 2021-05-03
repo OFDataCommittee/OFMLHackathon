@@ -1,4 +1,4 @@
-4#!/bin/bash
+#!/bin/bash
 
 
 # setup the necessary environment variables for testing and builds

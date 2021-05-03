@@ -49,7 +49,7 @@ include_directories(SYSTEM
 
 # Build dynamic library
 add_library(smartredis SHARED ${CLIENT_SRC})
-target_link_libraries(smartredis PUBLIC ${link_flag} ${EXT_CLIENT_LIBRARIES})
+target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES})
 
 # Install dynamic library and headers
 install(TARGETS smartredis
@@ -69,10 +69,18 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/utils/protobuf/"
 
 if(BUILD_PYTHON)
 	message("-- Python client build enabled")
-	add_subdirectory(${CMAKE_SOURCE_DIR}/third-party/pybind ${CMAKE_SOURCE_DIR}/third-party/pybind/build)
+	add_subdirectory(${CMAKE_SOURCE_DIR}/third-party/pybind
+                     ${CMAKE_SOURCE_DIR}/third-party/pybind/build)
+
+    add_library(smartredis_static STATIC ${CLIENT_SRC})
+
 	pybind11_add_module(smartredisPy
-	src/python/src/pyclient.cpp src/python/src/pydataset.cpp ${smartredis} src/python/bindings/bind.cpp)
-	target_link_libraries(smartredisPy PUBLIC smartredis)
+	                    src/python/src/pyclient.cpp
+                        src/python/src/pydataset.cpp
+                        ${CLIENT_SRC}
+                        src/python/bindings/bind.cpp)
+
+	target_link_libraries(smartredisPy PUBLIC ${EXT_CLIENT_LIBRARIES})
 	install(TARGETS smartredisPy
 	        LIBRARY DESTINATION lib)
 else()

@@ -50,7 +50,7 @@ else
     mkdir compile
     cd compile
 
-    $CMAKE -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="${HIREDIS_INSTALL_PATH}" -DCMAKE_INSTALL_PREFIX="$(pwd)/../../../install" -DCMAKE_CXX_STANDARD=17 ..
+    $CMAKE -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="$(pwd)../../../install/lib/" -DCMAKE_INSTALL_PREFIX="$(pwd)/../../../install" -DCMAKE_CXX_STANDARD=17 ..
     CC=gcc CXX=g++ make -j $NPROC
     CC=gcc CXX=g++ make install
     cd ../../
