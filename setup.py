@@ -54,8 +54,6 @@ class CMakeBuild(build_ext):
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
             env.get('CXXFLAGS', ''),
             self.distribution.get_version())
-        build_env = get_build_env(self.build_temp)
-        env.update(build_env)
 
         # make tmp dir
         if not build_directory.is_dir():
@@ -72,7 +70,6 @@ class CMakeBuild(build_ext):
 
         # run cmake prep step
         print('-'*10, 'Running CMake prepare', '-'*40)
-        print(f"Build Env: {build_env}")
         subprocess.check_call([self.cmake, setup_path] + cmake_args,
                               cwd=build_directory,
                               env=env)
@@ -107,11 +104,6 @@ def check_prereq(command):
     except OSError:
         raise RuntimeError(
             f"{command} must be installed to build SmartRedis")
-
-# return env dict with dependency paths
-def get_build_env(base_path):
-    build_env = {}
-    return build_env
 
 # update existing env var
 def update_env_var(var, new):
