@@ -74,6 +74,8 @@ class CMakeBuild(build_ext):
                               cwd=self.build_temp,
                               shell=True)
 
+        shutil.copytree(os.path.join(self.build_temp, "install"),
+                        os.path.join(setup_path, "install"))
 
         # run cmake prep step
         print('-'*10, 'Running CMake prepare', '-'*40)
