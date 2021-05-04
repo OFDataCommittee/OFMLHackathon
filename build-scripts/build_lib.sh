@@ -7,9 +7,9 @@ NPROC=$(python -c "import multiprocessing as mp; print(mp.cpu_count())")
 #CMAKE=$(python -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
 
 # Remove existing module
-if [ -f ./src/python/module/smartredis/smartredisPy.* ]; then
+if [ -f ./src/python/module/smartredis/smartredisPy.*.so ]; then
     echo "Removing existing module installation"
-    rm ./src/python/module/smartredis/smartredisPy.*
+    rm ./src/python/module/smartredis/smartredisPy.*.so
 fi
 
 if [[ -d "./build" ]]; then
@@ -25,17 +25,17 @@ cmake ..
 make -j $NPROC
 make install
 
-if [ -f ./../install/lib/libsmartredis.* ]; then
+if [ -f ./../install/lib/libsmartredis.so ]; then
     echo "Finished building and installing libsmartredis"
 else
     echo "ERROR: libsmartredis failed to build and install"
     exit 1
 fi
 
-if [ -f ./smartredisPy.* ]; then
+if [ -f ./smartredisPy.*.so ]; then
     echo "Finished building smartredisPy module"
     # move python module to module directory
-    cp smartredisPy.* ../src/python/module/smartredis/
+    cp smartredisPy.*.so ../src/python/module/smartredis/
     cd ../
 else
     echo "ERROR: smartredisPy module failed to compile"

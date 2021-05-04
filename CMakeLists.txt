@@ -46,6 +46,7 @@ include_directories(SYSTEM
 
 # Build dynamic library
 add_library(smartredis SHARED ${CLIENT_SRC})
+set_target_properties(smartredis PROPERTIES SUFFIX ".so")
 target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES})
 
 # Install dynamic library and headers
