@@ -36,9 +36,9 @@ class CMakeBuild(build_ext):
         check_prereq("gcc")
         check_prereq("g++")
 
-        build_directory = os.path.abspath(self.build_temp)
+        build_directory = Path(self.build_temp).resolve()
         cmake_args = [
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + build_directory,
+            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(build_directory),
             '-DPYTHON_EXECUTABLE=' + sys.executable
         ]
 
@@ -58,7 +58,7 @@ class CMakeBuild(build_ext):
         env.update(build_env)
 
         # make tmp dir
-        if not os.path.exists(self.build_temp):
+        if not build_directory.is_dir():
             os.makedirs(self.build_temp)
 
         print('-'*10, 'Building C dependencies', '-'*40)
@@ -81,14 +81,14 @@ class CMakeBuild(build_ext):
         print('-'*10, 'Running CMake prepare', '-'*40)
         print(f"Build Env: {build_env}")
         subprocess.check_call([self.cmake, setup_path] + cmake_args,
-                              cwd=self.build_temp,
+                              cwd=build_directory,
                               env=env)
 
 
         print('-'*10, 'Building extensions', '-'*40)
         cmake_cmd = [self.cmake, '--build', '.'] + self.build_args
         subprocess.check_call(cmake_cmd,
-                              cwd=self.build_temp)
+                              cwd=build_directory)
 
         # Move from build temp to final position
         for ext in self.extensions:
