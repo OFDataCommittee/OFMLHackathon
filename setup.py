@@ -63,7 +63,7 @@ class CMakeBuild(build_ext):
 
         print('-'*10, 'Building C dependencies', '-'*40)
         make_cmd = shutil.which("make")
-        setup_path = os.path.abspath(os.path.dirname(__file__))
+        setup_path = Path(os.path.abspath(os.path.dirname(__file__))).resolve()
 
         # build dependencies
         subprocess.check_call([f"{make_cmd} deps"],
@@ -82,6 +82,9 @@ class CMakeBuild(build_ext):
         cmake_cmd = [self.cmake, '--build', '.'] + self.build_args
         subprocess.check_call(cmake_cmd,
                               cwd=build_directory)
+
+        shutil.copytree(setup_path.joinpath("install"),
+                        build_directory.joinpath("install"))
 
         # Move from build temp to final position
         for ext in self.extensions:
