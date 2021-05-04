@@ -64,18 +64,11 @@ class CMakeBuild(build_ext):
         print('-'*10, 'Building C dependencies', '-'*40)
         make_cmd = shutil.which("make")
         setup_path = os.path.abspath(os.path.dirname(__file__))
-        shutil.copy(os.path.join(setup_path, "Makefile"),
-                    os.path.join(self.build_temp, "Makefile"))
-        shutil.copytree(os.path.join(setup_path, "build-scripts"),
-                    os.path.join(self.build_temp, "build-scripts"))
 
         # build dependencies
         subprocess.check_call([f"{make_cmd} deps"],
-                              cwd=self.build_temp,
+                              cwd=setup_path,
                               shell=True)
-
-        shutil.copytree(os.path.join(self.build_temp, "install"),
-                        os.path.join(setup_path, "install"))
 
         # run cmake prep step
         print('-'*10, 'Running CMake prepare', '-'*40)
