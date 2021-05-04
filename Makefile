@@ -75,12 +75,14 @@ build-examples: build-example-serial build-example-parallel
 # help: build-example-serial           - buld serial examples
 .PHONY: build-example-serial
 build-example-serial:
+	make lib
 	./build-scripts/build_serial_examples.sh
 
 
 # help: build-example-parallel         - build parallel examples (requires MPI)
 .PHONY: build-example-parallel
 build-example-parallel:
+	make lib
 	./build-scripts/build_parallel_examples.sh
 
 
