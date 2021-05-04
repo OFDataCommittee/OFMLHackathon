@@ -30,9 +30,9 @@ else
     # delete shared libraries
     rm *.so
     rm *.dylib
-    rm install/lib/*.so
-    rm install/lib/*.dylib
     cd ../
+    rm ../install/lib/*.so
+    rm ../install/lib/*.dylib
     echo "Finished installing Hiredis"
 fi
 
