@@ -1,7 +1,5 @@
 project(SmartRedis)
 
-set(CMAKE_VERBOSE_MAKEFILE TRUE)
-
 cmake_minimum_required(VERSION 3.10)
 
 option(BUILD_PYTHON "Build the python module" ON)
