@@ -16,8 +16,8 @@ NPROC=$(python -c "import multiprocessing as mp; print(mp.cpu_count())")
 CMAKE=$(python -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
 
 # Install Hiredis
-if ls ../install/lib/libhiredis* 1>/dev/null 2>&1; then
-    echo "Hiredis has already been downloaded and installed"
+if ls ../install/lib/libhiredis.a 1>/dev/null 2>&1; then
+    echo "Hiredis has already been installed"
 else
     if [[ ! -d "./hiredis" ]]; then
 	git clone https://github.com/redis/hiredis.git hiredis --branch v1.0.0 --depth=1
@@ -27,10 +27,8 @@ else
 
     CC=gcc CXX=g++ make PREFIX="$(pwd)/../../install" static -j $NPROC
     CC=gcc CXX=g++ make PREFIX="$(pwd)/../../install" install
-    # delete shared libraries
-    rm *.so
-    rm *.dylib
     cd ../
+    # delete shared libraries
     rm ../install/lib/*.so
     rm ../install/lib/*.dylib
     echo "Finished installing Hiredis"
@@ -38,8 +36,8 @@ fi
 
 
 #Install Redis-plus-plus
-if ls ../install/lib/libredis++* 1>/dev/null 2>&1; then
-    echo "Redis-plus-plus has already been downloaded and installed"
+if ls ../install/lib/libredis++.a 1>/dev/null 2>&1; then
+    echo "Redis-plus-plus has already been installed"
 else
     if [[ ! -d "./redis-plus-plus" ]]; then
         git clone https://github.com/sewenew/redis-plus-plus.git redis-plus-plus --branch 1.2.3 --depth=1
@@ -59,7 +57,7 @@ fi
 
 
 # Install Protobuf
-if ls ../install/lib/libproto* 1>/dev/null 2>&1; then
+if ls ../install/lib/libprotobuf.a 1>/dev/null 2>&1; then
     echo "Protobuf has already been downloaded and installed"
 else
     if [[ ! -d "./protobuf" ]]; then
