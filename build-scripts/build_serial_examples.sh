@@ -1,35 +1,15 @@
 #!/bin/bash
 
+CMAKE=$(python -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
+
 cd ./examples/serial/c/
-
-if [ -z "$HIREDIS_INSTALL_PATH" ]; then
-    echo "WARNING: HIREDIS_INSTALL_PATH is not set"
-    echo "Test may fail to build"
-else
-    echo "Found HIREDIS_INSTALL_PATH: $HIREDIS_INSTALL_PATH"
-fi
-
-if [ -z "$REDISPP_INSTALL_PATH" ]; then
-    echo "WARNING: REDISPP_INSTALL_PATH is not set"
-    echo "Tests may fail to build"
-else
-    echo "Found REDISPP_INSTALL_PATH: $REDISPP_INSTALL_PATH"
-fi
-
-if [ -z "$PROTOBUF_INSTALL_PATH" ]; then
-    echo "WARNING: PROTOBUF_INSTALL_PATH is not set"
-    echo "Tests may fail to build"
-else
-    echo "Found PROTOBUF_INSTALL_PATH: $PROTOBUF_INSTALL_PATH"
-fi
-
 
 # setup build dirs
 mkdir build
 cd ./build
 
 # TODO add platform dependent build step here
-cmake ..
+$CMAKE ..
 
 if [ $? != 0 ]; then
     echo "ERROR: cmake for C serial examples failed"
@@ -55,7 +35,7 @@ cd ../fortran
 DO_FORTRAN="yes"
 
 if [ "$(uname)" == "Darwin" ]; then
-    DO_FORTRAN="no"
+    DO_FORTRAN="yes"
 fi
 
 if [[ $DO_FORTRAN == "yes" ]]; then
@@ -63,9 +43,9 @@ if [[ $DO_FORTRAN == "yes" ]]; then
     # setup build dirs
     mkdir build
     cd ./build
-  
+
     # TODO add platform dependent build step here
-    cmake ..
+    $CMAKE ..
 
     if [ $? != 0 ]; then
         echo "ERROR: cmake for parallel Fortran examples failed"
@@ -95,7 +75,7 @@ mkdir build
 cd ./build
 
 # TODO add platform dependent build step here
-cmake ..
+$CMAKE ..
 
 if [ $? != 0 ]; then
     echo "ERROR: cmake for CPP parallel examples failed"

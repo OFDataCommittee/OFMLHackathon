@@ -20,7 +20,7 @@ Build and Install SmartRedis Python Client
 
 ----------------------------------------------
 
-Build SmartRedis as a Static Library
+Build SmartRedis Library
 ====================================
 
 .. include:: ./install/lib.rst

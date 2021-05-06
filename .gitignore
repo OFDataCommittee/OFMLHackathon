@@ -12,6 +12,7 @@ third-party/
 *.egg-info
 dist
 build
+install
 eggs
 .eggs
 parts

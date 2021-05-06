@@ -1,12 +1,7 @@
 import os
-import re
 import sys
-import glob
-import sysconfig
-import platform
 import subprocess
 import shutil
-import site
 from pathlib import Path
 import multiprocessing as mp
 
@@ -32,13 +27,12 @@ class CMakeBuild(build_ext):
 
     def run(self):
         check_prereq("make")
-        # check_prereq("cmake") Use pip installed cmakew
         check_prereq("gcc")
         check_prereq("g++")
 
-        build_directory = os.path.abspath(self.build_temp)
+        build_directory = Path(self.build_temp).resolve()
         cmake_args = [
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + build_directory,
+            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(build_directory),
             '-DPYTHON_EXECUTABLE=' + sys.executable
         ]
 
@@ -54,39 +48,34 @@ class CMakeBuild(build_ext):
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
             env.get('CXXFLAGS', ''),
             self.distribution.get_version())
-        build_env = get_build_env(self.build_temp)
-        env.update(build_env)
 
         # make tmp dir
-        if not os.path.exists(self.build_temp):
+        if not build_directory.is_dir():
             os.makedirs(self.build_temp)
 
         print('-'*10, 'Building C dependencies', '-'*40)
         make_cmd = shutil.which("make")
-        setup_path = os.path.abspath(os.path.dirname(__file__))
-        shutil.copy(os.path.join(setup_path, "Makefile"),
-                    os.path.join(self.build_temp, "Makefile"))
-        shutil.copytree(os.path.join(setup_path, "build-scripts"),
-                    os.path.join(self.build_temp, "build-scripts"))
+        setup_path = Path(os.path.abspath(os.path.dirname(__file__))).resolve()
 
         # build dependencies
         subprocess.check_call([f"{make_cmd} deps"],
-                              cwd=self.build_temp,
+                              cwd=setup_path,
                               shell=True)
-
 
         # run cmake prep step
         print('-'*10, 'Running CMake prepare', '-'*40)
-        print(f"Build Env: {build_env}")
         subprocess.check_call([self.cmake, setup_path] + cmake_args,
-                              cwd=self.build_temp,
+                              cwd=build_directory,
                               env=env)
 
 
         print('-'*10, 'Building extensions', '-'*40)
         cmake_cmd = [self.cmake, '--build', '.'] + self.build_args
         subprocess.check_call(cmake_cmd,
-                              cwd=self.build_temp)
+                              cwd=build_directory)
+
+        shutil.copytree(setup_path.joinpath("install"),
+                        build_directory.joinpath("install"))
 
         # Move from build temp to final position
         for ext in self.extensions:
@@ -109,23 +98,6 @@ def check_prereq(command):
     except OSError:
         raise RuntimeError(
             f"{command} must be installed to build SmartRedis")
-
-# return env dict with dependency paths
-def get_build_env(base_path):
-    build_env = {}
-    base_path = Path(base_path).resolve()
-    hiredis = Path(base_path, "third-party/hiredis/install")
-    build_env["HIREDIS_INSTALL_PATH"] = hiredis
-    redis_pp = Path(base_path, "third-party/redis-plus-plus/install")
-    build_env["REDISPP_INSTALL_PATH"] = redis_pp
-    protobuf = Path(base_path, "third-party/protobuf/install")
-    build_env["PROTOBUF_INSTALL_PATH"] = protobuf
-    build_env["LD_LIBRARY_PATH"] = update_env_var("LD_LIBRARY_PATH",
-                                                  protobuf.joinpath("lib"))
-    pybind = Path(base_path, "third-party/pybind")
-    build_env["PYBIND_INSTALL_PATH"] = pybind
-    build_env["PYBIND_INCLUDE_PATH"] = pybind.joinpath("include/pybind11/")
-    return build_env
 
 # update existing env var
 def update_env_var(var, new):

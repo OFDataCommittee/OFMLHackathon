@@ -43,41 +43,45 @@ test-deps-gpu:
 
 # help: build-tests                    - build all tests (C, C++, Fortran)
 .PHONY: build-tests
-build-tests: build-test-cpp build-test-c build-test-fortran
+build-tests: lib
+	./build-scripts/build_cpp_tests.sh
+	./build-scripts/build_c_tests.sh
+	./build-scripts/build_fortran_tests.sh
 
 
 # help: build-test-cpp                 - build the C++ tests
 .PHONY: build-test-cpp
-build-test-cpp:
+build-test-cpp: lib
 	./build-scripts/build_cpp_tests.sh
 
 
 # help: build-test-c                   - build the C tests
 .PHONY: build-test-c
-build-test-c:
+build-test-c: lib
 	./build-scripts/build_c_tests.sh
 
 
 # help: build-test-fortran             - build the Fortran tests
 .PHONY: build-test-fortran
-build-test-fortran:
+build-test-fortran: lib
 	./build-scripts/build_fortran_tests.sh
 
 
 # help: build-examples                 - build all examples (serial, parallel)
 .PHONY: build-examples
-build-examples: build-example-serial build-example-parallel
-
+build-examples: lib
+	./build-scripts/build_serial_examples.sh
+	./build-scripts/build_parallel_examples.sh
 
 # help: build-example-serial           - buld serial examples
 .PHONY: build-example-serial
-build-example-serial:
+build-example-serial: lib
 	./build-scripts/build_serial_examples.sh
 
 
 # help: build-example-parallel         - build parallel examples (requires MPI)
 .PHONY: build-example-parallel
-build-example-parallel:
+build-example-parallel: lib
 	./build-scripts/build_parallel_examples.sh
 
 

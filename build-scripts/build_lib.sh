@@ -3,8 +3,7 @@
 # get the number of processors
 NPROC=$(python -c "import multiprocessing as mp; print(mp.cpu_count())")
 
-# uncomment to use python installed cmake
-#CMAKE=$(python -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
+CMAKE=$(python -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
 
 # Remove existing module
 if [ -f ./src/python/module/smartredis/smartredisPy.*.so ]; then
@@ -17,24 +16,22 @@ if [[ -d "./build" ]]; then
     rm -rf ./build
 fi
 
-
 # make a new build directory and invoke cmake
 mkdir build
 cd build
-#$CMAKE ..
-cmake ..
+$CMAKE ..
 make -j $NPROC
+make install
 
-if [ -f ./libsmartredis.a ]; then
-    echo "Finished building libsmartredis.a"
+if [ -f ./../install/lib/libsmartredis.so ]; then
+    echo "Finished building and installing libsmartredis"
 else
-    echo "ERROR: libsmartredis.a failed to compile"
+    echo "ERROR: libsmartredis failed to build and install"
     exit 1
 fi
 
 if [ -f ./smartredisPy.*.so ]; then
     echo "Finished building smartredisPy module"
-
     # move python module to module directory
     cp smartredisPy.*.so ../src/python/module/smartredis/
     cd ../
@@ -42,5 +39,3 @@ else
     echo "ERROR: smartredisPy module failed to compile"
     exit 1
 fi
-
-

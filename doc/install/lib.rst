@@ -1,50 +1,86 @@
 
-To build the static library for the C++, C, and Fortran clients in SmartRedis,
+To build the SmartRedis library for the C++, C, and Fortran,
 make sure to be in the top level directory of ``smartredis-0.1.0``.
 
 .. code-block:: bash
 
-  source setup_env.sh
   make lib
 
-The SmartRedis library will be installed in ``build/libsmartredis.a``.  This library
-can be used with the SmartRedis environment variables set by ``setup_env.sh``
-to add SmartRedis to existing CMake builds.  For example, the CMake
-instructions below illustrate how to use the environment variables
-to link in the SmartRedis static library into a C++ application.
+The SmartRedis library will be installed in
+``smartredis-0.1.0/install/lib/`` and the SmartRedis
+header files will be installed in
+``smartredis-0.1.0/install/include/``.
+The library installation can be used to easily include SmartRedis
+capabilities in C++, C, and Fortran applications.
+For example, the CMake instructions below illustrate how to
+compile a C or C++ application with SmartRedis.
 
 .. code-block:: text
 
     project(Example)
+
     cmake_minimum_required(VERSION 3.10)
-    SET(CMAKE_CXX_STANDARD 17)
 
-    string(CONCAT HIREDIS_LIB_PATH $ENV{HIREDIS_INSTALL_PATH} "/lib")
-    find_library(HIREDIS_LIB hiredis PATHS ${HIREDIS_LIB_PATH} NO_DEFAULT_PATH REQUIRED)
-    string(CONCAT HIREDIS_INCLUDE_PATH $ENV{HIREDIS_INSTALL_PATH} "/include/")
+    set(CMAKE_CXX_STANDARD 17)
 
-    string(CONCAT PROTOBUF_LIB_PATH $ENV{PROTOBUF_INSTALL_PATH} "/lib")
-    find_library(PROTOBUF_LIB protobuf PATHS ${PROTOBUF_LIB_PATH} NO_DEFAULT_PATH REQUIRED)
-    string(CONCAT PROTOBUF_INCLUDE_PATH $ENV{PROTOBUF_INSTALL_PATH} "/include/")
+    find_library(sr_lib smartredis
+                 PATHS path/to/smartredis/install/lib
+                 NO_DEFAULT_PATH REQUIRED
+    )
 
-    string(CONCAT REDISPP_LIB_PATH $ENV{REDISPP_INSTALL_PATH} "/lib")
-    find_library(REDISPP_LIB redis++ PATHS ${REDISPP_LIB_PATH} REQUIRED)
-    string(CONCAT REDISPP_INCLUDE_PATH $ENV{REDISPP_INSTALL_PATH} "/include/")
+    include_directories(SYSTEM
+        /usr/local/include
+        path/to/smartredis/install/include
+    )
 
-    string(CONCAT SMARTREDIS_LIB_PATH $ENV{SMARTREDIS_INSTALL_PATH} "/build")
-    find_library(SMARTREDIS_LIB smartredis PATHS ${SMARTREDIS_LIB_PATH} REQUIRED)
-
-    include_directories(${HIREDIS_INCLUDE_PATH})
-    include_directories(${REDISPP_INCLUDE_PATH})
-    include_directories(${PROTOBUF_INCLUDE_PATH})
-    include_directories($ENV{SMARTREDIS_INSTALL_PATH}/include)
-    include_directories($ENV{SMARTREDIS_INSTALL_PATH}/utils/protobuf)
-
-    set(CLIENT_LIBRARIES ${REDISPP_LIB} ${HIREDIS_LIB} ${PROTOBUF_LIB} ${SMARTREDIS_LIB})
+    # Build executables
 
     add_executable(example
         example.cpp
     )
     target_link_libraries(example
-        ${CLIENT_LIBRARIES}
+        ${sr_lib}
+    )
+
+Compiling a Fortran application with the SmartRedis
+library is very similar to the instructions above.
+The only difference is that the Fortran SmartRedis
+client source files currently need to be included
+in the compilation. An example CMake file is
+shown below for a Fortran application.
+
+.. code-block:: text
+
+    project(Example)
+
+    cmake_minimum_required(VERSION 3.10)
+
+    enable_language(Fortran)
+
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_C_STANDARD 99)
+
+    set(ftn_client_src
+        path/to/smartredis/src/fortran/fortran_c_interop.F90
+        path/to/smartredis/src/fortran/dataset.F90
+        path/to/smartredis/src/fortran/client.F90
+    )
+
+    find_library(sr_lib smartredis
+                 PATHS path/to/smartredis/install/lib
+                 NO_DEFAULT_PATH REQUIRED
+    )
+
+    include_directories(SYSTEM
+        /usr/local/include
+        path/to/smartredis/install/include
+    )
+
+    add_executable(example
+    	example.F90
+	    ${ftn_client_src}
+    )
+
+    target_link_libraries(example
+    	${sr_lib}
     )

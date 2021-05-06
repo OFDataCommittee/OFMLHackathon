@@ -13,20 +13,13 @@ Retrieve and unpack the SmartRedis release tarball:
     wget <tarball location>
     tar -xf smartredis-0.1.0.tar.gz
 
-Next, build the dependencies of SmartRedis:
+Last, build and install the SmartRedis Python client into
+your virtual environment.  The pip install process will
+automatically download, build, and install SmartRedis
+dependencies.
 
 .. code-block:: bash
 
-    cd smartredis-0.1.0
-    make deps
-    source setup_env.sh
-
-Last, build and install the SmartRedis Python client into your virtual environment.
-Make sure you didn't change terminal sessions between the last step and this step.
-
-.. code-block:: bash
-
-    make pyclient
     pip install -e .
 
 Now, when inside your virtual environment, you should be able to import

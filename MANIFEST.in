@@ -1,6 +1,5 @@
 include requirements.txt
 include requirements-dev.txt
-include setup_env.sh
 include Makefile
 include CMakeLists.txt
 graft src
