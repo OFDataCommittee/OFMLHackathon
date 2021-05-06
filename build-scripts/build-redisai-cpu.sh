@@ -5,18 +5,17 @@ if [[ -f ./RedisAI/install-cpu/redisai.so ]]; then
     echo "RedisAI CPU has already been downloaded and installed"
 else
     if [[ ! -d "./RedisAI" ]]; then
-        git clone --recursive https://github.com/RedisAI/RedisAI.git RedisAI
+        git clone --recursive https://github.com/RedisAI/RedisAI.git --branch v1.2.2 --depth=1 RedisAI
         cd RedisAI
-	git checkout f1a05308e28ec307f064f1bb7e81886d8b711eb3
         cd ..
     else
         echo "RedisAI downloaded"
     fi
     cd RedisAI
     echo "Downloading RedisAI CPU dependencies"
-    CC=gcc CXX=g++ bash get_deps.sh cpu
+    CC=gcc CXX=g++ WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh cpu
     echo "Building RedisAI"
-    CC=gcc CXX=g++ ALL=1 make -C opt clean build GPU=0 WITH_PT=$1 WITH_TF=$2 WITH_TFLITE=$3 WITH_ORT=$4
+    CC=gcc CXX=g++ GPU=0 WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 WITH_UNIT_TESTS=0 make -C opt clean build
 
     if [ -f "./install-cpu/redisai.so" ]; then
         echo "Finished installing RedisAI"

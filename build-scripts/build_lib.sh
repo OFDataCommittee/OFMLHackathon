@@ -3,8 +3,7 @@
 # get the number of processors
 NPROC=$(python -c "import multiprocessing as mp; print(mp.cpu_count())")
 
-# uncomment to use python installed cmake
-#CMAKE=$(python -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
+CMAKE=$(python -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
 
 # Remove existing module
 if [ -f ./src/python/module/smartredis/smartredisPy.*.so ]; then
@@ -20,8 +19,7 @@ fi
 # make a new build directory and invoke cmake
 mkdir build
 cd build
-#$CMAKE ..
-cmake ..
+$CMAKE ..
 make -j $NPROC
 make install
 

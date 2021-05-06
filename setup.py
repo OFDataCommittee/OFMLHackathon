@@ -1,12 +1,7 @@
 import os
-import re
 import sys
-import glob
-import sysconfig
-import platform
 import subprocess
 import shutil
-import site
 from pathlib import Path
 import multiprocessing as mp
 
@@ -32,7 +27,6 @@ class CMakeBuild(build_ext):
 
     def run(self):
         check_prereq("make")
-        # check_prereq("cmake") Use pip installed cmakew
         check_prereq("gcc")
         check_prereq("g++")
 

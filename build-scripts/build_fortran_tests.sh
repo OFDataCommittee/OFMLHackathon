@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CMAKE=$(python -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
+
 cd ./tests/fortran/
 
 # setup build dirs
@@ -14,7 +16,7 @@ fi
 
 if [[ $DO_FORTRAN == "yes" ]]; then
     # TODO add platform dependent build step here
-    cmake ..
+    $CMAKE ..
 
     if [ $? != 0 ]; then
         echo "ERROR: cmake for Fortran tests failed"

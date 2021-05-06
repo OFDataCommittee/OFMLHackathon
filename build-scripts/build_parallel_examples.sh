@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CMAKE=$(python -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
+
 cd ./examples/parallel/fortran/
 
 DO_FORTRAN="yes"
@@ -15,7 +17,7 @@ if [[ $DO_FORTRAN == "yes" ]]; then
     cd ./build
 
     # TODO add platform dependent build step here
-    cmake ..
+    $CMAKE ..
 
     if [ $? != 0 ]; then
         echo "ERROR: cmake for parallel Fortran examples failed"
@@ -45,7 +47,7 @@ mkdir build
 cd ./build
 
 # TODO add platform dependent build step here
-cmake ..
+$CMAKE ..
 
 if [ $? != 0 ]; then
     echo "ERROR: cmake for CPP parallel examples failed"
