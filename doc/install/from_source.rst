@@ -15,7 +15,6 @@ source will be described.
 
     Build
     -------
-    pyclient                       - Build the python client bindings
     deps                           - Make SmartRedis dependencies
     lib                            - Build SmartRedis clients into a static library
     test-deps                      - Make SmartRedis testing dependencies
@@ -56,7 +55,7 @@ source will be described.
     test-fortran                   - run fortran tests
     testpy-cov                     - run python tests with coverage
 
-Clone and Install dependencies
+Clone SmartRedis
 -------------------------------
 
 First, clone the SmartRedis repo:
@@ -66,43 +65,23 @@ First, clone the SmartRedis repo:
     git clone https://github.com/CrayLabs/SmartRedis smartredis
     cd smartredis
 
-SmartRedis has a base set of dependencies that are required to use the
-clients.  These dependencies include Hiredis, Redis-plus-plus,
-Google Protobuf, and pybind11.  The dependencies can be
-downloaded, built, and installed by executing the following
-command in the top-level directory of SmartRedis:
-
-.. code-block:: bash
-
-  make deps
-
-To build a SmartRedis client in any language, the dependencies
-downloaded above need to be found by CMake. An easy way to do
-this is through environment variables. To setup your environment
-for building, run the following script in the top level of the
-SmartRedis directory.
-
-.. code-block:: bash
-
-  source setup_env.sh
 
 Building the Python Client from Source
 --------------------------------------
 
-After the dependencies have been setup, the Python client can be
-built and installed. Make sure to be using the same terminal as
-the one where you installed the dependencies and sourced the
-``setup_env.sh`` script.
-
-The Python client uses Pybind11 to wrap the C++ SmartRedis client
-and includes a native Python layer to make function calls simpler.
-By it's design, the Python client is meant to work directly with
-Numpy arrays and will return any data retrieved from a database
-as a Numpy type.
+After cloning the repository, the Python client can be
+installed from source with:
 
 .. code-block:: bash
 
-    make pyclient
+    pip install .
+
+If installing SmartRedis from source for development,
+it is recommended that the Python client be installed with the
+``-e`` and ``[dev]``:
+
+.. code-block:: bash
+
     pip install -e .[dev]
     # or if using ZSH
     pip install -e .\[dev\]
@@ -119,7 +98,7 @@ the ``Client`` from ``smartredis`` as follows
   >>>
 
 
-Building SmartRedis static library from Source
+Building SmartRedis Static Library from Source
 ----------------------------------------------
 
 Assuming the above steps have already been done, you are now
@@ -130,6 +109,83 @@ can be built with the command:
 
 .. code-block:: bash
 
-  source setup_env.sh
   make lib
 
+The SmartRedis library will be installed in
+``smartredis/install/lib/`` and the SmartRedis
+header files will be installed in
+``smartredis/install/include/``.
+The library installation can be used to easily include SmartRedis
+capabilities in C++, C, and Fortran applications.
+For example, the CMake instructions below illustrate how to
+compile a C or C++ application with SmartRedis.
+
+.. code-block:: text
+
+    project(Example)
+
+    cmake_minimum_required(VERSION 3.10)
+
+    set(CMAKE_CXX_STANDARD 17)
+
+    find_library(sr_lib smartredis
+                 PATHS path/to/smartredis/install/lib
+                 NO_DEFAULT_PATH REQUIRED
+    )
+
+    include_directories(SYSTEM
+        /usr/local/include
+        path/to/smartredis/install/include
+    )
+
+    # Build executables
+
+    add_executable(example
+        example.cpp
+    )
+    target_link_libraries(example
+        ${sr_lib}
+    )
+
+Compiling a Fortran application with the SmartRedis
+library is very similar to the instructions above.
+The only difference is that the Fortran SmartRedis
+client source files currently need to be included
+in the compilation. An example CMake file is
+shown below for a Fortran application.
+
+.. code-block:: text
+
+    project(Example)
+
+    cmake_minimum_required(VERSION 3.10)
+
+    enable_language(Fortran)
+
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_C_STANDARD 99)
+
+    set(ftn_client_src
+        path/to/smartredis/src/fortran/fortran_c_interop.F90
+        path/to/smartredis/src/fortran/dataset.F90
+        path/to/smartredis/src/fortran/client.F90
+    )
+
+    find_library(sr_lib smartredis
+                 PATHS path/to/smartredis/install/lib
+                 NO_DEFAULT_PATH REQUIRED
+    )
+
+    include_directories(SYSTEM
+        /usr/local/include
+        path/to/smartredis/install/include
+    )
+
+    add_executable(example
+    	example.F90
+	    ${ftn_client_src}
+    )
+
+    target_link_libraries(example
+    	${sr_lib}
+    )

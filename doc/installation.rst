@@ -9,19 +9,19 @@ at compile time. For Python, the clients can be used just like
 any other pip library.
 
 This document will show how to:
-  1. Build the SmartRedis Python client from the release
-  2. Build SmartRedis as a static lib from release
+  1. Install the SmartRedis Python client from the release
+  2. Build and install SmartRedis as a static lib from release
   3. Build SmartRedis from source
 
-Build and Install SmartRedis Python Client
-==========================================
+Build and Install SmartRedis Python Client from Release
+=======================================================
 
 .. include:: ./install/python_client.rst
 
 ----------------------------------------------
 
-Build SmartRedis Library
-====================================
+Build SmartRedis Library from Release
+=====================================
 
 .. include:: ./install/lib.rst
 

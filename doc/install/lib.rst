@@ -1,4 +1,11 @@
 
+Retrieve and unpack the SmartRedis release tarball:
+
+.. code-block:: bash
+
+    wget <tarball location>
+    tar -xf smartredis-0.1.0.tar.gz
+
 To build the SmartRedis library for the C++, C, and Fortran,
 make sure to be in the top level directory of ``smartredis-0.1.0``.
 
