@@ -38,6 +38,11 @@
    developer/python
    developer/editor
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Reference
+
+   changelog
 
 Indices and tables
 ==================
