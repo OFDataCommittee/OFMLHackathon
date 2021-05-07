@@ -86,7 +86,7 @@ jobs:
     # upload to PyPI on every tag starting with 'v'
     # if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
     # Publish when a GitHub Release is created
-    #if: github.event_name == 'release' && github.event.action == 'published'
+    if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - uses: actions/download-artifact@v2
         with:
@@ -96,5 +96,5 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@master
         with:
           user: __token__
-          password: ${{ secrets.TEST_PYPI }}
-          repository_url: https://test.pypi.org/legacy/
+          password: ${{ secrets.PYPI }}
+          #repository_url: https://test.pypi.org/legacy/

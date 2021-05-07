@@ -1,15 +1,14 @@
 
 
 <div align="center">
-    <a href="https://github.com/CrayLabs/SmartSim"><img src="https://github.com/CrayLabs/SmartSim/blob/develop/doc/images/SmartSim_Large.png" width="90%"><img></a>
+    <a href="https://github.com/CrayLabs/SmartSim"><img src="https://raw.githubusercontent.com/CrayLabs/SmartSim/master/doc/images/SmartSim_Large.png" width="90%"><img></a>
     <br />
     <br />
     <div display="inline-block">
         <a href="https://github.com/CrayLabs/SmartRedis"><b>Home</b></a>&nbsp;&nbsp;&nbsp;
         <a href="https://www.craylabs.org/build/html/installation.html#install-smartredis-from-source"><b>Install</b></a>&nbsp;&nbsp;&nbsp;
         <a href="https://www.craylabs.org/build/html/smartredis.html"><b>Documentation</b></a>&nbsp;&nbsp;&nbsp;
-        <a href="https://github.com/CrayLabs/SmartRedis/releases/download/v0.1.0/smartredis-0.1.0.tar.gz"><b>Download</b></a>&nbsp;&nbsp;&nbsp;
-        <a href="https://craylabs.slack.com/ssb/redirect"><b>Slack</b></a>&nbsp;&nbsp;&nbsp;
+        <a href="https://join.slack.com/t/craylabs/shared_invite/zt-nw3ag5z5-5PS4tIXBfufu1bIvvr71UA"><b>Slack</b></a>&nbsp;&nbsp;&nbsp;
         <a href="https://github.com/CrayLabs"><b>Cray Labs</b></a>&nbsp;&nbsp;&nbsp;
     </div>
     <br />
