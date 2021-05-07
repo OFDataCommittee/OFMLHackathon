@@ -6,21 +6,21 @@ First, activate your Python virtual environment:
 
     conda activate <env name>
 
-Retrieve and unpack the SmartRedis release tarball:
+Install SmartRedis Python client from PyPI:
 
 .. code-block:: bash
 
-    wget <tarball location>
-    tar -xf smartredis-0.1.0.tar.gz
+    pip install smartredis
 
-Last, build and install the SmartRedis Python client into
-your virtual environment.  The pip install process will
-automatically download, build, and install SmartRedis
-dependencies.
+Developers installing the Python client from PyPI
+can install the SmartRedis client with additional
+dependencies for testing and documentation with:
 
 .. code-block:: bash
 
-    pip install -e .
+    pip install smartredis[dev]
+    # or if using ZSH
+    pip install smartredis\[dev\]
 
 Now, when inside your virtual environment, you should be able to import
 the ``Client`` from ``smartredis`` as follows
