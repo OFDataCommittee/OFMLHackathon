@@ -6,8 +6,8 @@
     <br />
     <div display="inline-block">
         <a href="https://github.com/CrayLabs/SmartRedis"><b>Home</b></a>&nbsp;&nbsp;&nbsp;
-        <a href="https://www.craylabs.org/build/html/installation.html#install-smartredis-from-source"><b>Install</b></a>&nbsp;&nbsp;&nbsp;
-        <a href="https://www.craylabs.org/build/html/smartredis.html"><b>Documentation</b></a>&nbsp;&nbsp;&nbsp;
+        <a href="https://www.craylabs.org/docs/installation.html#smartredis"><b>Install</b></a>&nbsp;&nbsp;&nbsp;
+        <a href="https://www.craylabs.org/docs/smartredis.html"><b>Documentation</b></a>&nbsp;&nbsp;&nbsp;
         <a href="https://join.slack.com/t/craylabs/shared_invite/zt-nw3ag5z5-5PS4tIXBfufu1bIvvr71UA"><b>Slack</b></a>&nbsp;&nbsp;&nbsp;
         <a href="https://github.com/CrayLabs"><b>Cray Labs</b></a>&nbsp;&nbsp;&nbsp;
     </div>
@@ -49,8 +49,8 @@ SmartSim in any Python, C++, C, or Fortran project.
 ## Using SmartRedis
 
 SmartRedis installation instructions are currently hosted as part of the
-[SmartSim library installation instructions](https://www.craylabs.org/build/html/installation.html#install-smartredis-from-source)
-Additionally, detailed [API documents](https://www.craylabs.org/build/html/smartredis.html) are also available as
+[SmartSim library installation instructions](https://www.craylabs.org/docs/installation.html#smartredis)
+Additionally, detailed [API documents](https://www.craylabs.org/docs/api/smartredis_api.html) are also available as
 part of the SmartSim documentation.
 
 ## Dependencies
@@ -68,3 +68,26 @@ SmartRedis utilizes the following libraries.
 The following are public presentations or publications using SmartRedis
 
  - [Collaboration with NCAR - CGD Seminar](https://www.youtube.com/watch?v=2e-5j427AS0)
+ - [Using Machine Learning in HPC Simulations - paper (pre-print)](https://arxiv.org/abs/2104.09355)
+
+## Cite
+
+Please use the following citation when referencing SmartSim, SmartRedis, or any SmartSim related work.
+
+
+Partee et al., “Using Machine Learning at Scale in HPC Simulations with SmartSim:
+An Application to Ocean Climate Modeling,” arXiv:2104.09355, Apr. 2021,
+[Online]. Available: http://arxiv.org/abs/2104.09355.
+
+### bibtex
+
+    ```latex
+    @misc{partee2021using,
+          title={Using Machine Learning at Scale in HPC Simulations with SmartSim: An Application to Ocean Climate Modeling},
+          author={Sam Partee and Matthew Ellis and Alessandro Rigazzi and Scott Bachman and Gustavo Marques and Andrew Shao and Benjamin Robbins},
+          year={2021},
+          eprint={2104.09355},
+          archivePrefix={arXiv},
+          primaryClass={cs.CE}
+    }
+    ```
