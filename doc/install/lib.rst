@@ -4,7 +4,7 @@ release:
 
 .. code-block:: bash
 
-    git clone https://github.com/CrayLabs/SmartRedis.git --tag v0.1.1
+    git clone https://github.com/CrayLabs/SmartRedis.git --depth=1 --branch v0.1.1 smartredis
 
 Note that the release tarball can also be used instead of cloning
 the git repository, but the preferred method is a repository

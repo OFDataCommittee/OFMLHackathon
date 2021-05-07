@@ -42,7 +42,7 @@ If you wish to run tests on GPU hardware, run the following command:
   for the user
 
 After installing dependencies and setting up your testing environment with
-``setup__test_env.sh``, all tests can be built with the following command:
+``setup_test_env.sh``, all tests can be built with the following command:
 
 .. code-block:: bash
 

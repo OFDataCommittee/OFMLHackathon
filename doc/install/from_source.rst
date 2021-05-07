@@ -56,7 +56,7 @@ source will be described.
     testpy-cov                     - run python tests with coverage
 
 Clone SmartRedis
--------------------------------
+----------------
 
 First, clone the SmartRedis repo:
 
