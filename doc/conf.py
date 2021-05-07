@@ -18,11 +18,11 @@
 # -- Project information -----------------------------------------------------
 
 project = 'SmartRedis'
-copyright = '2020, Cray, a Hewlett Packard Enterprise company'
+copyright = '2021, Hewlett Packard Enterprise'
 author = 'HPE AI & Advanced Productivity'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.0-alpha'
+release = '0.1.1'
 
 
 # -- General configuration ---------------------------------------------------
