@@ -18,7 +18,9 @@
 
 [![License](https://img.shields.io/github/license/CrayLabs/SmartSim)](https://github.com/CrayLabs/SmartRedis/blob/master/LICENSE.md)
 ![GitHub last commit](https://img.shields.io/github/last-commit/CrayLabs/SmartRedis)
+![PyPI - Wheel](https://img.shields.io/pypi/wheel/smartredis)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/CrayLabs/SmartRedis)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/smartredis)
 ![Language](https://img.shields.io/github/languages/top/CrayLabs/SmartRedis)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
