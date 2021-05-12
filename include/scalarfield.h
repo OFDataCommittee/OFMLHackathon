@@ -64,26 +64,26 @@ class ScalarField : public MetadataField {
 
         /*!
         *   \brief Default ScalarField copy constructor
-        *   \param The scalar field to be copied.
+        *   \param scalar_field The scalar field to be copied.
         */
         ScalarField(const ScalarField<T>& scalar_field) = default;
 
         /*!
         *   \brief Default ScalarField move constructor
-        *   \param The scalar field to be moved for construction.
+        *   \param scalar_field The scalar field to be moved for construction.
         */
         ScalarField(ScalarField<T>&& scalar_field) = default;
 
         /*!
         *   \brief Default ScalarField copy assignment operator
-        *   \param The scalar field to be copied.
+        *   \param scalar_field The scalar field to be copied.
         */
         ScalarField<T>& operator=(const ScalarField<T>& scalar_field)
             = default;
 
         /*!
         *   \brief Default ScalarField move assignment operator
-        *   \param The scalar field to be moved.
+        *   \param scalar_field The scalar field to be moved.
         */
         ScalarField<T>& operator=(ScalarField<T>&& scalar_field)
             = default;
@@ -99,27 +99,37 @@ class ScalarField : public MetadataField {
         *          buffer returned by the ScalarField class
         *          contains the number of field values
         *          followed by the field values.
-        *   \param A prefix to attach to the serialized data
-        *   \param A suffix to attach to the serialized data
         *   \returns A string of the serialized field
         */
-        virtual std::string serialize(const std::string& prefix,
-                                      const std::string& suffix);
+        virtual std::string serialize();
 
         /*!
         *   \brief Add a value to the field
+        *   \param value A c-ptr to the value to append
         */
-        void append(T value);
+        virtual void append(void* value);
+
+        /*!
+        *   \brief Retrieve the number of values in the field
+        *   \returns The number of values
+        */
+        virtual size_t size();
+
+        /*!
+        *   \brief Returns a c-ptr to the underlying data.  This
+        *          pointer is not valid if any other operation
+        *          such as append() is performed.
+        *   \returns A c-ptr to the underlying data
+        */
+        void* data();
 
     private:
 
         /*!
-        *   \brief Unpack the data contained in the buffer string.
-        *          The buffer string should point to the location
-        *          after any prefix that was added to the buffer.
-        *   \param The buffer containing ScalarField data.
+        *   \brief Unpack the data contained in the buffer.
+        *   \param buf The buffer containing ScalarField data.
         */
-        void _unpack(void* buf);
+        void _unpack(const std::string_view& buf);
 
         /*!
         *   \brief The ScalarField values

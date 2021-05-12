@@ -69,12 +69,15 @@ class MetadataField {
     /*!
     *   \brief Serialize the MetadataField for
     *          transmission and storage.
-    *   \param A prefix to attach to the serialized data
-    *   \param A suffix to attach to the serialized data
     *   \returns A string of the serialized metadata
     */
-    virtual std::string serialize(const std::string& prefix,
-                                  const std::string& suffix) = 0;
+    virtual std::string serialize() = 0;
+
+    /*!
+    *   \brief Append a value to the field
+    *   \param value A c-ptr to the value to append
+    */
+    virtual void append(void* value) = 0;
 
     /*!
     *   \brief Retrieve the MetadataField name
@@ -88,7 +91,13 @@ class MetadataField {
     */
     MetaDataType type();
 
-    private:
+    /*!
+    *   \brief Retrieve the number of values in the field
+    *   \returns The number of values
+    */
+    virtual size_t size() = 0;
+
+    protected:
 
     /*!
     *   \brief The name of the field.

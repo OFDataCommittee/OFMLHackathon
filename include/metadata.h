@@ -32,8 +32,10 @@
 #include "stdlib.h"
 #include <string>
 #include <vector>
+#include <unordered_map>
 #include "sharedmemorylist.h"
 #include "enums/cpp_metadata_type.h"
+#include "metadatafield.h"
 
 ///@file
 
@@ -200,21 +202,12 @@ class MetaData
 
     private:
 
-        /*!
-        *   \brief The protobuf message that holds all fields
-        */
-        spb::MetaData _pb_metadata_msg;
 
         /*!
-        *   \brief Maps meta data field name to the
-        *          protobuf metadata message.
-        *   \details This map does not need to manage
-        *            memory because all of these
-        *            fields will be added to the top
-        *            level message and that top level
-        *            message will handle memory.
+        *   \brief Maps metadata field name to the
+        *          MetaDataField object.
         */
-        std::unordered_map<std::string, gpb::Message*> _meta_msg_map;
+        std::unordered_map<std::string, MetadataField*> _field_map;
 
         /*!
         *   \brief SharedMemoryList for arrays of c-str
@@ -273,11 +266,6 @@ class MetaData
         SharedMemoryList<size_t> _str_len_mem_mgr;
 
         /*!
-        *   \brief The serialized MetaData buffer
-        */
-        std::string _buf;
-
-        /*!
         *   \brief Unpacks the all fields for a metadata type
         *          (e.g. string, float, int) that are in the
         *          top level protobuf message and puts pointers
@@ -289,30 +277,44 @@ class MetaData
         void _unpack_metadata(const std::string& field_name);
 
         /*!
-        *   \brief Create a new metadata message for the field
-        *          and type
+        *   \brief Create a new metadata field with the given
+        *          name and type.
         *   \param field_name The name of the metadata field
         *   \param type The data type of the field
         */
-        void _create_message(const std::string& field_name,
-                             const MetaDataType type);
-
+        void _create_field(const std::string& field_name,
+                           const MetaDataType type);
 
         /*!
-        *   \brief This function creates a protobuf message for the
-        *          metadata field, adds the protobuf message to the map
-        *          holding all metadata messages, and sets the internal
-        *          id field of the message to field_name.  In this case,
-        *          the top level message is the repeated field that
-        *          holds all metadata fields for a specific type.
+        *   \brief This function creates a new scalar metadata field
+        *          and adds it to the field map.
         *   \tparam PB The protobuf message type to create
         *   \param field_name The name of the metadata field
-        *   \param container_name The name of the top level message
-        *                         container
+        *   \tparam The type of field (e.g. double, float, string)
         */
-        template <typename PB>
-        void _create_message_by_type(const std::string& field_name,
-                                     const std::string& container_name);
+        template <typename T>
+        void _create_scalar_field(const std::string& field_name,
+                                  const MetaDataType type);
+
+        /*!
+        *   \brief This function allocates new memory to hold
+        *          metadata field values and returns these values
+        *          via the c-ptr reference being pointed to the
+        *          newly allocated memory.
+        *   \tparam The type associated with the SharedMemoryList
+        *   \param data A c-ptr reference where metadata values
+        *               will be placed after allocation of memory
+        *   \param n_values A reference to a variable holding the
+        *                   number of values in the field
+        *   \param mem_list A reference to a SharedMemoryList that
+        *                   is used to allocate new memory for the
+        *                   return metadata field values.
+        */
+        template <typename T>
+        void _get_numeric_field_values(const std::string& name,
+                                       void*& data,
+                                       size_t& n_values,
+                                       SharedMemoryList<T>& mem_list);
 
         /*!
         *   \brief Set a string value to a string field

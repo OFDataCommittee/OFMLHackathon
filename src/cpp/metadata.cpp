@@ -33,8 +33,10 @@ using namespace SmartRedis;
 MetaData::MetaData(const MetaData& metadata) {
     /* Copy constructor for Metadata
     */
-    this->_pb_metadata_msg = metadata._pb_metadata_msg;
-    this->_rebuild_message_map();
+
+    //TODO we need to do a deep copy of the _field_map
+    //because those MetadataField values are allocated
+    //on the heap
     this->_char_array_mem_mgr = metadata._char_array_mem_mgr;
     this->_char_mem_mgr = metadata._char_mem_mgr;
     this->_double_mem_mgr = metadata._double_mem_mgr;
@@ -44,7 +46,6 @@ MetaData::MetaData(const MetaData& metadata) {
     this->_int32_mem_mgr = metadata._int32_mem_mgr;
     this->_uint32_mem_mgr = metadata._uint32_mem_mgr;
     this->_str_len_mem_mgr = metadata._str_len_mem_mgr;
-    this->_buf = metadata._buf;
 }
 
 MetaData& MetaData::operator=(const MetaData& metadata) {
@@ -84,46 +85,12 @@ void MetaData::fill_from_buffer(const char* buf, unsigned long long buf_size)
 void MetaData::add_scalar(const std::string& field_name,
                           const void* value,
                           MetaDataType type)
+
 {
     if(!(this->_field_exists(field_name))) {
-         this->_create_message(field_name, type);
+         this->_create_field(field_name, type);
     }
-
-    gpb::Message* msg = this->_meta_msg_map[field_name];
-    const gpb::Reflection* refl = msg->GetReflection();
-    const gpb::FieldDescriptor* field =
-        msg->GetDescriptor()->FindFieldByName("data");
-
-    //TODO add try catch for protobuf errors
-    switch(type) {
-        case MetaDataType::string :
-            throw std::runtime_error("Use add_string() to add "\
-                                     "a string to the metadata "\
-                                     "field.");
-            break;
-        case MetaDataType::dbl :
-            refl->AddDouble(msg, field, *((double*)value));
-            break;
-        case MetaDataType::flt :
-            refl->AddFloat(msg, field, *((float*)value));
-            break;
-        case MetaDataType::int64 :
-            refl->AddInt64(msg, field, *((int64_t*)value));
-            break;
-        case MetaDataType::uint64 :
-            refl->AddUInt64(msg, field, *((uint64_t*)value));
-            break;
-        case MetaDataType::int32 :
-            refl->AddInt32(msg, field, *((int32_t*)value));
-            break;
-        case MetaDataType::uint32 :
-            refl->AddUInt32(msg, field, *((uint32_t*)value));
-            break;
-        default :
-            throw std::runtime_error("Unsupported type used "\
-                                     "in MetaData.add_scalar().");
-            break;
-    }
+    this->_field_map[field_name]->append(value);
     return;
 }
 
@@ -133,13 +100,7 @@ void MetaData::add_string(const std::string& field_name,
     if(!(this->_field_exists(field_name)))
          this->_create_message(field_name, MetaDataType::string);
 
-    gpb::Message* msg = this->_meta_msg_map[field_name];
-    const gpb::Reflection* refl = msg->GetReflection();
-    const gpb::FieldDescriptor* field =
-        msg->GetDescriptor()->FindFieldByName("data");
-
-    refl->AddString(msg, field, value);
-
+    this->_field_map[field_name]->append(&value);
     return;
 }
 
@@ -153,32 +114,33 @@ void MetaData::get_scalar_values(const std::string& name,
                                  + name +
                                  " does not exist.");
 
-    type = this->_get_meta_value_type(name);
+    type = this->_field_map[name]->type();
+
     gpb::Message* msg = this->_meta_msg_map[name];
     switch(type) {
         case MetaDataType::dbl :
             this->_get_numeric_field_values<double>
-                (msg, data, length, this->_double_mem_mgr);
+                (name, data, length, this->_double_mem_mgr);
             break;
         case MetaDataType::flt :
             this->_get_numeric_field_values<float>
-                (msg, data, length, this->_float_mem_mgr);
+                (name, data, length, this->_float_mem_mgr);
             break;
         case MetaDataType::int64 :
             this->_get_numeric_field_values<int64_t>
-                (msg, data, length, this->_int64_mem_mgr);
+                (name, data, length, this->_int64_mem_mgr);
             break;
         case MetaDataType::uint64 :
             this->_get_numeric_field_values<uint64_t>
-                (msg, data, length, this->_uint64_mem_mgr);
+                (name, data, length, this->_uint64_mem_mgr);
             break;
         case MetaDataType::int32 :
             this->_get_numeric_field_values<int32_t>
-                (msg, data, length, this->_int32_mem_mgr);
+                (name, data, length, this->_int32_mem_mgr);
             break;
         case MetaDataType::uint32 :
             this->_get_numeric_field_values<uint32_t>
-                (msg, data, length, this->_uint32_mem_mgr);
+                (name, data, length, this->_uint32_mem_mgr);
             break;
         case MetaDataType::string :
             throw std::runtime_error("MetaData.get_scalar_values() "\
@@ -281,62 +243,45 @@ void MetaData::_unpack_metadata(const std::string& field_name)
     return;
 }
 
-void MetaData::_create_message(const std::string& field_name,
-                               const MetaDataType type)
+void MetaData::_create_field(const std::string& field_name,
+                             const MetaDataType type)
 {
     switch(type) {
         case MetaDataType::string :
-            this->_create_message_by_type
-                    <StringMsg>(field_name,top_string_msg);
+            /*
+            TODO implement this function
+            this->_create_string_field
+                    <std::string>(field_name,type);
+            */
             break;
         case MetaDataType::dbl :
-            this->_create_message_by_type
-                    <DoubleMsg>(field_name,top_double_msg);
+            this->_create_scalar_field<double>(field_name,type);
             break;
         case MetaDataType::flt :
-            this->_create_message_by_type
-                    <FloatMsg>(field_name,top_float_msg);
+            this->_create_scalar_field<float>(field_name,type);
             break;
         case MetaDataType::int64 :
-            this->_create_message_by_type
-                    <Int64Msg>(field_name,top_int64_msg);
+            this->_create_scalar_field<int64_t>(field_name,type);
             break;
         case MetaDataType::uint64 :
-            this->_create_message_by_type
-                    <UInt64Msg>(field_name,top_uint64_msg);
+            this->_create_scalar_field<uint64_t>(field_name,type);
             break;
         case MetaDataType::int32 :
-            this->_create_message_by_type
-                    <Int32Msg>(field_name,top_int32_msg);
+            this->_create_scalar_field<int32_t>(field_name,type);
             break;
         case MetaDataType::uint32 :
-            this->_create_message_by_type
-                    <UInt32Msg>(field_name,top_uint32_msg);
+            this->_create_scalar_field<uint32_t>(field_name,type);
             break;
     }
     return;
 }
 
-template <typename PB>
-void MetaData::_create_message_by_type(const std::string& field_name,
-                                       const std::string& container_name)
+template <typename T>
+void MetaData::_create_scalar_field<T>(const std::string& field_name,
+                                       const MetaDataType type)
 {
-    // Create a new message
-    PB* msg = new PB();
-    this->_meta_msg_map[field_name] = msg;
-
-    this->_set_string_in_message(msg, "id", field_name);
-
-    // Add the message to our map
-    const gpb::Reflection* refl =
-            this->_pb_metadata_msg.GetReflection();
-
-    const gpb::FieldDescriptor* meta_desc =
-            this->_pb_metadata_msg.GetDescriptor()->
-            FindFieldByName(container_name);
-
-    refl->AddAllocatedMessage(&(this->_pb_metadata_msg),
-                             meta_desc, msg);
+    MetadataField* mdf = new ScalarField<T>(field_name, type);
+    this->_field_map[field_name] = mdf;
     return;
 }
 
@@ -371,97 +316,27 @@ std::vector<std::string> MetaData::_get_string_field_values(gpb::Message* msg)
 }
 
 template <typename T>
-void MetaData::_get_numeric_field_values(gpb::Message* msg,
+void MetaData::_get_numeric_field_values(const std::string& name,
                                          void*& data,
                                          size_t& n_values,
                                          SharedMemoryList<T>& mem_list)
 {
-    const gpb::Reflection* refl = msg->GetReflection();
-    const gpb::FieldDescriptor* field_desc =
-        msg->GetDescriptor()->FindFieldByName("data");
+    // Fetch the ScalarField from the map
+    ScalarField* sdf = (ScalarField*)(this->_field_map[name]);
 
-    //Get the number of entries and number of bytes
-    n_values = refl->FieldSize(*msg,field_desc);
-    //Allocate the memory
+    // Get the number of entries and number of bytes
+    n_values = sdf->size();
+
+    // Allocate the memory
     data = (void*)mem_list.allocate(n_values);
 
-    const google::protobuf::MutableRepeatedFieldRef<T>
-        pb_data = refl->GetMutableRepeatedFieldRef<T>(msg, field_desc);
+    // Copy over the field values
+    std::memcpy(data, sdf->data(), n_values*sizeof(T));
 
-    //Copy each metadata string into numeric value
-    for(int i = 0; i < n_values; i++) {
-        ((T*)data)[i] = pb_data.Get(i);
-    }
     return;
 }
 
 bool MetaData::_field_exists(const std::string& field_name)
 {
-   return (_meta_msg_map.count(field_name)>0);
-}
-
-inline MetaDataType MetaData::_get_meta_value_type(const std::string& name)
-{
-    gpb::Message* msg = this->_meta_msg_map[name];
-    const gpb::Reflection* refl = msg->GetReflection();
-    const gpb::FieldDescriptor* field_desc =
-        msg->GetDescriptor()->FindFieldByName("data");
-
-    MetaDataType type;
-    switch(field_desc->cpp_type()) {
-        case gpb::FieldDescriptor::CppType::CPPTYPE_INT32 :
-            type = MetaDataType::int32;
-            break;
-        case gpb::FieldDescriptor::CppType::CPPTYPE_INT64 :
-            type = MetaDataType::int64;
-            break;
-        case gpb::FieldDescriptor::CppType::CPPTYPE_UINT32 :
-            type = MetaDataType::uint32;
-            break;
-        case gpb::FieldDescriptor::CppType::CPPTYPE_UINT64 :
-            type = MetaDataType::uint64;
-            break;
-        case gpb::FieldDescriptor::CppType::CPPTYPE_FLOAT :
-            type = MetaDataType::flt;
-            break;
-        case gpb::FieldDescriptor::CppType::CPPTYPE_DOUBLE :
-            type = MetaDataType::dbl;
-            break;
-        case gpb::FieldDescriptor::CppType::CPPTYPE_STRING :
-            type = MetaDataType::string;
-            break;
-        default :
-            throw std::runtime_error("Unexpected type encountered in"\
-                                     "MetaData._get_meta_value_type().");
-    }
-    return type;
-}
-
-void MetaData::_rebuild_message_map()
-{
-    this->_meta_msg_map.clear();
-
-    const gpb::Reflection* refl = this->_pb_metadata_msg.GetReflection();
-    std::vector<const gpb::FieldDescriptor*> field_descriptors;
-    refl->ListFields(this->_pb_metadata_msg,&field_descriptors);
-
-    std::vector<const gpb::FieldDescriptor*>::const_iterator it =
-        field_descriptors.cbegin();
-    std::vector<const gpb::FieldDescriptor*>::const_iterator it_end =
-        field_descriptors.cend();
-
-    while(it!=it_end) {
-        int field_size = refl->FieldSize(this->_pb_metadata_msg, *it);
-        for(int i=0; i<field_size; i++) {
-            gpb::Message* sub_msg =
-                refl->MutableRepeatedMessage(&(this->_pb_metadata_msg),*it, i);
-            const gpb::Reflection* sub_refl = sub_msg->GetReflection();
-            const gpb::FieldDescriptor* sub_field =
-                sub_msg->GetDescriptor()->FindFieldByName("id");
-            std::string name = sub_refl->GetString(*sub_msg, sub_field);
-            this->_meta_msg_map[name] = sub_msg;
-        }
-        it++;
-    }
-    return;
+   return (this->_field_map.count(field_name)>0);
 }
