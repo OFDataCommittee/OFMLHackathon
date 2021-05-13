@@ -36,6 +36,8 @@
 #include "sharedmemorylist.h"
 #include "enums/cpp_metadata_type.h"
 #include "metadatafield.h"
+#include "scalarfield.h"
+#include "stringfield.h"
 
 ///@file
 
@@ -266,17 +268,6 @@ class MetaData
         SharedMemoryList<size_t> _str_len_mem_mgr;
 
         /*!
-        *   \brief Unpacks the all fields for a metadata type
-        *          (e.g. string, float, int) that are in the
-        *          top level protobuf message and puts pointers
-        *          to the sub messages into _meta_msg_map
-        *   \param field_name The name of the metadata
-        *                     field type message in the top
-        *                     level message
-        */
-        void _unpack_metadata(const std::string& field_name);
-
-        /*!
         *   \brief Create a new metadata field with the given
         *          name and type.
         *   \param field_name The name of the metadata field
@@ -288,13 +279,21 @@ class MetaData
         /*!
         *   \brief This function creates a new scalar metadata field
         *          and adds it to the field map.
-        *   \tparam PB The protobuf message type to create
+        *   \tparam The datatype associated with the MetaDataType
+        *           (e.g. double)
         *   \param field_name The name of the metadata field
-        *   \tparam The type of field (e.g. double, float, string)
+        *   \param type The type of field (e.g. double, float, string)
         */
         template <typename T>
         void _create_scalar_field(const std::string& field_name,
                                   const MetaDataType type);
+
+        /*!
+        *   \brief This function creates a new string metadata field
+        *          and adds it to the field map.
+        *   \param field_name The name of the metadata field
+        */
+        void _create_string_field(const std::string& field_name);
 
         /*!
         *   \brief This function allocates new memory to hold
@@ -317,46 +316,6 @@ class MetaData
                                        SharedMemoryList<T>& mem_list);
 
         /*!
-        *   \brief Set a string value to a string field
-        *          (non-repeated field)
-        *   \param msg Protobuf message containing the string field
-        *   \param field_name The name of the metadata field
-        *   \param value The field value
-        */
-        void _set_string_in_message(gpb::Message* msg,
-                                    const std::string& field_name,
-                                    std::string value);
-
-        /*!
-        *   \brief Get an array of string metadata values
-        *   \param msg Protobuf message containing the string field
-        *   \returns The strings in the protobuf message
-        */
-        std::vector<std::string> _get_string_field_values(gpb::Message* msg);
-
-        /*!
-        *   \brief This funcition retrieves all of the metadata
-        *          "data" non-string fields from the message.  A copy
-        *          of the protobuf values is made using the
-        *          MemoryList objects in the MetaData class,
-        *          and as a result, the metadata values passed back
-        *          to the user will live as long as the MetaData object
-        *          persists.
-        *   \tparam T the type associated with the metdata (e.g. double, float)
-        *   \param msg Protobuf message containing the scalar field
-        *   \param data The pointer that will be pointed to the metadata
-        *   \param n_Values An size_t variable that will be set to the
-        *                   number of values in the metadata field
-        *   \param mem_list Memory manager for the metadata heap allocations
-        *                   associated with copying fetched metadata
-        */
-        template <typename T>
-        void _get_numeric_field_values(gpb::Message* msg,
-                                       void*& data,
-                                       size_t& n_values,
-                                       SharedMemoryList<T>& mem_list);
-
-        /*!
         *   \brief Return true if the field name is already in use
         *          for a protobuf messsage, otherwise false.
         *   \param field_name The name of the metadata field
@@ -364,24 +323,6 @@ class MetaData
         *            otherwise false
         */
         bool _field_exists(const std::string& field_name);
-
-        /*!
-        *   \brief Gets the metadata type for a particular field
-        *   \param name The name of the metadata field
-        *   \returns The MetaDataType of the field
-        */
-        MetaDataType _get_meta_value_type(const std::string& name);
-
-        /*!
-        *   \brief Rebuild the message map that maps
-        *          field name to protobuf message
-        *   \details This function should be invoked if
-        *            the location of messages in the map changes.
-        *            The message map is rebuilt by looping through
-        *            all fields in the main protobuf message.
-        */
-        void _rebuild_message_map();
-};
 
 } //namespace SmartRedis
 

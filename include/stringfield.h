@@ -26,88 +26,88 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SMARTREDIS_SCALARFIELD_H
-#define SMARTREDIS_SCALARFIELD_H
+#ifndef SMARTREDIS_STRINGFIELD_H
+#define SMARTREDIS_STRINGFIELD_H
 
 #include "metadatafield.h"
 
 namespace SmartRedis {
 
 /*!
-*   \brief  The ScalarField class implements
+*   \brief  The StringField class implements
 *   MetadataField class methods needed for
-*   storage and transfer of metadata scalar
-*   fields (e.g. double, float, int64, etc.)
+*   storage and transfer of metadata string
+*   fields.
 */
-template <class T>
-class ScalarField : public MetadataField {
+class StringField : public MetadataField {
 
     public:
 
         /*!
-        *   \brief ScalarField constructor
-        *   \param name The name used to reference the scalar field
+        *   \brief StringField constructor
+        *   \param name The name used to reference the string field
         *   \param MetaDataType The metadata type for this field
         */
-        ScalarField(const std::string& name, MetaDataType type);
+        StringField(const std::string& name);
 
         /*!
-        *   \brief MetadataField constructor that
+        *   \brief StringField constructor that
         *          takes in a serialized string to populate values.
         *   \param name The name used to reference the metadata
         *               field
         *   \param serial_string The serialized string containing
-        *                        values
+        *                        string values
         */
-        ScalarField(const std::string& name,
+        StringField(const std::string& name,
                     const std::string_view& serial_string);
 
         /*!
-        *   \brief Default ScalarField copy constructor
-        *   \param scalar_field The scalar field to be copied.
+        *   \brief Default StringField copy constructor
+        *   \param string_field The string field to be copied.
         */
-        ScalarField(const ScalarField<T>& scalar_field) = default;
+        StringField(const StringField& string_field) = default;
 
         /*!
-        *   \brief Default ScalarField move constructor
-        *   \param scalar_field The scalar field to be moved for construction.
+        *   \brief Default StringField move constructor
+        *   \param string_field The string field to be moved for construction.
         */
-        ScalarField(ScalarField<T>&& scalar_field) = default;
+        StringField(StringField&& string_field) = default;
 
         /*!
-        *   \brief Default ScalarField copy assignment operator
-        *   \param scalar_field The scalar field to be copied.
+        *   \brief Default StringField copy assignment operator
+        *   \param string_field The string field to be copied.
         */
-        ScalarField<T>& operator=(const ScalarField<T>& scalar_field)
+        StringField& operator=(const StringField& string_field)
             = default;
 
         /*!
-        *   \brief Default ScalarField move assignment operator
-        *   \param scalar_field The scalar field to be moved.
+        *   \brief Default StringField move assignment operator
+        *   \param string_field The string field to be moved.
         */
-        ScalarField<T>& operator=(ScalarField<T>&& scalar_field)
+        StringField& operator=(StringField&& string_field)
             = default;
 
         /*!
-        *   \brief Default MetadataField destructor
+        *   \brief Default StringField destructor
         */
-        ~ScalarField() = default;
+        ~StringField() = default;
 
         /*!
-        *   \brief Serialize the ScalarField for
+        *   \brief Serialize the StringField for
         *          transmission and storage.  The serialized
-        *          buffer returned by the ScalarField class
-        *          contains the number of field values
-        *          followed by the field values.
+        *          buffer returned by the StringField class
+        *          contains the number of field values, the
+        *          length of each string,
+        *          followed by the string values
         *   \returns A string of the serialized field
         */
         virtual std::string serialize();
 
         /*!
-        *   \brief Add a value to the field
+        *   \brief Add a string to the field
         *   \param value A c-ptr to the value to append
         */
-        virtual void append(void* value);
+        virtual void append(const std::string& value);
 
         /*!
         *   \brief Retrieve the number of values in the field
@@ -121,12 +121,11 @@ class ScalarField : public MetadataField {
         virtual void clear();
 
         /*!
-        *   \brief Returns a c-ptr to the underlying data.  This
-        *          pointer is not valid if any other operation
-        *          such as append() is performed.
-        *   \returns A c-ptr to the underlying data
+        *   \brief Returns a copy of the underlying field string
+        *          values.
+        *   \returns std::vector<std::string> of string values
         */
-        void* data();
+        std::vector<std::string> values();
 
     private:
 
@@ -139,12 +138,10 @@ class ScalarField : public MetadataField {
         /*!
         *   \brief The ScalarField values
         */
-        std::vector<T> _vals;
+        std::vector<std::string> _vals;
 
 };
 
-#include "scalarfield.tcc"
-
 } //namespace SmartRedis
 
-#endif //SMARTREDIS_SCALARFIELD_H
+#endif //SMARTREDIS_STRINGFIELD_H

@@ -50,9 +50,9 @@ MetaData::MetaData(const MetaData& metadata) {
 
 MetaData& MetaData::operator=(const MetaData& metadata) {
 
+    //TODO we need to do a deep copy of the _field_map
     if(this!=&metadata) {
         this->_pb_metadata_msg = metadata._pb_metadata_msg;
-        this->_rebuild_message_map();
         this->_char_array_mem_mgr = metadata._char_array_mem_mgr;
         this->_char_mem_mgr = metadata._char_mem_mgr;
         this->_double_mem_mgr = metadata._double_mem_mgr;
@@ -67,21 +67,6 @@ MetaData& MetaData::operator=(const MetaData& metadata) {
     return *this;
 }
 
-void MetaData::fill_from_buffer(const char* buf, unsigned long long buf_size)
-{
-    //TODO There doesn't seem to be a way around casting the buf
-    //as a std::string which means that the buffer will be copied
-    _pb_metadata_msg.ParseFromString(std::string(buf,buf_size));
-    this->_unpack_metadata(top_string_msg);
-    this->_unpack_metadata(top_double_msg);
-    this->_unpack_metadata(top_float_msg);
-    this->_unpack_metadata(top_int64_msg);
-    this->_unpack_metadata(top_uint64_msg);
-    this->_unpack_metadata(top_int32_msg);
-    this->_unpack_metadata(top_uint32_msg);
-    return;
-}
-
 void MetaData::add_scalar(const std::string& field_name,
                           const void* value,
                           MetaDataType type)
@@ -90,7 +75,38 @@ void MetaData::add_scalar(const std::string& field_name,
     if(!(this->_field_exists(field_name))) {
          this->_create_field(field_name, type);
     }
-    this->_field_map[field_name]->append(value);
+
+    MetadataField* mdf = this->_field_map[field_name];
+
+    MetaDataType existing_type = mdf->type();
+    if(existing_type!=type)
+        throw std::runtime_error("The existing metadata field "\
+                                 "has a different type. ");
+
+    switch(type) {
+        case MetaDataType::dbl :
+            (ScalarField<double>*)(mdf)->append(value);
+            break;
+        case MetaDataType::flt :
+            (ScalarField<float>*)(mdf)->append(value);
+            break;
+        case MetaDataType::int64 :
+            (ScalarField<int64_t>*)(mdf)->append(value);
+            break;
+        case MetaDataType::uint64 :
+            (ScalarField<uint64_t>*)(mdf)->append(value);
+            break;
+        case MetaDataType::int32 :
+            (ScalarField<int32_t>*)(mdf)->append(value);
+            break;
+        case MetaDataType::uint32 :
+            (ScalarField<uint32_t>*)(mdf)->append(value);
+            break;
+        case MetaDataType::string :
+            throw std::runtime_error("Invalid MetaDataType used in "\
+                                     "MetaData.add_scalar().");
+            break;
+    }
     return;
 }
 
@@ -100,7 +116,7 @@ void MetaData::add_string(const std::string& field_name,
     if(!(this->_field_exists(field_name)))
          this->_create_message(field_name, MetaDataType::string);
 
-    this->_field_map[field_name]->append(&value);
+    ((StringField*)(this->_field_map[field_name]))->append(value);
     return;
 }
 
@@ -116,7 +132,6 @@ void MetaData::get_scalar_values(const std::string& name,
 
     type = this->_field_map[name]->type();
 
-    gpb::Message* msg = this->_meta_msg_map[name];
     switch(type) {
         case MetaDataType::dbl :
             this->_get_numeric_field_values<double>
@@ -144,7 +159,7 @@ void MetaData::get_scalar_values(const std::string& name,
             break;
         case MetaDataType::string :
             throw std::runtime_error("MetaData.get_scalar_values() "\
-                                     "cannot retrieve strings.");
+                                     "requested invalid MetaDataType.");
             break;
     }
     return;
@@ -171,75 +186,31 @@ void MetaData::get_string_values(const std::string& name,
         data[i] = c;
         lengths[i] = size;
     }
-
     return;
 }
 
 std::vector<std::string>
 MetaData::get_string_values(const std::string& name)
-
 {
     if(!this->_field_exists(name))
         throw std::runtime_error("The metadata field "
                                  + name +
                                  " does not exist.");
 
-    MetaDataType type = this->_get_meta_value_type(name);
+    MetaDataType type = this->_field_map[name]->type();
 
     if(type!=MetaDataType::string)
         throw std::runtime_error("The metadata field " +
                                  name +
                                  " is not a string field.");
 
-    gpb::Message* msg = this->_meta_msg_map[name];
-
-    return this->_get_string_field_values(msg);
-}
-
-std::string_view MetaData::get_metadata_buf()
-{
-    this->_pb_metadata_msg.SerializeToString(&(this->_buf));
-    return std::string_view(this->_buf.c_str(), this->_buf.length());
+    return (StringField*)(this->_field_map[name])->values();
 }
 
 void MetaData::clear_field(const std::string& field_name)
 {
     if(this->_field_exists(field_name))
-        this->_meta_msg_map[field_name]->Clear();
-    return;
-}
-
-void MetaData::_unpack_metadata(const std::string& field_name)
-{
-    gpb::Message* top_msg = &(this->_pb_metadata_msg);
-
-    const gpb::Reflection* refl = top_msg->GetReflection();
-    const gpb::FieldDescriptor* field = top_msg->GetDescriptor()->
-                                        FindFieldByName(field_name);
-
-    int n = refl->FieldSize(*top_msg, field);
-
-    for(int i = 0; i<n; i++) {
-
-        // Fetch the ith meta data field
-        gpb::Message* meta_msg =
-            refl->MutableRepeatedMessage(top_msg, field, i);
-        const gpb::Reflection* meta_refl =
-            meta_msg->GetReflection();
-
-        // Get the ID and store the message pointer in the map
-        const gpb::FieldDescriptor* id_field =
-            meta_msg->GetDescriptor()->FindFieldByName("id");
-        std::string id = meta_refl->GetString(*meta_msg, id_field);
-
-        if(_meta_msg_map.count(id)>0) {
-            throw std::runtime_error("Could not unpack " + id +
-                                     " because it already exists"\
-                                     " in the map");
-        }
-
-        _meta_msg_map[id] = meta_msg;
-    }
+        this->_field_map[field_name]->clear();
     return;
 }
 
@@ -285,34 +256,11 @@ void MetaData::_create_scalar_field<T>(const std::string& field_name,
     return;
 }
 
-void MetaData::_set_string_in_message(gpb::Message* msg,
-                                      const std::string& field_name,
-                                      std::string value)
+void MetaData::_create_string_field(const std::string& field_name)
 {
-    //TODO add check to make sure the field is a string field
-    const gpb::Reflection* refl = msg->GetReflection();
-    const gpb::FieldDescriptor* field_desc =
-        msg->GetDescriptor()->FindFieldByName(field_name);
-    refl->SetString(msg, field_desc, value);
+    MetadataField* mdf = new StringField(field_name, type);
+    this->_field_map[field_name] = mdf;
     return;
-}
-
-std::vector<std::string> MetaData::_get_string_field_values(gpb::Message* msg)
-{
-    const gpb::Reflection* refl = msg->GetReflection();
-    const gpb::FieldDescriptor* field_desc =
-        msg->GetDescriptor()->FindFieldByName("data");
-
-    //Get the number of entries and bytes
-    int n_values = refl->FieldSize(*msg,field_desc);
-
-    std::vector<std::string> field_strings(n_values);
-
-    for(int i = 0; i < n_values; i++) {
-        field_strings[i] =
-            refl->GetRepeatedString(*msg, field_desc, i);
-    }
-    return field_strings;
 }
 
 template <typename T>

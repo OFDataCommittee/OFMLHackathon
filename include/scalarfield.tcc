@@ -89,6 +89,13 @@ size_t ScalarField<T>::size()
 }
 
 template <class T>
+void ScalarField<T>::clear()
+{
+    this->_vals.clear();
+    return;
+}
+
+template <class T>
 void* ScalarField<T>::data()
 {
     return this->_vals.data();

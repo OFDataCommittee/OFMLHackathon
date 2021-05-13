@@ -67,6 +67,13 @@ class MetadataField {
     ~MetadataField() = default;
 
     /*!
+    *   \brief Return the MetaDataType embedded in a
+    *          buffer string.
+    *   \returns The MetaDataType that is in the buffer
+    */
+    static MetaDataType get_type_from_buffer(const std::string_view& buf);
+
+    /*!
     *   \brief Serialize the MetadataField for
     *          transmission and storage.
     *   \returns A string of the serialized metadata
@@ -96,6 +103,11 @@ class MetadataField {
     *   \returns The number of values
     */
     virtual size_t size() = 0;
+
+    /*!
+    *   \brief Clear the values in the field
+    */
+    virtual void clear() = 0;
 
     protected:
 

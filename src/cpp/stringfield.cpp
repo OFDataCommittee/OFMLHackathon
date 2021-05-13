@@ -90,7 +90,7 @@ std::string StringField::serialize()
     return buf;
 }
 
-void StringField::append(std::string value)
+void StringField::append(const std::string& value)
 {
     this->_vals.push_back(value);
     return;
@@ -99,6 +99,12 @@ void StringField::append(std::string value)
 size_t StringField::size()
 {
     return this->_vals.size();
+}
+
+void StringField::clear()
+{
+    this->_vals.clear();
+    return;
 }
 
 std::vector<std::string> StringField::values()
