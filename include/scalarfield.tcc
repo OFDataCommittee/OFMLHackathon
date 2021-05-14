@@ -18,9 +18,8 @@ ScalarField<T>::ScalarField(const std::string& name,
     return;
 }
 
-template <classT>
-std::string ScalarField<T>::serialize(const std::string& prefix,
-                                      const std::string& suffix)
+template <class T>
+std::string ScalarField<T>::serialize()
 {
     /*
     *   The serialized string has the format described
@@ -53,30 +52,31 @@ std::string ScalarField<T>::serialize(const std::string& prefix,
     size_t n_chars = n_bytes / sizeof(char);
 
     std::string buf(n_chars, 0);
-
+    std::cout<<"buf.size at beg "<<buf.size()<<std::endl;
     size_t pos = 0;
 
     // Add the type ID
     int8_t type_id = (int8_t)this->_type;
     n_chars = sizeof(int8_t)/sizeof(char);
-    buf.insert(pos, (char*)(&type_id), n_chars);
+    this->_place_buf_chars(buf, pos, (char*)(&type_id), n_chars);
     pos += n_chars;
 
     // Add the number of values
     size_t n_vals = this->_vals.size();
     n_chars = sizeof(size_t)/sizeof(char);
-    buf.insert(pos, (char*)(&n_vals), n_chars);
+    this->_place_buf_chars(buf, pos, (char*)(&n_vals), n_chars);
     pos += n_chars;
 
     // Add the number of the values
     n_chars = sizeof(T)/sizeof(char) * this->_vals.size();
-    buf.insert(pos, (char*)(&this->_vals.data()), n_chars);
-
+    T* v_data = this->_vals.data();
+    this->_place_buf_chars(buf, pos, (char*)(v_data), n_chars);
+    std::cout<<"buf.size at end "<<buf.size()<<std::endl;
     return buf;
 }
 
 template <class T>
-void ScalarField<T>::append(T value)
+void ScalarField<T>::append(const void* value)
 {
     this->_vals.push_back(*((T*)(value)));
     return;
@@ -120,6 +120,21 @@ void ScalarField<T>::_unpack(const std::string_view& buf)
 
     std::memcpy(this->_vals.data(), (T*)data,
                 n_vals*sizeof(T));
+    return;
+}
+
+template <typename T>
+void ScalarField<T>::_place_buf_chars(std::string& buf,
+                                      size_t pos,
+                                      char* buf_chars,
+                                      size_t n_chars)
+{
+    for(size_t i=0; i<n_chars; i++) {
+        std::cout<<"Putting char "<<(*buf_chars)<<std::endl;
+        buf[pos] = *buf_chars;
+        pos++;
+        buf_chars++;
+    }
     return;
 }
 

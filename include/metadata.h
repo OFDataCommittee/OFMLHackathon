@@ -140,6 +140,16 @@ class MetaData
                         const std::string& value);
 
         /*!
+        *   \brief Add a serialized field to the MetaData object
+        *   \param name The name of the field
+        *   \param buf The buffer used for field construction
+        *   \param buf_size The length of the buffer
+        */
+        void add_serialized_field(const std::string& name,
+                                  char* buf,
+                                  size_t buf_size);
+
+        /*!
         *   \brief  Get metadata values from field
         *           that are scalars (non-string)
         *   \details This function allocates memory to
@@ -201,6 +211,17 @@ class MetaData
         *   \param field_name The name of the field to clear
         */
         void clear_field(const std::string& field_name);
+
+        /*!
+        *   \brief Returns a vector of std::pair with
+        *          the field name and the field serialization
+        *          for all fields in the MetaData set.
+        *   \returns std::pair<std::string, std::string> containing
+        *            the field name and the field serialization.
+        */
+        std::vector<std::pair<std::string, std::string>>
+            get_metadata_serialization_map();
+
 
     private:
 
@@ -323,6 +344,8 @@ class MetaData
         *            otherwise false
         */
         bool _field_exists(const std::string& field_name);
+
+};
 
 } //namespace SmartRedis
 

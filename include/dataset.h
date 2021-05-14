@@ -333,6 +333,16 @@ class DataSet
         */
         std::string name;
 
+        /*!
+        *   \brief Returns a vector of std::pair with
+        *          the field name and the field serialization
+        *          for all fields in the MetaData set.
+        *   \returns std::pair<std::string, std::string> containing
+        *            the field name and the field serialization.
+        */
+        std::vector<std::pair<std::string, std::string>>
+            get_metadata_serialization_map();
+
         friend class Client;
 
     protected:
@@ -376,14 +386,6 @@ class DataSet
         const_tensor_iterator tensor_cend();
 
         /*!
-        *   \brief Returns a buffer string represeting the
-        *          total metadata package in the DataSet
-        *   \returns std::string_view containing metadata
-        *            buffer
-        */
-        std::string_view get_metadata_buf();
-
-        /*!
         *   \brief Get a string representing the Tensor type
         *   \param name The name of the Tensor
         *   \returns std::string representing the Tensor type
@@ -399,12 +401,22 @@ class DataSet
         *   \param mem_layout The memory layout of the provided
         *                     tensor data
         */
-        void _add_to_tensorpack(const std::string& name /*!< The name used to reference the tensor*/,
-                                void* data /*!< A c-ptr to the data of the tensor*/,
-                                const std::vector<size_t>& dims /*! The dimensions of the data*/,
-                                const TensorType type /*! The type of the tensor*/,
-                                const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
-                                );
+        void _add_to_tensorpack(const std::string& name,
+                                void* data,
+                                const std::vector<size_t>& dims,
+                                const TensorType type,
+                                const MemoryLayout mem_layout);
+
+        /*!
+        *   \brief Add a serialized field to the DataSet
+        *   \param name The name of the field
+        *   \param buf The buffer used for object construction
+        *   \param buf_size The length of the buffer
+        */
+        void _add_serialized_field(const std::string& name,
+                                   char* buf,
+                                   size_t buf_size);
+
     private:
 
 

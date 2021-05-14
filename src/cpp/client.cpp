@@ -62,15 +62,23 @@ void Client::put_dataset(DataSet& dataset)
     CommandList cmds;
     Command* cmd;
 
-
-    // Send the metadata message
     std::string meta_key =
         this->_build_dataset_meta_key(dataset.name, false);
 
-    cmd = cmds.add_command();
-    cmd->add_field("SET");
-    cmd->add_field(meta_key, true);
-    cmd->add_field_ptr(dataset.get_metadata_buf());
+    // Send the metadata message
+    std::vector<std::pair<std::string, std::string>>
+        mdf = dataset.get_metadata_serialization_map();
+
+    for(size_t i=0; i<mdf.size(); i++) {
+        cmd = cmds.add_command();
+        cmd->add_field("HSET");
+        cmd->add_field(meta_key, true);
+        cmd->add_field(mdf[i].first);
+        std::cout<<mdf[i].first<<std::endl;
+        std::cout<<"The serialized field is "<<std::endl;
+        std::cout<<mdf[i].second<<std::endl;
+        cmd->add_field(mdf[i].second);
+    }
 
     // Send the tensor data
     DataSet::tensor_iterator it = dataset.tensor_begin();
@@ -112,6 +120,11 @@ DataSet Client::get_dataset(const std::string& name)
     CommandReply reply = this->_get_dataset_metadata(name);
 
     DataSet dataset = DataSet(name, reply.str(), reply.str_len());
+
+    //TODO move this DataSet construction ot a function after
+    //move and copy operators work
+
+
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
 
     std::vector<size_t> reply_dims;
@@ -148,6 +161,8 @@ void Client::rename_dataset(const std::string& name,
 void Client::copy_dataset(const std::string& src_name,
                           const std::string& dest_name)
 {
+    throw std::runtime_error("copy_dataset not implemented.");
+    /*
     CommandReply reply = this->_get_dataset_metadata(src_name);
     DataSet dataset = DataSet(src_name, reply.str(), reply.str_len());
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
@@ -183,6 +198,7 @@ void Client::copy_dataset(const std::string& src_name,
     ack_cmd.add_field("1");
     this->_run(ack_cmd);
     return;
+    */
 }
 
 void Client::delete_dataset(const std::string& name)

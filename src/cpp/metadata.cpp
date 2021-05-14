@@ -52,7 +52,6 @@ MetaData& MetaData::operator=(const MetaData& metadata) {
 
     //TODO we need to do a deep copy of the _field_map
     if(this!=&metadata) {
-        this->_pb_metadata_msg = metadata._pb_metadata_msg;
         this->_char_array_mem_mgr = metadata._char_array_mem_mgr;
         this->_char_mem_mgr = metadata._char_mem_mgr;
         this->_double_mem_mgr = metadata._double_mem_mgr;
@@ -62,7 +61,6 @@ MetaData& MetaData::operator=(const MetaData& metadata) {
         this->_int32_mem_mgr = metadata._int32_mem_mgr;
         this->_uint32_mem_mgr = metadata._uint32_mem_mgr;
         this->_str_len_mem_mgr = metadata._str_len_mem_mgr;
-        this->_buf = metadata._buf;
     }
     return *this;
 }
@@ -85,22 +83,22 @@ void MetaData::add_scalar(const std::string& field_name,
 
     switch(type) {
         case MetaDataType::dbl :
-            (ScalarField<double>*)(mdf)->append(value);
+            ((ScalarField<double>*)(mdf))->append(value);
             break;
         case MetaDataType::flt :
-            (ScalarField<float>*)(mdf)->append(value);
+            ((ScalarField<float>*)(mdf))->append(value);
             break;
         case MetaDataType::int64 :
-            (ScalarField<int64_t>*)(mdf)->append(value);
+            ((ScalarField<int64_t>*)(mdf))->append(value);
             break;
         case MetaDataType::uint64 :
-            (ScalarField<uint64_t>*)(mdf)->append(value);
+            ((ScalarField<uint64_t>*)(mdf))->append(value);
             break;
         case MetaDataType::int32 :
-            (ScalarField<int32_t>*)(mdf)->append(value);
+            ((ScalarField<int32_t>*)(mdf))->append(value);
             break;
         case MetaDataType::uint32 :
-            (ScalarField<uint32_t>*)(mdf)->append(value);
+            ((ScalarField<uint32_t>*)(mdf))->append(value);
             break;
         case MetaDataType::string :
             throw std::runtime_error("Invalid MetaDataType used in "\
@@ -114,7 +112,7 @@ void MetaData::add_string(const std::string& field_name,
                           const std::string& value)
 {
     if(!(this->_field_exists(field_name)))
-         this->_create_message(field_name, MetaDataType::string);
+         this->_create_field(field_name, MetaDataType::string);
 
     ((StringField*)(this->_field_map[field_name]))->append(value);
     return;
@@ -204,7 +202,7 @@ MetaData::get_string_values(const std::string& name)
                                  name +
                                  " is not a string field.");
 
-    return (StringField*)(this->_field_map[name])->values();
+    return ((StringField*)(this->_field_map[name]))->values();
 }
 
 void MetaData::clear_field(const std::string& field_name)
@@ -219,11 +217,7 @@ void MetaData::_create_field(const std::string& field_name,
 {
     switch(type) {
         case MetaDataType::string :
-            /*
-            TODO implement this function
-            this->_create_string_field
-                    <std::string>(field_name,type);
-            */
+            this->_create_string_field(field_name);
             break;
         case MetaDataType::dbl :
             this->_create_scalar_field<double>(field_name,type);
@@ -248,8 +242,8 @@ void MetaData::_create_field(const std::string& field_name,
 }
 
 template <typename T>
-void MetaData::_create_scalar_field<T>(const std::string& field_name,
-                                       const MetaDataType type)
+void MetaData::_create_scalar_field(const std::string& field_name,
+                                    const MetaDataType type)
 {
     MetadataField* mdf = new ScalarField<T>(field_name, type);
     this->_field_map[field_name] = mdf;
@@ -258,7 +252,7 @@ void MetaData::_create_scalar_field<T>(const std::string& field_name,
 
 void MetaData::_create_string_field(const std::string& field_name)
 {
-    MetadataField* mdf = new StringField(field_name, type);
+    MetadataField* mdf = new StringField(field_name);
     this->_field_map[field_name] = mdf;
     return;
 }
@@ -269,17 +263,63 @@ void MetaData::_get_numeric_field_values(const std::string& name,
                                          size_t& n_values,
                                          SharedMemoryList<T>& mem_list)
 {
-    // Fetch the ScalarField from the map
-    ScalarField* sdf = (ScalarField*)(this->_field_map[name]);
+    // Fetch the type of the field
+    MetaDataType type = this->_field_map[name]->type();
 
-    // Get the number of entries and number of bytes
-    n_values = sdf->size();
-
-    // Allocate the memory
-    data = (void*)mem_list.allocate(n_values);
-
-    // Copy over the field values
-    std::memcpy(data, sdf->data(), n_values*sizeof(T));
+    switch(type) {
+        case MetaDataType::dbl : {
+            ScalarField<double>* sdf =
+                ((ScalarField<double>*)(this->_field_map[name]));
+            n_values = sdf->size();
+            data = (void*)mem_list.allocate(n_values);
+            std::memcpy(data, sdf->data(), n_values*sizeof(T));
+            }
+            break;
+        case MetaDataType::flt : {
+            ScalarField<float>* sdf =
+                ((ScalarField<float>*)(this->_field_map[name]));
+            n_values = sdf->size();
+            data = (void*)mem_list.allocate(n_values);
+            std::memcpy(data, sdf->data(), n_values*sizeof(T));
+            }
+            break;
+        case MetaDataType::int64 : {
+            ScalarField<int64_t>* sdf =
+                ((ScalarField<int64_t>*)(this->_field_map[name]));
+            n_values = sdf->size();
+            data = (void*)mem_list.allocate(n_values);
+            std::memcpy(data, sdf->data(), n_values*sizeof(T));
+            }
+            break;
+        case MetaDataType::uint64 : {
+            ScalarField<uint64_t>* sdf =
+                ((ScalarField<uint64_t>*)(this->_field_map[name]));
+            n_values = sdf->size();
+            data = (void*)mem_list.allocate(n_values);
+            std::memcpy(data, sdf->data(), n_values*sizeof(T));
+            }
+            break;
+        case MetaDataType::int32 : {
+            ScalarField<int32_t>* sdf =
+                ((ScalarField<int32_t>*)(this->_field_map[name]));
+            n_values = sdf->size();
+            data = (void*)mem_list.allocate(n_values);
+            std::memcpy(data, sdf->data(), n_values*sizeof(T));
+            }
+            break;
+        case MetaDataType::uint32 : {
+            ScalarField<uint32_t>* sdf =
+                ((ScalarField<uint32_t>*)(this->_field_map[name]));
+            n_values = sdf->size();
+            data = (void*)mem_list.allocate(n_values);
+            std::memcpy(data, sdf->data(), n_values*sizeof(T));
+            }
+            break;
+        case MetaDataType::string :
+            throw std::runtime_error("Invalid MetaDataType used in "\
+                                     "MetaData.add_scalar().");
+            break;
+    }
 
     return;
 }
@@ -287,4 +327,80 @@ void MetaData::_get_numeric_field_values(const std::string& name,
 bool MetaData::_field_exists(const std::string& field_name)
 {
    return (this->_field_map.count(field_name)>0);
+}
+
+std::vector<std::pair<std::string, std::string>>
+    MetaData::get_metadata_serialization_map()
+{
+    std::unordered_map<std::string, MetadataField*>::iterator
+        mdf_it = this->_field_map.begin();
+    std::unordered_map<std::string, MetadataField*>::iterator
+        mdf_it_end = this->_field_map.end();
+
+    std::vector<std::pair<std::string, std::string>> fields;
+
+    while(mdf_it!=mdf_it_end) {
+        fields.push_back({mdf_it->first,mdf_it->second->serialize()});
+        mdf_it++;
+    }
+
+    return fields;
+}
+
+void MetaData::add_serialized_field(const std::string& name,
+                                    char* buf,
+                                    size_t buf_size)
+{
+
+    MetaDataType type = MetadataField::get_type_from_buffer(buf);
+
+    if(this->_field_exists(name))
+        throw std::runtime_error("Cannot add serialized field if "\
+                                 "already exists.");
+
+    switch(type) {
+        case MetaDataType::dbl : {
+            MetadataField* mdf = new ScalarField<double>(name,
+                std::string_view(buf, buf_size));
+            this->_field_map[name] = mdf;
+            }
+            break;
+        case MetaDataType::flt : {
+            MetadataField* mdf = new ScalarField<float>(name,
+                std::string_view(buf, buf_size));
+            this->_field_map[name] = mdf;
+            }
+            break;
+        case MetaDataType::int64 : {
+            MetadataField* mdf = new ScalarField<int64_t>(name,
+                std::string_view(buf, buf_size));
+            this->_field_map[name] = mdf;
+            }
+            break;
+        case MetaDataType::uint64 : {
+            MetadataField* mdf = new ScalarField<uint64_t>(name,
+                std::string_view(buf, buf_size));
+            this->_field_map[name] = mdf;
+            }
+            break;
+        case MetaDataType::int32 : {
+            MetadataField* mdf = new ScalarField<int32_t>(name,
+                std::string_view(buf, buf_size));
+            this->_field_map[name] = mdf;
+            }
+            break;
+        case MetaDataType::uint32 : {
+            MetadataField* mdf = new ScalarField<uint32_t>(name,
+                std::string_view(buf, buf_size));
+            this->_field_map[name] = mdf;
+            }
+            break;
+        case MetaDataType::string : {
+            MetadataField* mdf = new StringField(name,
+                std::string_view(buf, buf_size));
+            this->_field_map[name] = mdf;
+            }
+            break;
+    }
+    return;
 }

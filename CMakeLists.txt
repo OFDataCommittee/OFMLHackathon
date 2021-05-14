@@ -30,7 +30,8 @@ set(CLIENT_SRC
     src/cpp/redisserver.cpp
     src/cpp/rediscluster.cpp
     src/cpp/redis.cpp
-    utils/protobuf/smartredis.pb.cc
+    src/cpp/metadatafield.cpp
+    src/cpp/stringfield.cpp
     src/fortran/fortran_c_interop.F90
     src/fortran/dataset.F90
     src/fortran/client.F90)
@@ -38,7 +39,6 @@ set(CLIENT_SRC
 include_directories(SYSTEM
     install/include/
     include
-    utils/protobuf
     src/fortran
 )
 
@@ -55,12 +55,6 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
         DESTINATION "include"
         FILES_MATCHING
         PATTERN "*.h" PATTERN "*.tcc" PATTERN "*.inc"
-)
-
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/utils/protobuf/"
-        DESTINATION "include"
-        FILES_MATCHING
-        PATTERN "*.h" PATTERN "*.tcc"
 )
 
 if(BUILD_PYTHON)

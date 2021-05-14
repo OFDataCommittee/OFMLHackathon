@@ -107,7 +107,7 @@ class StringField : public MetadataField {
         *   \brief Add a string to the field
         *   \param value A c-ptr to the value to append
         */
-        virtual void append(const std::string& value);
+        void append(const std::string& value);
 
         /*!
         *   \brief Retrieve the number of values in the field
@@ -139,6 +139,23 @@ class StringField : public MetadataField {
         *   \brief The ScalarField values
         */
         std::vector<std::string> _vals;
+
+        /*!
+        *   \brief Put the buffer characters into the
+        *          buffer string.
+        *   \param buf The buffer in which the characters
+        *              should be placed.
+        *   \param pos The position in the buffer to place
+        *              characters.
+        *   \param buf_chars The characters to place in the
+        *                    buffer.
+        *   \param n_chars The number of characters to place
+        *                  in the buffer.
+        */
+        void _place_buf_chars(std::string& buf,
+                              size_t pos,
+                              char* buf_chars,
+                              size_t n_chars);
 
 };
 

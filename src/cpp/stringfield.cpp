@@ -1,5 +1,5 @@
 #include "stringfield.h"
-
+#include <iostream>
 using namespace SmartRedis;
 
 StringField::StringField(const std::string& name) :
@@ -54,9 +54,9 @@ std::string StringField::serialize()
 
     size_t n_bytes = type_bytes + str_count_bytes +
                      str_length_bytes + data_bytes;
-
-
+    std::cout<<"n_bytes = "<<n_bytes<<std::endl;
     size_t n_chars = n_bytes / sizeof(char);
+    std::cout<<"n_chars = "<<n_chars<<std::endl;
 
     std::string buf(n_chars, 0);
 
@@ -65,28 +65,30 @@ std::string StringField::serialize()
     // Add the type ID
     int8_t type_id = (int8_t)this->_type;
     n_chars = sizeof(int8_t)/sizeof(char);
-    buf.insert(pos, (char*)(&type_id), n_chars);
+    this->_place_buf_chars(buf, pos, (char*)(&type_id), n_chars);
     pos += n_chars;
 
     // Add the number of strings
     size_t n_str = this->_vals.size();
     n_chars = sizeof(size_t)/sizeof(char);
-    buf.insert(pos, (char*)(&n_str), n_chars);
+    this->_place_buf_chars(buf, pos, (char*)(&n_str), n_chars);
     pos += n_chars;
-
+    std::cout<<"buf.size() "<<buf.size()<<std::endl;
     // Add each string length and string value
     size_t str_length;
     for(size_t i=0; i<this->_vals.size(); i++) {
-
+        std::cout<<this->_vals[i]<<std::endl;
+        std::cout<<this->_vals[i].size()<<std::endl;
+        std::cout<<"pos = "<<pos<<std::endl;
         str_length = this->_vals[i].size();
         n_chars = sizeof(size_t) / sizeof(char);
-        buf.insert(pos, str_length, n_chars);
+        this->_place_buf_chars(buf, pos, (char*)(&str_length), n_chars);
         pos += n_chars;
-
-        buf.insert(pos, this->_vals[i]);
-        pos += this->_vals.size();
+        std::cout<<"buf.size() "<<buf.size()<<std::endl;
+        this->_place_buf_chars(buf, pos, (char*)(this->_vals[i].data()), this->_vals[i].size());
+        pos += this->_vals[i].size();
     }
-
+    std::cout<<"end buf length = "<<buf.size()<<std::endl;
     return buf;
 }
 
@@ -135,5 +137,18 @@ void StringField::_unpack(const std::string_view& buf)
         data = (char*)data + str_len;
     }
 
+    return;
+}
+
+void StringField::_place_buf_chars(std::string& buf,
+                                   size_t pos,
+                                   char* buf_chars,
+                                   size_t n_chars)
+{
+    for(size_t i=0; i<n_chars; i++) {
+        buf[pos] = *buf_chars;
+        pos++;
+        buf_chars++;
+    }
     return;
 }

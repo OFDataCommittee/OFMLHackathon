@@ -81,12 +81,6 @@ class MetadataField {
     virtual std::string serialize() = 0;
 
     /*!
-    *   \brief Append a value to the field
-    *   \param value A c-ptr to the value to append
-    */
-    virtual void append(void* value) = 0;
-
-    /*!
     *   \brief Retrieve the MetadataField name
     *   \returns MetadataField name
     */

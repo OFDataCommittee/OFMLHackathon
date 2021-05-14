@@ -40,7 +40,8 @@ DataSet::DataSet(const std::string& name,
                  size_t buf_size)
 {
     this->name = name;
-    this->_metadata.fill_from_buffer(buf, buf_size);
+    throw std::runtime_error("DataSet constructor from buffer not implemented.");
+    //OLD CODE this->_metadata.fill_from_buffer(buf, buf_size);
 }
 
 void DataSet::add_tensor(const std::string& name,
@@ -201,7 +202,16 @@ DataSet::const_tensor_iterator DataSet::tensor_cend()
     return this->_tensorpack.tensor_cend();
 }
 
-std::string_view DataSet::get_metadata_buf()
+std::vector<std::pair<std::string, std::string>>
+    DataSet::get_metadata_serialization_map()
 {
-   return this->_metadata.get_metadata_buf();
+   return this->_metadata.get_metadata_serialization_map();
+}
+
+void DataSet::_add_serialized_field(const std::string& name,
+                                   char* buf,
+                                   size_t buf_size)
+{
+    this->_metadata.add_serialized_field(name, buf, buf_size);
+    return;
 }
