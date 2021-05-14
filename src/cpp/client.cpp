@@ -119,11 +119,20 @@ DataSet Client::get_dataset(const std::string& name)
     // Get the metadata message and construct DataSet
     CommandReply reply = this->_get_dataset_metadata(name);
 
-    DataSet dataset = DataSet(name, reply.str(), reply.str_len());
+    DataSet dataset = DataSet(name);
+    std::string field_name;
 
-    //TODO move this DataSet construction ot a function after
-    //move and copy operators work
+    if(reply.n_elements()%2)
+        throw std::runtime_error("The DataSet metadata reply "\
+                                  "contains the wrong number of "\
+                                  "elements.");
 
+    for(size_t i=0; i<reply.n_elements(); i+=2) {
+        field_name = std::string(reply[i].str(), reply[i].str_len());
+        dataset._add_serialized_field(field_name,
+                                      reply[i+1].str(),
+                                      reply[i+1].str_len());
+    }
 
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
 
@@ -858,7 +867,7 @@ inline void Client::_append_with_put_prefix(
 inline CommandReply Client::_get_dataset_metadata(const std::string& name)
 {
     Command cmd;
-    cmd.add_field("GET");
+    cmd.add_field("HGETALL");
     cmd.add_field(this->_build_dataset_meta_key(name, true), true);
     return this->_run(cmd);
 }
