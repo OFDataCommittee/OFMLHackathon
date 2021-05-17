@@ -232,7 +232,21 @@ void Client::copy_dataset(const std::string& src_name,
 void Client::delete_dataset(const std::string& name)
 {
     CommandReply reply = this->_get_dataset_metadata(name);
-    DataSet dataset = DataSet(name, reply.str(), reply.str_len());
+
+    DataSet dataset = DataSet(name);
+    std::string field_name;
+
+    if(reply.n_elements()%2)
+        throw std::runtime_error("The DataSet metadata reply "\
+                                  "contains the wrong number of "\
+                                  "elements.");
+
+    for(size_t i=0; i<reply.n_elements(); i+=2) {
+        field_name = std::string(reply[i].str(), reply[i].str_len());
+        dataset._add_serialized_field(field_name,
+                                      reply[i+1].str(),
+                                      reply[i+1].str_len());
+    }
 
     Command cmd;
     cmd.add_field("DEL");

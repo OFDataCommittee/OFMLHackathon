@@ -33,12 +33,10 @@ using namespace SmartRedis;
 MetaData::MetaData(const MetaData& metadata) {
     /* Copy constructor for Metadata
     */
-
     std::unordered_map<std::string, MetadataField*>::const_iterator
         field_it = metadata._field_map.cbegin();
     std::unordered_map<std::string, MetadataField*>::const_iterator
         field_it_end = metadata._field_map.cend();
-
     while(field_it != field_it_end) {
         this->_create_field(field_it->first,
                             field_it->second->type());
@@ -60,7 +58,6 @@ MetaData::MetaData(const MetaData& metadata) {
 
 MetaData& MetaData::operator=(const MetaData& metadata) {
 
-    //TODO we need to do a deep copy of the _field_map
     if(this!=&metadata) {
 
         this->_delete_fields();
@@ -275,31 +272,30 @@ void MetaData::_deep_copy_field(MetadataField* dest_field,
         case MetaDataType::string :
             *((StringField*)dest_field) =
                 *((StringField*)src_field);
-            std::cout<<"Deep copied string field"<<std::endl;
             break;
         case MetaDataType::dbl :
             *((ScalarField<double>*)dest_field) =
                 *((ScalarField<double>*)src_field);
             break;
         case MetaDataType::flt :
-            *((ScalarField<double>*)dest_field) =
-                *((ScalarField<double>*)src_field);
+            *((ScalarField<float>*)dest_field) =
+                *((ScalarField<float>*)src_field);
             break;
         case MetaDataType::int64 :
-            *((ScalarField<double>*)dest_field) =
-                *((ScalarField<double>*)src_field);
+            *((ScalarField<int64_t>*)dest_field) =
+                *((ScalarField<int64_t>*)src_field);
             break;
         case MetaDataType::uint64 :
-            *((ScalarField<double>*)dest_field) =
-                *((ScalarField<double>*)src_field);
+            *((ScalarField<uint64_t>*)dest_field) =
+                *((ScalarField<uint64_t>*)src_field);
             break;
         case MetaDataType::int32 :
-            *((ScalarField<double>*)dest_field) =
-                *((ScalarField<double>*)src_field);
+            *((ScalarField<int32_t>*)dest_field) =
+                *((ScalarField<int32_t>*)src_field);
             break;
         case MetaDataType::uint32 :
-            *((ScalarField<double>*)dest_field) =
-                *((ScalarField<double>*)src_field);
+            *((ScalarField<uint32_t>*)dest_field) =
+                *((ScalarField<uint32_t>*)src_field);
             break;
     }
     return;
