@@ -34,9 +34,19 @@ MetaData::MetaData(const MetaData& metadata) {
     /* Copy constructor for Metadata
     */
 
-    //TODO we need to do a deep copy of the _field_map
-    //because those MetadataField values are allocated
-    //on the heap
+    std::unordered_map<std::string, MetadataField*>::const_iterator
+        field_it = metadata._field_map.cbegin();
+    std::unordered_map<std::string, MetadataField*>::const_iterator
+        field_it_end = metadata._field_map.cend();
+
+    while(field_it != field_it_end) {
+        this->_create_field(field_it->first,
+                            field_it->second->type());
+        this->_deep_copy_field(this->_field_map[field_it->first],
+                               field_it->second);
+        field_it++;
+    }
+
     this->_char_array_mem_mgr = metadata._char_array_mem_mgr;
     this->_char_mem_mgr = metadata._char_mem_mgr;
     this->_double_mem_mgr = metadata._double_mem_mgr;
@@ -52,6 +62,22 @@ MetaData& MetaData::operator=(const MetaData& metadata) {
 
     //TODO we need to do a deep copy of the _field_map
     if(this!=&metadata) {
+
+        this->_delete_fields();
+
+        std::unordered_map<std::string, MetadataField*>::const_iterator
+            field_it = metadata._field_map.cbegin();
+        std::unordered_map<std::string, MetadataField*>::const_iterator
+            field_it_end = metadata._field_map.cend();
+
+        while(field_it != field_it_end) {
+            this->_create_field(field_it->first,
+                                field_it->second->type());
+            this->_deep_copy_field(this->_field_map[field_it->first],
+                                   field_it->second);
+            field_it++;
+        }
+
         this->_char_array_mem_mgr = metadata._char_array_mem_mgr;
         this->_char_mem_mgr = metadata._char_mem_mgr;
         this->_double_mem_mgr = metadata._double_mem_mgr;
@@ -241,6 +267,44 @@ void MetaData::_create_field(const std::string& field_name,
     return;
 }
 
+void MetaData::_deep_copy_field(MetadataField* dest_field,
+                                MetadataField* src_field)
+{
+    MetaDataType type = src_field->type();
+    switch(type) {
+        case MetaDataType::string :
+            *((StringField*)dest_field) =
+                *((StringField*)src_field);
+            std::cout<<"Deep copied string field"<<std::endl;
+            break;
+        case MetaDataType::dbl :
+            *((ScalarField<double>*)dest_field) =
+                *((ScalarField<double>*)src_field);
+            break;
+        case MetaDataType::flt :
+            *((ScalarField<double>*)dest_field) =
+                *((ScalarField<double>*)src_field);
+            break;
+        case MetaDataType::int64 :
+            *((ScalarField<double>*)dest_field) =
+                *((ScalarField<double>*)src_field);
+            break;
+        case MetaDataType::uint64 :
+            *((ScalarField<double>*)dest_field) =
+                *((ScalarField<double>*)src_field);
+            break;
+        case MetaDataType::int32 :
+            *((ScalarField<double>*)dest_field) =
+                *((ScalarField<double>*)src_field);
+            break;
+        case MetaDataType::uint32 :
+            *((ScalarField<double>*)dest_field) =
+                *((ScalarField<double>*)src_field);
+            break;
+    }
+    return;
+}
+
 template <typename T>
 void MetaData::_create_scalar_field(const std::string& field_name,
                                     const MetaDataType type)
@@ -403,4 +467,19 @@ void MetaData::add_serialized_field(const std::string& name,
             break;
     }
     return;
+}
+
+void MetaData::_delete_fields()
+{
+    std::unordered_map<std::string, MetadataField*>::iterator
+        it = this->_field_map.begin();
+    std::unordered_map<std::string, MetadataField*>::iterator
+        it_end = this->_field_map.end();
+
+    while(it!=it_end) {
+        delete (it->second);
+        it++;
+    }
+
+    this->_field_map.clear();
 }

@@ -298,6 +298,16 @@ class MetaData
                            const MetaDataType type);
 
         /*!
+        *   \brief This function will perform a deep copy assignment
+        *          of a scalar or string field.
+        *   \param dest_field The destination field
+        *   \param src_field The source field
+        */
+        void _deep_copy_field(MetadataField* dest_field,
+                              MetadataField* src_field);
+
+
+        /*!
         *   \brief This function creates a new scalar metadata field
         *          and adds it to the field map.
         *   \tparam The datatype associated with the MetaDataType
@@ -344,6 +354,12 @@ class MetaData
         *            otherwise false
         */
         bool _field_exists(const std::string& field_name);
+
+        /*!
+        *   \brief Delete the memory associated with all fields
+        *          and clear inventory
+        */
+        void _delete_fields();
 
 };
 

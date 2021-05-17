@@ -52,7 +52,7 @@ std::string ScalarField<T>::serialize()
     size_t n_chars = n_bytes / sizeof(char);
 
     std::string buf(n_chars, 0);
-    std::cout<<"buf.size at beg "<<buf.size()<<std::endl;
+    //std::cout<<"buf.size at beg "<<buf.size()<<std::endl;
     size_t pos = 0;
 
     // Add the type ID
@@ -71,7 +71,7 @@ std::string ScalarField<T>::serialize()
     n_chars = sizeof(T)/sizeof(char) * this->_vals.size();
     T* v_data = this->_vals.data();
     this->_place_buf_chars(buf, pos, (char*)(v_data), n_chars);
-    std::cout<<"buf.size at end "<<buf.size()<<std::endl;
+    //std::cout<<"buf.size at end "<<buf.size()<<std::endl;
     return buf;
 }
 
@@ -130,7 +130,7 @@ void ScalarField<T>::_place_buf_chars(std::string& buf,
                                       size_t n_chars)
 {
     for(size_t i=0; i<n_chars; i++) {
-        std::cout<<"Putting char "<<(*buf_chars)<<std::endl;
+        //std::cout<<"Putting char "<<(*buf_chars)<<std::endl;
         buf[pos] = *buf_chars;
         pos++;
         buf_chars++;

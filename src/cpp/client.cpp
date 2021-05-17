@@ -74,9 +74,6 @@ void Client::put_dataset(DataSet& dataset)
         cmd->add_field("HSET");
         cmd->add_field(meta_key, true);
         cmd->add_field(mdf[i].first);
-        std::cout<<mdf[i].first<<std::endl;
-        std::cout<<"The serialized field is "<<std::endl;
-        std::cout<<mdf[i].second<<std::endl;
         cmd->add_field(mdf[i].second);
     }
 
@@ -170,10 +167,23 @@ void Client::rename_dataset(const std::string& name,
 void Client::copy_dataset(const std::string& src_name,
                           const std::string& dest_name)
 {
-    throw std::runtime_error("copy_dataset not implemented.");
-    /*
     CommandReply reply = this->_get_dataset_metadata(src_name);
-    DataSet dataset = DataSet(src_name, reply.str(), reply.str_len());
+
+    DataSet dataset = DataSet(src_name);
+    std::string field_name;
+
+    if(reply.n_elements()%2)
+        throw std::runtime_error("The DataSet metadata reply "\
+                                  "contains the wrong number of "\
+                                  "elements.");
+
+    for(size_t i=0; i<reply.n_elements(); i+=2) {
+        field_name = std::string(reply[i].str(), reply[i].str_len());
+        dataset._add_serialized_field(field_name,
+                                      reply[i+1].str(),
+                                      reply[i+1].str_len());
+    }
+
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
 
     std::vector<std::string> tensor_src_names;
@@ -187,14 +197,24 @@ void Client::copy_dataset(const std::string& src_name,
     this->_redis_server->copy_tensors(tensor_src_names,
                                       tensor_dest_names);
 
-    Command put_meta_cmd;
-    CommandReply put_meta_reply;
     std::string put_meta_key;
     put_meta_key = this->_build_dataset_meta_key(dest_name, false);
-    put_meta_cmd.add_field("SET");
-    put_meta_cmd.add_field(put_meta_key, true);
-    put_meta_cmd.add_field_ptr(dataset.get_metadata_buf());
-    put_meta_reply = this->_run(put_meta_cmd);
+
+    CommandList put_meta_cmds;
+    Command* put_cmd;
+    CommandReply put_meta_reply;
+
+    std::vector<std::pair<std::string, std::string>>
+        mdf = dataset.get_metadata_serialization_map();
+
+    for(size_t i=0; i<mdf.size(); i++) {
+        put_cmd = put_meta_cmds.add_command();
+        put_cmd->add_field("HSET");
+        put_cmd->add_field(put_meta_key, true);
+        put_cmd->add_field(mdf[i].first);
+        put_cmd->add_field(mdf[i].second);
+    }
+    put_meta_reply = this->_run(put_meta_cmds);
 
     // Add variable to indicate dataset was correctly set.
 
@@ -207,7 +227,6 @@ void Client::copy_dataset(const std::string& src_name,
     ack_cmd.add_field("1");
     this->_run(ack_cmd);
     return;
-    */
 }
 
 void Client::delete_dataset(const std::string& name)

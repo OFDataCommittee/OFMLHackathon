@@ -73,22 +73,22 @@ std::string StringField::serialize()
     n_chars = sizeof(size_t)/sizeof(char);
     this->_place_buf_chars(buf, pos, (char*)(&n_str), n_chars);
     pos += n_chars;
-    std::cout<<"buf.size() "<<buf.size()<<std::endl;
+    //std::cout<<"buf.size() "<<buf.size()<<std::endl;
     // Add each string length and string value
     size_t str_length;
     for(size_t i=0; i<this->_vals.size(); i++) {
         std::cout<<this->_vals[i]<<std::endl;
         std::cout<<this->_vals[i].size()<<std::endl;
-        std::cout<<"pos = "<<pos<<std::endl;
+        //std::cout<<"pos = "<<pos<<std::endl;
         str_length = this->_vals[i].size();
         n_chars = sizeof(size_t) / sizeof(char);
         this->_place_buf_chars(buf, pos, (char*)(&str_length), n_chars);
         pos += n_chars;
-        std::cout<<"buf.size() "<<buf.size()<<std::endl;
+        //std::cout<<"buf.size() "<<buf.size()<<std::endl;
         this->_place_buf_chars(buf, pos, (char*)(this->_vals[i].data()), this->_vals[i].size());
         pos += this->_vals[i].size();
     }
-    std::cout<<"end buf length = "<<buf.size()<<std::endl;
+    //std::cout<<"end buf length = "<<buf.size()<<std::endl;
     return buf;
 }
 
