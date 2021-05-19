@@ -375,7 +375,7 @@ class Client(PyClient):
         :raises RedisReplyError: if `tensor_exists` fails (i.e. causes an error)
         """
         try:
-            super().tensor_exists(name)
+            return super().tensor_exists(name)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "tensor_exists")
 
@@ -393,7 +393,7 @@ class Client(PyClient):
         :raises RedisReplyError: if `model_exists` fails (i.e. causes an error)
         """
         try:
-            super().model_exists(name)
+            return super().model_exists(name)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "model_exists")
 
@@ -408,7 +408,7 @@ class Client(PyClient):
         :raises RedisReplyError: if `key_exists` fails
         """
         try:
-            super().key_exists(key)
+            return super().key_exists(key)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "key_exists")
 

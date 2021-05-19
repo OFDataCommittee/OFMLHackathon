@@ -43,6 +43,8 @@ def send_get_arrays(client, data):
     for index, array in enumerate(data):
         key = f"array_{str(index)}"
         client.put_tensor(key, array)
+        assert client.tensor_exists(key) == True
+        assert client.key_exists(key) == True
 
     # get from database
     for index, array in enumerate(data):
