@@ -111,7 +111,7 @@ class MetaData
         *   \returns MetaData object reference that has
         *            been assigned the values
         */
-        MetaData& operator=(MetaData&& metadata) = default;
+        MetaData& operator=(MetaData&& metadata);
 
         /*!
         *   \brief Metadata destructor

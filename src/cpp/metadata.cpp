@@ -30,7 +30,8 @@
 
 using namespace SmartRedis;
 
-MetaData::MetaData(const MetaData& metadata) {
+MetaData::MetaData(const MetaData& metadata)
+{
     /* Copy constructor for Metadata
     */
     std::unordered_map<std::string, MetadataField*>::const_iterator
@@ -56,8 +57,8 @@ MetaData::MetaData(const MetaData& metadata) {
     this->_str_len_mem_mgr = metadata._str_len_mem_mgr;
 }
 
-MetaData& MetaData::operator=(const MetaData& metadata) {
-
+MetaData& MetaData::operator=(const MetaData& metadata)
+{
     if(this!=&metadata) {
 
         this->_delete_fields();
@@ -84,6 +85,35 @@ MetaData& MetaData::operator=(const MetaData& metadata) {
         this->_int32_mem_mgr = metadata._int32_mem_mgr;
         this->_uint32_mem_mgr = metadata._uint32_mem_mgr;
         this->_str_len_mem_mgr = metadata._str_len_mem_mgr;
+    }
+    return *this;
+}
+
+MetaData& MetaData::operator=(MetaData&& metadata)
+{
+    if(this!=&metadata) {
+        this->_delete_fields();
+
+        this->_field_map =
+            std::move(metadata._field_map);
+        this->_char_array_mem_mgr =
+            std::move(metadata._char_array_mem_mgr);
+        this->_char_mem_mgr =
+            std::move(metadata._char_mem_mgr);
+        this->_double_mem_mgr =
+            std::move(metadata._double_mem_mgr);
+        this->_float_mem_mgr =
+            std::move(metadata._float_mem_mgr);
+        this->_int64_mem_mgr =
+            std::move(metadata._int64_mem_mgr);
+        this->_uint64_mem_mgr =
+            std::move(metadata._uint64_mem_mgr);
+        this->_int32_mem_mgr =
+            std::move(metadata._int32_mem_mgr);
+        this->_uint32_mem_mgr =
+            std::move(metadata._uint32_mem_mgr);
+        this->_str_len_mem_mgr =
+            std::move(metadata._str_len_mem_mgr);
     }
     return *this;
 }
