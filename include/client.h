@@ -727,6 +727,52 @@ class Client
         inline std::string _build_dataset_ack_key(const std::string& dataset_name,
                                                   bool on_db);
 
+        /*!
+        *   \brief Append the Command associated with
+        *          placing DataSet metadata in the database
+        *          to a CommandList
+        *   \param cmd_list The CommandList to append DataSet
+        *                   metadata commands
+        *   \param dataset The dataset used for the Command
+        *                  construction
+        */
+        void _append_dataset_metadata_commands(CommandList& cmd_list,
+                                               DataSet& dataset);
+
+        /*!
+        *   \brief Append the Command associated with
+        *          placing DataSet tensors in the database
+        *          to a CommandList
+        *   \param cmd_list The CommandList to append DataSet
+        *                   tensor commands
+        *   \param dataset The dataset used for the Command
+        *                  construction
+        */
+        void _append_dataset_tensor_commands(CommandList& cmd_list,
+                                             DataSet& dataset);
+
+        /*!
+        *   \brief Append the Command associated with
+        *          acknowledging that the DataSet is complete
+        *          (all put commands processed) to the CommandList
+        *   \param cmd_list The CommandList to append DataSet
+        *                   ack command
+        *   \param dataset The dataset used for the Command
+        *                  construction
+        */
+        void _append_dataset_ack_command(CommandList& cmd_list,
+                                         DataSet& dataset);
+
+        /*!
+        *   \brief Put the metadata fields embedded in a
+        *          CommandReply into the DataSet
+        *   \param cmd_list The CommandList to append DataSet
+        *                   ack command
+        *   \param dataset The dataset used for the Command
+        *                  construction
+        */
+        void _unpack_dataset_metadata(DataSet& dataset,
+                                      CommandReply& reply);
 };
 
 } //namespace SmartRedis
