@@ -421,8 +421,16 @@ class DataSet
         TensorPack _tensorpack;
 
         /*!
-        *  \brief SharedMemoryList to manage memory associated
-        *         with tensor dimensions from tensor retrieval
+        *   \brief Check and enforce that a tensor must exist or
+        *          throw an error.
+        *   \throw std::runtime_error if the tensor is not
+        *          in the DataSet.
+        */
+        inline void _enforce_tensor_exists(const std::string& name);
+
+        /*!
+        *   \brief SharedMemoryList to manage memory associated
+        *          with tensor dimensions from tensor retrieval
         */
         SharedMemoryList<size_t> _dim_queries;
 };
