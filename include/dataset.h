@@ -69,17 +69,6 @@ class DataSet
         DataSet(const std::string& name);
 
         /*!
-        *   \brief DataSet constructor that builds the object
-        *          from a database buffer stream.
-        *   \param name The name used to reference the DataSet
-        *   \param buf The buffer used for object construction
-        *   \param buf_size The length of the buffer
-        */
-        DataSet(const std::string& name,
-                char* buf,
-                size_t buf_size);
-
-        /*!
         *   \brief DataSet copy constructor
         *   \param dataset The DataSet to copy
         */
@@ -333,16 +322,6 @@ class DataSet
         */
         std::string name;
 
-        /*!
-        *   \brief Returns a vector of std::pair with
-        *          the field name and the field serialization
-        *          for all fields in the MetaData set.
-        *   \returns std::pair<std::string, std::string> containing
-        *            the field name and the field serialization.
-        */
-        std::vector<std::pair<std::string, std::string>>
-            get_metadata_serialization_map();
-
         friend class Client;
 
     protected:
@@ -391,6 +370,16 @@ class DataSet
         *   \returns std::string representing the Tensor type
         */
         std::string get_tensor_type(const std::string& name);
+
+        /*!
+        *   \brief Returns a vector of std::pair with
+        *          the field name and the field serialization
+        *          for all fields in the MetaData set.
+        *   \returns std::pair<std::string, std::string> containing
+        *            the field name and the field serialization.
+        */
+        std::vector<std::pair<std::string, std::string>>
+            get_metadata_serialization_map();
 
         /*!
         *   \brief Add a Tensor (not yet allocated) to the TensorPack

@@ -35,15 +35,6 @@ DataSet::DataSet(const std::string& name)
     this->name = name;
 }
 
-DataSet::DataSet(const std::string& name,
-                 char* buf,
-                 size_t buf_size)
-{
-    this->name = name;
-    throw std::runtime_error("DataSet constructor from buffer not implemented.");
-    //OLD CODE this->_metadata.fill_from_buffer(buf, buf_size);
-}
-
 void DataSet::add_tensor(const std::string& name,
                          void* data,
                          const std::vector<size_t>& dims,

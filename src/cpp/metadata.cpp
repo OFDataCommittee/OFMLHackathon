@@ -477,11 +477,9 @@ void MetaData::_delete_fields()
         it = this->_field_map.begin();
     std::unordered_map<std::string, MetadataField*>::iterator
         it_end = this->_field_map.end();
-
     while(it!=it_end) {
         delete it->second;
         it++;
     }
-
     this->_field_map.clear();
 }
