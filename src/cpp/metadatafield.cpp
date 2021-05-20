@@ -30,6 +30,12 @@ MetaDataType MetadataField::type()
 MetaDataType MetadataField::get_type_from_buffer(
     const std::string_view& buf)
 {
+    if(buf.size() < (sizeof(int8_t)/sizeof(char)))
+        throw std::runtime_error("The MetadataField type cannot "\
+                                 "be retrived from buffer of " +
+                                 std::to_string(buf.size()) +
+                                 "characters.");
+
     void* data = (void*)(buf.data());
     int8_t type = *((int8_t*)data);
     return (MetaDataType)type;

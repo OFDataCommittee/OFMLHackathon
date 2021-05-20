@@ -91,7 +91,7 @@ class ScalarField : public MetadataField {
         /*!
         *   \brief Default MetadataField destructor
         */
-        ~ScalarField() = default;
+        virtual ~ScalarField() = default;
 
         /*!
         *   \brief Serialize the ScalarField for

@@ -90,7 +90,7 @@ class StringField : public MetadataField {
         /*!
         *   \brief Default StringField destructor
         */
-        ~StringField() = default;
+        virtual ~StringField() = default;
 
         /*!
         *   \brief Serialize the StringField for

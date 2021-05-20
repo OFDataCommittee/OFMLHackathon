@@ -114,6 +114,11 @@ class MetaData
         MetaData& operator=(MetaData&& metadata) = default;
 
         /*!
+        *   \brief Metadata destructor
+        */
+        ~MetaData();
+
+        /*!
         *   \brief Add metadata scalar field (non-string) with value.
         *          If the field does not exist, it will be created.
         *          If the field exists, the value

@@ -88,6 +88,12 @@ MetaData& MetaData::operator=(const MetaData& metadata) {
     return *this;
 }
 
+MetaData::~MetaData()
+{
+    this->_delete_fields();
+    return;
+}
+
 void MetaData::add_scalar(const std::string& field_name,
                           const void* value,
                           MetaDataType type)
@@ -473,7 +479,7 @@ void MetaData::_delete_fields()
         it_end = this->_field_map.end();
 
     while(it!=it_end) {
-        delete (it->second);
+        delete it->second;
         it++;
     }
 

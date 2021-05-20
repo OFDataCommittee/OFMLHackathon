@@ -64,7 +64,7 @@ class MetadataField {
     /*!
     *   \brief Default MetadataField destructor
     */
-    ~MetadataField() = default;
+    virtual ~MetadataField() = default;
 
     /*!
     *   \brief Return the MetaDataType embedded in a
