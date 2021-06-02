@@ -52,15 +52,25 @@ class ScalarField : public MetadataField {
         ScalarField(const std::string& name, MetaDataType type);
 
         /*!
-        *   \brief MetadataField constructor that
-        *          takes in a serialized string to populate values.
-        *   \param name The name used to reference the metadata
-        *               field
-        *   \param serial_string The serialized string containing
-        *                        values
+        *   \brief ScalarField constructor with initial vales
+        *   \param name The name used to reference the scalar field
+        *   \param MetaDataType The metadata type for this field
+        *   \param vals Initial values to be copied into the Scalarfield
         */
         ScalarField(const std::string& name,
-                    const std::string_view& serial_string);
+                    MetaDataType type,
+                    const std::vector<T>& vals);
+
+        /*!
+        *   \brief ScalarField constructor with initial values
+        *   \param name The name used to reference the scalar field
+        *   \param MetaDataType The metadata type for this field
+        *   \param vals Initial values to be place in the Scalarfield
+        *               via move semantics
+        */
+        ScalarField(const std::string& name,
+                    MetaDataType type,
+                    std::vector<T>&& vals);
 
         /*!
         *   \brief Default ScalarField copy constructor
@@ -95,10 +105,7 @@ class ScalarField : public MetadataField {
 
         /*!
         *   \brief Serialize the ScalarField for
-        *          transmission and storage.  The serialized
-        *          buffer returned by the ScalarField class
-        *          contains the number of field values
-        *          followed by the field values.
+        *          transmission and storage.
         *   \returns A string of the serialized field
         */
         virtual std::string serialize();
@@ -128,35 +135,20 @@ class ScalarField : public MetadataField {
         */
         void* data();
 
-    private:
-
         /*!
-        *   \brief Unpack the data contained in the buffer.
-        *   \param buf The buffer containing ScalarField data.
+        *   \brief Returns a constant reference to the internal
+        *          std::vector<T> object.
+        *   \returns const reference to std::vector<T>
+        *            of values
         */
-        void _unpack(const std::string_view& buf);
+        const std::vector<T>& immutable_values();
+
+    private:
 
         /*!
         *   \brief The ScalarField values
         */
         std::vector<T> _vals;
-
-        /*!
-        *   \brief Put the buffer characters into the
-        *          buffer string.
-        *   \param buf The buffer in which the characters
-        *              should be placed.
-        *   \param pos The position in the buffer to place
-        *              characters.
-        *   \param buf_chars The characters to place in the
-        *                    buffer.
-        *   \param n_chars The number of characters to place
-        *                  in the buffer.
-        */
-        void _place_buf_chars(std::string& buf,
-                              size_t pos,
-                              char* buf_chars,
-                              size_t n_chars);
 
 };
 

@@ -448,7 +448,8 @@ void MetaData::add_serialized_field(const std::string& name,
                                     size_t buf_size)
 {
 
-    MetaDataType type = MetadataField::get_type_from_buffer(buf);
+    std::string_view buf_sv(buf, buf_size);
+    MetaDataType type = MetadataBuffer::get_type(buf_sv);
 
     if(this->_field_exists(name))
         throw std::runtime_error("Cannot add serialized field if "\
@@ -456,44 +457,50 @@ void MetaData::add_serialized_field(const std::string& name,
 
     switch(type) {
         case MetaDataType::dbl : {
-            MetadataField* mdf = new ScalarField<double>(name,
-                std::string_view(buf, buf_size));
+            MetadataField* mdf = new ScalarField<double>(
+                name, MetaDataType::dbl,
+                MetadataBuffer::unpack_scalar_buf<double>(buf_sv));
             this->_field_map[name] = mdf;
             }
             break;
         case MetaDataType::flt : {
-            MetadataField* mdf = new ScalarField<float>(name,
-                std::string_view(buf, buf_size));
+            MetadataField* mdf = new ScalarField<float>(
+                name, MetaDataType::flt,
+                MetadataBuffer::unpack_scalar_buf<float>(buf_sv));
             this->_field_map[name] = mdf;
             }
             break;
         case MetaDataType::int64 : {
-            MetadataField* mdf = new ScalarField<int64_t>(name,
-                std::string_view(buf, buf_size));
+            MetadataField* mdf = new ScalarField<int64_t>(
+                name, MetaDataType::int64,
+                MetadataBuffer::unpack_scalar_buf<int64_t>(buf_sv));
             this->_field_map[name] = mdf;
             }
             break;
         case MetaDataType::uint64 : {
-            MetadataField* mdf = new ScalarField<uint64_t>(name,
-                std::string_view(buf, buf_size));
+            MetadataField* mdf = new ScalarField<uint64_t>(
+                name, MetaDataType::uint64,
+                MetadataBuffer::unpack_scalar_buf<uint64_t>(buf_sv));
             this->_field_map[name] = mdf;
             }
             break;
         case MetaDataType::int32 : {
-            MetadataField* mdf = new ScalarField<int32_t>(name,
-                std::string_view(buf, buf_size));
+            MetadataField* mdf = new ScalarField<int32_t>(
+                name, MetaDataType::int32,
+                MetadataBuffer::unpack_scalar_buf<int32_t>(buf_sv));
             this->_field_map[name] = mdf;
             }
             break;
         case MetaDataType::uint32 : {
-            MetadataField* mdf = new ScalarField<uint32_t>(name,
-                std::string_view(buf, buf_size));
+            MetadataField* mdf = new ScalarField<uint32_t>(
+                name, MetaDataType::uint32,
+                MetadataBuffer::unpack_scalar_buf<uint32_t>(buf_sv));
             this->_field_map[name] = mdf;
             }
             break;
         case MetaDataType::string : {
-            MetadataField* mdf = new StringField(name,
-                std::string_view(buf, buf_size));
+            MetadataField* mdf = new StringField(
+                name, MetadataBuffer::unpack_string_buf(buf_sv));
             this->_field_map[name] = mdf;
             }
             break;

@@ -30,6 +30,7 @@
 #define SMARTREDIS_STRINGFIELD_H
 
 #include "metadatafield.h"
+#include "metadatabuffer.h"
 
 namespace SmartRedis {
 
@@ -46,20 +47,25 @@ class StringField : public MetadataField {
         /*!
         *   \brief StringField constructor
         *   \param name The name used to reference the string field
-        *   \param MetaDataType The metadata type for this field
         */
         StringField(const std::string& name);
 
         /*!
-        *   \brief StringField constructor that
-        *          takes in a serialized string to populate values.
-        *   \param name The name used to reference the metadata
-        *               field
-        *   \param serial_string The serialized string containing
-        *                        string values
+        *   \brief StringField constructor with initial values to be copied
+        *   \param name The name used to reference the string field
+        *   \param vals An inital vector of values to populate the StringField
         */
         StringField(const std::string& name,
-                    const std::string_view& serial_string);
+                    const std::vector<std::string>& vals);
+
+        /*!
+        *   \brief StringField constructor with initial values to be moved
+        *   \param name The name used to reference the string field
+        *   \param vals An inital vector of values to populate the StringField.
+        *               Move semantics will be used.
+        */
+        StringField(const std::string& name,
+                    std::vector<std::string>&& vals);
 
         /*!
         *   \brief Default StringField copy constructor
@@ -94,11 +100,7 @@ class StringField : public MetadataField {
 
         /*!
         *   \brief Serialize the StringField for
-        *          transmission and storage.  The serialized
-        *          buffer returned by the StringField class
-        *          contains the number of field values, the
-        *          length of each string,
-        *          followed by the string values
+        *          transmission and storage.
         *   \returns A string of the serialized field
         */
         virtual std::string serialize();
@@ -127,35 +129,20 @@ class StringField : public MetadataField {
         */
         std::vector<std::string> values();
 
-    private:
-
         /*!
-        *   \brief Unpack the data contained in the buffer.
-        *   \param buf The buffer containing ScalarField data.
+        *   \brief Returns a constant reference to the internal
+        *          std::vector<std::string> object.
+        *   \returns const reference to std::vector<std::string>
+        *            of string values
         */
-        void _unpack(const std::string_view& buf);
+        const std::vector<std::string>& immutable_values();
+
+    private:
 
         /*!
         *   \brief The ScalarField values
         */
         std::vector<std::string> _vals;
-
-        /*!
-        *   \brief Put the buffer characters into the
-        *          buffer string.
-        *   \param buf The buffer in which the characters
-        *              should be placed.
-        *   \param pos The position in the buffer to place
-        *              characters.
-        *   \param buf_chars The characters to place in the
-        *                    buffer.
-        *   \param n_chars The number of characters to place
-        *                  in the buffer.
-        */
-        void _place_buf_chars(std::string& buf,
-                              size_t pos,
-                              char* buf_chars,
-                              size_t n_chars);
 
 };
 

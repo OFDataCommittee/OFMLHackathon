@@ -36,6 +36,7 @@
 #include "sharedmemorylist.h"
 #include "enums/cpp_metadata_type.h"
 #include "metadatafield.h"
+#include "metadatabuffer.h"
 #include "scalarfield.h"
 #include "stringfield.h"
 

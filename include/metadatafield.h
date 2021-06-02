@@ -53,30 +53,13 @@ class MetadataField {
     MetadataField(const std::string& name, MetaDataType type);
 
     /*!
-    *   \brief MetadataField constructor that
-    *          takes in a serialized string to populate values.
-    *   \param name The name used to reference the metadata field
-    *   \param serial_string The serialized string containing values
-    */
-    MetadataField(const std::string& name,
-                  const std::string_view& serial_string);
-
-    /*!
     *   \brief Default MetadataField destructor
     */
     virtual ~MetadataField() = default;
 
     /*!
-    *   \brief Return the MetaDataType embedded in a
-    *          buffer string.
-    *   \returns The MetaDataType that is in the buffer
-    */
-    static MetaDataType get_type_from_buffer(const std::string_view& buf);
-
-    /*!
-    *   \brief Serialize the MetadataField for
-    *          transmission and storage.
-    *   \returns A string of the serialized metadata
+    *   \brief Retrieve a serialized version of the field
+    *   \returns A std::string containing the serialized field
     */
     virtual std::string serialize() = 0;
 

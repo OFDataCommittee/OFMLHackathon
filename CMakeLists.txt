@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 
 option(BUILD_PYTHON "Build the python module" ON)
 
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXE_LINKER_FLAGS "-lpthread")
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
@@ -36,8 +36,8 @@ set(CLIENT_SRC
     src/fortran/client.F90)
 
 include_directories(SYSTEM
-    install/include/
     include
+    install/include
     src/fortran
 )
 
