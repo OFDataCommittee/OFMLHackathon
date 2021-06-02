@@ -32,8 +32,8 @@ ScalarField<T>::ScalarField(const std::string& name,
 template <class T>
 std::string ScalarField<T>::serialize()
 {
-    return MetadataBuffer::generate_scalar_buf(this->type(),
-                                              this->_vals);
+    return MetadataBuffer::generate_scalar_buf<T>(this->type(),
+                                                  this->_vals);
 }
 
 template <class T>
@@ -68,4 +68,4 @@ const std::vector<T>& ScalarField<T>::immutable_values()
     return this->_vals;
 }
 
-#endif SMARTREDIS_SCALARFIELD_TCC
+#endif //SMARTREDIS_SCALARFIELD_TCC
