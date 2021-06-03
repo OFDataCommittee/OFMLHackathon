@@ -24,7 +24,7 @@ extern inline MetaDataType get_type(const std::string_view& buf)
     return (MetaDataType)type;
 }
 
-extern inline void _add_buf_data(std::string& buf,
+extern inline void add_buf_data(std::string& buf,
                                           size_t pos,
                                           const void* data,
                                           size_t n_bytes)
@@ -34,7 +34,7 @@ extern inline void _add_buf_data(std::string& buf,
 }
 
 template <typename T>
-extern inline bool _safe_to_read(const size_t& byte_position,
+extern inline bool safe_to_read(const size_t& byte_position,
                                           const size_t& total_bytes,
                                           const size_t& n_values)
 {
@@ -49,17 +49,17 @@ extern inline bool _safe_to_read(const size_t& byte_position,
 }
 
 template <typename T>
-extern inline T _read(void* buf,
+extern inline T read(void* buf,
                                const size_t& byte_position,
                                const size_t& total_bytes,
                                const size_t& n_values)
 {
-    _safe_to_read<T>(byte_position, total_bytes, n_values);
+    safe_to_read<T>(byte_position, total_bytes, n_values);
     return *((T*)buf);
 }
 
 template <typename T>
-extern inline bool _advance(void*& buf,
+extern inline bool advance(void*& buf,
                                      size_t& byte_position,
                                      const size_t& total_bytes,
                                      const size_t& n_values)
@@ -74,12 +74,12 @@ extern inline bool _advance(void*& buf,
     return true;
 }
 
-extern inline std::string _read_string(void* buf,
+extern inline std::string read_string(void* buf,
                                                 const size_t& byte_position,
                                                 const size_t& total_bytes,
                                                 const size_t& n_chars)
 {
-    _safe_to_read<char>(byte_position, total_bytes, n_chars);
+    safe_to_read<char>(byte_position, total_bytes, n_chars);
     return std::string((char*)buf, n_chars);
 }
 
@@ -120,13 +120,13 @@ extern inline std::string generate_scalar_buf(MetaDataType type,
     // Add the type ID
     type_t type_id = (type_t)type;
     n_bytes = sizeof(type_t);
-    _add_buf_data(buf, pos, &type_id, n_bytes);
+    add_buf_data(buf, pos, &type_id, n_bytes);
     pos += n_bytes;
 
     // Add the values
     n_bytes = sizeof(T) * data.size();
     const T* v_data = data.data();
-    _add_buf_data(buf, pos, v_data, n_bytes);
+    add_buf_data(buf, pos, v_data, n_bytes);
     return buf;
 }
 
@@ -168,7 +168,7 @@ extern inline std::string generate_string_buf(
     // Add the type ID
     type_t type_id = (type_t)MetaDataType::string;
     n_bytes = sizeof(type_t);
-    _add_buf_data(buf, pos, &type_id, n_bytes);
+    add_buf_data(buf, pos, &type_id, n_bytes);
     pos += n_bytes;
 
     // Add each string length and string value
@@ -177,10 +177,10 @@ extern inline std::string generate_string_buf(
     for(size_t i=0; i<data.size(); i++) {
         str_length = data[i].size();
         entry_bytes = sizeof(size_t);
-        _add_buf_data(buf, pos, &str_length, entry_bytes);
+        add_buf_data(buf, pos, &str_length, entry_bytes);
         pos += entry_bytes;
 
-        _add_buf_data(buf, pos,
+        add_buf_data(buf, pos,
                                       (void*)(data[i].data()),
                                       data[i].size());
         pos += data[i].size();
@@ -199,7 +199,7 @@ extern inline std::vector<std::string> unpack_string_buf(
 
     void* data = (void*)(buf.data());
 
-    type_t type = _read<type_t>(data,
+    type_t type = read<type_t>(data,
                                                 byte_position,
                                                 total_bytes, 1);
 
@@ -212,7 +212,7 @@ extern inline std::vector<std::string> unpack_string_buf(
     std::vector<std::string> vals;
 
 
-    if(!_advance<type_t>(data, byte_position,
+    if(!advance<type_t>(data, byte_position,
                                          total_bytes, 1))
         return vals;
 
@@ -220,18 +220,18 @@ extern inline std::vector<std::string> unpack_string_buf(
 
     while(byte_position < total_bytes) {
 
-        str_len = _read<size_t>(data, byte_position,
+        str_len = read<size_t>(data, byte_position,
                                                 total_bytes, 1);
 
-        if(!_advance<size_t>(data, byte_position,
+        if(!advance<size_t>(data, byte_position,
                                              total_bytes, 1))
             return vals;
 
         vals.push_back(
-            _read_string(data, byte_position,
+            read_string(data, byte_position,
                                          total_bytes, str_len));
 
-        if(!_advance<char>(data, byte_position,
+        if(!advance<char>(data, byte_position,
                                            total_bytes, str_len))
             return vals;
     }
@@ -246,12 +246,12 @@ extern inline std::vector<T> unpack_scalar_buf(const std::string_view& buf)
     size_t byte_position = 0;
     size_t total_bytes = buf.size();
 
-    type_t type = _read<type_t>(data,
+    type_t type = read<type_t>(data,
                                 byte_position,
                                 total_bytes, 1);
 
 
-    if(!_advance<type_t>(data, byte_position,
+    if(!advance<type_t>(data, byte_position,
                          total_bytes, 1))
         return;
 
