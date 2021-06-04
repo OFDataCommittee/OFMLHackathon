@@ -9,8 +9,18 @@ using namespace SmartRedis;
 
 namespace MetadataBuffer {
 
+/*!
+*   \brief The data type associated with the type
+*          identifier in the serialized message
+*/
 typedef int8_t type_t;
 
+/*!
+*   \brief Determine the MetadataType in a metadata
+*          buffer
+*   \param buf The metadata buffer
+*   \return The MetaDataType embedded in the buffer
+*/
 extern inline MetaDataType get_type(const std::string_view& buf)
 {
     if(buf.size() < sizeof(type_t))
@@ -19,71 +29,150 @@ extern inline MetaDataType get_type(const std::string_view& buf)
                                  std::to_string(buf.size()) +
                                  "characters.");
 
-    void* data = (void*)(buf.data());
-    int8_t type = *((int8_t*)data);
-    return (MetaDataType)type;
+    type_t* data = (type_t*)(buf.data());
+    return (MetaDataType)(*data);
 }
 
+/*!
+*   \brief Add data to the buffer string
+*   \param buf The metadata buffer that has sufficient
+*              memory to hold the additional data
+*   \param pos The position in the buffer to start
+*              adding data
+*   \param data A c-ptr to the data
+*   \param n_bytes The number of bytes to be added
+*                  from data to the buffer
+*/
 extern inline void add_buf_data(std::string& buf,
-                                          size_t pos,
-                                          const void* data,
-                                          size_t n_bytes)
+                                size_t pos,
+                                const void* data,
+                                size_t n_bytes)
 {
     std::memcpy(buf.data()+pos, data, n_bytes);
     return;
 }
 
+/*!
+*   \brief Check if it is safe to read a set
+*          number of values of type T from the
+*          buffer
+*   \param byte_position The current position in the buffer
+*   \param total_bytes The total bytes in the buffer
+*   \param n_values The number of values to read
+*   \tparam T The data type that is to be read from buffer
+*   \return True if it is safe to read from the buffer,
+*           otherwise False
+*/
 template <typename T>
 extern inline bool safe_to_read(const size_t& byte_position,
-                                          const size_t& total_bytes,
-                                          const size_t& n_values)
+                                const size_t& total_bytes,
+                                const size_t& n_values)
 {
 
     if( (total_bytes - byte_position)/sizeof(T) < n_values )
+        return false;
+        /*
         throw std::runtime_error("An attempt was made to read "\
                                  "a value beyond the "\
                                  "metadata field buffer.  "\
                                  "The buffer may be corrupted.");
-
+        */
     return true;
 }
 
+/*!
+*   \brief Read a single value of type T from the buffer
+*   \param buf The data buffer
+*   \param byte_position The current position in the buffer
+*   \param total_bytes The total bytes in the buffer
+*   \param n_values The number of values to read
+*   \tparam T The data type that is to be read from buffer
+*   \return The value read from the buffer
+*   \throw std::runtime_error if an attempt is made to read
+*          beyond the buffer length.
+*/
 template <typename T>
 extern inline T read(void* buf,
-                               const size_t& byte_position,
-                               const size_t& total_bytes,
-                               const size_t& n_values)
+                     const size_t& byte_position,
+                     const size_t& total_bytes,
+                     const size_t& n_values)
 {
-    safe_to_read<T>(byte_position, total_bytes, n_values);
+    if(!safe_to_read<T>(byte_position, total_bytes, n_values))
+        throw std::runtime_error("A request to read one scalar value "
+                                 "from the metadata buffer "
+                                 "was made, but the buffer "
+                                 "contains insufficient bytes. "
+                                 "The buffer contains " +
+                                 std::to_string(total_bytes) +
+                                 "bytes and is currently at " +
+                                 "position " +
+                                 std::to_string(byte_position));
     return *((T*)buf);
 }
 
+/*!
+*   \brief Advance the position in the buffer corresponding
+*          to a number of values of a given type
+*   \param buf The data buffer
+*   \param byte_position The current position in the buffer
+*                        that will be updated
+*   \param total_bytes The total bytes in the buffer
+*   \param n_values The number of values to advance by
+*   \tparam T The data type used to calculate the updated
+*           position in the buffer
+*   \return True if the buffer is advanced, false if it cannot
+*           be advanced
+*/
 template <typename T>
 extern inline bool advance(void*& buf,
-                                     size_t& byte_position,
-                                     const size_t& total_bytes,
-                                     const size_t& n_values)
+                           size_t& byte_position,
+                           const size_t& total_bytes,
+                           const size_t& n_values)
 {
-    // TODO Check overflow error of additions
-    size_t final_byte_position = byte_position +
-                                 n_values * sizeof(T);
-    if(final_byte_position >= total_bytes)
+    if(!safe_to_read<T>(byte_position, total_bytes, n_values))
         return false;
-    byte_position = final_byte_position;
+
+    byte_position += n_values * sizeof(T);
     buf = (T*)buf + n_values;
     return true;
 }
 
+/*!
+*   \brief Read a string of length n_chars from the buffer
+*   \param buf The data buffer
+*   \param byte_position The current position in the buffer
+*   \param total_bytes The total bytes in the buffer
+*   \param n_chars The number of characters in the string
+*                  to be read
+*   \return The string read from the buffer
+*   \throw std::runtime_error if an attempt is made to read
+*          beyond the buffer length.
+*/
 extern inline std::string read_string(void* buf,
-                                                const size_t& byte_position,
-                                                const size_t& total_bytes,
-                                                const size_t& n_chars)
+                                      const size_t& byte_position,
+                                      const size_t& total_bytes,
+                                      const size_t& n_chars)
 {
-    safe_to_read<char>(byte_position, total_bytes, n_chars);
+    if(!safe_to_read<char>(byte_position, total_bytes, n_chars))
+        throw std::runtime_error("A request to read a string "
+                                 "from the metadata buffer "
+                                 "was made, but the buffer "
+                                 "contains insufficient bytes. "
+                                 "The buffer contains " +
+                                 std::to_string(total_bytes) +
+                                 "bytes and is currently at " +
+                                 "position " +
+                                 std::to_string(byte_position));
     return std::string((char*)buf, n_chars);
 }
 
-
+/*!
+*   \brief Serialize scalar data into a string buffer
+*   \param type The MetaDataType associated with the scalar data
+*   \param data The std::vector containing scalar data
+*   \tparam The type associated with the data
+*   \return std::string of the serialized data
+*/
 template <typename T>
 extern inline std::string generate_scalar_buf(MetaDataType type,
                                               const std::vector<T>& data)
@@ -100,7 +189,6 @@ extern inline std::string generate_scalar_buf(MetaDataType type,
     *
     *   data content     sizeof(T) * values.size()
     */
-
     if(sizeof(int8_t) != sizeof(char))
         throw std::runtime_error("Metadata is not supported on "\
                                  "systems with char length not "\
@@ -130,6 +218,11 @@ extern inline std::string generate_scalar_buf(MetaDataType type,
     return buf;
 }
 
+/*!
+*   \brief Serialize string data into a string buffer
+*   \param data The std::vector containing string data
+*   \return std::string of the serialized data
+*/
 extern inline std::string generate_string_buf(
     const std::vector<std::string>& data)
 {
@@ -179,15 +272,20 @@ extern inline std::string generate_string_buf(
         entry_bytes = sizeof(size_t);
         add_buf_data(buf, pos, &str_length, entry_bytes);
         pos += entry_bytes;
-
-        add_buf_data(buf, pos,
-                                      (void*)(data[i].data()),
-                                      data[i].size());
+        add_buf_data(buf, pos, (void*)(data[i].data()),
+                     data[i].size());
         pos += data[i].size();
     }
     return buf;
 }
 
+/*!
+*   \brief Unpack a buffer of string values and return
+*          a vector of strings
+*   \param buf The data buffer
+*   \return std::vector<std::string> of the buffer
+*           values
+*/
 extern inline std::vector<std::string> unpack_string_buf(
     const std::string_view& buf)
 {
@@ -199,9 +297,8 @@ extern inline std::vector<std::string> unpack_string_buf(
 
     void* data = (void*)(buf.data());
 
-    type_t type = read<type_t>(data,
-                                                byte_position,
-                                                total_bytes, 1);
+    type_t type = read<type_t>(data, byte_position,
+                               total_bytes, 1);
 
 
     if(type!=(type_t)MetaDataType::string)
@@ -211,35 +308,38 @@ extern inline std::vector<std::string> unpack_string_buf(
 
     std::vector<std::string> vals;
 
-
-    if(!advance<type_t>(data, byte_position,
-                                         total_bytes, 1))
+    if(!advance<type_t>(data, byte_position, total_bytes, 1))
         return vals;
 
     size_t str_len;
 
     while(byte_position < total_bytes) {
 
-        str_len = read<size_t>(data, byte_position,
-                                                total_bytes, 1);
+        str_len = read<size_t>(data, byte_position, total_bytes, 1);
 
-        if(!advance<size_t>(data, byte_position,
-                                             total_bytes, 1))
+        if(!advance<size_t>(data, byte_position, total_bytes, 1))
             return vals;
 
         vals.push_back(
-            read_string(data, byte_position,
-                                         total_bytes, str_len));
+            read_string(data, byte_position, total_bytes, str_len));
 
-        if(!advance<char>(data, byte_position,
-                                           total_bytes, str_len))
+        if(!advance<char>(data, byte_position, total_bytes, str_len))
             return vals;
     }
     return vals;
 }
 
+/*!
+*   \brief Unpack a buffer of scalar values and return
+*          a vector of scalars
+*   \param buf The data buffer
+*   \tparam T the data type associated with the values in the
+*           buffer
+*   \return std::vector<T> of the buffer values
+*/
 template <class T>
-extern inline std::vector<T> unpack_scalar_buf(const std::string_view& buf)
+extern inline std::vector<T> unpack_scalar_buf(
+    const std::string_view& buf)
 {
     void* data = (void*)(buf.data());
 
