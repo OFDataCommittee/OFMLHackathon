@@ -266,8 +266,11 @@ MetaData::get_string_values(const std::string& name)
 
 void MetaData::clear_field(const std::string& field_name)
 {
-    if(this->_field_exists(field_name))
+    if(this->_field_exists(field_name)) {
         this->_field_map[field_name]->clear();
+        delete this->_field_map[field_name];
+        this->_field_map.erase(field_name);
+    }
     return;
 }
 
