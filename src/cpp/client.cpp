@@ -865,11 +865,10 @@ void Client::_append_dataset_metadata_commands(CommandList& cmd_list,
     std::vector<std::pair<std::string, std::string>>
         mdf = dataset.get_metadata_serialization_map();
 
-    Command* cmd;
+    Command* cmd = cmd_list.add_command();
+    cmd->add_field("HMSET");
+    cmd->add_field (meta_key, true);
     for(size_t i=0; i<mdf.size(); i++) {
-        cmd = cmd_list.add_command();
-        cmd->add_field("HSET");
-        cmd->add_field (meta_key, true);
         cmd->add_field(mdf[i].first);
         cmd->add_field(mdf[i].second);
     }
