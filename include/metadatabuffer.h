@@ -181,10 +181,6 @@ extern inline std::string generate_scalar_buf(MetaDataType type,
     *
     *   data content     sizeof(T) * values.size()
     */
-    if(sizeof(int8_t) != sizeof(char))
-        throw std::runtime_error("Metadata is not supported on "\
-                                 "systems with char length not "\
-                                 "equal to 8 bits.");
 
     // Number of bytes needed for the type identifier
     size_t type_bytes = sizeof(type_t);
