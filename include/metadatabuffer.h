@@ -68,16 +68,7 @@ extern inline bool safe_to_read(const size_t& byte_position,
                                 const size_t& total_bytes,
                                 const size_t& n_values)
 {
-
-    if( (total_bytes - byte_position)/sizeof(T) < n_values )
-        return false;
-        /*
-        throw std::runtime_error("An attempt was made to read "\
-                                 "a value beyond the "\
-                                 "metadata field buffer.  "\
-                                 "The buffer may be corrupted.");
-        */
-    return true;
+    return ((total_bytes - byte_position)/sizeof(T) >= n_values);
 }
 
 /*!
@@ -353,7 +344,7 @@ extern inline std::vector<T> unpack_scalar_buf(
 
     if(!advance<type_t>(data, byte_position,
                          total_bytes, 1))
-        return;
+        return std::vector<T>();
 
     if( (total_bytes - byte_position) % sizeof(T))
         throw std::runtime_error("The data portion of the provided "\
