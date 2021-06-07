@@ -353,8 +353,8 @@ class MetaData
                                        SharedMemoryList<T>& mem_list);
 
         /*!
-        *   \brief Return true if the field name is already in use
-        *          for a protobuf messsage, otherwise false.
+        *   \brief Return true if the field name is already in use,
+        *          otherwise false.
         *   \param field_name The name of the metadata field
         *   \returns True if the field name is already in use,
         *            otherwise false
