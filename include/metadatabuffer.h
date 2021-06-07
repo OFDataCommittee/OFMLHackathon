@@ -86,10 +86,9 @@ extern inline bool safe_to_read(const size_t& byte_position,
 template <typename T>
 extern inline T read(void* buf,
                      const size_t& byte_position,
-                     const size_t& total_bytes,
-                     const size_t& n_values)
+                     const size_t& total_bytes)
 {
-    if(!safe_to_read<T>(byte_position, total_bytes, n_values))
+    if(!safe_to_read<T>(byte_position, total_bytes, 1))
         throw std::runtime_error("A request to read one scalar value "
                                  "from the metadata buffer "
                                  "was made, but the buffer "
@@ -285,8 +284,7 @@ extern inline std::vector<std::string> unpack_string_buf(
 
     void* data = (void*)(buf.data());
 
-    type_t type = read<type_t>(data, byte_position,
-                               total_bytes, 1);
+    type_t type = read<type_t>(data, byte_position, total_bytes);
 
 
     if(type!=(type_t)MetaDataType::string)
@@ -303,7 +301,7 @@ extern inline std::vector<std::string> unpack_string_buf(
 
     while(byte_position < total_bytes) {
 
-        str_len = read<size_t>(data, byte_position, total_bytes, 1);
+        str_len = read<size_t>(data, byte_position, total_bytes);
 
         if(!advance<size_t>(data, byte_position, total_bytes, 1))
             return vals;
@@ -334,10 +332,7 @@ extern inline std::vector<T> unpack_scalar_buf(
     size_t byte_position = 0;
     size_t total_bytes = buf.size();
 
-    type_t type = read<type_t>(data,
-                                byte_position,
-                                total_bytes, 1);
-
+    type_t type = read<type_t>(data, byte_position, total_bytes);
 
     if(!advance<type_t>(data, byte_position,
                          total_bytes, 1))
@@ -351,13 +346,6 @@ extern inline std::vector<T> unpack_scalar_buf(
                                  " byte scalar type. It contains " +
                                  std::to_string(total_bytes -
                                  byte_position) + " bytes");
-
-    /*
-    if(type!=(int8_t)this->type())
-        throw std::runtime_error("The buffer scalar metadata type "\
-                                 "does not match the object type "\
-                                 "being used to interpret it.");
-    */
 
     size_t n_vals = (total_bytes - byte_position) / sizeof(T);
     std::vector<T> vals(n_vals);
