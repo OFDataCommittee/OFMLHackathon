@@ -68,7 +68,7 @@ void PyClient::put_tensor(std::string& key,
     return;
 }
 
-py::array PyClient::get_tensor(std::string& key)
+py::array PyClient::get_tensor(const std::string& key)
 {
     // placeholder variables to be filled
     TensorType type;
@@ -139,6 +139,38 @@ py::array PyClient::get_tensor(std::string& key)
       throw std::runtime_error("Could not infer type");
       break;
   }
+}
+
+void PyClient::delete_tensor(const std::string& key) {
+    try {
+        this->_client->delete_tensor(key);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return;
+}
+
+void PyClient::copy_tensor(const std::string& key,
+                           const std::string& dest_key) {
+    try {
+        this->_client->copy_tensor(key, dest_key);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return;
+}
+
+void PyClient::rename_tensor(const std::string& key,
+                             const std::string& new_key) {
+    try {
+        this->_client->rename_tensor(key, new_key);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return;
 }
 
 void PyClient::put_dataset(PyDataset& dataset)

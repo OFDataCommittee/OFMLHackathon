@@ -36,8 +36,8 @@ set(CLIENT_SRC
     src/fortran/client.F90)
 
 include_directories(SYSTEM
-    install/include/
     include
+    install/include/
     utils/protobuf
     src/fortran
 )

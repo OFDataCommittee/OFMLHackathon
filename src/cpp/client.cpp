@@ -473,7 +473,7 @@ void Client::rename_tensor(const std::string& key,
                            const std::string& new_key)
 {
     std::string p_key = this->_build_tensor_key(key, true);
-    std::string p_new_key = this->_build_tensor_key(key, false);
+    std::string p_new_key = this->_build_tensor_key(new_key, false);
     CommandReply reply =
         this->_redis_server->rename_tensor(p_key, p_new_key);
     return;

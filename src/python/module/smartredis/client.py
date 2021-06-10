@@ -92,6 +92,47 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "get_tensor") from None
 
+    def delete_tensor(self, key):
+        """Delete a tensor within the database
+
+        :param key: key tensor is stored at
+        :type key: str
+        :raises RedisReplyError: if deletion fails
+        """
+        try:
+            super().delete_tensor(key)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "delete_tensor") from None
+
+    def copy_tensor(self, key, dest_key):
+        """Copy a tensor at one key to another key
+
+        :param key: key of tensor to be copied
+        :type key: str
+        :param dest_key: key to store new copy at
+        :type dest_key: str
+        :raises RedisReplyError: if copy operation fails
+        """
+        try:
+            super().copy_tensor(key, dest_key)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "copy_tensor") from None
+
+    def rename_tensor(self, key, new_key):
+        """Rename a tensor in the database
+
+        :param key: key of tensor to be renamed
+        :type key: str
+        :param new_key: new name for the tensor
+        :type new_key: str
+        :raises RedisReplyError: if rename operation fails
+        """
+        try:
+            super().rename_tensor(key, new_key)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "rename_tensor") from None
+
+
     def put_dataset(self, dataset):
         """Put a Dataset instance into the database
 
