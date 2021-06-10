@@ -197,6 +197,38 @@ PyDataset* PyClient::get_dataset(const std::string& name)
     return dataset;
 }
 
+void PyClient::delete_dataset(const std::string& key) {
+    try {
+        this->_client->delete_dataset(key);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return;
+}
+
+void PyClient::copy_dataset(const std::string& key,
+                           const std::string& dest_key) {
+    try {
+        this->_client->copy_dataset(key, dest_key);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return;
+}
+
+void PyClient::rename_dataset(const std::string& key,
+                             const std::string& new_key) {
+    try {
+        this->_client->rename_dataset(key, new_key);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return;
+}
+
 void PyClient::set_script_from_file(const std::string& key,
                                     const std::string& device,
                                     const std::string& script_file)

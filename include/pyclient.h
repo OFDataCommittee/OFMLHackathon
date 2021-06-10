@@ -111,7 +111,7 @@ class PyClient
 
         /*!
         *   \brief copy a tensor to a new key
-        *   \param key The key of tensor to delete
+        *   \param key The key of tensor to copy
         *   \param dest_key the key to store tensor copy at
         *   \throw std::runtime_error for all client errors
         */
@@ -134,6 +134,30 @@ class PyClient
         *   \throw std::runtime_error for all client errors
         */
         PyDataset* get_dataset(const std::string& name);
+
+
+        /*!
+        *   \brief delete a dataset stored in the database
+        *   \param key The key of dataset to delete
+        *   \throw std::runtime_error for all client errors
+        */
+        void delete_dataset(const std::string& key);
+
+        /*!
+        *   \brief rename a dataset stored in the database
+        *   \param key The key of dataset to rename
+        *   \param new_key the new name of the dataset
+        *   \throw std::runtime_error for all client errors
+        */
+        void rename_dataset(const std::string& key, const std::string& new_key);
+
+        /*!
+        *   \brief copy a dataset to a new key
+        *   \param key The key of datalset to copy
+        *   \param dest_key the key to store dataset copy at
+        *   \throw std::runtime_error for all client errors
+        */
+        void copy_dataset(const std::string& key, const std::string& dest_key);
 
 
         /*!
