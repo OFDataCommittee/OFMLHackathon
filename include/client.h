@@ -66,6 +66,7 @@ typedef redisReply ReplyElem;
 */
 class Client
 {
+
     public:
 
         /*!
@@ -626,6 +627,20 @@ class Client
         *             metadata
         */
         inline CommandReply _get_dataset_metadata(const std::string& name);
+
+        /*!
+        *   \brief Retrieve the tensor from the database and return
+        *          a Tensor object that can be used to return
+        *          tensor information to the user.
+        *   \details The Tensor object returned will always
+        *            have a MemoryLayout::contiguous layout.
+        *   \param key  The name used to reference the tensor
+        *   \tparam The type T associated with the TensorType.
+        *   \returns A Tensor<T> object.
+        */
+        TensorBase* _get_tensorbase_obj(const std::string& key);
+
+        friend class PyClient;
 
     private:
 
