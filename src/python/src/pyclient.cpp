@@ -83,7 +83,6 @@ py::array PyClient::get_tensor(const std::string& key)
 
     //Define py::capsule lambda function for destructor
     py::capsule free_when_done((void*)tensor, [](void *tensor) {
-            std::cerr << "freeing memory @ " << tensor << "\n";
             delete (TensorBase*)tensor;
             });
 
