@@ -22,6 +22,13 @@ target_link_libraries(client_test_dataset
 	${SR_LIB}
 )
 
+add_executable(client_test_dataset_multiple_get_tensor
+	client_test_dataset_multiple_get_tensor.cpp
+)
+target_link_libraries(client_test_dataset_multiple_get_tensor
+	${SR_LIB}
+)
+
 add_executable(client_test_delete_dataset
 	client_test_delete_dataset.cpp
 )

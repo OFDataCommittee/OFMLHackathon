@@ -629,14 +629,16 @@ class Client
         inline CommandReply _get_dataset_metadata(const std::string& name);
 
         /*!
-        *   \brief Retrieve the tensor from the database and return
-        *          a Tensor object that can be used to return
-        *          tensor information to the user.
-        *   \details The Tensor object returned will always
+        *   \brief Retrieve the tensor from the DataSet and return
+        *          a TensorBase object that can be used to return
+        *          tensor information to the user.  The returned
+        *          TensorBase object has been dynamically allocated,
+        *          but not yet tracked for memory management in
+        *          any object.
+        *   \details The TensorBase object returned will always
         *            have a MemoryLayout::contiguous layout.
-        *   \param key  The name used to reference the tensor
-        *   \tparam The type T associated with the TensorType.
-        *   \returns A Tensor<T> object.
+        *   \param name  The name used to reference the tensor
+        *   \returns A TensorBase object.
         */
         TensorBase* _get_tensorbase_obj(const std::string& key);
 

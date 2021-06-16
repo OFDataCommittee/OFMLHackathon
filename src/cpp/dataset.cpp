@@ -69,9 +69,12 @@ void DataSet::get_tensor(const std::string& name,
                          MemoryLayout mem_layout)
 {
     this->_enforce_tensor_exists(name);
-    type = this->_tensorpack.get_tensor(name)->type();
-    data = this->_tensorpack.get_tensor(name)->data_view(mem_layout);
-    dims = this->_tensorpack.get_tensor(name)->dims();
+    // Clone the tensor in the DataSet
+    TensorBase* tensor = this->_get_tensorbase_obj(name);
+    this->_tensor_memory.add_tensor(tensor);
+    type = tensor->type();
+    data = tensor->data_view(mem_layout);
+    dims = tensor->dims();
     return;
 }
 
@@ -205,4 +208,9 @@ inline void DataSet::_enforce_tensor_exists(const std::string& name)
                                  std::string(name) +
                                  " does not exist in " +
                                  this->name + " dataset.");
+}
+
+TensorBase* DataSet::_get_tensorbase_obj(const std::string& name)
+{
+    return this->_tensorpack.get_tensor(name)->clone();
 }

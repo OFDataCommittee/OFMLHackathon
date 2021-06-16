@@ -323,6 +323,7 @@ class DataSet
         std::string name;
 
         friend class Client;
+        friend class PyDataset;
 
     protected:
 
@@ -406,6 +407,20 @@ class DataSet
                                    char* buf,
                                    size_t buf_size);
 
+        /*!
+        *   \brief Retrieve the tensor from the DataSet and return
+        *          a TensorBase object that can be used to return
+        *          tensor information to the user.  The returned
+        *          TensorBase object has been dynamically allocated,
+        *          but not yet tracked for memory management in
+        *          any object.
+        *   \details The TensorBase object returned will always
+        *            have a MemoryLayout::contiguous layout.
+        *   \param name  The name used to reference the tensor
+        *   \returns A TensorBase object.
+        */
+        TensorBase* _get_tensorbase_obj(const std::string& name);
+
     private:
 
 
@@ -433,6 +448,14 @@ class DataSet
         *          with tensor dimensions from tensor retrieval
         */
         SharedMemoryList<size_t> _dim_queries;
+
+        /*!
+        *  \brief The _tensor_pack memory is not for querying
+        *         by name, but is used to manage memory associated
+        *         with get_tensor() function calls.
+        */
+        TensorPack _tensor_memory;
+
 };
 
 } //namespace SmartRedis
