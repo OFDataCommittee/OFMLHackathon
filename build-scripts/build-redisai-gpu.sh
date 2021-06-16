@@ -51,7 +51,7 @@ else
     fi
     cd RedisAI
     echo "Downloading RedisAI CPU dependencies"
-    CC=gcc CXX=g++ WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh cpu
+    CC=gcc CXX=g++ WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh gpu
     echo "Building RedisAI"
     CC=gcc CXX=g++ GPU=1 WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 WITH_UNIT_TESTS=0 make -C opt clean build
 
