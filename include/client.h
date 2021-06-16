@@ -766,10 +766,10 @@ class Client
         /*!
         *   \brief Put the metadata fields embedded in a
         *          CommandReply into the DataSet
-        *   \param cmd_list The CommandList to append DataSet
-        *                   ack command
-        *   \param dataset The dataset used for the Command
-        *                  construction
+        *   \param dataset The DataSet that will have
+        *                  metadata place in it.
+        *   \param reply The CommandReply containing the
+        *                metadata fields.
         */
         void _unpack_dataset_metadata(DataSet& dataset,
                                       CommandReply& reply);
