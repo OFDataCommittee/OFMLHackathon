@@ -60,48 +60,9 @@ Client::~Client() {
 void Client::put_dataset(DataSet& dataset)
 {
     CommandList cmds;
-    Command* cmd;
-
-
-    // Send the metadata message
-    std::string meta_key =
-        this->_build_dataset_meta_key(dataset.name, false);
-
-    cmd = cmds.add_command();
-    cmd->add_field("SET");
-    cmd->add_field(meta_key, true);
-    cmd->add_field_ptr(dataset.get_metadata_buf());
-
-    // Send the tensor data
-    DataSet::tensor_iterator it = dataset.tensor_begin();
-    DataSet::tensor_iterator it_end = dataset.tensor_end();
-    TensorBase* tensor = 0;
-    std::string tensor_key;
-    while(it != it_end) {
-        tensor = *it;
-        tensor_key =
-            this->_build_dataset_tensor_key(dataset.name,
-                                            tensor->name(),
-                                            false);
-        cmd = cmds.add_command();
-        cmd->add_field("AI.TENSORSET");
-        cmd->add_field(tensor_key, true);
-        cmd->add_field(tensor->type_str());
-        cmd->add_fields(tensor->dims());
-        cmd->add_field("BLOB");
-        cmd->add_field_ptr(tensor->buf());
-        it++;
-    }
-
-    // Add variable to indicate dataset was correctly set.
-    std::string dataset_ack_key =
-        this->_build_dataset_ack_key(dataset.name, false);
-
-    cmd = cmds.add_command();
-    cmd->add_field("SET");
-    cmd->add_field(dataset_ack_key, true);
-    cmd->add_field("1");
-
+    this->_append_dataset_metadata_commands(cmds, dataset);
+    this->_append_dataset_tensor_commands(cmds, dataset);
+    this->_append_dataset_ack_command(cmds, dataset);
     this->_run(cmds);
     return;
 }
@@ -111,7 +72,9 @@ DataSet Client::get_dataset(const std::string& name)
     // Get the metadata message and construct DataSet
     CommandReply reply = this->_get_dataset_metadata(name);
 
-    DataSet dataset = DataSet(name, reply.str(), reply.str_len());
+    DataSet dataset = DataSet(name);
+    this->_unpack_dataset_metadata(dataset, reply);
+
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
 
     std::vector<size_t> reply_dims;
@@ -120,7 +83,8 @@ DataSet Client::get_dataset(const std::string& name)
     std::string tensor_key;
     for(size_t i=0; i<tensor_names.size(); i++) {
         tensor_key =
-            this->_build_dataset_tensor_key(name, tensor_names[i], true);
+            this->_build_dataset_tensor_key(name, tensor_names[i],
+                                            true);
         Command cmd;
         cmd.add_field("AI.TENSORGET");
         cmd.add_field(tensor_key, true);
@@ -149,46 +113,43 @@ void Client::copy_dataset(const std::string& src_name,
                           const std::string& dest_name)
 {
     CommandReply reply = this->_get_dataset_metadata(src_name);
-    DataSet dataset = DataSet(src_name, reply.str(), reply.str_len());
-    std::vector<std::string> tensor_names = dataset.get_tensor_names();
+    DataSet dataset = DataSet(src_name);
+    this->_unpack_dataset_metadata(dataset, reply);
 
+    std::vector<std::string> tensor_names = dataset.get_tensor_names();
     std::vector<std::string> tensor_src_names;
     std::vector<std::string> tensor_dest_names;
     for(size_t i=0; i<tensor_names.size(); i++) {
         tensor_src_names.push_back(
-            this->_build_dataset_tensor_key(src_name, tensor_names[i],true));
+            this->_build_dataset_tensor_key(src_name,
+                                            tensor_names[i],true));
         tensor_dest_names.push_back(
-            this->_build_dataset_tensor_key(dest_name, tensor_names[i],false));
+            this->_build_dataset_tensor_key(dest_name,
+                                            tensor_names[i],false));
     }
     this->_redis_server->copy_tensors(tensor_src_names,
                                       tensor_dest_names);
 
-    Command put_meta_cmd;
+    // Update the DataSet name to the destination name
+    // so we can reuse the object for placing metadata
+    // and ack commands
+    dataset.name = dest_name;
+    CommandList put_meta_cmds;
     CommandReply put_meta_reply;
-    std::string put_meta_key;
-    put_meta_key = this->_build_dataset_meta_key(dest_name, false);
-    put_meta_cmd.add_field("SET");
-    put_meta_cmd.add_field(put_meta_key, true);
-    put_meta_cmd.add_field_ptr(dataset.get_metadata_buf());
-    put_meta_reply = this->_run(put_meta_cmd);
+    this->_append_dataset_metadata_commands(put_meta_cmds, dataset);
+    this->_append_dataset_ack_command(put_meta_cmds, dataset);
+    put_meta_reply = this->_run(put_meta_cmds);
 
-    // Add variable to indicate dataset was correctly set.
-
-    std::string dataset_ack_key =
-        this->_build_dataset_ack_key(dest_name, false);
-
-    Command ack_cmd;
-    ack_cmd.add_field("SET");
-    ack_cmd.add_field(dataset_ack_key, true);
-    ack_cmd.add_field("1");
-    this->_run(ack_cmd);
     return;
 }
 
 void Client::delete_dataset(const std::string& name)
 {
     CommandReply reply = this->_get_dataset_metadata(name);
-    DataSet dataset = DataSet(name, reply.str(), reply.str_len());
+
+    DataSet dataset = DataSet(name);
+    std::string field_name;
+    this->_unpack_dataset_metadata(dataset, reply);
 
     Command cmd;
     cmd.add_field("DEL");
@@ -294,7 +255,6 @@ void Client::get_tensor(const std::string& key,
         case TensorType::dbl :
             ptr = new Tensor<double>(g_key, (void*)blob.data(), dims,
                                      type, MemoryLayout::contiguous);
-
             break;
         case TensorType::flt :
             ptr = new Tensor<float>(g_key, (void*)blob.data(), dims,
@@ -326,7 +286,8 @@ void Client::get_tensor(const std::string& key,
             break;
         default :
             throw std::runtime_error("The tensor could not be "\
-                                     "retrieved in client.get_tensor().");
+                                     "retrieved in "\
+                                     "client.get_tensor().");
             break;
     }
     this->_tensor_memory.add_tensor(ptr);
@@ -358,7 +319,6 @@ void Client::get_tensor(const std::string& key,
         i++;
         it++;
     }
-
     return;
 }
 
@@ -842,7 +802,7 @@ inline void Client::_append_with_put_prefix(
 inline CommandReply Client::_get_dataset_metadata(const std::string& name)
 {
     Command cmd;
-    cmd.add_field("GET");
+    cmd.add_field("HGETALL");
     cmd.add_field(this->_build_dataset_meta_key(name, true), true);
     return this->_run(cmd);
 }
@@ -894,4 +854,82 @@ inline std::string Client::_build_dataset_ack_key(const std::string& dataset_nam
                                                   bool on_db)
 {
     return this->_build_tensor_key(dataset_name, on_db);
+}
+
+void Client::_append_dataset_metadata_commands(CommandList& cmd_list,
+                                               DataSet& dataset)
+{
+    std::string meta_key =
+        this->_build_dataset_meta_key(dataset.name, false);
+
+    std::vector<std::pair<std::string, std::string>>
+        mdf = dataset.get_metadata_serialization_map();
+
+    Command* cmd = cmd_list.add_command();
+    cmd->add_field("HMSET");
+    cmd->add_field (meta_key, true);
+    for(size_t i=0; i<mdf.size(); i++) {
+        cmd->add_field(mdf[i].first);
+        cmd->add_field(mdf[i].second);
+    }
+    return;
+}
+
+void Client::_append_dataset_tensor_commands(CommandList& cmd_list,
+                                             DataSet& dataset)
+{
+    DataSet::tensor_iterator it = dataset.tensor_begin();
+    DataSet::tensor_iterator it_end = dataset.tensor_end();
+    TensorBase* tensor = 0;
+    std::string tensor_key;
+
+    Command* cmd;
+    while(it != it_end) {
+        tensor = *it;
+        tensor_key =
+            this->_build_dataset_tensor_key(dataset.name,
+                                            tensor->name(),
+                                            false);
+        cmd = cmd_list.add_command();
+        cmd->add_field("AI.TENSORSET");
+        cmd->add_field(tensor_key, true);
+        cmd->add_field(tensor->type_str());
+        cmd->add_fields(tensor->dims());
+        cmd->add_field("BLOB");
+        cmd->add_field_ptr(tensor->buf());
+        it++;
+    }
+    return;
+}
+
+void Client::_append_dataset_ack_command(CommandList& cmd_list,
+                                         DataSet& dataset)
+{
+    std::string dataset_ack_key =
+        this->_build_dataset_ack_key(dataset.name, false);
+
+    Command* cmd = cmd_list.add_command();
+    cmd->add_field("SET");
+    cmd->add_field(dataset_ack_key, true);
+    cmd->add_field("1");
+    return;
+}
+
+void Client::_unpack_dataset_metadata(DataSet& dataset,
+                                      CommandReply& reply)
+{
+    std::string field_name;
+
+    if(reply.n_elements()%2)
+        throw std::runtime_error("The DataSet metadata reply "\
+                                  "contains the wrong number of "\
+                                  "elements.");
+
+    for(size_t i=0; i<reply.n_elements(); i+=2) {
+        field_name = std::string(reply[i].str(), reply[i].str_len());
+        dataset._add_serialized_field(field_name,
+                                      reply[i+1].str(),
+                                      reply[i+1].str_len());
+    }
+    return;
 }

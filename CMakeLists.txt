@@ -4,16 +4,15 @@ cmake_minimum_required(VERSION 3.10)
 
 option(BUILD_PYTHON "Build the python module" ON)
 
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE RELEASE)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXE_LINKER_FLAGS "-lpthread")
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
 
 find_library(REDISPP redis++ PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
 find_library(HIREDIS hiredis PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
-find_library(PROTOBUF protobuf PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
 
-set(EXT_CLIENT_LIBRARIES ${REDISPP} ${HIREDIS} ${PROTOBUF})
+set(EXT_CLIENT_LIBRARIES ${REDISPP} ${HIREDIS})
 
 set(CLIENT_SRC
     src/c/c_client.cpp
@@ -30,15 +29,15 @@ set(CLIENT_SRC
     src/cpp/redisserver.cpp
     src/cpp/rediscluster.cpp
     src/cpp/redis.cpp
-    utils/protobuf/smartredis.pb.cc
+    src/cpp/metadatafield.cpp
+    src/cpp/stringfield.cpp
     src/fortran/fortran_c_interop.F90
     src/fortran/dataset.F90
     src/fortran/client.F90)
 
 include_directories(SYSTEM
     include
-    install/include/
-    utils/protobuf
+    install/include
     src/fortran
 )
 
@@ -55,12 +54,6 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
         DESTINATION "include"
         FILES_MATCHING
         PATTERN "*.h" PATTERN "*.tcc" PATTERN "*.inc"
-)
-
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/utils/protobuf/"
-        DESTINATION "include"
-        FILES_MATCHING
-        PATTERN "*.h" PATTERN "*.tcc"
 )
 
 if(BUILD_PYTHON)

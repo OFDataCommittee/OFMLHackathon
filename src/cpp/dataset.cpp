@@ -35,14 +35,6 @@ DataSet::DataSet(const std::string& name)
     this->name = name;
 }
 
-DataSet::DataSet(const std::string& name,
-                 char* buf,
-                 size_t buf_size)
-{
-    this->name = name;
-    this->_metadata.fill_from_buffer(buf, buf_size);
-}
-
 void DataSet::add_tensor(const std::string& name,
                          void* data,
                          const std::vector<size_t>& dims,
@@ -76,12 +68,7 @@ void DataSet::get_tensor(const std::string& name,
                          TensorType& type,
                          MemoryLayout mem_layout)
 {
-    if(!(this->_tensorpack.tensor_exists(name)))
-        throw std::runtime_error("The tensor " +
-                                 std::string(name) +
-                                 " does not exist in " +
-                                 this->name + " dataset.");
-
+    this->_enforce_tensor_exists(name);
     type = this->_tensorpack.get_tensor(name)->type();
     data = this->_tensorpack.get_tensor(name)->data_view(mem_layout);
     dims = this->_tensorpack.get_tensor(name)->dims();
@@ -99,8 +86,7 @@ void DataSet::get_tensor(const std::string&  name,
     this->get_tensor(name, data, dims_vec,
                      type, mem_layout);
 
-    size_t n_bytes = sizeof(int)*dims_vec.size();
-    dims = this->_dim_queries.allocate_bytes(n_bytes);
+    dims = this->_dim_queries.allocate(dims_vec.size());
     n_dims = dims_vec.size();
 
     std::vector<size_t>::const_iterator it = dims_vec.cbegin();
@@ -121,12 +107,9 @@ void DataSet::unpack_tensor(const std::string& name,
                             const TensorType type,
                             MemoryLayout mem_layout)
 {
-   if(!(this->_tensorpack.tensor_exists(name)))
-        throw std::runtime_error("The tensor " + std::string(name)
-                                               + " does not exist in "
-                                               + this->name + " dataset.");
-
-    this->_tensorpack.get_tensor(name)->fill_mem_space(data, dims, mem_layout);
+    this->_enforce_tensor_exists(name);
+    this->_tensorpack.get_tensor(name)->fill_mem_space(data, dims,
+                                                       mem_layout);
     return;
 }
 
@@ -201,7 +184,25 @@ DataSet::const_tensor_iterator DataSet::tensor_cend()
     return this->_tensorpack.tensor_cend();
 }
 
-std::string_view DataSet::get_metadata_buf()
+std::vector<std::pair<std::string, std::string>>
+    DataSet::get_metadata_serialization_map()
 {
-   return this->_metadata.get_metadata_buf();
+   return this->_metadata.get_metadata_serialization_map();
+}
+
+void DataSet::_add_serialized_field(const std::string& name,
+                                   char* buf,
+                                   size_t buf_size)
+{
+    this->_metadata.add_serialized_field(name, buf, buf_size);
+    return;
+}
+
+inline void DataSet::_enforce_tensor_exists(const std::string& name)
+{
+    if(!(this->_tensorpack.tensor_exists(name)))
+        throw std::runtime_error("The tensor " +
+                                 std::string(name) +
+                                 " does not exist in " +
+                                 this->name + " dataset.");
 }
