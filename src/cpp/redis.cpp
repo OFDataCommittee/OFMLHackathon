@@ -70,25 +70,14 @@ CommandReply Redis::run(Command& cmd)
         }
         catch (sw::redis::TimeoutError &e) {
             n_trials--;
-            std::cout << "WARNING: Caught redis TimeoutError: " << e.what() << std::endl;
-            std::cout << "WARNING: Could not execute command " << cmd.first_field()
-                      << " and " << n_trials << " more trials will be made."
-                      << std::endl << std::flush;
             std::this_thread::sleep_for(std::chrono::seconds(2));
         }
         catch (sw::redis::IoError &e) {
             n_trials--;
-            std::cout << "WARNING: Caught redis IOError: " << e.what() << std::endl;
-            std::cout << "WARNING: Could not execute command " << cmd.first_field()
-                        << " and " << n_trials << " more trials will be made."
-                        << std::endl << std::flush;
+            std::this_thread::sleep_for(std::chrono::seconds(2));
         }
         catch (...) {
             n_trials--;
-            std::cout << "WARNING: Could not execute command " << cmd.first_field()
-                        << " and " << n_trials << " more trials will be made."
-                        << std::endl << std::flush;
-            std::cout << "Error command = "<<cmd.to_string()<<std::endl;
             throw;
         }
     }
