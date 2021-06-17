@@ -68,7 +68,7 @@ void PyClient::put_tensor(std::string& key,
     return;
 }
 
-py::array PyClient::get_tensor(std::string& key)
+py::array PyClient::get_tensor(const std::string& key)
 {
     // placeholder variables to be filled
     TensorType type;
@@ -141,6 +141,38 @@ py::array PyClient::get_tensor(std::string& key)
   }
 }
 
+void PyClient::delete_tensor(const std::string& key) {
+    try {
+        this->_client->delete_tensor(key);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return;
+}
+
+void PyClient::copy_tensor(const std::string& key,
+                           const std::string& dest_key) {
+    try {
+        this->_client->copy_tensor(key, dest_key);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return;
+}
+
+void PyClient::rename_tensor(const std::string& key,
+                             const std::string& new_key) {
+    try {
+        this->_client->rename_tensor(key, new_key);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return;
+}
+
 void PyClient::put_dataset(PyDataset& dataset)
 {
     try {
@@ -163,6 +195,38 @@ PyDataset* PyClient::get_dataset(const std::string& name)
     }
     PyDataset* dataset = new PyDataset(*data);
     return dataset;
+}
+
+void PyClient::delete_dataset(const std::string& key) {
+    try {
+        this->_client->delete_dataset(key);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return;
+}
+
+void PyClient::copy_dataset(const std::string& key,
+                           const std::string& dest_key) {
+    try {
+        this->_client->copy_dataset(key, dest_key);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return;
+}
+
+void PyClient::rename_dataset(const std::string& key,
+                             const std::string& new_key) {
+    try {
+        this->_client->rename_dataset(key, new_key);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return;
 }
 
 void PyClient::set_script_from_file(const std::string& key,

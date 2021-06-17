@@ -92,6 +92,46 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "get_tensor") from None
 
+    def delete_tensor(self, key):
+        """Delete a tensor within the database
+
+        :param key: key tensor is stored at
+        :type key: str
+        :raises RedisReplyError: if deletion fails
+        """
+        try:
+            super().delete_tensor(key)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "delete_tensor") from None
+
+    def copy_tensor(self, key, dest_key):
+        """Copy a tensor at one key to another key
+
+        :param key: key of tensor to be copied
+        :type key: str
+        :param dest_key: key to store new copy at
+        :type dest_key: str
+        :raises RedisReplyError: if copy operation fails
+        """
+        try:
+            super().copy_tensor(key, dest_key)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "copy_tensor") from None
+
+    def rename_tensor(self, key, new_key):
+        """Rename a tensor in the database
+
+        :param key: key of tensor to be renamed
+        :type key: str
+        :param new_key: new name for the tensor
+        :type new_key: str
+        :raises RedisReplyError: if rename operation fails
+        """
+        try:
+            super().rename_tensor(key, new_key)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "rename_tensor") from None
+
     def put_dataset(self, dataset):
         """Put a Dataset instance into the database
 
@@ -124,6 +164,46 @@ class Client(PyClient):
             return dataset
         except RuntimeError as e:
             raise RedisReplyError(str(e), "get_dataset", key=key) from None
+
+    def delete_dataset(self, key):
+        """Delete a dataset within the database
+
+        :param key: name of the dataset
+        :type key: str
+        :raises RedisReplyError: if deletion fails
+        """
+        try:
+            super().delete_dataset(key)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "delete_dataset") from None
+
+    def copy_dataset(self, key, dest_key):
+        """Copy a dataset from one key to another
+
+        :param key: name of dataset to be copied
+        :type key: str
+        :param dest_key: new name of dataset
+        :type dest_key: str
+        :raises RedisReplyError: if copy operation fails
+        """
+        try:
+            super().copy_dataset(key, dest_key)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "copy_dataset") from None
+
+    def rename_dataset(self, key, new_key):
+        """Rename a dataset in the database
+
+        :param key: name of the dataset to be renamed
+        :type key: str
+        :param new_key: new name for the dataset
+        :type new_key: str
+        :raises RedisReplyError: if rename operation fails
+        """
+        try:
+            super().rename_dataset(key, new_key)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "rename_dataset") from None
 
     def set_function(self, key, function, device="CPU"):
         """Set a callable function into the database
@@ -361,7 +441,6 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "run_model")
 
-
     def tensor_exists(self, name):
         """Check if a tensor or dataset exists in the database
 
@@ -378,7 +457,6 @@ class Client(PyClient):
             return super().tensor_exists(name)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "tensor_exists")
-
 
     def model_exists(self, name):
         """Check if a model or script exists in the database
@@ -397,7 +475,6 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "model_exists")
 
-
     def key_exists(self, key):
         """Check if the key exists in the database
 
@@ -411,7 +488,6 @@ class Client(PyClient):
             return super().key_exists(key)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "key_exists")
-
 
     def poll_key(self, key, poll_frequency_ms, num_tries):
         """Check if the key exists in the database
@@ -439,7 +515,6 @@ class Client(PyClient):
             return super().poll_key(key, poll_frequency_ms, num_tries)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "poll_key")
-
 
     def poll_tensor(self, name, poll_frequency_ms, num_tries):
         """Check if a tensor or dataset exists in the database
@@ -469,7 +544,6 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "poll_tensor")
 
-
     def poll_model(self, name, poll_frequency_ms, num_tries):
         """Check if a model or script exists in the database
 
@@ -498,7 +572,6 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "poll_model")
 
-
     def set_data_source(self, source_id):
         """Set the data source (i.e. key prefix for get functions)
 
@@ -511,7 +584,6 @@ class Client(PyClient):
             return super().set_data_source(source_id)
         except RuntimeError as e:
             raise RuntimeError(str(e), "set_data_source")
-
 
     def use_model_ensemble_prefix(self, use_prefix):
         """Set whether model and script keys should be prefixed
@@ -533,7 +605,6 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "use_model_ensemble_prefix")
 
-
     def use_tensor_ensemble_prefix(self, use_prefix):
         """Set whether tensor and dataset keys should be prefixed
 
@@ -553,7 +624,6 @@ class Client(PyClient):
             return super().use_tensor_ensemble_prefix(use_prefix)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "use_tensor_ensemble_prefix")
-
 
     # ---- helpers --------------------------------------------------------
 
