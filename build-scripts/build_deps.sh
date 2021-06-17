@@ -55,27 +55,6 @@ else
     echo "Finished installing Redis-plus-plus"
 fi
 
-
-# Install Protobuf
-if ls ../install/lib/libprotobuf.a 1>/dev/null 2>&1; then
-    echo "Protobuf has already been downloaded and installed"
-else
-    if [[ ! -d "./protobuf" ]]; then
-	git clone --depth 1 --branch v3.11.3 https://github.com/protocolbuffers/protobuf.git protobuf
-	  else
-	echo "Protobuf downloaded"
-    fi
-    cd protobuf
-    echo "Downloading Protobuf dependencies"
-    ./autogen.sh
-    CFLAGS=-fPIC CXXFLAGS=-fPIC ./configure --disable-shared --prefix="$(pwd)/../../install"
-    CC=gcc CXX=g++ make -j $NPROC
-    CC=gcc CXX=g++ make install
-    echo "Finished installing Protobuf"
-    cd ../
-fi
-
-
 # Install Pybind11
 if [[ -d "./pybind" ]]; then
     echo "PyBind11 has already been downloaded and installed"
