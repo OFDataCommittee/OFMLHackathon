@@ -33,7 +33,7 @@ def test_copy_dataset(use_cluster):
         string, copied_string, "strings in copied dataset are not equal"
     )
 
-    # assert copied meta string is the same
+    # assert copied meta scaler is the same
     scalar = dataset.get_meta_scalars("test_scalar")
     copied_scalar = returned.get_meta_scalars("test_scalar")
     np.testing.assert_array_equal(
@@ -69,7 +69,7 @@ def test_rename_dataset(use_cluster):
         string, copied_string, "strings in renamed dataset are not equal"
     )
 
-    # assert copied meta string is the same
+    # assert copied meta scalar is the same
     scalar = dataset.get_meta_scalars("test_scalar")
     copied_scalar = returned.get_meta_scalars("test_scalar")
     np.testing.assert_array_equal(

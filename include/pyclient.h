@@ -107,7 +107,8 @@ class PyClient
         *   \param new_key the new name of the tensor
         *   \throw std::runtime_error for all client errors
         */
-        void rename_tensor(const std::string& key, const std::string& new_key);
+        void rename_tensor(const std::string& key,
+                           const std::string& new_key);
 
         /*!
         *   \brief copy a tensor to a new key
@@ -115,7 +116,8 @@ class PyClient
         *   \param dest_key the key to store tensor copy at
         *   \throw std::runtime_error for all client errors
         */
-        void copy_tensor(const std::string& key, const std::string& dest_key);
+        void copy_tensor(const std::string& key,
+                         const std::string& dest_key);
 
 
         /*!
