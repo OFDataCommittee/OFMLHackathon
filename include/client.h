@@ -640,7 +640,7 @@ class Client
         *   \param name  The name used to reference the tensor
         *   \returns A TensorBase object.
         */
-        TensorBase* _get_tensorbase_obj(const std::string& key);
+        TensorBase* _get_tensorbase_obj(const std::string& name);
 
         friend class PyClient;
 

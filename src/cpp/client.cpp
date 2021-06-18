@@ -880,9 +880,9 @@ void Client::_unpack_dataset_metadata(DataSet& dataset,
     return;
 }
 
-TensorBase* Client::_get_tensorbase_obj(const std::string& key)
+TensorBase* Client::_get_tensorbase_obj(const std::string& name)
 {
-    std::string g_key = this->_build_tensor_key(key, true);
+    std::string g_key = this->_build_tensor_key(name, true);
 
     CommandReply reply = this->_redis_server->get_tensor(g_key);
 
