@@ -10,11 +10,15 @@ void put_get_empty_dataset(std::string dataset_name)
     SmartRedis::DataSet sent_dataset(dataset_name);
 
     //Put the DataSet into the database
-    client.put_dataset(sent_dataset);
+    try {
+        client.put_dataset(sent_dataset);
+    }
+    catch(std::runtime_error) {
+        return;
+    }
 
-    SmartRedis::DataSet retrieved_dataset = client.get_dataset(dataset_name);
-
-    return;
+    throw std::runtime_error("Failed to throw error "
+                             "for empty DataSet.");
 }
 
 int main(int argc, char* argv[]) {

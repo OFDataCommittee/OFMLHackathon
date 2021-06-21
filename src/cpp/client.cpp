@@ -811,6 +811,12 @@ void Client::_append_dataset_metadata_commands(CommandList& cmd_list,
     std::vector<std::pair<std::string, std::string>>
         mdf = dataset.get_metadata_serialization_map();
 
+    if(mdf.size()==0)
+        throw std::runtime_error("An attempt was made to put "\
+                                 "a DataSet into the database that "\
+                                 "does not contain any fields or "\
+                                 "tensors.");
+
     Command* cmd = cmd_list.add_command();
     cmd->add_field("HMSET");
     cmd->add_field (meta_key, true);
