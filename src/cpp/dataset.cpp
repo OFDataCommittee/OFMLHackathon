@@ -136,6 +136,11 @@ void DataSet::get_meta_strings(const std::string& name,
     return;
 }
 
+bool DataSet::has_field(const std::string& field_name)
+{
+    return this->_metadata.has_field(field_name);
+}
+
 void DataSet::clear_field(const std::string& field_name)
 {
     this->_metadata.clear_field(field_name);
@@ -143,7 +148,11 @@ void DataSet::clear_field(const std::string& field_name)
 
 std::vector<std::string> DataSet::get_tensor_names()
 {
-    return this->_metadata.get_string_values(".tensor_names");
+    if(this->_metadata.has_field(".tensor_names"))
+        return this->_metadata.get_string_values(".tensor_names");
+    else
+        return std::vector<std::string>();
+
 }
 
 std::vector<std::string> DataSet::get_meta_strings(const std::string& name)

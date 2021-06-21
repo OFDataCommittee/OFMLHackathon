@@ -304,6 +304,16 @@ class DataSet
                               size_t*& lengths);
 
         /*!
+        *   \brief This function checks if the DataSet has a
+        *          field
+        *   \param field_name The name of the field to check
+        *   \returns Boolean indicating if the DataSet has
+        *            the field.
+        */
+        bool has_field(const std::string& field_name);
+
+
+        /*!
         *   \brief This function clears all entries in a
         *          DataSet field.
         *   \param field_name The name of the field to clear

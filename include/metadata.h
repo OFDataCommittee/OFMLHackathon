@@ -1,4 +1,4 @@
-/*
+ /*
  * BSD 2-Clause License
  *
  * Copyright (c) 2021, Hewlett Packard Enterprise
@@ -212,6 +212,15 @@ class MetaData
                                size_t*& lengths);
 
         /*!
+        *   \brief This function checks if the DataSet has a
+        *          field
+        *   \param field_name The name of the field to check
+        *   \returns Boolean indicating if the DataSet has
+        *            the field.
+        */
+        bool has_field(const std::string& field_name);
+
+        /*!
         *   \brief This function clears all entries in a
         *          DataSet field.
         *   \param field_name The name of the field to clear
@@ -351,15 +360,6 @@ class MetaData
                                        void*& data,
                                        size_t& n_values,
                                        SharedMemoryList<T>& mem_list);
-
-        /*!
-        *   \brief Return true if the field name is already in use,
-        *          otherwise false.
-        *   \param field_name The name of the metadata field
-        *   \returns True if the field name is already in use,
-        *            otherwise false
-        */
-        bool _field_exists(const std::string& field_name);
 
         /*!
         *   \brief Delete the memory associated with all fields
