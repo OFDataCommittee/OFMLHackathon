@@ -72,6 +72,10 @@ DataSet Client::get_dataset(const std::string& name)
     // Get the metadata message and construct DataSet
     CommandReply reply = this->_get_dataset_metadata(name);
 
+    if(reply.n_elements()==0)
+        throw std::runtime_error("The requested DataSet " +
+                                 name + " does not exist.");
+
     DataSet dataset = DataSet(name);
     this->_unpack_dataset_metadata(dataset, reply);
 
@@ -909,7 +913,7 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
     for(size_t i=0; i<dims.size(); i++) {
         if(dims[i]<=0) {
         throw std::runtime_error("Dimension " +
-                                 std::to_string(dims[i]) +
+                                 std::to_string(i) +
                                  "of the fetched tensor is "\
                                  "not valid: " +
                                  std::to_string(dims[i]));
@@ -952,9 +956,11 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
                                       type, MemoryLayout::contiguous);
             break;
         default :
-            throw std::runtime_error("The tensor could not be "\
-                                     "retrieved in "\
-                                     "client.get_tensorbase_obj().");
+            throw std::runtime_error("An invalid TensorType was "\
+                                     "provided to "
+                                     "Client::_get_tensorbase_obj(). "
+                                     "The tensor could not be "\
+                                     "retrieved.");
             break;
     }
     return ptr;
