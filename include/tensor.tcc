@@ -73,7 +73,7 @@ template <class T>
 Tensor<T>& Tensor<T>::operator=(Tensor<T>&& tensor)
 {
     if(this!=&tensor) {
-        this->TensorBase::operator=(tensor);
+        this->TensorBase::operator=(std::move(tensor));
         this->_c_mem_views = std::move(tensor._c_mem_views);
         this->_f_mem_views = std::move(tensor._c_mem_views);
     }
