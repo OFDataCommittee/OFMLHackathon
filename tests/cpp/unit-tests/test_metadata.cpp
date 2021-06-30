@@ -20,18 +20,17 @@ SCENARIO("Test MetaData")
             metadata.add_scalar("uint64_scalar", &uint64_val, MetaDataType::uint64);
             metadata.add_scalar("int32_scalar", &int32_val, MetaDataType::int32);
             metadata.add_scalar("uint32_scalar", &uint32_val, MetaDataType::uint32);
+
+            double* dbl_data;
+            float* flt_data;
+            int64_t* int64_data;
+            uint64_t* uint64_data;
+            int32_t* int32_data;
+            uint32_t* uint32_data;
+            size_t length;
+            MetaDataType type;
             THEN("The scalers can be retrieved correctly")
             {
-                double* dbl_data;
-                float* flt_data;
-                int64_t* int64_data;
-                uint64_t* uint64_data;
-                int32_t* int32_data;
-                uint32_t* uint32_data;
-
-                size_t length;
-                MetaDataType type;
-
                 metadata.get_scalar_values("dbl_scalar", (void*&)dbl_data, length, type);
                 CHECK(*dbl_data == dbl_val);
                 CHECK(length == 1);
@@ -75,9 +74,60 @@ SCENARIO("Test MetaData")
             }
             AND_THEN("The MetaData object can be copied via the copy constructor")
             {
-                metadata.add_string("str_field", "100");
+                double* dbl_data_cpy;
+                float* flt_data_cpy;
+                int64_t* int64_data_cpy;
+                uint64_t* uint64_data_cpy;
+                int32_t* int32_data_cpy;
+                uint32_t* uint32_data_cpy;
+                size_t length_cpy;
+                MetaDataType type_cpy;
+                char** str_data;
+                size_t n_strings;
+                size_t* lengths;
+                char** str_data_cpy;
+                size_t n_strings_cpy;
+                size_t* lengths_cpy;
+
+                std::string str_val = "100";
+                metadata.add_string("str_field", str_val);
                 MetaData metadata_cpy(metadata);
-                // TODO: Ensure it was copied correctly
+
+                metadata.get_scalar_values("dbl_scalar", (void*&)dbl_data, length, type);
+                metadata_cpy.get_scalar_values("dbl_scalar", (void*&)dbl_data_cpy, length_cpy, type_cpy);
+                CHECK(*dbl_data == *dbl_data_cpy);
+                CHECK(length == length_cpy);
+                CHECK(type == type_cpy);
+                metadata.get_scalar_values("flt_scalar", (void*&)flt_data, length, type);
+                metadata_cpy.get_scalar_values("flt_scalar", (void*&)flt_data_cpy, length_cpy, type_cpy);
+                CHECK(*flt_data == *flt_data_cpy);
+                CHECK(length == length_cpy);
+                CHECK(type == type_cpy);
+                metadata.get_scalar_values("int64_scalar", (void*&)int64_data, length, type);
+                metadata_cpy.get_scalar_values("int64_scalar", (void*&)int64_data_cpy, length_cpy, type_cpy);
+                CHECK(*int64_data == *int64_data_cpy);
+                CHECK(length == length_cpy);
+                CHECK(type == type_cpy);
+                metadata.get_scalar_values("uint64_scalar", (void*&)uint64_data, length, type);
+                metadata_cpy.get_scalar_values("uint64_scalar", (void*&)uint64_data_cpy, length_cpy, type_cpy);
+                CHECK(*uint64_data == *uint64_data_cpy);
+                CHECK(length == length_cpy);
+                CHECK(type == type_cpy);
+                metadata.get_scalar_values("int32_scalar", (void*&)int32_data, length, type);
+                metadata_cpy.get_scalar_values("int32_scalar", (void*&)int32_data_cpy, length_cpy, type_cpy);
+                CHECK(*int32_data == *int32_data_cpy);
+                CHECK(length == length_cpy);
+                CHECK(type == type_cpy);
+                metadata.get_scalar_values("uint32_scalar", (void*&)uint32_data, length, type);
+                metadata_cpy.get_scalar_values("uint32_scalar", (void*&)uint32_data_cpy, length_cpy, type_cpy);
+                CHECK(*uint32_data == *uint32_data_cpy);
+                CHECK(length == length_cpy);
+                CHECK(type == type_cpy);
+                metadata.get_string_values("str_field", str_data, n_strings, lengths);
+                metadata_cpy.get_string_values("str_field", str_data_cpy, n_strings_cpy, lengths_cpy);
+                CHECK(std::strcmp(*str_data, *str_data_cpy) == 0);
+                CHECK(n_strings == n_strings_cpy);
+                CHECK(*lengths == *lengths_cpy);
             }
             AND_THEN("The MetaData object can be copied via the assignment operator")
             {

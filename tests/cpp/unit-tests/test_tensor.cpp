@@ -31,31 +31,65 @@ SCENARIO("Testing Tensor", "[Tensor]")
         Tensor<float> t_2(name_2, data_2, dims_2, type_2, mem_layout_2);
         WHEN("A tensor is copied with the assignment operator")
         {
-            // t_2 = t;
+            t_2 = t;
             THEN("The two tensors are the same")
             {
-                // CHECK(t->name() == t_2.name());
-                // CHECK(t->type() == t_2.type());
-                // CHECK(t->type_str() == t_2.type_str());
-                // CHECK(t->dims() == t_2.dims());
-                // CHECK(t->num_values() == t_2.num_values());
-                // CHECK(*((float*)t->data()) == *((float*)t_2.data()));
-                // CHECK(t->buf() == t_2.buf());
+                float* t_data = (float*)t.data();
+                float* t_2_data = (float*)t_2.data();
+                for (int i=0; i<tensor_size; i++)
+                    CHECK(*t_data++ == *t_2_data++);
+
+                CHECK(t.name() == t_2.name());
+                CHECK(t.type() == t_2.type());
+                CHECK(t.type_str() == t_2.type_str());
+                CHECK(t.dims() == t_2.dims());
+                CHECK(t.num_values() == t_2.num_values());
+                CHECK(t.buf() == t_2.buf());
             }
         }
-        AND_WHEN("A tensor is constructed with the move constructor")
+        AND_WHEN("A third Tensor is constructed with the copy constructor")
         {
-
-            void* prev_addr = t_2.data();
-            t_2 = std::move(t);
-            void* post_addr = t_2.data();
-            CHECK(prev_addr != post_addr);
-            CHECK(name == t_2.name());
-            CHECK(type == t_2.type());
-            CHECK(dims == t_2.dims());
-
-
+            Tensor<float> t_3(t);
+            THEN("The Tensor is copied correctly")
+            {
+                float* point = (float*)t_3.data();
+                for (int i=0; i<tensor_size; i++)
+                    CHECK(tensor[i] == *point++);
+                CHECK(t_3.name() == t.name());
+                CHECK(t_3.type() == t.type());
+                CHECK(t_3.dims() == t.dims());
+                CHECK(t_3.num_values() == t.num_values());
+                CHECK(t_3.buf() == t.buf());
+            }
         }
-        // delete t;
+        AND_WHEN("A Tensor is constructed with the move assignment operator")
+        {
+            t_2 = std::move(t);
+            THEN("The Tensor is moved correctly")
+            {
+                float* point = (float*)t_2.data();
+                for (int i=0; i<tensor_size; i++)
+                    CHECK(tensor[i] == *point++);
+
+                CHECK(t_2.name() == name);
+                CHECK(t_2.type() == type);
+                CHECK(t_2.dims() == dims);
+                CHECK(t.data() == 0);
+            }
+        }
+        AND_WHEN("A third Tensor is constructed with the move constructor")
+        {
+            Tensor<float> t_3(std::move(t));
+            THEN("The Tensor is moved correctly")
+            {
+                float* point = (float*)t_3.data();
+                for (int i=0; i<tensor_size; i++)
+                    CHECK(tensor[i] == *point++);
+                CHECK(t_3.name() == name);
+                CHECK(t_3.type() == type);
+                CHECK(t_3.dims() == dims);
+                CHECK(t.data() == 0);
+            }
+        }
     }
 }

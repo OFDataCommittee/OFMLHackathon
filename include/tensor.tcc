@@ -50,7 +50,7 @@ Tensor<T>::Tensor(const Tensor<T>& tensor) : TensorBase(tensor)
 }
 
 template <class T>
-Tensor<T>::Tensor(Tensor<T>&& tensor) : TensorBase(tensor)
+Tensor<T>::Tensor(Tensor<T>&& tensor) : TensorBase(std::move(tensor))
 {
     this->_c_mem_views = std::move(tensor._c_mem_views);
     this->_f_mem_views = std::move(tensor._f_mem_views);
@@ -75,7 +75,7 @@ Tensor<T>& Tensor<T>::operator=(Tensor<T>&& tensor)
     if(this!=&tensor) {
         this->TensorBase::operator=(std::move(tensor));
         this->_c_mem_views = std::move(tensor._c_mem_views);
-        this->_f_mem_views = std::move(tensor._c_mem_views);
+        this->_f_mem_views = std::move(tensor._f_mem_views);
     }
     return *this;
 }
