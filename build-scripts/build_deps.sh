@@ -59,7 +59,7 @@ fi
 if [[ -d "./pybind" ]]; then
     echo "PyBind11 has already been downloaded and installed"
 else
-    git clone https://github.com/pybind/pybind11.git pybind --depth=1
+    git clone https://github.com/pybind/pybind11.git pybind --branch v2.6.2 --depth=1
     cd pybind
     mkdir build
     cd ..
