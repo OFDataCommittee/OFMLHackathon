@@ -16,7 +16,6 @@ SCENARIO("Testing Tensor", "[Tensor]")
             tensor[i] = 2.0*rand()/RAND_MAX -1.0;
         void* data = tensor.data();
         MemoryLayout mem_layout = MemoryLayout::contiguous;
-        //Tensor<float>* t = new Tensor<float>(name, data, dims, type, mem_layout);
         Tensor<float> t(name, data, dims, type, mem_layout);
 
         std::string name_2 = "test_tensor_2";

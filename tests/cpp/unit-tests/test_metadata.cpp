@@ -1,7 +1,7 @@
 #include "catch.hpp"
 #include "metadata.h"
 
-SCENARIO("Test MetaData")
+SCENARIO("Test MetaData", "[MetaData]")
 {
     GIVEN("A MetaData object")
     {
@@ -131,13 +131,15 @@ SCENARIO("Test MetaData")
             }
             AND_THEN("The MetaData object can be copied via the assignment operator")
             {
+                MetaData medadata_2;
+                medadata_2 = metadata;
                 // TODO: Ensure it was copied correctly
             }
             AND_THEN("The MetaData object can be moved")
             {
-                // TODO: Ensure it was moved correctly
                 MetaData metadata_2;
                 metadata_2 = std::move(metadata);
+                // TODO: Ensure it was moved correctly
             }
         }
         AND_WHEN("Invalid scalars are added to the MetaData object")
@@ -205,7 +207,9 @@ SCENARIO("Test MetaData")
         }
         AND_WHEN("Valid serialized fields are added to the MetaData object")
         {
-            // ...
+            std::string name;
+            char* buf;
+            size_t buf_size;
             THEN("The serialized fields can be retrieved")
             {
 

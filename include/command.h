@@ -61,9 +61,10 @@ class Command
         Command() = default;
 
         /*!
-        *   \brief Command copy constructor not allowed
+        *   \brief Command copy constructor
+        *   \param cmd The Command to copy for construction
         */
-        Command(const Command& cmd) = delete;
+        Command(const Command& cmd);
 
         /*!
         *   \brief Command default move constructor
@@ -72,9 +73,9 @@ class Command
 
         /*!
         *   \brief Command copy assignment operator
-        *          not allowed.
+        *   \param cmd The Command to copy for assignment
         */
-        Command& operator=(const Command& cmd) = delete;
+        Command& operator=(const Command& cmd);
 
         /*!
         *   \brief Command move assignment operator

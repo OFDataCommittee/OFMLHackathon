@@ -46,11 +46,7 @@ SCENARIO("Testing TensorBase through TensorList", "[TensorBase]")
                 CHECK(tensor_ptr->dims() == tensor_cpy_ptr->dims());
                 CHECK(tensor_ptr->num_values() == tensor_cpy_ptr->num_values());
                 CHECK(tensor_ptr->buf() == tensor_cpy_ptr->buf());
-                // TODO: Check that tensor_ptr's and tensor_cpy_ptr's data() method return the same thing
             }
-            // TODO: Test the move constructor for TensorBase
-            // TODO: Test the copy assignment operator for TensorBase
-            // TODO: Test the move assignment operator for TensorBase
         }
         AND_WHEN("A tensor with data as nullptr is added to the tensorpack")
         {
@@ -70,8 +66,6 @@ SCENARIO("Testing TensorBase through TensorList", "[TensorBase]")
         }
         AND_WHEN("A tensor with an empty string as its name is added to the tensorpack")
         {
-            // NOTE: This is supposed to test tensorbase.cpp line 181, but it is unreachable
-            //       because the error is caught at tensorpack.cpp lines 66-67
             std::string name = "";
             std::vector<size_t> dims = {1, 2, 3};
             size_t tensor_size = dims.at(0) * dims.at(1) * dims.at(2);
@@ -138,10 +132,8 @@ SCENARIO("Testing TensorBase through TensorList", "[TensorBase]")
             {
                 CHECK_THROWS_AS(
                     tp.add_tensor(name, data, dims,
-                          tensor_type,
-                          MemoryLayout::contiguous),
-                    std::runtime_error
-                );
+                                  tensor_type, MemoryLayout::contiguous),
+                    std::runtime_error);
             }
         }
     }

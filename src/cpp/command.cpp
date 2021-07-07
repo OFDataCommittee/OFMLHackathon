@@ -30,6 +30,45 @@
 
 using namespace SmartRedis;
 
+Command::Command(const Command& cmd)
+{
+    this->_fields = std::vector<std::string_view>(cmd._fields);
+    this->_cmd_keys = std::unordered_map<std::string_view, size_t>(cmd._cmd_keys);
+    std::vector<char*>::const_iterator local_fields_it = cmd._local_fields.cbegin();
+    std::vector<char*>::const_iterator local_fields_it_end = cmd._local_fields.cend();
+    while(local_fields_it != local_fields_it_end) {
+        int field_size = std::strlen(*local_fields_it);
+        char* f = (char*) malloc(sizeof(char)*(field_size));
+        std::memcpy(f, *local_fields_it, sizeof(char)*field_size);
+        this->_local_fields.push_back(f);
+        local_fields_it++;
+    }
+}
+
+Command& Command::operator=(const Command& cmd)
+{
+    if(this!=&cmd) {
+        this->_fields = cmd._fields;
+        this->_cmd_keys = cmd._cmd_keys;
+        std::vector<char*>::iterator it = this->_local_fields.begin();
+        std::vector<char*>::iterator it_end = this->_local_fields.end();
+        for(; it!=it_end; it++) {
+            free(*it);
+            (*it) = 0;
+        }
+        std::vector<char*>::const_iterator local_fields_it = cmd._local_fields.cbegin();
+        std::vector<char*>::const_iterator local_fields_it_end = cmd._local_fields.cend();
+        while(local_fields_it != local_fields_it_end) {
+            int field_size = std::strlen(*local_fields_it);
+            char* f = (char*) malloc(sizeof(char)*(field_size));
+            std::memcpy(f, *local_fields_it, sizeof(char)*field_size);
+            this->_local_fields.push_back(f);
+            local_fields_it++;
+        }
+    }
+    return *this;
+}
+
 Command::~Command()
 {
     std::vector<char*>::iterator it = this->_local_fields.begin();
@@ -150,6 +189,8 @@ void Command::add_fields(const std::vector<std::string>& fields, bool is_key)
 
 std::string Command::first_field()
 {
+    if(this->begin() == this->end())
+        throw std::runtime_error("No fields exist in the Command.");
     return std::string(this->begin()->data(),
                        this->begin()->size());
 }
@@ -212,29 +253,4 @@ std::vector<std::string> Command::get_keys() {
     }
     return keys;
 
-}
-
-void Command::update_key(std::string old_key,
-                         std::string new_key)
-{
-    /* This function will change a value of a
-    key in the command.  This function will preserve
-    the order of the command fields.
-    */
-    std::string_view old_key_sv(old_key.data(), old_key.length());
-    size_t key_index = this->_cmd_keys.at(old_key_sv);
-
-    //Allocated memory and copy new_key
-    int new_key_size = new_key.size();
-    char* f = (char*) malloc(sizeof(char)*(new_key_size+1));
-    new_key.copy(f, new_key_size, 0);
-    f[new_key_size]=0;
-    std::string_view new_key_sv(f, new_key_size);
-
-    //Swap string_view, dellaocate old memory and
-    //track new memory
-    this->_fields[key_index].swap(new_key_sv);
-    free(this->_local_fields[key_index]);
-    this->_local_fields[key_index] = f;
-    return;
 }

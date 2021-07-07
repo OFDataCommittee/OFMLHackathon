@@ -365,11 +365,11 @@ class DataSet
         const_tensor_iterator tensor_cend();
 
         /*!
-        *   \brief Get a string representing the Tensor type
+        *   \brief Get the Tensor type of the Tensor
         *   \param name The name of the Tensor
-        *   \returns std::string representing the Tensor type
+        *   \returns The Tensor's TensorType
         */
-        std::string get_tensor_type(const std::string& name);
+        TensorType get_tensor_type(const std::string& name);
 
         /*!
         *   \brief Returns a vector of std::pair with
