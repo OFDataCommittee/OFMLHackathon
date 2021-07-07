@@ -30,6 +30,39 @@
 
 using namespace SmartRedis;
 
+CommandList::CommandList(const CommandList& cmd_lst)
+{
+    std::vector<Command*>::const_iterator c_it = cmd_lst._commands.cbegin();
+    std::vector<Command*>::const_iterator c_it_end = cmd_lst._commands.cend();
+    while(c_it != c_it_end) {
+        Command* curr_command = new Command(**c_it);
+        this->_commands.push_back(curr_command);
+        c_it++;
+    }
+}
+
+CommandList& CommandList::operator=(const CommandList& cmd_lst)
+{
+    if(this!=&cmd_lst) {
+        std::vector<Command*>::iterator it = this->_commands.begin();
+        std::vector<Command*>::iterator it_end = this->_commands.end();
+        while(it != it_end) {
+            delete (*it);
+            it++;
+        }
+        _commands.clear();
+
+        std::vector<Command*>::const_iterator c_it = cmd_lst._commands.begin();
+        std::vector<Command*>::const_iterator c_it_end = cmd_lst._commands.end();
+        while(c_it != c_it_end) {
+            Command* curr_command = new Command(**c_it);
+            this->_commands.push_back(curr_command);
+            c_it++;
+        }
+    }
+    return *this;
+}
+
 CommandList::~CommandList()
 {
     std::vector<Command*>::iterator it = this->_commands.begin();

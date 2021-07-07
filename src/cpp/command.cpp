@@ -30,6 +30,45 @@
 
 using namespace SmartRedis;
 
+Command::Command(const Command& cmd)
+{
+    this->_fields = std::vector<std::string_view>(cmd._fields);
+    this->_cmd_keys = std::unordered_map<std::string_view, size_t>(cmd._cmd_keys);
+    std::vector<char*>::const_iterator local_fields_it = cmd._local_fields.cbegin();
+    std::vector<char*>::const_iterator local_fields_it_end = cmd._local_fields.cend();
+    while(local_fields_it != local_fields_it_end) {
+        int field_size = std::strlen(*local_fields_it);
+        char* f = (char*) malloc(sizeof(char)*(field_size));
+        std::memcpy(f, *local_fields_it, sizeof(char)*field_size);
+        this->_local_fields.push_back(f);
+        local_fields_it++;
+    }
+}
+
+Command& Command::operator=(const Command& cmd)
+{
+    if(this!=&cmd) {
+        this->_fields = cmd._fields;
+        this->_cmd_keys = cmd._cmd_keys;
+        std::vector<char*>::iterator it = this->_local_fields.begin();
+        std::vector<char*>::iterator it_end = this->_local_fields.end();
+        for(; it!=it_end; it++) {
+            free(*it);
+            (*it) = 0;
+        }
+        std::vector<char*>::const_iterator local_fields_it = cmd._local_fields.cbegin();
+        std::vector<char*>::const_iterator local_fields_it_end = cmd._local_fields.cend();
+        while(local_fields_it != local_fields_it_end) {
+            int field_size = std::strlen(*local_fields_it);
+            char* f = (char*) malloc(sizeof(char)*(field_size));
+            std::memcpy(f, *local_fields_it, sizeof(char)*field_size);
+            this->_local_fields.push_back(f);
+            local_fields_it++;
+        }
+    }
+    return *this;
+}
+
 Command::~Command()
 {
     std::vector<char*>::iterator it = this->_local_fields.begin();
