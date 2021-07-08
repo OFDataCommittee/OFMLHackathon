@@ -81,6 +81,14 @@ Tensor<T>& Tensor<T>::operator=(Tensor<T>&& tensor)
 }
 
 template <class T>
+TensorBase* Tensor<T>::clone()
+{
+    Tensor<T>* new_tensor = new Tensor<T>(*this);
+    (*new_tensor) = *this;
+    return new_tensor;
+}
+
+template <class T>
 void* Tensor<T>::data_view(const MemoryLayout mem_layout)
 {
     /* This function returns a pointer to a memory

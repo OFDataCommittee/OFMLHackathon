@@ -72,6 +72,10 @@ DataSet Client::get_dataset(const std::string& name)
     // Get the metadata message and construct DataSet
     CommandReply reply = this->_get_dataset_metadata(name);
 
+    if(reply.n_elements()==0)
+        throw std::runtime_error("The requested DataSet " +
+                                 name + " does not exist.");
+
     DataSet dataset = DataSet(name);
     this->_unpack_dataset_metadata(dataset, reply);
 
@@ -227,71 +231,17 @@ void Client::get_tensor(const std::string& key,
                         TensorType& type,
                         const MemoryLayout mem_layout)
 {
+    // Retrieve the TensorBase from the database
+    TensorBase* ptr = this->_get_tensorbase_obj(key);
 
-    std::string g_key = this->_build_tensor_key(key, true);
-    CommandReply reply = this->_redis_server->get_tensor(g_key);
-
-    dims = CommandReplyParser::get_tensor_dims(reply);
-    type = CommandReplyParser::get_tensor_data_type(reply);
-    std::string_view blob =
-        CommandReplyParser::get_tensor_data_blob(reply);
-
-    if(dims.size()<=0)
-        throw std::runtime_error("The number of dimensions of the "\
-                                "fetched tensor are invalid: " +
-                                std::to_string(dims.size()));
-
-    for(size_t i=0; i<dims.size(); i++) {
-        if(dims[i]<=0) {
-        throw std::runtime_error("Dimension " +
-                                 std::to_string(dims[i]) +
-                                 "of the fetched tensor is not valid: " +
-                                 std::to_string(dims[i]));
-        }
-    }
-
-    TensorBase* ptr;
-    switch(type) {
-        case TensorType::dbl :
-            ptr = new Tensor<double>(g_key, (void*)blob.data(), dims,
-                                     type, MemoryLayout::contiguous);
-            break;
-        case TensorType::flt :
-            ptr = new Tensor<float>(g_key, (void*)blob.data(), dims,
-                                    type, MemoryLayout::contiguous);
-            break;
-        case TensorType::int64 :
-            ptr = new Tensor<int64_t>(g_key, (void*)blob.data(), dims,
-                                     type, MemoryLayout::contiguous);
-            break;
-        case TensorType::int32 :
-            ptr = new Tensor<int32_t>(g_key, (void*)blob.data(), dims,
-                                      type, MemoryLayout::contiguous);
-            break;
-        case TensorType::int16 :
-            ptr = new Tensor<int16_t>(g_key, (void*)blob.data(), dims,
-                                      type, MemoryLayout::contiguous);
-            break;
-        case TensorType::int8 :
-            ptr = new Tensor<int8_t>(g_key, (void*)blob.data(), dims,
-                                     type, MemoryLayout::contiguous);
-            break;
-        case TensorType::uint16 :
-            ptr = new Tensor<uint16_t>(g_key, (void*)blob.data(), dims,
-                                       type, MemoryLayout::contiguous);
-            break;
-        case TensorType::uint8 :
-            ptr = new Tensor<uint8_t>(g_key, (void*)blob.data(), dims,
-                                      type, MemoryLayout::contiguous);
-            break;
-        default :
-            throw std::runtime_error("The tensor could not be "\
-                                     "retrieved in "\
-                                     "client.get_tensor().");
-            break;
-    }
-    this->_tensor_memory.add_tensor(ptr);
+    // Set the user values
+    dims = ptr->dims();
+    type = ptr->type();
     data = ptr->data_view(mem_layout);
+
+    // Hold the Tensor in memory for memory management
+    this->_tensor_memory.add_tensor(ptr);
+
     return;
 }
 
@@ -865,6 +815,12 @@ void Client::_append_dataset_metadata_commands(CommandList& cmd_list,
     std::vector<std::pair<std::string, std::string>>
         mdf = dataset.get_metadata_serialization_map();
 
+    if(mdf.size()==0)
+        throw std::runtime_error("An attempt was made to put "\
+                                 "a DataSet into the database that "\
+                                 "does not contain any fields or "\
+                                 "tensors.");
+
     Command* cmd = cmd_list.add_command();
     cmd->add_field("HMSET");
     cmd->add_field (meta_key, true);
@@ -932,4 +888,80 @@ void Client::_unpack_dataset_metadata(DataSet& dataset,
                                       reply[i+1].str_len());
     }
     return;
+}
+
+TensorBase* Client::_get_tensorbase_obj(const std::string& name)
+{
+    std::string g_key = this->_build_tensor_key(name, true);
+
+    CommandReply reply = this->_redis_server->get_tensor(g_key);
+
+    std::vector<size_t> dims =
+        CommandReplyParser::get_tensor_dims(reply);
+
+    TensorType type =
+         CommandReplyParser::get_tensor_data_type(reply);
+
+    std::string_view blob =
+        CommandReplyParser::get_tensor_data_blob(reply);
+
+    if(dims.size()<=0)
+        throw std::runtime_error("The number of dimensions of the "\
+                                "fetched tensor are invalid: " +
+                                std::to_string(dims.size()));
+
+    for(size_t i=0; i<dims.size(); i++) {
+        if(dims[i]<=0) {
+        throw std::runtime_error("Dimension " +
+                                 std::to_string(i) +
+                                 "of the fetched tensor is "\
+                                 "not valid: " +
+                                 std::to_string(dims[i]));
+        }
+    }
+
+    TensorBase* ptr;
+    switch(type) {
+        case TensorType::dbl :
+            ptr = new Tensor<double>(g_key, (void*)blob.data(), dims,
+                                     type, MemoryLayout::contiguous);
+
+            break;
+        case TensorType::flt :
+            ptr = new Tensor<float>(g_key, (void*)blob.data(), dims,
+                                    type, MemoryLayout::contiguous);
+            break;
+        case TensorType::int64 :
+            ptr = new Tensor<int64_t>(g_key, (void*)blob.data(), dims,
+                                     type, MemoryLayout::contiguous);
+            break;
+        case TensorType::int32 :
+            ptr = new Tensor<int32_t>(g_key, (void*)blob.data(), dims,
+                                      type, MemoryLayout::contiguous);
+            break;
+        case TensorType::int16 :
+            ptr = new Tensor<int16_t>(g_key, (void*)blob.data(), dims,
+                                      type, MemoryLayout::contiguous);
+            break;
+        case TensorType::int8 :
+            ptr = new Tensor<int8_t>(g_key, (void*)blob.data(), dims,
+                                     type, MemoryLayout::contiguous);
+            break;
+        case TensorType::uint16 :
+            ptr = new Tensor<uint16_t>(g_key, (void*)blob.data(), dims,
+                                       type, MemoryLayout::contiguous);
+            break;
+        case TensorType::uint8 :
+            ptr = new Tensor<uint8_t>(g_key, (void*)blob.data(), dims,
+                                      type, MemoryLayout::contiguous);
+            break;
+        default :
+            throw std::runtime_error("An invalid TensorType was "\
+                                     "provided to "
+                                     "Client::_get_tensorbase_obj(). "
+                                     "The tensor could not be "\
+                                     "retrieved.");
+            break;
+    }
+    return ptr;
 }
