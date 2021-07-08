@@ -25,8 +25,8 @@ else
     fi
     cd hiredis
 
-    CC=gcc CXX=g++ make PREFIX="$(pwd)/../../install" static -j $NPROC
-    CC=gcc CXX=g++ make PREFIX="$(pwd)/../../install" install
+    LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="$(pwd)/../../install" static -j $NPROC
+    LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="$(pwd)/../../install" install
     cd ../
     # delete shared libraries
     rm ../install/lib/*.so
