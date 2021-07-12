@@ -129,7 +129,7 @@ void MetaData::add_scalar(const std::string& field_name,
                           MetaDataType type)
 
 {
-    if(!(this->_field_exists(field_name))) {
+    if(!(this->has_field(field_name))) {
          this->_create_field(field_name, type);
     }
 
@@ -170,7 +170,7 @@ void MetaData::add_scalar(const std::string& field_name,
 void MetaData::add_string(const std::string& field_name,
                           const std::string& value)
 {
-    if(!(this->_field_exists(field_name)))
+    if(!(this->has_field(field_name)))
          this->_create_field(field_name, MetaDataType::string);
 
     ((StringField*)(this->_field_map[field_name]))->append(value);
@@ -182,7 +182,7 @@ void MetaData::get_scalar_values(const std::string& name,
                                 size_t& length,
                                 MetaDataType& type)
 {
-    if(!this->_field_exists(name))
+    if(!this->has_field(name))
         throw std::runtime_error("The metadata field "
                                  + name +
                                  " does not exist.");
@@ -249,7 +249,7 @@ void MetaData::get_string_values(const std::string& name,
 std::vector<std::string>
 MetaData::get_string_values(const std::string& name)
 {
-    if(!this->_field_exists(name))
+    if(!this->has_field(name))
         throw std::runtime_error("The metadata field "
                                  + name +
                                  " does not exist.");
@@ -264,9 +264,14 @@ MetaData::get_string_values(const std::string& name)
     return ((StringField*)(this->_field_map[name]))->values();
 }
 
+bool MetaData::has_field(const std::string& field_name)
+{
+    return (this->_field_map.count(field_name)>0);
+}
+
 void MetaData::clear_field(const std::string& field_name)
 {
-    if(this->_field_exists(field_name)) {
+    if(this->has_field(field_name)) {
         this->_field_map[field_name]->clear();
         delete this->_field_map[field_name];
         this->_field_map.erase(field_name);
@@ -423,11 +428,6 @@ void MetaData::_get_numeric_field_values(const std::string& name,
     return;
 }
 
-bool MetaData::_field_exists(const std::string& field_name)
-{
-   return (this->_field_map.count(field_name)>0);
-}
-
 std::vector<std::pair<std::string, std::string>>
     MetaData::get_metadata_serialization_map()
 {
@@ -454,7 +454,7 @@ void MetaData::add_serialized_field(const std::string& name,
     std::string_view buf_sv(buf, buf_size);
     MetaDataType type = MetadataBuffer::get_type(buf_sv);
 
-    if(this->_field_exists(name))
+    if(this->has_field(name))
         throw std::runtime_error("Cannot add serialized field if "\
                                  "already exists.");
 

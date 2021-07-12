@@ -69,9 +69,12 @@ void DataSet::get_tensor(const std::string& name,
                          MemoryLayout mem_layout)
 {
     this->_enforce_tensor_exists(name);
-    type = this->_tensorpack.get_tensor(name)->type();
-    data = this->_tensorpack.get_tensor(name)->data_view(mem_layout);
-    dims = this->_tensorpack.get_tensor(name)->dims();
+    // Clone the tensor in the DataSet
+    TensorBase* tensor = this->_get_tensorbase_obj(name);
+    this->_tensor_memory.add_tensor(tensor);
+    type = tensor->type();
+    data = tensor->data_view(mem_layout);
+    dims = tensor->dims();
     return;
 }
 
@@ -133,6 +136,11 @@ void DataSet::get_meta_strings(const std::string& name,
     return;
 }
 
+bool DataSet::has_field(const std::string& field_name)
+{
+    return this->_metadata.has_field(field_name);
+}
+
 void DataSet::clear_field(const std::string& field_name)
 {
     this->_metadata.clear_field(field_name);
@@ -140,7 +148,11 @@ void DataSet::clear_field(const std::string& field_name)
 
 std::vector<std::string> DataSet::get_tensor_names()
 {
-    return this->_metadata.get_string_values(".tensor_names");
+    if(this->_metadata.has_field(".tensor_names"))
+        return this->_metadata.get_string_values(".tensor_names");
+    else
+        return std::vector<std::string>();
+
 }
 
 std::vector<std::string> DataSet::get_meta_strings(const std::string& name)
@@ -205,4 +217,9 @@ inline void DataSet::_enforce_tensor_exists(const std::string& name)
                                  std::string(name) +
                                  " does not exist in " +
                                  this->name + " dataset.");
+}
+
+TensorBase* DataSet::_get_tensorbase_obj(const std::string& name)
+{
+    return this->_tensorpack.get_tensor(name)->clone();
 }
