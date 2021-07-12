@@ -121,6 +121,15 @@ bool Redis::key_exists(const std::string& key)
     return reply.integer();
 }
 
+bool Redis::is_addressable(const std::string& address,
+                           const uint64_t& port)
+{
+    return this->_valid_nodes.find(address + ":"
+                        + std::to_string(port))
+                        != this->_valid_nodes.end();
+}
+
+
 CommandReply Redis::put_tensor(TensorBase& tensor)
 {
     Command cmd;
@@ -320,6 +329,8 @@ CommandReply Redis::get_script(const std::string& key)
 
 inline void Redis::_connect(std::string address_port)
 {
+    this->_valid_nodes.insert({address_port, nullptr});
+
     int n_connection_trials = 10;
 
     while(n_connection_trials > 0) {

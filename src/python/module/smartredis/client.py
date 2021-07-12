@@ -625,6 +625,18 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "use_tensor_ensemble_prefix")
 
+    def get_db_node_info(self, addresses):
+        """Returns information about given database nodes
+
+        :param addresses: The addresses of the database nodes
+        :type address: list[str]
+
+        """
+        try:
+            return super().get_db_node_info(addresses)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "get_db_node_info")
+
     # ---- helpers --------------------------------------------------------
 
     @staticmethod

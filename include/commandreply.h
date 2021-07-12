@@ -1,5 +1,5 @@
 /*
- * BSD 2-Clause License
+ * BD 2-Clause License
  *
  * Copyright (c) 2021, Hewlett Packard Enterprise
  * All rights reserved.

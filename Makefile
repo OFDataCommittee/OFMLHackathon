@@ -194,7 +194,7 @@ test-cpp:
 # help: test-py                        - run python tests
 .PHONY: test-py
 test-py:
-	@python -m pytest -vv ./tests/python/
+	@python -m pytest -vv -s ./tests/python/
 
 # help: test-fortran                   - run fortran tests
 .PHONY: test-fortran
