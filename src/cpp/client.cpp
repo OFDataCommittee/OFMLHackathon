@@ -168,11 +168,16 @@ void Client::delete_dataset(const std::string& name)
         cmd.add_field(tensor_key, true);
     }
 
+    reply = this->_run(cmd);
+
+    Command cmd_ack_key;
     std::string dataset_ack_key =
         this->_build_dataset_ack_key(name, false);
-    cmd.add_field(dataset_ack_key, true);
+    cmd_ack_key.add_field("DEL");
+    cmd_ack_key.add_field(dataset_ack_key, true);
 
-    reply = this->_run(cmd);
+    reply = this->_run(cmd_ack_key);
+
     return;
 }
 
