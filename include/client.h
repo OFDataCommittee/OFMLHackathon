@@ -51,9 +51,6 @@
 #include "enums/cpp_tensor_type.h"
 #include "enums/cpp_memory_layout.h"
 
-using inner_map = std::unordered_map<std::string, std::string>;
-using parsed_map = std::unordered_map<std::string, inner_map>;
-
 ///@file
 
 namespace SmartRedis {
@@ -558,14 +555,6 @@ class Client
         *   \returns parsed_map containing the database node information
         */
         parsed_map get_db_node_info(std::string address);
-
-        /*!
-        *   \brief Parse database node information from get_db_node_info()
-        *          into a nested unordered_map
-        *   \param info database node information
-        *   \returns parsed_map containing the database node information
-        */
-        parsed_map parse_db_node_info(std::string info);
 
     protected:
 

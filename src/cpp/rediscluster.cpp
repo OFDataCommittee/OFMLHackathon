@@ -55,11 +55,11 @@ CommandReply RedisCluster::run(Command& cmd)
 {
     std::string db_prefix;
 
-    if (cmd.has_keys())
-        db_prefix = this->_get_db_node_prefix(cmd);
-    else if (this->is_addressable(cmd.get_address(), cmd.get_port()))
-        db_prefix = this->_valid_nodes.at(cmd.get_address() + ":"
+    if (this->is_addressable(cmd.get_address(), cmd.get_port()))
+        db_prefix = this->_address_node_map.at(cmd.get_address() + ":"
                     + std::to_string(cmd.get_port()))->prefix;
+    else if (cmd.has_keys())
+        db_prefix = this->_get_db_node_prefix(cmd);
     else
         throw std::runtime_error("Redis has failed to find database");
 
@@ -144,8 +144,8 @@ bool RedisCluster::key_exists(const std::string& key)
 bool RedisCluster::is_addressable(const std::string& address,
                                   const uint64_t& port)
 {
-    return this->_valid_nodes.find(address + ":" + std::to_string(port))
-                                    != this->_valid_nodes.end();
+    return this->_address_node_map.find(address + ":" + std::to_string(port))
+                                    != this->_address_node_map.end();
 }
 
 CommandReply RedisCluster::put_tensor(TensorBase& tensor)
@@ -495,7 +495,7 @@ inline void RedisCluster::_connect(std::string address_port)
 inline void RedisCluster::_map_cluster()
 {
     this->_db_nodes.clear();
-    this->_valid_nodes.clear();
+    this->_address_node_map.clear();
 
     Command cmd;
     cmd.add_field("CLUSTER");
@@ -586,7 +586,7 @@ inline void RedisCluster::_parse_reply_for_slots(CommandReply& reply)
             throw std::runtime_error("A prefix could not be generated "\
                                      "for this cluster config.");
 
-        this->_valid_nodes.insert({this->_db_nodes[i].ip + ":"
+        this->_address_node_map.insert({this->_db_nodes[i].ip + ":"
                                     + std::to_string(this->_db_nodes[i].port),
                                     &this->_db_nodes[i]});
     }

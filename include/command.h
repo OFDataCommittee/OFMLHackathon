@@ -207,21 +207,24 @@ class Command
         *   \param port Port of database
         */
         void set_exec_address_port(std::string address,
-                                   uint64_t port);
+                                   uint16_t port);
 
         /*!
         *   \brief Get address that command will be
         *          to be executed on
         *   \return std::string of address
+        *           if an address hasn't been set,
+        *                 returns an empty string
         */
         std::string get_address();
 
         /*!
         *   \brief Get port that command will be
         *          to be executed on
-        *   \return uint64_t of port
+        *   \return uint16_t of port
+        *           if port hasn't been set, returns 0
         */
-        uint64_t get_port();
+        uint16_t get_port();
 
         /*!
         *   \brief Get the value of the field field

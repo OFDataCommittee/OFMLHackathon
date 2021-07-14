@@ -670,54 +670,16 @@ parsed_map Client::get_db_node_info(std::string address)
     std::string host = address.substr(0, address.find(":"));
     uint64_t port = std::stoul (address.substr(address.find(":") + 1),
                                 nullptr, 0);
+    if (host.empty() or port == 0)
+        throw std::runtime_error(std::string(address) +
+                                 "is not a valid database node address.");
     Command cmd;
     cmd.set_exec_address_port(host, port);
     cmd.add_field("INFO");
+    cmd.add_field("everything");
     CommandReply reply = this->_run(cmd);
-    // Put in a check here to make sure it is a str field or
-	// or throw error? this is done in reply.str()
-    parsed_map info_map = this ->
-        parse_db_node_info(std::string(reply.str(), reply.str_len()));
-    return info_map;
-}
-
-parsed_map Client::parse_db_node_info(std::string info)
-{
-    parsed_map info_map;
-
-    std::string delim = "\r\n";
-    std::string currKey = "";
-    auto start = 0U;
-    auto end = info.find(delim);
-
-    while (end != std::string::npos)
-    {
-        std::string line = info.substr(start, end-start);
-        start = end + delim.length();
-        end = info.find(delim, start);
-        if (line.length() == 0)
-            continue;
-        if (line[0] == '#')
-            currKey = line.substr(2);
-        else
-        {
-            std::size_t separatorIdx = line.find(':');
-            if (info_map.find(currKey)==info_map.end())
-                info_map[currKey] = {};
-            info_map[currKey][line.substr(0, separatorIdx)] =
-                                line.substr(separatorIdx+1);
-        }
-    }
-    std::string line = info.substr(start);
-    if (line.length() == 0)
-        return info_map;
-    std::size_t separatorIdx = line.find(':');
-    if (info_map.find(currKey)==info_map.end())
-                info_map[currKey] = {};
-    info_map[currKey][line.substr(0, separatorIdx)] =
-                        line.substr(separatorIdx+1);
-
-    return info_map;
+    return CommandReplyParser::parse_db_node_info(std::string(reply.str(),
+                                                        reply.str_len()));
 }
 
 

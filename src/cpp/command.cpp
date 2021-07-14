@@ -240,7 +240,7 @@ void Command::update_key(std::string old_key,
 }
 
 void Command::set_exec_address_port(std::string address,
-                                    uint64_t port)
+                                    uint16_t port)
 {
     this -> _address = address;
     this -> _port = port;
@@ -252,7 +252,7 @@ std::string Command::get_address()
     return this -> _address;
 }
 
-uint64_t Command::get_port()
+uint16_t Command::get_port()
 {
     return this -> _port;
 }

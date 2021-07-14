@@ -101,7 +101,7 @@ class RedisServer {
         virtual bool model_key_exists(const std::string& key) = 0;
 
         /*!
-         *  \brief Check if address is valid
+         *  \brief Check if address and port maps to database node
          *  \param addresss address of database
          *  \param port port of database
          *  \return True if address is valid
@@ -287,7 +287,7 @@ class RedisServer {
         /*!
         *   \brief Unordered map of address:port to DBNode in the cluster
         */
-        std::unordered_map<std::string, DBNode*> _valid_nodes;
+        std::unordered_map<std::string, DBNode*> _address_node_map;
 
         /*!
         *   \brief Check that the SSDB environment variable
