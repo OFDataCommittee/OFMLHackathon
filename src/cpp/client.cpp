@@ -665,7 +665,7 @@ void Client::use_tensor_ensemble_prefix(bool use_prefix)
     this->_use_tensor_prefix = use_prefix;
 }
 
-parsed_map Client::get_db_node_info(std::string address)
+parsed_reply_map Client::get_db_node_info(std::string address)
 {
     std::string host = address.substr(0, address.find(":"));
     uint64_t port = std::stoul (address.substr(address.find(":") + 1),

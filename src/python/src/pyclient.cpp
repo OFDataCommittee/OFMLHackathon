@@ -445,7 +445,7 @@ std::vector<py::dict> PyClient::get_db_node_info(std::vector<std::string> addres
 {
     std::vector<py::dict> addresses_info;
     for(size_t i=0; i<addresses.size(); i++) {
-        parsed_map info_map = this->_client->get_db_node_info(addresses[i]);
+        parsed_reply_map info_map = this->_client->get_db_node_info(addresses[i]);
         py::dict info_dict = py::cast(info_map);
         addresses_info.push_back(info_dict);
     }

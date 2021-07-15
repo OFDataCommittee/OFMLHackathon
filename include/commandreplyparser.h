@@ -35,7 +35,7 @@
 #include "enums/cpp_tensor_type.h"
 
 using inner_map = std::unordered_map<std::string, std::string>;
-using parsed_map = std::unordered_map<std::string, inner_map>;
+using parsed_reply_map = std::unordered_map<std::string, inner_map>;
 
 namespace SmartRedis {
 
@@ -95,13 +95,13 @@ inline TensorType get_tensor_data_type(CommandReply& reply)
                                             reply[1].str_len()));
 }
 
-inline parsed_map parse_db_node_info(std::string info)
+inline parsed_reply_map parse_db_node_info(std::string info)
 {
     /* Parse database node information from get_db_node_info()
     *          into a nested unordered_map
-    *  Returns parsed_map containing the database node information
+    *  Returns parsed_reply_map containing the database node information
     */
-    parsed_map info_map;
+    parsed_reply_map info_map;
 
     std::string delim = "\r\n";
     std::string currKey = "";

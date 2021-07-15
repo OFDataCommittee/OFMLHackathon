@@ -552,9 +552,9 @@ class Client
         /*!
         *   \brief Returns information about the given database node
         *   \param address The address of the database node (host:port)
-        *   \returns parsed_map containing the database node information
+        *   \returns parsed_reply_map containing the database node information
         */
-        parsed_map get_db_node_info(std::string address);
+        parsed_reply_map get_db_node_info(std::string address);
 
     protected:
 
