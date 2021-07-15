@@ -278,3 +278,21 @@ void Command::make_empty()
     this->_cmd_keys.clear();
     this->_fields.clear();
 }
+
+void Command::set_exec_address_port(std::string address,
+                                    uint16_t port)
+{
+    this -> _address = address;
+    this -> _port = port;
+    return;
+}
+
+std::string Command::get_address()
+{
+    return this -> _address;
+}
+
+uint16_t Command::get_port()
+{
+    return this -> _port;
+}
