@@ -70,25 +70,14 @@ CommandReply Redis::run(Command& cmd)
         }
         catch (sw::redis::TimeoutError &e) {
             n_trials--;
-            std::cout << "WARNING: Caught redis TimeoutError: " << e.what() << std::endl;
-            std::cout << "WARNING: Could not execute command " << cmd.first_field()
-                      << " and " << n_trials << " more trials will be made."
-                      << std::endl << std::flush;
             std::this_thread::sleep_for(std::chrono::seconds(2));
         }
         catch (sw::redis::IoError &e) {
             n_trials--;
-            std::cout << "WARNING: Caught redis IOError: " << e.what() << std::endl;
-            std::cout << "WARNING: Could not execute command " << cmd.first_field()
-                        << " and " << n_trials << " more trials will be made."
-                        << std::endl << std::flush;
+            std::this_thread::sleep_for(std::chrono::seconds(2));
         }
         catch (...) {
             n_trials--;
-            std::cout << "WARNING: Could not execute command " << cmd.first_field()
-                        << " and " << n_trials << " more trials will be made."
-                        << std::endl << std::flush;
-            std::cout << "Error command = "<<cmd.to_string()<<std::endl;
             throw;
         }
     }
@@ -131,6 +120,15 @@ bool Redis::key_exists(const std::string& key)
     CommandReply reply = this->run(cmd);
     return reply.integer();
 }
+
+bool Redis::is_addressable(const std::string& address,
+                           const uint64_t& port)
+{
+    return this->_address_node_map.find(address + ":"
+                        + std::to_string(port))
+                        != this->_address_node_map.end();
+}
+
 
 CommandReply Redis::put_tensor(TensorBase& tensor)
 {
@@ -331,6 +329,8 @@ CommandReply Redis::get_script(const std::string& key)
 
 inline void Redis::_connect(std::string address_port)
 {
+    this->_address_node_map.insert({address_port, nullptr});
+
     int n_connection_trials = 10;
 
     while(n_connection_trials > 0) {

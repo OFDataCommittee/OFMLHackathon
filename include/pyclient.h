@@ -32,13 +32,16 @@
 #include "client.h"
 #include "pydataset.h"
 #include <pybind11/pybind11.h>
+#include <pybind11/pytypes.h>
+#include <pybind11/stl_bind.h>
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
 #include <string>
+#include <unordered_map>
 
 ///@file
 
-using namespace SmartRedis;
+namespace SmartRedis {
 
 namespace py = pybind11;
 
@@ -92,7 +95,32 @@ class PyClient
         *   \param key The name used to reference the tensor
         *   \throw std::runtime_error for all client errors
         */
-        py::array get_tensor(std::string& key);
+        py::array get_tensor(const std::string& key);
+
+        /*!
+        *   \brief delete a tensor stored in the database
+        *   \param key The key of tensor to delete
+        *   \throw std::runtime_error for all client errors
+        */
+        void delete_tensor(const std::string& key);
+
+        /*!
+        *   \brief rename a tensor stored in the database
+        *   \param key The key of tensor to rename
+        *   \param new_key the new name of the tensor
+        *   \throw std::runtime_error for all client errors
+        */
+        void rename_tensor(const std::string& key,
+                           const std::string& new_key);
+
+        /*!
+        *   \brief copy a tensor to a new key
+        *   \param key The key of tensor to copy
+        *   \param dest_key the key to store tensor copy at
+        *   \throw std::runtime_error for all client errors
+        */
+        void copy_tensor(const std::string& key,
+                         const std::string& dest_key);
 
 
         /*!
@@ -111,6 +139,30 @@ class PyClient
         *   \throw std::runtime_error for all client errors
         */
         PyDataset* get_dataset(const std::string& name);
+
+
+        /*!
+        *   \brief delete a dataset stored in the database
+        *   \param key The key of dataset to delete
+        *   \throw std::runtime_error for all client errors
+        */
+        void delete_dataset(const std::string& key);
+
+        /*!
+        *   \brief rename a dataset stored in the database
+        *   \param key The key of dataset to rename
+        *   \param new_key the new name of the dataset
+        *   \throw std::runtime_error for all client errors
+        */
+        void rename_dataset(const std::string& key, const std::string& new_key);
+
+        /*!
+        *   \brief copy a dataset to a new key
+        *   \param key The key of datalset to copy
+        *   \param dest_key the key to store dataset copy at
+        *   \throw std::runtime_error for all client errors
+        */
+        void copy_dataset(const std::string& key, const std::string& dest_key);
 
 
         /*!
@@ -265,7 +317,7 @@ class PyClient
         *   \brief Check if the tensor or dataset exists in the database
         *   \param name The name that will be checked in the database
         *               Depending on the current prefixing
-        *               behavior, the name will be automatically prefixed 
+        *               behavior, the name will be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the tensor or dataset exists in the database
         */
@@ -275,7 +327,7 @@ class PyClient
         *   \brief Check if the model or script exists in the database
         *   \param name The name that will be checked in the database
         *               Depending on the current prefixing
-        *               behavior, the name will be automatically prefixed 
+        *               behavior, the name will be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the model or script exists in the database
         */
@@ -353,7 +405,7 @@ class PyClient
         *        By default, the client does not prefix model and script keys.
         *
         * \param use_prefix If set to true, all future operations
-        *                   on model and scripts will add 
+        *                   on model and scripts will add
         *                   a prefix to the entity names, if available.
         */
         void use_model_ensemble_prefix(bool use_prefix);
@@ -369,10 +421,18 @@ class PyClient
         *        and SSKEYOUT environment variables.
         *
         * \param use_prefix If set to true, all future operations
-        *                   on tensors and datasets will add 
+        *                   on tensors and datasets will add
         *                   a prefix to the entity names, if available.
         */
         void use_tensor_ensemble_prefix(bool use_prefix);
+
+        /*!
+        *   \brief Returns information about the given database nodes
+        *   \param addresses The addresses of the database nodes
+        *   \returns A list of parsed_map objects containing all the
+        *            information about the given database nodes
+        */
+        std::vector<py::dict> get_db_node_info(std::vector<std::string> addresses);
 
     private:
 
@@ -383,4 +443,7 @@ class PyClient
         Client* _client;
 
 };
+
+} //namespace SmartRedis
+
 #endif //PY_CLIENT_H

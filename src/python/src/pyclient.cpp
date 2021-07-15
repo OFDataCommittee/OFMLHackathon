@@ -27,6 +27,9 @@
  */
 
 #include "pyclient.h"
+#include "tensorbase.h"
+#include "tensor.h"
+
 
 using namespace SmartRedis;
 
@@ -68,77 +71,108 @@ void PyClient::put_tensor(std::string& key,
     return;
 }
 
-py::array PyClient::get_tensor(std::string& key)
+py::array PyClient::get_tensor(const std::string& key)
 {
-    // placeholder variables to be filled
-    TensorType type;
-    std::vector<size_t> dims;
-    void* ptr;
-
-    // call C++ client
+    TensorBase* tensor;
     try {
-        this->_client->get_tensor(key, ptr, dims, type,
-                                    MemoryLayout::contiguous);
+        tensor = this->_client->_get_tensorbase_obj(key);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
-  }
+    }
 
-  // detect data type
-  switch(type) {
-    case TensorType::dbl : {
-      double* data;
-      data = (double*) ptr;
-      return py::array(dims, data, py::none());
-      break;
+    //Define py::capsule lambda function for destructor
+    py::capsule free_when_done((void*)tensor, [](void *tensor) {
+            delete (TensorBase*)tensor;
+            });
+
+    // detect data type
+    switch(tensor->type()) {
+        case TensorType::dbl : {
+            double* data =
+                (double*)(tensor->data_view(MemoryLayout::contiguous));
+            return py::array(tensor->dims(), data, free_when_done);
+            break;
+        }
+        case TensorType::flt : {
+            float* data =
+                (float*)(tensor->data_view(MemoryLayout::contiguous));
+            return py::array(tensor->dims(), data, free_when_done);
+            break;
+        }
+        case TensorType::int64 : {
+            int64_t* data =
+                (int64_t*)(tensor->data_view(MemoryLayout::contiguous));
+            return py::array(tensor->dims(), data, free_when_done);
+            break;
+        }
+        case TensorType::int32: {
+            int32_t* data =
+                (int32_t*)(tensor->data_view(MemoryLayout::contiguous));
+            return py::array(tensor->dims(), data, free_when_done);
+            break;
+        }
+        case TensorType::int16: {
+            int16_t* data =
+                (int16_t*)(tensor->data_view(MemoryLayout::contiguous));
+            return py::array(tensor->dims(), data, free_when_done);
+            break;
+        }
+        case TensorType::int8: {
+            int8_t* data =
+                (int8_t*)(tensor->data_view(MemoryLayout::contiguous));
+            return py::array(tensor->dims(), data, free_when_done);
+            break;
+        }
+        case TensorType::uint16: {
+            uint16_t* data =
+                (uint16_t*)(tensor->data_view(MemoryLayout::contiguous));
+            return py::array(tensor->dims(), data, free_when_done);
+            break;
+        }
+        case TensorType::uint8: {
+            uint8_t* data =
+                (uint8_t*)(tensor->data_view(MemoryLayout::contiguous));
+            return py::array(tensor->dims(), data, free_when_done);
+            break;
+        }
+        default :
+            throw std::runtime_error("Could not infer type in "\
+                                     "PyClient::get_tensor().");
+            break;
     }
-    case TensorType::flt : {
-      float* data;
-      data = (float*) ptr;
-      return py::array(dims, data, py::none());
-      break;
+}
+
+void PyClient::delete_tensor(const std::string& key) {
+    try {
+        this->_client->delete_tensor(key);
     }
-    case TensorType::int64 : {
-      int64_t* data;
-      data = (int64_t*) ptr;
-      return py::array(dims, data, py::none());
-      break;
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
     }
-    case TensorType::int32 : {
-      int32_t* data;
-      data = (int32_t*) ptr;
-      return py::array(dims, data, py::none());
-      break;
+    return;
+}
+
+void PyClient::copy_tensor(const std::string& key,
+                           const std::string& dest_key) {
+    try {
+        this->_client->copy_tensor(key, dest_key);
     }
-    case TensorType::int16 : {
-      int16_t* data;
-      data = (int16_t*) ptr;
-      return py::array(dims, data, py::none());
-      break;
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
     }
-    case TensorType::int8 : {
-      int8_t* data;
-      data = (int8_t*) ptr;
-      return py::array(dims, data, py::none());
-      break;
+    return;
+}
+
+void PyClient::rename_tensor(const std::string& key,
+                             const std::string& new_key) {
+    try {
+        this->_client->rename_tensor(key, new_key);
     }
-    case TensorType::uint16 : {
-      uint16_t* data;
-      data = (uint16_t*) ptr;
-      return py::array(dims, data, py::none());
-      break;
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
     }
-    case TensorType::uint8 : {
-      uint8_t* data;
-      data = (uint8_t*) ptr;
-      return py::array(dims, data, py::none());
-      break;
-    }
-    default :
-      // TODO throw python expection here
-      throw std::runtime_error("Could not infer type");
-      break;
-  }
+    return;
 }
 
 void PyClient::put_dataset(PyDataset& dataset)
@@ -163,6 +197,38 @@ PyDataset* PyClient::get_dataset(const std::string& name)
     }
     PyDataset* dataset = new PyDataset(*data);
     return dataset;
+}
+
+void PyClient::delete_dataset(const std::string& key) {
+    try {
+        this->_client->delete_dataset(key);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return;
+}
+
+void PyClient::copy_dataset(const std::string& key,
+                           const std::string& dest_key) {
+    try {
+        this->_client->copy_dataset(key, dest_key);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return;
+}
+
+void PyClient::rename_dataset(const std::string& key,
+                             const std::string& new_key) {
+    try {
+        this->_client->rename_dataset(key, new_key);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    return;
 }
 
 void PyClient::set_script_from_file(const std::string& key,
@@ -373,4 +439,15 @@ void PyClient::use_tensor_ensemble_prefix(bool use_prefix)
 void PyClient::use_model_ensemble_prefix(bool use_prefix)
 {
   this->_client->use_model_ensemble_prefix(use_prefix);
+}
+
+std::vector<py::dict> PyClient::get_db_node_info(std::vector<std::string> addresses)
+{
+    std::vector<py::dict> addresses_info;
+    for(size_t i=0; i<addresses.size(); i++) {
+        parsed_reply_map info_map = this->_client->get_db_node_info(addresses[i]);
+        py::dict info_dict = py::cast(info_map);
+        addresses_info.push_back(info_dict);
+    }
+    return addresses_info;
 }

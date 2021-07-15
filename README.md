@@ -62,8 +62,6 @@ SmartRedis utilizes the following libraries.
  - [NumPy](https://github.com/numpy/numpy)
  - [Hiredis](https://github.com/redis/hiredis) 1.0.0
  - [Redis-plus-plus](https://github.com/sewenew/redis-plus-plus)  1.2.3
- - [protobuf](https://github.com/protocolbuffers/protobuf)  3.11.3
-
 
 ## Publications
 

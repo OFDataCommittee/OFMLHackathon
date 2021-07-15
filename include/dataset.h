@@ -69,17 +69,6 @@ class DataSet
         DataSet(const std::string& name);
 
         /*!
-        *   \brief DataSet constructor that builds the object
-        *          from a database buffer stream.
-        *   \param name The name used to reference the DataSet
-        *   \param buf The buffer used for object construction
-        *   \param buf_size The length of the buffer
-        */
-        DataSet(const std::string& name,
-                char* buf,
-                size_t buf_size);
-
-        /*!
         *   \brief DataSet copy constructor
         *   \param dataset The DataSet to copy
         */
@@ -315,6 +304,16 @@ class DataSet
                               size_t*& lengths);
 
         /*!
+        *   \brief This function checks if the DataSet has a
+        *          field
+        *   \param field_name The name of the field to check
+        *   \returns Boolean indicating if the DataSet has
+        *            the field.
+        */
+        bool has_field(const std::string& field_name);
+
+
+        /*!
         *   \brief This function clears all entries in a
         *          DataSet field.
         *   \param field_name The name of the field to clear
@@ -334,6 +333,7 @@ class DataSet
         std::string name;
 
         friend class Client;
+        friend class PyDataset;
 
     protected:
 
@@ -376,19 +376,21 @@ class DataSet
         const_tensor_iterator tensor_cend();
 
         /*!
-        *   \brief Returns a buffer string represeting the
-        *          total metadata package in the DataSet
-        *   \returns std::string_view containing metadata
-        *            buffer
-        */
-        std::string_view get_metadata_buf();
-
-        /*!
         *   \brief Get a string representing the Tensor type
         *   \param name The name of the Tensor
         *   \returns std::string representing the Tensor type
         */
         std::string get_tensor_type(const std::string& name);
+
+        /*!
+        *   \brief Returns a vector of std::pair with
+        *          the field name and the field serialization
+        *          for all fields in the MetaData set.
+        *   \returns std::pair<std::string, std::string> containing
+        *            the field name and the field serialization.
+        */
+        std::vector<std::pair<std::string, std::string>>
+            get_metadata_serialization_map();
 
         /*!
         *   \brief Add a Tensor (not yet allocated) to the TensorPack
@@ -399,12 +401,36 @@ class DataSet
         *   \param mem_layout The memory layout of the provided
         *                     tensor data
         */
-        void _add_to_tensorpack(const std::string& name /*!< The name used to reference the tensor*/,
-                                void* data /*!< A c-ptr to the data of the tensor*/,
-                                const std::vector<size_t>& dims /*! The dimensions of the data*/,
-                                const TensorType type /*! The type of the tensor*/,
-                                const MemoryLayout mem_layout /*!< The MemoryLayout enum describing the layout of source data*/
-                                );
+        void _add_to_tensorpack(const std::string& name,
+                                void* data,
+                                const std::vector<size_t>& dims,
+                                const TensorType type,
+                                const MemoryLayout mem_layout);
+
+        /*!
+        *   \brief Add a serialized field to the DataSet
+        *   \param name The name of the field
+        *   \param buf The buffer used for object construction
+        *   \param buf_size The length of the buffer
+        */
+        void _add_serialized_field(const std::string& name,
+                                   char* buf,
+                                   size_t buf_size);
+
+        /*!
+        *   \brief Retrieve the tensor from the DataSet and return
+        *          a TensorBase object that can be used to return
+        *          tensor information to the user.  The returned
+        *          TensorBase object has been dynamically allocated,
+        *          but not yet tracked for memory management in
+        *          any object.
+        *   \details The TensorBase object returned will always
+        *            have a MemoryLayout::contiguous layout.
+        *   \param name  The name used to reference the tensor
+        *   \returns A TensorBase object.
+        */
+        TensorBase* _get_tensorbase_obj(const std::string& name);
+
     private:
 
 
@@ -420,10 +446,26 @@ class DataSet
         TensorPack _tensorpack;
 
         /*!
-        *  \brief SharedMemoryList to manage memory associated
-        *         with tensor dimensions from tensor retrieval
+        *   \brief Check and enforce that a tensor must exist or
+        *          throw an error.
+        *   \throw std::runtime_error if the tensor is not
+        *          in the DataSet.
+        */
+        inline void _enforce_tensor_exists(const std::string& name);
+
+        /*!
+        *   \brief SharedMemoryList to manage memory associated
+        *          with tensor dimensions from tensor retrieval
         */
         SharedMemoryList<size_t> _dim_queries;
+
+        /*!
+        *  \brief The _tensor_pack memory is not for querying
+        *         by name, but is used to manage memory associated
+        *         with get_tensor() function calls.
+        */
+        TensorPack _tensor_memory;
+
 };
 
 } //namespace SmartRedis

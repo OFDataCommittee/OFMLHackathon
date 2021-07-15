@@ -53,7 +53,16 @@ RedisCluster::~RedisCluster()
 
 CommandReply RedisCluster::run(Command& cmd)
 {
-    std::string db_prefix = this->_get_db_node_prefix(cmd);
+    std::string db_prefix;
+
+    if (this->is_addressable(cmd.get_address(), cmd.get_port()))
+        db_prefix = this->_address_node_map.at(cmd.get_address() + ":"
+                    + std::to_string(cmd.get_port()))->prefix;
+    else if (cmd.has_keys())
+        db_prefix = this->_get_db_node_prefix(cmd);
+    else
+        throw std::runtime_error("Redis has failed to find database");
+
     std::string_view sv_prefix(db_prefix.data(), db_prefix.size());
 
     Command::iterator cmd_fields_start = cmd.begin();
@@ -76,25 +85,14 @@ CommandReply RedisCluster::run(Command& cmd)
         }
         catch (sw::redis::TimeoutError &e) {
             n_trials--;
-            std::cout << "WARNING: Caught redis TimeoutError: " << e.what() << std::endl;
-            std::cout << "WARNING: Could not execute command " << cmd.first_field()
-                      << " and " << n_trials << " more trials will be made."
-                      << std::endl << std::flush;
             std::this_thread::sleep_for(std::chrono::seconds(2));
         }
         catch (sw::redis::IoError &e) {
             n_trials--;
-            std::cout << "WARNING: Caught redis IOError: " << e.what() << std::endl;
-            std::cout << "WARNING: Could not execute command " << cmd.first_field()
-                        << " and " << n_trials << " more trials will be made."
-                        << std::endl << std::flush;
+            std::this_thread::sleep_for(std::chrono::seconds(2));
         }
         catch (...) {
             n_trials--;
-            std::cout << "WARNING: Could not execute command " << cmd.first_field()
-                        << " and " << n_trials << " more trials will be made."
-                        << std::endl << std::flush;
-            std::cout << "Error command = "<<cmd.to_string()<<std::endl;
             throw;
         }
     }
@@ -141,6 +139,13 @@ bool RedisCluster::key_exists(const std::string& key)
     cmd.add_field(key, true);
     CommandReply reply = this->run(cmd);
     return reply.integer();
+}
+
+bool RedisCluster::is_addressable(const std::string& address,
+                                  const uint64_t& port)
+{
+    return this->_address_node_map.find(address + ":" + std::to_string(port))
+                                    != this->_address_node_map.end();
 }
 
 CommandReply RedisCluster::put_tensor(TensorBase& tensor)
@@ -490,6 +495,7 @@ inline void RedisCluster::_connect(std::string address_port)
 inline void RedisCluster::_map_cluster()
 {
     this->_db_nodes.clear();
+    this->_address_node_map.clear();
 
     Command cmd;
     cmd.add_field("CLUSTER");
@@ -579,6 +585,10 @@ inline void RedisCluster::_parse_reply_for_slots(CommandReply& reply)
         if(k>n_hashes)
             throw std::runtime_error("A prefix could not be generated "\
                                      "for this cluster config.");
+
+        this->_address_node_map.insert({this->_db_nodes[i].ip + ":"
+                                    + std::to_string(this->_db_nodes[i].port),
+                                    &this->_db_nodes[i]});
     }
     //Put the vector of db nodes in order based on lower hash slot
     std::sort(this->_db_nodes.begin(), this->_db_nodes.end());

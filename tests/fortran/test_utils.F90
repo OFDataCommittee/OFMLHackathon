@@ -37,6 +37,7 @@ module test_utils
 
     call get_environment_variable('SMARTREDIS_TEST_CLUSTER', smartredis_test_cluster)
     smartredis_test_cluster = to_lower(smartredis_test_cluster)
+    use_cluster = .false.
     if (len_trim(smartredis_test_cluster)>0) then
       select case (smartredis_test_cluster)
         case ('true')
