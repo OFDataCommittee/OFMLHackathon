@@ -161,3 +161,11 @@ add_executable(client_test_ensemble
 target_link_libraries(client_test_ensemble
 	${SR_LIB}
 )
+
+add_executable(client_test_ensemble_dataset
+	client_test_ensemble_dataset.cpp
+)
+target_link_libraries(client_test_ensemble_dataset
+	${SR_LIB}
+)
+
