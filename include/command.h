@@ -202,6 +202,32 @@ class Command
                         std::string new_key);
 
         /*!
+        *   \brief Set address and port for command
+        *          to be executed on
+        *   \param address Address of database
+        *   \param port Port of database
+        */
+        void set_exec_address_port(std::string address,
+                                   uint16_t port);
+
+        /*!
+        *   \brief Get address that command will be
+        *          to be executed on
+        *   \return std::string of address
+        *           if an address hasn't been set,
+        *                 returns an empty string
+        */
+        std::string get_address();
+
+        /*!
+        *   \brief Get port that command will be
+        *          to be executed on
+        *   \return uint16_t of port
+        *           if port hasn't been set, returns 0
+        */
+        uint16_t get_port();
+
+        /*!
         *   \brief Get the value of the field field
         *   \returns std::string of the first Command field
         */
@@ -269,6 +295,16 @@ class Command
         *          fields
         */
         std::vector<char*>_local_fields;
+
+        /*!
+        *   \brief Address of database node
+        */
+        std::string _address;
+
+        /*!
+        *   \brief Port of database node
+        */
+        uint64_t _port;
 
         /*!
         *   \brief Unordered map of std::string_view to

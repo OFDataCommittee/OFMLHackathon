@@ -22,6 +22,34 @@ target_link_libraries(client_test_dataset
 	${SR_LIB}
 )
 
+add_executable(client_test_dataset_no_tensors
+	client_test_dataset_no_tensors.cpp
+)
+target_link_libraries(client_test_dataset_no_tensors
+	${SR_LIB}
+)
+
+add_executable(client_test_dataset_no_meta
+	client_test_dataset_no_meta.cpp
+)
+target_link_libraries(client_test_dataset_no_meta
+	${SR_LIB}
+)
+
+add_executable(client_test_dataset_empty
+	client_test_dataset_empty.cpp
+)
+target_link_libraries(client_test_dataset_empty
+	${SR_LIB}
+)
+
+add_executable(client_test_dataset_multiple_get_tensor
+	client_test_dataset_multiple_get_tensor.cpp
+)
+target_link_libraries(client_test_dataset_multiple_get_tensor
+	${SR_LIB}
+)
+
 add_executable(client_test_delete_dataset
 	client_test_delete_dataset.cpp
 )
@@ -133,3 +161,11 @@ add_executable(client_test_ensemble
 target_link_libraries(client_test_ensemble
 	${SR_LIB}
 )
+
+add_executable(client_test_ensemble_dataset
+	client_test_ensemble_dataset.cpp
+)
+target_link_libraries(client_test_ensemble_dataset
+	${SR_LIB}
+)
+

@@ -131,6 +131,14 @@ class RedisCluster : public RedisServer
         virtual bool model_key_exists(const std::string& key);
 
         /*!
+         *  \brief Check if address is valid
+         *  \param addresss address of database
+         *  \param port port of database
+         *  \return True if address is valid
+         */
+        virtual bool is_addressable(const std::string& address, const uint64_t& port);
+
+        /*!
         *   \brief Put a Tensor on the server
         *   \param tensor The Tensor to put on the server
         *   \returns The CommandReply from the put tensor

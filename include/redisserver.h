@@ -37,6 +37,7 @@
 #include "commandreplyparser.h"
 #include "commandlist.h"
 #include "tensorbase.h"
+#include "dbnode.h"
 
 ///@file
 
@@ -98,6 +99,14 @@ class RedisServer {
          *  \return True if the model or script exists
          */
         virtual bool model_key_exists(const std::string& key) = 0;
+
+        /*!
+         *  \brief Check if address and port maps to database node
+         *  \param addresss address of database
+         *  \param port port of database
+         *  \return True if address is valid
+         */
+        virtual bool is_addressable(const std::string& address, const uint64_t& port) = 0;
 
         /*!
         *   \brief Put a Tensor on the server
@@ -274,6 +283,11 @@ class RedisServer {
         *            address:port
         */
         std::string _get_ssdb();
+
+        /*!
+        *   \brief Unordered map of address:port to DBNode in the cluster
+        */
+        std::unordered_map<std::string, DBNode*> _address_node_map;
 
         /*!
         *   \brief Check that the SSDB environment variable
