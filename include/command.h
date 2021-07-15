@@ -286,15 +286,25 @@ class Command
     private:
 
         /*!
-        *   \brief All of the fields in the Command
+        *   \brief All local fields and
+        *          pointer fields in the order that
+        *          they were added to the Command
         */
         std::vector<std::string_view> _fields;
 
         /*!
-        *   \brief A copy of data that is pointed to by Command
-        *          fields
+        *   \brief All of the fields whose memory was
+                   allocated by Command, along with
+                   their associated index in _fields
         */
-        std::vector<char*>_local_fields;
+        std::vector<std::pair<char*, size_t> > _local_fields;
+
+        /*!
+        *   \brief All of the fields whose memory was not
+        *          allocated by Command, along with their
+        *          associated index in _fields
+        */
+        std::vector<std::pair<char*, size_t> > _ptr_fields;
 
         /*!
         *   \brief Address of database node
@@ -312,6 +322,11 @@ class Command
         *          for the std::string_view
         */
         std::unordered_map<std::string_view, size_t> _cmd_keys;
+
+        /*!
+        *   \brief Helper function for emptying the Command
+        */
+        void make_empty();
 };
 
 #include "command.tcc"
