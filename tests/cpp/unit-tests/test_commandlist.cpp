@@ -87,8 +87,7 @@ SCENARIO("Testing CommandList object", "[CommandList]")
                     Command::const_iterator cmd_it_cpy = (**lst_it_cpy).cbegin();
                     Command::const_iterator cmd_it_end_cpy = (**lst_it_cpy).cend();
                     while (cmd_it != cmd_it_end) {
-                        if (cmd_it_cpy == cmd_it_end_cpy)
-                            REQUIRE(false);
+                        REQUIRE(cmd_it_cpy != cmd_it_end_cpy);
                         CHECK(*cmd_it == *cmd_it_cpy);
                         cmd_it++;
                         cmd_it_cpy++;
@@ -124,16 +123,14 @@ SCENARIO("Testing CommandList object", "[CommandList]")
                 std::vector<Command*>::const_iterator lst_it_cpy = cmd_lst_cpy->cbegin();
                 std::vector<Command*>::const_iterator lst_it_end_cpy = cmd_lst_cpy->cend();
                 while (lst_it != lst_it_end) {
-                    if (lst_it_cpy == lst_it_end_cpy)
-                        REQUIRE(false);
+                    REQUIRE(lst_it_cpy != lst_it_end_cpy);
                     // Ensure each field in the current Commands are the same
                     Command::const_iterator cmd_it = (**lst_it).cbegin();
                     Command::const_iterator cmd_it_end = (**lst_it).cend();
                     Command::const_iterator cmd_it_cpy = (**lst_it_cpy).cbegin();
                     Command::const_iterator cmd_it_end_cpy = (**lst_it_cpy).cend();
                     while (cmd_it != cmd_it_end) {
-                        if (cmd_it_cpy == cmd_it_end_cpy)
-                            REQUIRE(false);
+                        REQUIRE(cmd_it_cpy != cmd_it_end_cpy);
                         CHECK(*cmd_it == *cmd_it_cpy);
                         cmd_it++;
                         cmd_it_cpy++;
@@ -169,6 +166,38 @@ SCENARIO("Testing CommandList object", "[CommandList]")
                     it++;
                     i++;
                 }
+            }
+        }
+    }
+    GIVEN("A CommandList object on the heap with three Commands")
+    {
+        CommandList* cmd_lst = new CommandList;
+        Command* cmd_1 = cmd_lst->add_command();
+        Command* cmd_2 = cmd_lst->add_command();
+        Command* cmd_3 = cmd_lst->add_command();
+        std::vector<std::string> keys = {"AI.TENSORSET", "EXISTS", "DEL"};
+        cmd_1->add_field(keys[0], true);
+        cmd_2->add_field(keys[1], true);
+        cmd_3->add_field(keys[2], true);
+        WHEN("A new CommandList is created usig the assignment operator and then the original is deleted")
+        {
+            CommandList* cmd_lst_cpy = new CommandList;
+            Command* tmp_cmd = cmd_lst_cpy->add_command();
+            tmp_cmd->add_field("tmp_field", true);
+            *cmd_lst_cpy = *cmd_lst;
+            delete cmd_lst;
+            THEN("The state of the new CommandList is preserved")
+            {
+                // Ensure that the state of the original CommandList object is preserved
+                int cmd_count = 0;
+                std::vector<Command*>::const_iterator it = cmd_lst_cpy->cbegin();
+                std::vector<Command*>::const_iterator it_end = cmd_lst_cpy->cend();
+                while((it != it_end) && (cmd_count < keys.size())) {
+                    CHECK((*it)->first_field() == keys[cmd_count]);
+                    it++;
+                    cmd_count++;
+                }
+                CHECK(cmd_count == keys.size());
             }
         }
     }

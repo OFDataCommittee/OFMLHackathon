@@ -50,7 +50,7 @@ CommandList& CommandList::operator=(const CommandList& cmd_lst)
             delete (*it);
             it++;
         }
-        _commands.clear();
+        this->_commands.clear();
 
         std::vector<Command*>::const_iterator c_it = cmd_lst._commands.begin();
         std::vector<Command*>::const_iterator c_it_end = cmd_lst._commands.end();

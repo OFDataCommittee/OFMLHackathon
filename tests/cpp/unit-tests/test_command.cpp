@@ -54,7 +54,7 @@ SCENARIO("Testing Command object", "[Command]")
     AND_GIVEN("A Command object")
     {
         Command cmd;
-        
+
         std::string field_1 = "TAG";
         char field_2[4] = "DEL";
         const char field_3[7] = "RENAME";
@@ -64,7 +64,8 @@ SCENARIO("Testing Command object", "[Command]")
         std::vector<std::string> fields_1 = {"EXISTS", "META", "BLOB"};
         std::vector<std::string>::iterator end_it = fields_1.end();
         std::string output = " TAG DEL RENAME SOURCE INPUTS EXISTS META BLOB";
-        std::vector<std::string> sorted_keys = {"BLOB", "DEL", "EXISTS", "META", "RENAME", "TAG"};
+        std::vector<std::string> sorted_keys =
+            {"BLOB", "DEL", "EXISTS", "META", "RENAME", "TAG"};
         std::vector<std::string> cmd_keys;
         WHEN("Fields are added to the Command object in every possible manner")
         {
@@ -92,8 +93,7 @@ SCENARIO("Testing Command object", "[Command]")
                 Command::const_iterator it_cpy = cmd_cpy->cbegin();
                 Command::const_iterator it_end_cpy = cmd_cpy->cend();
                 while (it != it_end) {
-                    if (it_cpy == it_end_cpy)
-                        REQUIRE(false);
+                    REQUIRE(it_cpy != it_end_cpy);
                     CHECK(*it == *it_cpy);
                     it++;
                     it_cpy++;
@@ -122,14 +122,12 @@ SCENARIO("Testing Command object", "[Command]")
                 Command* cmd_cpy = new Command;
                 cmd_cpy->add_field("field_to_be_destroyed", true);
                 *cmd_cpy = cmd;
-
                 Command::const_iterator it = cmd.cbegin();
                 Command::const_iterator it_end = cmd.cend();
                 Command::const_iterator it_cpy = cmd_cpy->cbegin();
                 Command::const_iterator it_end_cpy = cmd_cpy->cend();
                 while (it != it_end) {
-                    if (it_cpy == it_end_cpy)
-                        REQUIRE(false);
+                    REQUIRE(it_cpy != it_end_cpy);
                     CHECK(*it == *it_cpy);
                     it++;
                     it_cpy++;
@@ -152,6 +150,91 @@ SCENARIO("Testing Command object", "[Command]")
                 std::sort(cmd_keys.begin(), cmd_keys.end());
                 CHECK(cmd_keys == sorted_keys);
             }
+        }
+    }
+    AND_GIVEN("A Command object on the heap")
+    {
+        Command* cmd = new Command;
+
+        std::string field_1 = "TAG";
+        char field_2[4] = "DEL";
+        const char field_3[7] = "RENAME";
+        char field_4[7] = "SOURCE";
+        size_t field_size_4 = std::strlen(field_4);
+        std::string field_5 = "INPUTS";
+        std::vector<std::string> fields_1 = {"EXISTS", "META", "BLOB"};
+        std::string_view field_sv = std::string_view(field_4, field_size_4);
+
+        std::vector<std::string>::iterator end_it = fields_1.end();
+        std::string output = " TAG DEL RENAME SOURCE INPUTS EXISTS META BLOB SOURCE";
+        std::vector<std::string> sorted_keys = {"BLOB", "DEL", "EXISTS", "META", "RENAME", "TAG"};
+        std::vector<std::string> cmd_keys;
+        cmd->add_field(field_1, true);
+        cmd->add_field(field_2, true);
+        cmd->add_field(field_3, true);
+        cmd->add_field_ptr(field_4, field_size_4);
+        cmd->add_field_ptr(field_5);
+        cmd->add_fields(fields_1, true);
+        cmd->add_field_ptr(field_sv);
+        THEN("The Command object can be copied with the assign op and then deleted")
+        {
+            Command* cmd_cpy = new Command;
+            cmd_cpy->add_field("field_to_be_destroyed", true);
+            *cmd_cpy = *cmd;
+            Command::const_iterator it = cmd->cbegin();
+            Command::const_iterator it_end = cmd->cend();
+            Command::const_iterator it_cpy = cmd_cpy->cbegin();
+            Command::const_iterator it_end_cpy = cmd_cpy->cend();
+            while (it != it_end) {
+                REQUIRE(it_cpy != it_end_cpy);
+                CHECK(*it == *it_cpy);
+                it++;
+                it_cpy++;
+            }
+            CHECK(it_cpy == it_end_cpy);
+            cmd_keys = cmd->get_keys();
+            std::vector<std::string> cmd_keys_cpy = cmd_cpy->get_keys();
+            std::sort(cmd_keys.begin(), cmd_keys.end());
+            std::sort(cmd_keys_cpy.begin(), cmd_keys_cpy.end());
+            CHECK(cmd_keys_cpy == cmd_keys);
+            delete cmd;
+            // Ensure the state of the original Command object is preserved
+            CHECK(cmd_cpy->has_keys() == true);
+            CHECK(cmd_cpy->first_field() == field_1);
+            CHECK(output == cmd_cpy->to_string());
+            cmd_keys = cmd_cpy->get_keys();
+            std::sort(cmd_keys.begin(), cmd_keys.end());
+            CHECK(cmd_keys == sorted_keys);
+            delete cmd_cpy;
+        }
+        AND_THEN("The Command object can be copied with the copy constructor and then deleted")
+        {
+            Command* cmd_cpy = new Command(*cmd);
+            Command::const_iterator it = cmd->cbegin();
+            Command::const_iterator it_end = cmd->cend();
+            Command::const_iterator it_cpy = cmd_cpy->cbegin();
+            Command::const_iterator it_end_cpy = cmd_cpy->cend();
+            while (it != it_end) {
+                REQUIRE(it_cpy != it_end_cpy);
+                CHECK(*it == *it_cpy);
+                it++;
+                it_cpy++;
+            }
+            CHECK(it_cpy == it_end_cpy);
+            cmd_keys = cmd->get_keys();
+            std::vector<std::string> cmd_keys_cpy = cmd_cpy->get_keys();
+            std::sort(cmd_keys.begin(), cmd_keys.end());
+            std::sort(cmd_keys_cpy.begin(), cmd_keys_cpy.end());
+            CHECK(cmd_keys_cpy == cmd_keys);
+            delete cmd;
+            // Ensure the state of the original Command object is preserved
+            CHECK(cmd_cpy->has_keys() == true);
+            CHECK(cmd_cpy->first_field() == field_1);
+            CHECK(output == cmd_cpy->to_string());
+            cmd_keys = cmd_cpy->get_keys();
+            std::sort(cmd_keys.begin(), cmd_keys.end());
+            CHECK(cmd_keys == sorted_keys);
+            delete cmd_cpy;
         }
     }
 }

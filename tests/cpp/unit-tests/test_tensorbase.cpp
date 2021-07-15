@@ -4,7 +4,7 @@
 
 using namespace SmartRedis;
 
-SCENARIO("Testing TensorBase through TensorList", "[TensorBase]")
+SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
 {
     TensorType tensor_type = GENERATE(TensorType::dbl, TensorType::flt, TensorType::int64,
                                       TensorType::int32, TensorType::int16, TensorType::int8,
@@ -47,6 +47,41 @@ SCENARIO("Testing TensorBase through TensorList", "[TensorBase]")
                 CHECK(tensor_ptr->num_values() == tensor_cpy_ptr->num_values());
                 CHECK(tensor_ptr->buf() == tensor_cpy_ptr->buf());
             }
+            AND_THEN("The TensorPack containing the Tensor can be copied")
+            {
+                TensorPack tp_cpy;
+                tp_cpy = tp;
+
+                // ensure the TensorPacks have the same
+                // "_all_tensors" by way of iterating
+                TensorPack::const_tensorbase_iterator it = tp.tensor_cbegin();
+                TensorPack::const_tensorbase_iterator it_end = tp.tensor_cend();
+                TensorPack::const_tensorbase_iterator it_cpy = tp_cpy.tensor_cbegin();
+                TensorPack::const_tensorbase_iterator it_cpy_end = tp_cpy.tensor_cend();
+                while (it != it_end) {
+                    REQUIRE(it_cpy != it_cpy_end);
+                    CHECK((*it)->name() == (*it_cpy)->name());
+                    CHECK((*it)->type() == (*it_cpy)->type());
+                    CHECK((*it)->type_str() == (*it_cpy)->type_str());
+                    CHECK((*it)->dims() == (*it_cpy)->dims());
+                    CHECK((*it)->num_values() == (*it_cpy)->num_values());
+                    CHECK((*it)->buf() == (*it_cpy)->buf());
+                    it++;
+                    it_cpy++;
+                }
+                // verify equivalency of length
+                CHECK(it_cpy == it_cpy_end);
+
+                // ensure the tensor inside each TensorPack is the same
+                TensorBase* t = tp.get_tensor(name);
+                TensorBase* t_cpy = tp_cpy.get_tensor(name);
+                CHECK(t->name() == t_cpy->name());
+                CHECK(t->type() == t_cpy->type());
+                CHECK(t->type_str() == t_cpy->type_str());
+                CHECK(t->dims() == t_cpy->dims());
+                CHECK(t->num_values() == t_cpy->num_values());
+                CHECK(t->buf() == t_cpy->buf());
+            }
         }
         AND_WHEN("A tensor with data as nullptr is added to the tensorpack")
         {
@@ -58,8 +93,8 @@ SCENARIO("Testing TensorBase through TensorList", "[TensorBase]")
             {
                 CHECK_THROWS_AS(
                     tp.add_tensor(name, data, dims,
-                          tensor_type,
-                          MemoryLayout::contiguous),
+                                  tensor_type,
+                                  MemoryLayout::contiguous),
                     std::runtime_error
                 );
             }
@@ -77,8 +112,8 @@ SCENARIO("Testing TensorBase through TensorList", "[TensorBase]")
             {
                 CHECK_THROWS_AS(
                     tp.add_tensor(name, data, dims,
-                          tensor_type,
-                          MemoryLayout::contiguous),
+                                  tensor_type,
+                                  MemoryLayout::contiguous),
                     std::runtime_error
                 );
             }
@@ -96,8 +131,8 @@ SCENARIO("Testing TensorBase through TensorList", "[TensorBase]")
             {
                 CHECK_THROWS_AS(
                     tp.add_tensor(name, data, dims,
-                          tensor_type,
-                          MemoryLayout::contiguous),
+                                 tensor_type,
+                                 MemoryLayout::contiguous),
                     std::runtime_error
                 );
             }
@@ -114,8 +149,8 @@ SCENARIO("Testing TensorBase through TensorList", "[TensorBase]")
             {
                 CHECK_THROWS_AS(
                     tp.add_tensor(name, data, dims,
-                          tensor_type,
-                          MemoryLayout::contiguous),
+                                  tensor_type,
+                                  MemoryLayout::contiguous),
                     std::runtime_error
                 );
             }
@@ -132,7 +167,8 @@ SCENARIO("Testing TensorBase through TensorList", "[TensorBase]")
             {
                 CHECK_THROWS_AS(
                     tp.add_tensor(name, data, dims,
-                                  tensor_type, MemoryLayout::contiguous),
+                                  tensor_type,
+                                  MemoryLayout::contiguous),
                     std::runtime_error);
             }
         }
