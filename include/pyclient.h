@@ -32,9 +32,12 @@
 #include "client.h"
 #include "pydataset.h"
 #include <pybind11/pybind11.h>
+#include <pybind11/pytypes.h>
+#include <pybind11/stl_bind.h>
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
 #include <string>
+#include <unordered_map>
 
 ///@file
 
@@ -422,6 +425,14 @@ class PyClient
         *                   a prefix to the entity names, if available.
         */
         void use_tensor_ensemble_prefix(bool use_prefix);
+
+        /*!
+        *   \brief Returns information about the given database nodes
+        *   \param addresses The addresses of the database nodes
+        *   \returns A list of parsed_map objects containing all the
+        *            information about the given database nodes
+        */
+        std::vector<py::dict> get_db_node_info(std::vector<std::string> addresses);
 
     private:
 

@@ -238,3 +238,21 @@ void Command::update_key(std::string old_key,
     this->_local_fields[key_index] = f;
     return;
 }
+
+void Command::set_exec_address_port(std::string address,
+                                    uint16_t port)
+{
+    this -> _address = address;
+    this -> _port = port;
+    return;
+}
+
+std::string Command::get_address()
+{
+    return this -> _address;
+}
+
+uint16_t Command::get_port()
+{
+    return this -> _port;
+}

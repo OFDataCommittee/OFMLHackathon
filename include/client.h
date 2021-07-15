@@ -549,6 +549,13 @@ class Client
         */
         void use_model_ensemble_prefix(bool use_prefix);
 
+        /*!
+        *   \brief Returns information about the given database node
+        *   \param address The address of the database node (host:port)
+        *   \returns parsed_reply_map containing the database node information
+        */
+        parsed_reply_map get_db_node_info(std::string address);
+
     protected:
 
         /*!
