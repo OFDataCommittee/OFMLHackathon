@@ -94,8 +94,7 @@ void Command::add_field(std::string field, bool is_key)
     char* f = (char*) malloc(sizeof(char)*(field_size+1));
     field.copy(f, field_size, 0);
     f[field_size]=0;
-    this->_local_fields.push_back(std::pair<char*, size_t>
-                                 (f, _fields.size()));
+    this->_local_fields.push_back({f, _fields.size()});
     this->_fields.push_back(std::string_view(f, field_size));
 
     if(is_key)
@@ -118,8 +117,7 @@ void Command::add_field(char* field, bool is_key)
     int field_size = std::strlen(field);
     char* f = (char*) malloc(sizeof(char)*(field_size));
     std::memcpy(f, field, sizeof(char)*field_size);
-    this->_local_fields.push_back(std::pair<char*, size_t>
-                                 (f, _fields.size()));
+    this->_local_fields.push_back({f, _fields.size()});
     this->_fields.push_back(std::string_view(f, field_size));
 
     if(is_key)
@@ -142,8 +140,7 @@ void Command::add_field(const char* field, bool is_key)
     int field_size = std::strlen(field);
     char* f = (char*) malloc(sizeof(char)*(field_size));
     std::memcpy(f, field, sizeof(char)*field_size);
-    this->_local_fields.push_back(std::pair<char*, size_t>
-                                 (f, _fields.size()));
+    this->_local_fields.push_back({f, _fields.size()});
     this->_fields.push_back(std::string_view(f, field_size));
 
     if(is_key)
@@ -161,8 +158,7 @@ void Command::add_field_ptr(char* field, size_t field_size)
     accessed.  This function should be used for very large
     fields.  Field pointers cannot act as Command keys.
     */
-    this->_ptr_fields.push_back(std::pair<char*, size_t>
-                               (field, _fields.size()));
+    this->_ptr_fields.push_back({field, _fields.size()});
     this->_fields.push_back(std::string_view(field, field_size));
     return;
 }
@@ -176,8 +172,8 @@ void Command::add_field_ptr(std::string_view field)
     fields.  If is_key is true, the key will be added to the
     command keys.  Field pointers cannot act as Command keys.
     */
-    this->_ptr_fields.push_back(std::pair<char*, size_t>
-                               ((char*)field.data(), _fields.size()));
+    this->_ptr_fields.push_back({(char*)field.data(), _fields.size()});
+
     this->_fields.push_back(field);
     return;
 }
@@ -271,7 +267,7 @@ void Command::make_empty()
         this->_local_fields.end();
     for(; it!=it_end; it++) {
         free((*it).first);
-        (*it).first = 0;
+        *it = {NULL,0};
     }
     this->_local_fields.clear();
     this->_ptr_fields.clear();
