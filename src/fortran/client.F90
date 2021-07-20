@@ -544,8 +544,10 @@ subroutine set_model_from_file( client, key, model_file, backend, device, batch_
                              output_lengths_ptr, n_outputs)
   deallocate(c_inputs)
   deallocate(input_lengths)
+  deallocate(ptrs_to_inputs)
   deallocate(c_outputs)
   deallocate(output_lengths)
+  deallocate(ptrs_to_outputs)
   deallocate(c_tag)
 end subroutine set_model_from_file
 
@@ -610,10 +612,10 @@ subroutine set_model( client, key, model, backend, device, batch_size, min_batch
 
   deallocate(c_inputs)
   deallocate(input_lengths)
-  !deallocate(ptrs_to_inputs)
+  deallocate(ptrs_to_inputs)
   deallocate(c_outputs)
   deallocate(output_lengths)
-  !deallocate(ptrs_to_outputs)
+  deallocate(ptrs_to_outputs)
 end subroutine set_model
 
 !> Execute a model
@@ -648,10 +650,10 @@ subroutine run_model(client, key, inputs, outputs)
 
   deallocate(c_inputs)
   deallocate(input_lengths)
-  !deallocate(ptrs_to_inputs)
+  deallocate(ptrs_to_inputs)
   deallocate(c_outputs)
   deallocate(output_lengths)
-  !deallocate(ptrs_to_outputs)
+  deallocate(ptrs_to_outputs)
 end subroutine run_model
 
 !> Retrieve the script from the database
@@ -771,8 +773,10 @@ subroutine run_script(client, key, func, inputs, outputs)
 
   deallocate(c_inputs)
   deallocate(input_lengths)
+  deallocate(ptrs_to_inputs)
   deallocate(c_outputs)
   deallocate(output_lengths)
+  deallocate(ptrs_to_outputs)
 
 end subroutine run_script
 
