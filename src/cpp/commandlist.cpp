@@ -34,10 +34,9 @@ CommandList::CommandList(const CommandList& cmd_lst)
 {
     std::vector<Command*>::const_iterator c_it = cmd_lst._commands.cbegin();
     std::vector<Command*>::const_iterator c_it_end = cmd_lst._commands.cend();
-    while(c_it != c_it_end) {
+    for(; c_it != c_it_end; c_it++) {
         Command* curr_command = new Command(**c_it);
         this->_commands.push_back(curr_command);
-        c_it++;
     }
 }
 
@@ -46,10 +45,8 @@ CommandList& CommandList::operator=(const CommandList& cmd_lst)
     if(this!=&cmd_lst) {
         std::vector<Command*>::iterator it = this->_commands.begin();
         std::vector<Command*>::iterator it_end = this->_commands.end();
-        while(it != it_end) {
+        for(; it != it_end; it++)
             delete (*it);
-            it++;
-        }
         this->_commands.clear();
 
         std::vector<Command*>::const_iterator c_it = cmd_lst._commands.begin();
@@ -67,10 +64,8 @@ CommandList::~CommandList()
 {
     std::vector<Command*>::iterator it = this->_commands.begin();
     std::vector<Command*>::iterator it_end = this->_commands.end();
-    while(it != it_end) {
+    for(; it != it_end; it++)
         delete (*it);
-        it++;
-    }
 }
 
 Command* CommandList::add_command()
