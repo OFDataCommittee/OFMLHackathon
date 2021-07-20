@@ -10,4 +10,6 @@ program main
 
   if(.not. client%isinitialized()) stop 'client is initialized'
 
+  write(*,*) "client initialized: passed"
+
 end program main
