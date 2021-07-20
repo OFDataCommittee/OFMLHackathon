@@ -610,8 +610,10 @@ subroutine set_model( client, key, model, backend, device, batch_size, min_batch
 
   deallocate(c_inputs)
   deallocate(input_lengths)
+  !deallocate(ptrs_to_inputs)
   deallocate(c_outputs)
   deallocate(output_lengths)
+  !deallocate(ptrs_to_outputs)
 end subroutine set_model
 
 !> Execute a model
@@ -627,7 +629,7 @@ subroutine run_model(client, key, inputs, outputs)
 
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
   integer(kind=c_size_t) :: n_inputs, n_outputs, key_length
-  type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
+  type(c_ptr) :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
 
   integer :: i
@@ -646,16 +648,17 @@ subroutine run_model(client, key, inputs, outputs)
 
   deallocate(c_inputs)
   deallocate(input_lengths)
+  !deallocate(ptrs_to_inputs)
   deallocate(c_outputs)
   deallocate(output_lengths)
-
+  !deallocate(ptrs_to_outputs)
 end subroutine run_model
 
 !> Retrieve the script from the database
 subroutine get_script(client, key, script)
-  class(client_type),               intent(in   ) :: clien  !< An initialized SmartRedis client
-  character(len=*),                 intent(in   ) :: key    !< The key to use to place the script
-  character(len=*),                 intent(  out) :: script !< The script as a continuous buffer
+  class(client_type), intent(in   ) :: client !< An initialized SmartRedis client
+  character(len=*),   intent(in   ) :: key    !< The key to use to place the script
+  character(len=*),   intent(  out) :: script !< The script as a continuous buffer
 
   ! Local variables
   character(kind=c_char,len=len_trim(key)) :: c_key
@@ -684,13 +687,17 @@ subroutine set_script_from_file( client, key, device, script_file )
   character(len=*),   intent(in) :: script_file !< The file storing the script
 
   ! Local variables
-  character(kind=c_char) :: c_key(len_trim(key)), c_script_file(len_trim(script_file)), c_device(len_trim(device))
+  character(kind=c_char, len=len_trim(key)) :: c_key
+  character(kind=c_char, len=len_trim(device)) :: c_device
+  character(kind=c_char, len=len_trim(script)) :: c_script_file
 
-  integer(kind=c_size_t) :: key_length, script_file_length, device_length
+  integer(kind=c_size_t) :: key_length
+  integer(kind=c_size_t) :: script_file_length
+  integer(kind=c_size_t) :: device_length
 
-  c_key = transfer(trim(key), c_key)
-  c_script_file = transfer(trim(script_file), c_script_file)
-  c_device = transfer(trim(device), c_device)
+  c_key = trim(key)
+  c_script_file = trim(script_file)
+  c_device = trim(device)
 
   key_length = len_trim(key)
   script_file_length = len_trim(script_file)
@@ -702,19 +709,23 @@ subroutine set_script_from_file( client, key, device, script_file )
 end subroutine set_script_from_file
 
 subroutine set_script( client, key, device, script )
-  class(client_type),             intent(in) :: client !< An initialized SmartRedis client
-  character(len=*),               intent(in) :: key    !< The key to use to place the script
-  character(len=*),               intent(in) :: device !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
-  character(len=*),               intent(in) :: script !< The file storing the script
+  class(client_type), intent(in) :: client !< An initialized SmartRedis client
+  character(len=*),   intent(in) :: key    !< The key to use to place the script
+  character(len=*),   intent(in) :: device !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
+  character(len=*),   intent(in) :: script !< The file storing the script
 
   ! Local variables
-  character(kind=c_char) :: c_key(len_trim(key)), c_script(len_trim(script)), c_device(len_trim(device))
+  character(kind=c_char, len=len_trim(key)) :: c_key
+  character(kind=c_char, len=len_trim(device)) :: c_device
+  character(kind=c_char, len=len_trim(script)) :: c_script
 
-  integer(kind=c_size_t) :: key_length, script_length, device_length
+  integer(kind=c_size_t) :: key_length
+  integer(kind=c_size_t) :: script_length
+  integer(kind=c_size_t) :: device_length
 
-  c_key    = transfer(trim(key), c_key)
-  c_script = transfer(trim(script), c_script)
-  c_device = transfer(trim(device), c_device)
+  c_key    = trim(key)
+  c_script = trim(script)
+  c_device = trim(device)
 
   key_length = len_trim(key)
   script_length = len_trim(script)
@@ -737,7 +748,7 @@ subroutine run_script(client, key, func, inputs, outputs)
 
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
   integer(kind=c_size_t) :: n_inputs, n_outputs, key_length, func_length
-  type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
+  type(c_ptr) :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
 
   integer :: i
@@ -754,8 +765,8 @@ subroutine run_script(client, key, func, inputs, outputs)
   call convert_char_array_to_c( outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
                                 output_lengths_ptr, n_outputs)
 
-  call run_script_c(client%client_ptr, c_key, key_length, c_func, func_length, inputs_ptr, input_lengths_ptr, n_inputs, &
-                    outputs_ptr, output_lengths_ptr, n_outputs)
+  call run_script_c(client%client_ptr, c_key, key_length, c_func, func_length, inputs_ptr, input_lengths_ptr, &
+       n_inputs, outputs_ptr, output_lengths_ptr, n_outputs)
 
   deallocate(c_inputs)
   deallocate(input_lengths)
