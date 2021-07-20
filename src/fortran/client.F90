@@ -377,7 +377,7 @@ end subroutine unpack_tensor_double
 
 !> Move a tensor to a new key
 subroutine rename_tensor(client, key, new_key)
-  class(client_type), intent(in) :: client    !< The initialized Fortran SmartRedis client
+  class(client_type), intent(in) :: client  !< The initialized Fortran SmartRedis client
   character(len=*),   intent(in) :: key     !< The current key for the tensor
                                             !! excluding null terminating character
   character(len=*),   intent(in) :: new_key !< The new tensor key
@@ -399,7 +399,7 @@ end subroutine rename_tensor
 !> Delete a tensor
 subroutine delete_tensor(client, key)
   class(client_type), intent(in) :: client !< The initialized Fortran SmartRedis client
-  character(len=*),   intent(in) :: key  !< The key associated with the tensor
+  character(len=*),   intent(in) :: key    !< The key associated with the tensor
 
   ! Local variables
   character(kind=c_char, len=len_trim(key)) :: c_key
@@ -413,7 +413,7 @@ end subroutine delete_tensor
 
 !> Copy a tensor to the destination key
 subroutine copy_tensor(client, src_name, dest_name)
-  class(client_type), intent(in) :: client      !< The initialized Fortran SmartRedis client
+  class(client_type), intent(in) :: client    !< The initialized Fortran SmartRedis client
   character(len=*),   intent(in) :: src_name  !< The key associated with the tensor
                                               !! excluding null terminating character
   character(len=*),   intent(in) :: dest_name !< The new tensor key
@@ -434,9 +434,9 @@ end subroutine copy_tensor
 
 !> Retrieve the model from the database
 subroutine get_model(client, key, model)
-  class(client_type),               intent(in   ) :: clien !< An initialized SmartRedis client
-  character(len=*),                 intent(in   ) :: key   !< The key associated with the model
-  character(len=*),                 intent(  out) :: model !< The model as a continuous buffer
+  class(client_type),               intent(in   ) :: client !< An initialized SmartRedis client
+  character(len=*),                 intent(in   ) :: key    !< The key associated with the model
+  character(len=*),                 intent(  out) :: model  !< The model as a continuous buffer
 
   ! Local variables
   character(kind=c_char, len=len_trim(key)) :: c_key
@@ -661,13 +661,13 @@ subroutine get_script(client, key, script)
   character(len=*),   intent(  out) :: script !< The script as a continuous buffer
 
   ! Local variables
-  character(kind=c_char,len=len_trim(key)) :: c_key
+  character(kind=c_char, len=len_trim(key)) :: c_key
   integer(kind=c_size_t) :: key_length, script_length
   character(kind=c_char), dimension(:), pointer :: f_str_ptr
   type(c_ptr) :: c_str_ptr
   integer :: i
 
-  c_key = transfer(trim(key), c_key)
+  c_key = trim(key)
   key_length = len_trim(key)
 
   call get_script_c(client%client_ptr, key, key_length, c_str_ptr, script_length)
@@ -687,9 +687,9 @@ subroutine set_script_from_file( client, key, device, script_file )
   character(len=*),   intent(in) :: script_file !< The file storing the script
 
   ! Local variables
-  character(kind=c_char, len=len_trim(key)) :: c_key
-  character(kind=c_char, len=len_trim(device)) :: c_device
-  character(kind=c_char, len=len_trim(script)) :: c_script_file
+  character(kind=c_char, len=len_trim(key))         :: c_key
+  character(kind=c_char, len=len_trim(device))      :: c_device
+  character(kind=c_char, len=len_trim(script_file)) :: c_script_file
 
   integer(kind=c_size_t) :: key_length
   integer(kind=c_size_t) :: script_file_length
@@ -743,7 +743,8 @@ subroutine run_script(client, key, func, inputs, outputs)
   character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of script output nodes (TF scripts)
 
   ! Local variables
-  character(kind=c_char) :: c_key(len_trim(key)), c_func(len_trim(func))
+  character(kind=c_char, len=len_trim(key)) :: c_key
+  character(kind=c_char, len=len_trim(func)) :: c_func
   character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
 
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
@@ -754,8 +755,8 @@ subroutine run_script(client, key, func, inputs, outputs)
   integer :: i
   integer :: max_length, length
 
-  c_key  = transfer(trim(key), c_key)
-  c_func = transfer(trim(func), c_func)
+  c_key  = trim(key)
+  c_func = trim(func)
 
   key_length = len_trim(key)
   func_length = len_trim(func)
@@ -780,7 +781,7 @@ subroutine put_dataset( client, dataset )
   class(client_type), intent(in) :: client  !< An initialized SmartRedis client
   type(dataset_type), intent(in) :: dataset !< Dataset to store in the dataset
 
-  call put_dataset_c(client%client_ptr, dataset%dataset)
+  call put_dataset_c(client%client_ptr, dataset%dataset_ptr)
 end subroutine put_dataset
 
 !> Retrieve a dataset from the database
@@ -794,7 +795,7 @@ type(dataset_type) function get_dataset( client, name )
 
   c_name = trim(name)
   name_length = len_trim(name)
-  get_dataset%dataset = get_dataset_c(client%client_ptr, c_name, name_length)
+  get_dataset%dataset_ptr = get_dataset_c(client%client_ptr, c_name, name_length)
 end function get_dataset
 
 !> Rename a dataset stored in the database

@@ -24,9 +24,9 @@
 ! OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  class(dataset_type),                  intent(in) :: this  !< Pointer to the initialized dataset
-  character(len=*),                     intent(in) :: name   !< The name to use to place the tensor
-  integer, dimension(:),                intent(in) :: dims  !< Length along each dimension of the tensor
+  class(dataset_type),                  intent(in) :: dataset !< Pointer to the initialized dataset
+  character(len=*),                     intent(in) :: name    !< The name to use to place the tensor
+  integer, dimension(:),                intent(in) :: dims    !< Length along each dimension of the tensor
 
   ! Local variables
   integer(kind=c_size_t) :: ndim ! Number of dimensions
