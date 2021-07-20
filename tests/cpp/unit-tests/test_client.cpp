@@ -1,9 +1,7 @@
-#include "catch.hpp"
-#include "../client_test_utils.h"
+#include "../../../third-party/catch/catch.hpp"
 #include "client.h"
 #include "dataset.h"
-// #include "client_test_utils.h"
-// #include "dataset_test_utils.h"
+#include "../client_test_utils.h"
 
 using namespace SmartRedis;
 
@@ -53,8 +51,7 @@ SCENARIO("Testing Client Object", "[Client]")
 {
     GIVEN("A Client object not connected to a redis cluster")
     {
-        bool use_cluster = false;
-        Client client(use_cluster);
+        Client client(use_cluster());
         //client.use_tensor_ensemble_prefix(false);
         THEN("get, rename, and copy DataSet called on a nonexistent DataSet throws errors")
         {
@@ -213,6 +210,8 @@ SCENARIO("Testing Client Object", "[Client]")
                                          mem_layout);
                 }
                 check_all_data(datas, retrieved_datas, tensors_size);
+                for(int i=0; i<retrieved_datas.size(); i++)
+                    free(retrieved_datas[i]);
             }
             AND_THEN("The Tensors can be unpacked incorrectly")
             {
@@ -318,12 +317,19 @@ SCENARIO("Testing Client Object", "[Client]")
             }
             AND_THEN("A Tensor can incorrectly be unpacked, resulting in a runtime error")
             {
-                // fetched type does not match provided type
+                // TODO: fetched type does not match provided type
                 // contiguous and total_dims != dims[0]
-                // nested memorylayout and dims.size() != reply_dims.size()
-                // nested memorylayout and dims[i] != reply_dims[i]
+                void* retrieved_data = malloc(dims[0][0] * dims[0][1] * sizeof(double));
+                std::vector<size_t> incorrect_dims = {10};
+                CHECK_THROWS_AS(
+                    client.unpack_tensor(keys[0], retrieved_data, incorrect_dims,
+                                     types[0], mem_layout),
+                    std::runtime_error
+                );
+                free(retrieved_data);
+                // TODO: nested memorylayout and dims.size() != reply_dims.size()
+                // TODO: nested memorylayout and dims[i] != reply_dims[i]
             }
         }
     }
 }
-

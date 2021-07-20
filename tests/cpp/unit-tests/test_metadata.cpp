@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include "../../../third-party/catch/catch.hpp"
 #include "metadata.h"
 
 SCENARIO("Test MetaData", "[MetaData]")
@@ -207,21 +207,15 @@ SCENARIO("Test MetaData", "[MetaData]")
         }
         AND_WHEN("Valid serialized fields are added to the MetaData object")
         {
-            std::string name;
-            char* buf;
-            size_t buf_size;
+            std::string name = "serialized_field";
+            char buf[4] = "buf";
+            size_t buf_size = std::strlen(buf);
             THEN("The serialized fields can be retrieved")
             {
-
             }
-        }
-        AND_WHEN("Invalid serialized fields are added to the MetaData object")
-        {
-            // ...
-            THEN("A runtime error is thrown")
+            THEN("Cannot add a serialized field with a name that already exists")
             {
                 INFO("Cannot add a serialized field that already exists");
-                // ...
             }
         }
     }

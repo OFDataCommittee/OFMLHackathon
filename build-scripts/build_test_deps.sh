@@ -36,4 +36,13 @@ else
     fi
 fi
 
+
+# build catch
+bash ../build-scripts/build-catch.sh
+if [ $? != 0 ]; then
+    echo "ERROR: Catch failed to build"
+    cd ..
+    exit 1
+fi
+
 cd ../

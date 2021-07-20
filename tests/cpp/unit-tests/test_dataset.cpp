@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include "../../../third-party/catch/catch.hpp"
 #include "dataset.h"
 
 SCENARIO("Testig DataSet object", "[DataSet]")
@@ -74,7 +74,6 @@ SCENARIO("Testig DataSet object", "[DataSet]")
                     data_ptr++;
                     ret_data_ptr++;
                 }
-
             }
             THEN("The tensor cannot be retrieved if the specified name DNE")
             {
@@ -93,7 +92,9 @@ SCENARIO("Testig DataSet object", "[DataSet]")
             std::string meta_scalar_name = "flt_meta_scalars";
             float meta_scalar = 10.0;
             MetaDataType type = MetaDataType::flt;
+            CHECK(dataset.has_field(meta_scalar_name) == false);
             dataset.add_meta_scalar(meta_scalar_name, &meta_scalar, type);
+            CHECK(dataset.has_field(meta_scalar_name) == true);
             THEN("The meta scalar can be retrieved")
             {
                 float* retrieved_data;

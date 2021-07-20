@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include "../../../third-party/catch/catch.hpp"
 #include "commandlist.h"
 
 using namespace SmartRedis;

@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include "../../../third-party/catch/catch.hpp"
 #include "stringfield.h"
 
 SCENARIO("Test StringField", "[StringField]")

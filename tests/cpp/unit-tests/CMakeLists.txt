@@ -36,6 +36,7 @@ set(SOURCES
 set(UNIT_TESTS
 	main.cpp
 	test_client.cpp
+	test_client_ensemble.cpp
 	test_dataset.cpp
 	test_tensorbase.cpp
 	test_dbnode.cpp
