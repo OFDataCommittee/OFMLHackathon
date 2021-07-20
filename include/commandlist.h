@@ -55,6 +55,28 @@ class CommandList
         CommandList() = default;
 
         /*!
+        *   \brief CommandList copy constructor
+        *   \param cmd_lst The CommandList to copy for construction
+        */
+       CommandList(const CommandList& cmd_lst);
+
+        /*!
+        *   \brief CommandList default move constructor
+        */
+       CommandList(CommandList&& cmd_lst) = default;
+
+        /*!
+        *   \brief CommandList copy assignment operator
+        *   \param cmd_lst The CommandList to copy for assignment
+        */
+        CommandList& operator=(const CommandList& cmd_lst);
+
+        /*!
+        *   \brief CommandList move assignment operator
+        */
+        CommandList& operator=(CommandList&& cmd_lst) = default;
+
+        /*!
         *   \brief Default CommandList destructor
         */
         ~CommandList();
