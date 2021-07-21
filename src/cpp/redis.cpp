@@ -347,7 +347,7 @@ inline void Redis::_connect(std::string address_port)
     }
 
     // Attempt to have the sw::redis::Redis object
-    // make a connection using the PONG command
+    // make a connection using the PING command
     int n_trials = 10;
 
     for(int i=n_trials; i>0; i--) {
