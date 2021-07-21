@@ -61,6 +61,7 @@ CommandReply Redis::run(Command& cmd)
     while (n_trials > 0 && success) {
 
         try {
+            std::cout<<"Trying command execution "<<std::endl;
             reply = this->_redis->command(cmd_fields_start, cmd_fields_end);
 
             if(reply.has_error()==0)
@@ -329,29 +330,45 @@ CommandReply Redis::get_script(const std::string& key)
 
 inline void Redis::_connect(std::string address_port)
 {
+    // Note that this logic flow differs from a cluster
+    // because the non-cluster Redis constructor
+    // does not form a connection until a command is run
+
     this->_address_node_map.insert({address_port, nullptr});
 
-    int n_connection_trials = 10;
-
-    while(n_connection_trials > 0) {
-        try {
-            this->_redis = new sw::redis::Redis(address_port);
-            n_connection_trials = -1;
-        }
-        catch (sw::redis::TimeoutError &e) {
-          std::cout << "WARNING: Caught redis TimeoutError: "
-                    << e.what() << std::endl;
-          std::cout << "WARNING: TimeoutError occurred with "\
-                       "initial client connection.";
-          std::cout << "WARNING: "<< n_connection_trials
-                      << " more trials will be made.";
-          n_connection_trials--;
-          std::this_thread::sleep_for(std::chrono::seconds(2));
-        }
+    // Try to create the sw::redis::Redis object
+    try {
+        this->_redis = new sw::redis::Redis(address_port);
+    }
+    catch (std::exception& e) {
+        throw std::runtime_error("Failed to create Redis "\
+                                 "object with error: " +
+                                 std::string(e.what()));
     }
 
-    if(n_connection_trials==0)
-        throw std::runtime_error("A connection could not be "\
-                                 "established to the redis database.");
+    // Attempt to have the sw::redis::Redis object
+    // make a connection using the PONG command
+    int n_trials = 10;
+
+    for(int i=n_trials; i>0; i--) {
+        try {
+            if(this->_redis->ping().compare("PONG")==0) {
+                break;
+            }
+        }
+        catch (sw::redis::Error& e) {
+            if(i == 1) {
+                delete this->_redis;
+                this->_redis = 0;
+                throw std::runtime_error(e.what());
+            }
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+        }
+        catch (std::exception& e) {
+            delete this->_redis;
+            this->_redis = 0;
+            throw std::runtime_error(e.what());
+        }
+    }
     return;
 }
