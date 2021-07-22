@@ -468,8 +468,10 @@ CommandReply RedisCluster::get_script(const std::string& key)
 inline void RedisCluster::_connect(std::string address_port)
 {
     int n_trials = 10;
+    bool run_sleep = false;
 
     for(int i=1; i<=n_trials; i++) {
+        run_sleep = false;
         try {
             this->_redis_cluster =
                 new sw::redis::RedisCluster(address_port);
@@ -483,13 +485,15 @@ inline void RedisCluster::_connect(std::string address_port)
             if(i == n_trials) {
                 throw std::runtime_error(e.what());
             }
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            run_sleep = true;
         }
         catch (std::exception& e) {
             delete this->_redis_cluster;
             this->_redis_cluster = 0;
             throw std::runtime_error(e.what());
         }
+        if(run_sleep)
+            std::this_thread::sleep_for(std::chrono::seconds(2));
     }
     return;
 }

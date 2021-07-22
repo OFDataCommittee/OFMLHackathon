@@ -353,8 +353,10 @@ inline void Redis::_connect(std::string address_port)
     // Attempt to have the sw::redis::Redis object
     // make a connection using the PING command
     int n_trials = 10;
+    bool run_sleep = false;
 
     for(int i=1; i<=n_trials; i++) {
+        run_sleep = false;
         try {
             if(this->_redis->ping().compare("PONG")==0) {
                 break;
@@ -366,13 +368,15 @@ inline void Redis::_connect(std::string address_port)
                 this->_redis = 0;
                 throw std::runtime_error(e.what());
             }
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            run_sleep = true;
         }
         catch (std::exception& e) {
             delete this->_redis;
             this->_redis = 0;
             throw std::runtime_error(e.what());
         }
+        if(run_sleep)
+            std::this_thread::sleep_for(std::chrono::seconds(2));
     }
     return;
 }
