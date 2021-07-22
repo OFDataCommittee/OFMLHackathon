@@ -1,3 +1,4 @@
+
 /*
  * BSD 2-Clause License
  *
@@ -50,6 +51,13 @@ void* CDataSet(const char* name,
                const size_t name_length);
 
 /*!
+*   \brief C-DataSet destructor
+*   \param name The name of the dataset
+*   \param dataset A c-ptr to the dataset object
+*/
+void DeallocateeDataSet(void* dataset)
+
+/*!
 *   \brief Add a tensor to the DataSet.
 *   \param dataset A c-ptr to the dataset object
 *   \param name The name used to reference the tensor
@@ -71,8 +79,8 @@ void add_tensor(void* dataset,
                 void* data,
                 const size_t* dims,
                 const size_t n_dims,
-                CTensorType type,
-                CMemoryLayout mem_layout);
+                const CTensorType type,
+                const CMemoryLayout mem_layout);
 
 /*!
 *   \brief Add metadata scalar field (non-string)
@@ -93,7 +101,7 @@ void add_meta_scalar(void* dataset,
                      const char* name,
                      const size_t name_length,
                      const void* data,
-                     CMetaDataType type);
+                     const CMetaDataType type);
 
 
 /*!
