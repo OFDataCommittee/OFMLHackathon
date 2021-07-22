@@ -61,7 +61,6 @@ CommandReply Redis::run(Command& cmd)
     while (n_trials > 0 && success) {
 
         try {
-            std::cout<<"Trying command execution "<<std::endl;
             reply = this->_redis->command(cmd_fields_start, cmd_fields_end);
 
             if(reply.has_error()==0)
@@ -340,7 +339,12 @@ inline void Redis::_connect(std::string address_port)
     try {
         this->_redis = new sw::redis::Redis(address_port);
     }
+    catch (std::bad_alloc& e) {
+        throw std::runtime_error(e.what());
+    }
     catch (std::exception& e) {
+        delete this->_redis;
+        this->_redis = 0;
         throw std::runtime_error("Failed to create Redis "\
                                  "object with error: " +
                                  std::string(e.what()));
@@ -350,14 +354,14 @@ inline void Redis::_connect(std::string address_port)
     // make a connection using the PING command
     int n_trials = 10;
 
-    for(int i=n_trials; i>0; i--) {
+    for(int i=1; i<=n_trials; i++) {
         try {
             if(this->_redis->ping().compare("PONG")==0) {
                 break;
             }
         }
         catch (sw::redis::Error& e) {
-            if(i == 1) {
+            if(i == n_trials) {
                 delete this->_redis;
                 this->_redis = 0;
                 throw std::runtime_error(e.what());
