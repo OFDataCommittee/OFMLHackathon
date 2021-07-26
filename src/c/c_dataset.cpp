@@ -149,7 +149,7 @@ void get_dataset_tensor(void *dataset,
   DataSet *d = (DataSet *)dataset;
   std::string name_str(name, name_length);
 
-  TensorType t_type = c_undefined;
+  TensorType t_type = TensorType::undefined;
   d->get_tensor(name_str, *data, *dims, *n_dims,
                 t_type, convert_layout(mem_layout));
   *type = convert_tensor_type(t_type);

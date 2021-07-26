@@ -55,7 +55,7 @@ void* CDataSet(const char* name,
 *   \param name The name of the dataset
 *   \param dataset A c-ptr to the dataset object
 */
-void DeallocateeDataSet(void* dataset)
+void DeallocateeDataSet(void* dataset);
 
 /*!
 *   \brief Add a tensor to the DataSet.
