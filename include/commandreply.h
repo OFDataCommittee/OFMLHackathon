@@ -113,8 +113,7 @@ class CommandReply {
         *   \param reply The RedisReplyUPtr for construction
         *   \returns CommandReply reference
         */
-        CommandReply& operator=(RedisReplyUPtr&& reply
-                       );
+        CommandReply& operator=(RedisReplyUPtr&& reply);
 
         /*!
         *   \brief Move assignment operator with redisReply

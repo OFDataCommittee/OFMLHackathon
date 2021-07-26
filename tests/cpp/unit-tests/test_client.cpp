@@ -5,7 +5,8 @@
 
 using namespace SmartRedis;
 
-// helper function that determines whether two vectors of type T contain the same elements
+// helper function that determines whether two
+// vectors of type T contain the same elements
 template<typename T>
 bool is_same_data(T* t1, T* t2, size_t length)
 {
@@ -18,8 +19,10 @@ bool is_same_data(T* t1, T* t2, size_t length)
     return true;
 }
 
-// auxiliary function
-void check_all_data(std::vector<void*>& original_datas, std::vector<void*>& new_datas, size_t length)
+// auxiliary function for testing the equivalence
+// of two vectors that each contain tensor data
+void check_all_data(size_t length, std::vector<void*>& original_datas,
+                    std::vector<void*>& new_datas)
 {
     CHECK(is_same_data((double*)original_datas[0],
                        (double*)new_datas[0],
@@ -49,29 +52,31 @@ void check_all_data(std::vector<void*>& original_datas, std::vector<void*>& new_
 
 SCENARIO("Testing Client Object", "[Client]")
 {
-    GIVEN("A Client object not connected to a redis cluster")
+
+    GIVEN("A Client object")
     {
         Client client(use_cluster());
-        //client.use_tensor_ensemble_prefix(false);
-        THEN("get, rename, and copy DataSet called on a nonexistent DataSet throws errors")
+
+        THEN("get, rename, and copy DataSet called on "
+             "a nonexistent DataSet throws errors")
         {
             CHECK_THROWS_AS(
                 client.get_dataset("DNE"),
-                std::runtime_error
-            );
+                std::runtime_error);
             CHECK_THROWS_AS(
                 client.rename_dataset("DNE", "rename_DNE"),
-                std::runtime_error
-            );
+                std::runtime_error);
             CHECK_THROWS_AS(
                 client.copy_dataset("src_DNE", "dest_DNE"),
-                std::runtime_error
-            );
+                std::runtime_error);
         }
+
         WHEN("A dataset is created and put into the Client")
         {
+            // Create the DataSet
             std::string dataset_name = "test_dataset_name";
             DataSet dataset(dataset_name);
+
             // Add meta scalar to DataSet
             std::string meta_scalar_name = "dbl_field";
             const double dbl_meta = std::numeric_limits<double>::max();
@@ -79,6 +84,7 @@ SCENARIO("Testing Client Object", "[Client]")
             dataset.add_meta_scalar(meta_scalar_name,
                                      &dbl_meta,
                                      meta_type);
+
             // Add tensor to DataSet
             std::string tensor_name = "test_tensor";
             std::vector<size_t> dims = {1, 2, 3};
@@ -88,39 +94,57 @@ SCENARIO("Testing Client Object", "[Client]")
             void* data = tensor.data();
             MemoryLayout mem_layout = MemoryLayout::contiguous;
             dataset.add_tensor(tensor_name, data, dims, type, mem_layout);
-            // put the DataSet into the Client
+
+            // Put the DataSet into the Client
             client.put_dataset(dataset);
+
             THEN("The DataSet can be retrieved")
             {
+                // Get the DataSet
                 double* retrieved_meta_data;
                 size_t retrieved_meta_length;
                 DataSet retrieved_dataset = client.get_dataset(dataset_name);
+
+                // Ensure the DataSet has the correct data
                 retrieved_dataset.get_meta_scalars(meta_scalar_name,
                                                   (void*&)retrieved_meta_data,
                                                    retrieved_meta_length,
                                                    meta_type);
                 CHECK(*retrieved_meta_data == dbl_meta);
-                CHECK(dataset.get_tensor_names() == retrieved_dataset.get_tensor_names());
+                CHECK(dataset.get_tensor_names() ==
+                      retrieved_dataset.get_tensor_names());
             }
-            AND_THEN("The DataSet can be renamed. (rename_dataset calls copy and delete)")
+
+            AND_THEN("The DataSet can be renamed. (rename_dataset "
+                     "calls copy and delete)")
             {
+                // rename dataset
                 std::string renamed_dataset_name = "renamed_" + dataset_name;
                 client.rename_dataset(dataset_name, renamed_dataset_name);
+
+                // original name no longer exists after renaming
                 CHECK_THROWS_AS(
                     client.get_dataset(dataset_name),
                     std::runtime_error);
+
+                // the dataset with new name can be retrieved
                 double* retrieved_meta_data;
                 size_t retrieved_meta_length;
-                DataSet retrieved_dataset = client.get_dataset(renamed_dataset_name);
+                DataSet retrieved_dataset =
+                    client.get_dataset(renamed_dataset_name);
+
+                // ensure the retrieved dataset has the correct data
                 retrieved_dataset.get_meta_scalars(meta_scalar_name,
                                                   (void*&)retrieved_meta_data,
                                                    retrieved_meta_length,
                                                    meta_type);
                 CHECK(*retrieved_meta_data == dbl_meta);
-                CHECK(dataset.get_tensor_names() == retrieved_dataset.get_tensor_names());
+                CHECK(dataset.get_tensor_names() ==
+                      retrieved_dataset.get_tensor_names());
             }
         }
-        AND_WHEN("Tensors are created and put into the Client")
+
+        AND_WHEN("Tensors of each type are created and put into the Client")
         {
             MemoryLayout mem_layout = MemoryLayout::contiguous;
             const int num_of_tensors = 8;
@@ -130,39 +154,56 @@ SCENARIO("Testing Client Object", "[Client]")
                                               "int64_key", "int32_key",
                                               "int16_key", "int8_key",
                                               "uint16_key", "uint8_key"};
-            std::vector<TensorType> types = {TensorType::dbl, TensorType::flt,
-                                             TensorType::int64, TensorType::int32,
-                                             TensorType::int16, TensorType::int8,
-                                             TensorType::uint16, TensorType::uint8};
-            std::vector<double> dbl_tensor = {std::numeric_limits<double>::min(),
-                                              std::numeric_limits<double>::max()};
-            std::vector<float> flt_tensor = {std::numeric_limits<float>::min(),
-                                             std::numeric_limits<float>::max()};
-            std::vector<int64_t> int64_tensor = {std::numeric_limits<int64_t>::min(),
-                                                 std::numeric_limits<int64_t>::max()};
-            std::vector<int32_t> int32_tensor = {std::numeric_limits<int32_t>::min(),
-                                                 std::numeric_limits<int32_t>::max()};
-            std::vector<int16_t> int16_tensor = {std::numeric_limits<int16_t>::min(),
-                                                 std::numeric_limits<int16_t>::max()};
-            std::vector<int8_t> int8_tensor = {std::numeric_limits<int8_t>::min(),
-                                               std::numeric_limits<int8_t>::max()};
-            std::vector<uint16_t> uint16_tensor = {std::numeric_limits<uint16_t>::min(),
-                                                   std::numeric_limits<uint16_t>::max()};
-            std::vector<uint8_t> uint8_tensor = {std::numeric_limits<uint8_t>::min(),
-                                                 std::numeric_limits<uint8_t>::max()};
-            std::vector<void*> datas = {dbl_tensor.data(), flt_tensor.data(),
-                                        int64_tensor.data(), int32_tensor.data(),
-                                        int16_tensor.data(), int8_tensor.data(),
-                                        uint16_tensor.data(), uint8_tensor.data()};
+            std::vector<TensorType> types =
+                {TensorType::dbl, TensorType::flt,
+                 TensorType::int64, TensorType::int32,
+                 TensorType::int16, TensorType::int8,
+                 TensorType::uint16, TensorType::uint8};
 
+            std::vector<double> dbl_tensor =
+                {std::numeric_limits<double>::min(),
+                 std::numeric_limits<double>::max()};
+            std::vector<float> flt_tensor =
+                {std::numeric_limits<float>::min(),
+                 std::numeric_limits<float>::max()};
+            std::vector<int64_t> int64_tensor =
+                {std::numeric_limits<int64_t>::min(),
+                 std::numeric_limits<int64_t>::max()};
+            std::vector<int32_t> int32_tensor =
+                {std::numeric_limits<int32_t>::min(),
+                 std::numeric_limits<int32_t>::max()};
+            std::vector<int16_t> int16_tensor =
+                {std::numeric_limits<int16_t>::min(),
+                 std::numeric_limits<int16_t>::max()};
+            std::vector<int8_t> int8_tensor =
+                {std::numeric_limits<int8_t>::min(),
+                 std::numeric_limits<int8_t>::max()};
+            std::vector<uint16_t> uint16_tensor =
+                {std::numeric_limits<uint16_t>::min(),
+                 std::numeric_limits<uint16_t>::max()};
+            std::vector<uint8_t> uint8_tensor =
+                {std::numeric_limits<uint8_t>::min(),
+                 std::numeric_limits<uint8_t>::max()};
+
+            std::vector<void*> datas =
+                {dbl_tensor.data(), flt_tensor.data(),
+                 int64_tensor.data(), int32_tensor.data(),
+                 int16_tensor.data(), int8_tensor.data(),
+                 uint16_tensor.data(), uint8_tensor.data()};
+
+            // put each tensor into the Client
             for (int i=0; i<num_of_tensors; i++)
-                client.put_tensor(keys[i], datas[i], dims[i], types[i], mem_layout);
+                client.put_tensor(keys[i], datas[i], dims[i],
+                                  types[i], mem_layout);
 
             THEN("The Tensors can be retrieved")
             {
-                std::vector<void*> retrieved_datas(num_of_tensors);
-                std::vector<std::vector<size_t> > retrieved_dims(num_of_tensors);
                 TensorType retrieved_type;
+                std::vector<void*> retrieved_datas(num_of_tensors);
+                std::vector<std::vector<size_t>>
+                    retrieved_dims(num_of_tensors);
+
+                // Get the tensors and ensure the correct data is retrieved
                 for(int i=0; i<num_of_tensors; i++) {
                     client.get_tensor(keys[i], retrieved_datas[i],
                                       retrieved_dims[i], retrieved_type,
@@ -170,14 +211,17 @@ SCENARIO("Testing Client Object", "[Client]")
                     CHECK(retrieved_dims[i] == dims[i]);
                     CHECK(retrieved_type == types[i]);
                 }
-                check_all_data(datas, retrieved_datas, tensors_size);
+                check_all_data(tensors_size, datas, retrieved_datas);
             }
+
             AND_THEN("The Tensors can be retrieved with the c-style interface")
             {
                 std::vector<void*> retrieved_datas(num_of_tensors);
                 std::vector<size_t*> retrieved_dims(num_of_tensors);
                 std::vector<size_t> retrieved_n_dims(num_of_tensors);
                 TensorType retrieved_type;
+
+                // Get the tensors and ensure the correct data is retrieved
                 for(int i=0; i<num_of_tensors; i++) {
                     client.get_tensor(keys[i], retrieved_datas[i],
                                       retrieved_dims[i], retrieved_n_dims[i],
@@ -191,10 +235,12 @@ SCENARIO("Testing Client Object", "[Client]")
                         retrieved_dim++;
                     }
                 }
-                check_all_data(datas, retrieved_datas, tensors_size);
+                check_all_data(tensors_size, datas, retrieved_datas);
             }
+
             AND_THEN("The Tensors can be unpacked")
             {
+                // allocate memory for the tensors that will be unpacked
                 std::vector<void*> retrieved_datas = {
                     malloc(dims[0][0] * dims[0][1] * sizeof(double)),
                     malloc(dims[1][0] * dims[1][1] * sizeof(float)),
@@ -204,43 +250,73 @@ SCENARIO("Testing Client Object", "[Client]")
                     malloc(dims[5][0] * dims[5][1] * sizeof(int8_t)),
                     malloc(dims[6][0] * dims[6][1] * sizeof(uint16_t)),
                     malloc(dims[7][0] * dims[7][1] * sizeof(uint8_t))};
+
+                // unpack each tensor into retrieved_datas
                 for(int i=0; i<num_of_tensors; i++) {
                     client.unpack_tensor(keys[i], retrieved_datas[i],
                                         {dims[i][0]*dims[i][1]}, types[i],
                                          mem_layout);
                 }
-                check_all_data(datas, retrieved_datas, tensors_size);
+                check_all_data(tensors_size, datas, retrieved_datas);
+
                 for(int i=0; i<retrieved_datas.size(); i++)
                     free(retrieved_datas[i]);
             }
-            AND_THEN("The Tensors can be unpacked incorrectly")
+
+            AND_THEN("A contiguous and a nested tensor "
+                     "can be unpacked incorrectly")
             {
+                // create and put the nested tensor
+                std::string nested_key = "nested_key";
+                std::vector<size_t> nested_dims = {2,1};
+                double* nested_data = (double*)malloc(nested_dims[0] *
+                                                      nested_dims[1] *
+                                                      sizeof(double));
+                // client.put_tensor(nested_key, (void*)nested_data, nested_dims,
+                //                   TensorType::dbl, MemoryLayout::nested);
+
+                // allocate memory for the unpack_tensor calls
                 void* contig_retrieved_data =
                     malloc(dims[0][0] * dims[0][1] * sizeof(double));
                 void* nested_retrieved_data =
-                    malloc(dims[0][0] * dims[0][1] * sizeof(double));
+                    malloc(nested_dims[0] * nested_dims[1] * sizeof(double));
 
+                // incorrectly unpack contiguous tensor (contiguous mem space doesn't
+                // match the dimensions that were fetched)
                 CHECK_THROWS_AS(
                     client.unpack_tensor(keys[0], contig_retrieved_data,
-                                        dims[0], TensorType::dbl,
-                                        MemoryLayout::contiguous),
-                    std::runtime_error
-                );
-                // TODO: do so with MemoryLayout::nested
+                                         dims[0], TensorType::dbl,
+                                         MemoryLayout::contiguous),
+                    std::runtime_error);
+
+                // incorrectly unpack nested tensor (dimensions of the user memory
+                // space doesnt match the dimensions of the fetched tensor)
+                // CHECK_THROWS_AS(
+                //     client.unpack_tensor(nested_key, nested_retrieved_data, nested_dims,
+                //                          TensorType::dbl, MemoryLayout::nested),
+                //     std::runtime_error);
+
+                free(contig_retrieved_data);
+                free(nested_retrieved_data);
+                free(nested_data);
             }
+
             AND_THEN("The Tensors can be renamed")
             {
                 for(int i=0; i<num_of_tensors; i++) {
                     client.rename_tensor(keys[i], "renamed_" + keys[i]);
                     // Ensure the tensor with old name doesnt exist anymore
-                    // ...
-                    CHECK(client.tensor_exists(keys[i]) == false);
+                    CHECK_FALSE(client.tensor_exists(keys[i]));
+                    // Ensure the tensor with the new name exists
                     CHECK(client.tensor_exists("renamed_" + keys[i]) == true);
                 }
-                // Ensure the tensors were correctly migrated to their new names
-                std::vector<void*> retrieved_datas(num_of_tensors);
-                std::vector<std::vector<size_t> > retrieved_dims(num_of_tensors);
+
+                // Ensure the tensors were correctly migrated to their new name
                 TensorType retrieved_type;
+                std::vector<void*> retrieved_datas(num_of_tensors);
+                std::vector<std::vector<size_t>>
+                    retrieved_dims(num_of_tensors);
+
                 for(int i=0; i<num_of_tensors; i++) {
                     std::string renamed_key = "renamed_" + keys[i];
                     client.get_tensor(renamed_key, retrieved_datas[i],
@@ -249,25 +325,35 @@ SCENARIO("Testing Client Object", "[Client]")
                     CHECK(retrieved_dims[i] == dims[i]);
                     CHECK(retrieved_type == types[i]);
                 }
-                check_all_data(datas, retrieved_datas, tensors_size);
+                check_all_data(tensors_size, datas, retrieved_datas);
             }
+
+            AND_THEN("A Tensor can be renamed to the same name")
+            {
+                client.rename_tensor(keys[0], keys[0]);
+                CHECK(client.tensor_exists(keys[0]) == true);
+            }
+
             AND_THEN("The Tensors can be deleted")
             {
                 for(int i=0; i<num_of_tensors; i++) {
                     client.delete_tensor(keys[i]);
-                    CHECK(client.tensor_exists(keys[i]) == false);
+                    CHECK_FALSE(client.tensor_exists(keys[i]));
                 }
             }
+
             AND_THEN("The Tensors can be copied")
             {
                 // copy each tensor
                 for(int i=0; i<num_of_tensors; i++)
                     client.copy_tensor(keys[i], "copied_" + keys[i]);
 
-                // ensure the copied tensors contain the correct data, dims, type
-                std::vector<void*> copied_datas(num_of_tensors);
-                std::vector<std::vector<size_t> > copied_dims(num_of_tensors);
+                // ensure the copied tensors contain
+                // the correct data, dims, type
                 TensorType copied_type;
+                std::vector<void*> copied_datas(num_of_tensors);
+                std::vector<std::vector<size_t>> copied_dims(num_of_tensors);
+
                 for(int i=0; i<num_of_tensors; i++) {
                     client.get_tensor("copied_" + keys[i], copied_datas[i],
                                       copied_dims[i], copied_type,
@@ -275,15 +361,18 @@ SCENARIO("Testing Client Object", "[Client]")
                     CHECK(copied_dims[i] == dims[i]);
                     CHECK(copied_type == types[i]);
                 }
-                check_all_data(datas, copied_datas, tensors_size);
+                check_all_data(tensors_size, datas, copied_datas);
 
-                // ensure the original tensors' states are preserved when
-                // the copied tensors are deleted
+                // ensure the original tensors' states are preserved
+                // when the copied tensors are deleted
                 for(int i=0; i<num_of_tensors; i++)
                     client.delete_tensor("copied_" + keys[i]);
-                std::vector<void*> retrieved_datas(num_of_tensors);
-                std::vector<std::vector<size_t> > retrieved_dims(num_of_tensors);
+
                 TensorType retrieved_type;
+                std::vector<void*> retrieved_datas(num_of_tensors);
+                std::vector<std::vector<size_t>>
+                    retrieved_dims(num_of_tensors);
+
                 for(int i=0; i<num_of_tensors; i++) {
                     client.get_tensor(keys[i], retrieved_datas[i],
                                       retrieved_dims[i], retrieved_type,
@@ -291,41 +380,61 @@ SCENARIO("Testing Client Object", "[Client]")
                     CHECK(retrieved_dims[i] == dims[i]);
                     CHECK(retrieved_type == types[i]);
                 }
-                check_all_data(datas, retrieved_datas, tensors_size);
+                check_all_data(tensors_size, datas, retrieved_datas);
             }
+
             AND_THEN("The Tensors can be polled")
             {
                 int poll_freq = 10;
                 int num_tries = 4;
+                // polling tensors that exist returns true
                 for(int i=0; i<num_of_tensors; i++)
-                    CHECK(client.poll_tensor(keys[i], poll_freq, num_tries) == true);
-                CHECK(client.poll_tensor("DNE", poll_freq, num_tries) == false);
+                    CHECK(true == client.poll_tensor(keys[i],
+                                                     poll_freq,
+                                                     num_tries));
+
+                // polling a tensor that does not exist returns false
+                CHECK_FALSE(client.poll_tensor("DNE",
+                                                poll_freq,
+                                                num_tries));
             }
+
             AND_THEN("The keys can be polled")
             {
                 int poll_freq = 10;
                 int num_tries = 4;
+                // polling keys that exist returns true
                 for(int i=0; i<num_of_tensors; i++)
-                    CHECK(client.poll_key(keys[i], poll_freq, num_tries) == true);
-                CHECK(client.poll_key("DNE", poll_freq, num_tries) == false);
+                    CHECK(true == client.poll_key(keys[i],
+                                                  poll_freq,
+                                                  num_tries));
+
+                // polling a key that does not exist returns false
+                CHECK_FALSE(client.poll_key("DNE",
+                                             poll_freq,
+                                             num_tries));
             }
+
             AND_THEN("A Tensor can incorrectly be retrieved, resulting in a runtime error")
             {
                 // dims.size <= 0
                 // dims[i].size <= 0
                 // TensorType::string
             }
+
             AND_THEN("A Tensor can incorrectly be unpacked, resulting in a runtime error")
             {
                 // TODO: fetched type does not match provided type
                 // contiguous and total_dims != dims[0]
-                void* retrieved_data = malloc(dims[0][0] * dims[0][1] * sizeof(double));
+                void* retrieved_data =
+                    malloc(dims[0][0] * dims[0][1] * sizeof(double));
                 std::vector<size_t> incorrect_dims = {10};
                 CHECK_THROWS_AS(
-                    client.unpack_tensor(keys[0], retrieved_data, incorrect_dims,
-                                     types[0], mem_layout),
-                    std::runtime_error
-                );
+                    client.unpack_tensor(keys[0], retrieved_data,
+                                         incorrect_dims, types[0],
+                                         mem_layout),
+                    std::runtime_error);
+
                 free(retrieved_data);
                 // TODO: nested memorylayout and dims.size() != reply_dims.size()
                 // TODO: nested memorylayout and dims[i] != reply_dims[i]

@@ -9,55 +9,58 @@ using namespace SmartRedis;
 // variables to their original state
 void reset_env_vars(const char* old_keyin, const char* old_keyout)
 {
-  if (old_keyin != nullptr) {
-    std::string reset_keyin = std::string("SSKEYIN=") + std::string(old_keyin);
-    char* reset_keyin_c = new char[reset_keyin.size() + 1];
-    std::copy(reset_keyin.begin(), reset_keyin.end(), reset_keyin_c);
-    reset_keyin_c[reset_keyin.size()] = '\0';
-    putenv( reset_keyin_c);
-    delete [] reset_keyin_c;
-  }
-  else {
-    unsetenv("SSKEYIN");
-  }
-  if (old_keyout != nullptr) {
-    std::string reset_keyout = std::string("SSKEYOUT=") + std::string(old_keyout);
-    char* reset_keyout_c = new char[reset_keyout.size() + 1];
-    std::copy(reset_keyout.begin(), reset_keyout.end(), reset_keyout_c);
-    reset_keyout_c[reset_keyout.size()] = '\0';
-    putenv( reset_keyout_c);
-    delete [] reset_keyout_c;
-  }
-  else {
-    unsetenv("SSKEYOUT");
-  }
+    if (old_keyin != nullptr) {
+        std::string reset_keyin =
+            std::string("SSKEYIN=") + std::string(old_keyin);
+        char* reset_keyin_c = new char[reset_keyin.size() + 1];
+        std::copy(reset_keyin.begin(), reset_keyin.end(), reset_keyin_c);
+        reset_keyin_c[reset_keyin.size()] = '\0';
+        putenv( reset_keyin_c);
+        delete [] reset_keyin_c;
+    }
+    else {
+        unsetenv("SSKEYIN");
+    }
+    if (old_keyout != nullptr) {
+        std::string reset_keyout =
+            std::string("SSKEYOUT=") + std::string(old_keyout);
+        char* reset_keyout_c = new char[reset_keyout.size() + 1];
+        std::copy(reset_keyout.begin(), reset_keyout.end(), reset_keyout_c);
+        reset_keyout_c[reset_keyout.size()] = '\0';
+        putenv( reset_keyout_c);
+        delete [] reset_keyout_c;
+    }
+    else {
+        unsetenv("SSKEYOUT");
+    }
 }
 
 // helper function for loading mnist
 void load_mnist_image_to_array(float**** img)
 {
-  std::string image_file = "../../mnist_data/one.raw";
-  std::ifstream fin(image_file, std::ios::binary);
-  std::ostringstream ostream;
-  ostream << fin.rdbuf();
-  fin.close();
+    std::string image_file = "../../mnist_data/one.raw";
+    std::ifstream fin(image_file, std::ios::binary);
+    std::ostringstream ostream;
+    ostream << fin.rdbuf();
+    fin.close();
 
-  const std::string tmp = ostream.str();
-  const char *image_buf = tmp.data();
-  int image_buf_length = tmp.length();
+    const std::string tmp = ostream.str();
+    const char *image_buf = tmp.data();
+    int image_buf_length = tmp.length();
 
-  int position = 0;
-  for(int i=0; i<28; i++) {
-    for(int j=0; j<28; j++) {
-      img[0][0][i][j] = ((float*)image_buf)[position++];
+    int position = 0;
+    for(int i=0; i<28; i++) {
+        for(int j=0; j<28; j++) {
+            img[0][0][i][j] = ((float*)image_buf)[position++];
+        }
     }
-  }
 }
 
 
-SCENARIO("Testing Client ensemble using producer/consumer")
+SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
 {
-    GIVEN("The appropriate environment variables")
+
+    GIVEN("Variables that will be used by the producer and consumer")
     {
         const char* old_keyin = std::getenv("SSKEYIN");
         const char* old_keyout = std::getenv("SSKEYOUT");
@@ -78,7 +81,8 @@ SCENARIO("Testing Client ensemble using producer/consumer")
         std::string model_file = "./../../mnist_data/mnist_cnn.pt";
         // for script
         std::string script_key = "mnist_script";
-        std::string script_file = "./../../mnist_data/data_processing_script.txt";
+        std::string script_file =
+            "./../../mnist_data/data_processing_script.txt";
         // for setup mnist
         std::string in_key = "mnist_input";
         std::string out_key = "mnist_output";
@@ -91,11 +95,13 @@ SCENARIO("Testing Client ensemble using producer/consumer")
         std::string out_key_ds = "mnist_output_ds";
         std::string dataset_name = "mnist_input_dataset_ds";
         std::string dataset_in_key = "{" + dataset_name + "}." + in_key_ds;
-        // for consumer Tensors
+        // for consumer tensor
         TensorType g_type;
         std::vector<size_t> g_dims;
         void* g_result;
-        THEN("The Client ensemble can be tested with a producer/consumer relationship")
+
+        THEN("The Client ensemble can be tested with "
+             "a producer/consumer relationship")
         {
             // do producer stuff
             putenv(keyin_env_put);
@@ -110,7 +116,8 @@ SCENARIO("Testing Client ensemble using producer/consumer")
                               dims, TensorType::flt,
                               MemoryLayout::nested);
             CHECK(producer_client.tensor_exists(tensor_key) == true);
-            CHECK(producer_client.key_exists(producer_keyout + "." + tensor_key) == true);
+            CHECK(producer_client.key_exists(producer_keyout+"."+tensor_key) ==
+                  true);
             free_1D_array(array);
 
             // Models
@@ -120,7 +127,8 @@ SCENARIO("Testing Client ensemble using producer/consumer")
             CHECK(producer_client.poll_model(model_key, 300, 100) == true);
 
             // Scripts
-            producer_client.set_script_from_file(script_key, "CPU", script_file);
+            producer_client.set_script_from_file(script_key, "CPU",
+                                                 script_file);
             CHECK(producer_client.model_exists(script_key) == true);
 
             // Setup mnist
@@ -155,14 +163,17 @@ SCENARIO("Testing Client ensemble using producer/consumer")
             // Tensors
             float* u_result = (float*)malloc(dims[0]*sizeof(float));
             CHECK(consumer_client.tensor_exists(tensor_key) == false);
-            CHECK(consumer_client.key_exists(consumer_keyout + "." + tensor_key) == false);
+            CHECK(consumer_client.key_exists(consumer_keyout+"."+tensor_key) ==
+                  false);
 
             consumer_client.set_data_source("producer_0");
             CHECK(consumer_client.tensor_exists(tensor_key) == true);
-            CHECK(consumer_client.key_exists(consumer_keyin + "." + tensor_key) == true);
+            CHECK(consumer_client.key_exists(consumer_keyin+"."+tensor_key) ==
+                  true);
 
-            consumer_client.unpack_tensor(tensor_key, u_result, dims,
-                                          TensorType::flt, MemoryLayout::nested);
+            consumer_client.unpack_tensor(tensor_key, u_result,
+                                          dims, TensorType::flt,
+                                          MemoryLayout::nested);
             consumer_client.get_tensor(tensor_key, g_result, g_dims,
                                        g_type, MemoryLayout::nested);
             float* g_type_result = (float*)g_result;
@@ -184,10 +195,12 @@ SCENARIO("Testing Client ensemble using producer/consumer")
 
             // Get mnist result
             float** mnist_result = allocate_2D_array<float>(1, 10);
-            consumer_client.unpack_tensor(out_key, mnist_result, {1,10},
-                                          TensorType::flt, MemoryLayout::nested);
-            consumer_client.unpack_tensor(out_key_ds, mnist_result, {1,10},
-                                           TensorType::flt, MemoryLayout::nested);
+            consumer_client.unpack_tensor(out_key, mnist_result,
+                                          {1,10}, TensorType::flt,
+                                          MemoryLayout::nested);
+            consumer_client.unpack_tensor(out_key_ds, mnist_result,
+                                          {1,10}, TensorType::flt,
+                                          MemoryLayout::nested);
             free_2D_array(mnist_result, 1);
 
             // reset environment variables to their original state

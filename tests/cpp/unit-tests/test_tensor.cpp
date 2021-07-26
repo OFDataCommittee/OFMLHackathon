@@ -5,8 +5,10 @@ using namespace SmartRedis;
 
 SCENARIO("Testing Tensor", "[Tensor]")
 {
+
     GIVEN("Two Tensors")
     {
+        // Create first tensor
         std::string name = "test_tensor";
         std::vector<size_t> dims = {1, 2, 3};
         TensorType type = TensorType::flt;
@@ -18,6 +20,7 @@ SCENARIO("Testing Tensor", "[Tensor]")
         MemoryLayout mem_layout = MemoryLayout::contiguous;
         Tensor<float> t(name, data, dims, type, mem_layout);
 
+        // Create second tensor
         std::string name_2 = "test_tensor_2";
         std::vector<size_t> dims_2 = {3, 2, 2};
         TensorType type_2 = TensorType::flt;
@@ -28,9 +31,11 @@ SCENARIO("Testing Tensor", "[Tensor]")
         void* data_2 = tensor_2.data();
         MemoryLayout mem_layout_2 = MemoryLayout::contiguous;
         Tensor<float> t_2(name_2, data_2, dims_2, type_2, mem_layout_2);
+
         WHEN("A tensor is copied with the assignment operator")
         {
             t_2 = t;
+
             THEN("The two tensors are the same")
             {
                 float* t_data = (float*)t.data();
@@ -46,14 +51,17 @@ SCENARIO("Testing Tensor", "[Tensor]")
                 CHECK(t.buf() == t_2.buf());
             }
         }
+
         AND_WHEN("A third Tensor is constructed with the copy constructor")
         {
             Tensor<float> t_3(t);
+
             THEN("The Tensor is copied correctly")
             {
                 float* point = (float*)t_3.data();
                 for (int i=0; i<tensor_size; i++)
                     CHECK(tensor[i] == *point++);
+
                 CHECK(t_3.name() == t.name());
                 CHECK(t_3.type() == t.type());
                 CHECK(t_3.dims() == t.dims());
@@ -61,9 +69,11 @@ SCENARIO("Testing Tensor", "[Tensor]")
                 CHECK(t_3.buf() == t.buf());
             }
         }
+
         AND_WHEN("A Tensor is constructed with the move assignment operator")
         {
             t_2 = std::move(t);
+
             THEN("The Tensor is moved correctly")
             {
                 float* point = (float*)t_2.data();
@@ -76,14 +86,17 @@ SCENARIO("Testing Tensor", "[Tensor]")
                 CHECK(t.data() == 0);
             }
         }
+
         AND_WHEN("A third Tensor is constructed with the move constructor")
         {
             Tensor<float> t_3(std::move(t));
+
             THEN("The Tensor is moved correctly")
             {
                 float* point = (float*)t_3.data();
                 for (int i=0; i<tensor_size; i++)
                     CHECK(tensor[i] == *point++);
+
                 CHECK(t_3.name() == name);
                 CHECK(t_3.type() == type);
                 CHECK(t_3.dims() == dims);

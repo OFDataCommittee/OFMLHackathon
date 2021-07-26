@@ -5,10 +5,12 @@ using namespace SmartRedis;
 
 SCENARIO("Testing DBNode object", "[DBNode]")
 {
+
     GIVEN("Two DBNode objects created with the default contructor")
     {
         DBNode node_1;
         DBNode node_2;
+
         THEN("The DBNode's data members are set to their default values")
         {
             CHECK(node_1.name == "");
@@ -17,15 +19,18 @@ SCENARIO("Testing DBNode object", "[DBNode]")
             CHECK(node_1.lower_hash_slot == -1);
             CHECK(node_1.upper_hash_slot == -1);
         }
+
         AND_THEN("The < operator is overloaded correctly")
         {
             CHECK_FALSE(node_1 < node_2);
             node_1.lower_hash_slot = 1;
             node_2.lower_hash_slot = 2;
-            CHECK( node_1 < node_2);
+            CHECK(node_1 < node_2);
         }
     }
-    AND_GIVEN("Two DBNode objects created with connection and hash slot information")
+
+    AND_GIVEN("Two DBNode objects created with connection "
+              "and hash slot information")
     {
         std::string name = "name";
         std::string ip = "192.168.4.1";
@@ -36,6 +41,7 @@ SCENARIO("Testing DBNode object", "[DBNode]")
         std::string prefix = "prefix";
         DBNode node_1(ip, name, port, l_slot_1, u_slot, prefix);
         DBNode node_2(ip, name, port, l_slot_2, u_slot, prefix);
+
         THEN("The DBNode's data members are set to their default values")
         {
             CHECK(node_1.name == name);
@@ -45,6 +51,7 @@ SCENARIO("Testing DBNode object", "[DBNode]")
             CHECK(node_1.upper_hash_slot == u_slot);
             CHECK(node_1.prefix == prefix);
         }
+
         AND_THEN("The < operator is overloaded correctly")
         {
             CHECK_FALSE(node_1 < node_2);

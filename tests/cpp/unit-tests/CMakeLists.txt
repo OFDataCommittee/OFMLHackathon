@@ -7,7 +7,6 @@ set(CMAKE_BUILD_TYPE DEBUG)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS --coverage)
 
-
 find_library(SR_LIB smartredis PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
 
 include_directories(SYSTEM
@@ -27,8 +26,6 @@ set(SOURCES
 	../../../src/cpp/dbnode.cpp
 	../../../src/cpp/commandreply.cpp
 	../../../src/cpp/redisserver.cpp
-	../../../src/cpp/rediscluster.cpp
-	../../../src/cpp/redis.cpp
 	../../../src/cpp/metadatafield.cpp
 	../../../src/cpp/stringfield.cpp
 )
@@ -45,7 +42,14 @@ set(UNIT_TESTS
 	test_tensor.cpp
 	test_metadata.cpp
 	test_stringfield.cpp
+	test_ssdb.cpp
+	test_commandreply.cpp
 )
 
-add_executable(test ${SOURCES} ${UNIT_TESTS})
+if($ENV{SMARTREDIS_TEST_CLUSTER})
+	add_executable(test ${SOURCES} ../../../src/cpp/rediscluster.cpp ${UNIT_TESTS})
+else()
+	add_executable(test ${SOURCES} ../../../src/cpp/redis.cpp ${UNIT_TESTS})
+endif()
+
 target_link_libraries(test ${SR_LIB})
