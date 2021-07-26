@@ -145,9 +145,10 @@ end subroutine initialize
 
 !> A destructor for the SmartRedis client
 subroutine destructor( self )
-  class(client_type), intent(in) :: self
+  class(client_type), intent(inout) :: self
 
   call c_destructor(self%client_ptr)
+  self%client_ptr = C_NULL_PTR
 end subroutine destructor
 
 !> Check if the specified key exists in the database
