@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#Install Catch
+# Install Catch
 if [[ -f ./catch/catch.hpp ]]; then
     echo "Catch has already been download and installed"
 else
