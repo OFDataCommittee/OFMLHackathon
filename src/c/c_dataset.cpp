@@ -43,8 +43,8 @@ void* CDataSet(const char* name, const size_t name_length)
 
 extern "C"
 void add_tensor(void* dataset,
-                const char* name,
-                const size_t name_length,
+                const char* tensor_name,
+                const size_t tensor_name_length,
                 void* data,
                 const size_t* dims,
                 const size_t n_dims,
@@ -54,13 +54,13 @@ void add_tensor(void* dataset,
   /* This function adds a tensor to the dataset.
   */
   DataSet* d = (DataSet*)dataset;
-  std::string name_str = std::string(name, name_length);
+  std::string tensor_name_str = std::string(tensor_name, tensor_name_length);
 
   std::vector<size_t> dims_vec;
   for(size_t i=0; i<n_dims; i++)
     dims_vec.push_back(dims[i]);
 
-  d->add_tensor(name_str, data, dims_vec,
+  d->add_tensor(tensor_name_str, data, dims_vec,
                 convert_tensor_type(type),
                 convert_layout(mem_layout));
   return;
