@@ -89,7 +89,7 @@ CommandReply Redis::run(Command& cmd)
         if(reply.has_error()>0)
             reply.print_reply_error();
         throw std::runtime_error("Redis failed to execute command: " +
-                                 cmd.to_string());
+                                 cmd.first_field());
     }
 
     return reply;
