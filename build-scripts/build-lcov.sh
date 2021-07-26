@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install LCOV
-if [[ -f ./lcov/bin/updateversion.pl ]]; then
+if [[ -f ./lcov/install/usr/local/bin/lcov ]]; then
     echo "LCOV has already been download and installed"
 else
     echo "Installing LCOV"
@@ -14,7 +14,8 @@ else
         echo "LCOV downloaded"
     fi
     cd lcov
+    mkdir install
     echo "Building LCOV v1.15"
-    CC=gcc CXX=g++ make install
+    CC=gcc CXX=g++ DESTDIR="install/" make install
     cd ../
 fi
