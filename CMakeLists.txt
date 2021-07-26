@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.10)
 option(BUILD_PYTHON "Build the python module" ON)
 
 set(CMAKE_BUILD_TYPE RELEASE)
-SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -Werror")
+#SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -Werror")
 set(CMAKE_EXE_LINKER_FLAGS "-lpthread")
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
 
