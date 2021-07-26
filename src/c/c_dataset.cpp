@@ -65,26 +65,23 @@ void DeallocateeDataSet(void *dataset)
 
 // Add a tensor to the dataset.
 extern "C"
-void add_tensor(void *dataset,
-                const char *name,
-                const size_t name_length,
-                void *data,
-                const size_t *dims,
+void add_tensor(void* dataset,
+                const char* tensor_name,
+                const size_t tensor_name_length,
+                void* data,
+                const size_t* dims,
                 const size_t n_dims,
                 const CTensorType type,
                 const CMemoryLayout mem_layout)
 {
   // Sanity check parameters
-  if (NULL == dataset || NULL == name || NULL == data || NULL == dims)
-	return;
-
-  DataSet *d = (DataSet *)dataset;
-  std::string name_str(name, name_length);
+  DataSet* d = (DataSet*)dataset;
+  std::string tensor_name_str = std::string(tensor_name, tensor_name_length);
 
   std::vector<size_t> dims_vec;
   dims_vec.assign(dims, dims + n_dims);
 
-  d->add_tensor(name_str, data, dims_vec,
+  d->add_tensor(tensor_name_str, data, dims_vec,
                 convert_tensor_type(type),
                 convert_layout(mem_layout));
 }
