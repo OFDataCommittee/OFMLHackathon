@@ -47,9 +47,9 @@ set(UNIT_TESTS
 )
 
 if($ENV{SMARTREDIS_TEST_CLUSTER})
-	add_executable(test ${SOURCES} ../../../src/cpp/rediscluster.cpp ${UNIT_TESTS})
+	add_executable(cpp_unit_tests ${SOURCES} ../../../src/cpp/rediscluster.cpp ${UNIT_TESTS})
 else()
-	add_executable(test ${SOURCES} ../../../src/cpp/redis.cpp ${UNIT_TESTS})
+	add_executable(cpp_unit_tests ${SOURCES} ../../../src/cpp/redis.cpp ${UNIT_TESTS})
 endif()
 
-target_link_libraries(test ${SR_LIB})
+target_link_libraries(cpp_unit_tests ${SR_LIB})

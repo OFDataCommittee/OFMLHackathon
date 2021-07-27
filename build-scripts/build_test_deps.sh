@@ -38,7 +38,7 @@ fi
 
 
 # build catch
-bash ../build-scripts/build-catch.sh
+../build-scripts/build-catch.sh
 if [ $? != 0 ]; then
     echo "ERROR: Catch failed to build"
     cd ..
@@ -46,7 +46,7 @@ if [ $? != 0 ]; then
 fi
 
 # build LCOV
-bash ../build-scripts/build-lcov.sh
+../build-scripts/build-lcov.sh
 if [ $? != 0 ]; then
     echo "ERROR: Catch failed to build"
     cd ..
