@@ -401,6 +401,11 @@ bool PyClient::tensor_exists(const std::string& name)
   return this->_client->tensor_exists(name);
 }
 
+bool PyClient::dataset_exists(const std::string& name)
+{
+  return this->_client->dataset_exists(name);
+}
+
 bool PyClient::poll_tensor(const std::string& name,
                            int poll_frequency_ms,
                            int num_tries)

@@ -441,14 +441,24 @@ class Client
         bool model_exists(const std::string& name);
 
         /*!
-        *   \brief Check if the tensor (or the dataset) exists in the database
+        *   \brief Check if the tensor exists in the database
         *   \param name The name that will be checked in the database
         *               Depending on the current prefixing behavior,
         *               the name could be automatically prefixed
         *               to form the corresponding key.
-        *   \returns Returns true if the key exists in the database
+        *   \returns Returns true if the tensor key exists in the database
         */
         bool tensor_exists(const std::string& name);
+
+        /*!
+        *   \brief Check if the ataset exists in the database
+        *   \param name The name that will be checked in the database
+        *               Depending on the current prefixing behavior,
+        *               the name could be automatically prefixed
+        *               to form the corresponding key.
+        *   \returns Returns true if the dataset key exists in the database
+        */
+        bool dataset_exists(const std::string& name);
 
         /*!
         *   \brief Check if the key exists in the database at a
