@@ -63,7 +63,7 @@ type, public :: client_type
                               unpack_tensor_float, unpack_tensor_double
 
   !> Initializes a new instance of the SmartRedis client
-  procedure :: initialize_client
+  procedure :: initialize => initialize_client
   !> Destructs a new instance of the SmartRedis client
   procedure :: destructor
   !> Check the database for the existence of a specific model

@@ -45,7 +45,7 @@ type, public :: dataset_type
   contains
 
   !> Initialize a new dataset with a given name
-  procedure :: initialize_dataset
+  procedure :: initialize => initialize_dataset
   !> Add metadata to the dataset with a given field and string
   procedure :: add_meta_string
   ! procedure :: get_meta_strings ! Not supported currently

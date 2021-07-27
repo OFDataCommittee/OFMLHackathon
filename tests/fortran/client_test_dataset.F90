@@ -61,7 +61,7 @@ program main
     recv_array_integer_64(i,j,k) = irand()
   enddo; enddo; enddo
 
-  call dataset%initialize_dataset( "test_dataset" )
+  call dataset%initialize( "test_dataset" )
 
   ! Test adding and retrieving a tensor of every supported type
   call dataset%add_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))
