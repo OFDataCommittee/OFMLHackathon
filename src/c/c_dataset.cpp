@@ -37,18 +37,18 @@ void *CDataSet(const char *name, const size_t name_length)
 {
   // Sanity check parameters
   if (NULL == name)
-	return NULL;
+    return NULL;
 
   std::string name_str(name, name_length);
 
   DataSet *dataset = NULL;
   try {
-	  dataset = new DataSet(name_str);
+    dataset = new DataSet(name_str);
   } catch (...) {
-	  dataset = NULL;
+    dataset = NULL;
   }
   
-  return (void *)dataset;
+  return reinterpret_cast<void *>(dataset);
 }
 
 // Deallocate a DataSet
@@ -57,9 +57,9 @@ void DeallocateeDataSet(void *dataset)
 {
   // Sanity check parameters
   if (NULL == dataset)
-	return;
+    return;
 
-  DataSet *d = (DataSet *)dataset;
+  DataSet *d = reinterpret_cast<DataSet *>(dataset);
   delete d;
 }
 
@@ -75,7 +75,7 @@ void add_tensor(void* dataset,
                 const CMemoryLayout mem_layout)
 {
   // Sanity check parameters
-  DataSet* d = (DataSet*)dataset;
+  DataSet *d = reinterpret_cast<DataSet *>(dataset);
   std::string tensor_name_str = std::string(tensor_name, tensor_name_length);
 
   std::vector<size_t> dims_vec;
@@ -96,9 +96,9 @@ void add_meta_scalar(void *dataset,
 {
   // Sanity check parameters
   if (NULL == dataset || NULL == name || NULL == data)
-	return;
+    return;
 
-  DataSet *d = (DataSet *)dataset;
+  DataSet *d = reinterpret_cast<DataSet *>(dataset);
   std::string name_str(name, name_length);
 
   d->add_meta_scalar(name_str, data,
@@ -115,9 +115,9 @@ void add_meta_string(void *dataset,
 {
   // Sanity check parameters
   if (NULL == dataset || NULL == name || NULL == data)
-	return;
+    return;
 
-  DataSet *d = (DataSet *)dataset;
+  DataSet *d = reinterpret_cast<DataSet *>(dataset);
   std::string name_str(name, name_length);
   std::string data_str(data, data_length);
 
@@ -140,8 +140,8 @@ void get_dataset_tensor(void *dataset,
 {
   // Sanity check parameters
   if (NULL == dataset || NULL == name || NULL == data ||
-	  NULL == dims || NULL == n_dims || NULL == type)
-	return;
+      NULL == dims || NULL == n_dims || NULL == type)
+    return;
 
   DataSet *d = (DataSet *)dataset;
   std::string name_str(name, name_length);
@@ -165,9 +165,9 @@ void unpack_dataset_tensor(void *dataset,
 {
   // Sanity check parameters
   if (NULL == dataset || NULL == name || NULL == data || NULL == dims)
-	return;
+    return;
 
-  DataSet *d = (DataSet *)dataset;
+  DataSet *d = reinterpret_cast<DataSet *>(dataset);
   std::string name_str(name, name_length);
 
   std::vector<size_t> dims_vec;
@@ -183,16 +183,16 @@ void unpack_dataset_tensor(void *dataset,
 // DataSet object
 extern "C"
 void *get_meta_scalars(void *dataset,
-                      const char *name,
-                      const size_t name_length,
-                      size_t *length,
-                      CMetaDataType *type)
+		       const char *name,
+		       const size_t name_length,
+		       size_t *length,
+		       CMetaDataType *type)
 {
   // Sanity check parameters
   if (NULL == dataset || NULL == name || NULL == length || NULL == type)
-	return NULL;
+    return NULL;
 
-  DataSet *d = (DataSet *)dataset;
+  DataSet *d = reinterpret_cast<DataSet *>(dataset);
   std::string key_str(name, name_length);
   void *data = NULL;
   MetaDataType m_type;
@@ -216,10 +216,10 @@ void get_meta_strings(void *dataset,
 {
   // Sanity check parameters
   if (NULL == dataset || NULL == name || NULL == data ||
-	  NULL == n_strings || NULL == lengths)
-	return;
+      NULL == n_strings || NULL == lengths)
+    return;
 
-  DataSet *d = (DataSet *)dataset;
+  DataSet *d = reinterpret_cast<DataSet *>(dataset);
   std::string key_str(name, name_length);
   d->get_meta_strings(key_str, *data, *n_strings, *lengths);
 }

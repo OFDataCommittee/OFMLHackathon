@@ -60,8 +60,7 @@ void DeleteCClient(void* c_client);
 *                   to use for communication
 *   \param dataset The DataSet object to send
 */
-void put_dataset(void* c_client,
-                 const void* dataset);
+void put_dataset(void* c_client, void* dataset);
 
 /*!
 *   \brief Get a DataSet object from the database
