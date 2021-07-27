@@ -20,7 +20,11 @@ def test_put_get_dataset(mock_data, use_cluster):
 
     client = Client(None, use_cluster)
 
+    assert not client.dataset_exists("nonexistent-dataset"), "Existence of nonexistant dataset!"
+    
     client.put_dataset(dataset)
+
+    assert client.dataset_exists("test-dataset"), "Non-existance of real dataset!"
 
     rdataset = client.get_dataset("test-dataset")
     for index, tensor in enumerate(data):
