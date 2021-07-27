@@ -302,7 +302,7 @@ void set_model_from_file(void *c_client,
   std::vector<std::string> input_vec;
   if (1 != n_inputs || 0 != input_lengths[0]) {
     for (size_t i=0; i<n_inputs; i++) {
-      input_vec.push_back((NULL != inputs[i]) ?
+      input_vec.push_back((NULL != inputs[i] && 0 != input_lengths[i]) ?
 			  std::string(inputs[i], input_lengths[i]) :
 			  std::string(""));
     }
@@ -311,7 +311,7 @@ void set_model_from_file(void *c_client,
   std::vector<std::string> output_vec;
   if (1 != n_outputs || 0 != output_lengths[0]) {
     for (size_t i=0; i<n_outputs; i++) {
-      output_vec.push_back((NULL != outputs[i]) ?
+      output_vec.push_back((NULL != outputs[i] && 0 != output_lengths[i]) ?
 			   std::string(outputs[i], output_lengths[i]) :
 			   std::string(""));
     }
@@ -353,7 +353,7 @@ void set_model(void *c_client,
   std::vector<std::string> input_vec;
   if (1 != n_inputs || 0 != input_lengths[0]) {
     for (size_t i=0; i<n_inputs; i++) {
-      input_vec.push_back((NULL != inputs[i]) ?
+      input_vec.push_back((NULL != inputs[i] && 0 != input_lengths[i]) ?
 			  std::string(inputs[i], input_lengths[i]) :
 			  std::string(""));
     }
@@ -362,7 +362,7 @@ void set_model(void *c_client,
   std::vector<std::string> output_vec;
   if (1 != n_outputs || 0 != output_lengths[0]) {
     for (size_t i=0; i<n_outputs; i++) {
-      output_vec.push_back((NULL != outputs[i]) ?
+      output_vec.push_back((NULL != outputs[i] && 0 != output_lengths[i]) ?
 			   std::string(outputs[i], output_lengths[i]) :
 			   std::string(""));
     }
@@ -483,7 +483,7 @@ void run_script(void *c_client,
   std::vector<std::string> input_vec;
   if (1 != n_inputs || 0 != input_lengths[0]) {
     for (size_t i=0; i<n_inputs; i++) {
-      input_vec.push_back((NULL != inputs[i]) ?
+      input_vec.push_back((NULL != inputs[i] && 0 != input_lengths[i]) ?
 			  std::string(inputs[i], input_lengths[i]) :
 			  std::string(""));
     }
@@ -492,7 +492,7 @@ void run_script(void *c_client,
   std::vector<std::string> output_vec;
   if (1 != n_outputs || 0 != output_lengths[0]) {
     for (size_t i=0; i<n_outputs; i++) {
-      output_vec.push_back((NULL != outputs[i]) ?
+      output_vec.push_back((NULL != outputs[i] && 0 != output_lengths[i]) ?
 			   std::string(outputs[i], output_lengths[i]) :
 			   std::string(""));
     }
@@ -525,7 +525,7 @@ void run_model(void *c_client,
   std::vector<std::string> input_vec;
   if (1 != n_inputs || 0 != input_lengths[0]) {
     for (size_t i=0; i<n_inputs; i++) {
-      input_vec.push_back((NULL != inputs[i]) ?
+      input_vec.push_back((NULL != inputs[i] && 0 != input_lengths[i]) ?
 			  std::string(inputs[i], input_lengths[i]) :
 			  std::string(""));
     }
@@ -534,7 +534,7 @@ void run_model(void *c_client,
   std::vector<std::string> output_vec;
   if (1 != n_outputs || 0 != output_lengths[0]) {
     for (size_t i=0; i<n_outputs; i++) {
-      output_vec.push_back((NULL != outputs[i]) ?
+      output_vec.push_back((NULL != outputs[i] && 0 != output_lengths[i]) ?
 			   std::string(outputs[i], output_lengths[i]) :
 			   std::string(""));
     }
