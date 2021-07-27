@@ -17,7 +17,7 @@ ensemble_keyout = "producer_0"
 call setenv("SSKEYIN", "producer_0,producer_1")
 call setenv("SSKEYOUT", ensemble_keyout)
 
-call client%initialize(use_cluster())
+call client%initialize_client(use_cluster())
 call client%use_model_ensemble_prefix(.true.)
 
 ! Put tensor, script, and model into the database. Then check to make
@@ -57,7 +57,7 @@ ensemble_keyout = "producer_1"
 call setenv("SSKEYIN", "producer_1,producer_0")
 call setenv("SSKEYOUT", ensemble_keyout)
 
-call client%initialize(use_cluster())
+call client%initialize_client(use_cluster())
 call client%use_model_ensemble_prefix(.true.)
 
 ! Check that the keys associated with producer_1 do not exist

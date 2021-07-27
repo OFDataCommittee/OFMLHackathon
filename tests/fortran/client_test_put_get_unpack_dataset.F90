@@ -31,7 +31,7 @@ program main
 
   integer :: err_code
 
-  call client%initialize(use_cluster())
+  call client%initialize_client(use_cluster())
 
   call random_number(true_array_real_32)
   call random_number(true_array_real_64)
@@ -51,7 +51,7 @@ program main
     recv_array_integer_64(i,j,k) = irand()
   enddo; enddo; enddo
 
-  call send_dataset%initialize( "test_dataset" )
+  call send_dataset%initialize_dataset( "test_dataset" )
 
   call send_dataset%add_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))
   call send_dataset%add_tensor("true_array_real_64", true_array_real_64, shape(true_array_real_64))

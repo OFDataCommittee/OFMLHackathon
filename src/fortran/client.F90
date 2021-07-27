@@ -63,7 +63,7 @@ type, public :: client_type
                               unpack_tensor_float, unpack_tensor_double
 
   !> Initializes a new instance of the SmartRedis client
-  procedure :: initialize
+  procedure :: initialize_client
   !> Destructs a new instance of the SmartRedis client
   procedure :: destructor
   !> Check the database for the existence of a specific model
@@ -135,13 +135,13 @@ end type client_type
 contains
 
 !> Initializes a new instance of a SmartRedis client
-subroutine initialize( client, cluster )
-  class(client_type), intent(inout) :: client  !< Receives the initialized client
+subroutine initialize_client( self, cluster )
+  class(client_type), intent(inout) :: self    !< Receives the initialized client
   logical, optional,  intent(in   ) :: cluster !< If true, client uses a database cluster (Default: .false.)
 
-  if (present(cluster)) client%cluster = cluster
-  client%client_ptr = c_constructor(client%cluster)
-end subroutine initialize
+  if (present(cluster)) self%cluster = cluster
+  self%client_ptr = c_constructor(self%cluster)
+end subroutine initialize_client
 
 !> A destructor for the SmartRedis client
 subroutine destructor( self )

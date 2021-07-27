@@ -45,7 +45,7 @@ type, public :: dataset_type
   contains
 
   !> Initialize a new dataset with a given name
-  procedure :: initialize
+  procedure :: initialize_dataset
   !> Add metadata to the dataset with a given field and string
   procedure :: add_meta_string
   ! procedure :: get_meta_strings ! Not supported currently
@@ -87,9 +87,9 @@ end type dataset_type
 
 contains
 
-subroutine initialize( dataset, name )
-  class(dataset_type), intent(inout) :: dataset !< Receives the dataset
-  character(len=*),    intent(in)    :: name    !< Name of the dataset
+subroutine initialize_dataset( self, name )
+  class(dataset_type), intent(inout) :: self !< Receives the dataset
+  character(len=*),    intent(in)    :: name !< Name of the dataset
 
   ! local variables
   integer(kind=c_size_t) :: name_length
@@ -98,8 +98,8 @@ subroutine initialize( dataset, name )
   name_length = len_trim(name)
   c_name = trim(name)
   
-  dataset%dataset_ptr = dataset_constructor(c_name, name_length)
-end subroutine initialize
+  self%dataset_ptr = dataset_constructor(c_name, name_length)
+end subroutine initialize_dataset
 
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'int8' C-type
 subroutine add_tensor_i8(self, name, data, dims)

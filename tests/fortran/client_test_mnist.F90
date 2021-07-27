@@ -14,7 +14,7 @@ program mnist_test
   integer :: err_code
   character(len=2) :: key_suffix
 
-  call client%initialize(use_cluster())
+  call client%initialize_client(use_cluster())
 
   call client%set_model_from_file(model_key, model_file, "TORCH", "CPU")
   call client%set_script_from_file(script_key, "CPU", script_file)

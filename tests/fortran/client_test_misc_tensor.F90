@@ -15,7 +15,7 @@ program main
 
   integer :: err_code
 
-  call client%initialize(use_cluster())
+  call client%initialize_client(use_cluster())
   print *, "Putting tensor"
   call client%put_tensor( "test_initial", array, shape(array) )
 

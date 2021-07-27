@@ -44,7 +44,7 @@ program main
     recv_array_integer_64(i) = irand()
   enddo
 
-  call client%initialize(use_cluster())
+  call client%initialize_client(use_cluster())
 
   call client%put_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))
   call client%unpack_tensor("true_array_real_32", recv_array_real_32, shape(recv_array_real_32))
