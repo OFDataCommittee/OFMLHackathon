@@ -112,13 +112,14 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
 
             // Tensors
             float* array = (float*)malloc(dims[0]*sizeof(float));
+            for(int i=0; i<dims[0]; i++)
+                array[i] = (float)(rand()/((float)RAND_MAX/10.0));
             producer_client.put_tensor(tensor_key, (void*)array,
                               dims, TensorType::flt,
                               MemoryLayout::nested);
             CHECK(producer_client.tensor_exists(tensor_key) == true);
             CHECK(producer_client.key_exists(producer_keyout+"."+tensor_key) ==
                   true);
-            free_1D_array(array);
 
             // Models
             producer_client.set_model_from_file(model_key, model_file,
@@ -174,11 +175,18 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
             consumer_client.unpack_tensor(tensor_key, u_result,
                                           dims, TensorType::flt,
                                           MemoryLayout::nested);
+            for(int i=0; i<dims[0]; i++)
+                CHECK(array[i] == u_result[i]);
+
             consumer_client.get_tensor(tensor_key, g_result, g_dims,
                                        g_type, MemoryLayout::nested);
             float* g_type_result = (float*)g_result;
+            for(int i=0; i<dims[0]; i++)
+                CHECK(array[i] == g_type_result[i]);
             CHECK(TensorType::flt == g_type);
             CHECK(g_dims == dims);
+
+            free_1D_array(array);
             free_1D_array(u_result);
 
             // Models

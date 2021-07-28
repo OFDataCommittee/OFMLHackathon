@@ -1,6 +1,102 @@
 #include "../../../third-party/catch/catch.hpp"
 #include "metadata.h"
 
+// helper function for checking if the MetaData object was copied correctly
+void check_metadata_copied_correctly(MetaData metadata, MetaData metadata_cpy)
+{
+    double* dbl_data;
+    float* flt_data;
+    int64_t* int64_data;
+    uint64_t* uint64_data;
+    int32_t* int32_data;
+    uint32_t* uint32_data;
+    size_t length;
+    MetaDataType type;
+
+    double* dbl_data_cpy;
+    float* flt_data_cpy;
+    int64_t* int64_data_cpy;
+    uint64_t* uint64_data_cpy;
+    int32_t* int32_data_cpy;
+    uint32_t* uint32_data_cpy;
+    size_t length_cpy;
+    MetaDataType type_cpy;
+    char** str_data;
+    size_t n_strings;
+    size_t* lengths;
+    char** str_data_cpy;
+    size_t n_strings_cpy;
+    size_t* lengths_cpy;
+
+    metadata.get_scalar_values("dbl_scalar",
+                              (void*&)dbl_data,
+                              length, type);
+    metadata_cpy.get_scalar_values("dbl_scalar",
+                                  (void*&)dbl_data_cpy,
+                                  length_cpy, type_cpy);
+    CHECK(*dbl_data == *dbl_data_cpy);
+    CHECK(length == length_cpy);
+    CHECK(type == type_cpy);
+
+    metadata.get_scalar_values("flt_scalar",
+                              (void*&)flt_data,
+                               length, type);
+    metadata_cpy.get_scalar_values("flt_scalar",
+                                  (void*&)flt_data_cpy,
+                                  length_cpy, type_cpy);
+    CHECK(*flt_data == *flt_data_cpy);
+    CHECK(length == length_cpy);
+    CHECK(type == type_cpy);
+
+    metadata.get_scalar_values("int64_scalar",
+                              (void*&)int64_data,
+                              length, type);
+    metadata_cpy.get_scalar_values("int64_scalar",
+                                  (void*&)int64_data_cpy,
+                                  length_cpy, type_cpy);
+    CHECK(*int64_data == *int64_data_cpy);
+    CHECK(length == length_cpy);
+    CHECK(type == type_cpy);
+
+    metadata.get_scalar_values("uint64_scalar",
+                              (void*&)uint64_data,
+                              length, type);
+    metadata_cpy.get_scalar_values("uint64_scalar",
+                                  (void*&)uint64_data_cpy,
+                                  length_cpy, type_cpy);
+    CHECK(*uint64_data == *uint64_data_cpy);
+    CHECK(length == length_cpy);
+    CHECK(type == type_cpy);
+
+    metadata.get_scalar_values("int32_scalar",
+                              (void*&)int32_data,
+                              length, type);
+    metadata_cpy.get_scalar_values("int32_scalar",
+                                  (void*&)int32_data_cpy,
+                                  length_cpy, type_cpy);
+    CHECK(*int32_data == *int32_data_cpy);
+    CHECK(length == length_cpy);
+    CHECK(type == type_cpy);
+
+    metadata.get_scalar_values("uint32_scalar",
+                              (void*&)uint32_data,
+                              length, type);
+    metadata_cpy.get_scalar_values("uint32_scalar",
+                                  (void*&)uint32_data_cpy,
+                                  length_cpy, type_cpy);
+    CHECK(*uint32_data == *uint32_data_cpy);
+    CHECK(length == length_cpy);
+    CHECK(type == type_cpy);
+
+    metadata.get_string_values("str_field", str_data,
+                                n_strings, lengths);
+    metadata_cpy.get_string_values("str_field", str_data_cpy,
+                                    n_strings_cpy, lengths_cpy);
+    CHECK(std::strcmp(*str_data, *str_data_cpy) == 0);
+    CHECK(n_strings == n_strings_cpy);
+    CHECK(*lengths == *lengths_cpy);
+}
+
 SCENARIO("Test MetaData", "[MetaData]")
 {
 
@@ -99,107 +195,61 @@ SCENARIO("Test MetaData", "[MetaData]")
             AND_THEN("The MetaData object can be copied "
                      "via the copy constructor")
             {
-                double* dbl_data_cpy;
-                float* flt_data_cpy;
-                int64_t* int64_data_cpy;
-                uint64_t* uint64_data_cpy;
-                int32_t* int32_data_cpy;
-                uint32_t* uint32_data_cpy;
-                size_t length_cpy;
-                MetaDataType type_cpy;
-                char** str_data;
-                size_t n_strings;
-                size_t* lengths;
-                char** str_data_cpy;
-                size_t n_strings_cpy;
-                size_t* lengths_cpy;
-
                 std::string str_val = "100";
                 metadata.add_string("str_field", str_val);
+
                 MetaData metadata_cpy(metadata);
 
-                metadata.get_scalar_values("dbl_scalar",
-                                          (void*&)dbl_data,
-                                          length, type);
-                metadata_cpy.get_scalar_values("dbl_scalar",
-                                              (void*&)dbl_data_cpy,
-                                              length_cpy, type_cpy);
-                CHECK(*dbl_data == *dbl_data_cpy);
-                CHECK(length == length_cpy);
-                CHECK(type == type_cpy);
-
-                metadata.get_scalar_values("flt_scalar",
-                                          (void*&)flt_data,
-                                           length, type);
-                metadata_cpy.get_scalar_values("flt_scalar",
-                                              (void*&)flt_data_cpy,
-                                              length_cpy, type_cpy);
-                CHECK(*flt_data == *flt_data_cpy);
-                CHECK(length == length_cpy);
-                CHECK(type == type_cpy);
-
-                metadata.get_scalar_values("int64_scalar",
-                                          (void*&)int64_data,
-                                          length, type);
-                metadata_cpy.get_scalar_values("int64_scalar",
-                                              (void*&)int64_data_cpy,
-                                              length_cpy, type_cpy);
-                CHECK(*int64_data == *int64_data_cpy);
-                CHECK(length == length_cpy);
-                CHECK(type == type_cpy);
-
-                metadata.get_scalar_values("uint64_scalar",
-                                          (void*&)uint64_data,
-                                          length, type);
-                metadata_cpy.get_scalar_values("uint64_scalar",
-                                              (void*&)uint64_data_cpy,
-                                              length_cpy, type_cpy);
-                CHECK(*uint64_data == *uint64_data_cpy);
-                CHECK(length == length_cpy);
-                CHECK(type == type_cpy);
-
-                metadata.get_scalar_values("int32_scalar",
-                                          (void*&)int32_data,
-                                          length, type);
-                metadata_cpy.get_scalar_values("int32_scalar",
-                                              (void*&)int32_data_cpy,
-                                              length_cpy, type_cpy);
-                CHECK(*int32_data == *int32_data_cpy);
-                CHECK(length == length_cpy);
-                CHECK(type == type_cpy);
-
-                metadata.get_scalar_values("uint32_scalar",
-                                          (void*&)uint32_data,
-                                          length, type);
-                metadata_cpy.get_scalar_values("uint32_scalar",
-                                              (void*&)uint32_data_cpy,
-                                              length_cpy, type_cpy);
-                CHECK(*uint32_data == *uint32_data_cpy);
-                CHECK(length == length_cpy);
-                CHECK(type == type_cpy);
-
-                metadata.get_string_values("str_field", str_data,
-                                            n_strings, lengths);
-                metadata_cpy.get_string_values("str_field", str_data_cpy,
-                                                n_strings_cpy, lengths_cpy);
-                CHECK(std::strcmp(*str_data, *str_data_cpy) == 0);
-                CHECK(n_strings == n_strings_cpy);
-                CHECK(*lengths == *lengths_cpy);
+                check_metadata_copied_correctly(metadata, metadata_cpy);
             }
 
             AND_THEN("The MetaData object can be copied "
                      "via the assignment operator")
             {
-                MetaData medadata_2;
-                medadata_2 = metadata;
-                // TODO: Ensure it was copied correctly
+                std::string str_val = "100";
+                metadata.add_string("str_field", str_val);
+
+                MetaData metadata_cpy;
+                metadata_cpy = metadata;
+
+                check_metadata_copied_correctly(metadata, metadata_cpy);
             }
 
             AND_THEN("The MetaData object can be moved")
             {
                 MetaData metadata_2;
                 metadata_2 = std::move(metadata);
-                // TODO: Ensure it was moved correctly
+
+                metadata_2.get_scalar_values(keys[0], (void*&)dbl_data,
+                                            length, type);
+                CHECK(*dbl_data == dbl_val);
+                CHECK(length == 1);
+                CHECK(type == MetaDataType::dbl);
+                metadata_2.get_scalar_values(keys[1], (void*&)flt_data,
+                                            length, type);
+                CHECK(*flt_data == flt_val);
+                CHECK(length == 1);
+                CHECK(type == MetaDataType::flt);
+                metadata_2.get_scalar_values(keys[2], (void*&)int64_data,
+                                            length, type);
+                CHECK(*int64_data == int64_val);
+                CHECK(length == 1);
+                CHECK(type == MetaDataType::int64);
+                metadata_2.get_scalar_values(keys[3], (void*&)uint64_data,
+                                            length, type);
+                CHECK(*uint64_data == uint64_val);
+                CHECK(length == 1);
+                CHECK(type == MetaDataType::uint64);
+                metadata_2.get_scalar_values(keys[4], (void*&)int32_data,
+                                            length, type);
+                CHECK(*int32_data == int32_val);
+                CHECK(length == 1);
+                CHECK(type == MetaDataType::int32);
+                metadata_2.get_scalar_values(keys[5], (void*&)uint32_data,
+                                            length, type);
+                CHECK(*uint32_data == uint32_val);
+                CHECK(length == 1);
+                CHECK(type == MetaDataType::uint32);
             }
         }
 

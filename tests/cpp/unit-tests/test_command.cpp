@@ -79,11 +79,11 @@ SCENARIO("Testing Command object", "[Command]")
             // define necessary variables for testing
             std::string output = " TAG DEL RENAME SOURCE INPUTS EXISTS META BLOB";
             std::vector<std::string> sorted_keys =
-                {"BLOB", "DEL", "EXISTS", "META", "RENAME", "TAG"};
+                {"BLOB", "DEL", "EXISTS", "META", "RENAME"};
             std::vector<std::string> cmd_keys;
 
             // add the fields to the Command
-            cmd.add_field(field_1, true);
+            cmd.add_field(field_1, false);
             cmd.add_field(field_2, true);
             cmd.add_field(field_3, true);
             cmd.add_field_ptr(field_4, field_size_4);
@@ -197,11 +197,11 @@ SCENARIO("Testing Command object", "[Command]")
         std::string output = " TAG DEL RENAME SOURCE INPUTS "
                              "EXISTS META BLOB SOURCE";
         std::vector<std::string> sorted_keys =
-            {"BLOB", "DEL", "EXISTS", "META", "RENAME", "TAG"};
+            {"BLOB", "DEL", "EXISTS", "META", "RENAME"};
         std::vector<std::string> cmd_keys;
 
         // add fields
-        cmd->add_field(field_1, true);
+        cmd->add_field(field_1, false);
         cmd->add_field(field_2, true);
         cmd->add_field(field_3, true);
         cmd->add_field_ptr(field_4, field_size_4);

@@ -86,6 +86,8 @@ SCENARIO("Testing DataSet object", "[DataSet]")
                     data_ptr++;
                     ret_data_ptr++;
                 }
+
+                free(retrieved_data);
             }
 
             THEN("The tensor cannot be retrieved if the "

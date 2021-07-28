@@ -24,7 +24,7 @@ void putenv_ssdb(const char* ssdb)
         char* reset_ssdb_c = new char[reset_ssdb.size() + 1];
         std::copy(reset_ssdb.begin(), reset_ssdb.end(), reset_ssdb_c);
         reset_ssdb_c[reset_ssdb.size()] = '\0';
-        putenv( reset_ssdb_c);
+        putenv(reset_ssdb_c);
         delete [] reset_ssdb_c;
     }
 }

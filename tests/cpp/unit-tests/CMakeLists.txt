@@ -25,6 +25,8 @@ set(SOURCES
 	../../../src/cpp/tensorpack.cpp
 	../../../src/cpp/dbnode.cpp
 	../../../src/cpp/commandreply.cpp
+	../../../src/cpp/redis.cpp
+	../../../src/cpp/rediscluster.cpp
 	../../../src/cpp/redisserver.cpp
 	../../../src/cpp/metadatafield.cpp
 	../../../src/cpp/stringfield.cpp
@@ -46,10 +48,6 @@ set(UNIT_TESTS
 	test_commandreply.cpp
 )
 
-if($ENV{SMARTREDIS_TEST_CLUSTER})
-	add_executable(cpp_unit_tests ${SOURCES} ../../../src/cpp/rediscluster.cpp ${UNIT_TESTS})
-else()
-	add_executable(cpp_unit_tests ${SOURCES} ../../../src/cpp/redis.cpp ${UNIT_TESTS})
-endif()
+add_executable(cpp_unit_tests ${SOURCES} ${UNIT_TESTS})
 
 target_link_libraries(cpp_unit_tests ${SR_LIB})

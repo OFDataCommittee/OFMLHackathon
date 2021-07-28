@@ -6,10 +6,7 @@ if [[ -f ./lcov/install/usr/local/bin/lcov ]]; then
 else
     echo "Installing LCOV"
     if [[ ! -d "./lcov" ]]; then
-        git clone https://github.com/linux-test-project/lcov.git lcov
-        cd lcov
-        git checkout tags/v1.15
-        cd ..
+        git clone https://github.com/linux-test-project/lcov.git --branch v1.15 --depth=1 lcov
     else
         echo "LCOV downloaded"
     fi
