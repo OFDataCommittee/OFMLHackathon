@@ -33,4 +33,4 @@
   name_length = len_trim(name)
   meta_ptr = c_loc(meta)
 
-  call add_meta_scalar_c(this%dataset, c_name, name_length, meta_ptr, meta_type)
+  call add_meta_scalar_c(self%dataset_ptr, c_name, name_length, meta_ptr, meta_type)
