@@ -263,23 +263,12 @@ SCENARIO("Testing Client Object", "[Client]")
                     free(retrieved_datas[i]);
             }
 
-            AND_THEN("A contiguous and a nested tensor "
+            AND_THEN("A contiguous tensor "
                      "can be unpacked incorrectly")
             {
-                // create and put the nested tensor
-                std::string nested_key = "nested_key";
-                std::vector<size_t> nested_dims = {2,1};
-                double* nested_data = (double*)malloc(nested_dims[0] *
-                                                      nested_dims[1] *
-                                                      sizeof(double));
-                // client.put_tensor(nested_key, (void*)nested_data, nested_dims,
-                //                   TensorType::dbl, MemoryLayout::nested);
-
                 // allocate memory for the unpack_tensor calls
                 void* contig_retrieved_data =
                     malloc(dims[0][0] * dims[0][1] * sizeof(double));
-                void* nested_retrieved_data =
-                    malloc(nested_dims[0] * nested_dims[1] * sizeof(double));
 
                 // incorrectly unpack contiguous tensor (contiguous mem space doesn't
                 // match the dimensions that were fetched)
@@ -289,16 +278,9 @@ SCENARIO("Testing Client Object", "[Client]")
                                          MemoryLayout::contiguous),
                     std::runtime_error);
 
-                // incorrectly unpack nested tensor (dimensions of the user memory
-                // space doesnt match the dimensions of the fetched tensor)
-                // CHECK_THROWS_AS(
-                //     client.unpack_tensor(nested_key, nested_retrieved_data, nested_dims,
-                //                          TensorType::dbl, MemoryLayout::nested),
-                //     std::runtime_error);
-
                 free(contig_retrieved_data);
-                free(nested_retrieved_data);
-                free(nested_data);
+
+                // TODO: Do this same test again, but for nested MemoryLayout
             }
 
             AND_THEN("The Tensors can be renamed")
@@ -415,17 +397,9 @@ SCENARIO("Testing Client Object", "[Client]")
                                              num_tries));
             }
 
-            AND_THEN("A Tensor can incorrectly be retrieved, resulting in a runtime error")
+            AND_THEN("A Tensor can be incorrectly unpacked, resulting in a runtime error")
             {
-                // dims.size <= 0
-                // dims[i].size <= 0
-                // TensorType::string
-            }
-
-            AND_THEN("A Tensor can incorrectly be unpacked, resulting in a runtime error")
-            {
-                // TODO: fetched type does not match provided type
-                // contiguous and total_dims != dims[0]
+                // contiguous and total_dims != dims[0] throws error in unpack_tensor
                 void* retrieved_data =
                     malloc(dims[0][0] * dims[0][1] * sizeof(double));
                 std::vector<size_t> incorrect_dims = {10};
@@ -436,8 +410,6 @@ SCENARIO("Testing Client Object", "[Client]")
                     std::runtime_error);
 
                 free(retrieved_data);
-                // TODO: nested memorylayout and dims.size() != reply_dims.size()
-                // TODO: nested memorylayout and dims[i] != reply_dims[i]
             }
         }
     }
