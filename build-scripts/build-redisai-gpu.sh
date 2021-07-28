@@ -43,7 +43,7 @@ else
 
 
     if [[ ! -d "./RedisAI" ]]; then
-        git clone --recursive https://github.com/RedisAI/RedisAI.git --branch v1.2.2 --depth=1 RedisAI
+        git clone --recursive https://github.com/RedisAI/RedisAI.git --branch v1.2.3 --depth=1 RedisAI
         cd RedisAI
         cd ..
     else
