@@ -46,14 +46,14 @@ extern "C" {
 *   \param name_length The length of the dataset
 *                      name c-string, excluding
 *                      null terminating character
+*   \return Returns NULL on failure
 */
 void* CDataSet(const char* name,
                const size_t name_length);
 
 /*!
 *   \brief C-DataSet destructor
-*   \param name The name of the dataset
-*   \param dataset A c-ptr to the dataset object
+*   \param dataset A c-ptr to receive the dataset object
 */
 void DeallocateeDataSet(void* dataset);
 
@@ -227,7 +227,7 @@ void unpack_dataset_tensor(void* dataset,
 *   \param type The MetadataType enum describing
 *               the data type of the metadata field
 *   \returns A c-ptr to newly allocated memory containing
-*            the metadata
+*            the metadata or NULL on bad parameters
 */
 void* get_meta_scalars(void* dataset,
                       const char* name,

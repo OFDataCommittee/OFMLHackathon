@@ -34,41 +34,44 @@ using namespace SmartRedis;
 // Return a pointer to a new Client.
 // The caller is responsible for deleting the client via DeleteClient().
 extern "C"
-void *SmartRedisCClient(bool cluster)
+void* SmartRedisCClient(bool cluster)
 {
-  Client *s = NULL;
+  Client* s = NULL;
 
   try {
     s = new Client(cluster);
+  } catch (const std::bad_alloc&) {
+	s = NULL;
   } catch (...) {
+	delete s;
     s = NULL;
   }
 
-  return reinterpret_cast<void *>(s);
+  return reinterpret_cast<void*>(s);
 }
 
 // Free the memory associated with the c client.
 extern "C"
-void DeleteCClient(void *c_client)
+void DeleteCClient(void* c_client)
 {
   // Sanity check params
-  if (NULL == c_client)
+  if (c_client == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   delete s;
 }
 
 // Put a dataset into the database.
 extern "C"
-void put_dataset(void *c_client, void *dataset)
+void put_dataset(void* c_client, void* dataset)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == dataset)
+  if (c_client == NULL || dataset == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
 
-  Client *s = reinterpret_cast<Client *>(c_client);
-  DataSet *d = reinterpret_cast<DataSet *>(dataset);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  DataSet* d = reinterpret_cast<DataSet*>(dataset);
 
   s->put_dataset(*d);
 }
@@ -76,35 +79,35 @@ void put_dataset(void *c_client, void *dataset)
 // Return a pointer to a new dataset.  The user is
 // responsible for deleting the dataset via DeallocateeDataSet()
 extern "C"
-void *get_dataset(void *c_client, const char *name, const size_t name_length)
+void* get_dataset(void* c_client, const char* name, const size_t name_length)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == name)
+  if (c_client == NULL || name == NULL)
     return NULL; // Nothing we can do, so just bail. (error reporting to come later)
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string dataset_name(name, name_length);
-  DataSet *dataset = NULL;
+  DataSet* dataset = NULL;
 
   try {
     dataset = new DataSet(s->get_dataset(dataset_name));
   } catch (...) {
     dataset = NULL;
   }
-  return reinterpret_cast<void *>(dataset);
+  return reinterpret_cast<void*>(dataset);
 }
 
 // Rename a dataset in the database.
 extern "C"
-void rename_dataset(void *c_client, const char *name,
-                    const size_t name_length, const char *new_name,
+void rename_dataset(void* c_client, const char* name,
+                    const size_t name_length, const char* new_name,
                     const size_t new_name_length)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == name || NULL == new_name)
+  if (c_client == NULL || name == NULL || new_name == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string name_str(name, name_length);
   std::string new_name_str(new_name, new_name_length);
 
@@ -113,15 +116,15 @@ void rename_dataset(void *c_client, const char *name,
 
 // Copy a dataset from the src_name to the dest_name
 extern "C"
-void copy_dataset(void *c_client, const char *src_name,
-                  const size_t src_name_length, const char *dest_name,
+void copy_dataset(void* c_client, const char* src_name,
+                  const size_t src_name_length, const char* dest_name,
                   const size_t dest_name_length)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == src_name || NULL == dest_name)
+  if (c_client == NULL || src_name == NULL || dest_name == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string src_name_str(src_name, src_name_length);
   std::string dest_name_str(dest_name, dest_name_length);
 
@@ -130,33 +133,33 @@ void copy_dataset(void *c_client, const char *src_name,
 
 // Delete a dataset (all metadata and tensors) from the database.
 extern "C"
-void delete_dataset(void *c_client, const char *name, const size_t name_length)
+void delete_dataset(void* c_client, const char* name, const size_t name_length)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == name)
+  if (c_client == NULL || name == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string dataset_name(name, name_length);
   s->delete_dataset(dataset_name);
 }
 
 // Put a tensor of a specified type into the database
 extern "C"
-void put_tensor(void *c_client,
-                const char *key,
+void put_tensor(void* c_client,
+                const char* key,
                 const size_t key_length,
-                void *data,
-                const size_t *dims,
+                void* data,
+                const size_t* dims,
                 const size_t n_dims,
                 const CTensorType type,
                 const CMemoryLayout mem_layout)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == key || NULL == data || NULL == dims)
+  if (c_client == NULL || key == NULL || data == NULL || dims == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
 
   std::vector<size_t> dims_vec;
@@ -169,21 +172,21 @@ void put_tensor(void *c_client,
 
 // Get a tensor of a specified type from the database
 extern "C"
-void get_tensor(void *c_client,
-		const char *key,
+void get_tensor(void* c_client,
+		const char* key,
                 const size_t key_length,
-                void **result,
-                size_t **dims,
-                size_t *n_dims,
-                CTensorType *type,
+                void** result,
+                size_t** dims,
+                size_t* n_dims,
+                CTensorType* type,
                 const CMemoryLayout mem_layout)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == key || NULL == result || NULL == dims ||
-      NULL == n_dims)
+  if (c_client == NULL || key == NULL || result == NULL || dims == NULL ||
+      n_dims == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
 
   TensorType t_type;
@@ -196,20 +199,20 @@ void get_tensor(void *c_client,
 // Get a tensor of a specified type from the database
 // and put the values into the user provided memory space.
 extern "C"
-void unpack_tensor(void *c_client,
-                   const char *key,
+void unpack_tensor(void* c_client,
+                   const char* key,
                    const size_t key_length,
-                   void *result,
-                   const size_t *dims,
+                   void* result,
+                   const size_t* dims,
                    const size_t n_dims,
                    const CTensorType type,
                    const CMemoryLayout mem_layout)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == key || NULL == result || NULL == dims)
+  if (c_client == NULL || key == NULL || result == NULL || dims == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
 
   std::vector<size_t> dims_vec;
@@ -222,15 +225,15 @@ void unpack_tensor(void *c_client,
 
 // Rename a tensor from key to new_key
 extern "C"
-void rename_tensor(void *c_client, const char *key,
-                   const size_t key_length, const char *new_key,
+void rename_tensor(void* c_client, const char* key,
+                   const size_t key_length, const char* new_key,
                    const size_t new_key_length)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == key || NULL == new_key)
+  if (c_client == NULL || key == NULL || new_key == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
   std::string new_key_str(new_key, new_key_length);
 
@@ -239,14 +242,14 @@ void rename_tensor(void *c_client, const char *key,
 
 // Delete a tensor from the database.
 extern "C"
-void delete_tensor(void *c_client, const char *key,
+void delete_tensor(void* c_client, const char* key,
                    const size_t key_length)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == key)
+  if (c_client == NULL || key == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
 
   s->delete_tensor(key_str);
@@ -254,17 +257,17 @@ void delete_tensor(void *c_client, const char *key,
 
 // Copy a tensor from src_name to dest_name.
 extern "C"
-void copy_tensor(void *c_client,
-		 const char *src_name,
+void copy_tensor(void* c_client,
+		 const char* src_name,
                  const size_t src_name_length,
-                 const char *dest_name,
+                 const char* dest_name,
                  const size_t dest_name_length)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == src_name || NULL == dest_name)
+  if (c_client == NULL || src_name == NULL || dest_name == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string src_str(src_name, src_name_length);
   std::string dest_str(dest_name, dest_name_length);
 
@@ -273,25 +276,31 @@ void copy_tensor(void *c_client,
 
 // Set a model stored in a binary file.
 extern "C"
-void set_model_from_file(void *c_client,
-                         const char *key, const size_t key_length,
-                         const char *model_file, const size_t model_file_length,
-                         const char *backend, const size_t backend_length,
-                         const char *device, const size_t device_length,
+void set_model_from_file(void* c_client,
+                         const char* key, const size_t key_length,
+                         const char* model_file, const size_t model_file_length,
+                         const char* backend, const size_t backend_length,
+                         const char* device, const size_t device_length,
                          const int batch_size, const int min_batch_size,
-                         const char *tag, const size_t tag_length,
-                         const char **inputs, const size_t *input_lengths,
+                         const char* tag, const size_t tag_length,
+                         const char** inputs, const size_t* input_lengths,
                          const size_t n_inputs,
-                         const char **outputs, const size_t *output_lengths,
+                         const char** outputs, const size_t* output_lengths,
                          const size_t n_outputs)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == key || NULL == model_file || NULL == backend ||
-      NULL == device || NULL == tag || NULL == inputs || NULL == input_lengths ||
-      NULL == outputs || NULL == output_lengths)
+  if (c_client == NULL || key == NULL || model_file == NULL || backend == NULL ||
+      device == NULL || tag == NULL || inputs == NULL || input_lengths == NULL ||
+      outputs == NULL || output_lengths == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
+  for (size_t i = 0; i < n_inputs; i++) {
+      if (inputs[i] == NULL || input_lengths[i] == 0)
+		  return; // Bad param = bail
+  for (size_t i = 0; i < n_outputs; i++) {
+      if (outputs[i] == NULL || outputs_lengths[i] == 0)
+		  return; // Bad param = bail
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
   std::string model_file_str(model_file, model_file_length);
   std::string backend_str(backend, backend_length);
@@ -300,20 +309,16 @@ void set_model_from_file(void *c_client,
 
   // Catch the case where an empty string was sent (default C++ client behavior)
   std::vector<std::string> input_vec;
-  if (1 != n_inputs || 0 != input_lengths[0]) {
-    for (size_t i=0; i<n_inputs; i++) {
-      input_vec.push_back((NULL != inputs[i] && 0 != input_lengths[i]) ?
-			  std::string(inputs[i], input_lengths[i]) :
-			  std::string(""));
+  if (n_inputs != 1 || input_lengths[0] != 0) {
+    for (size_t i = 0; i < n_inputs; i++) {
+      input_vec.push_back(std::string(inputs[i], input_lengths[i]));
     }
   }
 
   std::vector<std::string> output_vec;
-  if (1 != n_outputs || 0 != output_lengths[0]) {
-    for (size_t i=0; i<n_outputs; i++) {
-      output_vec.push_back((NULL != outputs[i] && 0 != output_lengths[i]) ?
-			   std::string(outputs[i], output_lengths[i]) :
-			   std::string(""));
+  if (n_outputs != 1 || output_lengths[0] != 0) {
+    for (size_t i = 0; i < n_outputs; i++) {
+      output_vec.push_back(std::string(outputs[i], output_lengths[i]));
     }
   }
 
@@ -324,25 +329,31 @@ void set_model_from_file(void *c_client,
 
 // Set a model stored in a buffer c-string.
 extern "C"
-void set_model(void *c_client,
-               const char *key, const size_t key_length,
-               const char *model, const size_t model_length,
-               const char *backend, const size_t backend_length,
-               const char *device, const size_t device_length,
+void set_model(void* c_client,
+               const char* key, const size_t key_length,
+               const char* model, const size_t model_length,
+               const char* backend, const size_t backend_length,
+               const char* device, const size_t device_length,
                const int batch_size, const int min_batch_size,
-               const char *tag, const size_t tag_length,
-               const char **inputs, const size_t *input_lengths,
+               const char* tag, const size_t tag_length,
+               const char** inputs, const size_t* input_lengths,
                const size_t n_inputs,
-               const char **outputs, const size_t *output_lengths,
+               const char** outputs, const size_t* output_lengths,
                const size_t n_outputs)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == key || NULL == model || NULL == backend ||
-      NULL == device || NULL == tag || NULL == inputs || NULL == input_lengths ||
-      NULL == outputs || NULL == output_lengths)
+  if (c_client == NULL || key == NULL || model == NULL || backend == NULL ||
+      device == NULL || tag == NULL || inputs == NULL || input_lengths == NULL ||
+      outputs == NULL || output_lengths == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
+  for (size_t i = 0; i < n_inputs; i++) {
+      if (inputs[i] == NULL || input_lengths[i] == 0)
+		  return; // Bad param = bail
+  for (size_t i = 0; i < n_outputs; i++) {
+      if (outputs[i] == NULL || outputs_lengths[i] == 0)
+		  return; // Bad param = bail
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
   std::string model_str(model, model_length);
   std::string backend_str(backend, backend_length);
@@ -351,20 +362,16 @@ void set_model(void *c_client,
 
   // Catch the case where an empty string was sent (default C++ client behavior)
   std::vector<std::string> input_vec;
-  if (1 != n_inputs || 0 != input_lengths[0]) {
-    for (size_t i=0; i<n_inputs; i++) {
-      input_vec.push_back((NULL != inputs[i] && 0 != input_lengths[i]) ?
-			  std::string(inputs[i], input_lengths[i]) :
-			  std::string(""));
+  if (n_inputs != 1 || input_lengths[0] != 0) {
+    for (size_t i = 0; i < n_inputs; i++) {
+      input_vec.push_back(std::string(inputs[i], input_lengths[i]));
     }
   }
 
   std::vector<std::string> output_vec;
-  if (1 != n_outputs || 0 != output_lengths[0]) {
-    for (size_t i=0; i<n_outputs; i++) {
-      output_vec.push_back((NULL != outputs[i] && 0 != output_lengths[i]) ?
-			   std::string(outputs[i], output_lengths[i]) :
-			   std::string(""));
+  if (n_outputs != 1 || output_lengths[0] != 0) {
+    for (size_t i = 0; i < n_outputs; i++) {
+      output_vec.push_back(std::string(outputs[i], output_lengths[i]));
     }
   }
 
@@ -375,16 +382,16 @@ void set_model(void *c_client,
 
 // Retrieve the model and model length from the database
 extern "C"
-const char *get_model(void *c_client,
-		      const char *key,
+const char* get_model(void* c_client,
+		      const char* key,
 		      const size_t key_length,
-		      size_t *model_length)
+		      size_t* model_length)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == key || NULL == model_length)
+  if (c_client == NULL || key == NULL || model_length == NULL)
     return NULL; // Nothing we can do, so just bail. (error reporting to come later)
   
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
   std::string_view model_str_view(s->get_model(key_str));
 
@@ -394,19 +401,19 @@ const char *get_model(void *c_client,
 
 // Put a script in the database that is stored in a file.
 extern "C"
-void set_script_from_file(void *c_client,
-                          const char *key,
+void set_script_from_file(void* c_client,
+                          const char* key,
                           const size_t key_length,
-                          const char *device,
+                          const char* device,
                           const size_t device_length,
-                          const char *script_file,
+                          const char* script_file,
                           const size_t script_file_length)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == key || NULL == device || NULL == script_file)
+  if (c_client == NULL || key == NULL || device == NULL || script_file == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
   
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
   std::string device_str(device, device_length);
   std::string script_file_str(script_file, script_file_length);
@@ -416,19 +423,19 @@ void set_script_from_file(void *c_client,
 
 // Put a script in the database that is stored in a string.
 extern "C"
-void set_script(void *c_client,
-                const char *key,
+void set_script(void* c_client,
+                const char* key,
                 const size_t key_length,
-                const char *device,
+                const char* device,
                 const size_t device_length,
-                const char *script,
+                const char* script,
                 const size_t script_length)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == key || NULL == device || NULL == script)
+  if (c_client == NULL || key == NULL || device == NULL || script == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
   
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   
   std::string key_str(key, key_length);
   std::string device_str(device, device_length);
@@ -439,17 +446,17 @@ void set_script(void *c_client,
 
 // Retrieve the script stored in the database
 extern "C"
-void get_script(void *c_client,
-                const char *key,
-		const size_t key_length,
-                const char **script,
-		size_t *script_length)
+void get_script(void* c_client,
+                const char* key,
+				const size_t key_length,
+                const char** script,
+				size_t* script_length)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == key || NULL == script || NULL == script_length)
+  if (c_client == NULL || key == NULL || script == NULL || script_length == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
   
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
   std::string_view script_str_view(s->get_script(key_str));
 
@@ -459,100 +466,104 @@ void get_script(void *c_client,
 
 // Run  a script function in the database
 extern "C"
-void run_script(void *c_client,
-                const char *key,
+void run_script(void* c_client,
+                const char* key,
                 const size_t key_length,
-                const char *function,
+                const char* function,
                 const size_t function_length,
-                const char **inputs,
-                const size_t *input_lengths,
+                const char** inputs,
+                const size_t* input_lengths,
                 const size_t n_inputs,
-                const char **outputs,
-                const size_t *output_lengths,
+                const char** outputs,
+                const size_t* output_lengths,
                 const size_t n_outputs)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == key || NULL == function || NULL == inputs ||
-      NULL == input_lengths || NULL == outputs || NULL == output_lengths) {
+  if (c_client == NULL || key == NULL || function == NULL || inputs == NULL ||
+      input_lengths == NULL || outputs == NULL || output_lengths == NULL) {
     return; // Nothing we can do, so just bail. (error reporting to come later)
   }
+  for (size_t i = 0; i < n_inputs; i++) {
+      if (inputs[i] == NULL || input_lengths[i] == 0)
+		  return; // Bad param = bail
+  for (size_t i = 0; i < n_outputs; i++) {
+      if (outputs[i] == NULL || outputs_lengths[i] == 0)
+		  return; // Bad param = bail
 
   std::string key_str(key, key_length);
   std::string function_str(function, function_length);
 
   std::vector<std::string> input_vec;
-  if (1 != n_inputs || 0 != input_lengths[0]) {
-    for (size_t i=0; i<n_inputs; i++) {
-      input_vec.push_back((NULL != inputs[i] && 0 != input_lengths[i]) ?
-			  std::string(inputs[i], input_lengths[i]) :
-			  std::string(""));
+  if (n_inputs != 1 || input_lengths[0] != 0) {
+    for (size_t i = 0; i < n_inputs; i++) {
+      input_vec.push_back(std::string(inputs[i], input_lengths[i]));
     }
   }
 
   std::vector<std::string> output_vec;
-  if (1 != n_outputs || 0 != output_lengths[0]) {
-    for (size_t i=0; i<n_outputs; i++) {
-      output_vec.push_back((NULL != outputs[i] && 0 != output_lengths[i]) ?
-			   std::string(outputs[i], output_lengths[i]) :
-			   std::string(""));
+  if (n_outputs != 1 || output_lengths[0] != 0) {
+    for (size_t i = 0; i < n_outputs; i++) {
+      output_vec.push_back(std::string(outputs[i], output_lengths[i]));
     }
   }
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   s->run_script(key_str, function_str, input_vec, output_vec);
 }
 
 // Run a model in the database
 extern "C"
-void run_model(void *c_client,
-               const char *key,
+void run_model(void* c_client,
+               const char* key,
                const size_t key_length,
-               const char **inputs,
-               const size_t *input_lengths,
+               const char** inputs,
+               const size_t* input_lengths,
                const size_t n_inputs,
-               const char **outputs,
-               const size_t *output_lengths,
+               const char** outputs,
+               const size_t* output_lengths,
                const size_t n_outputs)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == key || NULL == inputs || NULL == input_lengths ||
-      NULL == outputs || NULL == output_lengths) {
+  if (c_client == NULL || key == NULL || inputs == NULL || input_lengths == NULL ||
+      outputs == NULL || output_lengths == NULL) {
     return; // Nothing we can do, so just bail. (error reporting to come later)
   }
-  
+  for (size_t i = 0; i < n_inputs; i++) {
+      if (inputs[i] == NULL || input_lengths[i] == 0)
+		  return; // Bad param = bail
+  for (size_t i = 0; i < n_outputs; i++) {
+      if (outputs[i] == NULL || outputs_lengths[i] == 0)
+		  return; // Bad param = bail
+
   std::string key_str(key, key_length);
 
   std::vector<std::string> input_vec;
-  if (1 != n_inputs || 0 != input_lengths[0]) {
-    for (size_t i=0; i<n_inputs; i++) {
-      input_vec.push_back((NULL != inputs[i] && 0 != input_lengths[i]) ?
-			  std::string(inputs[i], input_lengths[i]) :
-			  std::string(""));
+  if (n_inputs != 1 || input_lengths[0] != 0) {
+    for (size_t i = 0; i < n_inputs; i++) {
+      input_vec.push_back(std::string(inputs[i], input_lengths[i]));
     }
   }
 
   std::vector<std::string> output_vec;
-  if (1 != n_outputs || 0 != output_lengths[0]) {
-    for (size_t i=0; i<n_outputs; i++) {
-      output_vec.push_back((NULL != outputs[i] && 0 != output_lengths[i]) ?
-			   std::string(outputs[i], output_lengths[i]) :
-			   std::string(""));
+  if (n_outputs != 1 || output_lengths[0] != 0) {
+    for (size_t i = 0; i < n_outputs; i++) {
+      output_vec.push_back(std::string(outputs[i], output_lengths[i]));
     }
   }
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   s->run_model(key_str, input_vec, output_vec);
 }
 
 // Check whether a key exists in the database
 extern "C"
-bool key_exists(void *c_client, const char *key, const size_t key_length)
+bool key_exists(void* c_client, const char* key, const size_t key_length)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == key)
+  if (c_client == NULL || key == NULL)
     return false;
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
 
   return s->key_exists(key_str);
@@ -560,13 +571,13 @@ bool key_exists(void *c_client, const char *key, const size_t key_length)
 
 // Check whether a model exists in the database
 extern "C"
-bool model_exists(void *c_client, const char *name, const size_t name_length)
+bool model_exists(void* c_client, const char* name, const size_t name_length)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == name)
+  if (c_client == NULL || name == NULL)
     return false;
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string name_str(name, name_length);
 
   return s->model_exists(name_str);
@@ -574,13 +585,13 @@ bool model_exists(void *c_client, const char *name, const size_t name_length)
 
 // Check whether a tensor exists in the database
 extern "C"
-bool tensor_exists(void *c_client, const char *name, const size_t name_length)
+bool tensor_exists(void* c_client, const char* name, const size_t name_length)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == name)
+  if (c_client == NULL || name == NULL)
     return false;
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string name_str(name, name_length);
 
   return s->tensor_exists(name_str);
@@ -588,17 +599,17 @@ bool tensor_exists(void *c_client, const char *name, const size_t name_length)
 
 // Delay until a key exists in the database
 extern "C"
-bool poll_key(void *c_client,
-              const char *key,
-	      const size_t key_length,
+bool poll_key(void* c_client,
+              const char* key,
+			  const size_t key_length,
               const int poll_frequency_ms,
-	      const int num_tries)
+			  const int num_tries)
 {
   // Sanity check params
-  if (NULL == c_client)
+  if (c_client == NULL || key == NULL)
     return false;
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
 
   return s->poll_key(key_str, poll_frequency_ms, num_tries);
@@ -606,17 +617,17 @@ bool poll_key(void *c_client,
 
 // Delay until a model exists in the database
 extern "C"
-bool poll_model(void *c_client,
-		const char *name,
+bool poll_model(void* c_client,
+		const char* name,
 		const size_t name_length,
 		const int poll_frequency_ms,
 		const int num_tries)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == name)
+  if (c_client == NULL || name == NULL)
     return false;
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string name_str(name, name_length);
 
   return s->poll_model(name_str, poll_frequency_ms, num_tries);
@@ -624,17 +635,17 @@ bool poll_model(void *c_client,
 
 // Delay until a tensor exists in the database
 extern "C"
-bool poll_tensor(void *c_client,
-                 const char *name,
-		 const size_t name_length,
+bool poll_tensor(void* c_client,
+                 const char* name,
+				 const size_t name_length,
                  const int poll_frequency_ms,
-		 const int num_tries)
+				 const int num_tries)
 {
   // Sanity check params
-  if (NULL == c_client || NULL == name)
+  if (c_client == NULL || name == NULL)
     return false;
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string name_str(name, name_length);
 
   return s->poll_tensor(name_str, poll_frequency_ms, num_tries);
@@ -642,15 +653,15 @@ bool poll_tensor(void *c_client,
 
 // Establish a data source
 extern "C"
-void set_data_source(void *c_client,
-                     const char *source_id,
-		     const size_t source_id_length)
+void set_data_source(void* c_client,
+                     const char* source_id,
+					 const size_t source_id_length)
 {
   // Sanity check params
-  if (NULL == c_client)
+  if (c_client == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
   std::string source_id_str(source_id, source_id_length);
 
   s->set_data_source(source_id_str);
@@ -658,26 +669,26 @@ void set_data_source(void *c_client,
 
 // Control whether a model ensemble prefix is used
 extern "C"
-void use_model_ensemble_prefix(void *c_client, bool use_prefix)
+void use_model_ensemble_prefix(void* c_client, bool use_prefix)
 {
   // Sanity check params
-  if (NULL == c_client)
+  if (c_client == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
 
   s->use_model_ensemble_prefix(use_prefix);
 }
 
 // Control whether a tensor ensemble prefix is used
 extern "C"
-void use_tensor_ensemble_prefix(void *c_client, bool use_prefix)
+void use_tensor_ensemble_prefix(void* c_client, bool use_prefix)
 {
   // Sanity check params
-  if (NULL == c_client)
+  if (c_client == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
 
-  Client *s = reinterpret_cast<Client *>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
 
   s->use_tensor_ensemble_prefix(use_prefix);
 }

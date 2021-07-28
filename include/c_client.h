@@ -44,6 +44,7 @@ extern "C" {
 *   \brief C-client constructor
 *   \param cluster Flag to indicate if a
 *                  database cluster is being used
+*   \return Returns NULL on failure
 */
 void* SmartRedisCClient(bool cluster);
 
@@ -69,6 +70,7 @@ void put_dataset(void* c_client, void* dataset);
 *   \param name The name of the dataset object to fetch
 *   \param name_length The length of the name c-string,
 *                      excluding null terminating character
+*   \return Returns NULL on bad parameters
 */
 void* get_dataset(void* c_client,
                   const char* name,
@@ -383,7 +385,7 @@ void set_model(void* c_client,
 *   \param model_length The length of the model buffer
 *                       c-string, excluding null
 *                       terminating character
-*   \returns The model as a c-string
+*   \returns The model as a c-string or NULL on bad parameters
 */
 const char* get_model(void* c_client,
                      const char* key,
