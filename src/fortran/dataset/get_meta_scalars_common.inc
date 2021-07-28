@@ -31,5 +31,5 @@
 
   c_name = trim(name)
   name_length = len_trim(name)
-  result_ptr = get_meta_scalars_c(dataset%dataset_ptr, c_name, name_length, meta_length, c_data_type)
+  result_ptr = get_meta_scalars_c(self%dataset_ptr, c_name, name_length, meta_length, c_data_type)
   call c_f_pointer(result_ptr, meta, [meta_length])
