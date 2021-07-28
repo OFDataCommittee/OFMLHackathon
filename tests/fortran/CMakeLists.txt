@@ -93,3 +93,12 @@ add_executable(client_test_ensemble
 target_link_libraries(client_test_ensemble
 	${SR_LIB}
 )
+
+add_executable(client_test_initialized
+        client_test_initialized.F90
+        ${ftn_client_src}
+        test_utils.F90
+)
+target_link_libraries(client_test_initialized
+	${SR_LIB}
+)

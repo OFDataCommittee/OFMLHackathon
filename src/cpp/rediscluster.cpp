@@ -104,7 +104,7 @@ CommandReply RedisCluster::run(Command& cmd)
         if(reply.has_error()>0)
             reply.print_reply_error();
         throw std::runtime_error("Redis failed to execute command: " +
-                                 cmd.to_string());
+                                 cmd.first_field());
     }
 
     return reply;
@@ -467,28 +467,34 @@ CommandReply RedisCluster::get_script(const std::string& key)
 
 inline void RedisCluster::_connect(std::string address_port)
 {
-    int n_connection_trials = 10;
+    int n_trials = 10;
+    bool run_sleep = false;
 
-    while(n_connection_trials > 0) {
+    for(int i=1; i<=n_trials; i++) {
+        run_sleep = false;
         try {
-            this->_redis_cluster = new sw::redis::RedisCluster(address_port);
-            n_connection_trials = -1;
+            this->_redis_cluster =
+                new sw::redis::RedisCluster(address_port);
         }
-        catch (sw::redis::TimeoutError &e) {
-          std::cout << "WARNING: Caught redis TimeoutError: "
-                    << e.what() << std::endl;
-          std::cout << "WARNING: TimeoutError occurred with "\
-                       "initial client connection.";
-          std::cout << "WARNING: "<< n_connection_trials
-                      << " more trials will be made.";
-          n_connection_trials--;
-          std::this_thread::sleep_for(std::chrono::seconds(2));
+        catch (std::bad_alloc& e) {
+            throw std::runtime_error(e.what());
         }
+        catch (sw::redis::Error& e) {
+            delete this->_redis_cluster;
+            this->_redis_cluster = 0;
+            if(i == n_trials) {
+                throw std::runtime_error(e.what());
+            }
+            run_sleep = true;
+        }
+        catch (std::exception& e) {
+            delete this->_redis_cluster;
+            this->_redis_cluster = 0;
+            throw std::runtime_error(e.what());
+        }
+        if(run_sleep)
+            std::this_thread::sleep_for(std::chrono::seconds(2));
     }
-
-    if(n_connection_trials==0)
-        throw std::runtime_error("A connection could not be "\
-                                 "established to the redis cluster.");
     return;
 }
 

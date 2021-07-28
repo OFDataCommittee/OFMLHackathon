@@ -51,7 +51,7 @@ type, public :: client_type
 
   logical(kind=c_bool) :: cluster = .false.        !< True if a database cluster is being used
   type(c_ptr)          :: client_ptr = c_null_ptr !< Pointer to the initialized SmartRedisClient
-
+  logical              :: is_initialized = .false.    !< True if client is initialized
   contains
 
   ! Public procedures
@@ -64,6 +64,8 @@ type, public :: client_type
 
   !> Initializes a new instance of the SmartRedis client
   procedure :: initialize => initialize_client
+  !> Check if a SmartRedis client has been initialized
+  procedure :: isinitialized
   !> Destructs a new instance of the SmartRedis client
   procedure :: destructor
   !> Check the database for the existence of a specific model
@@ -141,7 +143,13 @@ subroutine initialize_client( self, cluster )
 
   if (present(cluster)) self%cluster = cluster
   self%client_ptr = c_constructor(self%cluster)
+  this%is_initialized = .true. 
 end subroutine initialize_client
+
+logical function isinitialized(this)
+  class(client_type) :: this
+  isinitialized = this%is_initialized
+end function isinitialized
 
 !> A destructor for the SmartRedis client
 subroutine destructor( self )
