@@ -293,13 +293,13 @@ void set_model_from_file(void* c_client,
       device == NULL || tag == NULL || inputs == NULL || input_lengths == NULL ||
       outputs == NULL || output_lengths == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
-  for (size_t i = 0; i < n_inputs; i++) {
-      if (inputs[i] == NULL || input_lengths[i] == 0)
-		  return; // Bad param = bail
-  for (size_t i = 0; i < n_outputs; i++) {
-      if (outputs[i] == NULL || outputs_lengths[i] == 0)
-		  return; // Bad param = bail
-
+  for (size_t i = 0; i < n_inputs; i++)
+    if (inputs[i] == NULL || input_lengths[i] == 0)
+      return; // Bad param = bail
+  for (size_t i = 0; i < n_outputs; i++)
+    if (outputs[i] == NULL || output_lengths[i] == 0)
+      return; // Bad param = bail
+  
   Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
   std::string model_file_str(model_file, model_file_length);
@@ -346,12 +346,12 @@ void set_model(void* c_client,
       device == NULL || tag == NULL || inputs == NULL || input_lengths == NULL ||
       outputs == NULL || output_lengths == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
-  for (size_t i = 0; i < n_inputs; i++) {
-      if (inputs[i] == NULL || input_lengths[i] == 0)
-		  return; // Bad param = bail
-  for (size_t i = 0; i < n_outputs; i++) {
-      if (outputs[i] == NULL || outputs_lengths[i] == 0)
-		  return; // Bad param = bail
+  for (size_t i = 0; i < n_inputs; i++)
+    if (inputs[i] == NULL || input_lengths[i] == 0)
+      return; // Bad param = bail
+  for (size_t i = 0; i < n_outputs; i++)
+    if (outputs[i] == NULL || output_lengths[i] == 0)
+      return; // Bad param = bail
 
   Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
@@ -483,12 +483,12 @@ void run_script(void* c_client,
       input_lengths == NULL || outputs == NULL || output_lengths == NULL) {
     return; // Nothing we can do, so just bail. (error reporting to come later)
   }
-  for (size_t i = 0; i < n_inputs; i++) {
-      if (inputs[i] == NULL || input_lengths[i] == 0)
-		  return; // Bad param = bail
-  for (size_t i = 0; i < n_outputs; i++) {
-      if (outputs[i] == NULL || outputs_lengths[i] == 0)
-		  return; // Bad param = bail
+  for (size_t i = 0; i < n_inputs; i++)
+    if (inputs[i] == NULL || input_lengths[i] == 0)
+      return; // Bad param = bail
+  for (size_t i = 0; i < n_outputs; i++)
+    if (outputs[i] == NULL || output_lengths[i] == 0)
+      return; // Bad param = bail
 
   std::string key_str(key, key_length);
   std::string function_str(function, function_length);
@@ -528,12 +528,12 @@ void run_model(void* c_client,
       outputs == NULL || output_lengths == NULL) {
     return; // Nothing we can do, so just bail. (error reporting to come later)
   }
-  for (size_t i = 0; i < n_inputs; i++) {
-      if (inputs[i] == NULL || input_lengths[i] == 0)
-		  return; // Bad param = bail
-  for (size_t i = 0; i < n_outputs; i++) {
-      if (outputs[i] == NULL || outputs_lengths[i] == 0)
-		  return; // Bad param = bail
+  for (size_t i = 0; i < n_inputs; i++)
+    if (inputs[i] == NULL || input_lengths[i] == 0)
+      return; // Bad param = bail
+  for (size_t i = 0; i < n_outputs; i++)
+    if (outputs[i] == NULL || output_lengths[i] == 0)
+      return; // Bad param = bail
 
   std::string key_str(key, key_length);
 
