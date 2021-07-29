@@ -91,7 +91,6 @@ CommandReply RedisCluster::run(Command& cmd)
             std::this_thread::sleep_for(std::chrono::seconds(2));
         }
         catch (std::exception& e) {
-            n_trials--;
             throw std::runtime_error(e.what());
         }
     }
