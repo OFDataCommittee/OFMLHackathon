@@ -630,12 +630,32 @@ class Client(PyClient):
 
         :param addresses: The addresses of the database nodes
         :type address: list[str]
+        :returns: A list of dictionaries with each entry in the
+                  list corresponding to an address reply
+        :rtype: list[dict]
 
         """
         try:
             return super().get_db_node_info(addresses)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "get_db_node_info")
+
+    def get_db_cluster_info(self, addresses):
+        """Returns cluster information from a specified db node.
+        If the address does not correspond to a cluster node,
+        an empty dictionary is returned.
+
+        :param addresses: The addresses of the database nodes
+        :type address: list[str]
+        :returns: A list of dictionaries with each entry in the
+                  list corresponding to an address reply
+        :rtype: list[dict]
+
+        """
+        try:
+            return super().get_db_cluster_info(addresses)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "get_db_cluster_info")
 
     # ---- helpers --------------------------------------------------------
 

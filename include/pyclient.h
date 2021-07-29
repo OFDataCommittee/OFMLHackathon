@@ -434,6 +434,15 @@ class PyClient
         */
         std::vector<py::dict> get_db_node_info(std::vector<std::string> addresses);
 
+        /*!
+        *   \brief \brief Returns the CLUSTER INFO command reply addressed to one
+        *                 or multiple cluster nodes.
+        *   \param addresses The addresses of the database nodes
+        *   \returns A list of parsed_map objects containing all the cluster
+        *            information about the given database nodes
+        */
+        std::vector<py::dict> get_db_cluster_info(std::vector<std::string> addresses);
+
     private:
 
         /*!
