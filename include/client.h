@@ -552,9 +552,19 @@ class Client
         /*!
         *   \brief Returns information about the given database node
         *   \param address The address of the database node (host:port)
-        *   \returns parsed_reply_map containing the database node information
+        *   \returns parsed_reply_nested_map containing the database node information
         */
-        parsed_reply_map get_db_node_info(std::string address);
+        parsed_reply_nested_map get_db_node_info(std::string address);
+
+        /*!
+        *   \brief Returns the CLUSTER INFO command reply addressed to a single
+        *          cluster node.
+        *   \param address The address of the database node (host:port)
+        *   \returns parsed_reply_map containing the database cluster information.
+        *            If this command is executed on a non-cluster database, an
+        *            empty parsed_reply_map is returned.
+        */
+        parsed_reply_map get_db_cluster_info(std::string address);
 
     protected:
 

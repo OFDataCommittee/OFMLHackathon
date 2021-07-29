@@ -56,9 +56,8 @@ CommandReply Redis::run(Command& cmd)
     CommandReply reply;
 
     int n_trials = 100;
-    bool success = true;
 
-    while (n_trials > 0 && success) {
+    while (n_trials > 0) {
 
         try {
             reply = this->_redis->command(cmd_fields_start, cmd_fields_end);
@@ -68,24 +67,20 @@ CommandReply Redis::run(Command& cmd)
             else
                 n_trials = 0;
         }
-        catch (sw::redis::TimeoutError &e) {
-            n_trials--;
-            std::this_thread::sleep_for(std::chrono::seconds(2));
-        }
         catch (sw::redis::IoError &e) {
             n_trials--;
             std::this_thread::sleep_for(std::chrono::seconds(2));
         }
-        catch (...) {
+        catch (sw::redis::ClosedError &e) {
             n_trials--;
-            throw;
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+        }
+        catch (std::exception& e) {
+            throw std::runtime_error(e.what());
         }
     }
 
-    if (n_trials == 0)
-        success = false;
-
-    if (!success) {
+    if (n_trials == 0) {
         if(reply.has_error()>0)
             reply.print_reply_error();
         throw std::runtime_error("Redis failed to execute command: " +
@@ -362,18 +357,13 @@ inline void Redis::_connect(std::string address_port)
                 break;
             }
         }
-        catch (sw::redis::Error& e) {
+        catch (std::exception& e) {
             if(i == n_trials) {
                 delete this->_redis;
                 this->_redis = 0;
                 throw std::runtime_error(e.what());
             }
             run_sleep = true;
-        }
-        catch (std::exception& e) {
-            delete this->_redis;
-            this->_redis = 0;
-            throw std::runtime_error(e.what());
         }
         if(run_sleep)
             std::this_thread::sleep_for(std::chrono::seconds(2));

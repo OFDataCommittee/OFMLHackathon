@@ -34,8 +34,8 @@
 #include "tensorbase.h"
 #include "enums/cpp_tensor_type.h"
 
-using inner_map = std::unordered_map<std::string, std::string>;
-using parsed_reply_map = std::unordered_map<std::string, inner_map>;
+using parsed_reply_map = std::unordered_map<std::string, std::string>;
+using parsed_reply_nested_map = std::unordered_map<std::string, parsed_reply_map>;
 
 namespace SmartRedis {
 
@@ -95,13 +95,13 @@ inline TensorType get_tensor_data_type(CommandReply& reply)
                                             reply[1].str_len()));
 }
 
-inline parsed_reply_map parse_db_node_info(std::string info)
+inline parsed_reply_nested_map parse_db_node_info(std::string info)
 {
     /* Parse database node information from get_db_node_info()
     *          into a nested unordered_map
-    *  Returns parsed_reply_map containing the database node information
+    *  Returns parsed_reply_nested_map containing the database node information
     */
-    parsed_reply_map info_map;
+    parsed_reply_nested_map info_map;
 
     std::string delim = "\r\n";
     std::string currKey = "";
@@ -136,6 +136,42 @@ inline parsed_reply_map parse_db_node_info(std::string info)
                     info_map[currKey] = {};
         info_map[currKey][line.substr(0, separatorIdx)] =
                             line.substr(separatorIdx+1);
+    }
+    return info_map;
+}
+
+inline parsed_reply_map parse_db_cluster_info(std::string info)
+{
+    /* Parse database node information from get_db_node_info()
+    *          into a nested unordered_map
+    *  Returns parsed_reply_map containing the database node cluster
+    *  information
+    */
+    parsed_reply_map info_map;
+
+    std::string delim = "\r\n";
+    std::string currKey = "";
+    size_t start = 0U;
+    size_t end = info.find(delim);
+
+    while (end != std::string::npos)
+    {
+        std::string line = info.substr(start, end-start);
+        start = end + delim.length();
+        end = info.find(delim, start);
+        if (line.length() == 0)
+            continue;
+
+        std::size_t separatorIdx = line.find(':');
+        info_map[line.substr(0, separatorIdx)] =
+                 line.substr(separatorIdx+1);
+    }
+    std::string line = info.substr(start);
+    if (line.length() > 0)
+    {
+        std::size_t separatorIdx = line.find(':');
+        info_map[line.substr(0, separatorIdx)] =
+                 line.substr(separatorIdx+1);
     }
     return info_map;
 }

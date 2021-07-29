@@ -674,7 +674,7 @@ void Client::use_tensor_ensemble_prefix(bool use_prefix)
     this->_use_tensor_prefix = use_prefix;
 }
 
-parsed_reply_map Client::get_db_node_info(std::string address)
+parsed_reply_nested_map Client::get_db_node_info(std::string address)
 {
     std::string host = address.substr(0, address.find(":"));
     uint64_t port = std::stoul (address.substr(address.find(":") + 1),
@@ -691,6 +691,25 @@ parsed_reply_map Client::get_db_node_info(std::string address)
                                                         reply.str_len()));
 }
 
+parsed_reply_map Client::get_db_cluster_info(std::string address)
+{
+    if(this->_redis_cluster == NULL)
+        return parsed_reply_map();
+
+    std::string host = address.substr(0, address.find(":"));
+    uint64_t port = std::stoul (address.substr(address.find(":") + 1),
+                                nullptr, 0);
+    if (host.empty() or port == 0)
+        throw std::runtime_error(std::string(address) +
+                                 "is not a valid database node address.");
+    Command cmd;
+    cmd.set_exec_address_port(host, port);
+    cmd.add_field("CLUSTER");
+    cmd.add_field("INFO");
+    CommandReply reply = this->_run(cmd);
+    return CommandReplyParser::parse_db_cluster_info(std::string(reply.str(),
+                                                     reply.str_len()));
+}
 
 CommandReply Client::_run(Command& cmd)
 {
