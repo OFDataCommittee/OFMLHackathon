@@ -83,17 +83,13 @@ CommandReply RedisCluster::run(Command& cmd)
             else
                 n_trials = 0;
         }
-        catch (sw::redis::TimeoutError &e) {
+        catch (sw::redis::Error &e) {
             n_trials--;
             std::this_thread::sleep_for(std::chrono::seconds(2));
         }
-        catch (sw::redis::IoError &e) {
+        catch (std::exception& e) {
             n_trials--;
-            std::this_thread::sleep_for(std::chrono::seconds(2));
-        }
-        catch (...) {
-            n_trials--;
-            throw;
+            throw std::runtime_error(e.what());
         }
     }
 
