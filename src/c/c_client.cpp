@@ -26,6 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <iostream>
 #include "c_client.h"
 
 using namespace SmartRedis;
@@ -41,9 +42,9 @@ void* SmartRedisCClient(bool cluster)
   try {
     s = new Client(cluster);
   } catch (const std::bad_alloc&) {
-	s = NULL;
+    s = NULL;
   } catch (...) {
-	delete s;
+    delete s;
     s = NULL;
   }
 
@@ -173,7 +174,7 @@ void put_tensor(void* c_client,
 // Get a tensor of a specified type from the database
 extern "C"
 void get_tensor(void* c_client,
-		const char* key,
+                const char* key,
                 const size_t key_length,
                 void** result,
                 size_t** dims,
@@ -258,7 +259,7 @@ void delete_tensor(void* c_client, const char* key,
 // Copy a tensor from src_name to dest_name.
 extern "C"
 void copy_tensor(void* c_client,
-		 const char* src_name,
+                 const char* src_name,
                  const size_t src_name_length,
                  const char* dest_name,
                  const size_t dest_name_length)
@@ -291,14 +292,27 @@ void set_model_from_file(void* c_client,
   // Sanity check params
   if (c_client == NULL || key == NULL || model_file == NULL || backend == NULL ||
       device == NULL || tag == NULL || inputs == NULL || input_lengths == NULL ||
-      outputs == NULL || output_lengths == NULL)
+      outputs == NULL || output_lengths == NULL) {
     return; // Nothing we can do, so just bail. (error reporting to come later)
-  for (size_t i = 0; i < n_inputs; i++)
-    if (inputs[i] == NULL || input_lengths[i] == 0)
-      return; // Bad param = bail
-  for (size_t i = 0; i < n_outputs; i++)
-    if (outputs[i] == NULL || output_lengths[i] == 0)
-      return; // Bad param = bail
+  }
+
+  // For the inputs and outputs arrays, a single empty string is ok (this means
+  // that the array should be skipped) but if more than one entry is present, the
+  // strings must be nonzero length
+  if (n_inputs != 1 && input_lengths[0] != 0) {
+    for (size_t i = 0; i < n_inputs; i++){ 
+      if (inputs[i] == NULL || input_lengths[i] == 0) {
+        return; // Bad param = bail
+      }
+    }
+  }
+  if (n_outputs > 0 != 1 && output_lengths[0] != 0) {
+    for (size_t i = 0; i < n_outputs; i++) {
+      if (outputs[i] == NULL || output_lengths[i] == 0) {
+        return; // Bad param = bail
+      }
+    }
+  }
   
   Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
@@ -346,12 +360,24 @@ void set_model(void* c_client,
       device == NULL || tag == NULL || inputs == NULL || input_lengths == NULL ||
       outputs == NULL || output_lengths == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
-  for (size_t i = 0; i < n_inputs; i++)
-    if (inputs[i] == NULL || input_lengths[i] == 0)
-      return; // Bad param = bail
-  for (size_t i = 0; i < n_outputs; i++)
-    if (outputs[i] == NULL || output_lengths[i] == 0)
-      return; // Bad param = bail
+
+  // For the inputs and outputs arrays, a single empty string is ok (this means
+  // that the array should be skipped) but if more than one entry is present, the
+  // strings must be nonzero length
+  if (n_inputs != 1 && input_lengths[0] != 0) {
+    for (size_t i = 0; i < n_inputs; i++){ 
+      if (inputs[i] == NULL || input_lengths[i] == 0) {
+        return; // Bad param = bail
+      }
+    }
+  }
+  if (n_outputs > 0 != 1 && output_lengths[0] != 0) {
+    for (size_t i = 0; i < n_outputs; i++) {
+      if (outputs[i] == NULL || output_lengths[i] == 0) {
+        return; // Bad param = bail
+      }
+    }
+  }
 
   Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
@@ -383,9 +409,9 @@ void set_model(void* c_client,
 // Retrieve the model and model length from the database
 extern "C"
 const char* get_model(void* c_client,
-		      const char* key,
-		      const size_t key_length,
-		      size_t* model_length)
+                      const char* key,
+                      const size_t key_length,
+                      size_t* model_length)
 {
   // Sanity check params
   if (c_client == NULL || key == NULL || model_length == NULL)
@@ -448,9 +474,9 @@ void set_script(void* c_client,
 extern "C"
 void get_script(void* c_client,
                 const char* key,
-				const size_t key_length,
+                const size_t key_length,
                 const char** script,
-				size_t* script_length)
+                size_t* script_length)
 {
   // Sanity check params
   if (c_client == NULL || key == NULL || script == NULL || script_length == NULL)
@@ -483,6 +509,8 @@ void run_script(void* c_client,
       input_lengths == NULL || outputs == NULL || output_lengths == NULL) {
     return; // Nothing we can do, so just bail. (error reporting to come later)
   }
+
+  // Inputs and outputs are mandatory for run_script
   for (size_t i = 0; i < n_inputs; i++)
     if (inputs[i] == NULL || input_lengths[i] == 0)
       return; // Bad param = bail
@@ -528,6 +556,8 @@ void run_model(void* c_client,
       outputs == NULL || output_lengths == NULL) {
     return; // Nothing we can do, so just bail. (error reporting to come later)
   }
+
+  // Inputs and outputs are mandatory for run_model
   for (size_t i = 0; i < n_inputs; i++)
     if (inputs[i] == NULL || input_lengths[i] == 0)
       return; // Bad param = bail
@@ -601,9 +631,9 @@ bool tensor_exists(void* c_client, const char* name, const size_t name_length)
 extern "C"
 bool poll_key(void* c_client,
               const char* key,
-			  const size_t key_length,
+              const size_t key_length,
               const int poll_frequency_ms,
-			  const int num_tries)
+              const int num_tries)
 {
   // Sanity check params
   if (c_client == NULL || key == NULL)
@@ -618,10 +648,10 @@ bool poll_key(void* c_client,
 // Delay until a model exists in the database
 extern "C"
 bool poll_model(void* c_client,
-		const char* name,
-		const size_t name_length,
-		const int poll_frequency_ms,
-		const int num_tries)
+                const char* name,
+                const size_t name_length,
+                const int poll_frequency_ms,
+                const int num_tries)
 {
   // Sanity check params
   if (c_client == NULL || name == NULL)
@@ -637,9 +667,9 @@ bool poll_model(void* c_client,
 extern "C"
 bool poll_tensor(void* c_client,
                  const char* name,
-				 const size_t name_length,
+                 const size_t name_length,
                  const int poll_frequency_ms,
-				 const int num_tries)
+                 const int num_tries)
 {
   // Sanity check params
   if (c_client == NULL || name == NULL)
@@ -655,7 +685,7 @@ bool poll_tensor(void* c_client,
 extern "C"
 void set_data_source(void* c_client,
                      const char* source_id,
-					 const size_t source_id_length)
+                     const size_t source_id_length)
 {
   // Sanity check params
   if (c_client == NULL)

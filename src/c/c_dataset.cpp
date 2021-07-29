@@ -45,9 +45,9 @@ void* CDataSet(const char* name, const size_t name_length)
   try {
     dataset = new DataSet(name_str);
   } catch (const std::bad_alloc&) {
-	dataset = NULL;
+    dataset = NULL;
   } catch (...) {
-	delete dataset;
+    delete dataset;
     dataset = NULL;
   }
   
@@ -186,10 +186,10 @@ void unpack_dataset_tensor(void* dataset,
 // DataSet object
 extern "C"
 void* get_meta_scalars(void* dataset,
-		       const char* name,
-		       const size_t name_length,
-		       size_t* length,
-		       CMetaDataType* type)
+                       const char* name,
+                       const size_t name_length,
+                       size_t* length,
+                       CMetaDataType* type)
 {
   // Sanity check parameters
   if (dataset == NULL || name == NULL || length == NULL || type == NULL)
