@@ -223,6 +223,8 @@ void Client::put_tensor(const std::string& key,
             tensor = new Tensor<uint8_t>(p_key, data, dims,
                                          type, mem_layout);
             break;
+        default : // FINDME: Need to handle this case better
+            throw std::runtime_error("Invalid type for put_tensor");
     }
 
     CommandReply reply = this->_redis_server->put_tensor(*tensor);
@@ -377,6 +379,8 @@ void Client::unpack_tensor(const std::string& key,
                                      reply_dims, reply_type,
                                      MemoryLayout::contiguous);
         break;
+        default : // FINDME: Need to handle this case better
+            throw std::runtime_error("Invalid type for unpack_tensor");
     }
 
     tensor->fill_mem_space(data, dims, mem_layout);

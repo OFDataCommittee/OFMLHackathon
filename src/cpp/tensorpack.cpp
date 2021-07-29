@@ -105,6 +105,8 @@ void TensorPack::add_tensor(const std::string& name,
              ptr = new Tensor<uint8_t>(name, data, dims,
                                        type, mem_layout);
              break;
+        default :
+	  return; // FINDME: Handle this case better
     }
     this->add_tensor(ptr);
     return;
