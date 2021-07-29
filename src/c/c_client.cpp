@@ -306,7 +306,7 @@ void set_model_from_file(void* c_client,
       }
     }
   }
-  if (n_outputs > 0 != 1 && output_lengths[0] != 0) {
+  if (n_outputs != 1 && output_lengths[0] != 0) {
     for (size_t i = 0; i < n_outputs; i++) {
       if (outputs[i] == NULL || output_lengths[i] == 0) {
         return; // Bad param = bail
@@ -371,7 +371,7 @@ void set_model(void* c_client,
       }
     }
   }
-  if (n_outputs > 0 != 1 && output_lengths[0] != 0) {
+  if (n_outputs != 1 && output_lengths[0] != 0) {
     for (size_t i = 0; i < n_outputs; i++) {
       if (outputs[i] == NULL || output_lengths[i] == 0) {
         return; // Bad param = bail
