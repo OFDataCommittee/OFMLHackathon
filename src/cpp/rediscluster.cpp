@@ -482,16 +482,20 @@ inline void RedisCluster::_connect(std::string address_port)
             throw std::runtime_error(e.what());
         }
         catch (std::exception& e) {
-            delete this->_redis_cluster;
-            this->_redis_cluster = 0;
+            if(this->_redis_cluster != NULL) {
+                delete this->_redis_cluster;
+                this->_redis_cluster = 0;
+            }
             if(i == n_trials) {
                 throw std::runtime_error(e.what());
             }
             run_sleep = true;
         }
         catch (...) {
-            delete this->_redis_cluster;
-            this->_redis_cluster = 0;
+            if(this->_redis_cluster != NULL) {
+                delete this->_redis_cluster;
+                this->_redis_cluster = 0;
+            }
             if(i == n_trials) {
                 throw std::runtime_error("A non-standard exception "\
                                          "encountered during client "\

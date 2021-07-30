@@ -109,6 +109,11 @@ py::array PyClient::get_tensor(const std::string& key)
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
     }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "get_tensor execution.");
+    }
 
     //Define py::capsule lambda function for destructor
     py::capsule free_when_done((void*)tensor, [](void *tensor) {
@@ -179,6 +184,11 @@ void PyClient::delete_tensor(const std::string& key) {
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
     }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "delete_tensor execution.");
+    }
     return;
 }
 
@@ -189,6 +199,11 @@ void PyClient::copy_tensor(const std::string& key,
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
+    }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "copy_tensor execution.");
     }
     return;
 }
@@ -201,6 +216,11 @@ void PyClient::rename_tensor(const std::string& key,
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
     }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "rename_tensor execution.");
+    }
     return;
 }
 
@@ -211,6 +231,11 @@ void PyClient::put_dataset(PyDataset& dataset)
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
+    }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "put_dataset execution.");
     }
     return;
 }
@@ -224,6 +249,11 @@ PyDataset* PyClient::get_dataset(const std::string& name)
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
     }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "get_dataset execution.");
+    }
     PyDataset* dataset = new PyDataset(*data);
     return dataset;
 }
@@ -234,6 +264,11 @@ void PyClient::delete_dataset(const std::string& key) {
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
+    }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "delete_dataset execution.");
     }
     return;
 }
@@ -246,6 +281,11 @@ void PyClient::copy_dataset(const std::string& key,
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
     }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "copy_dataset execution.");
+    }
     return;
 }
 
@@ -256,6 +296,11 @@ void PyClient::rename_dataset(const std::string& key,
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
+    }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "rename_dataset execution.");
     }
     return;
 }
@@ -270,6 +315,11 @@ void PyClient::set_script_from_file(const std::string& key,
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
     }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "set_script_from_file execution.");
+    }
     return;
 }
 
@@ -283,6 +333,11 @@ void PyClient::set_script(const std::string& key,
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
     }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "set_script execution.");
+    }
     return;
 }
 
@@ -294,6 +349,11 @@ std::string_view PyClient::get_script(const std::string& key)
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
+    }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "get_script execution.");
     }
     return script;
 }
@@ -309,6 +369,11 @@ void PyClient::run_script(const std::string& key,
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
     }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "run_script execution.");
+    }
     return;
 }
 
@@ -320,6 +385,11 @@ py::bytes PyClient::get_model(const std::string& key)
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
+    }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "get_model execution.");
     }
     model = py::bytes(model);
     return model;
@@ -364,6 +434,11 @@ void PyClient::set_model_from_file(const std::string& key,
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
     }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "set_model_from_file execution.");
+    }
     return;
 }
 
@@ -376,6 +451,11 @@ void PyClient::run_model(const std::string& key,
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
+    }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "run_model execution.");
     }
     return;
 }
@@ -395,6 +475,11 @@ bool PyClient::key_exists(const std::string& key)
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
     }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "key_exists execution.");
+    }
     return result;
 }
 
@@ -410,6 +495,11 @@ bool PyClient::poll_key(const std::string& key,
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
     }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "poll_key execution.");
+    }
     return result;
 }
 
@@ -422,12 +512,29 @@ bool PyClient::model_exists(const std::string& name)
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
     }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "model_exists execution.");
+    }
     return result;
 }
 
 bool PyClient::tensor_exists(const std::string& name)
 {
-  return this->_client->tensor_exists(name);
+    bool result = false;
+    try {
+        result = this->_client->tensor_exists(name);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "tensor_exists execution.");
+    }
+    return result;
 }
 
 bool PyClient::poll_tensor(const std::string& name,
@@ -441,6 +548,11 @@ bool PyClient::poll_tensor(const std::string& name,
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
+    }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "poll_tensor execution.");
     }
     return result;
 }
@@ -456,6 +568,11 @@ bool PyClient::poll_model(const std::string& name,
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
+    }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "poll_model execution.");
     }
     return result;
 }
@@ -474,9 +591,20 @@ std::vector<py::dict> PyClient::get_db_node_info(std::vector<std::string> addres
 {
     std::vector<py::dict> addresses_info;
     for(size_t i=0; i<addresses.size(); i++) {
-        parsed_reply_nested_map info_map = this->_client->get_db_node_info(addresses[i]);
-        py::dict info_dict = py::cast(info_map);
-        addresses_info.push_back(info_dict);
+        try {
+            parsed_reply_nested_map info_map = this->_client->get_db_node_info(addresses[i]);
+            py::dict info_dict = py::cast(info_map);
+            addresses_info.push_back(info_dict);
+        }
+        catch(const std::exception& e) {
+            throw std::runtime_error(e.what());
+        }
+        catch(...) {
+            throw std::runtime_error("A non-standard exception "\
+                                     "was encountered during client "\
+                                     "get_db_node_info execution.");
+        }
+
     }
     return addresses_info;
 }
@@ -485,9 +613,19 @@ std::vector<py::dict> PyClient::get_db_cluster_info(std::vector<std::string> add
 {
     std::vector<py::dict> addresses_info;
     for(size_t i=0; i<addresses.size(); i++) {
-        parsed_reply_map info_map = this->_client->get_db_cluster_info(addresses[i]);
-        py::dict info_dict = py::cast(info_map);
-        addresses_info.push_back(info_dict);
+        try {
+            parsed_reply_map info_map = this->_client->get_db_cluster_info(addresses[i]);
+            py::dict info_dict = py::cast(info_map);
+            addresses_info.push_back(info_dict);
+        }
+        catch(const std::exception& e) {
+            throw std::runtime_error(e.what());
+        }
+        catch(...) {
+            throw std::runtime_error("A non-standard exception "\
+                                     "was encountered during client "\
+                                     "get_db_cluster_info execution.");
+        }
     }
     return addresses_info;
 }

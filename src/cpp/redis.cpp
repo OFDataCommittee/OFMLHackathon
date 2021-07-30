@@ -370,16 +370,20 @@ inline void Redis::_connect(std::string address_port)
         }
         catch (std::exception& e) {
             if(i == n_trials) {
-                delete this->_redis;
-                this->_redis = 0;
+                if(this->_redis != NULL) {
+                    delete this->_redis;
+                    this->_redis = 0;
+                }
                 throw std::runtime_error(e.what());
             }
             run_sleep = true;
         }
         catch (...) {
             if(i == n_trials) {
-                delete this->_redis;
-                this->_redis = 0;
+                if(this->_redis != NULL) {
+                    delete this->_redis;
+                    this->_redis = 0;
+                }
                 throw std::runtime_error("A non-standard exception "\
                                          "encountered during client "\
                                          "connection.");
