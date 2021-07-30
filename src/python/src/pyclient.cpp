@@ -43,21 +43,10 @@ PyClient::PyClient(bool cluster)
         Client* client = new Client(cluster);
         this->_client = client;
     }
-    catch(std::bad_alloc& e) {
-        throw std::runtime_error(e.what());
-    }
     catch(std::exception& e) {
-        if(this->_client != NULL) {
-            delete client;
-            this->_client = NULL;
-        }
         throw std::runtime_error(e.what());
     }
     catch(...) {
-        if(this->_client != NULL) {
-            delete client;
-            this->_client = NULL;
-        }
         throw std::runtime_error("A non-standard exception "\
                                  "was encountered during client "\
                                  "construction.");

@@ -78,9 +78,8 @@ CommandReply RedisCluster::run(Command& cmd)
             reply = db.command(cmd_fields_start, cmd_fields_end);
 
             if(reply.has_error()==0)
-                n_trials = -1;
-            else
-                n_trials = 0;
+                return reply;
+            n_trials = 0;
         }
         catch (sw::redis::IoError &e) {
             n_trials--;
@@ -476,26 +475,15 @@ inline void RedisCluster::_connect(std::string address_port)
         try {
             this->_redis_cluster =
                 new sw::redis::RedisCluster(address_port);
-            break;
-        }
-        catch (std::bad_alloc& e) {
-            throw std::runtime_error(e.what());
+            return;
         }
         catch (std::exception& e) {
-            if(this->_redis_cluster != NULL) {
-                delete this->_redis_cluster;
-                this->_redis_cluster = 0;
-            }
             if(i == n_trials) {
                 throw std::runtime_error(e.what());
             }
             run_sleep = true;
         }
         catch (...) {
-            if(this->_redis_cluster != NULL) {
-                delete this->_redis_cluster;
-                this->_redis_cluster = 0;
-            }
             if(i == n_trials) {
                 throw std::runtime_error("A non-standard exception "\
                                          "encountered during client "\
