@@ -13,7 +13,7 @@ Description
  - Added unit testing infrastructure for the C++ client (PR96_)
  - Improve command execution fault handling (PR65_) (PR97_) (PR105_)
  - Bug fixes (PR52_) (PR72_) (PR76_) (PR84_)
- - Added copy, rename, and delete commands in the Python client (PR66_)
+ - Added copy, rename, and delete tensor and DataSet commands in the Python client (PR66_)
  - Upgrade to RedisAI 1.2.3 (PR101_)
  - Fortran and C interface improvements (PR93_) (PR94_) (PR95_) (PR99_)
  - Add Redis INFO command execution to the Python client (PR83_)
