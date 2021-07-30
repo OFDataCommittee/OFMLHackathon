@@ -476,6 +476,7 @@ inline void RedisCluster::_connect(std::string address_port)
         try {
             this->_redis_cluster =
                 new sw::redis::RedisCluster(address_port);
+            break;
         }
         catch (std::bad_alloc& e) {
             throw std::runtime_error(e.what());
