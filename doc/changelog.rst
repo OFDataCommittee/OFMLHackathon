@@ -11,12 +11,13 @@ Description
  - Improved tensor memory management in the Python client (PR70_)
  - Improved metadata serialization and removed protobuf dependency (PR61_)
  - Added unit testing infrastructure for the C++ client (PR96_)
- - Improve command execution fault handling (PR65_) (PR97_)
+ - Improve command execution fault handling (PR65_) (PR97_) (PR105_)
  - Bug fixes (PR52_) (PR72_) (PR76_) (PR84_)
  - Added copy, rename, and delete commands in the Python client (PR66_)
  - Upgrade to RedisAI 1.2.3 (PR101_)
  - Fortran and C interface improvements (PR93_) (PR94_) (PR95_) (PR99_)
  - Add Redis INFO command execution to the Python client (PR83_)
+ - Add Redis CLUSTER INFO command execution to the Python client (PR105_)
 .. _PR52: https://github.com/CrayLabs/SmartRedis/pull/52
 .. _PR61: https://github.com/CrayLabs/SmartRedis/pull/61
 .. _PR65: https://github.com/CrayLabs/SmartRedis/pull/65
@@ -33,6 +34,7 @@ Description
 .. _PR97: https://github.com/CrayLabs/SmartRedis/pull/97
 .. _PR99: https://github.com/CrayLabs/SmartRedis/pull/99
 .. _PR101: https://github.com/CrayLabs/SmartRedis/pull/101
+.. _PR105: https://github.com/CrayLabs/SmartRedis/pull/105
 
 
 0.1.1
