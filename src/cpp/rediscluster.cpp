@@ -93,6 +93,12 @@ CommandReply RedisCluster::run(Command& cmd)
         catch (std::exception& e) {
             throw std::runtime_error(e.what());
         }
+        catch (...) {
+            throw std::runtime_error("A non-standard exception "\
+                                     "encountered during command " +
+                                     cmd.first_field() +
+                                     " execution.");
+        }
     }
 
     if (n_trials == 0) {
@@ -479,6 +485,16 @@ inline void RedisCluster::_connect(std::string address_port)
             this->_redis_cluster = 0;
             if(i == n_trials) {
                 throw std::runtime_error(e.what());
+            }
+            run_sleep = true;
+        }
+        catch (...) {
+            delete this->_redis_cluster;
+            this->_redis_cluster = 0;
+            if(i == n_trials) {
+                throw std::runtime_error("A non-standard exception "\
+                                         "encountered during client "\
+                                         "connection.");
             }
             run_sleep = true;
         }

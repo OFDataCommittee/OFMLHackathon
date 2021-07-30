@@ -78,6 +78,12 @@ CommandReply Redis::run(Command& cmd)
         catch (std::exception& e) {
             throw std::runtime_error(e.what());
         }
+        catch (...) {
+            throw std::runtime_error("A non-standard exception "\
+                                     "encountered during command " +
+                                     cmd.first_field() +
+                                     " execution. ");
+        }
     }
 
     if (n_trials == 0) {
@@ -344,6 +350,11 @@ inline void Redis::_connect(std::string address_port)
                                  "object with error: " +
                                  std::string(e.what()));
     }
+    catch (...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "encountered during client "\
+                                 "connection.");
+    }
 
     // Attempt to have the sw::redis::Redis object
     // make a connection using the PING command
@@ -362,6 +373,16 @@ inline void Redis::_connect(std::string address_port)
                 delete this->_redis;
                 this->_redis = 0;
                 throw std::runtime_error(e.what());
+            }
+            run_sleep = true;
+        }
+        catch (...) {
+            if(i == n_trials) {
+                delete this->_redis;
+                this->_redis = 0;
+                throw std::runtime_error("A non-standard exception "\
+                                         "encountered during client "\
+                                         "connection.");
             }
             run_sleep = true;
         }
