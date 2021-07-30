@@ -63,9 +63,8 @@ CommandReply Redis::run(Command& cmd)
             reply = this->_redis->command(cmd_fields_start, cmd_fields_end);
 
             if(reply.has_error()==0)
-                n_trials = -1;
-            else
-                n_trials = 0;
+                return reply;
+            n_trials = 0;
         }
         catch (sw::redis::IoError &e) {
             n_trials--;
@@ -77,6 +76,12 @@ CommandReply Redis::run(Command& cmd)
         }
         catch (std::exception& e) {
             throw std::runtime_error(e.what());
+        }
+        catch (...) {
+            throw std::runtime_error("A non-standard exception "\
+                                     "encountered during command " +
+                                     cmd.first_field() +
+                                     " execution. ");
         }
     }
 
@@ -334,15 +339,17 @@ inline void Redis::_connect(std::string address_port)
     try {
         this->_redis = new sw::redis::Redis(address_port);
     }
-    catch (std::bad_alloc& e) {
-        throw std::runtime_error(e.what());
-    }
     catch (std::exception& e) {
-        delete this->_redis;
-        this->_redis = 0;
+        this->_redis = NULL;
         throw std::runtime_error("Failed to create Redis "\
                                  "object with error: " +
                                  std::string(e.what()));
+    }
+    catch (...) {
+        this->_redis = NULL;
+        throw std::runtime_error("A non-standard exception "\
+                                 "encountered during client "\
+                                 "connection.");
     }
 
     // Attempt to have the sw::redis::Redis object
@@ -356,12 +363,21 @@ inline void Redis::_connect(std::string address_port)
             if(this->_redis->ping().compare("PONG")==0) {
                 break;
             }
+            else {
+                run_sleep = true;
+            }
         }
         catch (std::exception& e) {
             if(i == n_trials) {
-                delete this->_redis;
-                this->_redis = 0;
                 throw std::runtime_error(e.what());
+            }
+            run_sleep = true;
+        }
+        catch (...) {
+            if(i == n_trials) {
+                throw std::runtime_error("A non-standard exception "\
+                                         "encountered during client "\
+                                         "connection.");
             }
             run_sleep = true;
         }

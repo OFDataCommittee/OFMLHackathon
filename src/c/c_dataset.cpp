@@ -44,13 +44,10 @@ void* CDataSet(const char* name, const size_t name_length)
   DataSet* dataset = NULL;
   try {
     dataset = new DataSet(name_str);
-  } catch (const std::bad_alloc&) {
-    dataset = NULL;
   } catch (...) {
-    delete dataset;
     dataset = NULL;
   }
-  
+
   return reinterpret_cast<void* >(dataset);
 }
 

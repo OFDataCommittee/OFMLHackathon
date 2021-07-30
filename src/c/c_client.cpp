@@ -41,10 +41,7 @@ void* SmartRedisCClient(bool cluster)
 
   try {
     s = new Client(cluster);
-  } catch (const std::bad_alloc&) {
-    s = NULL;
   } catch (...) {
-    delete s;
     s = NULL;
   }
 
@@ -300,7 +297,7 @@ void set_model_from_file(void* c_client,
   // that the array should be skipped) but if more than one entry is present, the
   // strings must be nonzero length
   if (n_inputs != 1 && input_lengths[0] != 0) {
-    for (size_t i = 0; i < n_inputs; i++){ 
+    for (size_t i = 0; i < n_inputs; i++){
       if (inputs[i] == NULL || input_lengths[i] == 0) {
         return; // Bad param = bail
       }
@@ -313,7 +310,7 @@ void set_model_from_file(void* c_client,
       }
     }
   }
-  
+
   Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
   std::string model_file_str(model_file, model_file_length);
@@ -365,7 +362,7 @@ void set_model(void* c_client,
   // that the array should be skipped) but if more than one entry is present, the
   // strings must be nonzero length
   if (n_inputs != 1 && input_lengths[0] != 0) {
-    for (size_t i = 0; i < n_inputs; i++){ 
+    for (size_t i = 0; i < n_inputs; i++){
       if (inputs[i] == NULL || input_lengths[i] == 0) {
         return; // Bad param = bail
       }
@@ -416,7 +413,7 @@ const char* get_model(void* c_client,
   // Sanity check params
   if (c_client == NULL || key == NULL || model_length == NULL)
     return NULL; // Nothing we can do, so just bail. (error reporting to come later)
-  
+
   Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
   std::string_view model_str_view(s->get_model(key_str));
@@ -438,7 +435,7 @@ void set_script_from_file(void* c_client,
   // Sanity check params
   if (c_client == NULL || key == NULL || device == NULL || script_file == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
-  
+
   Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
   std::string device_str(device, device_length);
@@ -460,9 +457,9 @@ void set_script(void* c_client,
   // Sanity check params
   if (c_client == NULL || key == NULL || device == NULL || script == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
-  
+
   Client* s = reinterpret_cast<Client*>(c_client);
-  
+
   std::string key_str(key, key_length);
   std::string device_str(device, device_length);
   std::string script_str(script, script_length);
@@ -481,7 +478,7 @@ void get_script(void* c_client,
   // Sanity check params
   if (c_client == NULL || key == NULL || script == NULL || script_length == NULL)
     return; // Nothing we can do, so just bail. (error reporting to come later)
-  
+
   Client* s = reinterpret_cast<Client*>(c_client);
   std::string key_str(key, key_length);
   std::string_view script_str_view(s->get_script(key_str));
