@@ -340,11 +340,13 @@ inline void Redis::_connect(std::string address_port)
         this->_redis = new sw::redis::Redis(address_port);
     }
     catch (std::exception& e) {
+        this->_redis = NULL;
         throw std::runtime_error("Failed to create Redis "\
                                  "object with error: " +
                                  std::string(e.what()));
     }
     catch (...) {
+        this->_redis = NULL;
         throw std::runtime_error("A non-standard exception "\
                                  "encountered during client "\
                                  "connection.");
