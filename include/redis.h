@@ -88,15 +88,50 @@ class Redis : public RedisServer
         */
         Redis& operator=(Redis&& cluster) = default;
 
-        /*!
-        *   \brief Run a single-key or single-hash slot
-        *          Command on the server
-        *   \param cmd The single-key or single-hash
-        *              slot Comand to run
+       /*!
+        *   \brief Run a single-key Command on the server
+        *   \param cmd The single-key Comand to run
         *   \returns The CommandReply from the
         *            command execution
         */
-        virtual CommandReply run(Command& cmd);
+        virtual CommandReply run(SingleKeyCommand& cmd);
+
+        /*!
+        *   \brief Run a multi-key Command on the server
+        *   \param cmd The multi-key Comand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(MultiKeyCommand& cmd);
+
+        /*!
+        *   \brief Run a multi-command
+        *          Command on the server
+        *   \param cmd The multi-command Comand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(MultiCommandCommand& cmd);
+
+        /*!
+        *   \brief Run a non-keyed Command that addresses
+        *          the given db node(s) on the server
+        *   \param cmd The non-keyed Command that
+        *              addresses the given db node(s)
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAtCommand& cmd);
+
+        /*!
+        *   \brief Run a non-keyed Command that addresses
+        *          any db node(s) on the server
+        *   \param cmd The non-keyed Command that
+        *              addresses any db node(s)
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAnyCommand& cmd);
 
         /*!
         *   \brief Run multiple single-key or single-hash slot
@@ -292,6 +327,14 @@ class Redis : public RedisServer
         *   \brief sw::redis::Redis object pointer
         */
         sw::redis::Redis* _redis;
+
+        /*!
+        *   \brief Run a Command on the server
+        *   \param cmd The Command to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        inline CommandReply _run(Command& cmd);
 
         /*!
         *   \brief Connect to the server at the address and port

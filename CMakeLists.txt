@@ -20,6 +20,8 @@ set(CLIENT_SRC
     src/cpp/client.cpp
     src/cpp/dataset.cpp
     src/cpp/command.cpp
+    src/cpp/keyedcommand.cpp
+    src/cpp/nonkeyedcommand.cpp
     src/cpp/commandlist.cpp
     src/cpp/metadata.cpp
     src/cpp/tensorbase.cpp

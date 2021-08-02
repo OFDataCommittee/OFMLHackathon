@@ -581,11 +581,41 @@ class Client
         Redis* _redis;
 
         /*!
-        *   \brief Execute a Command
-        *   \param cmd The Command to execute
+        *   \brief Execute a non-keyed Command that addresses
+        *          the given db node(s)
+        *   \param cmd The non-keyed Command to execute
         *   \returns The CommandReply after execution
         */
-        CommandReply _run(Command& cmd);
+        CommandReply _run(AddressAtCommand& cmd);
+
+        /*!
+        *   \brief Execute a non-keyed Command that addresses
+        *          any db node(s)
+        *   \param cmd The non-keyed Command to execute
+        *   \returns The CommandReply after execution
+        */
+        CommandReply _run(AddressAnyCommand& cmd);
+
+        /*!
+        *   \brief Execute a single-keyed command Command
+        *   \param cmd The single-keyed Command to execute
+        *   \returns The CommandReply after execution
+        */
+        CommandReply _run(SingleKeyCommand& cmd);
+
+        /*!
+        *   \brief Execute a multi-keyed command Command
+        *   \param cmd The mulit-keyed Command to execute
+        *   \returns The CommandReply after execution
+        */
+        CommandReply _run(MultiKeyCommand& cmd);
+
+        /*!
+        *   \brief Execute a keyed multi-command Command
+        *   \param cmd The keyed multi-command Command to execute
+        *   \returns The CommandReply after execution
+        */
+        CommandReply _run(MultiCommandCommand& cmd);
 
         /*!
         *   \brief Execute a list of commands

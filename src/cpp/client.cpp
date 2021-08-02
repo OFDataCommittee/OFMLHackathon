@@ -89,7 +89,7 @@ DataSet Client::get_dataset(const std::string& name)
         tensor_key =
             this->_build_dataset_tensor_key(name, tensor_names[i],
                                             true);
-        Command cmd;
+        MultiCommandCommand cmd;
         cmd.add_field("AI.TENSORGET");
         cmd.add_field(tensor_key, true);
         cmd.add_field("META");
@@ -155,7 +155,7 @@ void Client::delete_dataset(const std::string& name)
     std::string field_name;
     this->_unpack_dataset_metadata(dataset, reply);
 
-    Command cmd;
+    MultiCommandCommand cmd;
     cmd.add_field("DEL");
     cmd.add_field(this->_build_dataset_meta_key(dataset.name, true),true);
 
@@ -170,7 +170,7 @@ void Client::delete_dataset(const std::string& name)
 
     reply = this->_run(cmd);
 
-    Command cmd_ack_key;
+    MultiCommandCommand cmd_ack_key;
     std::string dataset_ack_key =
         this->_build_dataset_ack_key(name, false);
     cmd_ack_key.add_field("DEL");
@@ -678,7 +678,7 @@ parsed_reply_map Client::get_db_node_info(std::string address)
     if (host.empty() or port == 0)
         throw std::runtime_error(std::string(address) +
                                  "is not a valid database node address.");
-    Command cmd;
+    AddressAtCommand cmd;
     cmd.set_exec_address_port(host, port);
     cmd.add_field("INFO");
     cmd.add_field("everything");
@@ -687,8 +687,27 @@ parsed_reply_map Client::get_db_node_info(std::string address)
                                                         reply.str_len()));
 }
 
+CommandReply Client::_run(AddressAtCommand& cmd)
+{
+    return this->_redis_server->run(cmd);
+}
 
-CommandReply Client::_run(Command& cmd)
+CommandReply Client::_run(AddressAnyCommand& cmd)
+{
+    return this->_redis_server->run(cmd);
+}
+
+CommandReply Client::_run(SingleKeyCommand& cmd)
+{
+    return this->_redis_server->run(cmd);
+}
+
+CommandReply Client::_run(MultiKeyCommand& cmd)
+{
+    return this->_redis_server->run(cmd);
+}
+
+CommandReply Client::_run(MultiCommandCommand& cmd)
 {
     return this->_redis_server->run(cmd);
 }
@@ -774,7 +793,7 @@ inline void Client::_append_with_put_prefix(
 
 inline CommandReply Client::_get_dataset_metadata(const std::string& name)
 {
-    Command cmd;
+    MultiCommandCommand cmd;
     cmd.add_field("HGETALL");
     cmd.add_field(this->_build_dataset_meta_key(name, true), true);
     return this->_run(cmd);
@@ -843,8 +862,8 @@ void Client::_append_dataset_metadata_commands(CommandList& cmd_list,
                                  "a DataSet into the database that "\
                                  "does not contain any fields or "\
                                  "tensors.");
-
-    Command* cmd = cmd_list.add_command();
+    MultiCommandCommand* cmd = new MultiCommandCommand();
+    cmd_list.add_command(cmd);
     cmd->add_field("HMSET");
     cmd->add_field (meta_key, true);
     for(size_t i=0; i<mdf.size(); i++) {
@@ -862,14 +881,14 @@ void Client::_append_dataset_tensor_commands(CommandList& cmd_list,
     TensorBase* tensor = 0;
     std::string tensor_key;
 
-    Command* cmd;
     while(it != it_end) {
         tensor = *it;
         tensor_key =
             this->_build_dataset_tensor_key(dataset.name,
                                             tensor->name(),
                                             false);
-        cmd = cmd_list.add_command();
+        MultiCommandCommand* cmd = new MultiCommandCommand();
+        cmd_list.add_command(cmd);
         cmd->add_field("AI.TENSORSET");
         cmd->add_field(tensor_key, true);
         cmd->add_field(tensor->type_str());
@@ -887,7 +906,8 @@ void Client::_append_dataset_ack_command(CommandList& cmd_list,
     std::string dataset_ack_key =
         this->_build_dataset_ack_key(dataset.name, false);
 
-    Command* cmd = cmd_list.add_command();
+    MultiCommandCommand* cmd = new MultiCommandCommand();
+    cmd_list.add_command(cmd);
     cmd->add_field("SET");
     cmd->add_field(dataset_ack_key, true);
     cmd->add_field("1");

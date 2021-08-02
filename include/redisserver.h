@@ -38,6 +38,8 @@
 #include "commandlist.h"
 #include "tensorbase.h"
 #include "dbnode.h"
+#include "nonkeyedcommand.h"
+#include "keyedcommand.h"
 
 ///@file
 
@@ -65,14 +67,49 @@ class RedisServer {
         virtual ~RedisServer() = default;
 
         /*!
-        *   \brief Run a single-key or single-hash slot
-        *          Command on the server
-        *   \param cmd The single-key or single-hash
-        *              slot Comand to run
+        *   \brief Run a single-key Command on the server
+        *   \param cmd The single-key Comand to run
         *   \returns The CommandReply from the
         *            command execution
         */
-        virtual CommandReply run(Command& cmd) = 0;
+        virtual CommandReply run(SingleKeyCommand& cmd) = 0;
+
+        /*!
+        *   \brief Run a multi-key Command on the server
+        *   \param cmd The multi-key Comand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(MultiKeyCommand& cmd) = 0;
+
+        /*!
+        *   \brief Run a multi-command
+        *          Command on the server
+        *   \param cmd The multi-command Comand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(MultiCommandCommand& cmd) = 0;
+
+        /*!
+        *   \brief Run a non-keyed Command that
+        *          addresses the given db node on the server
+        *   \param cmd The non-keyed Command that
+        *              addresses the given db node
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAtCommand& cmd) = 0;
+
+        /*!
+        *   \brief Run a non-keyed Command that
+        *          addresses any db node on the server
+        *   \param cmd The non-keyed Command that
+        *              addresses any db node
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAnyCommand& cmd) = 0;
 
         /*!
         *   \brief Run multiple single-key or single-hash slot

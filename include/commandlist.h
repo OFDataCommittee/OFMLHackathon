@@ -82,11 +82,10 @@ class CommandList
         ~CommandList();
 
         /*!
-        *   \brief Dynamically allocate a new Command
-        *          and return a pointer to the new Command
-        *   \returns Pointer to a new Command
+        *   \brief Adds a new Command to the Command List
+        *   \param new_cmd Pointer to the new Command
         */
-        Command* add_command();
+        void add_command(Command* new_cmd);
 
         /*!
         *   \typedef An iterator type for iterating

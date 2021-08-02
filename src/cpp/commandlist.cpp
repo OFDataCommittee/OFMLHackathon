@@ -68,10 +68,9 @@ CommandList::~CommandList()
         delete (*it);
 }
 
-Command* CommandList::add_command()
+void CommandList::add_command(Command* new_cmd)
 {
-    this->_commands.push_back(new Command());
-    return this->_commands.back();
+    this->_commands.push_back(new_cmd);
 }
 
 CommandList::iterator CommandList::begin()

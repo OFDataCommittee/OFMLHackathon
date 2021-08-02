@@ -49,50 +49,30 @@ Redis::~Redis()
         delete this->_redis;
 }
 
-CommandReply Redis::run(Command& cmd)
-{
-    Command::iterator cmd_fields_start = cmd.begin();
-    Command::iterator cmd_fields_end = cmd.end();
-    CommandReply reply;
+//cast as Command and call _run()
+CommandReply Redis::run(SingleKeyCommand& cmd){
+    Command* bcmd = &cmd;
+    return _run(*bcmd);
+}
 
-    int n_trials = 100;
-    bool success = true;
+CommandReply Redis::run(MultiKeyCommand& cmd){
+    Command* bcmd = &cmd;
+    return _run(*bcmd);
+}
 
-    while (n_trials > 0 && success) {
+CommandReply Redis::run(MultiCommandCommand& cmd){
+    Command* bcmd = &cmd;
+    return _run(*bcmd);
+}
 
-        try {
-            reply = this->_redis->command(cmd_fields_start, cmd_fields_end);
+CommandReply Redis::run(AddressAtCommand& cmd){
+    Command* bcmd = &cmd;
+    return _run(*bcmd);
+}
 
-            if(reply.has_error()==0)
-                n_trials = -1;
-            else
-                n_trials = 0;
-        }
-        catch (sw::redis::TimeoutError &e) {
-            n_trials--;
-            std::this_thread::sleep_for(std::chrono::seconds(2));
-        }
-        catch (sw::redis::IoError &e) {
-            n_trials--;
-            std::this_thread::sleep_for(std::chrono::seconds(2));
-        }
-        catch (...) {
-            n_trials--;
-            throw;
-        }
-    }
-
-    if (n_trials == 0)
-        success = false;
-
-    if (!success) {
-        if(reply.has_error()>0)
-            reply.print_reply_error();
-        throw std::runtime_error("Redis failed to execute command: " +
-                                 cmd.to_string());
-    }
-
-    return reply;
+CommandReply Redis::run(AddressAnyCommand& cmd){
+    Command* bcmd = &cmd;
+    return _run(*bcmd);
 }
 
 CommandReply Redis::run(CommandList& cmds)
@@ -101,7 +81,7 @@ CommandReply Redis::run(CommandList& cmds)
     CommandList::iterator cmd_end = cmds.end();
     CommandReply reply;
     while(cmd != cmd_end) {
-        reply = this->run(**cmd);
+        reply = ((Command *)(*cmd))->runme(this);
         cmd++;
     }
     return reply;
@@ -114,7 +94,7 @@ bool Redis::model_key_exists(const std::string& key)
 
 bool Redis::key_exists(const std::string& key)
 {
-    Command cmd;
+    SingleKeyCommand cmd;
     cmd.add_field("EXISTS");
     cmd.add_field(key);
     CommandReply reply = this->run(cmd);
@@ -132,7 +112,7 @@ bool Redis::is_addressable(const std::string& address,
 
 CommandReply Redis::put_tensor(TensorBase& tensor)
 {
-    Command cmd;
+    SingleKeyCommand cmd;
     cmd.add_field("AI.TENSORSET");
     cmd.add_field(tensor.name());
     cmd.add_field(tensor.type_str());
@@ -144,7 +124,7 @@ CommandReply Redis::put_tensor(TensorBase& tensor)
 
 CommandReply Redis::get_tensor(const std::string& key)
 {
-    Command cmd;
+    SingleKeyCommand cmd;
     cmd.add_field("AI.TENSORGET");
     cmd.add_field(key);
     cmd.add_field("META");
@@ -155,7 +135,7 @@ CommandReply Redis::get_tensor(const std::string& key)
 CommandReply Redis::rename_tensor(const std::string& key,
                                   const std::string& new_key)
 {
-    Command cmd;
+    MultiKeyCommand cmd;
     cmd.add_field("RENAME");
     cmd.add_field(key);
     cmd.add_field(new_key);
@@ -164,7 +144,7 @@ CommandReply Redis::rename_tensor(const std::string& key,
 
 CommandReply Redis::delete_tensor(const std::string& key)
 {
-    Command cmd;
+    SingleKeyCommand cmd;
     cmd.add_field("DEL");
     cmd.add_field(key, true);
     return this->run(cmd);
@@ -175,7 +155,7 @@ CommandReply Redis::copy_tensor(const std::string& src_key,
 {
     //TODO can we do COPY for same hash slot or database?
     CommandReply cmd_get_reply;
-    Command cmd_get;
+    MultiKeyCommand cmd_get;
 
     cmd_get.add_field("AI.TENSORGET");
     cmd_get.add_field(src_key, true);
@@ -191,7 +171,7 @@ CommandReply Redis::copy_tensor(const std::string& src_key,
         CommandReplyParser::get_tensor_data_type(cmd_get_reply);
 
     CommandReply cmd_put_reply;
-    Command cmd_put;
+    MultiKeyCommand cmd_put;
 
     cmd_put.add_field("AI.TENSORSET");
     cmd_put.add_field(dest_key, true);
@@ -236,7 +216,7 @@ CommandReply Redis::set_model(const std::string& model_name,
                               const std::vector<std::string>& outputs
                               )
 {
-    Command cmd;
+    SingleKeyCommand cmd;
     cmd.add_field("AI.MODELSET");
     cmd.add_field(model_name);
     cmd.add_field(backend);
@@ -270,7 +250,7 @@ CommandReply Redis::set_script(const std::string& key,
                                const std::string& device,
                                std::string_view script)
 {
-    Command cmd;
+    SingleKeyCommand cmd;
     cmd.add_field("AI.SCRIPTSET");
     cmd.add_field(key, true);
     cmd.add_field(device);
@@ -283,7 +263,7 @@ CommandReply Redis::run_model(const std::string& key,
                               std::vector<std::string> inputs,
                               std::vector<std::string> outputs)
 {
-    Command cmd;
+    MultiCommandCommand cmd;
     cmd.add_field("AI.MODELRUN");
     cmd.add_field(key);
     cmd.add_field("INPUTS");
@@ -298,7 +278,7 @@ CommandReply Redis::run_script(const std::string& key,
                               std::vector<std::string> inputs,
                               std::vector<std::string> outputs)
 {
-    Command cmd;
+    MultiCommandCommand cmd;
     cmd.add_field("AI.SCRIPTRUN");
     cmd.add_field(key);
     cmd.add_field(function);
@@ -311,7 +291,7 @@ CommandReply Redis::run_script(const std::string& key,
 
 CommandReply Redis::get_model(const std::string& key)
 {
-    Command cmd;
+    SingleKeyCommand cmd;
     cmd.add_field("AI.MODELGET");
     cmd.add_field(key);
     cmd.add_field("BLOB");
@@ -320,11 +300,57 @@ CommandReply Redis::get_model(const std::string& key)
 
 CommandReply Redis::get_script(const std::string& key)
 {
-    Command cmd;
+    SingleKeyCommand cmd;
     cmd.add_field("AI.SCRIPTGET");
     cmd.add_field(key, true);
     cmd.add_field("SOURCE");
     return this->run(cmd);
+}
+
+inline CommandReply Redis::_run(Command& cmd)
+{
+    Command::iterator cmd_fields_start = cmd.begin();
+    Command::iterator cmd_fields_end = cmd.end();
+    CommandReply reply;
+
+    int n_trials = 100;
+    bool success = true;
+
+    while (n_trials > 0 && success) {
+
+        try {
+            reply = this->_redis->command(cmd_fields_start, cmd_fields_end);
+
+            if(reply.has_error()==0)
+                n_trials = -1;
+            else
+                n_trials = 0;
+        }
+        catch (sw::redis::TimeoutError &e) {
+            n_trials--;
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+        }
+        catch (sw::redis::IoError &e) {
+            n_trials--;
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+        }
+        catch (...) {
+            n_trials--;
+            throw;
+        }
+    }
+
+    if (n_trials == 0)
+        success = false;
+
+    if (!success) {
+        if(reply.has_error()>0)
+            reply.print_reply_error();
+        throw std::runtime_error("Redis failed to execute command: " +
+                                 cmd.to_string());
+    }
+
+    return reply;
 }
 
 inline void Redis::_connect(std::string address_port)
