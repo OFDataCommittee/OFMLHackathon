@@ -22,7 +22,7 @@ copyright = '2021, Hewlett Packard Enterprise'
 author = 'HPE AI & Advanced Productivity'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.1'
+release = '0.2.0'
 
 
 # -- General configuration ---------------------------------------------------
