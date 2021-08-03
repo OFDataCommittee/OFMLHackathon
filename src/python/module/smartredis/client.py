@@ -45,7 +45,7 @@ class Client(PyClient):
         by the client itself. (e.g. address="127.0.0.1:6379")
 
         If an address is not set, the client will look for the environment
-        variable ``$SSDB`` (e.g. SSDB="127.0.0.1:6379;")
+        variable ``SSDB`` (e.g. SSDB="127.0.0.1:6379;")
 
         :param address: Address of the database
         :param cluster: True if connecting to a redis cluster, defaults to False
@@ -233,7 +233,7 @@ class Client(PyClient):
             raise RedisReplyError(str(e), "set_function") from None
 
     def set_script(self, key, script, device="CPU"):
-        """Store a TorchScript at key in database
+        """Store a TorchScript at key in the database
 
         Device selection is either "GPU" or "CPU". If many devices are
         present, a number can be passed for specification e.g. "GPU:1".

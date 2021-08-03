@@ -433,7 +433,7 @@ class Client
         /*!
         *   \brief Check if the model (or the script) exists in the database
         *   \param name The name that will be checked in the database
-        *               Depending on the current prefixing behavior,
+        *               depending on the current prefixing behavior,
         *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the key exists in the database
@@ -443,7 +443,7 @@ class Client
         /*!
         *   \brief Check if the tensor (or the dataset) exists in the database
         *   \param name The name that will be checked in the database
-        *               Depending on the current prefixing behavior,
+        *               depending on the current prefixing behavior,
         *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the key exists in the database
@@ -494,7 +494,7 @@ class Client
         *          at a specified frequency for a specified number
         *          of times.
         *   \param name The name that will be checked in the database
-        *               Depending on the current prefixing behavior,
+        *               depending on the current prefixing behavior,
         *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \param poll_frequency_ms The frequency of checks for the

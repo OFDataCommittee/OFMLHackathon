@@ -565,7 +565,7 @@ subroutine set_model( self, key, model, backend, device, batch_size, min_batch_s
     inputs, outputs )
   class(client_type),             intent(in) :: self           !< An initialized SmartRedis client
   character(len=*),               intent(in) :: key            !< The key to use to place the model
-  character(len=*),               intent(in) :: model          !< The binary representaiton o
+  character(len=*),               intent(in) :: model          !< The binary representation
   character(len=*),               intent(in) :: backend        !< The name of the backend (TF, TFLITE, TORCH, ONNX)
   character(len=*),               intent(in) :: device         !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
   integer,                        intent(in) :: batch_size     !< The batch size for model execution

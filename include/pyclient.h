@@ -316,7 +316,7 @@ class PyClient
         /*!
         *   \brief Check if the tensor or dataset exists in the database
         *   \param name The name that will be checked in the database
-        *               Depending on the current prefixing
+        *               depending on the current prefixing
         *               behavior, the name will be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the tensor or dataset exists in the database
@@ -326,7 +326,7 @@ class PyClient
         /*!
         *   \brief Check if the model or script exists in the database
         *   \param name The name that will be checked in the database
-        *               Depending on the current prefixing
+        *               depending on the current prefixing
         *               behavior, the name will be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the model or script exists in the database

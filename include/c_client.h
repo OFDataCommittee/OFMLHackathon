@@ -270,7 +270,7 @@ void copy_tensor(void* c_client,
 *                            excluding null terminating character
 *   \param backend The name of the backend
 *                  (TF, TFLITE, TORCH, ONNX)
-*   \param backed_length The length of the backend c-string,
+*   \param backend_length The length of the backend c-string,
 *                        excluding null terminating character
 *   \param device The name of the device for execution
 *                 (e.g. CPU or GPU)
@@ -329,7 +329,7 @@ void set_model_from_file(void* c_client,
 *                            excluding null terminating character
 *   \param backend The name of the backend
 *                  (TF, TFLITE, TORCH, ONNX)
-*   \param backed_length The length of the backend c-string,
+*   \param backend_length The length of the backend c-string,
 *                        excluding null terminating character
 *   \param device The name of the device for execution
 *                 (e.g. CPU or GPU)
