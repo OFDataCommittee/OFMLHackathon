@@ -133,7 +133,7 @@ know the dimensions or type of the tensor, and as a result, the
 tensor data.  The C++ function signature for ``get_tensor()`` is shown
 below.  Note that a pointer to the newly allocated data, tensor
 dimensions, and tensor type are returned to the user via
-modifying reference variables that the user declares before the
+modifying referenced variables that the user declares before the
 ``get_tensor()`` call.  This is done to provide a similar
 experience across the C++, C, and Fortran clients.
 
@@ -157,12 +157,11 @@ experience across the C++, C, and Fortran clients.
 The Python client currently only offers a ``get_tensor()`` option for
 retrieving tensors.  In this methodology, a NumPy array is returned
 to the user, and the only required input to the function is the
-name of the tensor to retrieve because the type and dimensions of the
-tensor are embedded in the NumPy array object.
-The Python interface for ``get_tensor()`` is shown below.  In the
-Python implementation of ``get_tensor()``, the memory associated
-with the retrieved tensor will be freed when the NumPy array
-goes out of scope or is deleted.
+name of the tensor to retrieve because its type and dimensions
+are embedded in the NumPy array object. The Python interface for
+``get_tensor()`` is shown below.  In the Python implementation of
+``get_tensor()``, the memory associated with the retrieved tensor
+will be freed when the NumPy array goes out of scope or is deleted.
 
 .. code-block:: python
 
