@@ -96,8 +96,7 @@ send and receive data with the Fortran client.
   :language: fortran
   :linenos:
 
-Other examples are shown in the
-:ref:`Fortran Client Examples section<fortran_client_examples>`.
+Other examples are shown in the Fortran client examples sections.
 
 Compiler Requirements
 ---------------------
@@ -120,7 +119,7 @@ been implemented. This includes
 * Retrieving metadata strings (Dataset: ``get_meta_strings``)
 * Returning a dataset tensor or tensor from the database as an opaque type (Dataset: ``get_dataset_tensor``, Client: ``get_tensor``)
 * Getting tensors from the database as an opaque type (Client:``get_tensor``) (note unpacking tensors into allocated
-  memory is supported, see the :ref:`Fortran Client Examples section<fortran_client_examples>`)
+  memory is supported, see the Fortran client examples section.
 
 Source code organization
 ------------------------
@@ -135,8 +134,7 @@ duplicated code and organize the variety of methods included within each type. T
 general functionality and suffixed by the type of code contained within.
 
 * ``<functionality>_interfaces.inc``: Define the C-bound interfaces to the SmartRedis-C methods
-* ``<functionality>_methods_common.inc``: Represents the source code that is exactly the same for all methods which
-share the same functionality, but differ only by the type of variable
+* ``<functionality>_methods_common.inc``: Represents the source code that is exactly the same for all methods which share the same functionality, but differ only by the type of variable
 
 For example, ``client/put_tensor_interfaces.inc`` define the Fortran-C interfaces to put a tensor into the database.
 ``client/put_tensor_methods_common.inc`` form the main body of the source code that handles the conversion and

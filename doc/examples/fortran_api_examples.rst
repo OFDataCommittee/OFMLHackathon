@@ -115,30 +115,35 @@ dataset metadata scalars.
   :linenos:
   :language: fortran
 
+.. _SR Fortran Models:
+
 Models
 ======
 
 For an example of placing a model in the database
 and executing the model using a stored tensor,
-see the `Parallel (MPI) execution`_ example.  The
+see the :ref:`SR Parallel MPI` example.  The
 aforementioned example is customized to show how
 key collisions can be avoided in parallel
 applications, but the ``Client`` API calls
 pertaining to model actions are identical
 to non-parallel applications.
 
+.. _SR Fortran Scripts:
+
 Scripts
 =======
 
 For an example of placing a PyTorch script in the database
 and executing the script using a stored tensor,
-see the `Parallel (MPI) execution`_ example.  The
+see the :ref:`SR Parallel MPI` example.  The
 aforementioned example is customized to show how
 key collisions can be avoided in parallel
 applications, but the ``Client`` API calls
 pertaining to script actions are identical
 to non-parallel applications.
 
+.. _SR Parallel MPI:
 
 Parallel (MPI) execution
 ========================
@@ -271,15 +276,15 @@ vector of strings.
 
 .. code-block:: Fortran
 
-  character(len=255), dimension(1) :: inputs
-  character(len=255), dimension(1) :: outputs
+    character(len=255), dimension(1) :: inputs
+    character(len=255), dimension(1) :: outputs
 
 In this case, only one input and output are expected the
-vector of strings only need to be one element long. In t
-he case of multiple inputs/outputs, change the ``dimension``
- attribute of the ``inputs`` and ``outputs`` accordingly,
- e.g. for two inputs this code would be ``character(len=255),
- dimension(2) :: inputs``.
+vector of strings only need to be one element long. In the
+case of multiple inputs/outputs, change the ``dimension``
+attribute of the ``inputs`` and ``outputs`` accordingly,
+e.g. for two inputs this code would be ``character(len=255),
+dimension(2) :: inputs``.
 
 Next, the input and output keys for the model and script are
 now constructed
