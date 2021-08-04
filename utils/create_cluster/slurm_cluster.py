@@ -2,41 +2,6 @@ from subprocess import Popen, TimeoutExpired, PIPE, SubprocessError, run
 from os import environ
 import os
 
-def launch_db(host, port, dpn):
-    """
-    set cluster log file
-    set log file
-    """
-
-    redis = environ['REDIS_INSTALL_PATH'] + '/redis-server '
-    redisai = "--loadmodule " +  environ['REDISAI_CPU_INSTALL_PATH'] + "/redisai.so "
-    if(dpn < 3):
-        cmd = "srun -N 1 -n 1 " + redis + "./smartredisdb.conf " + redisai + "--cluster-enabled yes  "
-        log_file = "--logfile " + host + "-" + str(port) + ".log"
-        cluster_file = "--cluster-config-file nodes-" + host + "-" + str(port) + ".conf"
-        cmd += log_file + " "
-        cmd += cluster_file + " "
-        print(cmd)
-        pid = Popen(cmd, shell=True)
-        return pid
-    else:
-        conf_file = open("run_orc.conf","w")
-        for i in range(dpn):
-            dir = os.getcwd()
-            cmd = redis + dir+"/smartredisdb.conf " + "--port " + str(port+i) + " " + redisai + "--cluster-enabled yes  "
-            log_file = "--logfile " + host + "-" + str(port+i) + ".log"
-            cluster_file = "--cluster-config-file nodes-" + host + "-" + str(port+i) + ".conf"
-            cmd += log_file + " "
-            cmd += cluster_file + " "
-            conf_str = str(i) + " " + cmd + "\n"
-            conf_file.write(conf_str)
-        conf_file.close()
-        dpn_cmd = "srun -N 1 -n " + str(dpn) + " --multi-prog run_orc.conf"
-        print(dpn_cmd)
-        pid = Popen(dpn_cmd , shell=True)
-        time.sleep(1)
-        return pid
-
 def get_ip_from_host(host):
     ping_out = ping_host(host)
     found = False
@@ -53,6 +18,40 @@ def get_ip_from_host(host):
         if item == host:
             found = True
 
+def launch_db(host, port, dpn):
+    """
+    set cluster log file
+    set log file
+    """
+
+    redis = environ['REDIS_INSTALL_PATH'] + '/redis-server '
+    redisai = "--loadmodule " +  environ['REDISAI_CPU_INSTALL_PATH'] + "/redisai.so "
+    if(dpn < 3):
+        cmd = "srun -N 1 -n 1 " + redis + "./smartredisdb.conf " + redisai + "--cluster-enabled yes  " + "--bind " + get_ip_from_host(host) + " "
+        log_file = "--logfile " + host + "-" + str(port) + ".log"
+        cluster_file = "--cluster-config-file nodes-" + host + "-" + str(port) + ".conf"
+        cmd += log_file + " "
+        cmd += cluster_file + " "
+        print(cmd)
+        pid = Popen(cmd, shell=True)
+        return pid
+    else:
+        conf_file = open("run_orc.conf","w")
+        for i in range(dpn):
+            dir = os.getcwd()
+            cmd = redis + dir+"/smartredisdb.conf " + "--port " + str(port+i) + " " + redisai + "--cluster-enabled yes " +  "--bind " + get_ip_from_host(host) + " "
+            log_file = "--logfile " + host + "-" + str(port+i) + ".log"
+            cluster_file = "--cluster-config-file nodes-" + host + "-" + str(port+i) + ".conf"
+            cmd += log_file + " "
+            cmd += cluster_file + " "
+            conf_str = str(i) + " " + cmd + "\n"
+            conf_file.write(conf_str)
+        conf_file.close()
+        dpn_cmd = "srun -N 1 -n " + str(dpn) + " --multi-prog run_orc.conf"
+        print(dpn_cmd)
+        pid = Popen(dpn_cmd , shell=True)
+        time.sleep(1)
+        return pid
 
 def create_cluster(nodes, port, dpn):
     # TODO change to support list instead of node string when put into smartsim
