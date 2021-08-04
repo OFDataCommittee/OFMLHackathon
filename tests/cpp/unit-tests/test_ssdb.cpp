@@ -17,15 +17,10 @@ class TestSSDB : public Redis
 
 // helper function for putting the SSDB environment
 // variable back to its original state
-void putenv_ssdb(const char* ssdb)
+void setenv_ssdb(const char* ssdb)
 {
     if (ssdb != nullptr) {
-        std::string reset_ssdb = std::string("SSDB=") + std::string(ssdb);
-        char* reset_ssdb_c = new char[reset_ssdb.size() + 1];
-        std::copy(reset_ssdb.begin(), reset_ssdb.end(), reset_ssdb_c);
-        reset_ssdb_c[reset_ssdb.size()] = '\0';
-        putenv(reset_ssdb_c);
-        delete [] reset_ssdb_c;
+      setenv("SSDB", ssdb, true);
     }
 }
 
@@ -35,10 +30,11 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
     GIVEN("A TestSSDB object")
     {
         const char* old_ssdb = std::getenv("SSDB");
-        // SSDB can't be nullptr or invalid upon instantiation of TestSSDB
-        // object, so temporarily set SSDB to a valid string
-        putenv_ssdb("127.0.0.1:6379");
 
+	INFO("SSDB must be set to a valid host and "\
+	     "port before running this test.");
+	REQUIRE(old_ssdb != NULL);
+	  
         TestSSDB test_ssdb;
 
         THEN("SSDB environment variable must exist "
@@ -49,15 +45,15 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
             CHECK_THROWS(test_ssdb.get_ssdb());
 
             // SSDB contains invalid characters
-            putenv_ssdb("127.0.0.1:*&^9");
+            setenv_ssdb ("127.0.0.1:*&^9");
             CHECK_THROWS(test_ssdb.get_ssdb());
 
             // Valid SSDB. Ensure one of 127 or 128 is chosen
-            putenv_ssdb("127,128");
+            setenv_ssdb("127,128");
             std::string hp = test_ssdb.get_ssdb();
             CHECK((hp == "tcp://127" || hp == "tcp://128"));
 
-            putenv_ssdb(old_ssdb);
+            setenv_ssdb(old_ssdb);
         }
     }
 }
