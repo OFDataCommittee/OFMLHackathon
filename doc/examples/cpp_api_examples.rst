@@ -44,6 +44,8 @@ which belong to a ``DataSet``.
   :linenos:
   :language: C++
 
+.. _SR CPP Models:
+
 Models
 ======
 
@@ -57,20 +59,24 @@ executes a preprocessing script.
   :linenos:
   :language: C++
 
+.. _SR CPP Scripts:
+
 Scripts
 =======
 
-The example in `Models`_ shows how to store, and use a PyTorch script
+The example in :ref:`SR CPP Models` shows how to store, and use a PyTorch script
 in the database with the C++ Client.  The script is stored a file
 in the ``../../../common/mnist_data/`` path relative to the
 compiled executable.  Note that this example also sets and
 executes a PyTorch model.
 
+.. _SR CPP Parallel MPI:
+
 Parallel (MPI) execution
 ========================
 
-In this example, the example shown in `Models`_ and
-`Scripts`_ is adapted to run in parallel using MPI.
+In this example, the example shown in :ref:`SR CPP Models` and
+:ref:`SR CPP Scripts` is adapted to run in parallel using MPI.
 This example has the same functionality, however,
 it shows how keys can be prefixed to prevent key
 collisions across MPI ranks.  Note that only one
