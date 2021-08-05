@@ -4,7 +4,7 @@ Changelog
 0.2.0
 -----
 
-Release on July, 29, 2021
+Release on August, 5, 2021
 
 Description
 
