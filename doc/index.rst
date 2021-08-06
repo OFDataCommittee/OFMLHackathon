@@ -37,6 +37,7 @@
    developer/git
    developer/python
    developer/editor
+   developer/testing
 
 .. toctree::
    :maxdepth: 2

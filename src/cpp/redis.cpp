@@ -346,7 +346,7 @@ inline CommandReply Redis::_run(Command& cmd)
         throw std::runtime_error("Redis failed to execute command: " +
                                  cmd.first_field());
     }
-    
+
     return reply;
 }
 

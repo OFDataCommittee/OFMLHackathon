@@ -1,7 +1,6 @@
-
-*******************************
-Adding Unit Tests To C++ Client
-*******************************
+*******************
+Unit Test Framework
+*******************
 
 All unit tests for the C++ client are located at ``tests/cpp/unit-tests/`` and use the Catch2
 test framework. The unit tests mostly follow a Behavior Driven Development (BDD) style by
