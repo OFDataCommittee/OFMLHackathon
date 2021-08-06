@@ -24,7 +24,7 @@
 ! OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  class(client_type),                   intent(in) :: this  !< Pointer to the initialized client
+  class(client_type),                   intent(in) :: self  !< Pointer to the initialized client
   character(len=*),                     intent(in) :: key   !< The key to use to place the tensor
   integer, dimension(:),                intent(in) :: dims  !< Length along each dimension of the tensor
 

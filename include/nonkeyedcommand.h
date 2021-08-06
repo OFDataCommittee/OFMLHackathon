@@ -31,6 +31,9 @@
 
 #include "command.h"
 
+using parsed_reply_map = std::unordered_map<std::string, std::string>;
+using parsed_reply_nested_map = std::unordered_map<std::string, parsed_reply_map>;
+
 ///@file
 
 namespace SmartRedis {
@@ -108,7 +111,33 @@ class AddressAnyCommand : public NonKeyedCommand
         virtual CommandReply runme(RedisServer * r);
 };
 
+class DBInfoCommand : public AddressAtCommand
+{
+    public:
+        virtual CommandReply runme(RedisServer *r);
 
+        /*!
+        *   \brief Parse database node information from get_db_node_info()
+        *          into a nested unordered_map
+        *   \param info containing the database node information
+        *   \return parsed_reply_nested_map containing the database node information
+        */
+        parsed_reply_nested_map parse_db_node_info(std::string info);
+};
+
+class ClusterInfoCommand : public AddressAtCommand
+{
+    public:
+        virtual CommandReply runme(RedisServer *r);
+
+        /*!
+        *   \brief Parse database node information from get_db_node_info()
+        *          into a nested unordered_map
+        *   \param info containing the database node information
+        *   \return parsed_reply_map containing the database node cluster information
+        */
+        parsed_reply_map parse_db_cluster_info(std::string info);
+};
 
 } //namespace SmartRedis
 

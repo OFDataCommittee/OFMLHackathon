@@ -316,7 +316,7 @@ class PyClient
         /*!
         *   \brief Check if the tensor or dataset exists in the database
         *   \param name The name that will be checked in the database
-        *               Depending on the current prefixing
+        *               depending on the current prefixing
         *               behavior, the name will be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the tensor or dataset exists in the database
@@ -326,7 +326,7 @@ class PyClient
         /*!
         *   \brief Check if the model or script exists in the database
         *   \param name The name that will be checked in the database
-        *               Depending on the current prefixing
+        *               depending on the current prefixing
         *               behavior, the name will be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the model or script exists in the database
@@ -433,6 +433,15 @@ class PyClient
         *            information about the given database nodes
         */
         std::vector<py::dict> get_db_node_info(std::vector<std::string> addresses);
+
+        /*!
+        *   \brief \brief Returns the CLUSTER INFO command reply addressed to one
+        *                 or multiple cluster nodes.
+        *   \param addresses The addresses of the database nodes
+        *   \returns A list of parsed_map objects containing all the cluster
+        *            information about the given database nodes
+        */
+        std::vector<py::dict> get_db_cluster_info(std::vector<std::string> addresses);
 
     private:
 

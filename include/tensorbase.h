@@ -33,6 +33,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include <string_view>
 #include <stdexcept>
 #include "enums/cpp_tensor_type.h"
 #include "enums/cpp_memory_layout.h"

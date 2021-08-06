@@ -45,7 +45,6 @@
 #include "command.h"
 #include "commandlist.h"
 #include "commandreply.h"
-#include "commandreplyparser.h"
 #include "tensorbase.h"
 #include "tensor.h"
 #include "enums/cpp_tensor_type.h"
@@ -147,7 +146,6 @@ class Client
         *               deleted.
         */
         void delete_dataset(const std::string& name);
-
 
         /*!
         *   \brief Put a tensor into the database
@@ -433,7 +431,7 @@ class Client
         /*!
         *   \brief Check if the model (or the script) exists in the database
         *   \param name The name that will be checked in the database
-        *               Depending on the current prefixing behavior,
+        *               depending on the current prefixing behavior,
         *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the key exists in the database
@@ -443,7 +441,7 @@ class Client
         /*!
         *   \brief Check if the tensor (or the dataset) exists in the database
         *   \param name The name that will be checked in the database
-        *               Depending on the current prefixing behavior,
+        *               depending on the current prefixing behavior,
         *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the key exists in the database
@@ -494,7 +492,7 @@ class Client
         *          at a specified frequency for a specified number
         *          of times.
         *   \param name The name that will be checked in the database
-        *               Depending on the current prefixing behavior,
+        *               depending on the current prefixing behavior,
         *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \param poll_frequency_ms The frequency of checks for the
@@ -552,9 +550,19 @@ class Client
         /*!
         *   \brief Returns information about the given database node
         *   \param address The address of the database node (host:port)
-        *   \returns parsed_reply_map containing the database node information
+        *   \returns parsed_reply_nested_map containing the database node information
         */
-        parsed_reply_map get_db_node_info(std::string address);
+        parsed_reply_nested_map get_db_node_info(std::string address);
+
+        /*!
+        *   \brief Returns the CLUSTER INFO command reply addressed to a single
+        *          cluster node.
+        *   \param address The address of the database node (host:port)
+        *   \returns parsed_reply_map containing the database cluster information.
+        *            If this command is executed on a non-cluster database, an
+        *            empty parsed_reply_map is returned.
+        */
+        parsed_reply_map get_db_cluster_info(std::string address);
 
     protected:
 
@@ -586,7 +594,7 @@ class Client
         *   \param cmd The non-keyed Command to execute
         *   \returns The CommandReply after execution
         */
-        CommandReply _run(AddressAtCommand& cmd);
+        inline CommandReply _run(AddressAtCommand& cmd);
 
         /*!
         *   \brief Execute a non-keyed Command that addresses
@@ -594,28 +602,28 @@ class Client
         *   \param cmd The non-keyed Command to execute
         *   \returns The CommandReply after execution
         */
-        CommandReply _run(AddressAnyCommand& cmd);
+        inline CommandReply _run(AddressAnyCommand& cmd);
 
         /*!
         *   \brief Execute a single-keyed command Command
         *   \param cmd The single-keyed Command to execute
         *   \returns The CommandReply after execution
         */
-        CommandReply _run(SingleKeyCommand& cmd);
+        inline CommandReply _run(SingleKeyCommand& cmd);
 
         /*!
         *   \brief Execute a multi-keyed command Command
         *   \param cmd The mulit-keyed Command to execute
         *   \returns The CommandReply after execution
         */
-        CommandReply _run(MultiKeyCommand& cmd);
+        inline CommandReply _run(MultiKeyCommand& cmd);
 
         /*!
         *   \brief Execute a keyed multi-command Command
         *   \param cmd The keyed multi-command Command to execute
         *   \returns The CommandReply after execution
         */
-        CommandReply _run(MultiCommandCommand& cmd);
+        inline CommandReply _run(CompoundCommand& cmd);
 
         /*!
         *   \brief Execute a list of commands
@@ -623,7 +631,7 @@ class Client
         *   \returns The CommandReply from the last
         *            command execution
         */
-        CommandReply _run(CommandList& cmd_list);
+        inline CommandReply _run(CommandList& cmd_list);
 
         /*!
         *  \brief Set the prefixes that are used for

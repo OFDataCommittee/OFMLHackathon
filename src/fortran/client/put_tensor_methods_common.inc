@@ -26,7 +26,7 @@
 
   !** Beginning of code common to all put_tensor subroutines
 
-  class(client_type),                    intent(in) :: this !< Fortran SLIC client
+  class(client_type),                    intent(in) :: self !< Fortran SLIC client
   character(len=*),                      intent(in) :: key  !< The unique key used to store in the database
   integer, dimension(:),                 intent(in) :: dims !< The length of each dimension
   ! Local variables

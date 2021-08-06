@@ -89,15 +89,15 @@ DataSet Client::get_dataset(const std::string& name)
         tensor_key =
             this->_build_dataset_tensor_key(name, tensor_names[i],
                                             true);
-        MultiCommandCommand cmd;
+        GetTensorCommand cmd;
         cmd.add_field("AI.TENSORGET");
         cmd.add_field(tensor_key, true);
         cmd.add_field("META");
         cmd.add_field("BLOB");
         reply = this->_run(cmd);
-        reply_dims = CommandReplyParser::get_tensor_dims(reply);
-        blob = CommandReplyParser::get_tensor_data_blob(reply);
-        type = CommandReplyParser::get_tensor_data_type(reply);
+        reply_dims = cmd.get_tensor_dims(reply);
+        blob = cmd.get_tensor_data_blob(reply);
+        type = cmd.get_tensor_data_type(reply);
         dataset._add_to_tensorpack(tensor_names[i],
                                    (void*)blob.data(), reply_dims,
                                    type, MemoryLayout::contiguous);
@@ -155,7 +155,7 @@ void Client::delete_dataset(const std::string& name)
     std::string field_name;
     this->_unpack_dataset_metadata(dataset, reply);
 
-    MultiCommandCommand cmd;
+    CompoundCommand cmd;
     cmd.add_field("DEL");
     cmd.add_field(this->_build_dataset_meta_key(dataset.name, true),true);
 
@@ -170,7 +170,7 @@ void Client::delete_dataset(const std::string& name)
 
     reply = this->_run(cmd);
 
-    MultiCommandCommand cmd_ack_key;
+    CompoundCommand cmd_ack_key;
     std::string dataset_ack_key =
         this->_build_dataset_ack_key(name, false);
     cmd_ack_key.add_field("DEL");
@@ -223,6 +223,8 @@ void Client::put_tensor(const std::string& key,
             tensor = new Tensor<uint8_t>(p_key, data, dims,
                                          type, mem_layout);
             break;
+        default : // FINDME: Need to handle this case better
+            throw std::runtime_error("Invalid type for put_tensor");
     }
 
     CommandReply reply = this->_redis_server->put_tensor(*tensor);
@@ -292,10 +294,11 @@ void Client::unpack_tensor(const std::string& key,
         }
 
     std::string g_key = this->_build_tensor_key(key, true);
-    CommandReply reply = this->_redis_server->get_tensor(g_key);
+    GetTensorCommand cmd;
+    CommandReply reply = this->_redis_server->get_tensor(g_key, cmd);
 
     std::vector<size_t> reply_dims =
-        CommandReplyParser::get_tensor_dims(reply);
+        cmd.get_tensor_dims(reply);
 
     if(mem_layout == MemoryLayout::contiguous ||
         mem_layout == MemoryLayout::fortran_contiguous) {
@@ -329,11 +332,11 @@ void Client::unpack_tensor(const std::string& key,
         }
     }
 
-    TensorType reply_type = CommandReplyParser::get_tensor_data_type(reply);
+    TensorType reply_type = cmd.get_tensor_data_type(reply);
     if(type!=reply_type)
         throw std::runtime_error("The type of the fetched tensor "\
                                 "does not match the provided type");
-    std::string_view blob = CommandReplyParser::get_tensor_data_blob(reply);
+    std::string_view blob = cmd.get_tensor_data_blob(reply);
 
     TensorBase* tensor;
     switch(reply_type) {
@@ -377,6 +380,8 @@ void Client::unpack_tensor(const std::string& key,
                                      reply_dims, reply_type,
                                      MemoryLayout::contiguous);
         break;
+        default : // FINDME: Need to handle this case better
+            throw std::runtime_error("Invalid type for unpack_tensor");
     }
 
     tensor->fill_mem_space(data, dims, mem_layout);
@@ -670,7 +675,7 @@ void Client::use_tensor_ensemble_prefix(bool use_prefix)
     this->_use_tensor_prefix = use_prefix;
 }
 
-parsed_reply_map Client::get_db_node_info(std::string address)
+parsed_reply_nested_map Client::get_db_node_info(std::string address)
 {
     std::string host = address.substr(0, address.find(":"));
     uint64_t port = std::stoul (address.substr(address.find(":") + 1),
@@ -678,41 +683,61 @@ parsed_reply_map Client::get_db_node_info(std::string address)
     if (host.empty() or port == 0)
         throw std::runtime_error(std::string(address) +
                                  "is not a valid database node address.");
-    AddressAtCommand cmd;
+    DBInfoCommand cmd;
     cmd.set_exec_address_port(host, port);
     cmd.add_field("INFO");
     cmd.add_field("everything");
     CommandReply reply = this->_run(cmd);
-    return CommandReplyParser::parse_db_node_info(std::string(reply.str(),
+    return cmd.parse_db_node_info(std::string(reply.str(),
                                                         reply.str_len()));
 }
 
-CommandReply Client::_run(AddressAtCommand& cmd)
+parsed_reply_map Client::get_db_cluster_info(std::string address)
+{
+    if(this->_redis_cluster == NULL)
+        return parsed_reply_map();
+
+    std::string host = address.substr(0, address.find(":"));
+    uint64_t port = std::stoul (address.substr(address.find(":") + 1),
+                                nullptr, 0);
+    if (host.empty() or port == 0)
+        throw std::runtime_error(std::string(address) +
+                                 "is not a valid database node address.");
+    ClusterInfoCommand cmd;
+    cmd.set_exec_address_port(host, port);
+    cmd.add_field("CLUSTER");
+    cmd.add_field("INFO");
+    CommandReply reply = this->_run(cmd);
+    return cmd.parse_db_cluster_info(std::string(reply.str(),
+                                                     reply.str_len()));
+}
+
+inline CommandReply Client::_run(AddressAtCommand& cmd)
 {
     return this->_redis_server->run(cmd);
 }
 
-CommandReply Client::_run(AddressAnyCommand& cmd)
+inline CommandReply Client::_run(AddressAnyCommand& cmd)
 {
     return this->_redis_server->run(cmd);
 }
 
-CommandReply Client::_run(SingleKeyCommand& cmd)
+inline CommandReply Client::_run(SingleKeyCommand& cmd)
 {
     return this->_redis_server->run(cmd);
 }
 
-CommandReply Client::_run(MultiKeyCommand& cmd)
+inline CommandReply Client::_run(MultiKeyCommand& cmd)
 {
     return this->_redis_server->run(cmd);
 }
 
-CommandReply Client::_run(MultiCommandCommand& cmd)
+inline CommandReply Client::_run(CompoundCommand& cmd)
 {
     return this->_redis_server->run(cmd);
 }
 
-CommandReply Client::_run(CommandList& cmds)
+inline CommandReply Client::_run(CommandList& cmds)
 {
     return this->_redis_server->run(cmds);
 }
@@ -793,7 +818,7 @@ inline void Client::_append_with_put_prefix(
 
 inline CommandReply Client::_get_dataset_metadata(const std::string& name)
 {
-    MultiCommandCommand cmd;
+    CompoundCommand cmd;
     cmd.add_field("HGETALL");
     cmd.add_field(this->_build_dataset_meta_key(name, true), true);
     return this->_run(cmd);
@@ -862,7 +887,7 @@ void Client::_append_dataset_metadata_commands(CommandList& cmd_list,
                                  "a DataSet into the database that "\
                                  "does not contain any fields or "\
                                  "tensors.");
-    MultiCommandCommand* cmd = new MultiCommandCommand();
+    CompoundCommand* cmd = new CompoundCommand();
     cmd_list.add_command(cmd);
     cmd->add_field("HMSET");
     cmd->add_field (meta_key, true);
@@ -887,7 +912,7 @@ void Client::_append_dataset_tensor_commands(CommandList& cmd_list,
             this->_build_dataset_tensor_key(dataset.name,
                                             tensor->name(),
                                             false);
-        MultiCommandCommand* cmd = new MultiCommandCommand();
+        CompoundCommand* cmd = new CompoundCommand();
         cmd_list.add_command(cmd);
         cmd->add_field("AI.TENSORSET");
         cmd->add_field(tensor_key, true);
@@ -906,7 +931,7 @@ void Client::_append_dataset_ack_command(CommandList& cmd_list,
     std::string dataset_ack_key =
         this->_build_dataset_ack_key(dataset.name, false);
 
-    MultiCommandCommand* cmd = new MultiCommandCommand();
+    CompoundCommand* cmd = new CompoundCommand();
     cmd_list.add_command(cmd);
     cmd->add_field("SET");
     cmd->add_field(dataset_ack_key, true);
@@ -936,17 +961,15 @@ void Client::_unpack_dataset_metadata(DataSet& dataset,
 TensorBase* Client::_get_tensorbase_obj(const std::string& name)
 {
     std::string g_key = this->_build_tensor_key(name, true);
-
-    CommandReply reply = this->_redis_server->get_tensor(g_key);
+    GetTensorCommand cmd;
+    CommandReply reply = this->_redis_server->get_tensor(g_key, cmd);
 
     std::vector<size_t> dims =
-        CommandReplyParser::get_tensor_dims(reply);
+        cmd.get_tensor_dims(reply);
 
-    TensorType type =
-         CommandReplyParser::get_tensor_data_type(reply);
+    TensorType type = cmd.get_tensor_data_type(reply);
 
-    std::string_view blob =
-        CommandReplyParser::get_tensor_data_blob(reply);
+    std::string_view blob = cmd.get_tensor_data_blob(reply);
 
     if(dims.size()<=0)
         throw std::runtime_error("The number of dimensions of the "\

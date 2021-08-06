@@ -64,9 +64,6 @@ void TensorPack::add_tensor(const std::string& name,
                             const TensorType type,
                             const MemoryLayout mem_layout)
 {
-    if(name.size()==0)
-        throw std::runtime_error("The tensor name must "\
-                                 "be greater than 0.");
 
     if(this->tensor_exists(name))
         throw std::runtime_error("The tensor " +
@@ -108,6 +105,8 @@ void TensorPack::add_tensor(const std::string& name,
              ptr = new Tensor<uint8_t>(name, data, dims,
                                        type, mem_layout);
              break;
+        default :
+	  return; // FINDME: Handle this case better
     }
     this->add_tensor(ptr);
     return;

@@ -55,7 +55,7 @@ class Dataset(PyDataset):
         super().add_tensor(name, data, dtype)
 
     def get_tensor(self, name):
-        """Get a tensor from this Dataset
+        """Get a tensor from the Dataset
 
         :param name: name of the tensor to get
         :type name: str

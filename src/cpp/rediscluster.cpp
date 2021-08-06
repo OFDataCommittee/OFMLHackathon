@@ -65,7 +65,7 @@ CommandReply RedisCluster::run(SingleKeyCommand& cmd)
     return this->_run(*bcmd, db_prefix);
 }
 
-CommandReply RedisCluster::run(MultiCommandCommand& cmd)
+CommandReply RedisCluster::run(CompoundCommand& cmd)
 {
     std::string db_prefix;
     if (cmd.has_keys())
@@ -165,9 +165,8 @@ CommandReply RedisCluster::put_tensor(TensorBase& tensor)
     return this->run(cmd);
 }
 
-CommandReply RedisCluster::get_tensor(const std::string& key)
+CommandReply RedisCluster::get_tensor(const std::string& key, GetTensorCommand& cmd)
 {
-    SingleKeyCommand cmd;
     cmd.add_field("AI.TENSORGET");
     cmd.add_field(key, true);
     cmd.add_field("META");
@@ -210,7 +209,7 @@ CommandReply RedisCluster::copy_tensor(const std::string& src_key,
 {
     //TODO can we do COPY for same hash slot or database (only for redis 6.2)?
     CommandReply cmd_get_reply;
-    MultiKeyCommand cmd_get;
+    GetTensorCommand cmd_get;
 
     cmd_get.add_field("AI.TENSORGET");
     cmd_get.add_field(src_key, true);
@@ -219,11 +218,11 @@ CommandReply RedisCluster::copy_tensor(const std::string& src_key,
     cmd_get_reply = this->run(cmd_get);
 
     std::vector<size_t> dims =
-        CommandReplyParser::get_tensor_dims(cmd_get_reply);
+        cmd_get.get_tensor_dims(cmd_get_reply);
     std::string_view blob =
-        CommandReplyParser::get_tensor_data_blob(cmd_get_reply);
+        cmd_get.get_tensor_data_blob(cmd_get_reply);
     TensorType type =
-        CommandReplyParser::get_tensor_data_type(cmd_get_reply);
+        cmd_get.get_tensor_data_type(cmd_get_reply);
 
     CommandReply cmd_put_reply;
     MultiKeyCommand cmd_put;
@@ -282,7 +281,7 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
     {
         prefixed_key = "{" + node->prefix +
                        "}." + model_name;
-        MultiCommandCommand cmd;
+        CompoundCommand cmd;
         cmd.add_field("AI.MODELSET");
         cmd.add_field(prefixed_key, true);
         cmd.add_field(backend);
@@ -372,7 +371,7 @@ CommandReply RedisCluster::run_model(const std::string& key,
     std::string model_name = "{" + db->prefix +
                             "}." + std::string(key);
 
-    MultiCommandCommand cmd;
+    CompoundCommand cmd;
     CommandReply reply;
     cmd.add_field("AI.MODELRUN");
     cmd.add_field(model_name, true);
@@ -418,7 +417,7 @@ CommandReply RedisCluster::run_script(const std::string& key,
 
     std::string script_name = "{" + db->prefix +
                             "}." + std::string(key);
-    MultiCommandCommand cmd;
+    CompoundCommand cmd;
     CommandReply reply;
     cmd.add_field("AI.SCRIPTRUN");
     cmd.add_field(script_name, true);
@@ -478,69 +477,78 @@ inline CommandReply RedisCluster::_run(Command& cmd, std::string db_prefix)
     CommandReply reply;
 
     int n_trials = 100;
-    bool success = true;
 
-    while (n_trials > 0 && success) {
+    while (n_trials > 0) {
 
         try {
             sw::redis::Redis db = this->_redis_cluster->redis(sv_prefix, false);
             reply = db.command(cmd_fields_start, cmd_fields_end);
 
             if(reply.has_error()==0)
-                n_trials = -1;
-            else
-                n_trials = 0;
-        }
-        catch (sw::redis::TimeoutError &e) {
-            n_trials--;
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+                return reply;
+            n_trials = 0;
         }
         catch (sw::redis::IoError &e) {
             n_trials--;
             std::this_thread::sleep_for(std::chrono::seconds(2));
         }
-        catch (...) {
+        catch (sw::redis::ClosedError &e) {
             n_trials--;
-            throw;
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+        }
+        catch (std::exception& e) {
+            throw std::runtime_error(e.what());
+        }
+        catch (...) {
+            throw std::runtime_error("A non-standard exception "\
+                                     "encountered during command " +
+                                     cmd.first_field() +
+                                     " execution.");
         }
     }
 
-    if (n_trials == 0)
-        success = false;
-
-    if (!success) {
+    if (n_trials == 0) {
         if(reply.has_error()>0)
             reply.print_reply_error();
         throw std::runtime_error("Redis failed to execute command: " +
-                                 cmd.to_string());
+                                 cmd.first_field());
     }
+
     return reply;
+
 }
 
 inline void RedisCluster::_connect(std::string address_port)
 {
-    int n_connection_trials = 10;
+    int n_trials = 10;
+    bool run_sleep = false;
 
-    while(n_connection_trials > 0) {
+    for(int i=1; i<=n_trials; i++) {
+        run_sleep = false;
         try {
-            this->_redis_cluster = new sw::redis::RedisCluster(address_port);
-            n_connection_trials = -1;
+            this->_redis_cluster =
+                new sw::redis::RedisCluster(address_port);
+            return;
         }
-        catch (sw::redis::TimeoutError &e) {
-          std::cout << "WARNING: Caught redis TimeoutError: "
-                    << e.what() << std::endl;
-          std::cout << "WARNING: TimeoutError occurred with "\
-                       "initial client connection.";
-          std::cout << "WARNING: "<< n_connection_trials
-                      << " more trials will be made.";
-          n_connection_trials--;
-          std::this_thread::sleep_for(std::chrono::seconds(2));
+        catch (std::exception& e) {
+            this->_redis_cluster = 0;
+            if(i == n_trials) {
+                throw std::runtime_error(e.what());
+            }
+            run_sleep = true;
         }
+        catch (...) {
+            this->_redis_cluster = 0;
+            if(i == n_trials) {
+                throw std::runtime_error("A non-standard exception "\
+                                         "encountered during client "\
+                                         "connection.");
+            }
+            run_sleep = true;
+        }
+        if(run_sleep)
+            std::this_thread::sleep_for(std::chrono::seconds(2));
     }
-
-    if(n_connection_trials==0)
-        throw std::runtime_error("A connection could not be "\
-                                 "established to the redis cluster.");
     return;
 }
 
@@ -813,7 +821,7 @@ void RedisCluster::__run_model_dagrun(const std::string& key,
 
     std::string model_name = "{" + db->prefix +
                             "}." + std::string(key);
-    MultiCommandCommand cmd;
+    CompoundCommand cmd;
 
     cmd.add_field("AI.DAGRUN");
     cmd.add_field("LOAD");

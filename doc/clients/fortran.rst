@@ -136,7 +136,6 @@ general functionality and suffixed by the type of code contained within.
 
 * ``<functionality>_interfaces.inc``: Define the C-bound interfaces to the SmartRedis-C methods
 * ``<functionality>_methods_common.inc``: Represents the source code that is exactly the same for all methods which
-
 share the same functionality, but differ only by the type of variable
 
 For example, ``client/put_tensor_interfaces.inc`` define the Fortran-C interfaces to put a tensor into the database.

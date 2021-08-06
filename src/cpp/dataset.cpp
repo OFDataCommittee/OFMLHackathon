@@ -26,6 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string_view>
 #include "dataset.h"
 
 using namespace SmartRedis;
@@ -160,9 +161,9 @@ std::vector<std::string> DataSet::get_meta_strings(const std::string& name)
     return this->_metadata.get_string_values(name);
 }
 
-std::string DataSet::get_tensor_type(const std::string& name)
+TensorType DataSet::get_tensor_type(const std::string& name)
 {
-    return this->_tensorpack.get_tensor(name)->name();
+    return this->_tensorpack.get_tensor(name)->type();
 }
 
 void DataSet::_add_to_tensorpack(const std::string& name,

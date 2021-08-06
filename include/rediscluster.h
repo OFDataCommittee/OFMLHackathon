@@ -110,13 +110,12 @@ class RedisCluster : public RedisServer
         virtual CommandReply run(MultiKeyCommand& cmd);
 
         /*!
-        *   \brief Run a multi-command
-        *          Command on the server
-        *   \param cmd The multi-command Comand to run
+        *   \brief Run a compound Command on the server
+        *   \param cmd The compound Comand to run
         *   \returns The CommandReply from the
         *            command execution
         */
-        virtual CommandReply run(MultiCommandCommand& cmd);
+        virtual CommandReply run(CompoundCommand& cmd);
 
         /*!
         *   \brief Run a non-keyed Command that
@@ -186,10 +185,11 @@ class RedisCluster : public RedisServer
         /*!
         *   \brief Get a Tensor from the server
         *   \param key The name of the tensor to retrieve
+        *   \param cmd The command to run on the server
         *   \returns The CommandReply from the get tensor server
         *            command execution
         */
-        virtual CommandReply get_tensor(const std::string& key);
+        virtual CommandReply get_tensor(const std::string& key, GetTensorCommand& cmd);
 
         /*!
         *   \brief Rename a tensor in the database

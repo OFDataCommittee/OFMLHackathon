@@ -49,7 +49,6 @@ Redis::~Redis()
         delete this->_redis;
 }
 
-//cast as Command and call _run()
 CommandReply Redis::run(SingleKeyCommand& cmd){
     Command* bcmd = &cmd;
     return _run(*bcmd);
@@ -60,7 +59,7 @@ CommandReply Redis::run(MultiKeyCommand& cmd){
     return _run(*bcmd);
 }
 
-CommandReply Redis::run(MultiCommandCommand& cmd){
+CommandReply Redis::run(CompoundCommand& cmd){
     Command* bcmd = &cmd;
     return _run(*bcmd);
 }
@@ -109,7 +108,6 @@ bool Redis::is_addressable(const std::string& address,
                         != this->_address_node_map.end();
 }
 
-
 CommandReply Redis::put_tensor(TensorBase& tensor)
 {
     SingleKeyCommand cmd;
@@ -122,9 +120,8 @@ CommandReply Redis::put_tensor(TensorBase& tensor)
     return this->run(cmd);
 }
 
-CommandReply Redis::get_tensor(const std::string& key)
+CommandReply Redis::get_tensor(const std::string& key, GetTensorCommand& cmd)
 {
-    SingleKeyCommand cmd;
     cmd.add_field("AI.TENSORGET");
     cmd.add_field(key);
     cmd.add_field("META");
@@ -155,7 +152,7 @@ CommandReply Redis::copy_tensor(const std::string& src_key,
 {
     //TODO can we do COPY for same hash slot or database?
     CommandReply cmd_get_reply;
-    MultiKeyCommand cmd_get;
+    GetTensorCommand cmd_get;
 
     cmd_get.add_field("AI.TENSORGET");
     cmd_get.add_field(src_key, true);
@@ -164,11 +161,11 @@ CommandReply Redis::copy_tensor(const std::string& src_key,
     cmd_get_reply = this->run(cmd_get);
 
     std::vector<size_t> dims =
-        CommandReplyParser::get_tensor_dims(cmd_get_reply);
+        cmd_get.get_tensor_dims(cmd_get_reply);
     std::string_view blob =
-        CommandReplyParser::get_tensor_data_blob(cmd_get_reply);
+        cmd_get.get_tensor_data_blob(cmd_get_reply);
     TensorType type =
-        CommandReplyParser::get_tensor_data_type(cmd_get_reply);
+        cmd_get.get_tensor_data_type(cmd_get_reply);
 
     CommandReply cmd_put_reply;
     MultiKeyCommand cmd_put;
@@ -263,7 +260,7 @@ CommandReply Redis::run_model(const std::string& key,
                               std::vector<std::string> inputs,
                               std::vector<std::string> outputs)
 {
-    MultiCommandCommand cmd;
+    CompoundCommand cmd;
     cmd.add_field("AI.MODELRUN");
     cmd.add_field(key);
     cmd.add_field("INPUTS");
@@ -278,7 +275,7 @@ CommandReply Redis::run_script(const std::string& key,
                               std::vector<std::string> inputs,
                               std::vector<std::string> outputs)
 {
-    MultiCommandCommand cmd;
+    CompoundCommand cmd;
     cmd.add_field("AI.SCRIPTRUN");
     cmd.add_field(key);
     cmd.add_field(function);
@@ -314,70 +311,101 @@ inline CommandReply Redis::_run(Command& cmd)
     CommandReply reply;
 
     int n_trials = 100;
-    bool success = true;
 
-    while (n_trials > 0 && success) {
+    while (n_trials > 0) {
 
         try {
             reply = this->_redis->command(cmd_fields_start, cmd_fields_end);
 
             if(reply.has_error()==0)
-                n_trials = -1;
-            else
-                n_trials = 0;
-        }
-        catch (sw::redis::TimeoutError &e) {
-            n_trials--;
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+                return reply;
+            n_trials = 0;
         }
         catch (sw::redis::IoError &e) {
             n_trials--;
             std::this_thread::sleep_for(std::chrono::seconds(2));
         }
-        catch (...) {
+        catch (sw::redis::ClosedError &e) {
             n_trials--;
-            throw;
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+        }
+        catch (std::exception& e) {
+            throw std::runtime_error(e.what());
+        }
+        catch (...) {
+            throw std::runtime_error("A non-standard exception "\
+                                     "encountered during command " +
+                                     cmd.first_field() +
+                                     " execution. ");
         }
     }
 
-    if (n_trials == 0)
-        success = false;
-
-    if (!success) {
+    if (n_trials == 0) {
         if(reply.has_error()>0)
             reply.print_reply_error();
         throw std::runtime_error("Redis failed to execute command: " +
-                                 cmd.to_string());
+                                 cmd.first_field());
     }
-
+    
     return reply;
 }
 
 inline void Redis::_connect(std::string address_port)
 {
+    // Note that this logic flow differs from a cluster
+    // because the non-cluster Redis constructor
+    // does not form a connection until a command is run
+
     this->_address_node_map.insert({address_port, nullptr});
 
-    int n_connection_trials = 10;
-
-    while(n_connection_trials > 0) {
-        try {
-            this->_redis = new sw::redis::Redis(address_port);
-            n_connection_trials = -1;
-        }
-        catch (sw::redis::TimeoutError &e) {
-          std::cout << "WARNING: Caught redis TimeoutError: "
-                    << e.what() << std::endl;
-          std::cout << "WARNING: TimeoutError occurred with "\
-                       "initial client connection.";
-          std::cout << "WARNING: "<< n_connection_trials
-                      << " more trials will be made.";
-          n_connection_trials--;
-          std::this_thread::sleep_for(std::chrono::seconds(2));
-        }
+    // Try to create the sw::redis::Redis object
+    try {
+        this->_redis = new sw::redis::Redis(address_port);
+    }
+    catch (std::exception& e) {
+        this->_redis = NULL;
+        throw std::runtime_error("Failed to create Redis "\
+                                 "object with error: " +
+                                 std::string(e.what()));
+    }
+    catch (...) {
+        this->_redis = NULL;
+        throw std::runtime_error("A non-standard exception "\
+                                 "encountered during client "\
+                                 "connection.");
     }
 
-    if(n_connection_trials==0)
-        throw std::runtime_error("A connection could not be "\
-                                 "established to the redis database.");
+    // Attempt to have the sw::redis::Redis object
+    // make a connection using the PING command
+    int n_trials = 10;
+    bool run_sleep = false;
+
+    for(int i=1; i<=n_trials; i++) {
+        run_sleep = false;
+        try {
+            if(this->_redis->ping().compare("PONG")==0) {
+                break;
+            }
+            else {
+                run_sleep = true;
+            }
+        }
+        catch (std::exception& e) {
+            if(i == n_trials) {
+                throw std::runtime_error(e.what());
+            }
+            run_sleep = true;
+        }
+        catch (...) {
+            if(i == n_trials) {
+                throw std::runtime_error("A non-standard exception "\
+                                         "encountered during client "\
+                                         "connection.");
+            }
+            run_sleep = true;
+        }
+        if(run_sleep)
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+    }
     return;
 }

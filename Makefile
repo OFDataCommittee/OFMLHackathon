@@ -45,6 +45,7 @@ test-deps-gpu:
 .PHONY: build-tests
 build-tests: lib
 	./build-scripts/build_cpp_tests.sh
+	./build-scripts/build_cpp_unit_tests.sh
 	./build-scripts/build_c_tests.sh
 	./build-scripts/build_fortran_tests.sh
 
@@ -53,7 +54,12 @@ build-tests: lib
 .PHONY: build-test-cpp
 build-test-cpp: lib
 	./build-scripts/build_cpp_tests.sh
+	./build-scripts/build_cpp_unit_tests.sh
 
+# help: build-unit-test-cpp            - build the C++ unit tests
+.PHONY: build-unit-test-cpp
+build-unit-test-cpp: lib
+	./build-scripts/build_cpp_unit_tests.sh
 
 # help: build-test-c                   - build the C tests
 .PHONY: build-test-c
@@ -187,9 +193,15 @@ test-c:
 # help: test-cpp                       - Build and run all C++ tests
 .PHONY: test-cpp
 test-cpp: build-test-cpp
+test-cpp: build-unit-test-cpp
 test-cpp:
 	@python -m pytest -vv -s ./tests/cpp/
 
+# help: unit-test-cpp                  - Build and run unit tests for C++
+.PHONY: unit-test-cpp
+unit-test-cpp: build-unit-test-cpp
+unit-test-cpp:
+	@python -m pytest -vv -s ./tests/cpp/unit-tests/
 
 # help: test-py                        - run python tests
 .PHONY: test-py
@@ -206,3 +218,7 @@ test-fortran: build-test-fortran
 testpy-cov:
 	@PYTHONFAULTHANDLER=1 python -m pytest --cov=./src/python/module/smartredis/ -vv ./tests/python/
 
+# help: testcpp-cov                    - run cpp unit tests with coverage
+.PHONY: testcpp-cov
+testcpp-cov: unit-test-cpp
+	./build-scripts/build_cpp_cov.sh

@@ -73,6 +73,14 @@ void CommandList::add_command(Command* new_cmd)
     this->_commands.push_back(new_cmd);
 }
 
+/*
+*   Command* CommandList::add_command()
+*   {
+*       this->_commands.push_back(new Command());
+*       return this->_commands.back();
+*   }
+*/
+
 CommandList::iterator CommandList::begin()
 {
     return this->_commands.begin();

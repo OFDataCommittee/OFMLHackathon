@@ -30,7 +30,8 @@
 #define SMARTREDIS_KEYEDCOMMAND_H
 
 #include "command.h"
-
+#include "tensorbase.h"
+#include "enums/cpp_tensor_type.h"
 
 ///@file
 
@@ -81,14 +82,52 @@ class SingleKeyCommand : public KeyedCommand
 };
 
 /*!
-*   \brief The MultiCommandCommand class constructs Client
+*   \brief The CompoundCommand class constructs Client
 *          commands with multiple commands. This is a subclass
 *          of the KeyedCommand class.
 */
-class MultiCommandCommand : public KeyedCommand
+class CompoundCommand : public KeyedCommand
 {
     public:
         virtual CommandReply runme(RedisServer * r);
+};
+
+
+class GetTensorCommand : public SingleKeyCommand
+{
+    public:
+        virtual CommandReply runme(RedisServer *r);
+
+        /*!
+        *   \brief This function will fill a vector with the dimensions of
+        *          the tensor.
+        *   \param reply CommandReply from running "AI.TENSORGET"
+        *   \return std::vecotr<size_t> with dimensions of the tensor
+        *   We assume right now that the META reply is always
+        *   in the same order and we can index base reply elements array;
+        */
+        std::vector<size_t> get_tensor_dims(CommandReply& reply);
+
+        /*!
+        *   \brief This function returns a string view of the data
+        *          tensor blob value
+        *   \param reply CommandReply from running "AI.TENSORGET"
+        *   \return string view of the data tensor blob value
+        *   We are going to assume right now that the meta data reply
+        *   is always in the same order and we are going to just
+        *   index into the base reply.
+        */
+        std::string_view get_tensor_data_blob(CommandReply& reply);
+
+        /*!
+        *   \brief This function returns a string of the tensor type
+        *   \param reply CommandReply from running "AI.TENSORGET"
+        *   \return string of the tensor type
+        *   We are going to assume right now that the meta data reply
+        *   is always in the same order and we are going to just
+        *   index into the base reply.
+        */
+       TensorType get_tensor_data_type(CommandReply& reply);
 };
 
 } //namespace SmartRedis
