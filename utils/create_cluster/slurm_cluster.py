@@ -5,15 +5,10 @@ import os
 def get_ip_from_host(host):
     ping_out = ping_host(host)
     found = False
-    print(host)
-    print(ping_out)
-    print('here')
     # break loop when the hostname is found in
     # the ping output
     for item in ping_out.split():
-        print(item)
         if found:
-            print('Found!')
             return item.split("(")[1].split(")")[0]
         if item == host:
             found = True
