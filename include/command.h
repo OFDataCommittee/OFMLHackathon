@@ -33,6 +33,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <cstring>
 #include <iostream>
 
@@ -61,9 +62,10 @@ class Command
         Command() = default;
 
         /*!
-        *   \brief Command copy constructor not allowed
+        *   \brief Command copy constructor
+        *   \param cmd The Command to copy for construction
         */
-        Command(const Command& cmd) = delete;
+        Command(const Command& cmd);
 
         /*!
         *   \brief Command default move constructor
@@ -72,9 +74,9 @@ class Command
 
         /*!
         *   \brief Command copy assignment operator
-        *          not allowed.
+        *   \param cmd The Command to copy for assignment
         */
-        Command& operator=(const Command& cmd) = delete;
+        Command& operator=(const Command& cmd);
 
         /*!
         *   \brief Command move assignment operator
@@ -201,6 +203,32 @@ class Command
                         std::string new_key);
 
         /*!
+        *   \brief Set address and port for command
+        *          to be executed on
+        *   \param address Address of database
+        *   \param port Port of database
+        */
+        void set_exec_address_port(std::string address,
+                                   uint16_t port);
+
+        /*!
+        *   \brief Get address that command will be
+        *          to be executed on
+        *   \return std::string of address
+        *           if an address hasn't been set,
+        *                 returns an empty string
+        */
+        std::string get_address();
+
+        /*!
+        *   \brief Get port that command will be
+        *          to be executed on
+        *   \return uint16_t of port
+        *           if port hasn't been set, returns 0
+        */
+        uint16_t get_port();
+
+        /*!
         *   \brief Get the value of the field field
         *   \returns std::string of the first Command field
         */
@@ -259,15 +287,35 @@ class Command
     private:
 
         /*!
-        *   \brief All of the fields in the Command
+        *   \brief All local fields and
+        *          pointer fields in the order that
+        *          they were added to the Command
         */
         std::vector<std::string_view> _fields;
 
         /*!
-        *   \brief A copy of data that is pointed to by Command
-        *          fields
+        *   \brief All of the fields whose memory was
+                   allocated by Command, along with
+                   their associated index in _fields
         */
-        std::vector<char*>_local_fields;
+        std::vector<std::pair<char*, size_t> > _local_fields;
+
+        /*!
+        *   \brief All of the fields whose memory was not
+        *          allocated by Command, along with their
+        *          associated index in _fields
+        */
+        std::vector<std::pair<char*, size_t> > _ptr_fields;
+
+        /*!
+        *   \brief Address of database node
+        */
+        std::string _address;
+
+        /*!
+        *   \brief Port of database node
+        */
+        uint64_t _port;
 
         /*!
         *   \brief Unordered map of std::string_view to
@@ -275,6 +323,11 @@ class Command
         *          for the std::string_view
         */
         std::unordered_map<std::string_view, size_t> _cmd_keys;
+
+        /*!
+        *   \brief Helper function for emptying the Command
+        */
+        void make_empty();
 };
 
 #include "command.tcc"

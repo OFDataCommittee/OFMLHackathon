@@ -28,6 +28,7 @@
 
 #include "pyclient.h"
 
+using namespace SmartRedis;
 namespace py = pybind11;
 
 
@@ -39,8 +40,14 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def(py::init<bool>())
         .def("put_tensor", &PyClient::put_tensor)
         .def("get_tensor", &PyClient::get_tensor)
+        .def("delete_tensor", &PyClient::delete_tensor)
+        .def("copy_tensor", &PyClient::copy_tensor)
+        .def("rename_tensor", &PyClient::rename_tensor)
         .def("put_dataset", &PyClient::put_dataset)
         .def("get_dataset", &PyClient::get_dataset)
+        .def("delete_dataset", &PyClient::delete_dataset)
+        .def("copy_dataset", &PyClient::copy_dataset)
+        .def("rename_dataset", &PyClient::rename_dataset)
         .def("set_script_from_file", &PyClient::set_script_from_file)
         .def("set_script", &PyClient::set_script)
         .def("get_script", &PyClient::get_script)
@@ -57,7 +64,9 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("poll_tensor", &PyClient::poll_tensor)
         .def("set_data_source", &PyClient::set_data_source)
         .def("use_tensor_ensemble_prefix", &PyClient::use_tensor_ensemble_prefix)
-        .def("use_model_ensemble_prefix", &PyClient::use_model_ensemble_prefix);
+        .def("use_model_ensemble_prefix", &PyClient::use_model_ensemble_prefix)
+        .def("get_db_node_info", &PyClient::get_db_node_info)
+        .def("get_db_cluster_info", &PyClient::get_db_cluster_info);
 
     // Python Dataset class
     py::class_<PyDataset>(m, "PyDataset")

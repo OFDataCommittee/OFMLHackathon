@@ -45,7 +45,7 @@ class Client(PyClient):
         by the client itself. (e.g. address="127.0.0.1:6379")
 
         If an address is not set, the client will look for the environment
-        variable ``$SSDB`` (e.g. SSDB="127.0.0.1:6379;")
+        variable ``SSDB`` (e.g. SSDB="127.0.0.1:6379;")
 
         :param address: Address of the database
         :param cluster: True if connecting to a redis cluster, defaults to False
@@ -92,6 +92,46 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "get_tensor") from None
 
+    def delete_tensor(self, key):
+        """Delete a tensor within the database
+
+        :param key: key tensor is stored at
+        :type key: str
+        :raises RedisReplyError: if deletion fails
+        """
+        try:
+            super().delete_tensor(key)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "delete_tensor") from None
+
+    def copy_tensor(self, key, dest_key):
+        """Copy a tensor at one key to another key
+
+        :param key: key of tensor to be copied
+        :type key: str
+        :param dest_key: key to store new copy at
+        :type dest_key: str
+        :raises RedisReplyError: if copy operation fails
+        """
+        try:
+            super().copy_tensor(key, dest_key)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "copy_tensor") from None
+
+    def rename_tensor(self, key, new_key):
+        """Rename a tensor in the database
+
+        :param key: key of tensor to be renamed
+        :type key: str
+        :param new_key: new name for the tensor
+        :type new_key: str
+        :raises RedisReplyError: if rename operation fails
+        """
+        try:
+            super().rename_tensor(key, new_key)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "rename_tensor") from None
+
     def put_dataset(self, dataset):
         """Put a Dataset instance into the database
 
@@ -125,6 +165,46 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "get_dataset", key=key) from None
 
+    def delete_dataset(self, key):
+        """Delete a dataset within the database
+
+        :param key: name of the dataset
+        :type key: str
+        :raises RedisReplyError: if deletion fails
+        """
+        try:
+            super().delete_dataset(key)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "delete_dataset") from None
+
+    def copy_dataset(self, key, dest_key):
+        """Copy a dataset from one key to another
+
+        :param key: name of dataset to be copied
+        :type key: str
+        :param dest_key: new name of dataset
+        :type dest_key: str
+        :raises RedisReplyError: if copy operation fails
+        """
+        try:
+            super().copy_dataset(key, dest_key)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "copy_dataset") from None
+
+    def rename_dataset(self, key, new_key):
+        """Rename a dataset in the database
+
+        :param key: name of the dataset to be renamed
+        :type key: str
+        :param new_key: new name for the dataset
+        :type new_key: str
+        :raises RedisReplyError: if rename operation fails
+        """
+        try:
+            super().rename_dataset(key, new_key)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "rename_dataset") from None
+
     def set_function(self, key, function, device="CPU"):
         """Set a callable function into the database
 
@@ -153,7 +233,7 @@ class Client(PyClient):
             raise RedisReplyError(str(e), "set_function") from None
 
     def set_script(self, key, script, device="CPU"):
-        """Store a TorchScript at key in database
+        """Store a TorchScript at key in the database
 
         Device selection is either "GPU" or "CPU". If many devices are
         present, a number can be passed for specification e.g. "GPU:1".
@@ -361,7 +441,6 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "run_model")
 
-
     def tensor_exists(self, name):
         """Check if a tensor or dataset exists in the database
 
@@ -375,10 +454,9 @@ class Client(PyClient):
         :raises RedisReplyError: if `tensor_exists` fails (i.e. causes an error)
         """
         try:
-            super().tensor_exists(name)
+            return super().tensor_exists(name)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "tensor_exists")
-
 
     def model_exists(self, name):
         """Check if a model or script exists in the database
@@ -393,10 +471,9 @@ class Client(PyClient):
         :raises RedisReplyError: if `model_exists` fails (i.e. causes an error)
         """
         try:
-            super().model_exists(name)
+            return super().model_exists(name)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "model_exists")
-
 
     def key_exists(self, key):
         """Check if the key exists in the database
@@ -408,10 +485,9 @@ class Client(PyClient):
         :raises RedisReplyError: if `key_exists` fails
         """
         try:
-            super().key_exists(key)
+            return super().key_exists(key)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "key_exists")
-
 
     def poll_key(self, key, poll_frequency_ms, num_tries):
         """Check if the key exists in the database
@@ -439,7 +515,6 @@ class Client(PyClient):
             return super().poll_key(key, poll_frequency_ms, num_tries)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "poll_key")
-
 
     def poll_tensor(self, name, poll_frequency_ms, num_tries):
         """Check if a tensor or dataset exists in the database
@@ -469,7 +544,6 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "poll_tensor")
 
-
     def poll_model(self, name, poll_frequency_ms, num_tries):
         """Check if a model or script exists in the database
 
@@ -498,7 +572,6 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "poll_model")
 
-
     def set_data_source(self, source_id):
         """Set the data source (i.e. key prefix for get functions)
 
@@ -511,7 +584,6 @@ class Client(PyClient):
             return super().set_data_source(source_id)
         except RuntimeError as e:
             raise RuntimeError(str(e), "set_data_source")
-
 
     def use_model_ensemble_prefix(self, use_prefix):
         """Set whether model and script keys should be prefixed
@@ -533,7 +605,6 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "use_model_ensemble_prefix")
 
-
     def use_tensor_ensemble_prefix(self, use_prefix):
         """Set whether tensor and dataset keys should be prefixed
 
@@ -554,6 +625,57 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "use_tensor_ensemble_prefix")
 
+    def get_db_node_info(self, addresses):
+        """Returns information about given database nodes
+
+        :param addresses: The addresses of the database nodes
+        :type address: list[str]
+        :returns: A list of dictionaries with each entry in the
+                  list corresponding to an address reply
+        :rtype: list[dict]
+        :raises RedisReplyError: if there is an error in
+                  in command execution or the address
+                  is not reachable by the client.  
+                  In the case of using a cluster of database nodes,
+                  it is best practice to bind each node in the cluster
+                  to a specific adddress to avoid inconsistencies in
+                  addresses retreived with the CLUSTER SLOTS command.
+                  Inconsistencies in node addresses across
+                  CLUSTER SLOTS comands will lead to RedisReplyError
+                  being thrown.
+
+        """
+        try:
+            return super().get_db_node_info(addresses)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "get_db_node_info")
+
+    def get_db_cluster_info(self, addresses):
+        """Returns cluster information from a specified db node.
+        If the address does not correspond to a cluster node,
+        an empty dictionary is returned.
+
+        :param addresses: The addresses of the database nodes
+        :type address: list[str]
+        :returns: A list of dictionaries with each entry in the
+                  list corresponding to an address reply
+        :rtype: list[dict]
+        :raises RedisReplyError: if there is an error in
+                  in command execution or the address
+                  is not reachable by the client.
+                  In the case of using a cluster of database nodes,
+                  it is best practice to bind each node in the cluster
+                  to a specific adddress to avoid inconsistencies in
+                  addresses retreived with the CLUSTER SLOTS command.
+                  Inconsistencies in node addresses across
+                  CLUSTER SLOTS comands will lead to RedisReplyError
+                  being thrown.
+
+        """
+        try:
+            return super().get_db_cluster_info(addresses)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "get_db_cluster_info")
 
     # ---- helpers --------------------------------------------------------
 

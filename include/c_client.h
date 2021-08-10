@@ -44,6 +44,7 @@ extern "C" {
 *   \brief C-client constructor
 *   \param cluster Flag to indicate if a
 *                  database cluster is being used
+*   \return Returns NULL on failure
 */
 void* SmartRedisCClient(bool cluster);
 
@@ -60,8 +61,7 @@ void DeleteCClient(void* c_client);
 *                   to use for communication
 *   \param dataset The DataSet object to send
 */
-void put_dataset(void* c_client,
-                 const void* dataset);
+void put_dataset(void* c_client, void* dataset);
 
 /*!
 *   \brief Get a DataSet object from the database
@@ -70,6 +70,7 @@ void put_dataset(void* c_client,
 *   \param name The name of the dataset object to fetch
 *   \param name_length The length of the name c-string,
 *                      excluding null terminating character
+*   \return Returns NULL on bad parameters
 */
 void* get_dataset(void* c_client,
                   const char* name,
@@ -269,7 +270,7 @@ void copy_tensor(void* c_client,
 *                            excluding null terminating character
 *   \param backend The name of the backend
 *                  (TF, TFLITE, TORCH, ONNX)
-*   \param backed_length The length of the backend c-string,
+*   \param backend_length The length of the backend c-string,
 *                        excluding null terminating character
 *   \param device The name of the device for execution
 *                 (e.g. CPU or GPU)
@@ -328,7 +329,7 @@ void set_model_from_file(void* c_client,
 *                            excluding null terminating character
 *   \param backend The name of the backend
 *                  (TF, TFLITE, TORCH, ONNX)
-*   \param backed_length The length of the backend c-string,
+*   \param backend_length The length of the backend c-string,
 *                        excluding null terminating character
 *   \param device The name of the device for execution
 *                 (e.g. CPU or GPU)
@@ -384,7 +385,7 @@ void set_model(void* c_client,
 *   \param model_length The length of the model buffer
 *                       c-string, excluding null
 *                       terminating character
-*   \returns The model as a c-string
+*   \returns The model as a c-string or NULL on bad parameters
 */
 const char* get_model(void* c_client,
                      const char* key,

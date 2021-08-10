@@ -18,7 +18,9 @@
 
 [![License](https://img.shields.io/github/license/CrayLabs/SmartSim)](https://github.com/CrayLabs/SmartRedis/blob/master/LICENSE.md)
 ![GitHub last commit](https://img.shields.io/github/last-commit/CrayLabs/SmartRedis)
+![PyPI - Wheel](https://img.shields.io/pypi/wheel/smartredis)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/CrayLabs/SmartRedis)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/smartredis)
 ![Language](https://img.shields.io/github/languages/top/CrayLabs/SmartRedis)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
@@ -32,7 +34,7 @@ SmartRedis provides clients in the following languages:
 
 | Language   | Version/Standard  |
 |------------|:-----------------:|
-| Python     |   3.7+            |
+| Python     |   3.7, 3.8, 3.9   |
 | C++        |   C++17           |
 | C          |   C99             |
 | Fortran    |   Fortran 2018    |
@@ -60,8 +62,6 @@ SmartRedis utilizes the following libraries.
  - [NumPy](https://github.com/numpy/numpy)
  - [Hiredis](https://github.com/redis/hiredis) 1.0.0
  - [Redis-plus-plus](https://github.com/sewenew/redis-plus-plus)  1.2.3
- - [protobuf](https://github.com/protocolbuffers/protobuf)  3.11.3
-
 
 ## Publications
 

@@ -45,6 +45,7 @@ test-deps-gpu:
 .PHONY: build-tests
 build-tests: lib
 	./build-scripts/build_cpp_tests.sh
+	./build-scripts/build_cpp_unit_tests.sh
 	./build-scripts/build_c_tests.sh
 	./build-scripts/build_fortran_tests.sh
 
@@ -53,7 +54,12 @@ build-tests: lib
 .PHONY: build-test-cpp
 build-test-cpp: lib
 	./build-scripts/build_cpp_tests.sh
+	./build-scripts/build_cpp_unit_tests.sh
 
+# help: build-unit-test-cpp            - build the C++ unit tests
+.PHONY: build-unit-test-cpp
+build-unit-test-cpp: lib
+	./build-scripts/build_cpp_unit_tests.sh
 
 # help: build-test-c                   - build the C tests
 .PHONY: build-test-c
@@ -169,14 +175,14 @@ cov:
 .PHONY: test
 test: build-tests
 test:
-	@python -m pytest -vv ./tests
+	@PYTHONFAULTHANDLER=1 python -m pytest -vv ./tests
 
 
 # help: test-verbose                   - Build and run all tests [verbosely]
 .PHONY: test-verbose
 test-verbose: build-tests
 test-verbose:
-	@python -m pytest -vv -s ./tests
+	@PYTHONFAULTHANDLER=1 python -m pytest -vv -s ./tests
 
 # help: test-c                         - Build and run all C tests
 .PHONY: test-c
@@ -187,14 +193,20 @@ test-c:
 # help: test-cpp                       - Build and run all C++ tests
 .PHONY: test-cpp
 test-cpp: build-test-cpp
+test-cpp: build-unit-test-cpp
 test-cpp:
 	@python -m pytest -vv -s ./tests/cpp/
 
+# help: unit-test-cpp                  - Build and run unit tests for C++
+.PHONY: unit-test-cpp
+unit-test-cpp: build-unit-test-cpp
+unit-test-cpp:
+	@python -m pytest -vv -s ./tests/cpp/unit-tests/
 
 # help: test-py                        - run python tests
 .PHONY: test-py
 test-py:
-	@python -m pytest -vv ./tests/python/
+	@PYTHONFAULTHANDLER=1 python -m pytest -vv ./tests/python/
 
 # help: test-fortran                   - run fortran tests
 .PHONY: test-fortran
@@ -204,5 +216,9 @@ test-fortran: build-test-fortran
 # help: testpy-cov                     - run python tests with coverage
 .PHONY: testpy-cov
 testpy-cov:
-	@python -m pytest --cov=./src/python/module/smartredis/ -vv ./tests/python/
+	@PYTHONFAULTHANDLER=1 python -m pytest --cov=./src/python/module/smartredis/ -vv ./tests/python/
 
+# help: testcpp-cov                    - run cpp unit tests with coverage
+.PHONY: testcpp-cov
+testcpp-cov: unit-test-cpp
+	./build-scripts/build_cpp_cov.sh

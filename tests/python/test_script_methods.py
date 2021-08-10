@@ -31,6 +31,7 @@ def test_set_script_from_file(use_cluster):
     c.set_script_from_file(
         "test-script-file", osp.join(file_path, "./data_processing_script.txt")
     )
+    assert c.model_exists("test-script-file")
     returned_script = c.get_script("test-script-file")
     assert sent_script == returned_script
 

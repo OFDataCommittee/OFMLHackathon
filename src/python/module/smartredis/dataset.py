@@ -24,8 +24,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import numpy as np
 from numbers import Number
+
+import numpy as np
 
 from .smartredisPy import PyDataset
 from .util import Dtypes
@@ -54,7 +55,7 @@ class Dataset(PyDataset):
         super().add_tensor(name, data, dtype)
 
     def get_tensor(self, name):
-        """Get a tensor from this Dataset
+        """Get a tensor from the Dataset
 
         :param name: name of the tensor to get
         :type name: str
@@ -64,15 +65,15 @@ class Dataset(PyDataset):
         return super().get_tensor(name)
 
     def add_meta_scalar(self, name, data):
-        """ Add metadata scalar field (non-string) with value to the DataSet
-            
+        """Add metadata scalar field (non-string) with value to the DataSet
+
             If the field does not exist, it will be created.
             If the field exists, the value
             will be appended to existing field.
 
         :param name: The name used to reference the metadata
                      field
-        :type name: str             
+        :type name: str
         :param data: a scalar
         :type data: int | float
         """
@@ -86,8 +87,8 @@ class Dataset(PyDataset):
         super().add_meta_scalar(name, data_as_array, dtype)
 
     def add_meta_string(self, name, data):
-        """ Add metadata string field with value to the DataSet
-            
+        """Add metadata string field with value to the DataSet
+
         If the field does not exist, it will be created
         If the field exists the value will
         be appended to existing field.
@@ -101,7 +102,7 @@ class Dataset(PyDataset):
         super().add_meta_string(name, data)
 
     def get_meta_scalars(self, name):
-        """ Get the metadata scalar field values from the DataSet
+        """Get the metadata scalar field values from the DataSet
 
         :param name: The name used to reference the metadata
                      field in the DataSet
@@ -110,7 +111,7 @@ class Dataset(PyDataset):
         return super().get_meta_scalars(name)
 
     def get_meta_strings(self, name):
-        """ Get the metadata scalar field values from the DataSet
+        """Get the metadata scalar field values from the DataSet
 
         :param name: The name used to reference the metadata
                         field in the DataSet

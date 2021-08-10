@@ -30,6 +30,7 @@
 #define SMARTSIM_METADATATYPE_H
 
 #include "enums/c_metadata_type.h"
+#include <stdexcept>
 
 namespace SmartRedis {
 

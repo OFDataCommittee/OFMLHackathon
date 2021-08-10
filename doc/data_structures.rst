@@ -147,7 +147,8 @@ experience across the C++, C, and Fortran clients.
                     const MemoryLayout mem_layout);
 
 .. note::
-    Memory allocated by ``Client`` during a ``get_tensor()``
+    Memory allocated by C++, C, and Fortran
+    ``Client`` during a ``get_tensor()``
     call will be valid and not freed until the ``Client``
     object is destroyed.  Therefore, if the type and dimensions
     of the tensor are known, it is recommended that
@@ -156,9 +157,11 @@ experience across the C++, C, and Fortran clients.
 The Python client currently only offers a ``get_tensor()`` option for
 retrieving tensors.  In this methodology, a NumPy array is returned
 to the user, and the only required input to the function is the
-name of the tensor to retrieve because all the type and dimensions
-information are embedded in the NumPy array object.
-The Python interface for ``get_tensor()`` is shown below.
+name of the tensor to retrieve because its type and dimensions
+are embedded in the NumPy array object. The Python interface for
+``get_tensor()`` is shown below.  In the Python implementation of
+``get_tensor()``, the memory associated with the retrieved tensor
+will be freed when the NumPy array goes out of scope or is deleted.
 
 .. code-block:: python
 
@@ -175,7 +178,7 @@ Dataset
 =======
 
 In many situations, a ``Client``  might be tasked with sending a
-group of tensors and metadata that are closely related and
+group of tensors and metadata which are closely related and
 naturally grouped into a collection for future retrieval.
 The ``DataSet`` object stages these items so that they can be
 more efficiently placed in the redis database and can later be
@@ -386,7 +389,7 @@ Retrieving
 ----------
 
 A model can be retrieved from the database using the
-```Client.get_model()``` function.  While the return
+``Client.get_model()`` function.  While the return
 type varies between languages, only the model key
 that was used with ``Client.set_model()`` is needed
 to reference the model in the database.  Note that
@@ -407,8 +410,8 @@ The only required inputs to execute a model are the model key,
 a list of input tensor names, and a list of output tensor names.
 If using a Redis cluster configuration, a copy of the model
 referenced by the provided key will be chosen based on data locality.
-It is worth noting that the names of input and output tensor will be
-altered with ensemble member identifications if this SmartSim
+It is worth noting that the names of input and output tensors will be
+altered with ensemble member identifications if the SmartSim
 ensemble compatibility features are used.
 
 .. note::
@@ -471,7 +474,7 @@ Retrieving
 ----------
 
 A script can be retrieved from the database using the
-```Client.get_script()``` function.  While the return
+``Client.get_script()`` function.  While the return
 type varies between languages, only the script key
 that was used with ``Client.set_script()`` is needed
 to reference the script in the database.  Note that
@@ -489,12 +492,12 @@ Executing
 
 A script can be executed using the ``Client.run_script()`` function.
 The only required inputs to execute a script are the script key,
-the name of the function in the script to executive, a list of input
+the name of the function in the script to execute, a list of input
 tensor names, and a list of output tensor names.
 If using a Redis cluster configuration, a copy of the script
 referenced by the provided key will be chosen based on data locality.
-It is worth noting that the names of input and output tensor will be
-altered with ensemble member identifications if this SmartSim
+It is worth noting that the names of input and output tensors will be
+altered with ensemble member identifications if the SmartSim
 ensemble compatibility features are used.
 
 .. note::

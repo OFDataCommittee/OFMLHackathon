@@ -56,51 +56,40 @@ CommandReply Redis::run(Command& cmd)
     CommandReply reply;
 
     int n_trials = 100;
-    bool success = true;
 
-    while (n_trials > 0 && success) {
+    while (n_trials > 0) {
 
         try {
             reply = this->_redis->command(cmd_fields_start, cmd_fields_end);
 
             if(reply.has_error()==0)
-                n_trials = -1;
-            else
-                n_trials = 0;
-        }
-        catch (sw::redis::TimeoutError &e) {
-            n_trials--;
-            std::cout << "WARNING: Caught redis TimeoutError: " << e.what() << std::endl;
-            std::cout << "WARNING: Could not execute command " << cmd.first_field()
-                      << " and " << n_trials << " more trials will be made."
-                      << std::endl << std::flush;
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+                return reply;
+            n_trials = 0;
         }
         catch (sw::redis::IoError &e) {
             n_trials--;
-            std::cout << "WARNING: Caught redis IOError: " << e.what() << std::endl;
-            std::cout << "WARNING: Could not execute command " << cmd.first_field()
-                        << " and " << n_trials << " more trials will be made."
-                        << std::endl << std::flush;
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+        }
+        catch (sw::redis::ClosedError &e) {
+            n_trials--;
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+        }
+        catch (std::exception& e) {
+            throw std::runtime_error(e.what());
         }
         catch (...) {
-            n_trials--;
-            std::cout << "WARNING: Could not execute command " << cmd.first_field()
-                        << " and " << n_trials << " more trials will be made."
-                        << std::endl << std::flush;
-            std::cout << "Error command = "<<cmd.to_string()<<std::endl;
-            throw;
+            throw std::runtime_error("A non-standard exception "\
+                                     "encountered during command " +
+                                     cmd.first_field() +
+                                     " execution. ");
         }
     }
 
-    if (n_trials == 0)
-        success = false;
-
-    if (!success) {
+    if (n_trials == 0) {
         if(reply.has_error()>0)
             reply.print_reply_error();
         throw std::runtime_error("Redis failed to execute command: " +
-                                 cmd.to_string());
+                                 cmd.first_field());
     }
 
     return reply;
@@ -131,6 +120,15 @@ bool Redis::key_exists(const std::string& key)
     CommandReply reply = this->run(cmd);
     return reply.integer();
 }
+
+bool Redis::is_addressable(const std::string& address,
+                           const uint64_t& port)
+{
+    return this->_address_node_map.find(address + ":"
+                        + std::to_string(port))
+                        != this->_address_node_map.end();
+}
+
 
 CommandReply Redis::put_tensor(TensorBase& tensor)
 {
@@ -331,27 +329,60 @@ CommandReply Redis::get_script(const std::string& key)
 
 inline void Redis::_connect(std::string address_port)
 {
-    int n_connection_trials = 10;
+    // Note that this logic flow differs from a cluster
+    // because the non-cluster Redis constructor
+    // does not form a connection until a command is run
 
-    while(n_connection_trials > 0) {
-        try {
-            this->_redis = new sw::redis::Redis(address_port);
-            n_connection_trials = -1;
-        }
-        catch (sw::redis::TimeoutError &e) {
-          std::cout << "WARNING: Caught redis TimeoutError: "
-                    << e.what() << std::endl;
-          std::cout << "WARNING: TimeoutError occurred with "\
-                       "initial client connection.";
-          std::cout << "WARNING: "<< n_connection_trials
-                      << " more trials will be made.";
-          n_connection_trials--;
-          std::this_thread::sleep_for(std::chrono::seconds(2));
-        }
+    this->_address_node_map.insert({address_port, nullptr});
+
+    // Try to create the sw::redis::Redis object
+    try {
+        this->_redis = new sw::redis::Redis(address_port);
+    }
+    catch (std::exception& e) {
+        this->_redis = NULL;
+        throw std::runtime_error("Failed to create Redis "\
+                                 "object with error: " +
+                                 std::string(e.what()));
+    }
+    catch (...) {
+        this->_redis = NULL;
+        throw std::runtime_error("A non-standard exception "\
+                                 "encountered during client "\
+                                 "connection.");
     }
 
-    if(n_connection_trials==0)
-        throw std::runtime_error("A connection could not be "\
-                                 "established to the redis database.");
+    // Attempt to have the sw::redis::Redis object
+    // make a connection using the PING command
+    int n_trials = 10;
+    bool run_sleep = false;
+
+    for(int i=1; i<=n_trials; i++) {
+        run_sleep = false;
+        try {
+            if(this->_redis->ping().compare("PONG")==0) {
+                break;
+            }
+            else {
+                run_sleep = true;
+            }
+        }
+        catch (std::exception& e) {
+            if(i == n_trials) {
+                throw std::runtime_error(e.what());
+            }
+            run_sleep = true;
+        }
+        catch (...) {
+            if(i == n_trials) {
+                throw std::runtime_error("A non-standard exception "\
+                                         "encountered during client "\
+                                         "connection.");
+            }
+            run_sleep = true;
+        }
+        if(run_sleep)
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+    }
     return;
 }

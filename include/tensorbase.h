@@ -33,6 +33,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include <string_view>
 #include <stdexcept>
 #include "enums/cpp_tensor_type.h"
 #include "enums/cpp_memory_layout.h"
@@ -113,6 +114,24 @@ class TensorBase{
         *   \param tb The TensorBase to move for construction
         */
         TensorBase(TensorBase&& tb);
+
+        /*!
+        *   \brief Deep copy operator
+        *   \details This method creates a new derived
+        *            type Tensor and returns a TensorBase*
+        *            pointer.  The new dervied type is
+        *            allocated on the heap.  Contents
+        *            are copied using the copy assignment
+        *            operator for the derived type. This is meant
+        *            to provide functionality to deep
+        *            copy a Tensor when only a TensorBase
+        *            object is possessed (i.e. a deep
+        *            copy in a polymorphic capacity).
+        *   \returns A pointer to dynamically allocated
+        *            dervied type cast to parent TensorBase
+        *            type.
+        */
+        virtual TensorBase* clone() = 0;
 
         /*!
         *   \brief TensorBase destructor

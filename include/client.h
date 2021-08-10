@@ -66,6 +66,7 @@ typedef redisReply ReplyElem;
 */
 class Client
 {
+
     public:
 
         /*!
@@ -432,7 +433,7 @@ class Client
         /*!
         *   \brief Check if the model (or the script) exists in the database
         *   \param name The name that will be checked in the database
-        *               Depending on the current prefixing behavior,
+        *               depending on the current prefixing behavior,
         *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the key exists in the database
@@ -442,7 +443,7 @@ class Client
         /*!
         *   \brief Check if the tensor (or the dataset) exists in the database
         *   \param name The name that will be checked in the database
-        *               Depending on the current prefixing behavior,
+        *               depending on the current prefixing behavior,
         *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the key exists in the database
@@ -493,7 +494,7 @@ class Client
         *          at a specified frequency for a specified number
         *          of times.
         *   \param name The name that will be checked in the database
-        *               Depending on the current prefixing behavior,
+        *               depending on the current prefixing behavior,
         *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \param poll_frequency_ms The frequency of checks for the
@@ -547,6 +548,39 @@ class Client
         *                   a prefix, if available.
         */
         void use_model_ensemble_prefix(bool use_prefix);
+
+        /*!
+        *   \brief Returns information about the given database node
+        *   \param address The address of the database node (host:port)
+        *   \returns parsed_reply_nested_map containing the database node information
+	*   \throws std::runtime_error if the address is not addressable by this
+	*           client.  In the case of using a cluster of database nodes,
+	*           it is best practice to bind each node in the cluster
+	*           to a specific adddress to avoid inconsistencies in
+	*           addresses retreived with the CLUSTER SLOTS command.
+	*           Inconsistencies in node addresses across
+	*           CLUSTER SLOTS comands will lead to std::runtime_error
+	*           being thrown.
+        */
+        parsed_reply_nested_map get_db_node_info(std::string address);
+
+        /*!
+        *   \brief Returns the CLUSTER INFO command reply addressed to a single
+        *          cluster node.
+        *   \param address The address of the database node (host:port)
+        *   \returns parsed_reply_map containing the database cluster information.
+        *            If this command is executed on a non-cluster database, an
+        *            empty parsed_reply_map is returned.
+	*   \throws std::runtime_error if the address is not addressable by this
+        *           client.  In the case of using a cluster of database nodes,
+        *           it is best practice to bind each node in the cluster
+        *           to a specific adddress to avoid inconsistencies in
+        *           addresses retreived with the CLUSTER SLOTS command.
+        *           Inconsistencies in node addresses across
+        *           CLUSTER SLOTS comands will lead to std::runtime_error
+        *           being thrown.
+        */
+        parsed_reply_map get_db_cluster_info(std::string address);
 
     protected:
 
@@ -626,6 +660,22 @@ class Client
         *             metadata
         */
         inline CommandReply _get_dataset_metadata(const std::string& name);
+
+        /*!
+        *   \brief Retrieve the tensor from the DataSet and return
+        *          a TensorBase object that can be used to return
+        *          tensor information to the user.  The returned
+        *          TensorBase object has been dynamically allocated,
+        *          but not yet tracked for memory management in
+        *          any object.
+        *   \details The TensorBase object returned will always
+        *            have a MemoryLayout::contiguous layout.
+        *   \param name  The name used to reference the tensor
+        *   \returns A TensorBase object.
+        */
+        TensorBase* _get_tensorbase_obj(const std::string& name);
+
+        friend class PyClient;
 
     private:
 
@@ -727,6 +777,52 @@ class Client
         inline std::string _build_dataset_ack_key(const std::string& dataset_name,
                                                   bool on_db);
 
+        /*!
+        *   \brief Append the Command associated with
+        *          placing DataSet metadata in the database
+        *          to a CommandList
+        *   \param cmd_list The CommandList to append DataSet
+        *                   metadata commands
+        *   \param dataset The dataset used for the Command
+        *                  construction
+        */
+        void _append_dataset_metadata_commands(CommandList& cmd_list,
+                                               DataSet& dataset);
+
+        /*!
+        *   \brief Append the Command associated with
+        *          placing DataSet tensors in the database
+        *          to a CommandList
+        *   \param cmd_list The CommandList to append DataSet
+        *                   tensor commands
+        *   \param dataset The dataset used for the Command
+        *                  construction
+        */
+        void _append_dataset_tensor_commands(CommandList& cmd_list,
+                                             DataSet& dataset);
+
+        /*!
+        *   \brief Append the Command associated with
+        *          acknowledging that the DataSet is complete
+        *          (all put commands processed) to the CommandList
+        *   \param cmd_list The CommandList to append DataSet
+        *                   ack command
+        *   \param dataset The dataset used for the Command
+        *                  construction
+        */
+        void _append_dataset_ack_command(CommandList& cmd_list,
+                                         DataSet& dataset);
+
+        /*!
+        *   \brief Put the metadata fields embedded in a
+        *          CommandReply into the DataSet
+        *   \param dataset The DataSet that will have
+        *                  metadata place in it.
+        *   \param reply The CommandReply containing the
+        *                metadata fields.
+        */
+        void _unpack_dataset_metadata(DataSet& dataset,
+                                      CommandReply& reply);
 };
 
 } //namespace SmartRedis

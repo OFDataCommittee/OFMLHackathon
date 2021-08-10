@@ -12,8 +12,14 @@ Client API
     Client.__init__
     Client.put_tensor
     Client.get_tensor
+    Client.delete_tensor
+    Client.copy_tensor
+    Client.rename_tensor
     Client.put_dataset
     Client.get_dataset
+    Client.delete_dataset
+    Client.copy_dataset
+    Client.rename_dataset
     Client.set_function
     Client.set_script
     Client.set_script_from_file

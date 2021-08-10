@@ -1,3 +1,4 @@
+
 /*
  * BSD 2-Clause License
  *
@@ -45,9 +46,16 @@ extern "C" {
 *   \param name_length The length of the dataset
 *                      name c-string, excluding
 *                      null terminating character
+*   \return Returns NULL on failure
 */
 void* CDataSet(const char* name,
                const size_t name_length);
+
+/*!
+*   \brief C-DataSet destructor
+*   \param dataset A c-ptr to receive the dataset object
+*/
+void DeallocateeDataSet(void* dataset);
 
 /*!
 *   \brief Add a tensor to the DataSet.
@@ -71,8 +79,8 @@ void add_tensor(void* dataset,
                 void* data,
                 const size_t* dims,
                 const size_t n_dims,
-                CTensorType type,
-                CMemoryLayout mem_layout);
+                const CTensorType type,
+                const CMemoryLayout mem_layout);
 
 /*!
 *   \brief Add metadata scalar field (non-string)
@@ -93,7 +101,7 @@ void add_meta_scalar(void* dataset,
                      const char* name,
                      const size_t name_length,
                      const void* data,
-                     CMetaDataType type);
+                     const CMetaDataType type);
 
 
 /*!
@@ -219,7 +227,7 @@ void unpack_dataset_tensor(void* dataset,
 *   \param type The MetadataType enum describing
 *               the data type of the metadata field
 *   \returns A c-ptr to newly allocated memory containing
-*            the metadata
+*            the metadata or NULL on bad parameters
 */
 void* get_meta_scalars(void* dataset,
                       const char* name,

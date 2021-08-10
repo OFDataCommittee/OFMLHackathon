@@ -39,14 +39,15 @@ enum should be used by users.
 namespace SmartRedis {
 
 enum class TensorType{
-    dbl    = 1,
-    flt    = 2,
-    int8   = 3,
-    int16  = 4,
-    int32  = 5,
-    int64  = 6,
-    uint8  = 7,
-    uint16 = 8 };
+    undefined = 0,
+    dbl       = 1,
+    flt       = 2,
+    int8      = 3,
+    int16     = 4,
+    int32     = 5,
+    int64     = 6,
+    uint8     = 7,
+    uint16    = 8 };
 
 //! Helper method to convert between CTensorType and TensorType
 inline TensorType convert_tensor_type(CTensorType type) {
