@@ -633,6 +633,16 @@ class Client(PyClient):
         :returns: A list of dictionaries with each entry in the
                   list corresponding to an address reply
         :rtype: list[dict]
+        :raises RedisReplyError: if there is an error in
+                  in command execution or the address
+                  is not reachable by the client.  
+                  In the case of using a cluster of database nodes,
+                  it is best practice to bind each node in the cluster
+                  to a specific adddress to avoid inconsistencies in
+                  addresses retreived with the CLUSTER SLOTS command.
+                  Inconsistencies in node addresses across
+                  CLUSTER SLOTS comands will lead to RedisReplyError
+                  being thrown.
 
         """
         try:
@@ -650,6 +660,16 @@ class Client(PyClient):
         :returns: A list of dictionaries with each entry in the
                   list corresponding to an address reply
         :rtype: list[dict]
+        :raises RedisReplyError: if there is an error in
+                  in command execution or the address
+                  is not reachable by the client.
+                  In the case of using a cluster of database nodes,
+                  it is best practice to bind each node in the cluster
+                  to a specific adddress to avoid inconsistencies in
+                  addresses retreived with the CLUSTER SLOTS command.
+                  Inconsistencies in node addresses across
+                  CLUSTER SLOTS comands will lead to RedisReplyError
+                  being thrown.
 
         """
         try:

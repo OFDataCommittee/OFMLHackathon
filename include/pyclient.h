@@ -431,6 +431,14 @@ class PyClient
         *   \param addresses The addresses of the database nodes
         *   \returns A list of parsed_map objects containing all the
         *            information about the given database nodes
+	*   \throws std::runtime_error if the address is not addressable by this
+        *           client.  In the case of using a cluster of database nodes,
+        *           it is best practice to bind each node in the cluster
+        *           to a specific adddress to avoid inconsistencies in
+        *           addresses retreived with the CLUSTER SLOTS command.
+        *           Inconsistencies in node addresses across
+        *           CLUSTER SLOTS comands will lead to std::runtime_error
+        *           being thrown.
         */
         std::vector<py::dict> get_db_node_info(std::vector<std::string> addresses);
 
@@ -440,6 +448,14 @@ class PyClient
         *   \param addresses The addresses of the database nodes
         *   \returns A list of parsed_map objects containing all the cluster
         *            information about the given database nodes
+	*   \throws std::runtime_error if the address is not addressable by this
+        *           client.  In the case of using a cluster of database nodes,
+        *           it is best practice to bind each node in the cluster
+        *           to a specific adddress to avoid inconsistencies in
+        *           addresses retreived with the CLUSTER SLOTS command.
+        *           Inconsistencies in node addresses across
+        *           CLUSTER SLOTS comands will lead to std::runtime_error
+        *           being thrown.
         */
         std::vector<py::dict> get_db_cluster_info(std::vector<std::string> addresses);
 

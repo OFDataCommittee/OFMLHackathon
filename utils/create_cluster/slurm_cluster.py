@@ -2,6 +2,17 @@ from subprocess import Popen, TimeoutExpired, PIPE, SubprocessError, run
 from os import environ
 import os
 
+def get_ip_from_host(host):
+    ping_out = ping_host(host)
+    found = False
+    # break loop when the hostname is found in
+    # the ping output
+    for item in ping_out.split():
+        if found:
+            return item.split("(")[1].split(")")[0]
+        if item == host:
+            found = True
+
 def launch_db(host, port, dpn):
     """
     set cluster log file
@@ -11,7 +22,7 @@ def launch_db(host, port, dpn):
     redis = environ['REDIS_INSTALL_PATH'] + '/redis-server '
     redisai = "--loadmodule " +  environ['REDISAI_CPU_INSTALL_PATH'] + "/redisai.so "
     if(dpn < 3):
-        cmd = "srun -N 1 -n 1 " + redis + "./smartredisdb.conf " + redisai + "--cluster-enabled yes  "
+        cmd = "srun -N 1 -n 1 " + redis + "./smartredisdb.conf " + redisai + "--cluster-enabled yes  " + "--bind " + get_ip_from_host(host) + " "
         log_file = "--logfile " + host + "-" + str(port) + ".log"
         cluster_file = "--cluster-config-file nodes-" + host + "-" + str(port) + ".conf"
         cmd += log_file + " "
@@ -23,7 +34,7 @@ def launch_db(host, port, dpn):
         conf_file = open("run_orc.conf","w")
         for i in range(dpn):
             dir = os.getcwd()
-            cmd = redis + dir+"/smartredisdb.conf " + "--port " + str(port+i) + " " + redisai + "--cluster-enabled yes  "
+            cmd = redis + dir+"/smartredisdb.conf " + "--port " + str(port+i) + " " + redisai + "--cluster-enabled yes " +  "--bind " + get_ip_from_host(host) + " "
             log_file = "--logfile " + host + "-" + str(port+i) + ".log"
             cluster_file = "--cluster-config-file nodes-" + host + "-" + str(port+i) + ".conf"
             cmd += log_file + " "
@@ -36,23 +47,6 @@ def launch_db(host, port, dpn):
         pid = Popen(dpn_cmd , shell=True)
         time.sleep(1)
         return pid
-
-def get_ip_from_host(host):
-    ping_out = ping_host(host)
-    found = False
-    print(host)
-    print(ping_out)
-    print('here')
-    # break loop when the hostname is found in
-    # the ping output
-    for item in ping_out.split():
-        print(item)
-        if found:
-            print('Found!')
-            return item.split("(")[1].split(")")[0]
-        if item == host:
-            found = True
-
 
 def create_cluster(nodes, port, dpn):
     # TODO change to support list instead of node string when put into smartsim
