@@ -39,6 +39,13 @@
 #include "dbnode.h"
 #include "nonkeyedcommand.h"
 #include "keyedcommand.h"
+#include "multikeycommand.h"
+#include "singlekeycommand.h"
+#include "compoundcommand.h"
+#include "addressatcommand.h"
+#include "addressanycommand.h"
+#include "clusterinfocommand.h"
+#include "dbinfocommand.h"
 
 ///@file
 

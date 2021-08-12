@@ -26,10 +26,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SMARTREDIS_NONKEYEDCOMMAND_H
-#define SMARTREDIS_NONKEYEDCOMMAND_H
+#ifndef SMARTREDIS_CLUSTERINFOCOMMAND_H
+#define SMARTREDIS_CLUSTERINFOCOMMAND_H
 
-#include "command.h"
+#include "addressatcommand.h"
+
+using parsed_reply_map = std::unordered_map<std::string, std::string>;
+using parsed_reply_nested_map = std::unordered_map<std::string, parsed_reply_map>;
 
 ///@file
 
@@ -37,55 +40,20 @@ namespace SmartRedis {
 
 class RedisServer;
 
-/*!
-*   \brief The NonKeyedCommand intermediary class constructs Client
-*          commands without keys. These commands use db node addresses.
-*   \details The KeyedCommand class has multiple methods for dealing
-*            with non-keyed commands.
-*/
-class NonKeyedCommand : public Command
+class ClusterInfoCommand : public AddressAtCommand
 {
     public:
-        /*!
-        *   \brief Set address and port for command
-        *          to be executed on
-        *   \param address Address of database
-        *   \param port Port of database
-        */
-        void set_exec_address_port(std::string address,
-                                   uint16_t port);
+        virtual CommandReply runme(RedisServer *r);
 
         /*!
-        *   \brief Get address that command will be
-        *          to be executed on
-        *   \return std::string of address
-        *           if an address hasn't been set,
-        *                 returns an empty string
+        *   \brief Parse database node information from get_db_node_info()
+        *          into a nested unordered_map
+        *   \param info containing the database node information
+        *   \return parsed_reply_map containing the database node cluster information
         */
-        std::string get_address();
-
-        /*!
-        *   \brief Get port that command will be
-        *          to be executed on
-        *   \return uint16_t of port
-        *           if port hasn't been set, returns 0
-        */
-        uint16_t get_port();
-
-        virtual CommandReply runme(RedisServer * r) = 0;
-
-    private:
-        /*!
-        *   \brief Address of database node
-        */
-        std::string _address;
-
-        /*!
-        *   \brief Port of database node
-        */
-        uint64_t _port;
+        parsed_reply_map parse_db_cluster_info(std::string info);
 };
 
 } //namespace SmartRedis
 
-#endif //NONKEYEDCOMMAND
+#endif //CLUSTERINFOCOMMAND

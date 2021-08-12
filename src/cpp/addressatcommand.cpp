@@ -26,13 +26,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "keyedcommand.h"
+#include "addressatcommand.h"
 #include "redisserver.h"
 
 using namespace SmartRedis;
 
-CommandReply KeyedCommand::runme(RedisServer * r)
+CommandReply AddressAtCommand::runme(RedisServer * r)
 {
-    CommandReply reply;
-    return reply;
+    return r->run(*this);
 }

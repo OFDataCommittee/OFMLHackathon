@@ -22,6 +22,13 @@ set(CLIENT_SRC
     src/cpp/command.cpp
     src/cpp/keyedcommand.cpp
     src/cpp/nonkeyedcommand.cpp
+    src/cpp/multikeycommand.cpp
+    src/cpp/singlekeycommand.cpp
+    src/cpp/compoundcommand.cpp
+    src/cpp/addressatcommand.cpp
+    src/cpp/addressanycommand.cpp
+    src/cpp/clusterinfocommand.cpp
+    src/cpp/dbinfocommand.cpp
     src/cpp/commandlist.cpp
     src/cpp/metadata.cpp
     src/cpp/tensorbase.cpp

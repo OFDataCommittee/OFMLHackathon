@@ -26,13 +26,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "keyedcommand.h"
+#include "clusterinfocommand.h"
 #include "redisserver.h"
 
 using namespace SmartRedis;
 
-CommandReply KeyedCommand::runme(RedisServer * r)
+CommandReply ClusterInfoCommand::runme(RedisServer *r)
 {
-    CommandReply reply;
-    return reply;
+    return r->run(*this);
+}
+
+parsed_reply_map ClusterInfoCommand::parse_db_cluster_info(std::string info)
+{
+    parsed_reply_map info_map;
+
+    std::string delim = "\r\n";
+    std::string currKey = "";
+    size_t start = 0U;
+    size_t end = info.find(delim);
+
+    while (end != std::string::npos)
+    {
+        std::string line = info.substr(start, end-start);
+        start = end + delim.length();
+        end = info.find(delim, start);
+        if (line.length() == 0)
+            continue;
+
+        std::size_t separatorIdx = line.find(':');
+        info_map[line.substr(0, separatorIdx)] =
+                 line.substr(separatorIdx+1);
+    }
+    std::string line = info.substr(start);
+    if (line.length() > 0)
+    {
+        std::size_t separatorIdx = line.find(':');
+        info_map[line.substr(0, separatorIdx)] =
+                 line.substr(separatorIdx+1);
+    }
+    return info_map;
 }
