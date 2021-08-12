@@ -4,11 +4,7 @@ Changelog
 0.2.0
 -----
 
-<<<<<<< HEAD
-Release on July, 29, 2021
-=======
 Release on August, 5, 2021
->>>>>>> 8efe7293bc6eb1722ca047a75ed5ef99d21ef789
 
 Description
 
@@ -22,10 +18,6 @@ Description
  - Fortran and C interface improvements (PR93_) (PR94_) (PR95_) (PR99_)
  - Add Redis INFO command execution to the Python client (PR83_)
  - Add Redis CLUSTER INFO command execution to the Python client (PR105_)
-<<<<<<< HEAD
-=======
-
->>>>>>> 8efe7293bc6eb1722ca047a75ed5ef99d21ef789
 .. _PR52: https://github.com/CrayLabs/SmartRedis/pull/52
 .. _PR61: https://github.com/CrayLabs/SmartRedis/pull/61
 .. _PR65: https://github.com/CrayLabs/SmartRedis/pull/65
@@ -44,10 +36,6 @@ Description
 .. _PR101: https://github.com/CrayLabs/SmartRedis/pull/101
 .. _PR105: https://github.com/CrayLabs/SmartRedis/pull/105
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 8efe7293bc6eb1722ca047a75ed5ef99d21ef789
 0.1.1
 -----
 
