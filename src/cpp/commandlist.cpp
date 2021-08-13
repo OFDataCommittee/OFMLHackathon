@@ -30,11 +30,11 @@
 
 using namespace SmartRedis;
 
+// CommandList copy constructor
 CommandList::CommandList(const CommandList& cmd_lst)
 {
     std::vector<Command*>::const_iterator c_it = cmd_lst._commands.cbegin();
-    std::vector<Command*>::const_iterator c_it_end = cmd_lst._commands.cend();
-    for(; c_it != c_it_end; c_it++) {
+    for ( ; c_it != cmd_lst._commands.cend(); c_it++) {
         Command* curr_command = new Command(**c_it);
         this->_commands.push_back(curr_command);
     }

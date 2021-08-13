@@ -30,33 +30,37 @@
 
 using namespace SmartRedis;
 
-Client::Client(bool cluster)
+// Constructor
+Client::Client(bool cluster) :
+    _redis_cluster(cluster ? new RedisCluster() : NULL),
+    _redis(cluster ? NULL : new Redis())
 {
-    if(cluster) {
-        this->_redis_cluster = new RedisCluster();
-        this->_redis = 0;
-        this->_redis_server = this->_redis_cluster;
-    }
-    else {
-        this->_redis_cluster = 0;
-        this->_redis = new Redis();
-        this->_redis_server = this->_redis;
-    }
+    if (cluster)
+        _redis_server =  _redis_cluster;
+    else
+        _redis_server =  _redis;
     this->_set_prefixes_from_env();
-
     this->_use_tensor_prefix = true;
     this->_use_model_prefix = false;
-
-    return;
 }
 
-Client::~Client() {
-    if(this->_redis_cluster)
+// Destructor
+Client::~Client()
+{
+    if (this->_redis_cluster != NULL)
+    {
         delete this->_redis_cluster;
-    if(this->_redis)
+        this->_redis_cluster = NULL;
+    }
+    if (this->_redis != NULL)
+    {
         delete this->_redis;
+        this->_redis = NULL;
+    }
+    this->_redis_server = NULL;
 }
 
+// Establish a dataset
 void Client::put_dataset(DataSet& dataset)
 {
     CommandList cmds;
@@ -64,123 +68,131 @@ void Client::put_dataset(DataSet& dataset)
     this->_append_dataset_tensor_commands(cmds, dataset);
     this->_append_dataset_ack_command(cmds, dataset);
     this->_run(cmds);
-    return;
 }
 
+// Retrieve the current dataset
 DataSet Client::get_dataset(const std::string& name)
 {
     // Get the metadata message and construct DataSet
     CommandReply reply = this->_get_dataset_metadata(name);
-
-    if(reply.n_elements()==0)
+    if (reply.n_elements() == 0) {
         throw std::runtime_error("The requested DataSet " +
                                  name + " does not exist.");
+    }
 
-    DataSet dataset = DataSet(name);
+    DataSet dataset(name);
     this->_unpack_dataset_metadata(dataset, reply);
 
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
 
-    std::vector<size_t> reply_dims;
-    std::string_view blob;
-    TensorType type;
-    std::string tensor_key;
-    for(size_t i=0; i<tensor_names.size(); i++) {
-        tensor_key =
-            this->_build_dataset_tensor_key(name, tensor_names[i],
-                                            true);
+    for (size_t i = 0; i < tensor_names.size(); i++) {
+        std::string tensor_key = this->_build_dataset_tensor_key(
+            name, tensor_names[i], true);
         Command cmd;
         cmd.add_field("AI.TENSORGET");
         cmd.add_field(tensor_key, true);
         cmd.add_field("META");
         cmd.add_field("BLOB");
         reply = this->_run(cmd);
-        reply_dims = CommandReplyParser::get_tensor_dims(reply);
-        blob = CommandReplyParser::get_tensor_data_blob(reply);
-        type = CommandReplyParser::get_tensor_data_type(reply);
+        std::vector<size_t> reply_dims =
+            CommandReplyParser::get_tensor_dims(reply);
+        std::string_view blob = CommandReplyParser::get_tensor_data_blob(reply);
+        TensorType type = CommandReplyParser::get_tensor_data_type(reply);
         dataset._add_to_tensorpack(tensor_names[i],
                                    (void*)blob.data(), reply_dims,
                                    type, MemoryLayout::contiguous);
     }
+
+    // ***WS*** FINDME: Passing objects by value causes unnecessary copies
     return dataset;
 }
 
+// Rename the current dataset
 void Client::rename_dataset(const std::string& name,
                             const std::string& new_name)
 {
     this->copy_dataset(name, new_name);
     this->delete_dataset(name);
-    return;
 }
 
+// Clone the dataset to a new name
 void Client::copy_dataset(const std::string& src_name,
                           const std::string& dest_name)
 {
+    // Extract metadata
     CommandReply reply = this->_get_dataset_metadata(src_name);
-    DataSet dataset = DataSet(src_name);
+    if (reply.n_elements() == 0) {
+        throw std::runtime_error("The requested DataSet " +
+                                 src_name + " does not exist.");
+    }
+    DataSet dataset(src_name);
     this->_unpack_dataset_metadata(dataset, reply);
 
+    // Clone tensor keys
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
     std::vector<std::string> tensor_src_names;
     std::vector<std::string> tensor_dest_names;
-    for(size_t i=0; i<tensor_names.size(); i++) {
-        tensor_src_names.push_back(
-            this->_build_dataset_tensor_key(src_name,
-                                            tensor_names[i],true));
-        tensor_dest_names.push_back(
-            this->_build_dataset_tensor_key(dest_name,
-                                            tensor_names[i],false));
+    for (size_t i = 0; i < tensor_names.size(); i++) {
+        std::string key = this->_build_dataset_tensor_key(src_name, tensor_names[i],true);
+        tensor_src_names.push_back(key);
+        key = this->_build_dataset_tensor_key(dest_name, tensor_names[i],false);
+        tensor_dest_names.push_back(key);
     }
-    this->_redis_server->copy_tensors(tensor_src_names,
-                                      tensor_dest_names);
+
+    // Clone tensors
+    this->_redis_server->copy_tensors(tensor_src_names, tensor_dest_names);
 
     // Update the DataSet name to the destination name
     // so we can reuse the object for placing metadata
     // and ack commands
     dataset.name = dest_name;
     CommandList put_meta_cmds;
-    CommandReply put_meta_reply;
     this->_append_dataset_metadata_commands(put_meta_cmds, dataset);
     this->_append_dataset_ack_command(put_meta_cmds, dataset);
-    put_meta_reply = this->_run(put_meta_cmds);
-
-    return;
+    CommandReply put_meta_reply = this->_run(put_meta_cmds);
 }
 
+// Delete a DataSet from the database.
+// All tensors and metdata in the DataSet will be deleted.
 void Client::delete_dataset(const std::string& name)
 {
     CommandReply reply = this->_get_dataset_metadata(name);
+    if (reply.n_elements() == 0) {
+        throw std::runtime_error("The requested DataSet " +
+                                 name + " does not exist.");
+    }
 
-    DataSet dataset = DataSet(name);
-    std::string field_name;
+    DataSet dataset(name);
     this->_unpack_dataset_metadata(dataset, reply);
 
+    // Build the delete command
     Command cmd;
     cmd.add_field("DEL");
-    cmd.add_field(this->_build_dataset_meta_key(dataset.name, true),true);
+    cmd.add_field(this->_build_dataset_meta_key(dataset.name, true), true);
 
+    // Add in all the tensors to be deleted
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
-    std::string tensor_key;
-    for(size_t i=0; i<tensor_names.size(); i++) {
-        tensor_key =
-            this->_build_dataset_tensor_key(dataset.name,
-                                            tensor_names[i], true);
+    for (size_t i = 0; i < tensor_names.size(); i++) {
+        std::string tensor_key(this->_build_dataset_tensor_key(dataset.name,
+                                            tensor_names[i], true));
         cmd.add_field(tensor_key, true);
     }
 
+    // Run the command
     reply = this->_run(cmd);
+    if (reply.has_error())
+        return; // Bail on error
 
+    // Acknowledge the response
     Command cmd_ack_key;
-    std::string dataset_ack_key =
-        this->_build_dataset_ack_key(name, false);
+    std::string dataset_ack_key(this->_build_dataset_ack_key(name, false));
     cmd_ack_key.add_field("DEL");
     cmd_ack_key.add_field(dataset_ack_key, true);
 
     reply = this->_run(cmd_ack_key);
-
-    return;
 }
 
+// Put a tensor into the database
 void Client::put_tensor(const std::string& key,
                         void* data,
                         const std::vector<size_t>& dims,
@@ -192,46 +204,46 @@ void Client::put_tensor(const std::string& key,
     TensorBase* tensor;
     switch(type) {
         case TensorType::dbl :
-            tensor = new Tensor<double>(p_key, data, dims,
-                                        type, mem_layout);
+            tensor = new Tensor<double>(p_key, data, dims, type, mem_layout);
             break;
         case TensorType::flt :
-            tensor = new Tensor<float>(p_key, data, dims,
-                                        type, mem_layout);
+            tensor = new Tensor<float>(p_key, data, dims, type, mem_layout);
             break;
         case TensorType::int64 :
-            tensor = new Tensor<int64_t>(p_key, data, dims,
-                                         type, mem_layout);
+            tensor = new Tensor<int64_t>(p_key, data, dims, type, mem_layout);
             break;
         case TensorType::int32 :
-            tensor = new Tensor<int32_t>(p_key, data, dims,
-                                         type, mem_layout);
+            tensor = new Tensor<int32_t>(p_key, data, dims, type, mem_layout);
             break;
         case TensorType::int16 :
-            tensor = new Tensor<int16_t>(p_key, data, dims,
-                                         type, mem_layout);
+            tensor = new Tensor<int16_t>(p_key, data, dims, type, mem_layout);
             break;
         case TensorType::int8 :
-            tensor = new Tensor<int8_t>(p_key, data, dims,
-                                        type, mem_layout);
+            tensor = new Tensor<int8_t>(p_key, data, dims, type, mem_layout);
             break;
         case TensorType::uint16 :
-            tensor = new Tensor<uint16_t>(p_key, data, dims,
-                                          type, mem_layout);
+            tensor = new Tensor<uint16_t>(p_key, data, dims, type, mem_layout);
             break;
         case TensorType::uint8 :
-            tensor = new Tensor<uint8_t>(p_key, data, dims,
-                                         type, mem_layout);
+            tensor = new Tensor<uint8_t>(p_key, data, dims, type, mem_layout);
             break;
         default : // FINDME: Need to handle this case better
             throw std::runtime_error("Invalid type for put_tensor");
     }
 
+    // Send the tensor
     CommandReply reply = this->_redis_server->put_tensor(*tensor);
 
+    // Cleanup
     delete tensor;
+    tensor = NULL;
+    if (reply.has_error())
+        throw std::runtime_error("put_tensor failed");
 }
 
+// Get the tensor data, dimensions, and type for the provided tensor key.
+// This function will allocate and retain management of the memory for the
+// tensor data.
 void Client::get_tensor(const std::string& key,
                         void*& data,
                         std::vector<size_t>& dims,
@@ -248,82 +260,86 @@ void Client::get_tensor(const std::string& key,
 
     // Hold the Tensor in memory for memory management
     this->_tensor_memory.add_tensor(ptr);
-
-    return;
 }
 
-void Client::get_tensor(const std::string& key,
-                                void*& data,
-                                size_t*& dims,
-                                size_t& n_dims,
-                                TensorType& type,
-                                const MemoryLayout mem_layout)
+// Get the tensor data, dimensions, and type for the provided tensor key.
+// This function will allocate and retain management of the memory for the
+// tensor data and dimensions. This is a c-style interface for the tensor
+// dimensions. Another function exists for std::vector dimensions.
+ void Client::get_tensor(const std::string& key,
+                        void*& data,
+                        size_t*& dims,
+                        size_t& n_dims,
+                        TensorType& type,
+                        const MemoryLayout mem_layout)
 {
 
     std::vector<size_t> dims_vec;
-    this->get_tensor(key, data, dims_vec,
-                    type, mem_layout);
+    this->get_tensor(key, data, dims_vec, type, mem_layout);
 
-    size_t dims_bytes = sizeof(size_t)*dims_vec.size();
+    size_t dims_bytes = sizeof(size_t) * dims_vec.size();
     dims = this->_dim_queries.allocate_bytes(dims_bytes);
     n_dims = dims_vec.size();
 
     std::vector<size_t>::const_iterator it = dims_vec.cbegin();
-    std::vector<size_t>::const_iterator it_end = dims_vec.cend();
-    size_t i = 0;
-    while(it!=it_end) {
+    for (size_t i = 0; it != dims_vec.cend(); i++, it++)
         dims[i] = *it;
-        i++;
-        it++;
-    }
-    return;
 }
 
+// Get tensor data and fill an already allocated array memory space that
+// has the specified MemoryLayout. The provided type and dimensions are
+// checked against retrieved values to ensure the provided memory space is
+// sufficient. This method is the most memory efficient way to retrieve
+// tensor data.
 void Client::unpack_tensor(const std::string& key,
-                          void* data,
-                          const std::vector<size_t>& dims,
-                          const TensorType type,
-                          const MemoryLayout mem_layout)
+                           void* data,
+                           const std::vector<size_t>& dims,
+                           const TensorType type,
+                           const MemoryLayout mem_layout)
 {
-    if(mem_layout == MemoryLayout::contiguous &&
-        dims.size()>1) {
+    if (mem_layout == MemoryLayout::contiguous && dims.size() > 1) {
         throw std::runtime_error("The destination memory space "\
                                 "dimension vector should only "\
                                 "be of size one if the memory "\
                                 "layout is contiguous.");
-        }
+    }
 
-    std::string g_key = this->_build_tensor_key(key, true);
-    CommandReply reply = this->_redis_server->get_tensor(g_key);
+    std::string get_key = this->_build_tensor_key(key, true);
+    CommandReply reply = this->_redis_server->get_tensor(get_key);
 
     std::vector<size_t> reply_dims =
         CommandReplyParser::get_tensor_dims(reply);
 
-    if(mem_layout == MemoryLayout::contiguous ||
+    // Make sure we have the right dims to unpack into (Contiguous case)
+    if (mem_layout == MemoryLayout::contiguous ||
         mem_layout == MemoryLayout::fortran_contiguous) {
-
         int total_dims = 1;
-        for(size_t i=0; i<reply_dims.size(); i++) {
+        for (size_t i = 0; i < reply_dims.size(); i++) {
             total_dims *= reply_dims[i];
         }
-        if( (total_dims != dims[0]) &&
-            (mem_layout == MemoryLayout::contiguous) )
-        throw std::runtime_error("The dimensions of the fetched "\
+        if (total_dims != dims[0] &&
+            mem_layout == MemoryLayout::contiguous) {
+            throw std::runtime_error("The dimensions of the fetched "\
                                 "tensor do not match the length of "\
                                 "the contiguous memory space.");
+        }
     }
 
-    if(mem_layout == MemoryLayout::nested) {
-        if(dims.size()!= reply_dims.size())
-        throw std::runtime_error("The number of dimensions of the  "\
-                                "fetched tensor, " +
-                                std::to_string(reply_dims.size()) + " "\
-                                "does not match the number of "\
-                                "dimensions of the user memory space, " +
-                                std::to_string(dims.size()));
+    // Make sure we have the right dims to unpack into (Nested case)
+    if (mem_layout == MemoryLayout::nested) {
+        if (dims.size() != reply_dims.size()) {
+            // Same number of dimensions
+            throw std::runtime_error("The number of dimensions of the  "\
+                                    "fetched tensor, " +
+                                    std::to_string(reply_dims.size()) + " "\
+                                    "does not match the number of "\
+                                    "dimensions of the user memory space, " +
+                                    std::to_string(dims.size()));
+        }
 
-        for(size_t i=0; i<reply_dims.size(); i++) {
-            if(dims[i]!=reply_dims[i]) {
+        // Same size in each dimension
+        for (size_t i = 0; i < reply_dims.size(); i++) {
+            if (dims[i] != reply_dims[i]) {
                 throw std::runtime_error("The dimensions of the fetched tensor "\
                                         "do not match the provided "\
                                         "dimensions of the user memory space.");
@@ -331,63 +347,67 @@ void Client::unpack_tensor(const std::string& key,
         }
     }
 
+    // Make sure we're unpacking the right type of data
     TensorType reply_type = CommandReplyParser::get_tensor_data_type(reply);
-    if(type!=reply_type)
+    if (type != reply_type)
         throw std::runtime_error("The type of the fetched tensor "\
                                 "does not match the provided type");
-    std::string_view blob = CommandReplyParser::get_tensor_data_blob(reply);
 
-    TensorBase* tensor;
+    // Retrieve the tensor data into a Tensor
+    std::string_view blob = CommandReplyParser::get_tensor_data_blob(reply);
+    TensorBase* tensor = NULL;
     switch(reply_type) {
         case TensorType::dbl :
-        tensor = new Tensor<double>(g_key, (void*)blob.data(),
-                                    reply_dims, reply_type,
-                                    MemoryLayout::contiguous);
-        break;
+            tensor = new Tensor<double>(get_key, (void*)blob.data(),
+                                        reply_dims, reply_type,
+                                        MemoryLayout::contiguous);
+            break;
         case TensorType::flt :
-        tensor = new Tensor<float>(g_key, (void*)blob.data(),
-                                    reply_dims, reply_type,
-                                    MemoryLayout::contiguous);
-        break;
+            tensor = new Tensor<float>(get_key, (void*)blob.data(),
+                                       reply_dims, reply_type,
+                                       MemoryLayout::contiguous);
+            break;
         case TensorType::int64  :
-        tensor = new Tensor<int64_t>(g_key, (void*)blob.data(),
-                                    reply_dims, reply_type,
-                                    MemoryLayout::contiguous);
-        break;
+            tensor = new Tensor<int64_t>(get_key, (void*)blob.data(),
+                                         reply_dims, reply_type,
+                                         MemoryLayout::contiguous);
+            break;
         case TensorType::int32 :
-        tensor = new Tensor<int32_t>(g_key, (void*)blob.data(),
-                                    reply_dims, reply_type,
-                                    MemoryLayout::contiguous);
-        break;
+            tensor = new Tensor<int32_t>(get_key, (void*)blob.data(),
+                                         reply_dims, reply_type,
+                                         MemoryLayout::contiguous);
+            break;
         case TensorType::int16 :
-        tensor = new Tensor<int16_t>(g_key, (void*)blob.data(),
-                                    reply_dims, reply_type,
-                                    MemoryLayout::contiguous);
-        break;
+            tensor = new Tensor<int16_t>(get_key, (void*)blob.data(),
+                                         reply_dims, reply_type,
+                                         MemoryLayout::contiguous);
+            break;
         case TensorType::int8 :
-        tensor = new Tensor<int8_t>(g_key, (void*)blob.data(),
-                                    reply_dims, reply_type,
-                                    MemoryLayout::contiguous);
-        break;
+            tensor = new Tensor<int8_t>(get_key, (void*)blob.data(),
+                                        reply_dims, reply_type,
+                                        MemoryLayout::contiguous);
+            break;
         case TensorType::uint16 :
-        tensor = new Tensor<uint16_t>(g_key, (void*)blob.data(),
-                                      reply_dims, reply_type,
-                                      MemoryLayout::contiguous);
-        break;
+            tensor = new Tensor<uint16_t>(get_key, (void*)blob.data(),
+                                          reply_dims, reply_type,
+                                          MemoryLayout::contiguous);
+            break;
         case TensorType::uint8 :
-        tensor = new Tensor<uint8_t>(g_key, (void*)blob.data(),
-                                     reply_dims, reply_type,
-                                     MemoryLayout::contiguous);
-        break;
+            tensor = new Tensor<uint8_t>(get_key, (void*)blob.data(),
+                                         reply_dims, reply_type,
+                                         MemoryLayout::contiguous);
+            break;
         default : // FINDME: Need to handle this case better
             throw std::runtime_error("Invalid type for unpack_tensor");
     }
 
+    // Unpack the tensor and reclaim it
     tensor->fill_mem_space(data, dims, mem_layout);
     delete tensor;
-    return;
+    tensor = NULL;
 }
 
+// Move a tensor from one key to another key
 void Client::rename_tensor(const std::string& key,
                            const std::string& new_key)
 {
@@ -395,17 +415,20 @@ void Client::rename_tensor(const std::string& key,
     std::string p_new_key = this->_build_tensor_key(new_key, false);
     CommandReply reply =
         this->_redis_server->rename_tensor(p_key, p_new_key);
-    return;
+    if (reply.has_error())
+        throw std::runtime_error("rename_tensor failed");
 }
 
+// Delete a tensor from the database
 void Client::delete_tensor(const std::string& key)
 {
     std::string p_key = this->_build_tensor_key(key, true);
-    CommandReply reply =
-            this->_redis_server->delete_tensor(p_key);
-    return;
+    CommandReply reply = this->_redis_server->delete_tensor(p_key);
+    if (reply.has_error())
+        throw std::runtime_error("delete_tensor failed");
 }
 
+// Copy the tensor from the source key to the destination key
 void Client::copy_tensor(const std::string& src_key,
                          const std::string& dest_key)
 {
@@ -413,9 +436,11 @@ void Client::copy_tensor(const std::string& src_key,
     std::string p_dest_key = this->_build_tensor_key(dest_key, false);
     CommandReply reply =
             this->_redis_server->copy_tensor(p_src_key, p_dest_key);
-    return;
+    if (reply.has_error())
+        throw std::runtime_error("copy_tensor failed");
 }
 
+// Set a model from file in the database for future execution
 void Client::set_model_from_file(const std::string& key,
                                  const std::string& model_file,
                                  const std::string& backend,
@@ -426,8 +451,8 @@ void Client::set_model_from_file(const std::string& key,
                                  const std::vector<std::string>& inputs,
                                  const std::vector<std::string>& outputs)
 {
-    if(model_file.size()==0)
-        throw std::runtime_error("model_file is a required  "
+    if (model_file.size() == 0)
+        throw std::runtime_error("model_file is a required "
                                 "parameter of set_model.");
 
     std::ifstream fin(model_file, std::ios::binary);
@@ -439,9 +464,9 @@ void Client::set_model_from_file(const std::string& key,
 
     this->set_model(key, model, backend, device, batch_size,
                     min_batch_size, tag, inputs, outputs);
-    return;
 }
 
+// Set a model from a string buffer in the database for future execution
 void Client::set_model(const std::string& key,
                        const std::string_view& model,
                        const std::string& backend,
@@ -452,35 +477,42 @@ void Client::set_model(const std::string& key,
                        const std::vector<std::string>& inputs,
                        const std::vector<std::string>& outputs)
 {
-    if(key.size()==0)
-        throw std::runtime_error("key is a required parameter "
-                                 "of set_model.");
-
-    if(backend.size()==0)
-        throw std::runtime_error("backend is a required  "
-                                 "parameter of set_model.");
-
-    if(backend.compare("TF")!=0) {
-        if(inputs.size() > 0)
-        throw std::runtime_error("INPUTS in the model set command "\
-                                 "is only valid for TF models");
-        if(outputs.size() > 0)
-        throw std::runtime_error("OUTPUTS in the model set command "\
-                                 "is only valid for TF models");
+    if (key.size() == 0) {
+        throw std::runtime_error("key is a required parameter of set_model.");
     }
 
-    if(backend.compare("TF")!=0 && backend.compare("TFLITE")!=0 &&
-        backend.compare("TORCH")!=0 && backend.compare("ONNX")!=0) {
+    if (backend.size() == 0) {
+        throw std::runtime_error("backend is a required  "\
+                                 "parameter of set_model.");
+    }
+
+    if (backend.compare("TF") !=0 ) {
+        if (inputs.size() > 0) {
+            throw std::runtime_error("INPUTS in the model set command "\
+                                     "is only valid for TF models");
+        }
+        if(outputs.size() > 0) {
+            throw std::runtime_error("OUTPUTS in the model set command "\
+                                     "is only valid for TF models");
+        }
+    }
+
+    const char *backends[] = { "TF", "TFLITE", "TORCH", "ONNX" };
+    bool found = false;
+    for (int i = 0; i < sizeof(backends)/sizeof(backends[0]); i++)
+        found = found || (backend.compare(backends[i]) != 0);
+    if (!found) {
         throw std::runtime_error(std::string(backend) +
                                     " is not a valid backend.");
     }
 
-    if(device.size()==0)
-        throw std::runtime_error("device is a required  "
+    if (device.size() == 0) {
+        throw std::runtime_error("device is a required "
                                  "parameter of set_model.");
+    }
 
-    if(device.compare("CPU")!=0 &&
-        std::string(device).find("GPU")==std::string::npos) {
+    if (device.compare("CPU") != 0 &&
+        std::string(device).find("GPU") == std::string::npos) {
         throw std::runtime_error(std::string(backend) +
                                  " is not a valid backend.");
     }
@@ -489,23 +521,29 @@ void Client::set_model(const std::string& key,
     this->_redis_server->set_model(p_key, model, backend, device,
                                    batch_size, min_batch_size,
                                    tag, inputs, outputs);
-
-    return;
 }
 
+// Retrieve the model from the database
 std::string_view Client::get_model(const std::string& key)
 {
-    std::string g_key = this->_build_model_key(key, true);
-    CommandReply reply = this->_redis_server->get_model(g_key);
+    std::string get_key = this->_build_model_key(key, true);
+    CommandReply reply = this->_redis_server->get_model(get_key);
+    if (reply.has_error())
+        throw std::runtime_error("failed to get model from server");
+
     char* model = this->_model_queries.allocate(reply.str_len());
+    if (model == NULL)
+        throw std::bad_alloc();
     std::memcpy(model, reply.str(), reply.str_len());
     return std::string_view(model, reply.str_len());
 }
 
+// Set a script from file in the database for future execution
 void Client::set_script_from_file(const std::string& key,
                                   const std::string& device,
                                   const std::string& script_file)
 {
+    // Read the script from the file
     std::ifstream fin(script_file);
     std::ostringstream ostream;
     ostream << fin.rdbuf();
@@ -513,288 +551,317 @@ void Client::set_script_from_file(const std::string& key,
     const std::string tmp = ostream.str();
     std::string_view script(tmp.data(), tmp.length());
 
+    // Send it to the database
     this->set_script(key, device, script);
-    return;
 }
 
-
+// Set a script from a string buffer in the database for future execution
 void Client::set_script(const std::string& key,
                         const std::string& device,
                         const std::string_view& script)
 {
     std::string s_key = this->_build_model_key(key, false);
     this->_redis_server->set_script(s_key, device, script);
-    return;
 }
 
+// Retrieve the script from the database
 std::string_view Client::get_script(const std::string& key)
 {
-    std::string g_key = this->_build_model_key(key, true);
-    CommandReply reply = this->_redis_server->get_script(g_key);
+    std::string get_key = this->_build_model_key(key, true);
+    CommandReply reply = this->_redis_server->get_script(get_key);
     char* script = this->_model_queries.allocate(reply.str_len());
+    if (script == NULL)
+        throw std::bad_alloc();
     std::memcpy(script, reply.str(), reply.str_len());
     return std::string_view(script, reply.str_len());
 }
 
+// Run a model in the database using the specificed input and output tensors
 void Client::run_model(const std::string& key,
                        std::vector<std::string> inputs,
                        std::vector<std::string> outputs)
 {
-    std::string g_key = this->_build_model_key(key, true);
+    std::string get_key = this->_build_model_key(key, true);
 
     if (this->_use_tensor_prefix) {
         this->_append_with_get_prefix(inputs);
         this->_append_with_put_prefix(outputs);
     }
-    this->_redis_server->run_model(g_key, inputs, outputs);
-    return;
+    this->_redis_server->run_model(get_key, inputs, outputs);
 }
 
+// Run a script function in the database using the specificed input and output tensors
 void Client::run_script(const std::string& key,
                         const std::string& function,
                         std::vector<std::string> inputs,
                         std::vector<std::string> outputs)
 {
-    std::string g_key = this->_build_model_key(key, true);
+    std::string get_key = this->_build_model_key(key, true);
 
     if (this->_use_tensor_prefix) {
         this->_append_with_get_prefix(inputs);
         this->_append_with_put_prefix(outputs);
     }
-    this->_redis_server->run_script(g_key, function, inputs, outputs);
-    return;
+    this->_redis_server->run_script(get_key, function, inputs, outputs);
 }
 
+// Check if the key exists in the database
 bool Client::key_exists(const std::string& key)
 {
     return this->_redis_server->key_exists(key);
 }
 
+// Check if the tensor (or the dataset) exists in the database
 bool Client::tensor_exists(const std::string& name)
 {
-    std::string g_key = this->_build_tensor_key(name, true);
-    return this->_redis_server->key_exists(g_key);
+    std::string get_key = this->_build_tensor_key(name, true);
+    return this->_redis_server->key_exists(get_key);
 }
 
+// Check if the model (or the script) exists in the database
 bool Client::model_exists(const std::string& name)
 {
-    std::string g_key = this->_build_model_key(name, true);
-    return this->_redis_server->model_key_exists(g_key);
+    std::string get_key = this->_build_model_key(name, true);
+    return this->_redis_server->model_key_exists(get_key);
 }
 
+// Check if the key exists in the database at a specified frequency for a specified number of times
 bool Client::poll_key(const std::string& key,
                       int poll_frequency_ms,
                       int num_tries)
 {
-    bool key_exists = false;
-
-    while(!(num_tries==0)) {
-        if(this->key_exists(key)) {
-            key_exists = true;
-            break;
-        }
+    // Check for the key however many times requested
+    for (int i = 0; i < num_tries; i++) {
+        if (this->key_exists(key))
+            return true;
         std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
-        if(num_tries>0)
-        num_tries--;
     }
 
-    return key_exists;
+    // If we get here, it was never found
+    return false;
 }
 
+// Check if the model (or script) exists in the database at a specified frequency for a specified number of times.
 bool Client::poll_model(const std::string& name,
                         int poll_frequency_ms,
                         int num_tries)
 {
-    bool key_exists = false;
-
-    while(!(num_tries==0)) {
-        if(this->model_exists(name)) {
-            key_exists = true;
-            break;
-        }
+    // Check for the model/script however many times requested
+    for (int i = 0; i < num_tries; i++) {
+        if(this->model_exists(name))
+            return true;
         std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
-        if(num_tries>0)
-        num_tries--;
     }
 
-    return key_exists;
+    // If we get here, it was never found
+    return false;
 }
 
+// Check if the tensor (or dataset) exists in the database at a specified frequency for a specified number of times
 bool Client::poll_tensor(const std::string& name,
                          int poll_frequency_ms,
                          int num_tries)
 {
-    bool key_exists = false;
-
-    while(!(num_tries==0)) {
-        if(this->tensor_exists(name)) {
-            key_exists = true;
-            break;
-        }
+    // Check for the model/script however many times requested
+    for (int i = 0; i < num_tries; i++) {
+        if(this->tensor_exists(name))
+            return true;
         std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
-        if(num_tries>0)
-        num_tries--;
     }
 
-    if(key_exists)
-        return true;
-    else
-        return false;
+    // If we get here, it was never found
+    return false;
 }
 
+// Establish a datasource
 void Client::set_data_source(std::string source_id)
 {
+    // Validate the source prefix
     bool valid_prefix = false;
     int num_prefix = _get_key_prefixes.size();
-    int i = 0;
-    for (i=0; i<num_prefix; i++) {
-        if (this->_get_key_prefixes[i].compare(source_id)==0) {
+    int save_index = -1;
+    for (int i = 0; i < num_prefix; i++) {
+        if (this->_get_key_prefixes[i].compare(source_id )== 0) {
             valid_prefix = true;
+            save_index = i;
             break;
         }
     }
 
-    if (valid_prefix)
-        this->_get_key_prefix = this->_get_key_prefixes[i];
-    else
+    if (!valid_prefix) {
         throw std::runtime_error("Client error: data source " +
                     std::string(source_id) +
                     "could not be found during client "+
                     "initialization.");
+    }
+
+    // Save the prefix
+    this->_get_key_prefix = this->_get_key_prefixes[save_index];
 }
 
-
+// Set whether names of model and script entities should be prefixed
+// (e.g. in an ensemble) to form database keys. Prefixes will only be
+// used if they were previously set through the environment variables
+// SSKEYOUT and SSKEYIN. Keys of entities created before this function
+// is called will not be affected. By default, the client does not
+// prefix model and script keys.
 void Client::use_model_ensemble_prefix(bool use_prefix)
 {
     this->_use_model_prefix = use_prefix;
 }
 
+// Set whether names of tensor and dataset entities should be prefixed
+// (e.g. in an ensemble) to form database keys. Prefixes will only be used
+// if they were previously set through the environment variables SSKEYOUT
+// and SSKEYIN. Keys of entities created before this function is called
+// will not be affected. By default, the client prefixes tensor and dataset
+// keys with the first prefix specified with the SSKEYIN and SSKEYOUT
+// environment variables.
 void Client::use_tensor_ensemble_prefix(bool use_prefix)
 {
     this->_use_tensor_prefix = use_prefix;
 }
 
+// Returns information about the given database node
 parsed_reply_nested_map Client::get_db_node_info(std::string address)
 {
+    // Validate the address
     std::string host = address.substr(0, address.find(":"));
-    uint64_t port = std::stoul (address.substr(address.find(":") + 1),
-                                nullptr, 0);
-    if (host.empty() or port == 0)
+    uint64_t port = std::stoul(address.substr(address.find(":") + 1),
+                               nullptr, 0);
+    if (host.empty() || port == 0) {
         throw std::runtime_error(std::string(address) +
                                  "is not a valid database node address.");
+    }
+
+    // Run an INFO EVERYTHING command to get node info
     Command cmd;
     cmd.set_exec_address_port(host, port);
     cmd.add_field("INFO");
-    cmd.add_field("everything");
+    cmd.add_field("EVERYTHING");
     CommandReply reply = this->_run(cmd);
+    if (reply.has_error())
+        throw std::runtime_error("INFO EVERYTHING command failed on server");
+
+    // Parse the results
     return CommandReplyParser::parse_db_node_info(std::string(reply.str(),
                                                         reply.str_len()));
 }
 
+// Returns the CLUSTER INFO command reply addressed to a single cluster node.
 parsed_reply_map Client::get_db_cluster_info(std::string address)
 {
-    if(this->_redis_cluster == NULL)
+    // Make sure we're on a cluster
+    if (this->_redis_cluster == NULL)
         return parsed_reply_map();
 
+    // Validate the address
     std::string host = address.substr(0, address.find(":"));
     uint64_t port = std::stoul (address.substr(address.find(":") + 1),
                                 nullptr, 0);
-    if (host.empty() or port == 0)
+    if (host.empty() || port == 0) {
         throw std::runtime_error(std::string(address) +
                                  "is not a valid database node address.");
+    }
+
+    // Run the CLUSTER INFO command
     Command cmd;
     cmd.set_exec_address_port(host, port);
     cmd.add_field("CLUSTER");
     cmd.add_field("INFO");
     CommandReply reply = this->_run(cmd);
+    if (reply.has_error())
+        throw std::runtime_error("CLUSTER INFO command failed on server");
+
+    // Parse the results
     return CommandReplyParser::parse_db_cluster_info(std::string(reply.str(),
                                                      reply.str_len()));
 }
 
+// Execute a Command
 CommandReply Client::_run(Command& cmd)
 {
     return this->_redis_server->run(cmd);
 }
 
+// Execute a list of commands
 CommandReply Client::_run(CommandList& cmds)
 {
     return this->_redis_server->run(cmds);
 }
 
+// Set the prefixes that are used for set and get methods using SSKEYIN 
+// and SSKEYOUT environment variables.
 void Client::_set_prefixes_from_env()
 {
+    // Establish set prefix
     const char* keyout_p = std::getenv("SSKEYOUT");
-    if (keyout_p)
+    if (keyout_p != NULL)
         this->_put_key_prefix = keyout_p;
     else
         this->_put_key_prefix.clear();
 
+    // Establish get prefix(es)
     char* keyin_p = std::getenv("SSKEYIN");
-    if(keyin_p) {
-        char* a = &keyin_p[0];
+    if (keyin_p != NULL) {
+        char* a = keyin_p;
         char* b = a;
         char parse_char = ',';
-        while (*b) {
-            if(*b==parse_char) {
-                if(a!=b)
-                    this->_get_key_prefixes.push_back(std::string(a, b-a));
-                a=++b;
+        while (*b != '\0') {
+            if (*b == parse_char) {
+                if (a != b)
+                    this->_get_key_prefixes.push_back(std::string(a, b - a));
+                a = ++b;
             }
             else
                 b++;
         }
-        if(a!=b)
-            this->_get_key_prefixes.push_back(std::string(a, b-a));
+        if (a != b)
+            this->_get_key_prefixes.push_back(std::string(a, b - a));
     }
 
+    // Set the first prefix as the data source
     if (this->_get_key_prefixes.size() > 0)
         this->set_data_source(this->_get_key_prefixes[0].c_str());
 }
 
+// Get the key prefix for placement methods
 inline std::string Client::_put_prefix()
 {
     std::string prefix;
-    if(this->_put_key_prefix.size()>0)
+    if (this->_put_key_prefix.size() > 0)
         prefix =  this->_put_key_prefix + '.';
     return prefix;
 }
 
+// Get the key prefix for retrieval methods
 inline std::string Client::_get_prefix()
 {
     std::string prefix;
-    if(this->_get_key_prefix.size()>0)
+    if (this->_get_key_prefix.size() > 0)
         prefix =  this->_get_key_prefix + '.';
     return prefix;
 }
 
-inline void Client::_append_with_get_prefix(
-                     std::vector<std::string>& keys)
+// Append a vector of keys with the retrieval prefix
+inline void Client::_append_with_get_prefix( std::vector<std::string>& keys)
 {
-    std::vector<std::string>::iterator prefix_it;
-    std::vector<std::string>::iterator prefix_it_end;
-    prefix_it = keys.begin();
-    prefix_it_end = keys.end();
-    while(prefix_it != prefix_it_end) {
+    std::vector<std::string>::iterator prefix_it = keys.begin();
+    for ( ; prefix_it != keys.end(); prefix_it++) {
         *prefix_it = this->_build_tensor_key(*prefix_it, true);
-        prefix_it++;
     }
-    return;
 }
 
-inline void Client::_append_with_put_prefix(
-                     std::vector<std::string>& keys)
+// Append a vector of keys with the placement prefix
+inline void Client::_append_with_put_prefix(std::vector<std::string>& keys)
 {
-    std::vector<std::string>::iterator prefix_it;
-    std::vector<std::string>::iterator prefix_it_end;
-    prefix_it = keys.begin();
-    prefix_it_end = keys.end();
-    while(prefix_it != prefix_it_end) {
+    std::vector<std::string>::iterator prefix_it = keys.begin();
+    for ( ; prefix_it != keys.end(); prefix_it++) {
         *prefix_it = this->_build_tensor_key(*prefix_it, false);
-        prefix_it++;
     }
-    return;
 }
 
+// Execute the command to retrieve the DataSet metadata portion of the DataSet.
 inline CommandReply Client::_get_dataset_metadata(const std::string& name)
 {
     Command cmd;
@@ -803,6 +870,7 @@ inline CommandReply Client::_get_dataset_metadata(const std::string& name)
     return this->_run(cmd);
 }
 
+// Build full formatted key of a tensor, based on current prefix settings.
 inline std::string Client::_build_tensor_key(const std::string& key, bool on_db)
 {
     std::string prefix;
@@ -812,6 +880,7 @@ inline std::string Client::_build_tensor_key(const std::string& key, bool on_db)
     return prefix + key;
 }
 
+// Build full formatted key of a model or a script, based on current prefix settings.
 inline std::string Client::_build_model_key(const std::string& key, bool on_db)
 {
     std::string prefix;
@@ -821,91 +890,88 @@ inline std::string Client::_build_model_key(const std::string& key, bool on_db)
     return prefix + key;
 }
 
+// Build full formatted key of a dataset, based on current prefix settings.
 inline std::string Client::_build_dataset_key(const std::string& dataset_name, bool on_db)
 {
-    std::string key;
     std::string prefix;
     if (this->_use_tensor_prefix)
         prefix = on_db ? this->_get_prefix() : this->_put_prefix();
 
-    key = prefix +
-          "{" + dataset_name + "}";
-    return key;
+    return prefix + "{" + dataset_name + "}";
 }
 
+// Create the key for putting or getting a DataSet tensor in the database
 inline std::string Client::_build_dataset_tensor_key(const std::string& dataset_name,
                                                      const std::string& tensor_name,
                                                      bool on_db)
 {
-    return this->_build_dataset_key(dataset_name, on_db) + "."+ tensor_name;
+    return this->_build_dataset_key(dataset_name, on_db) + "." + tensor_name;
 }
 
+// Create the key for putting or getting DataSet metadata in the database
 inline std::string Client::_build_dataset_meta_key(const std::string& dataset_name,
                                                    bool on_db)
 {
     return this->_build_dataset_key(dataset_name, on_db) + ".meta";
 }
 
+// Create the key to place an indicator in the database that the dataset has been
+// successfully stored.
 inline std::string Client::_build_dataset_ack_key(const std::string& dataset_name,
                                                   bool on_db)
 {
     return this->_build_tensor_key(dataset_name, on_db);
 }
 
+// Append the Command associated with placing DataSet metadata in the database
+// to a CommandList
 void Client::_append_dataset_metadata_commands(CommandList& cmd_list,
                                                DataSet& dataset)
 {
     std::string meta_key =
         this->_build_dataset_meta_key(dataset.name, false);
 
-    std::vector<std::pair<std::string, std::string>>
-        mdf = dataset.get_metadata_serialization_map();
-
-    if(mdf.size()==0)
+    std::vector<std::pair<std::string, std::string>> mdf =
+        dataset.get_metadata_serialization_map();
+    if (mdf.size()==0) {
         throw std::runtime_error("An attempt was made to put "\
                                  "a DataSet into the database that "\
                                  "does not contain any fields or "\
                                  "tensors.");
+    }
 
     Command* cmd = cmd_list.add_command();
     cmd->add_field("HMSET");
     cmd->add_field (meta_key, true);
-    for(size_t i=0; i<mdf.size(); i++) {
+    for (size_t i = 0; i < mdf.size(); i++) {
         cmd->add_field(mdf[i].first);
         cmd->add_field(mdf[i].second);
     }
-    return;
 }
 
+// Append the Command associated with placing DataSet tensors in the
+// database to a CommandList
 void Client::_append_dataset_tensor_commands(CommandList& cmd_list,
                                              DataSet& dataset)
 {
     DataSet::tensor_iterator it = dataset.tensor_begin();
-    DataSet::tensor_iterator it_end = dataset.tensor_end();
-    TensorBase* tensor = 0;
-    std::string tensor_key;
-
-    Command* cmd;
-    while(it != it_end) {
-        tensor = *it;
-        tensor_key =
-            this->_build_dataset_tensor_key(dataset.name,
-                                            tensor->name(),
-                                            false);
-        cmd = cmd_list.add_command();
+    for ( ; it != dataset.tensor_end(); it++) {
+        TensorBase* tensor = *it;
+        std::string tensor_key = this->_build_dataset_tensor_key(
+            dataset.name, tensor->name(), false);
+        Command* cmd = cmd_list.add_command();
         cmd->add_field("AI.TENSORSET");
         cmd->add_field(tensor_key, true);
         cmd->add_field(tensor->type_str());
         cmd->add_fields(tensor->dims());
         cmd->add_field("BLOB");
         cmd->add_field_ptr(tensor->buf());
-        it++;
     }
-    return;
 }
 
-void Client::_append_dataset_ack_command(CommandList& cmd_list,
-                                         DataSet& dataset)
+// Append the Command associated with acknowledging that the DataSet is complete
+// (all put commands processed) to the CommandList
+void Client::_append_dataset_ack_command(CommandList& cmd_list, DataSet& dataset)
 {
     std::string dataset_ack_key =
         this->_build_dataset_ack_key(dataset.name, false);
@@ -914,91 +980,94 @@ void Client::_append_dataset_ack_command(CommandList& cmd_list,
     cmd->add_field("SET");
     cmd->add_field(dataset_ack_key, true);
     cmd->add_field("1");
-    return;
 }
 
-void Client::_unpack_dataset_metadata(DataSet& dataset,
-                                      CommandReply& reply)
+// Put the metadata fields embedded in a CommandReply into the DataSet
+void Client::_unpack_dataset_metadata(DataSet& dataset, CommandReply& reply)
 {
-    std::string field_name;
-
-    if(reply.n_elements()%2)
+    // Make sure we have paired elements
+    if ((reply.n_elements() % 2) != 0)
         throw std::runtime_error("The DataSet metadata reply "\
                                   "contains the wrong number of "\
                                   "elements.");
 
-    for(size_t i=0; i<reply.n_elements(); i+=2) {
-        field_name = std::string(reply[i].str(), reply[i].str_len());
+    // Process each pair of response fields
+    for (size_t i = 0; i < reply.n_elements(); i += 2) {
+        std::string field_name(reply[i].str(), reply[i].str_len());
         dataset._add_serialized_field(field_name,
-                                      reply[i+1].str(),
-                                      reply[i+1].str_len());
+                                      reply[i + 1].str(),
+                                      reply[i + 1].str_len());
     }
     return;
 }
 
+// Retrieve the tensor from the DataSet and return a TensorBase object that
+// can be used to return tensor information to the user. The returned
+// TensorBase object has been dynamically allocated, but not yet tracked
+// for memory management in any object.
 TensorBase* Client::_get_tensorbase_obj(const std::string& name)
 {
-    std::string g_key = this->_build_tensor_key(name, true);
-
-    CommandReply reply = this->_redis_server->get_tensor(g_key);
+    // Fetch the tensor
+    std::string get_key = this->_build_tensor_key(name, true);
+    CommandReply reply = this->_redis_server->get_tensor(get_key);
+    if (reply.has_error())
+        throw std::runtime_error("tensor retrieval failed");
 
     std::vector<size_t> dims =
         CommandReplyParser::get_tensor_dims(reply);
-
-    TensorType type =
-         CommandReplyParser::get_tensor_data_type(reply);
-
-    std::string_view blob =
-        CommandReplyParser::get_tensor_data_blob(reply);
-
-    if(dims.size()<=0)
+    if (dims.size() <= 0)
         throw std::runtime_error("The number of dimensions of the "\
                                 "fetched tensor are invalid: " +
                                 std::to_string(dims.size()));
 
-    for(size_t i=0; i<dims.size(); i++) {
-        if(dims[i]<=0) {
-        throw std::runtime_error("Dimension " +
-                                 std::to_string(i) +
-                                 "of the fetched tensor is "\
-                                 "not valid: " +
-                                 std::to_string(dims[i]));
+    TensorType type =
+         CommandReplyParser::get_tensor_data_type(reply);
+    std::string_view blob =
+        CommandReplyParser::get_tensor_data_blob(reply);
+
+
+    for (size_t i = 0; i < dims.size(); i++) {
+        if (dims[i] <= 0) {
+            throw std::runtime_error("Dimension " +
+                                     std::to_string(i) +
+                                     "of the fetched tensor is "\
+                                     "not valid: " +
+                                     std::to_string(dims[i]));
         }
     }
 
-    TensorBase* ptr;
-    switch(type) {
+    TensorBase* ptr = NULL;
+    switch (type) {
         case TensorType::dbl :
-            ptr = new Tensor<double>(g_key, (void*)blob.data(), dims,
+            ptr = new Tensor<double>(get_key, (void*)blob.data(), dims,
                                      type, MemoryLayout::contiguous);
-
             break;
         case TensorType::flt :
-            ptr = new Tensor<float>(g_key, (void*)blob.data(), dims,
+            ptr = new Tensor<float>(get_key, (void*)blob.data(), dims,
                                     type, MemoryLayout::contiguous);
             break;
         case TensorType::int64 :
-            ptr = new Tensor<int64_t>(g_key, (void*)blob.data(), dims,
+            ptr = new Tensor<int64_t>(get_key, (void*)blob.data(), dims,
                                      type, MemoryLayout::contiguous);
             break;
         case TensorType::int32 :
-            ptr = new Tensor<int32_t>(g_key, (void*)blob.data(), dims,
+            ptr = new Tensor<int32_t>(get_key, (void*)blob.data(), dims,
                                       type, MemoryLayout::contiguous);
             break;
         case TensorType::int16 :
-            ptr = new Tensor<int16_t>(g_key, (void*)blob.data(), dims,
+            ptr = new Tensor<int16_t>(get_key, (void*)blob.data(), dims,
                                       type, MemoryLayout::contiguous);
             break;
         case TensorType::int8 :
-            ptr = new Tensor<int8_t>(g_key, (void*)blob.data(), dims,
+            ptr = new Tensor<int8_t>(get_key, (void*)blob.data(), dims,
                                      type, MemoryLayout::contiguous);
             break;
         case TensorType::uint16 :
-            ptr = new Tensor<uint16_t>(g_key, (void*)blob.data(), dims,
+            ptr = new Tensor<uint16_t>(get_key, (void*)blob.data(), dims,
                                        type, MemoryLayout::contiguous);
             break;
         case TensorType::uint8 :
-            ptr = new Tensor<uint8_t>(g_key, (void*)blob.data(), dims,
+            ptr = new Tensor<uint8_t>(get_key, (void*)blob.data(), dims,
                                       type, MemoryLayout::contiguous);
             break;
         default :
@@ -1011,3 +1080,5 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
     }
     return ptr;
 }
+
+// EOF
