@@ -31,47 +31,14 @@
 
 using namespace SmartRedis;
 
-CommandReply SingleKeyCommand::runme(RedisServer * r)
+CommandReply SingleKeyCommand::run_me(RedisServer* r)
 {
     return r->run(*this);
 }
 
-CommandReply GetTensorCommand::runme(RedisServer * r)
+Command* SingleKeyCommand::clone()
 {
-    return r->run(*this);
-}
-
-std::vector<size_t> GetTensorCommand::get_tensor_dims(CommandReply& reply)
-{
-    if(reply.n_elements() < 6)
-        throw std::runtime_error("The message does not have the "\
-                                "correct number of fields");
-
-    size_t n_dims = reply[3].n_elements();
-    std::vector<size_t> dims(n_dims);
-
-    for(size_t i=0; i<n_dims; i++) {
-        dims[i] = reply[3][i].integer();
-    }
-
-    return dims;
-}
-
-TensorType GetTensorCommand::get_tensor_data_type(CommandReply& reply)
-{
-    if(reply.n_elements() < 2)
-        throw std::runtime_error("The message does not have the correct "\
-                                "number of fields");
-
-    return TENSOR_TYPE_MAP.at(std::string(reply[1].str(),
-                                            reply[1].str_len()));
-}
-
-std::string_view GetTensorCommand::get_tensor_data_blob(CommandReply& reply)
-{
-    if(reply.n_elements() < 6)
-        throw std::runtime_error("The message does not have the "\
-                                "correct number of fields");
-
-    return std::string_view(reply[5].str(), reply[5].str_len());
+    SingleKeyCommand* new_cmd = new SingleKeyCommand(*this);
+    (*new_cmd) = *this;
+    return new_cmd;
 }

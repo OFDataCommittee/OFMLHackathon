@@ -31,7 +31,14 @@
 
 using namespace SmartRedis;
 
-CommandReply AddressAnyCommand::runme(RedisServer * r)
+CommandReply AddressAnyCommand::run_me(RedisServer* r)
 {
     return r->run(*this);
+}
+
+Command* AddressAnyCommand::clone()
+{
+    AddressAnyCommand* new_cmd = new AddressAnyCommand(*this);
+    (*new_cmd) = *this;
+    return new_cmd;
 }

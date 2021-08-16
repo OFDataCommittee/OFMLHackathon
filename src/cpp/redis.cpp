@@ -50,40 +50,35 @@ Redis::~Redis()
 }
 
 CommandReply Redis::run(SingleKeyCommand& cmd){
-    Command* bcmd = &cmd;
-    return _run(*bcmd);
+    return this->_run(cmd);
 }
 
 CommandReply Redis::run(MultiKeyCommand& cmd){
-    Command* bcmd = &cmd;
-    return _run(*bcmd);
+    return this->_run(cmd);
 }
 
 CommandReply Redis::run(CompoundCommand& cmd){
-    Command* bcmd = &cmd;
-    return _run(*bcmd);
+    return this->_run(cmd);
 }
 
 CommandReply Redis::run(AddressAtCommand& cmd){
-    Command* bcmd = &cmd;
-    return _run(*bcmd);
+    return this->_run(cmd);
 }
 
 CommandReply Redis::run(AddressAnyCommand& cmd){
-    Command* bcmd = &cmd;
-    return _run(*bcmd);
+    return this->_run(cmd);
 }
 
-CommandReply Redis::run(CommandList& cmds)
+std::vector<CommandReply> Redis::run(CommandList& cmds)
 {
+    std::vector<CommandReply> replies;
     CommandList::iterator cmd = cmds.begin();
     CommandList::iterator cmd_end = cmds.end();
-    CommandReply reply;
     while(cmd != cmd_end) {
-        reply = ((Command *)(*cmd))->runme(this);
+        replies.push_back(((Command *)(*cmd))->run_me(this));
         cmd++;
     }
-    return reply;
+    return replies;
 }
 
 bool Redis::model_key_exists(const std::string& key)
@@ -120,8 +115,9 @@ CommandReply Redis::put_tensor(TensorBase& tensor)
     return this->run(cmd);
 }
 
-CommandReply Redis::get_tensor(const std::string& key, GetTensorCommand& cmd)
+CommandReply Redis::get_tensor(const std::string& key)
 {
+    GetTensorCommand cmd;
     cmd.add_field("AI.TENSORGET");
     cmd.add_field(key);
     cmd.add_field("META");
@@ -304,10 +300,10 @@ CommandReply Redis::get_script(const std::string& key)
     return this->run(cmd);
 }
 
-inline CommandReply Redis::_run(Command& cmd)
+inline CommandReply Redis::_run(const Command& cmd)
 {
-    Command::iterator cmd_fields_start = cmd.begin();
-    Command::iterator cmd_fields_end = cmd.end();
+    Command::const_iterator cmd_fields_start = cmd.cbegin();
+    Command::const_iterator cmd_fields_end = cmd.cend();
     CommandReply reply;
 
     int n_trials = 100;

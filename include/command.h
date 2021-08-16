@@ -88,15 +88,31 @@ class Command
         Command& operator=(Command&& cmd) = default;
 
         /*!
-        *   \brief Command destructor
+        *   \brief Deep copy operator
+        *   \details This method creates a new derived
+        *            type Command and returns a Command*
+        *            pointer.  The new derived type is
+        *            allocated on the heap.  Contents
+        *            are copied using the copy assignment
+        *            operator for the derived type. This is meant
+        *            to provide functionality to deep
+        *            copy a Command.
+        *   \returns A pointer to dynamically allocated
+        *            derived type cast to parent Command
+        *            type.
         */
-        ~Command();
+        virtual Command* clone() = 0;
 
         /*!
-        *   \brief Run any type of Command on the RedisServer.
+        *   \brief Command destructor
+        */
+        virtual ~Command();
+
+        /*!
+        *   \brief Run this Command on the RedisServer.
         *   \param r A pointer to the RedisServer
         */
-        virtual CommandReply runme(RedisServer * r);
+        virtual CommandReply run_me(RedisServer* r) = 0;
 
         /*!
         *   \brief Add a field to the Command from a string.
@@ -216,7 +232,7 @@ class Command
         *   \brief Get the value of the field field
         *   \returns std::string of the first Command field
         */
-        std::string first_field();
+        std::string first_field() const;
 
         /*!
         *   \brief Get a string of the entire Command
@@ -249,7 +265,7 @@ class Command
         *          first field in the Command
         *   \returns const Command iterator to the first field
         */
-        const_iterator cbegin();
+        const_iterator cbegin() const;
 
         /*!
         *   \brief Returns an iterator pointing to the
@@ -264,7 +280,7 @@ class Command
         *          past-the-end field in the Command
         *   \returns const Command iterator to the past-the-end field
         */
-        const_iterator cend();
+        const_iterator cend() const;
 
     private:
 

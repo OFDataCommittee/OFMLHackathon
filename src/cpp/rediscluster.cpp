@@ -61,8 +61,7 @@ CommandReply RedisCluster::run(SingleKeyCommand& cmd)
     else
         throw std::runtime_error("Redis has failed to find database");
 
-    Command *bcmd = &cmd;
-    return this->_run(*bcmd, db_prefix);
+    return this->_run(cmd, db_prefix);
 }
 
 CommandReply RedisCluster::run(CompoundCommand& cmd)
@@ -73,8 +72,7 @@ CommandReply RedisCluster::run(CompoundCommand& cmd)
     else
         throw std::runtime_error("Redis has failed to find database");
 
-    Command *bcmd = &cmd;
-    return this->_run(*bcmd, db_prefix);
+    return this->_run(cmd, db_prefix);
 }
 
 CommandReply RedisCluster::run(MultiKeyCommand& cmd)
@@ -85,8 +83,7 @@ CommandReply RedisCluster::run(MultiKeyCommand& cmd)
     else
         throw std::runtime_error("Redis has failed to find database");
 
-    Command *bcmd = &cmd;
-    return this->_run(*bcmd, db_prefix);
+    return this->_run(cmd, db_prefix);
 }
 
 CommandReply RedisCluster::run(AddressAtCommand& cmd)
@@ -98,8 +95,7 @@ CommandReply RedisCluster::run(AddressAtCommand& cmd)
     else
         throw std::runtime_error("Redis has failed to find database");
 
-    Command *bcmd = &cmd;
-    return this->_run(*bcmd, db_prefix);
+    return this->_run(cmd, db_prefix);
 }
 
 // to do: pick an active db node
@@ -112,20 +108,19 @@ CommandReply RedisCluster::run(AddressAnyCommand &cmd)
     else
         throw std::runtime_error("Redis has failed to find database");
 
-    Command *bcmd = &cmd;
-    return this->_run(*bcmd, db_prefix);
+    return this->_run(cmd, db_prefix);
 }
 
-CommandReply RedisCluster::run(CommandList& cmds)
+std::vector<CommandReply> RedisCluster::run(CommandList& cmds)
 {
+    std::vector<CommandReply> replies;
     CommandList::iterator cmd = cmds.begin();
     CommandList::iterator cmd_end = cmds.end();
-    CommandReply reply;
     while(cmd != cmd_end) {
-        reply = ((Command *)(*cmd))->runme(this);
+        replies.push_back(((Command *)(*cmd))->run_me(this));
         cmd++;
     }
-    return reply;
+    return replies;
 }
 
 bool RedisCluster::model_key_exists(const std::string& key)
@@ -165,8 +160,9 @@ CommandReply RedisCluster::put_tensor(TensorBase& tensor)
     return this->run(cmd);
 }
 
-CommandReply RedisCluster::get_tensor(const std::string& key, GetTensorCommand& cmd)
+CommandReply RedisCluster::get_tensor(const std::string& key)
 {
+    GetTensorCommand cmd;
     cmd.add_field("AI.TENSORGET");
     cmd.add_field(key, true);
     cmd.add_field("META");
@@ -183,7 +179,7 @@ CommandReply RedisCluster::rename_tensor(const std::string& key,
     uint16_t new_key_hash_slot = this->_get_hash_slot(new_key);
 
     if(key_hash_slot == new_key_hash_slot) {
-        MultiKeyCommand cmd;
+        CompoundCommand cmd;
         cmd.add_field("RENAME");
         cmd.add_field(key, true);
         cmd.add_field(new_key, true);
@@ -468,12 +464,12 @@ CommandReply RedisCluster::get_script(const std::string& key)
     return this->run(cmd);
 }
 
-inline CommandReply RedisCluster::_run(Command& cmd, std::string db_prefix)
+inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix)
 {
     std::string_view sv_prefix(db_prefix.data(), db_prefix.size());
 
-    Command::iterator cmd_fields_start = cmd.begin();
-    Command::iterator cmd_fields_end = cmd.end();
+    Command::const_iterator cmd_fields_start = cmd.cbegin();
+    Command::const_iterator cmd_fields_end = cmd.cend();
     CommandReply reply;
 
     int n_trials = 100;
@@ -557,7 +553,7 @@ inline void RedisCluster::_map_cluster()
     this->_db_nodes.clear();
     this->_address_node_map.clear();
 
-    Command cmd;
+    AddressAnyCommand cmd;
     cmd.add_field("CLUSTER");
     cmd.add_field("SLOTS");
     CommandReply reply(this->_redis_cluster->

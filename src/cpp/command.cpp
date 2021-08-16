@@ -80,12 +80,6 @@ Command::~Command()
     make_empty();
 }
 
-CommandReply Command::runme(RedisServer * r)
-{
-    CommandReply reply;
-    return reply;
-}
-
 void Command::add_field(std::string field, bool is_key)
 {
     /* Copy the field string into a char* that is stored
@@ -197,12 +191,12 @@ void Command::add_fields(const std::vector<std::string>& fields, bool is_key)
     return;
 }
 
-std::string Command::first_field()
+std::string Command::first_field() const
 {
-    if(this->begin() == this->end())
+    if(this->cbegin() == this->cend())
         throw std::runtime_error("No fields exist in the Command.");
-    return std::string(this->begin()->data(),
-                       this->begin()->size());
+    return std::string(this->cbegin()->data(),
+                       this->cbegin()->size());
 }
 
 std::string Command::to_string()
@@ -223,7 +217,7 @@ Command::iterator Command::begin()
     return this->_fields.begin();
 }
 
-Command::const_iterator Command::cbegin()
+Command::const_iterator Command::cbegin() const
 {
     return this->_fields.cbegin();
 }
@@ -233,7 +227,7 @@ Command::iterator Command::end()
     return this->_fields.end();
 }
 
-Command::const_iterator Command::cend()
+Command::const_iterator Command::cend() const
 {
     return this->_fields.cend();
 }

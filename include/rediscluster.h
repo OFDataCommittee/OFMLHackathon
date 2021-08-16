@@ -144,10 +144,10 @@ class RedisCluster : public RedisServer
         *   \param cmd The CommandList containing multiple
         *              single-key or single-hash
         *              slot Command to run
-        *   \returns The CommandReply from the last
-        *            command execution
+        *   \returns A list of CommandReply for each Command
+        *            in the CommandList
         */
-        virtual CommandReply run(CommandList& cmd);
+        virtual std::vector<CommandReply> run(CommandList& cmd);
 
         /*!
         *   \brief Check if a key exists in the database. This
@@ -185,11 +185,10 @@ class RedisCluster : public RedisServer
         /*!
         *   \brief Get a Tensor from the server
         *   \param key The name of the tensor to retrieve
-        *   \param cmd The command to run on the server
         *   \returns The CommandReply from the get tensor server
         *            command execution
         */
-        virtual CommandReply get_tensor(const std::string& key, GetTensorCommand& cmd);
+        virtual CommandReply get_tensor(const std::string& key);
 
         /*!
         *   \brief Rename a tensor in the database
@@ -350,7 +349,7 @@ class RedisCluster : public RedisServer
         *   \returns The CommandReply from the
         *            command execution
         */
-        inline CommandReply _run(Command& cmd, std::string db_prefix);
+        inline CommandReply _run(const Command& cmd, std::string db_prefix);
 
         /*!
         *   \brief Connect to the cluster at the address and port

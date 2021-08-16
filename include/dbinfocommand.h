@@ -43,15 +43,13 @@ class RedisServer;
 class DBInfoCommand : public AddressAtCommand
 {
     public:
-        virtual CommandReply runme(RedisServer *r);
-
         /*!
         *   \brief Parse database node information from get_db_node_info()
         *          into a nested unordered_map
         *   \param info containing the database node information
         *   \return parsed_reply_nested_map containing the database node information
         */
-        parsed_reply_nested_map parse_db_node_info(std::string info);
+        static parsed_reply_nested_map parse_db_node_info(std::string info);
 };
 
 } //namespace SmartRedis

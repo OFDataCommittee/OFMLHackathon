@@ -30,9 +30,3 @@
 #include "redisserver.h"
 
 using namespace SmartRedis;
-
-CommandReply KeyedCommand::runme(RedisServer * r)
-{
-    CommandReply reply;
-    return reply;
-}

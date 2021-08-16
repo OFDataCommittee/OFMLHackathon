@@ -26,38 +26,47 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "clusterinfocommand.h"
+#include "gettensorcommand.h"
 #include "redisserver.h"
 
 using namespace SmartRedis;
 
-parsed_reply_map ClusterInfoCommand::parse_db_cluster_info(std::string info)
+CommandReply GetTensorCommand::run_me(RedisServer* r)
 {
-    parsed_reply_map info_map;
+    return r->run(*this);
+}
 
-    std::string delim = "\r\n";
-    std::string currKey = "";
-    size_t start = 0U;
-    size_t end = info.find(delim);
+std::vector<size_t> GetTensorCommand::get_tensor_dims(CommandReply& reply)
+{
+    if(reply.n_elements() < 6)
+        throw std::runtime_error("The message does not have the "\
+                                "correct number of fields");
 
-    while (end != std::string::npos)
-    {
-        std::string line = info.substr(start, end-start);
-        start = end + delim.length();
-        end = info.find(delim, start);
-        if (line.length() == 0)
-            continue;
+    size_t n_dims = reply[3].n_elements();
+    std::vector<size_t> dims(n_dims);
 
-        std::size_t separatorIdx = line.find(':');
-        info_map[line.substr(0, separatorIdx)] =
-                 line.substr(separatorIdx+1);
+    for(size_t i=0; i<n_dims; i++) {
+        dims[i] = reply[3][i].integer();
     }
-    std::string line = info.substr(start);
-    if (line.length() > 0)
-    {
-        std::size_t separatorIdx = line.find(':');
-        info_map[line.substr(0, separatorIdx)] =
-                 line.substr(separatorIdx+1);
-    }
-    return info_map;
+
+    return dims;
+}
+
+TensorType GetTensorCommand::get_tensor_data_type(CommandReply& reply)
+{
+    if(reply.n_elements() < 2)
+        throw std::runtime_error("The message does not have the correct "\
+                                "number of fields");
+
+    return TENSOR_TYPE_MAP.at(std::string(reply[1].str(),
+                                            reply[1].str_len()));
+}
+
+std::string_view GetTensorCommand::get_tensor_data_blob(CommandReply& reply)
+{
+    if(reply.n_elements() < 6)
+        throw std::runtime_error("The message does not have the "\
+                                "correct number of fields");
+
+    return std::string_view(reply[5].str(), reply[5].str_len());
 }

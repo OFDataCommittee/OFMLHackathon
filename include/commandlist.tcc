@@ -26,38 +26,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "clusterinfocommand.h"
-#include "redisserver.h"
+#ifndef SMARTREDIS_COMMANDLIST_TCC
+#define SMARTREDIS_COMMANDLIST_TCC
 
-using namespace SmartRedis;
-
-parsed_reply_map ClusterInfoCommand::parse_db_cluster_info(std::string info)
+template <class C>
+C* CommandList::add_command()
 {
-    parsed_reply_map info_map;
+    C* new_cmd = new C();
+    this->_commands.push_back(new_cmd);
+    return new_cmd;
+};
 
-    std::string delim = "\r\n";
-    std::string currKey = "";
-    size_t start = 0U;
-    size_t end = info.find(delim);
-
-    while (end != std::string::npos)
-    {
-        std::string line = info.substr(start, end-start);
-        start = end + delim.length();
-        end = info.find(delim, start);
-        if (line.length() == 0)
-            continue;
-
-        std::size_t separatorIdx = line.find(':');
-        info_map[line.substr(0, separatorIdx)] =
-                 line.substr(separatorIdx+1);
-    }
-    std::string line = info.substr(start);
-    if (line.length() > 0)
-    {
-        std::size_t separatorIdx = line.find(':');
-        info_map[line.substr(0, separatorIdx)] =
-                 line.substr(separatorIdx+1);
-    }
-    return info_map;
-}
+#endif //SMARTREDIS_COMMANDLIST_TCC

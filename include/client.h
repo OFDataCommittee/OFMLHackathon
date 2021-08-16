@@ -605,38 +605,36 @@ class Client
         Redis* _redis;
 
         /*!
-        *   \brief Execute a non-keyed Command that addresses
-        *          the given db node(s)
-        *   \param cmd The non-keyed Command to execute
+        *   \brief Execute an AddressAtCommand
+        *   \param cmd The AddresseAtCommand to execute
         *   \returns The CommandReply after execution
         */
         inline CommandReply _run(AddressAtCommand& cmd);
 
         /*!
-        *   \brief Execute a non-keyed Command that addresses
-        *          any db node(s)
-        *   \param cmd The non-keyed Command to execute
+        *   \brief Execute an AddressAnyCommand
+        *   \param cmd The AddressAnyCommand to execute
         *   \returns The CommandReply after execution
         */
         inline CommandReply _run(AddressAnyCommand& cmd);
 
         /*!
-        *   \brief Execute a single-keyed command Command
-        *   \param cmd The single-keyed Command to execute
+        *   \brief Execute a SingleKeyCommand Command
+        *   \param cmd The SingleKeyCommand to execute
         *   \returns The CommandReply after execution
         */
         inline CommandReply _run(SingleKeyCommand& cmd);
 
         /*!
-        *   \brief Execute a multi-keyed command Command
-        *   \param cmd The mulit-keyed Command to execute
+        *   \brief Execute a MultiKeyCommand Command
+        *   \param cmd The MultiKeyCommand to execute
         *   \returns The CommandReply after execution
         */
         inline CommandReply _run(MultiKeyCommand& cmd);
 
         /*!
-        *   \brief Execute a keyed multi-command Command
-        *   \param cmd The keyed multi-command Command to execute
+        *   \brief Execute a CompoundCommand
+        *   \param cmd The CompoundCommand to execute
         *   \returns The CommandReply after execution
         */
         inline CommandReply _run(CompoundCommand& cmd);
@@ -647,7 +645,7 @@ class Client
         *   \returns The CommandReply from the last
         *            command execution
         */
-        inline CommandReply _run(CommandList& cmd_list);
+        inline std::vector<CommandReply> _run(CommandList& cmd_list);
 
         /*!
         *  \brief Set the prefixes that are used for

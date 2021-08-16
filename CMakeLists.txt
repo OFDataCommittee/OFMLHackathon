@@ -29,6 +29,7 @@ set(CLIENT_SRC
     src/cpp/addressanycommand.cpp
     src/cpp/clusterinfocommand.cpp
     src/cpp/dbinfocommand.cpp
+    src/cpp/gettensorcommand.cpp
     src/cpp/commandlist.cpp
     src/cpp/metadata.cpp
     src/cpp/tensorbase.cpp

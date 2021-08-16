@@ -31,11 +31,6 @@
 
 using namespace SmartRedis;
 
-CommandReply DBInfoCommand::runme(RedisServer *r)
-{
-    return r->run(*this);
-}
-
 parsed_reply_nested_map DBInfoCommand::parse_db_node_info(std::string info)
 {
     parsed_reply_nested_map info_map;

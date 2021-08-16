@@ -47,6 +47,54 @@ class NonKeyedCommand : public Command
 {
     public:
         /*!
+        *   \brief Default NonKeyedCommand constructor
+        */
+        NonKeyedCommand() = default;
+
+        /*!
+        *   \brief NonKeyedCommand copy constructor
+        *   \param cmd The NonKeyedCommand to copy for construction
+        */
+        NonKeyedCommand(const NonKeyedCommand& cmd) = default;
+
+        /*!
+        *   \brief NonKeyedCommand default move constructor
+        */
+        NonKeyedCommand(NonKeyedCommand&& cmd) = default;
+
+        /*!
+        *   \brief NonKeyedCommand copy assignment operator
+        *   \param cmd The NonKeyedCommand to copy for assignment
+        */
+        NonKeyedCommand& operator=(const NonKeyedCommand& cmd) = default;
+
+        /*!
+        *   \brief KeyedCommand move assignment operator
+        */
+        NonKeyedCommand& operator=(NonKeyedCommand&& cmd) = default;
+
+        /*!
+        *   \brief KeyedCommand destructor
+        */
+        virtual ~NonKeyedCommand() = default;
+
+        /*!
+        *   \brief Deep copy operator
+        *   \details This method creates a new derived
+        *            type Command and returns a Command*
+        *            pointer.  The new derived type is
+        *            allocated on the heap.  Contents
+        *            are copied using the copy assignment
+        *            operator for the derived type. This is meant
+        *            to provide functionality to deep
+        *            copy a Command.
+        *   \returns A pointer to dynamically allocated
+        *            derived type cast to parent Command
+        *            type.
+        */
+        virtual Command* clone() = 0;
+
+        /*!
         *   \brief Set address and port for command
         *          to be executed on
         *   \param address Address of database
@@ -72,7 +120,11 @@ class NonKeyedCommand : public Command
         */
         uint16_t get_port();
 
-        virtual CommandReply runme(RedisServer * r) = 0;
+        /*!
+        *   \brief Run this Command on the RedisServer.
+        *   \param r A pointer to the RedisServer
+        */
+        virtual CommandReply run_me(RedisServer* r) = 0;
 
     private:
         /*!

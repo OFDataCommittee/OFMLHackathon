@@ -82,10 +82,11 @@ class CommandList
         ~CommandList();
 
         /*!
-        *   \brief Adds a new Command to the Command List
-        *   \param new_cmd Pointer to the new Command
+        *   \brief Add new Commmand of type C to the CommandList
+        *   \tparam C Any type of Command
         */
-        void add_command(Command* new_cmd);
+        template <class C>
+        C* add_command();
 
         /*!
         *   \typedef An iterator type for iterating
@@ -133,9 +134,9 @@ class CommandList
         *   \brief A vector container a pointer to all Command
         */
         std::vector<Command*> _commands;
-
-
 };
+
+#include "commandlist.tcc"
 
 } //namespace SmartRedis
 

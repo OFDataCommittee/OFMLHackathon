@@ -47,44 +47,27 @@ class RedisServer;
 class SingleKeyCommand : public KeyedCommand
 {
     public:
-	    virtual CommandReply runme(RedisServer * r);
-};
-
-class GetTensorCommand : public SingleKeyCommand
-{
-    public:
-        virtual CommandReply runme(RedisServer *r);
+        /*!
+        *   \brief Run this Command on the RedisServer.
+        *   \param r A pointer to the RedisServer
+        */
+	    virtual CommandReply run_me(RedisServer * r);
 
         /*!
-        *   \brief This function will fill a vector with the dimensions of
-        *          the tensor.
-        *   \param reply CommandReply from running "AI.TENSORGET"
-        *   \return std::vecotr<size_t> with dimensions of the tensor
-        *   We assume right now that the META reply is always
-        *   in the same order and we can index base reply elements array;
+        *   \brief Deep copy operator
+        *   \details This method creates a new derived
+        *            type Command and returns a Command*
+        *            pointer.  The new derived type is
+        *            allocated on the heap.  Contents
+        *            are copied using the copy assignment
+        *            operator for the derived type. This is meant
+        *            to provide functionality to deep
+        *            copy a Command.
+        *   \returns A pointer to dynamically allocated
+        *            derived type cast to parent Command
+        *            type.
         */
-        std::vector<size_t> get_tensor_dims(CommandReply& reply);
-
-        /*!
-        *   \brief This function returns a string view of the data
-        *          tensor blob value
-        *   \param reply CommandReply from running "AI.TENSORGET"
-        *   \return string view of the data tensor blob value
-        *   We are going to assume right now that the meta data reply
-        *   is always in the same order and we are going to just
-        *   index into the base reply.
-        */
-        std::string_view get_tensor_data_blob(CommandReply& reply);
-
-        /*!
-        *   \brief This function returns a string of the tensor type
-        *   \param reply CommandReply from running "AI.TENSORGET"
-        *   \return string of the tensor type
-        *   We are going to assume right now that the meta data reply
-        *   is always in the same order and we are going to just
-        *   index into the base reply.
-        */
-       TensorType get_tensor_data_type(CommandReply& reply);
+        virtual Command* clone();
 };
 
 } //namespace SmartRedis

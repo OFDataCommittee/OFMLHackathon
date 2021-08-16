@@ -48,14 +48,59 @@ class RedisServer;
 class KeyedCommand : public Command
 {
     public:
+        /*!
+        *   \brief Default KeyedCommand constructor
+        */
+        KeyedCommand() = default;
 
         /*!
-        *   \brief Return a copy of all Command keys
-        *   \returns std::vector of Command keys
+        *   \brief KeyedCommand copy constructor
+        *   \param cmd The KeyedCommand to copy for construction
         */
-        std::vector<std::string> get_keys();
+        KeyedCommand(const KeyedCommand& cmd) = default;
 
-        virtual CommandReply runme(RedisServer * r);
+        /*!
+        *   \brief KeyedCommand default move constructor
+        */
+        KeyedCommand(KeyedCommand&& cmd) = default;
+
+        /*!
+        *   \brief KeyedCommand copy assignment operator
+        *   \param cmd The KeyedCommand to copy for assignment
+        */
+        KeyedCommand& operator=(const KeyedCommand& cmd) = default;
+
+        /*!
+        *   \brief KeyedCommand move assignment operator
+        */
+        KeyedCommand& operator=(KeyedCommand&& cmd) = default;
+
+        /*!
+        *   \brief KeyedCommand destructor
+        */
+        virtual ~KeyedCommand() = default;
+
+        /*!
+        *   \brief Deep copy operator
+        *   \details This method creates a new derived
+        *            type Command and returns a Command*
+        *            pointer.  The new derived type is
+        *            allocated on the heap.  Contents
+        *            are copied using the copy assignment
+        *            operator for the derived type. This is meant
+        *            to provide functionality to deep
+        *            copy a Command.
+        *   \returns A pointer to dynamically allocated
+        *            derived type cast to parent Command
+        *            type.
+        */
+        virtual Command* clone() = 0;
+
+        /*!
+        *   \brief Run this Command on the RedisServer.
+        *   \param r A pointer to the RedisServer
+        */
+        virtual CommandReply run_me(RedisServer * r) = 0;
 };
 
 } //namespace SmartRedis

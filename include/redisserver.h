@@ -46,6 +46,7 @@
 #include "addressanycommand.h"
 #include "clusterinfocommand.h"
 #include "dbinfocommand.h"
+#include "gettensorcommand.h"
 
 ///@file
 
@@ -123,10 +124,10 @@ class RedisServer {
         *   \param cmd The CommandList containing multiple
         *              single-key or single-hash
         *              slot Comand to run
-        *   \returns The CommandReply from the last
-        *            command execution
+        *   \returns A list of CommandReply for each Command
+        *            in the CommandList
         */
-        virtual CommandReply run(CommandList& cmd) = 0;
+        virtual std::vector<CommandReply> run(CommandList& cmd) = 0;
 
         /*!
         *   \brief Check if a key exists in the database
@@ -161,11 +162,10 @@ class RedisServer {
         /*!
         *   \brief Get a Tensor from the server
         *   \param key The name of the tensor to retrieve
-        *   \param cmd The command to run on the server
         *   \returns The CommandReply from the get tensor server
         *            command execution
         */
-        virtual CommandReply get_tensor(const std::string& key, GetTensorCommand& cmd) = 0;
+        virtual CommandReply get_tensor(const std::string& key) = 0;
 
         /*!
         *   \brief Rename a tensor in the database
