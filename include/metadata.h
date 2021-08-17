@@ -240,6 +240,11 @@ class MetaData
 
     private:
 
+       /*!
+        *   \brief Clone data from another Metadata instance
+        *   \param other The MetaData object to clone
+        */
+        void _clone_from(const MetaData& other);
 
         /*!
         *   \brief Maps metadata field name to the

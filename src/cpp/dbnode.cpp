@@ -30,6 +30,7 @@
 
 using namespace SmartRedis;
 
+// DBNode constructor
 DBNode::DBNode()
 {
    this->name = "";
@@ -39,20 +40,21 @@ DBNode::DBNode()
    this->upper_hash_slot = -1;
 }
 
-DBNode::DBNode(std::string ip, std::string name,
-               uint64_t port, uint64_t l_slot,
-               uint64_t u_slot, std::string prefix)
+// DBNode constructor with connection and hash slot information.
+DBNode::DBNode(std::string _ip, std::string _name,
+               uint64_t _port, uint64_t l_slot,
+               uint64_t u_slot, std::string _prefix)
+    : name(_name), ip(_ip), port(_port), lower_hash_slot(l_slot), upper_hash_slot(u_slot),
+      prefix(_prefix)
 {
-    this->name = name;
-    this->ip = ip;
-    this->port = port;
-    this->lower_hash_slot = l_slot;
-    this->upper_hash_slot = u_slot;
-    this->prefix = prefix;
+    // NOP
 }
 
+// Less than operator. Returns True if the lower hash slot of this node
+// is less than the other lower hash slot.
 bool DBNode::operator<(const DBNode& db_node) const
 {
-    return this->lower_hash_slot <
-        db_node.lower_hash_slot;
+    return this->lower_hash_slot < db_node.lower_hash_slot;
 }
+
+// EOF
