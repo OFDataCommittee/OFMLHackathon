@@ -247,7 +247,7 @@ class TensorBase{
         private:
 
         /*!
-        *   \brief Pointer to the data memory space
+        *   \brief Validate inputs for a tensor
         *   \param src_data A pointer to the data source for the tensor
         *   \param name The name used to reference the tensor
         *   \param dims The dimensions of the data

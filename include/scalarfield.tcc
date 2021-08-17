@@ -29,14 +29,15 @@
 #ifndef SMARTREDIS_SCALARFIELD_TCC
 #define SMARTREDIS_SCALARFIELD_TCC
 
+// ScalarField constructor
 template <class T>
-ScalarField<T>::ScalarField(const std::string& name,
-                            MetaDataType type) :
+ScalarField<T>::ScalarField(const std::string& name, MetaDataType type) :
     MetadataField(name, type)
 {
-    return;
+    // NOP
 }
 
+// ScalarField constructor with data values
 template <class T>
 ScalarField<T>::ScalarField(const std::string& name,
                             MetaDataType type,
@@ -44,9 +45,9 @@ ScalarField<T>::ScalarField(const std::string& name,
     MetadataField(name, type)
 {
     this->_vals = vals;
-    return;
 }
 
+// ScalarField move constructor with data values
 template <class T>
 ScalarField<T>::ScalarField(const std::string& name,
                             MetaDataType type,
@@ -54,9 +55,9 @@ ScalarField<T>::ScalarField(const std::string& name,
     MetadataField(name, type)
 {
     this->_vals = std::move(vals);
-    return;
 }
 
+// Serialize a scalar
 template <class T>
 std::string ScalarField<T>::serialize()
 {
@@ -64,32 +65,36 @@ std::string ScalarField<T>::serialize()
                                                   this->_vals);
 }
 
+// Add a value to a scalar
 template <class T>
 void ScalarField<T>::append(const void* value)
 {
-    this->_vals.push_back(*((T*)(value)));
-    return;
+    if (value != NULL)
+        this->_vals.push_back(*((T*)value));
 }
 
+// Retrieve the number of values in a scalar
 template <class T>
 size_t ScalarField<T>::size()
 {
     return this->_vals.size();
 }
 
+// Clear out all values from a scalar
 template <class T>
 void ScalarField<T>::clear()
 {
     this->_vals.clear();
-    return;
 }
 
+// Retrieve the scalar data
 template <class T>
 void* ScalarField<T>::data()
 {
     return this->_vals.data();
 }
 
+// Retrieve a pointer to the underlying value structure
 template <class T>
 const std::vector<T>& ScalarField<T>::immutable_values()
 {

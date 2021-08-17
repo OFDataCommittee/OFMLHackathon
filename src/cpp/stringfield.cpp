@@ -30,55 +30,63 @@
 
 using namespace SmartRedis;
 
+// StringField constructor
 StringField::StringField(const std::string& name) :
     MetadataField(name, MetaDataType::string)
 {
-    return;
+    // NOP
 }
 
-StringField::StringField(const std::string& name, const std::vector<std::string>& vals) :
+// StringField constructor with initial values to be copied
+StringField::StringField(const std::string& name, 
+                         const std::vector<std::string>& vals) :
     MetadataField(name, MetaDataType::string)
 {
     this->_vals = vals;
-    return;
 }
 
+// StringField constructor with initial values to be copied
 StringField::StringField(const std::string& name,
                          std::vector<std::string>&& vals) :
     MetadataField(name, MetaDataType::string)
 {
     this->_vals = std::move(vals);
-    return;
 }
 
+// Serialize the StringField for transmission and storage.
 std::string StringField::serialize()
 {
     return MetadataBuffer::generate_string_buf(this->_vals);
 }
 
+// Add a string to the field
 void StringField::append(const std::string& value)
 {
     this->_vals.push_back(value);
-    return;
 }
 
+// Retrieve the number of values in the field
 size_t StringField::size()
 {
     return this->_vals.size();
 }
 
+// Clear the values in the field
 void StringField::clear()
 {
     this->_vals.clear();
-    return;
 }
 
+// Retrieve a copy of the underlying field string values.
 std::vector<std::string> StringField::values()
 {
     return std::vector<std::string>(this->_vals);
 }
 
+// Returns a constant reference to the internal std::vectorstd::string object.
 const std::vector<std::string>& StringField::immutable_values()
 {
     return this->_vals;
 }
+
+// EOF

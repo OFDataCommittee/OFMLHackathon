@@ -29,6 +29,7 @@
 #ifndef SMARTREDIS_SHAREDMEMORYLIST_TCC
 #define SMARTREDIS_SHAREDMEMORYLIST_TCC
 
+// Record a memory allocation
 template <class T>
 void SharedMemoryList<T>::add_allocation(size_t bytes, T* ptr)
 {
@@ -37,6 +38,7 @@ void SharedMemoryList<T>::add_allocation(size_t bytes, T* ptr)
     return;
 }
 
+// Allocate memory and record the allocation
 template <class T>
 T* SharedMemoryList<T>::allocate_bytes(size_t bytes)
 {
@@ -45,6 +47,7 @@ T* SharedMemoryList<T>::allocate_bytes(size_t bytes)
     return ptr;
 }
 
+// Perform type-specific memory allocation
 template <class T>
 T* SharedMemoryList<T>::allocate(size_t n_values)
 {
