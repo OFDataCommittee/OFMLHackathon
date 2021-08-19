@@ -82,20 +82,20 @@ py::array PyDataset::get_tensor(const std::string& name) {
             });
 
     // detect data type
-    switch(tensor->type()) {
-        case TensorType::dbl : {
+    switch (tensor->type()) {
+        case TensorType::dbl: {
             double* data =
                 (double*)(tensor->data_view(MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
             break;
         }
-        case TensorType::flt : {
+        case TensorType::flt: {
             float* data =
                 (float*)(tensor->data_view(MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
             break;
         }
-        case TensorType::int64 : {
+        case TensorType::int64: {
             int64_t* data =
                 (int64_t*)(tensor->data_view(MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
@@ -161,44 +161,44 @@ py::array PyDataset::get_meta_scalars(const std::string& name) {
   this->_dataset->get_meta_scalars(name, ptr, length, type);
 
   // detect data type
-  switch(type) {
-    case MetaDataType::dbl : {
+  switch (type) {
+    case MetaDataType::dbl: {
       double* data;
       data = (double*) ptr;
       return py::array(length, data, py::none());
       break;
     }
-    case MetaDataType::flt : {
+    case MetaDataType::flt: {
       float* data;
       data = (float*) ptr;
       return py::array(length, data, py::none());
       break;
     }
-    case MetaDataType::int32 : {
+    case MetaDataType::int32: {
       int32_t* data;
       data = (int32_t*) ptr;
       return py::array(length, data, py::none());
       break;
     }
-    case MetaDataType::int64 : {
+    case MetaDataType::int64: {
       int64_t* data;
       data = (int64_t*) ptr;
       return py::array(length, data, py::none());
       break;
     }
-    case MetaDataType::uint32 : {
+    case MetaDataType::uint32: {
       uint32_t* data;
       data = (uint32_t*) ptr;
       return py::array(length, data, py::none());
       break;
     }
-    case MetaDataType::uint64 : {
+    case MetaDataType::uint64: {
       uint64_t* data;
       data = (uint64_t*) ptr;
       return py::array(length, data, py::none());
       break;
     }
-    case MetaDataType::string : {
+    case MetaDataType::string: {
       throw std::runtime_error("MetaData is of type string. Use get_meta_strings method.");
     }
     default :

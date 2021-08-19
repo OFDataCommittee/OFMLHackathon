@@ -52,7 +52,7 @@ typedef int8_t type_t;
 */
 extern inline MetaDataType get_type(const std::string_view& buf)
 {
-    if(buf.size() < sizeof(type_t))
+    if (buf.size() < sizeof(type_t))
         throw std::runtime_error("The MetadataField type cannot "\
                                  "be retrived from buffer of " +
                                  std::to_string(buf.size()) +
@@ -116,7 +116,7 @@ extern inline T read(void* buf,
                      const size_t& byte_position,
                      const size_t& total_bytes)
 {
-    if(!safe_to_read<T>(byte_position, total_bytes, 1))
+    if (!safe_to_read<T>(byte_position, total_bytes, 1))
         throw std::runtime_error("A request to read one scalar value "
                                  "from the metadata buffer "
                                  "was made, but the buffer "
@@ -148,7 +148,7 @@ extern inline bool advance(void*& buf,
                            const size_t& total_bytes,
                            const size_t& n_values)
 {
-    if(!safe_to_read<T>(byte_position, total_bytes, n_values))
+    if (!safe_to_read<T>(byte_position, total_bytes, n_values))
         return false;
 
     byte_position += n_values * sizeof(T);
@@ -172,7 +172,7 @@ extern inline std::string read_string(void* buf,
                                       const size_t& total_bytes,
                                       const size_t& n_chars)
 {
-    if(!safe_to_read<char>(byte_position, total_bytes, n_chars))
+    if (!safe_to_read<char>(byte_position, total_bytes, n_chars))
         throw std::runtime_error("A request to read a string "
                                  "from the metadata buffer "
                                  "was made, but the buffer "
@@ -307,22 +307,21 @@ extern inline std::vector<std::string> unpack_string_buf(
     size_t byte_position = 0;
     size_t total_bytes = buf.size();
 
-    if(total_bytes==0)
+    if (total_bytes == 0)
         return std::vector<std::string>();
 
     void* data = (void*)(buf.data());
 
     type_t type = read<type_t>(data, byte_position, total_bytes);
 
-
-    if(type!=(type_t)MetaDataType::string)
+    if (type!=(type_t)MetaDataType::string)
         throw std::runtime_error("The buffer string metadata type "\
                                  "does not contain the expected "\
                                  "type of string.");
 
     std::vector<std::string> vals;
 
-    if(!advance<type_t>(data, byte_position, total_bytes, 1))
+    if (!advance<type_t>(data, byte_position, total_bytes, 1))
         return vals;
 
     size_t str_len;
@@ -331,13 +330,13 @@ extern inline std::vector<std::string> unpack_string_buf(
 
         str_len = read<size_t>(data, byte_position, total_bytes);
 
-        if(!advance<size_t>(data, byte_position, total_bytes, 1))
+        if (!advance<size_t>(data, byte_position, total_bytes, 1))
             return vals;
 
         vals.push_back(
             read_string(data, byte_position, total_bytes, str_len));
 
-        if(!advance<char>(data, byte_position, total_bytes, str_len))
+        if (!advance<char>(data, byte_position, total_bytes, str_len))
             return vals;
     }
     return vals;
@@ -362,11 +361,11 @@ extern inline std::vector<T> unpack_scalar_buf(
 
     type_t type = read<type_t>(data, byte_position, total_bytes);
 
-    if(!advance<type_t>(data, byte_position,
+    if (!advance<type_t>(data, byte_position,
                          total_bytes, 1))
         return std::vector<T>();
 
-    if( (total_bytes - byte_position) % sizeof(T))
+    if ( (total_bytes - byte_position) % sizeof(T))
         throw std::runtime_error("The data portion of the provided "\
                                  "metadata buffer does not contain "
                                  "the correct number of bytes for "

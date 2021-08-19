@@ -72,28 +72,28 @@ void TensorPack::add_tensor(const std::string& name,
     // Allocate memory for the tensor
     TensorBase* ptr = NULL;
     switch (type) {
-        case TensorType::dbl :
+        case TensorType::dbl:
             ptr = new Tensor<double>(name, data, dims, type, mem_layout);
             break;
-        case TensorType::flt :
+        case TensorType::flt:
             ptr = new Tensor<float>(name, data, dims, type, mem_layout);
             break;
-        case TensorType::int64 :
+        case TensorType::int64:
             ptr = new Tensor<int64_t>(name, data, dims, type, mem_layout);
             break;
-        case TensorType::int32 :
+        case TensorType::int32:
             ptr = new Tensor<int32_t>(name, data, dims, type, mem_layout);
             break;
-        case TensorType::int16 :
+        case TensorType::int16:
             ptr = new Tensor<int16_t>(name, data, dims, type, mem_layout);
             break;
-        case TensorType::int8 :
+        case TensorType::int8:
             ptr = new Tensor<int8_t>(name, data, dims, type, mem_layout);
             break;
-        case TensorType::uint16 :
+        case TensorType::uint16:
             ptr = new Tensor<uint16_t>(name, data, dims, type, mem_layout);
             break;
-        case TensorType::uint8 :
+        case TensorType::uint8:
             ptr = new Tensor<uint8_t>(name, data, dims, type, mem_layout);
              break;
         default :

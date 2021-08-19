@@ -55,7 +55,7 @@ PyClient::PyClient(bool cluster)
 
 PyClient::~PyClient()
 {
-    if(this->_client != NULL)
+    if (this->_client != NULL)
         delete this->_client;
 }
 
@@ -110,20 +110,20 @@ py::array PyClient::get_tensor(const std::string& key)
             });
 
     // detect data type
-    switch(tensor->type()) {
-        case TensorType::dbl : {
+    switch (tensor->type()) {
+        case TensorType::dbl: {
             double* data =
                 (double*)(tensor->data_view(MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
             break;
         }
-        case TensorType::flt : {
+        case TensorType::flt: {
             float* data =
                 (float*)(tensor->data_view(MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
             break;
         }
-        case TensorType::int64 : {
+        case TensorType::int64: {
             int64_t* data =
                 (int64_t*)(tensor->data_view(MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);

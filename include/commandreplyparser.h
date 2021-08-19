@@ -48,7 +48,7 @@ inline std::vector<size_t> get_tensor_dims(CommandReply& reply)
     in the same order and we can index base reply elements array;
     */
 
-    if(reply.n_elements() < 6)
+    if (reply.n_elements() < 6)
         throw std::runtime_error("The message does not have the "\
                                 "correct number of fields");
 
@@ -71,7 +71,7 @@ inline std::string_view get_tensor_data_blob(CommandReply& reply)
     //is always in the same order and we are going to just
     //index into the base reply.
 
-    if(reply.n_elements() < 6)
+    if (reply.n_elements() < 6)
         throw std::runtime_error("The message does not have the "\
                                 "correct number of fields");
 
@@ -87,7 +87,7 @@ inline TensorType get_tensor_data_type(CommandReply& reply)
     //is always in the same order and we are going to just
     //index into the base reply.
 
-    if(reply.n_elements() < 2)
+    if (reply.n_elements() < 2)
         throw std::runtime_error("The message does not have the correct "\
                                 "number of fields");
 

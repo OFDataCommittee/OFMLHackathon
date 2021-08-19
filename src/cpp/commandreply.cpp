@@ -79,7 +79,7 @@ CommandReply& CommandReply::operator=(redisReply*&& reply)
 // Move assignment operator with CommandReply as input.
 CommandReply& CommandReply::operator=(CommandReply&& reply)
 {
-  if( this != &reply) {
+  if ( this != &reply) {
     _uptr_reply = std::move(reply._uptr_reply);
     _reply = _uptr_reply.get();
   }

@@ -346,7 +346,7 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
             cmd.add_field("MINBATCHSIZE");
             cmd.add_field(std::to_string(min_batch_size));
         }
-        if( inputs.size() > 0) {
+        if ( inputs.size() > 0) {
             cmd.add_field("INPUTS");
             cmd.add_fields(inputs);
         }

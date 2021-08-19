@@ -139,21 +139,21 @@ void* Tensor<T>::data_view(const MemoryLayout mem_layout)
     void* ptr = NULL;
 
     switch (mem_layout) {
-        case(MemoryLayout::contiguous) :
+        case MemoryLayout::contiguous:
             ptr = this->_data;
             break;
-        case(MemoryLayout::fortran_contiguous) :
+        case MemoryLayout::fortran_contiguous:
             ptr = this->_f_mem_views.allocate_bytes(
                                      this->_n_data_bytes());
             this->_c_to_f_memcpy((T*)ptr, (T*)this->_data, this->_dims);
             break;
-        case(MemoryLayout::nested) :
+        case MemoryLayout::nested:
             this->_build_nested_memory(&ptr,
                                        this->_dims.data(),
                                        this->_dims.size(),
                                        (T*)this->_data);
             break;
-        default :
+        default:
             throw std::runtime_error(
                 "Unsupported MemoryLayout value in "\
                 "Tensor<T>.data_view().");
@@ -195,14 +195,14 @@ void Tensor<T>::fill_mem_space(void* data,
     }
 
     // Copy over the data
-    switch(mem_layout) {
-        case MemoryLayout::fortran_contiguous :
+    switch (mem_layout) {
+        case MemoryLayout::fortran_contiguous:
             this->_c_to_f_memcpy((T*)data, (T*)this->_data, this->_dims);
             break;
-        case MemoryLayout::contiguous :
+        case MemoryLayout::contiguous:
             std::memcpy(data, this->_data, this->_n_data_bytes());
             break;
-        case MemoryLayout::nested : {
+        case MemoryLayout::nested: {
             size_t starting_position = 0;
             this->_fill_nested_mem_with_data(data, dims.data(),
                                              dims.size(),
@@ -210,7 +210,7 @@ void Tensor<T>::fill_mem_space(void* data,
                                              this->_data);
             }
             break;
-        default :
+        default:
             throw std::runtime_error(
                 "Unsupported MemoryLayout value in "\
                 "Tensor<T>.fill_mem_space().");
@@ -302,14 +302,14 @@ void Tensor<T>::_set_tensor_data(void* src_data,
     size_t n_bytes = n_values * sizeof(T);
     this->_data = new unsigned char[n_bytes];
 
-    switch(mem_layout) {
-        case(MemoryLayout::contiguous) :
+    switch (mem_layout) {
+        case MemoryLayout::contiguous:
             std::memcpy(this->_data, src_data, n_bytes);
             break;
-        case(MemoryLayout::fortran_contiguous) :
+        case MemoryLayout::fortran_contiguous:
             this->_f_to_c_memcpy((T*)this->_data, (T*) src_data, dims);
             break;
-        case(MemoryLayout::nested) :
+        case MemoryLayout::nested:
             this->_copy_nested_to_contiguous(
                 src_data, dims.data(), dims.size(), this->_data);
             break;

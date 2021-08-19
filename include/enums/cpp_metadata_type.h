@@ -35,6 +35,7 @@
 namespace SmartRedis {
 
 enum class MetaDataType {
+    invalid = 0,
     dbl     = 1,
     flt     = 2,
     int32   = 3,
@@ -47,26 +48,26 @@ enum class MetaDataType {
 //! Helper method to convert between MetaDataType and CMetaDataType
 inline CMetaDataType convert_metadata_type(MetaDataType type) {
     CMetaDataType t;
-    switch(type) {
-        case MetaDataType::dbl :
+    switch (type) {
+        case MetaDataType::dbl:
             t = CMetaDataType::c_meta_dbl;
             break;
-        case MetaDataType::flt :
+        case MetaDataType::flt:
             t = CMetaDataType::c_meta_flt;
             break;
-        case MetaDataType::int32 :
+        case MetaDataType::int32:
             t = CMetaDataType::c_meta_int32;
             break;
-        case MetaDataType::int64 :
+        case MetaDataType::int64:
             t = CMetaDataType::c_meta_int64;
             break;
-        case MetaDataType::uint32 :
+        case MetaDataType::uint32:
             t = CMetaDataType::c_meta_uint32;
             break;
-        case MetaDataType::uint64 :
+        case MetaDataType::uint64:
             t = CMetaDataType::c_meta_uint64;
             break;
-        case MetaDataType::string :
+        case MetaDataType::string:
             t = CMetaDataType::c_meta_string;
             break;
         default :
@@ -79,26 +80,26 @@ inline CMetaDataType convert_metadata_type(MetaDataType type) {
 //! Helper method to convert between CMetaDataType and MetaDataType
 inline MetaDataType convert_metadata_type(CMetaDataType type) {
     MetaDataType t;
-    switch(type) {
-        case CMetaDataType::c_meta_dbl :
+    switch (type) {
+        case CMetaDataType::c_meta_dbl:
             t = MetaDataType::dbl;
             break;
-        case CMetaDataType::c_meta_flt :
+        case CMetaDataType::c_meta_flt:
             t = MetaDataType::flt;
             break;
-        case CMetaDataType::c_meta_int32 :
+        case CMetaDataType::c_meta_int32:
             t = MetaDataType::int32;
             break;
-        case CMetaDataType::c_meta_int64 :
+        case CMetaDataType::c_meta_int64:
             t = MetaDataType::int64;
             break;
-        case CMetaDataType::c_meta_uint32 :
+        case CMetaDataType::c_meta_uint32:
             t = MetaDataType::uint32;
             break;
-        case CMetaDataType::c_meta_uint64 :
+        case CMetaDataType::c_meta_uint64:
             t = MetaDataType::uint64;
             break;
-        case CMetaDataType::c_meta_string :
+        case CMetaDataType::c_meta_string:
             t = MetaDataType::string;
             break;
         default :

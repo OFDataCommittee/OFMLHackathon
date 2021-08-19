@@ -201,29 +201,29 @@ void Client::put_tensor(const std::string& key,
     std::string p_key = _build_tensor_key(key, false);
 
     TensorBase* tensor;
-    switch(type) {
-        case TensorType::dbl :
+    switch (type) {
+        case TensorType::dbl:
             tensor = new Tensor<double>(p_key, data, dims, type, mem_layout);
             break;
-        case TensorType::flt :
+        case TensorType::flt:
             tensor = new Tensor<float>(p_key, data, dims, type, mem_layout);
             break;
-        case TensorType::int64 :
+        case TensorType::int64:
             tensor = new Tensor<int64_t>(p_key, data, dims, type, mem_layout);
             break;
-        case TensorType::int32 :
+        case TensorType::int32:
             tensor = new Tensor<int32_t>(p_key, data, dims, type, mem_layout);
             break;
-        case TensorType::int16 :
+        case TensorType::int16:
             tensor = new Tensor<int16_t>(p_key, data, dims, type, mem_layout);
             break;
-        case TensorType::int8 :
+        case TensorType::int8:
             tensor = new Tensor<int8_t>(p_key, data, dims, type, mem_layout);
             break;
-        case TensorType::uint16 :
+        case TensorType::uint16:
             tensor = new Tensor<uint16_t>(p_key, data, dims, type, mem_layout);
             break;
-        case TensorType::uint8 :
+        case TensorType::uint8:
             tensor = new Tensor<uint8_t>(p_key, data, dims, type, mem_layout);
             break;
         default : // FINDME: Need to handle this case better
@@ -356,42 +356,42 @@ void Client::unpack_tensor(const std::string& key,
     std::string_view blob = CommandReplyParser::get_tensor_data_blob(reply);
     TensorBase* tensor = NULL;
     switch (reply_type) {
-        case TensorType::dbl :
+        case TensorType::dbl:
             tensor = new Tensor<double>(get_key, (void*)blob.data(),
                                         reply_dims, reply_type,
                                         MemoryLayout::contiguous);
             break;
-        case TensorType::flt :
+        case TensorType::flt:
             tensor = new Tensor<float>(get_key, (void*)blob.data(),
                                        reply_dims, reply_type,
                                        MemoryLayout::contiguous);
             break;
-        case TensorType::int64  :
+        case TensorType::int64:
             tensor = new Tensor<int64_t>(get_key, (void*)blob.data(),
                                          reply_dims, reply_type,
                                          MemoryLayout::contiguous);
             break;
-        case TensorType::int32 :
+        case TensorType::int32:
             tensor = new Tensor<int32_t>(get_key, (void*)blob.data(),
                                          reply_dims, reply_type,
                                          MemoryLayout::contiguous);
             break;
-        case TensorType::int16 :
+        case TensorType::int16:
             tensor = new Tensor<int16_t>(get_key, (void*)blob.data(),
                                          reply_dims, reply_type,
                                          MemoryLayout::contiguous);
             break;
-        case TensorType::int8 :
+        case TensorType::int8:
             tensor = new Tensor<int8_t>(get_key, (void*)blob.data(),
                                         reply_dims, reply_type,
                                         MemoryLayout::contiguous);
             break;
-        case TensorType::uint16 :
+        case TensorType::uint16:
             tensor = new Tensor<uint16_t>(get_key, (void*)blob.data(),
                                           reply_dims, reply_type,
                                           MemoryLayout::contiguous);
             break;
-        case TensorType::uint8 :
+        case TensorType::uint8:
             tensor = new Tensor<uint8_t>(get_key, (void*)blob.data(),
                                          reply_dims, reply_type,
                                          MemoryLayout::contiguous);
@@ -1032,35 +1032,35 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
 
     TensorBase* ptr = NULL;
     switch (type) {
-        case TensorType::dbl :
+        case TensorType::dbl:
             ptr = new Tensor<double>(get_key, (void*)blob.data(),
                                      dims, type, MemoryLayout::contiguous);
             break;
-        case TensorType::flt :
+        case TensorType::flt:
             ptr = new Tensor<float>(get_key, (void*)blob.data(),
                                     dims, type, MemoryLayout::contiguous);
             break;
-        case TensorType::int64 :
+        case TensorType::int64:
             ptr = new Tensor<int64_t>(get_key, (void*)blob.data(),
                                       dims, type, MemoryLayout::contiguous);
             break;
-        case TensorType::int32 :
+        case TensorType::int32:
             ptr = new Tensor<int32_t>(get_key, (void*)blob.data(),
                                       dims, type, MemoryLayout::contiguous);
             break;
-        case TensorType::int16 :
+        case TensorType::int16:
             ptr = new Tensor<int16_t>(get_key, (void*)blob.data(),
                                       dims, type, MemoryLayout::contiguous);
             break;
-        case TensorType::int8 :
+        case TensorType::int8:
             ptr = new Tensor<int8_t>(get_key, (void*)blob.data(),
                                      dims, type, MemoryLayout::contiguous);
             break;
-        case TensorType::uint16 :
+        case TensorType::uint16:
             ptr = new Tensor<uint16_t>(get_key, (void*)blob.data(),
                                        dims, type, MemoryLayout::contiguous);
             break;
-        case TensorType::uint8 :
+        case TensorType::uint8:
             ptr = new Tensor<uint8_t>(get_key, (void*)blob.data(),
                                       dims, type, MemoryLayout::contiguous);
             break;
