@@ -299,7 +299,7 @@ void Tensor<T>::_set_tensor_data(void* src_data,
 {
     size_t n_values = this->num_values();
     size_t n_bytes = n_values * sizeof(T);
-    this->_data = malloc(n_bytes);
+    this->_data = new unsigned char[n_bytes];
 
     switch(mem_layout) {
         case(MemoryLayout::contiguous) :

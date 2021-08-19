@@ -82,8 +82,10 @@ TensorBase::TensorBase(TensorBase&& tb)
 // TensorBase destructor
 TensorBase::~TensorBase()
 {
-    if (_data != NULL)
-        free(_data);
+    if (_data != NULL) {
+        delete((unsigned char *)_data);
+        _data = NULL;
+    }
 }
 
 // TensorBase copy assignment operator
@@ -99,8 +101,10 @@ TensorBase& TensorBase::operator=(const TensorBase& tb)
     _dims = tb._dims;
 
     // Erase our old data
-    if (_data != NULL)
-        free(_data);
+    if (_data != NULL) {
+        delete((unsigned char *)_data);
+        _data = NULL;
+    }
 
     // NOTE: The actual tensor data will be copied by the child class
     // (template) after it calls this assignment operator.
@@ -124,7 +128,7 @@ TensorBase& TensorBase::operator=(TensorBase&& tb)
 
     // Erase our old data and assume ownership of tb's data
     if (_data != NULL)
-        free(_data);
+        delete((unsigned char *)_data);
     _data = tb._data;
     tb._data = NULL;
 
