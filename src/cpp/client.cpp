@@ -98,8 +98,7 @@ DataSet Client::get_dataset(const std::string& name)
             CommandReplyParser::get_tensor_dims(reply);
         std::string_view blob = CommandReplyParser::get_tensor_data_blob(reply);
         TensorType type = CommandReplyParser::get_tensor_data_type(reply);
-        dataset._add_to_tensorpack(tensor_names[i],
-                                   reinterpret_cast<void*>(blob.data()),
+        dataset._add_to_tensorpack(tensor_names[i], (void*)blob.data(),
                                    reply_dims, type, MemoryLayout::contiguous);
     }
 
@@ -1034,43 +1033,35 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
     TensorBase* ptr = NULL;
     switch (type) {
         case TensorType::dbl :
-            ptr = new Tensor<double>(get_key,
-                                     reinterpret_cast<void*>(blob.data()),
+            ptr = new Tensor<double>(get_key, (void*)blob.data(),
                                      dims, type, MemoryLayout::contiguous);
             break;
         case TensorType::flt :
-            ptr = new Tensor<float>(get_key,
-                                    reinterpret_cast<void*>(blob.data()),
+            ptr = new Tensor<float>(get_key, (void*)blob.data(),
                                     dims, type, MemoryLayout::contiguous);
             break;
         case TensorType::int64 :
-            ptr = new Tensor<int64_t>(get_key,
-                                      reinterpret_cast<void*>(blob.data()),
+            ptr = new Tensor<int64_t>(get_key, (void*)blob.data(),
                                       dims, type, MemoryLayout::contiguous);
             break;
         case TensorType::int32 :
-            ptr = new Tensor<int32_t>(get_key,
-                                      reinterpret_cast<void*>(blob.data()),
+            ptr = new Tensor<int32_t>(get_key, (void*)blob.data(),
                                       dims, type, MemoryLayout::contiguous);
             break;
         case TensorType::int16 :
-            ptr = new Tensor<int16_t>(get_key,
-                                      reinterpret_cast<void*>(blob.data()),
+            ptr = new Tensor<int16_t>(get_key, (void*)blob.data(),
                                       dims, type, MemoryLayout::contiguous);
             break;
         case TensorType::int8 :
-            ptr = new Tensor<int8_t>(get_key,
-                                     reinterpret_cast<void*>(blob.data()),
+            ptr = new Tensor<int8_t>(get_key, (void*)blob.data(),
                                      dims, type, MemoryLayout::contiguous);
             break;
         case TensorType::uint16 :
-            ptr = new Tensor<uint16_t>(get_key,
-                                       reinterpret_cast<void*>(blob.data()),
+            ptr = new Tensor<uint16_t>(get_key, (void*)blob.data(),
                                        dims, type, MemoryLayout::contiguous);
             break;
         case TensorType::uint8 :
-            ptr = new Tensor<uint8_t>(get_key,
-                                      reinterpret_cast<void*>(blob.data()),
+            ptr = new Tensor<uint8_t>(get_key, (void*)blob.data(),
                                       dims, type, MemoryLayout::contiguous);
             break;
         default :

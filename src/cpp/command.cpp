@@ -60,7 +60,7 @@ Command& Command::operator=(const Command& cmd)
     for (; local_it != cmd._local_fields.end(); local_it++) {
         // allocate memory and copy a local field
         int field_size = cmd._fields[local_it->second].size();
-        char* f = (char*)new unsigned char[field_size];
+        char* f = new char[field_size];
         if (f == NULL)
             throw std::bad_alloc();
         std::memcpy(f, local_it->first, field_size);
@@ -121,7 +121,7 @@ void Command::add_field(const char* field, bool is_key)
     */
 
     int field_size = std::strlen(field);
-    char* f = (char*)new unsigned char[field_size];
+    char* f = new char[field_size];
     if (f == NULL)
         throw std::bad_alloc();
     std::memcpy(f, field, field_size);
@@ -156,7 +156,7 @@ void Command::add_field_ptr(std::string_view field)
     fields.  If is_key is true, the key will be added to the
     command keys.  Field pointers cannot act as Command keys.
     */
-    _ptr_fields.push_back({(char*)field.data(), _fields.size()});
+    _ptr_fields.push_back({const_cast<char*>(field.data()), _fields.size()});
     _fields.push_back(field);
 }
 

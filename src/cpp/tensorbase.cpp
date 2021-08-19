@@ -83,7 +83,7 @@ TensorBase::TensorBase(TensorBase&& tb)
 TensorBase::~TensorBase()
 {
     if (_data != NULL) {
-        delete((unsigned char *)_data);
+        delete(reinterpret_cast<unsigned char *>(_data));
         _data = NULL;
     }
 }
@@ -102,7 +102,7 @@ TensorBase& TensorBase::operator=(const TensorBase& tb)
 
     // Erase our old data
     if (_data != NULL) {
-        delete((unsigned char *)_data);
+        delete(reinterpret_cast<unsigned char *>(_data));
         _data = NULL;
     }
 
@@ -128,7 +128,7 @@ TensorBase& TensorBase::operator=(TensorBase&& tb)
 
     // Erase our old data and assume ownership of tb's data
     if (_data != NULL)
-        delete((unsigned char *)_data);
+        delete(reinterpret_cast<unsigned char *>(_data));
     _data = tb._data;
     tb._data = NULL;
 
