@@ -33,22 +33,22 @@ using namespace SmartRedis;
 // Redis constructor.
 Redis::Redis() : RedisServer()
 {
-    std::string address_port = this->_get_ssdb();
-    this->_connect(address_port);
+    std::string address_port = _get_ssdb();
+    _connect(address_port);
 }
 
 // Redis constructor. Uses address provided to constructor instead of environment variables
 Redis::Redis(std::string address_port) : RedisServer()
 {
-    this->_connect(address_port);
+    _connect(address_port);
 }
 
 // Redis destructor
 Redis::~Redis()
 {
-    if (this->_redis != NULL) {
-        delete this->_redis;
-        this->_redis = NULL;
+    if (_redis != NULL) {
+        delete _redis;
+        _redis = NULL;
     }
 }
 
@@ -62,7 +62,7 @@ CommandReply Redis::run(Command& cmd)
         try {
             Command::iterator cmd_fields_start = cmd.begin();
             Command::iterator cmd_fields_end = cmd.end();
-            reply = this->_redis->command(cmd_fields_start, cmd_fields_end);
+            reply = _redis->command(cmd_fields_start, cmd_fields_end);
 
             if (reply.has_error() == 0)
                 return reply;
@@ -105,7 +105,7 @@ CommandReply Redis::run(CommandList& cmds)
     CommandReply reply;
     int error_count = 0;
     for ( ; cmd != cmds.end(); cmd++) {
-        reply = this->run(**cmd);
+        reply = run(**cmd);
         error_count += reply.has_error();
     }
     return reply;
@@ -114,7 +114,7 @@ CommandReply Redis::run(CommandList& cmds)
 // Check if a model or script key exists in the database
 bool Redis::model_key_exists(const std::string& key)
 {
-    return this->key_exists(key);
+    return key_exists(key);
 }
 
 // Check if a key exists in the database
@@ -126,7 +126,7 @@ bool Redis::key_exists(const std::string& key)
     cmd.add_field(key);
 
     // Run it
-    CommandReply reply = this->run(cmd);
+    CommandReply reply = run(cmd);
     if (reply.has_error() > 0)
         throw std::runtime_error("Error encountered while checking "\
                                  "for existence of key " + key);
@@ -137,9 +137,8 @@ bool Redis::key_exists(const std::string& key)
 bool Redis::is_addressable(const std::string& address,
                            const uint64_t& port)
 {
-    return this->_address_node_map.find(address + ":"
-                        + std::to_string(port))
-                        != this->_address_node_map.end();
+    return _address_node_map.find(address + ":" + std::to_string(port)) !=
+        _address_node_map.end();
 }
 
 // Put a Tensor on the server
@@ -155,7 +154,7 @@ CommandReply Redis::put_tensor(TensorBase& tensor)
     cmd.add_field_ptr(tensor.buf());
 
     // Run it
-    return this->run(cmd);
+    return run(cmd);
 }
 
 // Get a Tensor from the server
@@ -169,7 +168,7 @@ CommandReply Redis::get_tensor(const std::string& key)
     cmd.add_field("BLOB");
 
     // Run it
-    return this->run(cmd);
+    return run(cmd);
 }
 
 // Rename a tensor in the database
@@ -183,7 +182,7 @@ CommandReply Redis::rename_tensor(const std::string& key,
     cmd.add_field(new_key);
 
     // Run it
-    return this->run(cmd);
+    return run(cmd);
 }
 
 // Delete a tensor in the database
@@ -195,7 +194,7 @@ CommandReply Redis::delete_tensor(const std::string& key)
     cmd.add_field(key, true);
 
     // Run it
-    return this->run(cmd);
+    return run(cmd);
 }
 
 // Copy a tensor from the source key to the destination key
@@ -212,7 +211,7 @@ CommandReply Redis::copy_tensor(const std::string& src_key,
     cmd_get.add_field("BLOB");
 
     // Run the GET command
-    CommandReply cmd_get_reply = this->run(cmd_get);
+    CommandReply cmd_get_reply = run(cmd_get);
     if (cmd_get_reply.has_error() > 0) {
         throw std::runtime_error("Failed to retrieve tensor " +
                                  src_key + "from database");
@@ -237,7 +236,7 @@ CommandReply Redis::copy_tensor(const std::string& src_key,
     cmd_put.add_field_ptr(blob);
 
     // Run the PUT command
-    return this->run(cmd_put);
+    return run(cmd_put);
 }
 
 // Copy a vector of tensors from source keys to destination keys
@@ -257,7 +256,7 @@ CommandReply Redis::copy_tensors(const std::vector<std::string>& src,
     std::vector<std::string>::const_iterator it_dest = dest.cbegin();
     CommandReply reply;
     for ( ; it_src != src.cend(); it_src++, it_dest++) {
-        reply = this->copy_tensor(*it_src, *it_dest);
+        reply = copy_tensor(*it_src, *it_dest);
         if (reply.has_error() > 0) {
             throw std::runtime_error("tensor copy failed");
         }
@@ -312,7 +311,7 @@ CommandReply Redis::set_model(const std::string& model_name,
     cmd.add_field_ptr(model);
 
     // Run it
-    return this->run(cmd);
+    return run(cmd);
 }
 
 // Set a script from a string_view buffer in the database for future execution
@@ -329,7 +328,7 @@ CommandReply Redis::set_script(const std::string& key,
     cmd.add_field_ptr(script);
 
     // Run it
-    return this->run(cmd);
+    return run(cmd);
 }
 
 // Run a model in the database using the specificed input and output tensors
@@ -347,7 +346,7 @@ CommandReply Redis::run_model(const std::string& key,
     cmd.add_fields(outputs);
 
     // Run it
-    return this->run(cmd);
+    return run(cmd);
 }
 
 // Run a script function in the database using the specificed input and
@@ -368,7 +367,7 @@ CommandReply Redis::run_script(const std::string& key,
     cmd.add_fields(outputs);
 
     // Run it
-    return this->run(cmd);
+    return run(cmd);
 }
 
 // Retrieve the model from the database
@@ -381,7 +380,7 @@ CommandReply Redis::get_model(const std::string& key)
     cmd.add_field("BLOB");
 
     // Run it
-    return this->run(cmd);
+    return run(cmd);
 }
 
 // Retrieve the script from the database
@@ -394,7 +393,7 @@ CommandReply Redis::get_script(const std::string& key)
     cmd.add_field("SOURCE");
 
     // Run it
-    return this->run(cmd);
+    return run(cmd);
 }
 
 // Connect to the server at the address and port
@@ -404,19 +403,19 @@ inline void Redis::_connect(std::string address_port)
     // because the non-cluster Redis constructor
     // does not form a connection until a command is run
 
-    this->_address_node_map.insert({address_port, nullptr});
+    _address_node_map.insert({address_port, nullptr});
 
     // Try to create the sw::redis::Redis object
     try {
-        this->_redis = new sw::redis::Redis(address_port);
+        _redis = new sw::redis::Redis(address_port);
     }
     catch (std::exception& e) {
-        this->_redis = NULL;
+        _redis = NULL;
         throw std::runtime_error("Failed to create Redis object with error: " +
                                  std::string(e.what()));
     }
     catch (...) {
-        this->_redis = NULL;
+        _redis = NULL;
         throw std::runtime_error("A non-standard exception encountered "\
                                  "during client connection.");
     }
@@ -426,7 +425,7 @@ inline void Redis::_connect(std::string address_port)
     int n_trials = 10;
     for (int i = 1; i <= n_trials; i++) {
         try {
-            if (this->_redis->ping().compare("PONG") == 0) {
+            if (_redis->ping().compare("PONG") == 0) {
                 return;
             }
             else if (i == n_trials) {

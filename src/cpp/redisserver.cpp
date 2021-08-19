@@ -45,7 +45,7 @@ std::string RedisServer::_get_ssdb()
         throw std::runtime_error("The environment variable SSDB "\
                                 "must be set to use the client.");
     std::string env_str = std::string(env_char);
-    this->_check_ssdb_string(env_str);
+    _check_ssdb_string(env_str);
 
     // Parse the data in it
     std::vector<std::string> hosts_ports;

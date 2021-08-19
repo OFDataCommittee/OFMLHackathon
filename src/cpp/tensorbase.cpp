@@ -43,10 +43,10 @@ TensorBase::TensorBase(const std::string& name,
     owned by the tensor.
     */
 
-    this->_check_inputs(data, name, dims);
-    this->_name = name;
-    this->_type = type;
-    this->_dims = dims;
+    _check_inputs(data, name, dims);
+    _name = name;
+    _type = type;
+    _dims = dims;
 }
 
 // TensorBase copy constructor
@@ -57,9 +57,9 @@ TensorBase::TensorBase(const TensorBase& tb)
         return;
 
     // deep copy of tensor data
-    this->_dims = std::vector<size_t>(tb._dims);
-    this->_name = std::string(tb._name);
-    this->_type = TensorType(tb._type);
+    _dims = std::vector<size_t>(tb._dims);
+    _name = std::string(tb._name);
+    _type = TensorType(tb._type);
 }
 
 // TensorBase move constructor
@@ -70,10 +70,10 @@ TensorBase::TensorBase(TensorBase&& tb)
         return;
 
     // Move data
-    this->_name = std::move(tb._name);
-    this->_type = std::move(tb._type);
-    this->_dims = std::move(tb._dims);
-    this->_data = tb._data;
+    _name = std::move(tb._name);
+    _type = std::move(tb._type);
+    _dims = std::move(tb._dims);
+    _data = tb._data;
 
     // Mark that the data is no longer owned by the source
     tb._data = NULL;
@@ -82,8 +82,8 @@ TensorBase::TensorBase(TensorBase&& tb)
 // TensorBase destructor
 TensorBase::~TensorBase()
 {
-    if (this->_data != NULL)
-        free(this->_data);
+    if (_data != NULL)
+        free(_data);
 }
 
 // TensorBase copy assignment operator
@@ -94,13 +94,13 @@ TensorBase& TensorBase::operator=(const TensorBase& tb)
         return *this;
 
     // deep copy tensor data
-    this->_name = tb._name;
-    this->_type = tb._type;
-    this->_dims = tb._dims;
+    _name = tb._name;
+    _type = tb._type;
+    _dims = tb._dims;
 
     // Erase our old data
-    if (this->_data != NULL)
-        free(this->_data);
+    if (_data != NULL)
+        free(_data);
 
     // NOTE: The actual tensor data will be copied by the child class
     // (template) after it calls this assignment operator.
@@ -118,14 +118,14 @@ TensorBase& TensorBase::operator=(TensorBase&& tb)
         return *this;
 
     // Move tensor data
-    this->_name = std::move(tb._name);
-    this->_type = std::move(tb._type);
-    this->_dims = std::move(tb._dims);
+    _name = std::move(tb._name);
+    _type = std::move(tb._type);
+    _dims = std::move(tb._dims);
 
     // Erase our old data and assume ownership of tb's data
-    if (this->_data != NULL)
-        free(this->_data);
-    this->_data = tb._data;
+    if (_data != NULL)
+        free(_data);
+    _data = tb._data;
     tb._data = NULL;
 
     // Done
@@ -135,33 +135,33 @@ TensorBase& TensorBase::operator=(TensorBase&& tb)
 // Retrieve the tensor name.
 std::string TensorBase::name()
 {
-    return this->_name;
+    return _name;
 }
 
 // Retrieve the tensor type.
 TensorType TensorBase::type()
 {
-   return this->_type;
+   return _type;
 }
 
 // Retrieve the string version of the tensor type.
 std::string TensorBase::type_str()
 {
-    return TENSOR_STR_MAP.at(this->type());
+    return TENSOR_STR_MAP.at(type());
 }
 
 // Retrieve the tensor dims.
 std::vector<size_t> TensorBase::dims()
 {
-   return this->_dims;
+   return _dims;
 }
 
 // Retrieve the total number of values in the tensor.
 size_t TensorBase::num_values()
 {
-    size_t n_values = this->_dims[0];
-    for (size_t i = 1; i < this->_dims.size(); i++)
-        n_values *= this->_dims[i];
+    size_t n_values = 1;
+    for (size_t i = 0; i < _dims.size(); i++)
+        n_values *= _dims[i];
 
     return n_values;
 }
@@ -169,7 +169,7 @@ size_t TensorBase::num_values()
 // Retrieve a pointer to the tensor data.
 void* TensorBase::data()
 {
-   return this->_data;
+   return _data;
 }
 
 // Get a serialized buffer of the TensorBase data
@@ -180,7 +180,7 @@ std::string_view TensorBase::buf()
     has not yet been created, the data buffer will be
     created before returning.
     */
-    return std::string_view((char*)this->_data, this->_n_data_bytes());
+    return std::string_view((char*)_data, _n_data_bytes());
 }
 
 // Validate inputs for a tensor

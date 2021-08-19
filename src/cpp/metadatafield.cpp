@@ -40,13 +40,13 @@ MetadataField::MetadataField(const std::string& name, MetaDataType type) :
 // Retrieve the MetadataField name
 std::string MetadataField::name()
 {
-    return this->_name;
+    return _name;
 }
 
 // Retrieve the MetadataField name
 MetaDataType MetadataField::type()
 {
-    return this->_type;
+    return _type;
 }
 
 // EOF

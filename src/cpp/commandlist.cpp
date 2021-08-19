@@ -36,7 +36,7 @@ CommandList::CommandList(const CommandList& cmd_lst)
     std::vector<Command*>::const_iterator c_it = cmd_lst._commands.cbegin();
     for ( ; c_it != cmd_lst._commands.cend(); c_it++) {
         Command* curr_command = new Command(**c_it);
-        this->_commands.push_back(curr_command);
+        _commands.push_back(curr_command);
     }
 }
 
@@ -48,16 +48,16 @@ CommandList& CommandList::operator=(const CommandList& cmd_lst)
         return *this;
 
     // Remove my old contents
-    std::vector<Command*>::iterator it = this->_commands.begin();
-    for (; it != this->_commands.end(); it++)
+    std::vector<Command*>::iterator it = _commands.begin();
+    for (; it != _commands.end(); it++)
         delete (*it);
-    this->_commands.clear();
+    _commands.clear();
 
     // Copy over the new contents
     std::vector<Command*>::const_iterator c_it = cmd_lst._commands.begin();
     for ( ; c_it != cmd_lst._commands.end(); c_it++) {
         Command* curr_command = new Command(**c_it);
-        this->_commands.push_back(curr_command);
+        _commands.push_back(curr_command);
     }
 
     // Done
@@ -67,40 +67,40 @@ CommandList& CommandList::operator=(const CommandList& cmd_lst)
 // Default CommandList destructor
 CommandList::~CommandList()
 {
-    std::vector<Command*>::iterator it = this->_commands.begin();
-    for (; it != this->_commands.end(); it++)
+    std::vector<Command*>::iterator it = _commands.begin();
+    for (; it != _commands.end(); it++)
         delete (*it);
 }
 
 // Dynamically allocate a new Command and return a pointer to the new Command
 Command* CommandList::add_command()
 {
-    this->_commands.push_back(new Command());
-    return this->_commands.back();
+    _commands.push_back(new Command());
+    return _commands.back();
 }
 
 // Returns an iterator pointing to the first Command
 CommandList::iterator CommandList::begin()
 {
-    return this->_commands.begin();
+    return _commands.begin();
 }
 
 // Returns a const iterator pointing to the first Command
 CommandList::const_iterator CommandList::cbegin()
 {
-    return this->_commands.cbegin();
+    return _commands.cbegin();
 }
 
 // Returns an iterator pointing to the last Command
 CommandList::iterator CommandList::end()
 {
-    return this->_commands.end();
+    return _commands.end();
 }
 
 // Returns a const iterator pointing to the last Command
 CommandList::const_iterator CommandList::cend()
 {
-    return this->_commands.cend();
+    return _commands.cend();
 }
 
 // EOF
