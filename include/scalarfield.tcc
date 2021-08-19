@@ -41,8 +41,8 @@ ScalarField<T>::ScalarField(const std::string& name, MetaDataType type) :
 template <class T>
 ScalarField<T>::ScalarField(const std::string& name,
                             MetaDataType type,
-                            const std::vector<T>& vals) :
-    MetadataField(name, type)
+                            const std::vector<T>& vals)
+    : MetadataField(name, type)
 {
     this->_vals = vals;
 }
@@ -51,8 +51,8 @@ ScalarField<T>::ScalarField(const std::string& name,
 template <class T>
 ScalarField<T>::ScalarField(const std::string& name,
                             MetaDataType type,
-                            std::vector<T>&& vals) :
-    MetadataField(name, type)
+                            std::vector<T>&& vals)
+    : MetadataField(name, type)
 {
     this->_vals = std::move(vals);
 }

@@ -31,9 +31,9 @@
 using namespace SmartRedis;
 
 // Constructor
-Client::Client(bool cluster) :
-    _redis_cluster(cluster ? new RedisCluster() : NULL),
-    _redis(cluster ? NULL : new Redis())
+Client::Client(bool cluster)
+    : _redis_cluster(cluster ? new RedisCluster() : NULL),
+      _redis(cluster ? NULL : new Redis())
 {
     if (cluster)
         _redis_server =  _redis_cluster;
@@ -99,8 +99,8 @@ DataSet Client::get_dataset(const std::string& name)
         std::string_view blob = CommandReplyParser::get_tensor_data_blob(reply);
         TensorType type = CommandReplyParser::get_tensor_data_type(reply);
         dataset._add_to_tensorpack(tensor_names[i],
-                                   (void*)blob.data(), reply_dims,
-                                   type, MemoryLayout::contiguous);
+                                   reinterpret_cast<void*>(blob.data()),
+                                   reply_dims, type, MemoryLayout::contiguous);
     }
 
     // ***WS*** FINDME: Passing objects by value causes unnecessary copies
@@ -356,7 +356,7 @@ void Client::unpack_tensor(const std::string& key,
     // Retrieve the tensor data into a Tensor
     std::string_view blob = CommandReplyParser::get_tensor_data_blob(reply);
     TensorBase* tensor = NULL;
-    switch(reply_type) {
+    switch (reply_type) {
         case TensorType::dbl :
             tensor = new Tensor<double>(get_key, (void*)blob.data(),
                                         reply_dims, reply_type,
@@ -413,8 +413,7 @@ void Client::rename_tensor(const std::string& key,
 {
     std::string p_key = _build_tensor_key(key, true);
     std::string p_new_key = _build_tensor_key(new_key, false);
-    CommandReply reply =
-        _redis_server->rename_tensor(p_key, p_new_key);
+    CommandReply reply = _redis_server->rename_tensor(p_key, p_new_key);
     if (reply.has_error())
         throw std::runtime_error("rename_tensor failed");
 }
@@ -485,18 +484,18 @@ void Client::set_model(const std::string& key,
                                  "parameter of set_model.");
     }
 
-    if (backend.compare("TF") !=0 ) {
+    if (backend.compare("TF") != 0) {
         if (inputs.size() > 0) {
             throw std::runtime_error("INPUTS in the model set command "\
                                      "is only valid for TF models");
         }
-        if(outputs.size() > 0) {
+        if (outputs.size() > 0) {
             throw std::runtime_error("OUTPUTS in the model set command "\
                                      "is only valid for TF models");
         }
     }
 
-    const char *backends[] = { "TF", "TFLITE", "TORCH", "ONNX" };
+    const char* backends[] = { "TF", "TFLITE", "TORCH", "ONNX" };
     bool found = false;
     for (int i = 0; i < sizeof(backends)/sizeof(backends[0]); i++)
         found = found || (backend.compare(backends[i]) != 0);
@@ -931,7 +930,7 @@ void Client::_append_dataset_metadata_commands(CommandList& cmd_list,
 
     std::vector<std::pair<std::string, std::string>> mdf =
         dataset.get_metadata_serialization_map();
-    if (mdf.size()==0) {
+    if (mdf.size() == 0) {
         throw std::runtime_error("An attempt was made to put "\
                                  "a DataSet into the database that "\
                                  "does not contain any fields or "\
@@ -1035,36 +1034,44 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
     TensorBase* ptr = NULL;
     switch (type) {
         case TensorType::dbl :
-            ptr = new Tensor<double>(get_key, (void*)blob.data(), dims,
-                                     type, MemoryLayout::contiguous);
+            ptr = new Tensor<double>(get_key,
+                                     reinterpret_cast<void*>(blob.data()),
+                                     dims, type, MemoryLayout::contiguous);
             break;
         case TensorType::flt :
-            ptr = new Tensor<float>(get_key, (void*)blob.data(), dims,
-                                    type, MemoryLayout::contiguous);
+            ptr = new Tensor<float>(get_key,
+                                    reinterpret_cast<void*>(blob.data()),
+                                    dims, type, MemoryLayout::contiguous);
             break;
         case TensorType::int64 :
-            ptr = new Tensor<int64_t>(get_key, (void*)blob.data(), dims,
-                                     type, MemoryLayout::contiguous);
+            ptr = new Tensor<int64_t>(get_key,
+                                      reinterpret_cast<void*>(blob.data()),
+                                      dims, type, MemoryLayout::contiguous);
             break;
         case TensorType::int32 :
-            ptr = new Tensor<int32_t>(get_key, (void*)blob.data(), dims,
-                                      type, MemoryLayout::contiguous);
+            ptr = new Tensor<int32_t>(get_key,
+                                      reinterpret_cast<void*>(blob.data()),
+                                      dims, type, MemoryLayout::contiguous);
             break;
         case TensorType::int16 :
-            ptr = new Tensor<int16_t>(get_key, (void*)blob.data(), dims,
-                                      type, MemoryLayout::contiguous);
+            ptr = new Tensor<int16_t>(get_key,
+                                      reinterpret_cast<void*>(blob.data()),
+                                      dims, type, MemoryLayout::contiguous);
             break;
         case TensorType::int8 :
-            ptr = new Tensor<int8_t>(get_key, (void*)blob.data(), dims,
-                                     type, MemoryLayout::contiguous);
+            ptr = new Tensor<int8_t>(get_key,
+                                     reinterpret_cast<void*>(blob.data()),
+                                     dims, type, MemoryLayout::contiguous);
             break;
         case TensorType::uint16 :
-            ptr = new Tensor<uint16_t>(get_key, (void*)blob.data(), dims,
-                                       type, MemoryLayout::contiguous);
+            ptr = new Tensor<uint16_t>(get_key,
+                                       reinterpret_cast<void*>(blob.data()),
+                                       dims, type, MemoryLayout::contiguous);
             break;
         case TensorType::uint8 :
-            ptr = new Tensor<uint8_t>(get_key, (void*)blob.data(), dims,
-                                      type, MemoryLayout::contiguous);
+            ptr = new Tensor<uint8_t>(get_key,
+                                      reinterpret_cast<void*>(blob.data()),
+                                      dims, type, MemoryLayout::contiguous);
             break;
         default :
             throw std::runtime_error("An invalid TensorType was "\

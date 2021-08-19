@@ -279,10 +279,11 @@ T* Tensor<T>::_build_nested_memory(void** data,
         T** new_data = this->_c_mem_views.allocate(dims[0]);
         if (new_data == NULL)
             throw std::bad_alloc();
-        (*data) = (void*)new_data;
+        (*data) = reinterpret_cast<void*>(new_data);
         for (size_t i = 0; i < dims[0]; i++)
             contiguous_mem = this->_build_nested_memory(
-                (void**)(&new_data[i]), &dims[1], n_dims - 1, contiguous_mem);
+                reinterpret_cast<void**>(&new_data[i]), &dims[1],
+                n_dims - 1, contiguous_mem);
     }
     else {
         (*data) = (T*)contiguous_mem;
@@ -369,8 +370,7 @@ void Tensor<T>::_f_to_c(T* c_data,
 
     for (size_t i = start; i < end; i++) {
         if (more_dims)
-            this->_f_to_c(c_data, f_data, dims,
-                          dim_positions,
+            this->_f_to_c(c_data, f_data, dims, dim_positions,
                           current_dim + 1);
         else {
             size_t f_index = this->_f_index(dims, dim_positions);
@@ -397,10 +397,10 @@ void Tensor<T>::_c_to_f(T* f_data,
     bool more_dims = (current_dim + 1 != dims.size());
 
     for (size_t i = start; i < end; i++) {
-        if (more_dims)
-            this->_c_to_f(f_data, c_data, dims,
-                          dim_positions,
+        if (more_dims) {
+            this->_c_to_f(f_data, c_data, dims, dim_positions,
                           current_dim + 1);
+        }
         else {
             size_t f_index = this->_f_index(dims, dim_positions);
             size_t c_index = this->_c_index(dims, dim_positions);
