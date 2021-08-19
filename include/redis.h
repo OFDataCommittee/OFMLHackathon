@@ -46,7 +46,6 @@ class Redis : public RedisServer
     public:
         /*!
         *   \brief Redis constructor.
-        *          Initializes default values but does not connect.
         */
         Redis();
 

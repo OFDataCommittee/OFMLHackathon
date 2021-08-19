@@ -49,7 +49,6 @@ class RedisCluster : public RedisServer
 
         /*!
         *   \brief RedisCluster constructor.
-        *          Initializes default values but does not connect.
         */
         RedisCluster();
 
