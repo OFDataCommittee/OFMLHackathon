@@ -93,14 +93,14 @@ class CommandReply {
         *          redisReply as input
         *   \param reply The redisReply to copy
         */
-        CommandReply& operator=(redisReply* reply);
+        CommandReply& operator=(const redisReply* reply);
 
         /*!
         *   \brief CommandReply copy constructor with
         *          redisReply as input
         *   \param reply The redisReply to copy
         */
-        CommandReply(redisReply* reply);
+        CommandReply(const redisReply* reply);
 
         /*!
         *   \brief Move constructor with RedisReplyUPtr
@@ -237,7 +237,7 @@ class CommandReply {
         *          redisReply
         *   \param reply redisReply to copy
         */
-        redisReply* deep_clone_reply(redisReply* reply);
+        redisReply* deep_clone_reply(const redisReply* reply);
 
         /*!
         *   \brief RedisReplyUPtr that can hold redis reply data

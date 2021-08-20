@@ -36,7 +36,7 @@ CommandReply::CommandReply(const CommandReply& reply)
     _reply = _uptr_reply.get();
 }
 
-CommandReply::CommandReply(redisReply* reply)
+CommandReply::CommandReply(const redisReply* reply)
 {
     _uptr_reply = RedisReplyUPtr(deep_clone_reply(reply), sw::redis::ReplyDeleter());
     _reply = _uptr_reply.get();
@@ -71,7 +71,7 @@ CommandReply& CommandReply::operator=(const CommandReply& reply)
     return *this;
 }
 
-CommandReply& CommandReply::operator=(redisReply* reply)
+CommandReply& CommandReply::operator=(const redisReply* reply)
 {
     _uptr_reply.reset(NULL);
     _uptr_reply = RedisReplyUPtr(deep_clone_reply(reply), sw::redis::ReplyDeleter());
@@ -294,7 +294,7 @@ void CommandReply::print_reply_structure(std::string index_tracker)
     return;
 }
 
-redisReply* CommandReply::deep_clone_reply(redisReply* reply)
+redisReply* CommandReply::deep_clone_reply(const redisReply* reply)
 {
     if(reply == NULL)
         return NULL;
