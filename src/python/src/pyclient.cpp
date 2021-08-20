@@ -37,10 +37,9 @@ namespace py = pybind11;
 
 PyClient::PyClient(bool cluster)
 {
-    this->_client = NULL;
+    _client = NULL;
     try {
-        Client* client = new Client(cluster);
-        this->_client = client;
+        _client = new Client(cluster);
     }
     catch(std::exception& e) {
         throw std::runtime_error(e.what());
@@ -54,8 +53,10 @@ PyClient::PyClient(bool cluster)
 
 PyClient::~PyClient()
 {
-    if (this->_client != NULL)
-        delete this->_client;
+    if (_client != NULL) {
+        delete _client;
+        _client = NULL;
+    }
 }
 
 void PyClient::put_tensor(std::string& key,
@@ -67,15 +68,14 @@ void PyClient::put_tensor(std::string& key,
 
     // get dims
     std::vector<size_t> dims(buffer.ndim);
-    for (int i=0; i < buffer.shape.size(); i++) {
-        dims[i] = (size_t) buffer.shape[i];
+    for (int i = 0; i < buffer.shape.size(); i++) {
+        dims[i] = (size_t)buffer.shape[i];
     }
 
     TensorType ttype = TENSOR_TYPE_MAP.at(type);
 
     try {
-        this->_client->put_tensor(key, ptr, dims, ttype,
-                                    MemoryLayout::contiguous);
+        _client->put_tensor(key, ptr, dims, ttype, MemoryLayout::contiguous);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -85,14 +85,13 @@ void PyClient::put_tensor(std::string& key,
                                  "was encountered during client "\
                                  "put_tensor execution.");
     }
-    return;
 }
 
 py::array PyClient::get_tensor(const std::string& key)
 {
-    TensorBase* tensor;
+    TensorBase* tensor = NULL;
     try {
-        tensor = this->_client->_get_tensorbase_obj(key);
+        tensor = _client->_get_tensorbase_obj(key);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -105,69 +104,60 @@ py::array PyClient::get_tensor(const std::string& key)
 
     //Define py::capsule lambda function for destructor
     py::capsule free_when_done((void*)tensor, [](void *tensor) {
-            delete (TensorBase*)tensor;
+            delete reinterpret_cast<TensorBase*>(tensor);
             });
 
     // detect data type
     switch (tensor->type()) {
         case TensorType::dbl: {
-            double* data =
-                (double*)(tensor->data_view(MemoryLayout::contiguous));
+            double* data = reinterpret_cast<double*>(tensor->data_view(
+                MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
-            break;
         }
         case TensorType::flt: {
-            float* data =
-                (float*)(tensor->data_view(MemoryLayout::contiguous));
+            float* data = reinterpret_cast<float*>(tensor->data_view(
+                MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
-            break;
         }
         case TensorType::int64: {
-            int64_t* data =
-                (int64_t*)(tensor->data_view(MemoryLayout::contiguous));
+            int64_t* data = reinterpret_cast<int64_t*>(tensor->data_view(
+                MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
-            break;
         }
         case TensorType::int32: {
-            int32_t* data =
-                (int32_t*)(tensor->data_view(MemoryLayout::contiguous));
+            int32_t* data = reinterpret_cast<int32_t*>(tensor->data_view(
+                MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
-            break;
         }
         case TensorType::int16: {
-            int16_t* data =
-                (int16_t*)(tensor->data_view(MemoryLayout::contiguous));
+            int16_t* data = reinterpret_cast<int16_t*>(tensor->data_view(
+                MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
-            break;
         }
         case TensorType::int8: {
-            int8_t* data =
-                (int8_t*)(tensor->data_view(MemoryLayout::contiguous));
+            int8_t* data = reinterpret_cast<int8_t*>(tensor->data_view(
+                MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
-            break;
         }
         case TensorType::uint16: {
-            uint16_t* data =
-                (uint16_t*)(tensor->data_view(MemoryLayout::contiguous));
+            uint16_t* data = reinterpret_cast<uint16_t*>(tensor->data_view(
+                MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
-            break;
         }
         case TensorType::uint8: {
-            uint8_t* data =
-                (uint8_t*)(tensor->data_view(MemoryLayout::contiguous));
+            uint8_t* data = reinterpret_cast<uint8_t*>(tensor->data_view(
+                MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
-            break;
         }
         default :
             throw std::runtime_error("Could not infer type in "\
                                      "PyClient::get_tensor().");
-            break;
     }
 }
 
 void PyClient::delete_tensor(const std::string& key) {
     try {
-        this->_client->delete_tensor(key);
+        _client->delete_tensor(key);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -177,13 +167,12 @@ void PyClient::delete_tensor(const std::string& key) {
                                  "was encountered during client "\
                                  "delete_tensor execution.");
     }
-    return;
 }
 
 void PyClient::copy_tensor(const std::string& key,
                            const std::string& dest_key) {
     try {
-        this->_client->copy_tensor(key, dest_key);
+        _client->copy_tensor(key, dest_key);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -193,13 +182,12 @@ void PyClient::copy_tensor(const std::string& key,
                                  "was encountered during client "\
                                  "copy_tensor execution.");
     }
-    return;
 }
 
 void PyClient::rename_tensor(const std::string& key,
                              const std::string& new_key) {
     try {
-        this->_client->rename_tensor(key, new_key);
+        _client->rename_tensor(key, new_key);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -209,13 +197,12 @@ void PyClient::rename_tensor(const std::string& key,
                                  "was encountered during client "\
                                  "rename_tensor execution.");
     }
-    return;
 }
 
 void PyClient::put_dataset(PyDataset& dataset)
 {
     try {
-        this->_client->put_dataset(*dataset.get());
+        _client->put_dataset(*dataset.get());
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -225,14 +212,13 @@ void PyClient::put_dataset(PyDataset& dataset)
                                  "was encountered during client "\
                                  "put_dataset execution.");
     }
-    return;
 }
 
 PyDataset* PyClient::get_dataset(const std::string& name)
 {
     DataSet* data;
     try {
-        data = new DataSet(this->_client->get_dataset(name));
+        data = new DataSet(_client->get_dataset(name));
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -248,7 +234,7 @@ PyDataset* PyClient::get_dataset(const std::string& name)
 
 void PyClient::delete_dataset(const std::string& key) {
     try {
-        this->_client->delete_dataset(key);
+        _client->delete_dataset(key);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -258,13 +244,12 @@ void PyClient::delete_dataset(const std::string& key) {
                                  "was encountered during client "\
                                  "delete_dataset execution.");
     }
-    return;
 }
 
 void PyClient::copy_dataset(const std::string& key,
                            const std::string& dest_key) {
     try {
-        this->_client->copy_dataset(key, dest_key);
+        _client->copy_dataset(key, dest_key);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -274,13 +259,12 @@ void PyClient::copy_dataset(const std::string& key,
                                  "was encountered during client "\
                                  "copy_dataset execution.");
     }
-    return;
 }
 
 void PyClient::rename_dataset(const std::string& key,
                              const std::string& new_key) {
     try {
-        this->_client->rename_dataset(key, new_key);
+        _client->rename_dataset(key, new_key);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -290,7 +274,6 @@ void PyClient::rename_dataset(const std::string& key,
                                  "was encountered during client "\
                                  "rename_dataset execution.");
     }
-    return;
 }
 
 void PyClient::set_script_from_file(const std::string& key,
@@ -298,7 +281,7 @@ void PyClient::set_script_from_file(const std::string& key,
                                     const std::string& script_file)
 {
     try {
-        this->_client->set_script_from_file(key, device, script_file);
+        _client->set_script_from_file(key, device, script_file);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -308,7 +291,6 @@ void PyClient::set_script_from_file(const std::string& key,
                                  "was encountered during client "\
                                  "set_script_from_file execution.");
     }
-    return;
 }
 
 void PyClient::set_script(const std::string& key,
@@ -316,7 +298,7 @@ void PyClient::set_script(const std::string& key,
                           const std::string_view& script)
 {
     try {
-        this->_client->set_script(key, device, script);
+        _client->set_script(key, device, script);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -326,14 +308,13 @@ void PyClient::set_script(const std::string& key,
                                  "was encountered during client "\
                                  "set_script execution.");
     }
-    return;
 }
 
 std::string_view PyClient::get_script(const std::string& key)
 {
     std::string_view script;
     try {
-        script = this->_client->get_script(key);
+        script = _client->get_script(key);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -352,7 +333,7 @@ void PyClient::run_script(const std::string& key,
                 std::vector<std::string>& outputs)
 {
     try {
-      this->_client->run_script(key, function, inputs, outputs);
+      _client->run_script(key, function, inputs, outputs);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -362,14 +343,13 @@ void PyClient::run_script(const std::string& key,
                                  "was encountered during client "\
                                  "run_script execution.");
     }
-    return;
 }
 
 py::bytes PyClient::get_model(const std::string& key)
 {
     std::string model;
     try {
-        model = std::string(this->_client->get_model(key));
+        model = std::string(_client->get_model(key));
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -379,8 +359,7 @@ py::bytes PyClient::get_model(const std::string& key)
                                  "was encountered during client "\
                                  "get_model execution.");
     }
-    model = py::bytes(model);
-    return model;
+    return py::bytes(model);
 }
 
 void PyClient::set_model(const std::string& key,
@@ -394,14 +373,13 @@ void PyClient::set_model(const std::string& key,
                  const std::vector<std::string>& outputs)
 {
     try {
-        this->_client->set_model(key, model, backend, device,
+        _client->set_model(key, model, backend, device,
                                 batch_size, min_batch_size, tag,
                                 inputs, outputs);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
     }
-    return;
 }
 
 void PyClient::set_model_from_file(const std::string& key,
@@ -415,7 +393,7 @@ void PyClient::set_model_from_file(const std::string& key,
                                    const std::vector<std::string>& outputs)
 {
     try {
-        this->_client->set_model_from_file(key, model_file, backend, device,
+        _client->set_model_from_file(key, model_file, backend, device,
                                            batch_size, min_batch_size, tag,
                                            inputs, outputs);
     }
@@ -427,7 +405,6 @@ void PyClient::set_model_from_file(const std::string& key,
                                  "was encountered during client "\
                                  "set_model_from_file execution.");
     }
-    return;
 }
 
 void PyClient::run_model(const std::string& key,
@@ -435,7 +412,7 @@ void PyClient::run_model(const std::string& key,
                          std::vector<std::string> outputs)
 {
     try {
-        this->_client->run_model(key, inputs, outputs);
+        _client->run_model(key, inputs, outputs);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -445,20 +422,18 @@ void PyClient::run_model(const std::string& key,
                                  "was encountered during client "\
                                  "run_model execution.");
     }
-    return;
 }
 
 void PyClient::set_data_source(const std::string& source_id)
 {
-    this->_client->set_data_source(source_id);
-    return;
+    _client->set_data_source(source_id);
 }
 
 bool PyClient::key_exists(const std::string& key)
 {
-    bool result;
+    bool result = false;
     try {
-        result = this->_client->key_exists(key);
+        result = _client->key_exists(key);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -475,9 +450,9 @@ bool PyClient::poll_key(const std::string& key,
                         int poll_frequency_ms,
                         int num_tries)
 {
-    bool result;
+    bool result = false;
     try {
-        result = this->_client->poll_key(key, poll_frequency_ms,
+        result = _client->poll_key(key, poll_frequency_ms,
                                          num_tries);
     }
     catch(const std::exception& e) {
@@ -493,9 +468,9 @@ bool PyClient::poll_key(const std::string& key,
 
 bool PyClient::model_exists(const std::string& name)
 {
-    bool result;
+    bool result = false;
     try {
-        result = this->_client->model_exists(name);
+        result = _client->model_exists(name);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -512,7 +487,7 @@ bool PyClient::tensor_exists(const std::string& name)
 {
     bool result = false;
     try {
-        result = this->_client->tensor_exists(name);
+        result = _client->tensor_exists(name);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -529,9 +504,9 @@ bool PyClient::poll_tensor(const std::string& name,
                            int poll_frequency_ms,
                            int num_tries)
 {
-    bool result;
+    bool result = false;
     try {
-        result = this->_client->poll_tensor(name, poll_frequency_ms,
+        result = _client->poll_tensor(name, poll_frequency_ms,
                                             num_tries);
     }
     catch(const std::exception& e) {
@@ -549,9 +524,9 @@ bool PyClient::poll_model(const std::string& name,
                           int poll_frequency_ms,
                           int num_tries)
 {
-    bool result;
+    bool result = false;
     try {
-        result = this->_client->poll_model(name, poll_frequency_ms,
+        result = _client->poll_model(name, poll_frequency_ms,
                                            num_tries);
     }
     catch(const std::exception& e) {
@@ -567,20 +542,20 @@ bool PyClient::poll_model(const std::string& name,
 
 void PyClient::use_tensor_ensemble_prefix(bool use_prefix)
 {
-  this->_client->use_tensor_ensemble_prefix(use_prefix);
+  _client->use_tensor_ensemble_prefix(use_prefix);
 }
 
 void PyClient::use_model_ensemble_prefix(bool use_prefix)
 {
-  this->_client->use_model_ensemble_prefix(use_prefix);
+  _client->use_model_ensemble_prefix(use_prefix);
 }
 
 std::vector<py::dict> PyClient::get_db_node_info(std::vector<std::string> addresses)
 {
     std::vector<py::dict> addresses_info;
-    for(size_t i=0; i<addresses.size(); i++) {
+    for(size_t i = 0; i < addresses.size(); i++) {
         try {
-            parsed_reply_nested_map info_map = this->_client->get_db_node_info(addresses[i]);
+            parsed_reply_nested_map info_map = _client->get_db_node_info(addresses[i]);
             py::dict info_dict = py::cast(info_map);
             addresses_info.push_back(info_dict);
         }
@@ -600,9 +575,9 @@ std::vector<py::dict> PyClient::get_db_node_info(std::vector<std::string> addres
 std::vector<py::dict> PyClient::get_db_cluster_info(std::vector<std::string> addresses)
 {
     std::vector<py::dict> addresses_info;
-    for(size_t i=0; i<addresses.size(); i++) {
+    for(size_t i = 0; i < addresses.size(); i++) {
         try {
-            parsed_reply_map info_map = this->_client->get_db_cluster_info(addresses[i]);
+            parsed_reply_map info_map = _client->get_db_cluster_info(addresses[i]);
             py::dict info_dict = py::cast(info_map);
             addresses_info.push_back(info_dict);
         }
@@ -617,3 +592,5 @@ std::vector<py::dict> PyClient::get_db_cluster_info(std::vector<std::string> add
     }
     return addresses_info;
 }
+
+// EOF
