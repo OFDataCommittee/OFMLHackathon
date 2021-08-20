@@ -32,17 +32,16 @@ using namespace SmartRedis;
 
 // DBNode constructor
 DBNode::DBNode()
-    : name(""), ip(""), port(-1), lower_hash_slot(-1), upper_hash_slot(-1)
+    : ip(""), port(-1), name(""), lower_hash_slot(-1), upper_hash_slot(-1)
 {
    // NOP
 }
 
 // DBNode constructor with connection and hash slot information.
-DBNode::DBNode(std::string _ip, std::string _name,
-               uint64_t _port, uint64_t l_slot,
-               uint64_t u_slot, std::string _prefix)
-    : name(_name), ip(_ip), port(_port), lower_hash_slot(l_slot), upper_hash_slot(u_slot),
-      prefix(_prefix)
+DBNode::DBNode(std::string _ip, std::string _name, uint64_t _port,
+               uint64_t l_slot, uint64_t u_slot, std::string _prefix)
+    : ip(_ip), port(_port), name(_name), lower_hash_slot(l_slot),
+      upper_hash_slot(u_slot), prefix(_prefix)
 {
     // NOP
 }

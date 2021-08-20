@@ -37,7 +37,6 @@ namespace py = pybind11;
 
 PyClient::PyClient(bool cluster)
 {
-    Client* client = NULL;
     this->_client = NULL;
     try {
         Client* client = new Client(cluster);
