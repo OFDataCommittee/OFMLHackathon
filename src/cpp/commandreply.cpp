@@ -30,10 +30,16 @@
 
 using namespace SmartRedis;
 
+CommandReply::CommandReply(const CommandReply& reply)
+{
+    _uptr_reply = RedisReplyUPtr(deep_clone_reply(reply._uptr_reply.get()), sw::redis::ReplyDeleter());
+    _reply = _uptr_reply.get();
+}
+
 CommandReply::CommandReply(redisReply* reply)
 {
-    this->_uptr_reply = 0;
-    this->_reply = reply;
+    _uptr_reply = RedisReplyUPtr(deep_clone_reply(reply), sw::redis::ReplyDeleter());
+    _reply = _uptr_reply.get();
 }
 
 CommandReply::CommandReply(RedisReplyUPtr&& reply)
@@ -57,6 +63,22 @@ CommandReply::CommandReply(CommandReply&& reply)
     return;
 }
 
+CommandReply& CommandReply::operator=(const CommandReply& reply)
+{
+    _uptr_reply.reset(NULL);
+    _uptr_reply = RedisReplyUPtr(deep_clone_reply(reply._uptr_reply.get()), sw::redis::ReplyDeleter());
+    _reply = _uptr_reply.get();
+    return *this;
+}
+
+CommandReply& CommandReply::operator=(redisReply* reply)
+{
+    _uptr_reply.reset(NULL);
+    _uptr_reply = RedisReplyUPtr(deep_clone_reply(reply), sw::redis::ReplyDeleter());
+    _reply = _uptr_reply.get();
+    return *this;
+}
+
 CommandReply& CommandReply::operator=(RedisReplyUPtr&& reply)
 {
     this->_uptr_reply = std::move(reply);
@@ -78,6 +100,14 @@ CommandReply& CommandReply::operator=(CommandReply&& reply)
         this->_reply = this->_uptr_reply.get();
     }
     return *this;
+}
+
+CommandReply CommandReply::shallow_clone(redisReply* reply) // shallow clone
+{
+    CommandReply r;
+    r._uptr_reply = 0;
+    r._reply = reply;
+    return r;
 }
 
 char* CommandReply::str()
@@ -116,7 +146,7 @@ CommandReply CommandReply::operator[](int index)
         throw std::runtime_error("The reply cannot be indexed "\
                                  "because the reply type is " +
                                  this->redis_reply_type());
-    return CommandReply(this->_reply->element[index]);
+    return shallow_clone(this->_reply->element[index]);
 }
 
 size_t CommandReply::str_len()
@@ -262,4 +292,41 @@ void CommandReply::print_reply_structure(std::string index_tracker)
                      <<" value type not supported."<<std::endl;
     }
     return;
+}
+
+redisReply* CommandReply::deep_clone_reply(redisReply* reply)
+{
+    if(reply == NULL)
+        return NULL;
+    redisReply* redis_reply = new redisReply;
+    *redis_reply = *reply;
+    redis_reply->str = NULL;
+    redis_reply->element = NULL;
+    switch(redis_reply->type) {
+        case REDIS_REPLY_ARRAY:
+        case REDIS_REPLY_MAP:
+        case REDIS_REPLY_SET:
+            // allocate memory for element and do deep copy
+            if(redis_reply->elements > 0) {
+                redis_reply->element = new redisReply*[redis_reply->elements];
+                if(reply->element != NULL) {
+                    for(size_t i=0; i<reply->elements; i++)
+                        redis_reply->element[i] = deep_clone_reply(reply->element[i]);
+                }
+            }
+            break;
+        case REDIS_REPLY_ERROR:
+        case REDIS_REPLY_STATUS:
+        case REDIS_REPLY_STRING:
+        case REDIS_REPLY_DOUBLE:
+            // allocate memory for str and do deep copy
+            if(redis_reply->len > 0) {
+                redis_reply->str = new char[redis_reply->len];
+                std::strcpy(redis_reply->str, reply->str);
+            }
+            break;
+        default:
+            break;
+    }
+    return redis_reply;
 }
