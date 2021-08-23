@@ -30,9 +30,8 @@
 #define SMARTREDIS_DBINFOCOMMAND_H
 
 #include "addressatcommand.h"
-
-using parsed_reply_map = std::unordered_map<std::string, std::string>;
-using parsed_reply_nested_map = std::unordered_map<std::string, parsed_reply_map>;
+using parsed_reply_nested_map = std::unordered_map<std::string,
+                                std::unordered_map<std::string, std::string>>;
 
 ///@file
 

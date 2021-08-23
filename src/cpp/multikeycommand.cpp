@@ -31,14 +31,15 @@
 
 using namespace SmartRedis;
 
-CommandReply MultiKeyCommand::run_me(RedisServer* r)
+// Run MultiKeyCommand on the server
+CommandReply MultiKeyCommand::run_me(RedisServer* server)
 {
-    return r->run(*this);
+    return server->run(*this);
 }
 
+// Deep copy constructor
 Command* MultiKeyCommand::clone()
 {
     MultiKeyCommand* new_cmd = new MultiKeyCommand(*this);
-    (*new_cmd) = *this;
     return new_cmd;
 }

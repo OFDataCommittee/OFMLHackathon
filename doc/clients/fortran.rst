@@ -134,12 +134,7 @@ duplicated code and organize the variety of methods included within each type. T
 general functionality and suffixed by the type of code contained within.
 
 * ``<functionality>_interfaces.inc``: Define the C-bound interfaces to the SmartRedis-C methods
-<<<<<<< HEAD
-* ``<functionality>_methods_common.inc``: Represents the source code that is exactly the same for all methods which
-share the same functionality, but differ only by the type of variable
-=======
 * ``<functionality>_methods_common.inc``: Represents the source code that is exactly the same for all methods which share the same functionality, but differ only by the type of variable
->>>>>>> 8efe7293bc6eb1722ca047a75ed5ef99d21ef789
 
 For example, ``client/put_tensor_interfaces.inc`` define the Fortran-C interfaces to put a tensor into the database.
 ``client/put_tensor_methods_common.inc`` form the main body of the source code that handles the conversion and

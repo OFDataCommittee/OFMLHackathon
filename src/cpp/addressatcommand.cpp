@@ -31,14 +31,15 @@
 
 using namespace SmartRedis;
 
-CommandReply AddressAtCommand::run_me(RedisServer* r)
+// Run AddressAtCommand on the server
+CommandReply AddressAtCommand::run_me(RedisServer* server)
 {
-    return r->run(*this);
+    return server->run(*this);
 }
 
+// Deep copy operator
 Command* AddressAtCommand::clone()
 {
     AddressAtCommand* new_cmd = new AddressAtCommand(*this);
-    (*new_cmd) = *this;
     return new_cmd;
 }

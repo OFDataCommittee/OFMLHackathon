@@ -90,9 +90,9 @@ DataSet Client::get_dataset(const std::string& name)
             this->_build_dataset_tensor_key(name, tensor_names[i],
                                             true);
         CommandReply reply = this->_redis_server->get_tensor(tensor_key);
-        reply_dims = GetTensorCommand::get_tensor_dims(reply);
-        blob = GetTensorCommand::get_tensor_data_blob(reply);
-        type = GetTensorCommand::get_tensor_data_type(reply);
+        reply_dims = GetTensorCommand::get_dims(reply);
+        blob = GetTensorCommand::get_data_blob(reply);
+        type = GetTensorCommand::get_data_type(reply);
         dataset._add_to_tensorpack(tensor_names[i],
                                    (void*)blob.data(), reply_dims,
                                    type, MemoryLayout::contiguous);
@@ -291,7 +291,7 @@ void Client::unpack_tensor(const std::string& key,
     std::string g_key = this->_build_tensor_key(key, true);
     CommandReply reply = this->_redis_server->get_tensor(g_key);
 
-    std::vector<size_t> reply_dims = GetTensorCommand::get_tensor_dims(reply);
+    std::vector<size_t> reply_dims = GetTensorCommand::get_dims(reply);
 
     if(mem_layout == MemoryLayout::contiguous ||
         mem_layout == MemoryLayout::fortran_contiguous) {
@@ -325,11 +325,11 @@ void Client::unpack_tensor(const std::string& key,
         }
     }
 
-    TensorType reply_type = GetTensorCommand::get_tensor_data_type(reply);
+    TensorType reply_type = GetTensorCommand::get_data_type(reply);
     if(type!=reply_type)
         throw std::runtime_error("The type of the fetched tensor "\
                                 "does not match the provided type");
-    std::string_view blob = GetTensorCommand::get_tensor_data_blob(reply);
+    std::string_view blob = GetTensorCommand::get_data_blob(reply);
 
     TensorBase* tensor;
     switch(reply_type) {
@@ -705,36 +705,6 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
                                                      reply.str_len()));
 }
 
-inline CommandReply Client::_run(AddressAtCommand& cmd)
-{
-    return this->_redis_server->run(cmd);
-}
-
-inline CommandReply Client::_run(AddressAnyCommand& cmd)
-{
-    return this->_redis_server->run(cmd);
-}
-
-inline CommandReply Client::_run(SingleKeyCommand& cmd)
-{
-    return this->_redis_server->run(cmd);
-}
-
-inline CommandReply Client::_run(MultiKeyCommand& cmd)
-{
-    return this->_redis_server->run(cmd);
-}
-
-inline CommandReply Client::_run(CompoundCommand& cmd)
-{
-    return this->_redis_server->run(cmd);
-}
-
-inline std::vector<CommandReply> Client::_run(CommandList& cmds)
-{
-    return this->_redis_server->run(cmds);
-}
-
 void Client::_set_prefixes_from_env()
 {
     const char* keyout_p = std::getenv("SSKEYOUT");
@@ -956,11 +926,11 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
     std::string g_key = this->_build_tensor_key(name, true);
     CommandReply reply = this->_redis_server->get_tensor(g_key);
 
-    std::vector<size_t> dims = GetTensorCommand::get_tensor_dims(reply);
+    std::vector<size_t> dims = GetTensorCommand::get_dims(reply);
 
-    TensorType type = GetTensorCommand::get_tensor_data_type(reply);
+    TensorType type = GetTensorCommand::get_data_type(reply);
 
-    std::string_view blob = GetTensorCommand::get_tensor_data_blob(reply);
+    std::string_view blob = GetTensorCommand::get_data_blob(reply);
 
     if(dims.size()<=0)
         throw std::runtime_error("The number of dimensions of the "\

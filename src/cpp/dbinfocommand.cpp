@@ -31,6 +31,7 @@
 
 using namespace SmartRedis;
 
+// Parse database info into nested unordered map
 parsed_reply_nested_map DBInfoCommand::parse_db_node_info(std::string info)
 {
     parsed_reply_nested_map info_map;
@@ -60,14 +61,6 @@ parsed_reply_nested_map DBInfoCommand::parse_db_node_info(std::string info)
                                 line.substr(separatorIdx+1);
         }
     }
-    std::string line = info.substr(start);
-    if (line.length() > 0)
-    {
-        std::size_t separatorIdx = line.find(':');
-        if (info_map.find(currKey)==info_map.end())
-                    info_map[currKey] = {};
-        info_map[currKey][line.substr(0, separatorIdx)] =
-                            line.substr(separatorIdx+1);
-    }
+
     return info_map;
 }

@@ -122,9 +122,9 @@ class NonKeyedCommand : public Command
 
         /*!
         *   \brief Run this Command on the RedisServer.
-        *   \param r A pointer to the RedisServer
+        *   \param server A pointer to the RedisServer
         */
-        virtual CommandReply run_me(RedisServer* r) = 0;
+        virtual CommandReply run_me(RedisServer* server) = 0;
 
     private:
         /*!

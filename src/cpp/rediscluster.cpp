@@ -117,7 +117,7 @@ std::vector<CommandReply> RedisCluster::run(CommandList& cmds)
     CommandList::iterator cmd = cmds.begin();
     CommandList::iterator cmd_end = cmds.end();
     while(cmd != cmd_end) {
-        replies.push_back(((Command *)(*cmd))->run_me(this));
+        replies.push_back(dynamic_cast<Command*>(*cmd)->run_me(this));
         cmd++;
     }
     return replies;
@@ -214,11 +214,11 @@ CommandReply RedisCluster::copy_tensor(const std::string& src_key,
     cmd_get_reply = this->run(cmd_get);
 
     std::vector<size_t> dims =
-        cmd_get.get_tensor_dims(cmd_get_reply);
+        cmd_get.get_dims(cmd_get_reply);
     std::string_view blob =
-        cmd_get.get_tensor_data_blob(cmd_get_reply);
+        cmd_get.get_data_blob(cmd_get_reply);
     TensorType type =
-        cmd_get.get_tensor_data_type(cmd_get_reply);
+        cmd_get.get_data_type(cmd_get_reply);
 
     CommandReply cmd_put_reply;
     MultiKeyCommand cmd_put;

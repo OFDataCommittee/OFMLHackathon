@@ -31,12 +31,12 @@
 
 using namespace SmartRedis;
 
+// Parse database cluster info into nested unordered map
 parsed_reply_map ClusterInfoCommand::parse_db_cluster_info(std::string info)
 {
     parsed_reply_map info_map;
 
     std::string delim = "\r\n";
-    std::string currKey = "";
     size_t start = 0U;
     size_t end = info.find(delim);
 
@@ -52,12 +52,6 @@ parsed_reply_map ClusterInfoCommand::parse_db_cluster_info(std::string info)
         info_map[line.substr(0, separatorIdx)] =
                  line.substr(separatorIdx+1);
     }
-    std::string line = info.substr(start);
-    if (line.length() > 0)
-    {
-        std::size_t separatorIdx = line.find(':');
-        info_map[line.substr(0, separatorIdx)] =
-                 line.substr(separatorIdx+1);
-    }
+
     return info_map;
 }

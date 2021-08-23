@@ -1,0 +1,108 @@
+#include "../../../third-party/catch/catch.hpp"
+#include "addressatcommand.h"
+
+using namespace SmartRedis;
+
+SCENARIO("Ensuring the iterators for an AddressAtCommand are correct", "[AddressAtCommand]")
+{
+    GIVEN("An AddressAtCommand with a single field")
+    {
+        AddressAtCommand cmd;
+        std::string field = "INFO";
+        cmd.add_field(field);
+        WHEN("Iterators from the AddressAtKeyCommand object's "
+             "_fields data member are retrieved")
+        {
+            Command::iterator begin_it = cmd.begin();
+            Command::iterator end_it = cmd.end();
+            Command::const_iterator cbegin_it = cmd.cbegin();
+            Command::const_iterator cend_it = cmd.cend();
+            THEN("The iterators that were retrieved are the correct iterators")
+            {
+                CHECK(*cmd.begin() == field);
+                CHECK(*cmd.cbegin() == field);
+                begin_it++;
+                cbegin_it++;
+                CHECK(begin_it == end_it);
+                CHECK(cbegin_it == cend_it);
+            }
+        }
+    }
+}
+
+SCENARIO("Testing assignment operator for AddressAtCommand on heap", "[AddressAtCommand]")
+{
+    GIVEN("An AddressAtCommand object on the heap")
+    {
+        AddressAtCommand* cmd = new AddressAtCommand;
+
+        WHEN("Fields are added to the AddressAtCommand in every possible manner")
+        {
+            // define fields
+            std::string field_1 = "INFO";
+            char field_2[8] = "CLUSTER";
+            const char field_3[11] = "everything";
+            char field_4[5] = "INFO";
+            size_t field_size_4 = std::strlen(field_4);
+            std::string field_5 = "INFO";
+            std::vector<std::string> fields_1 = {"CLUSTER", "everything", "INFO"};
+            std::string_view field_sv = std::string_view(field_4, field_size_4);
+
+            // define necessary variables for testing
+            std::string output = " INFO CLUSTER everything INFO "
+                                "INFO CLUSTER everything INFO INFO";
+            std::vector<std::string> sorted_keys = {};
+            std::vector<std::string> cmd_keys;
+
+            // add fields
+            cmd->add_field(field_1, false);
+            cmd->add_field(field_2);
+            cmd->add_field(field_3);
+            cmd->add_field_ptr(field_4, field_size_4);
+            cmd->add_field_ptr(field_5);
+            cmd->add_fields(fields_1);
+            cmd->add_field_ptr(field_sv);
+
+            THEN("The AddressAtCommand can be copied with the assign "
+                "operator and then can be deleted while preserving "
+                "the original AddressAtCommand's state")
+            {
+                AddressAtCommand* cmd_cpy = new AddressAtCommand;
+                cmd_cpy->add_field("field_to_be_destroyed", true);
+
+                *cmd_cpy = *cmd;
+
+                Command::const_iterator it = cmd->cbegin();
+                Command::const_iterator it_end = cmd->cend();
+                Command::const_iterator it_cpy = cmd_cpy->cbegin();
+                Command::const_iterator it_end_cpy = cmd_cpy->cend();
+
+                while (it != it_end) {
+                    REQUIRE(it_cpy != it_end_cpy);
+                    CHECK(*it == *it_cpy);
+                    it++;
+                    it_cpy++;
+                }
+                CHECK(it_cpy == it_end_cpy);
+
+                cmd_keys = cmd->get_keys();
+                std::vector<std::string> cmd_keys_cpy = cmd_cpy->get_keys();
+                std::sort(cmd_keys.begin(), cmd_keys.end());
+                std::sort(cmd_keys_cpy.begin(), cmd_keys_cpy.end());
+                CHECK(cmd_keys_cpy == cmd_keys);
+
+                delete cmd;
+
+                // Ensure the state of the original AddressAtCommand is preserved
+                CHECK(cmd_cpy->has_keys() == false);
+                CHECK(cmd_cpy->first_field() == field_1);
+                CHECK(output == cmd_cpy->to_string());
+
+                cmd_keys = cmd_cpy->get_keys();
+                std::sort(cmd_keys.begin(), cmd_keys.end());
+                CHECK(cmd_keys == sorted_keys);
+                delete cmd_cpy;
+            }
+        }
+    }
+}

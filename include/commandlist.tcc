@@ -29,10 +29,10 @@
 #ifndef SMARTREDIS_COMMANDLIST_TCC
 #define SMARTREDIS_COMMANDLIST_TCC
 
-template <class C>
-C* CommandList::add_command()
+template <class T>
+T* CommandList::add_command()
 {
-    C* new_cmd = new C();
+    T* new_cmd = new T();
     this->_commands.push_back(new_cmd);
     return new_cmd;
 };

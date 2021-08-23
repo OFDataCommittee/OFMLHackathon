@@ -609,35 +609,50 @@ class Client
         *   \param cmd The AddresseAtCommand to execute
         *   \returns The CommandReply after execution
         */
-        inline CommandReply _run(AddressAtCommand& cmd);
+        inline CommandReply _run(AddressAtCommand& cmd)
+        {
+            return this->_redis_server->run(cmd);
+        }
 
         /*!
         *   \brief Execute an AddressAnyCommand
         *   \param cmd The AddressAnyCommand to execute
         *   \returns The CommandReply after execution
         */
-        inline CommandReply _run(AddressAnyCommand& cmd);
+        inline CommandReply _run(AddressAnyCommand& cmd)
+        {
+            return this->_redis_server->run(cmd);
+        }
 
         /*!
         *   \brief Execute a SingleKeyCommand Command
         *   \param cmd The SingleKeyCommand to execute
         *   \returns The CommandReply after execution
         */
-        inline CommandReply _run(SingleKeyCommand& cmd);
+        inline CommandReply _run(SingleKeyCommand& cmd)
+        {
+            return this->_redis_server->run(cmd);
+        }
 
         /*!
         *   \brief Execute a MultiKeyCommand Command
         *   \param cmd The MultiKeyCommand to execute
         *   \returns The CommandReply after execution
         */
-        inline CommandReply _run(MultiKeyCommand& cmd);
+        inline CommandReply _run(MultiKeyCommand& cmd)
+        {
+            return this->_redis_server->run(cmd);
+        }
 
         /*!
         *   \brief Execute a CompoundCommand
         *   \param cmd The CompoundCommand to execute
         *   \returns The CommandReply after execution
         */
-        inline CommandReply _run(CompoundCommand& cmd);
+        inline CommandReply _run(CompoundCommand& cmd)
+        {
+            return this->_redis_server->run(cmd);
+        }
 
         /*!
         *   \brief Execute a list of commands
@@ -645,7 +660,10 @@ class Client
         *   \returns The CommandReply from the last
         *            command execution
         */
-        inline std::vector<CommandReply> _run(CommandList& cmd_list);
+        inline std::vector<CommandReply> _run(CommandList& cmd_list)
+        {
+            return this->_redis_server->run(cmd_list);
+        }
 
         /*!
         *  \brief Set the prefixes that are used for

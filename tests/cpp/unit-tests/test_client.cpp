@@ -50,7 +50,7 @@ void check_all_data(size_t length, std::vector<void*>& original_datas,
                        length));
 }
 
-SCENARIO("Testing Client Object", "[Client]")
+SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
 {
 
     GIVEN("A Client object")
@@ -143,6 +143,15 @@ SCENARIO("Testing Client Object", "[Client]")
                       retrieved_dataset.get_tensor_names());
             }
         }
+    }
+}
+
+SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
+{
+
+    GIVEN("A Client object")
+    {
+        Client client(use_cluster());
 
         AND_WHEN("Tensors of each type are created and put into the Client")
         {
@@ -411,6 +420,37 @@ SCENARIO("Testing Client Object", "[Client]")
 
                 free(retrieved_data);
             }
+        }
+    }
+}
+
+SCENARIO("Testing INFO Functions on Client Object", "[Client]")
+{
+
+    GIVEN("A Client object")
+    {
+        Client client(true);
+
+        THEN("Calling INFO on database or cluster with "
+             "an invalid address throws errors")
+        {
+            std::string db_address = ":00";
+
+            CHECK_THROWS_AS(
+                client.get_db_node_info(db_address),
+                std::runtime_error);
+            CHECK_THROWS_AS(
+                client.get_db_cluster_info(db_address),
+                std::runtime_error);
+        }
+
+        AND_THEN("Calling INFO on database or cluster with "
+                "a valid address does not throw errors")
+        {
+            std::string db_address = "127.0.0.1:6379";
+
+            CHECK_NOTHROW(client.get_db_node_info(db_address));
+            CHECK_NOTHROW(client.get_db_cluster_info(db_address));
         }
     }
 }

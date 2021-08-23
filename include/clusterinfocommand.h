@@ -32,7 +32,6 @@
 #include "addressatcommand.h"
 
 using parsed_reply_map = std::unordered_map<std::string, std::string>;
-using parsed_reply_nested_map = std::unordered_map<std::string, parsed_reply_map>;
 
 ///@file
 
@@ -44,9 +43,9 @@ class ClusterInfoCommand : public AddressAtCommand
 {
     public:
         /*!
-        *   \brief Parse database node information from get_db_node_info()
+        *   \brief Parse database cluster information from get_db_cluster_info()
         *          into a nested unordered_map
-        *   \param info containing the database node information
+        *   \param info containing the database cluster information
         *   \return parsed_reply_map containing the database node cluster information
         */
         static parsed_reply_map parse_db_cluster_info(std::string info);

@@ -44,9 +44,9 @@ class GetTensorCommand : public SingleKeyCommand
     public:
         /*!
         *   \brief Run this Command on the RedisServer.
-        *   \param r A pointer to the RedisServer
+        *   \param server A pointer to the RedisServer
         */
-        virtual CommandReply run_me(RedisServer* r);
+        virtual CommandReply run_me(RedisServer* server);
 
         /*!
         *   \brief This function will fill a vector with the dimensions of
@@ -56,7 +56,7 @@ class GetTensorCommand : public SingleKeyCommand
         *   \param reply CommandReply from running "AI.TENSORGET"
         *   \return std::vecotr<size_t> with dimensions of the tensor
         */
-        static std::vector<size_t> get_tensor_dims(CommandReply& reply);
+        static std::vector<size_t> get_dims(CommandReply& reply);
 
         /*!
         *   \brief This function returns a string view of the data
@@ -67,7 +67,7 @@ class GetTensorCommand : public SingleKeyCommand
         *   \param reply CommandReply from running "AI.TENSORGET"
         *   \return string view of the data tensor blob value
         */
-        static std::string_view get_tensor_data_blob(CommandReply& reply);
+        static std::string_view get_data_blob(CommandReply& reply);
 
         /*!
         *   \brief This function returns a string of the tensor type
@@ -77,7 +77,7 @@ class GetTensorCommand : public SingleKeyCommand
         *   \param reply CommandReply from running "AI.TENSORGET"
         *   \return string of the tensor type
         */
-       static TensorType get_tensor_data_type(CommandReply& reply);
+       static TensorType get_data_type(CommandReply& reply);
 };
 
 } //namespace SmartRedis

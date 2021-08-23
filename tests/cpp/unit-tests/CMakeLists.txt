@@ -19,6 +19,13 @@ set(SOURCES
 	../../../src/cpp/client.cpp
 	../../../src/cpp/dataset.cpp
 	../../../src/cpp/command.cpp
+	../../../src/cpp/addressanycommand.cpp
+	../../../src/cpp/addressatcommand.cpp
+	../../../src/cpp/compoundcommand.cpp
+	../../../src/cpp/singlekeycommand.cpp
+	../../../src/cpp/multikeycommand.cpp
+	../../../src/cpp/dbinfocommand.cpp
+	../../../src/cpp/clusterinfocommand.cpp
 	../../../src/cpp/commandlist.cpp
 	../../../src/cpp/metadata.cpp
 	../../../src/cpp/tensorbase.cpp
@@ -39,13 +46,19 @@ set(UNIT_TESTS
 	test_dataset.cpp
 	test_tensorbase.cpp
 	test_dbnode.cpp
-	test_command.cpp
 	test_commandlist.cpp
 	test_tensor.cpp
 	test_metadata.cpp
 	test_stringfield.cpp
 	test_ssdb.cpp
 	test_commandreply.cpp
+	test_singlekeycommand.cpp
+	test_addressatcommand.cpp
+	test_compoundcommand.cpp
+	test_multikeycommand.cpp
+	test_addressanycommand.cpp
+	test_dbinfocommand.cpp
+	test_clusterinfocommand.cpp
 )
 
 add_executable(cpp_unit_tests ${SOURCES} ${UNIT_TESTS})

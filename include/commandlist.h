@@ -85,8 +85,8 @@ class CommandList
         *   \brief Add new Commmand of type C to the CommandList
         *   \tparam C Any type of Command
         */
-        template <class C>
-        C* add_command();
+        template <class T>
+        T* add_command();
 
         /*!
         *   \typedef An iterator type for iterating
