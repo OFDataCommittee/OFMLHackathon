@@ -7,6 +7,10 @@ RAI_TF=${3:-1}
 RAI_TFL=${4:-0}
 RAI_ONNX=${5:-0}
 
+# Make third-party directory if it doesn't exist
+if [[ ! -d "./third-party" ]]; then
+    mkdir ./third-party
+fi
 cd ./third-party
 
 # build redis
@@ -34,6 +38,23 @@ else
         cd ..
         exit 1
     fi
+fi
+
+
+# build catch
+../build-scripts/build-catch.sh
+if [ $? != 0 ]; then
+    echo "ERROR: Catch failed to build"
+    cd ..
+    exit 1
+fi
+
+# build LCOV
+../build-scripts/build-lcov.sh
+if [ $? != 0 ]; then
+    echo "ERROR: Catch failed to build"
+    cd ..
+    exit 1
 fi
 
 cd ../

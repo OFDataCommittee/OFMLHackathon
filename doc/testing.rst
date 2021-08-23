@@ -100,8 +100,10 @@ You can also run tests for individual clients as follows:
 
 .. code-block:: bash
 
-  make test-c       # run C tests
-  make test-fortran # run Fortran tests
-  make test-cpp     # run C++ test
-  make test-py      # run Python tests
-  make testpy-cov   # run python tests with coverage
+  make test-c         # run C tests
+  make test-fortran   # run Fortran tests
+  make test-cpp       # run all C++ tests
+  make unit-test-cpp  # run unit tests for C++
+  make test-py        # run Python tests
+  make testpy-cov     # run python tests with coverage
+  make testcpp-cpv    # run cpp unit tests with coverage

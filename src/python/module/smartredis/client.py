@@ -45,7 +45,7 @@ class Client(PyClient):
         by the client itself. (e.g. address="127.0.0.1:6379")
 
         If an address is not set, the client will look for the environment
-        variable ``$SSDB`` (e.g. SSDB="127.0.0.1:6379;")
+        variable ``SSDB`` (e.g. SSDB="127.0.0.1:6379;")
 
         :param address: Address of the database
         :param cluster: True if connecting to a redis cluster, defaults to False
@@ -233,7 +233,7 @@ class Client(PyClient):
             raise RedisReplyError(str(e), "set_function") from None
 
     def set_script(self, key, script, device="CPU"):
-        """Store a TorchScript at key in database
+        """Store a TorchScript at key in the database
 
         Device selection is either "GPU" or "CPU". If many devices are
         present, a number can be passed for specification e.g. "GPU:1".
@@ -630,12 +630,52 @@ class Client(PyClient):
 
         :param addresses: The addresses of the database nodes
         :type address: list[str]
+        :returns: A list of dictionaries with each entry in the
+                  list corresponding to an address reply
+        :rtype: list[dict]
+        :raises RedisReplyError: if there is an error in
+                  in command execution or the address
+                  is not reachable by the client.  
+                  In the case of using a cluster of database nodes,
+                  it is best practice to bind each node in the cluster
+                  to a specific adddress to avoid inconsistencies in
+                  addresses retreived with the CLUSTER SLOTS command.
+                  Inconsistencies in node addresses across
+                  CLUSTER SLOTS comands will lead to RedisReplyError
+                  being thrown.
 
         """
         try:
             return super().get_db_node_info(addresses)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "get_db_node_info")
+
+    def get_db_cluster_info(self, addresses):
+        """Returns cluster information from a specified db node.
+        If the address does not correspond to a cluster node,
+        an empty dictionary is returned.
+
+        :param addresses: The addresses of the database nodes
+        :type address: list[str]
+        :returns: A list of dictionaries with each entry in the
+                  list corresponding to an address reply
+        :rtype: list[dict]
+        :raises RedisReplyError: if there is an error in
+                  in command execution or the address
+                  is not reachable by the client.
+                  In the case of using a cluster of database nodes,
+                  it is best practice to bind each node in the cluster
+                  to a specific adddress to avoid inconsistencies in
+                  addresses retreived with the CLUSTER SLOTS command.
+                  Inconsistencies in node addresses across
+                  CLUSTER SLOTS comands will lead to RedisReplyError
+                  being thrown.
+
+        """
+        try:
+            return super().get_db_cluster_info(addresses)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "get_db_cluster_info")
 
     # ---- helpers --------------------------------------------------------
 

@@ -433,7 +433,7 @@ class Client
         /*!
         *   \brief Check if the model (or the script) exists in the database
         *   \param name The name that will be checked in the database
-        *               Depending on the current prefixing behavior,
+        *               depending on the current prefixing behavior,
         *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the key exists in the database
@@ -443,7 +443,7 @@ class Client
         /*!
         *   \brief Check if the tensor (or the dataset) exists in the database
         *   \param name The name that will be checked in the database
-        *               Depending on the current prefixing behavior,
+        *               depending on the current prefixing behavior,
         *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the key exists in the database
@@ -494,7 +494,7 @@ class Client
         *          at a specified frequency for a specified number
         *          of times.
         *   \param name The name that will be checked in the database
-        *               Depending on the current prefixing behavior,
+        *               depending on the current prefixing behavior,
         *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \param poll_frequency_ms The frequency of checks for the
@@ -552,9 +552,35 @@ class Client
         /*!
         *   \brief Returns information about the given database node
         *   \param address The address of the database node (host:port)
-        *   \returns parsed_reply_map containing the database node information
+        *   \returns parsed_reply_nested_map containing the database node information
+	*   \throws std::runtime_error if the address is not addressable by this
+	*           client.  In the case of using a cluster of database nodes,
+	*           it is best practice to bind each node in the cluster
+	*           to a specific adddress to avoid inconsistencies in
+	*           addresses retreived with the CLUSTER SLOTS command.
+	*           Inconsistencies in node addresses across
+	*           CLUSTER SLOTS comands will lead to std::runtime_error
+	*           being thrown.
         */
-        parsed_reply_map get_db_node_info(std::string address);
+        parsed_reply_nested_map get_db_node_info(std::string address);
+
+        /*!
+        *   \brief Returns the CLUSTER INFO command reply addressed to a single
+        *          cluster node.
+        *   \param address The address of the database node (host:port)
+        *   \returns parsed_reply_map containing the database cluster information.
+        *            If this command is executed on a non-cluster database, an
+        *            empty parsed_reply_map is returned.
+	*   \throws std::runtime_error if the address is not addressable by this
+        *           client.  In the case of using a cluster of database nodes,
+        *           it is best practice to bind each node in the cluster
+        *           to a specific adddress to avoid inconsistencies in
+        *           addresses retreived with the CLUSTER SLOTS command.
+        *           Inconsistencies in node addresses across
+        *           CLUSTER SLOTS comands will lead to std::runtime_error
+        *           being thrown.
+        */
+        parsed_reply_map get_db_cluster_info(std::string address);
 
     protected:
 

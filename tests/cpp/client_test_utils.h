@@ -4,7 +4,7 @@
 #include <typeinfo>
 #include <random>
 
-void to_lower(char* s) {
+inline void to_lower(char* s) {
     /* This will turn each character in the
     c-str into the lowercase value.
     This assumes the c-str is null terminated.
@@ -20,7 +20,7 @@ void to_lower(char* s) {
     return;
 }
 
-bool use_cluster()
+inline bool use_cluster()
 {
     /* This function determines if a cluster
     configuration should be used in the test
