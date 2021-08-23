@@ -37,7 +37,6 @@ void NonKeyedCommand::set_exec_address_port(std::string address,
 {
     this->_address = address;
     this->_port = port;
-    return;
 }
 
 // Get address that command will be to be executed on
