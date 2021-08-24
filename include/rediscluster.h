@@ -32,6 +32,8 @@
 #include <unordered_set>
 #include "redisserver.h"
 #include "dbnode.h"
+#include "nonkeyedcommand.h"
+#include "keyedcommand.h"
 
 namespace SmartRedis {
 
@@ -92,14 +94,48 @@ class RedisCluster : public RedisServer
         RedisCluster& operator=(RedisCluster&& cluster) = default;
 
         /*!
-        *   \brief Run a single-key or single-hash slot
-        *          Command on the server
-        *   \param cmd The single-key or single-hash
-        *              slot Command to run
+        *   \brief Run a single-key Command on the server
+        *   \param cmd The single-key Comand to run
         *   \returns The CommandReply from the
         *            command execution
         */
-        virtual CommandReply run(Command& cmd);
+        virtual CommandReply run(SingleKeyCommand& cmd);
+
+        /*!
+        *   \brief Run a multi-key Command on the server
+        *   \param cmd The multi-key Comand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(MultiKeyCommand& cmd);
+
+        /*!
+        *   \brief Run a compound Command on the server
+        *   \param cmd The compound Comand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(CompoundCommand& cmd);
+
+        /*!
+        *   \brief Run a non-keyed Command that
+        *          addresses the given db node on the server
+        *   \param cmd The non-keyed Command that
+        *              addresses the given db node
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAtCommand& cmd);
+
+        /*!
+        *   \brief Run a non-keyed Command that
+        *          addresses any db node on the server
+        *   \param cmd The non-keyed Command that
+        *              addresses any db node
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAnyCommand& cmd);
 
         /*!
         *   \brief Run multiple single-key or single-hash slot
@@ -108,10 +144,10 @@ class RedisCluster : public RedisServer
         *   \param cmd The CommandList containing multiple
         *              single-key or single-hash
         *              slot Command to run
-        *   \returns The CommandReply from the last
-        *            command execution
+        *   \returns A list of CommandReply for each Command
+        *            in the CommandList
         */
-        virtual CommandReply run(CommandList& cmd);
+        virtual std::vector<CommandReply> run(CommandList& cmd);
 
         /*!
         *   \brief Check if a key exists in the database. This
@@ -304,6 +340,21 @@ class RedisCluster : public RedisServer
         *   \brief Vector of DBNodes in the cluster
         */
         std::vector<DBNode> _db_nodes;
+
+        /*!
+        *   \brief Prefix of the most recently used DBNode
+        */
+        std::string _last_prefix;
+
+        /*!
+        *   \brief Run the command on the correct db node
+        *   \param cmd The command to run on the server
+        *   \param db_prefix The prefix of the db node the
+        *                    command addresses
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        inline CommandReply _run(const Command& cmd, std::string db_prefix);
 
         /*!
         *   \brief Connect to the cluster at the address and port

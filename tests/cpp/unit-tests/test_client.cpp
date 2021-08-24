@@ -50,7 +50,7 @@ void check_all_data(size_t length, std::vector<void*>& original_datas,
                        length));
 }
 
-SCENARIO("Testing Client Object", "[Client]")
+SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
 {
 
     GIVEN("A Client object")
@@ -143,6 +143,15 @@ SCENARIO("Testing Client Object", "[Client]")
                       retrieved_dataset.get_tensor_names());
             }
         }
+    }
+}
+
+SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
+{
+
+    GIVEN("A Client object")
+    {
+        Client client(use_cluster());
 
         AND_WHEN("Tensors of each type are created and put into the Client")
         {
@@ -410,6 +419,56 @@ SCENARIO("Testing Client Object", "[Client]")
                     std::runtime_error);
 
                 free(retrieved_data);
+            }
+        }
+    }
+}
+
+SCENARIO("Testing INFO Functions on Client Object", "[Client]")
+{
+
+    GIVEN("A Client object")
+    {
+        Client client(use_cluster());
+
+        WHEN("INFO or CLUSTER INFO is called on database with "
+             "an invalid address")
+        {
+            THEN("An error is thrown")
+            {
+                std::string db_address = ":00";
+
+                CHECK_THROWS_AS(client.get_db_node_info(db_address),
+                                std::runtime_error);
+                CHECK_THROWS_AS(client.get_db_cluster_info(db_address),
+                                std::runtime_error);
+            }
+        }
+
+        AND_WHEN("INFO is called on database with a valid address ")
+        {
+
+            THEN("No errors with be thrown for both cluster or "
+                 "non-cluster environemnts")
+            {
+                std::string db_address = std::getenv("SSDB");
+
+                CHECK_NOTHROW(client.get_db_node_info(db_address));
+            }
+        }
+
+        AND_WHEN("CLUSTER INFO is called with a valid address ")
+        {
+            THEN("No errors are thrown if called on a cluster environment "
+                 "but errors are thrown if called on a non-cluster environment")
+            {
+                std::string db_address = std::getenv("SSDB");
+
+                if(use_cluster())
+                    CHECK_NOTHROW(client.get_db_cluster_info(db_address));
+                else
+                    CHECK_THROWS_AS(client.get_db_cluster_info(db_address),
+                        std::runtime_error);
             }
         }
     }
