@@ -30,8 +30,6 @@
 #define SMARTREDIS_KEYEDCOMMAND_H
 
 #include "command.h"
-#include "tensorbase.h"
-#include "enums/cpp_tensor_type.h"
 
 ///@file
 
@@ -100,7 +98,7 @@ class KeyedCommand : public Command
         *   \brief Run this Command on the RedisServer.
         *   \param server A pointer to the RedisServer
         */
-        virtual CommandReply run_me(RedisServer * server) = 0;
+        virtual CommandReply run_me(RedisServer* server) = 0;
 };
 
 } //namespace SmartRedis

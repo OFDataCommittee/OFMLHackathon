@@ -24,8 +24,7 @@ SCENARIO("Adding fields of different types", "[MultiKeyCommand]")
 
             // define necessary variables for testing
             std::string output = " AI.TENSORSET BLOB DEL AI.TENSORSET BLOB DEL BLOB AI.TENSORSET";
-            std::vector<std::string> sorted_keys =
-                {"AI.TENSORSET", "BLOB", "DEL"};
+            std::vector<std::string> sorted_keys = {"AI.TENSORSET", "BLOB", "DEL"};
             std::vector<std::string> cmd_keys;
 
             // add the fields to the Command

@@ -116,7 +116,6 @@ class NonKeyedCommand : public Command
         *   \brief Get port that command will be
         *          to be executed on
         *   \return uint16_t of port
-        *           if port hasn't been set, returns 0
         */
         uint16_t get_port();
 

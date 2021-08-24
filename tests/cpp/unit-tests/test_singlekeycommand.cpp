@@ -76,8 +76,6 @@ SCENARIO("Testing copy constructor for SingleKeyCommand on heap", "[SingleKeyCom
 
             cmd_keys = cmd->get_keys();
             std::vector<std::string> cmd_keys_cpy = cmd_cpy->get_keys();
-            std::sort(cmd_keys.begin(), cmd_keys.end());
-            std::sort(cmd_keys_cpy.begin(), cmd_keys_cpy.end());
             CHECK(cmd_keys_cpy == cmd_keys);
 
             delete cmd;

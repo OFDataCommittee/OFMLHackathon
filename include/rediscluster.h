@@ -342,6 +342,11 @@ class RedisCluster : public RedisServer
         std::vector<DBNode> _db_nodes;
 
         /*!
+        *   \brief Prefix of the most recently used DBNode
+        */
+        std::string _last_prefix;
+
+        /*!
         *   \brief Run the command on the correct db node
         *   \param cmd The command to run on the server
         *   \param db_prefix The prefix of the db node the

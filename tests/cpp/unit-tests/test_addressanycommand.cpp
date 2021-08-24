@@ -59,8 +59,6 @@ SCENARIO("Testing assignment operator for AddressAnyCommand", "[AddressAnyComman
 
                 cmd_keys = cmd.get_keys();
                 std::vector<std::string> cmd_keys_cpy = cmd_cpy->get_keys();
-                std::sort(cmd_keys.begin(), cmd_keys.end());
-                std::sort(cmd_keys_cpy.begin(), cmd_keys_cpy.end());
                 CHECK(cmd_keys_cpy == cmd_keys);
 
                 delete cmd_cpy;
@@ -71,8 +69,29 @@ SCENARIO("Testing assignment operator for AddressAnyCommand", "[AddressAnyComman
                 CHECK(output == cmd.to_string());
 
                 cmd_keys = cmd.get_keys();
-                std::sort(cmd_keys.begin(), cmd_keys.end());
                 CHECK(cmd_keys == sorted_keys);
+            }
+        }
+    }
+}
+
+SCENARIO("Testing AddressAnyCommand member variables", "[AddressAnyCommand]")
+{
+
+    GIVEN("An AddressAnyCommand object and a db node address and port")
+    {
+        AddressAnyCommand cmd;
+        std::string db_address = "127.0.0.1";
+        uint16_t db_port = 6379;
+
+        WHEN("An address and port are set")
+        {
+            cmd.set_exec_address_port(db_address, db_port);
+
+            THEN("The command's address and port will be the same as those set")
+            {
+                CHECK(cmd.get_address() == db_address);
+                CHECK(cmd.get_port() == db_port);
             }
         }
     }

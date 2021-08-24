@@ -30,8 +30,6 @@
 #define SMARTREDIS_SINGLEKEYCOMMAND_H
 
 #include "keyedcommand.h"
-#include "tensorbase.h"
-#include "enums/cpp_tensor_type.h"
 
 ///@file
 
@@ -51,7 +49,7 @@ class SingleKeyCommand : public KeyedCommand
         *   \brief Run this Command on the RedisServer.
         *   \param server A pointer to the RedisServer
         */
-	    virtual CommandReply run_me(RedisServer * server);
+	    virtual CommandReply run_me(RedisServer* server);
 
         /*!
         *   \brief Deep copy operator

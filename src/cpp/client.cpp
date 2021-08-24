@@ -681,7 +681,7 @@ parsed_reply_nested_map Client::get_db_node_info(std::string address)
     cmd.add_field("INFO");
     cmd.add_field("everything");
     CommandReply reply = this->_run(cmd);
-    return cmd.parse_db_node_info(std::string(reply.str(),
+    return DBInfoCommand::parse_db_node_info(std::string(reply.str(),
                                                         reply.str_len()));
 }
 
@@ -701,7 +701,7 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
     cmd.add_field("CLUSTER");
     cmd.add_field("INFO");
     CommandReply reply = this->_run(cmd);
-    return cmd.parse_db_cluster_info(std::string(reply.str(),
+    return ClusterInfoCommand::parse_db_cluster_info(std::string(reply.str(),
                                                      reply.str_len()));
 }
 

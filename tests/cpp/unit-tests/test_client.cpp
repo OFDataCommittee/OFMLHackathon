@@ -429,28 +429,41 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
 
     GIVEN("A Client object")
     {
-        Client client(true);
+        Client client(use_cluster());
 
         THEN("Calling INFO on database or cluster with "
              "an invalid address throws errors")
         {
             std::string db_address = ":00";
 
-            CHECK_THROWS_AS(
-                client.get_db_node_info(db_address),
-                std::runtime_error);
-            CHECK_THROWS_AS(
-                client.get_db_cluster_info(db_address),
-                std::runtime_error);
+            CHECK_THROWS_AS(client.get_db_node_info(db_address),
+                            std::runtime_error);
+            CHECK_THROWS_AS(client.get_db_cluster_info(db_address),
+                            std::runtime_error);
         }
 
-        AND_THEN("Calling INFO on database or cluster with "
-                "a valid address does not throw errors")
+        AND_WHEN("Calling INFO on database or cluster with "
+                "a valid address")
         {
-            std::string db_address = "127.0.0.1:6379";
+            std::string db_address = std::getenv("SSDB");
 
-            CHECK_NOTHROW(client.get_db_node_info(db_address));
-            CHECK_NOTHROW(client.get_db_cluster_info(db_address));
+            THEN("An error will be thrown on a non-cluster environment "
+                 "and no errors will be thrown on a cluster environment")
+            {
+                if(use_cluster())
+                {
+                    CHECK_NOTHROW(client.get_db_node_info(db_address));
+                    CHECK_NOTHROW(client.get_db_cluster_info(db_address));
+                }
+                else
+                {
+                    CHECK_THROWS_AS(client.get_db_node_info(db_address),
+                            std::runtime_error);
+                    CHECK_THROWS_AS(client.get_db_cluster_info(db_address),
+                            std::runtime_error);
+                }
+
+            }
         }
     }
 }

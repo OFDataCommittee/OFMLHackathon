@@ -51,7 +51,7 @@ SCENARIO("Testing assignment operator for AddressAtCommand on heap", "[AddressAt
             // define necessary variables for testing
             std::string output = " INFO CLUSTER everything INFO "
                                 "INFO CLUSTER everything INFO INFO";
-            std::vector<std::string> sorted_keys = {};
+            std::vector<std::string> keys = {};
             std::vector<std::string> cmd_keys;
 
             // add fields
@@ -87,8 +87,6 @@ SCENARIO("Testing assignment operator for AddressAtCommand on heap", "[AddressAt
 
                 cmd_keys = cmd->get_keys();
                 std::vector<std::string> cmd_keys_cpy = cmd_cpy->get_keys();
-                std::sort(cmd_keys.begin(), cmd_keys.end());
-                std::sort(cmd_keys_cpy.begin(), cmd_keys_cpy.end());
                 CHECK(cmd_keys_cpy == cmd_keys);
 
                 delete cmd;
@@ -99,9 +97,26 @@ SCENARIO("Testing assignment operator for AddressAtCommand on heap", "[AddressAt
                 CHECK(output == cmd_cpy->to_string());
 
                 cmd_keys = cmd_cpy->get_keys();
-                std::sort(cmd_keys.begin(), cmd_keys.end());
-                CHECK(cmd_keys == sorted_keys);
+                CHECK(cmd_keys == keys);
                 delete cmd_cpy;
+            }
+        }
+    }
+}
+
+SCENARIO("Testing AddressAtCommand member variables", "[AddressAtCommand]")
+{
+
+    GIVEN("An AddressAtCommand object")
+    {
+        AddressAtCommand* cmd = new AddressAtCommand;
+
+        WHEN("An address and port are not set")
+        {
+
+            THEN("The command's address will be an empty string")
+            {
+                CHECK(cmd->get_address() == "");
             }
         }
     }

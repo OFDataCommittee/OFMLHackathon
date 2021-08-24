@@ -36,7 +36,12 @@ RedisCluster::RedisCluster() : RedisServer() {
     std::string address_port = this->_get_ssdb();
     this->_connect(address_port);
     this->_map_cluster();
-    return;
+    if (_address_node_map.count(address_port) > 0)
+        this->_last_prefix = _address_node_map.at(address_port)->prefix;
+    else if (this->_db_nodes.size() > 0)
+        this->_last_prefix = this->_db_nodes[0].prefix;
+    else
+        throw std::runtime_error("Cluster mapping failed in client initialization");
 }
 
 RedisCluster::RedisCluster(std::string address_port) :
@@ -44,7 +49,12 @@ RedisCluster::RedisCluster(std::string address_port) :
 {
     this->_connect(address_port);
     this->_map_cluster();
-    return;
+    if (_address_node_map.count(address_port) > 0)
+        this->_last_prefix = _address_node_map.at(address_port)->prefix;
+    else if (this->_db_nodes.size() > 0)
+        this->_last_prefix = this->_db_nodes[0].prefix;
+    else
+        throw std::runtime_error("Cluster mapping failed in client initialization");
 }
 
 RedisCluster::~RedisCluster()
@@ -98,17 +108,9 @@ CommandReply RedisCluster::run(AddressAtCommand& cmd)
     return this->_run(cmd, db_prefix);
 }
 
-// to do: pick an active db node
 CommandReply RedisCluster::run(AddressAnyCommand &cmd)
 {
-    std::string db_prefix;
-    if (this->is_addressable(cmd.get_address(), cmd.get_port()))
-        db_prefix = this->_address_node_map.at(cmd.get_address() + ":"
-                    + std::to_string(cmd.get_port()))->prefix;
-    else
-        throw std::runtime_error("Redis has failed to find database");
-
-    return this->_run(cmd, db_prefix);
+    return this->_run(cmd, _last_prefix);
 }
 
 std::vector<CommandReply> RedisCluster::run(CommandList& cmds)
@@ -480,8 +482,11 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
             sw::redis::Redis db = this->_redis_cluster->redis(sv_prefix, false);
             reply = db.command(cmd_fields_start, cmd_fields_end);
 
-            if(reply.has_error()==0)
+            if(reply.has_error()==0){
+                _last_prefix = db_prefix;
                 return reply;
+            }
+
             n_trials = 0;
         }
         catch (sw::redis::IoError &e) {
