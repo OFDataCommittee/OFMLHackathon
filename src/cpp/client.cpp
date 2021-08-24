@@ -688,7 +688,7 @@ parsed_reply_nested_map Client::get_db_node_info(std::string address)
 parsed_reply_map Client::get_db_cluster_info(std::string address)
 {
     if(this->_redis_cluster == NULL)
-        return parsed_reply_map();
+        throw std::runtime_error("Cannot run on non-cluster environment");
 
     std::string host = address.substr(0, address.find(":"));
     uint64_t port = std::stoul (address.substr(address.find(":") + 1),
