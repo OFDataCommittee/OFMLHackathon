@@ -775,7 +775,15 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
                                                      reply.str_len()));
 }
 
-// Set the prefixes that are used for set and get methods using SSKEYIN 
+std::string Client::flush_all_db()
+{
+    AddressAnyCommand cmd;
+    cmd.add_field("FLUSHALL");
+    CommandReply reply = this->_run(cmd);
+    return std::string(reply.str(), reply.str_len());
+}
+
+// Set the prefixes that are used for set and get methods using SSKEYIN
 // and SSKEYOUT environment variables.
 void Client::_set_prefixes_from_env()
 {

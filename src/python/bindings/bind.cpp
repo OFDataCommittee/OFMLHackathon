@@ -67,7 +67,8 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("use_tensor_ensemble_prefix", &PyClient::use_tensor_ensemble_prefix)
         .def("use_model_ensemble_prefix", &PyClient::use_model_ensemble_prefix)
         .def("get_db_node_info", &PyClient::get_db_node_info)
-        .def("get_db_cluster_info", &PyClient::get_db_cluster_info);
+        .def("get_db_cluster_info", &PyClient::get_db_cluster_info)
+        .def("flush_all_db", &PyClient::flush_all_db);
 
     // Python Dataset class
     py::class_<PyDataset>(m, "PyDataset")

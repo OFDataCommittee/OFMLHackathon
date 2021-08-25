@@ -598,4 +598,9 @@ std::vector<py::dict> PyClient::get_db_cluster_info(std::vector<std::string> add
     return addresses_info;
 }
 
+std::string PyClient::flush_all_db()
+{
+  return this->_client->flush_all_db();
+}
+
 // EOF
