@@ -82,7 +82,8 @@ CommandReply& CommandReply::operator=(CommandReply&& reply)
 
 char* CommandReply::str()
 {
-  if(this->_reply->type!=REDIS_REPLY_STRING)
+  if(this->_reply->type!=REDIS_REPLY_STRING
+     && this->_reply->type!=REDIS_REPLY_STATUS)
     throw std::runtime_error("A pointer to the reply str "\
                              "cannot be returned because the "\
                              "the reply type is " +
@@ -121,7 +122,8 @@ CommandReply CommandReply::operator[](int index)
 
 size_t CommandReply::str_len()
 {
-  if(this->_reply->type!=REDIS_REPLY_STRING)
+  if(this->_reply->type!=REDIS_REPLY_STRING
+     && this->_reply->type!=REDIS_REPLY_STATUS)
     throw std::runtime_error("The length of the reply str "\
                              "cannot be returned because the "\
                              "the reply type is " +

@@ -459,6 +459,12 @@ class PyClient
         */
         std::vector<py::dict> get_db_cluster_info(std::vector<std::string> addresses);
 
+        /*!
+        *   \brief Delete all the keys of all existing databases synchronously
+        *   \returns "OK" if keys are successfully flushed
+        */
+        std::string flush_all_db();
+
     private:
 
         /*!

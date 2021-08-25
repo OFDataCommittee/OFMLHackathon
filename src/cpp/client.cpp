@@ -705,6 +705,14 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
                                                      reply.str_len()));
 }
 
+std::string Client::flush_all_db()
+{
+    AddressAnyCommand cmd;
+    cmd.add_field("FLUSHALL");
+    CommandReply reply = this->_run(cmd);
+    return std::string(reply.str(), reply.str_len());
+}
+
 void Client::_set_prefixes_from_env()
 {
     const char* keyout_p = std::getenv("SSKEYOUT");

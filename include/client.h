@@ -580,6 +580,12 @@ class Client
         */
         parsed_reply_map get_db_cluster_info(std::string address);
 
+        /*!
+        *   \brief Delete all the keys of all existing databases synchronously
+        *   \returns "OK" if keys are successfully flushed
+        */
+        std::string flush_all_db();
+
     protected:
 
         /*!

@@ -473,3 +473,39 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
         }
     }
 }
+
+SCENARIO("Testing FLUSHALL on Client Object", "[Client]")
+{
+
+    GIVEN("A Client object")
+    {
+        Client client(use_cluster());
+
+        WHEN("The databases are populated with keys")
+        {
+            // Add tensor to Client
+            std::string key = "test_tensor";
+            float**** array = allocate_4D_array<float>(1,1,28,28);
+            client.put_tensor(key, array, {1,1,28,28},
+                        TensorType::flt, MemoryLayout::nested);
+
+            // Add dataset to Client
+            std::string dataset_name = "test_dataset";
+            DataSet dataset(dataset_name);
+            std::string tensor_name = "test_tensor2";
+            dataset.add_tensor(tensor_name, array, {1,1,28,28},
+                        TensorType::flt, MemoryLayout::nested);
+            client.put_dataset(dataset);
+
+            THEN("FLUSHALL deletes all keys in all the databases")
+            {
+                std::string reply = client.flush_all_db();
+                CHECK(client.key_exists("test_tensor") == false);
+                CHECK(client.key_exists("test_dataset") == false);
+                CHECK(client.key_exists("test_tensor2") == false);
+                CHECK(reply == "OK");
+            }
+        }
+    }
+}
+
