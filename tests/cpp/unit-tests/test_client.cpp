@@ -500,6 +500,7 @@ SCENARIO("Testing FLUSHALL on Client Object", "[Client]")
             THEN("FLUSHALL deletes all keys in all the databases")
             {
                 std::string reply = client.flush_all_db();
+                
                 CHECK(client.key_exists("test_tensor") == false);
                 CHECK(client.key_exists("test_dataset") == false);
                 CHECK(client.key_exists("test_tensor2") == false);
