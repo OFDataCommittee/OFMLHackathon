@@ -705,6 +705,7 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
                                                      reply.str_len()));
 }
 
+// Delete all keys of all existing databases synchronously
 std::string Client::flush_all_db()
 {
     AddressAnyCommand cmd;
