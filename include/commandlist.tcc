@@ -33,7 +33,7 @@ template <class T>
 T* CommandList::add_command()
 {
     T* new_cmd = new T();
-    if (new_cmd == NULL){
+    if (new_cmd == NULL) {
         throw std::bad_alloc();
     }
     this->_commands.push_back(new_cmd);

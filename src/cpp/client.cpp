@@ -669,9 +669,9 @@ void Client::set_data_source(std::string source_id)
 {
     // Validate the source prefix
     bool valid_prefix = false;
-    int num_prefix = _get_key_prefixes.size();
-    int save_index = -1;
-    for (int i = 0; i < num_prefix; i++) {
+    size_t num_prefix = _get_key_prefixes.size();
+    size_t save_index = -1;
+    for (size_t i = 0; i < num_prefix; i++) {
         if (_get_key_prefixes[i].compare(source_id )== 0) {
             valid_prefix = true;
             save_index = i;

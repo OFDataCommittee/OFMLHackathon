@@ -41,7 +41,7 @@ CommandReply MultiKeyCommand::run_me(RedisServer* server)
 Command* MultiKeyCommand::clone()
 {
     MultiKeyCommand* new_cmd = new MultiKeyCommand(*this);
-    if (new_cmd == NULL){
+    if (new_cmd == NULL) {
         throw std::bad_alloc();
     }
     return new_cmd;

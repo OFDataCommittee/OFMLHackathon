@@ -59,7 +59,7 @@ Command& Command::operator=(const Command& cmd)
         cmd._local_fields.begin();
     for (; local_it != cmd._local_fields.end(); local_it++) {
         // allocate memory and copy a local field
-        int field_size = cmd._fields[local_it->second].size();
+        size_t field_size = cmd._fields[local_it->second].size();
         char* f = new char[field_size];
         if (f == NULL)
             throw std::bad_alloc();
@@ -95,7 +95,7 @@ void Command::add_field(std::string field, bool is_key)
     keys.
     */
 
-    int field_size = field.size();
+    size_t field_size = field.size();
     char* f = (char*)new unsigned char[field_size + 1];
     if (f == NULL)
         throw std::bad_alloc();
@@ -120,7 +120,7 @@ void Command::add_field(const char* field, bool is_key)
     keys.
     */
 
-    int field_size = std::strlen(field);
+    size_t field_size = std::strlen(field);
     char* f = new char[field_size];
     if (f == NULL)
         throw std::bad_alloc();
@@ -168,7 +168,7 @@ void Command::add_fields(const std::vector<std::string>& fields, bool is_key)
     null terminated because the fields vector is of type
     string_view which stores the length of the string
     */
-    for (int i = 0; i < fields.size(); i++) {
+    for (size_t i = 0; i < fields.size(); i++) {
         add_field(fields[i], is_key);
     }
 }

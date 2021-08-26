@@ -73,7 +73,7 @@ std::string RedisServer::_get_ssdb()
             time_since_epoch().count());
         ___srand_seeded = true;
     }
-    int hp = rand() % hosts_ports.size();
+    size_t hp = ((size_t)rand()) % hosts_ports.size();
 
     // Done
     return hosts_ports[hp];

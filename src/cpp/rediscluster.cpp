@@ -706,7 +706,7 @@ inline void RedisCluster::_parse_reply_for_slots(CommandReply& reply)
     size_t n_db_nodes = reply.n_elements();
     _db_nodes = std::vector<DBNode>(n_db_nodes);
 
-    for (int i=0; i<n_db_nodes; i++) {
+    for (int i = 0; i < n_db_nodes; i++) {
         _db_nodes[i].lower_hash_slot = reply[i][0].integer();
         _db_nodes[i].upper_hash_slot = reply[i][1].integer();
         _db_nodes[i].ip = std::string(reply[i][2][0].str(),
@@ -715,15 +715,15 @@ inline void RedisCluster::_parse_reply_for_slots(CommandReply& reply)
         _db_nodes[i].name = std::string(reply[i][2][2].str(),
                                               reply[i][2][2].str_len());
         bool acceptable_prefix = false;
-        int n_hashes = _db_nodes[i].upper_hash_slot -
+        uint64_t n_hashes = _db_nodes[i].upper_hash_slot -
                        _db_nodes[i].lower_hash_slot + 1;
-        int k = 0;
-        for (k = 0; !acceptable_prefix && k <= n_hashes; k++) {
+        uint64_t k = 0;
+        for ( ; !acceptable_prefix && k <= n_hashes; k++) {
             _db_nodes[i].prefix = _get_crc16_prefix(
                                         _db_nodes[i].lower_hash_slot+k);
             std::string prefix = _db_nodes[i].prefix;
             bool found_bracket = false;
-            for (int j = 0; j < prefix.size(); j++) {
+            for (size_t j = 0; j < prefix.size(); j++) {
                 if (prefix[j] == '}') {
                     found_bracket = true;
                     break;
@@ -876,7 +876,7 @@ void RedisCluster::__run_model_dagrun(const std::string& key,
 
     // Create list of input tensors that do not hash to db slots
     std::unordered_set<std::string> remote_inputs;
-    for (int i = 0; i < inputs.size(); i++) {
+    for (size_t i = 0; i < inputs.size(); i++) {
         uint16_t hash_slot = _get_hash_slot(inputs[i]);
         if (hash_slot < db->lower_hash_slot ||
             hash_slot > db->upper_hash_slot) {
@@ -888,7 +888,7 @@ void RedisCluster::__run_model_dagrun(const std::string& key,
     // rename the tensors to {prefix}.tensor_name.TMP
     // TODO we need to make sure users don't use the .TMP suffix
     // or check that the key does not exist
-    for (int i = 0; i < inputs.size(); i++) {
+    for (size_t i = 0; i < inputs.size(); i++) {
         if (remote_inputs.count(inputs[i]) > 0) {
             std::string new_key = "{" + db->prefix + "}." + inputs[i] + ".TMP";
             copy_tensor(inputs[i], new_key);
@@ -900,7 +900,7 @@ void RedisCluster::__run_model_dagrun(const std::string& key,
 
     // Create a renaming scheme for output tensor
     std::unordered_map<std::string, std::string> remote_outputs;
-    for (int i = 0; i < outputs.size(); i++) {
+    for (size_t i = 0; i < outputs.size(); i++) {
         uint16_t hash_slot = _get_hash_slot(outputs[i]);
         if (hash_slot < db->lower_hash_slot ||
             hash_slot > db->upper_hash_slot) {
@@ -962,13 +962,13 @@ DBNode* RedisCluster::_get_model_script_db(const std::string& name,
 
     std::vector<int> hash_slot_tally(_db_nodes.size(), 0);
 
-    for (int i = 0; i < inputs.size(); i++) {
+    for (size_t i = 0; i < inputs.size(); i++) {
         uint16_t hash_slot = _get_hash_slot(inputs[i]);
         uint16_t db_index = _get_dbnode_index(hash_slot, 0, _db_nodes.size());
         hash_slot_tally[db_index]++;
     }
 
-    for (int i = 0; i < outputs.size(); i++) {
+    for (size_t i = 0; i < outputs.size(); i++) {
         uint16_t hash_slot = _get_hash_slot(outputs[i]);
         uint16_t db_index = _get_dbnode_index(hash_slot, 0, _db_nodes.size());
         hash_slot_tally[db_index]++;
@@ -977,7 +977,7 @@ DBNode* RedisCluster::_get_model_script_db(const std::string& name,
     // Determine which DBNode has the most hashes
     int max_hash = -1;
     DBNode* db = NULL;
-    for (int i = 0; i < _db_nodes.size(); i++) {
+    for (size_t i = 0; i < _db_nodes.size(); i++) {
         if (hash_slot_tally[i] > max_hash) {
             max_hash = hash_slot_tally[i];
             db = &(_db_nodes[i]);

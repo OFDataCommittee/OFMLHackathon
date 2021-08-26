@@ -31,8 +31,8 @@
 
 using namespace SmartRedis;
 
-const int num_elements = 2;
-const int num_fields = 6;
+const size_t num_elements = 2;
+const size_t num_fields = 6;
 const int type_idx = 1;
 const int dims_idx = 3;
 const int blob_idx = 5;

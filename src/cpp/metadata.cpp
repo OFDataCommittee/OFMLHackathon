@@ -253,7 +253,7 @@ void MetaData::get_string_values(const std::string& name,
         throw std::bad_alloc();
 
     // Copy each metadata string into the string buffer
-    for (int i = 0; i < field_strings.size(); i++) {
+    for (size_t i = 0; i < field_strings.size(); i++) {
         size_t size = field_strings[i].size();
         char* cstr = _char_mem_mgr.allocate(size + 1);
         if (cstr == NULL)
