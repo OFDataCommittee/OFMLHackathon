@@ -31,8 +31,8 @@
 using namespace SmartRedis;
 
 // MetadataField constructor
-MetadataField::MetadataField(const std::string& name, MetaDataType type) :
-    _name(name), _type(type)
+MetadataField::MetadataField(const std::string& name, MetaDataType type)
+ : _name(name), _type(type)
 {
     // NOP
 }

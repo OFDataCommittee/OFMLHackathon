@@ -46,3 +46,5 @@ Command* MultiKeyCommand::clone()
     }
     return new_cmd;
 }
+
+// EOF

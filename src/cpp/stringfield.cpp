@@ -31,24 +31,24 @@
 using namespace SmartRedis;
 
 // StringField constructor
-StringField::StringField(const std::string& name) :
-    MetadataField(name, MetaDataType::string)
+StringField::StringField(const std::string& name)
+ : MetadataField(name, MetaDataType::string)
 {
     // NOP
 }
 
 // StringField constructor with initial values to be copied
 StringField::StringField(const std::string& name,
-                         const std::vector<std::string>& vals) :
-    MetadataField(name, MetaDataType::string)
+                         const std::vector<std::string>& vals)
+ : MetadataField(name, MetaDataType::string)
 {
     _vals = vals;
 }
 
 // StringField constructor with initial values to be copied
 StringField::StringField(const std::string& name,
-                         std::vector<std::string>&& vals) :
-    MetadataField(name, MetaDataType::string)
+                         std::vector<std::string>&& vals)
+ : MetadataField(name, MetaDataType::string)
 {
     _vals = std::move(vals);
 }

@@ -53,9 +53,9 @@ RedisCluster::RedisCluster(std::string address_port) : RedisServer()
     _connect(address_port);
     _map_cluster();
     if (_address_node_map.count(address_port) > 0)
-        this->_last_prefix = _address_node_map.at(address_port)->prefix;
-    else if (this->_db_nodes.size() > 0)
-        this->_last_prefix = this->_db_nodes[0].prefix;
+        _last_prefix = _address_node_map.at(address_port)->prefix;
+    else if (_db_nodes.size() > 0)
+        _last_prefix = _db_nodes[0].prefix;
     else
         throw std::runtime_error("Cluster mapping failed in client initialization");
 }
@@ -69,55 +69,60 @@ RedisCluster::~RedisCluster()
     }
 }
 
+// Run a single-key Command on the server
 CommandReply RedisCluster::run(SingleKeyCommand& cmd)
 {
     // Preprend the target database to the command
     std::string db_prefix;
     if (cmd.has_keys())
-        db_prefix = this->_get_db_node_prefix(cmd);
+        db_prefix = _get_db_node_prefix(cmd);
     else
         throw std::runtime_error("Redis has failed to find database");
 
-    return this->_run(cmd, db_prefix);
+    return _run(cmd, db_prefix);
 }
 
+// Run a compound Command on the server
 CommandReply RedisCluster::run(CompoundCommand& cmd)
 {
     std::string db_prefix;
     if (cmd.has_keys())
-        db_prefix = this->_get_db_node_prefix(cmd);
+        db_prefix = _get_db_node_prefix(cmd);
     else
         throw std::runtime_error("Redis has failed to find database");
 
-    return this->_run(cmd, db_prefix);
+    return _run(cmd, db_prefix);
 }
 
+// Run a compound Command on the server
 CommandReply RedisCluster::run(MultiKeyCommand& cmd)
 {
     std::string db_prefix;
     if (cmd.has_keys())
-        db_prefix = this->_get_db_node_prefix(cmd);
+        db_prefix = _get_db_node_prefix(cmd);
     else
         throw std::runtime_error("Redis has failed to find database");
 
-    return this->_run(cmd, db_prefix);
+    return _run(cmd, db_prefix);
 }
 
+// Run a non-keyed Command that addresses the given db node on the server
 CommandReply RedisCluster::run(AddressAtCommand& cmd)
 {
     std::string db_prefix;
-    if (this->is_addressable(cmd.get_address(), cmd.get_port()))
-        db_prefix = this->_address_node_map.at(cmd.get_address() + ":"
+    if (is_addressable(cmd.get_address(), cmd.get_port()))
+        db_prefix = _address_node_map.at(cmd.get_address() + ":"
                     + std::to_string(cmd.get_port()))->prefix;
     else
         throw std::runtime_error("Redis has failed to find database");
 
-    return this->_run(cmd, db_prefix);
+    return _run(cmd, db_prefix);
 }
 
+// Run a non-keyed Command that addresses any db node on the server
 CommandReply RedisCluster::run(AddressAnyCommand &cmd)
 {
-    return this->_run(cmd, _last_prefix);
+    return _run(cmd, _last_prefix);
 }
 
 // Run multiple single-key or single-hash slot Command on the server.

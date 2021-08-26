@@ -30,3 +30,7 @@
 #include "redisserver.h"
 
 using namespace SmartRedis;
+
+// No actual content for this file; everything is defined in the header
+
+// EOF

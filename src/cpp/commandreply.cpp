@@ -34,7 +34,7 @@ using namespace SmartRedis;
 CommandReply::CommandReply(redisReply* reply)
 {
     _uptr_reply = NULL;
-    _reply= reply;
+    _reply = reply;
 }
 
 // Move constructor with RedisReplyUPtr as input

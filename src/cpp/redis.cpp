@@ -54,27 +54,27 @@ Redis::~Redis()
 
 // Run a single-key Command on the server
 CommandReply Redis::run(SingleKeyCommand& cmd){
-    return this->_run(cmd);
+    return _run(cmd);
 }
 
 // Run a multi-key Command on the server
 CommandReply Redis::run(MultiKeyCommand& cmd){
-    return this->_run(cmd);
+    return _run(cmd);
 }
 
 // Run a compound Command on the server
 CommandReply Redis::run(CompoundCommand& cmd){
-    return this->_run(cmd);
+    return _run(cmd);
 }
 
 // Run an address-at Command on the server
 CommandReply Redis::run(AddressAtCommand& cmd){
-    return this->_run(cmd);
+    return _run(cmd);
 }
 
 // Run an address-any Command on the server
 CommandReply Redis::run(AddressAnyCommand& cmd){
-    return this->_run(cmd);
+    return _run(cmd);
 }
 
 // Run a Command list on the server

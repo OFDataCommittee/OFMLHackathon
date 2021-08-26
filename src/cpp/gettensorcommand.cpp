@@ -46,14 +46,15 @@ CommandReply GetTensorCommand::run_me(RedisServer* server)
 // Returns a filled vector with the dimensions of the tensor
 std::vector<size_t> GetTensorCommand::get_dims(CommandReply& reply)
 {
-    if(reply.n_elements() < num_fields)
+    if (reply.n_elements() < num_fields) {
         throw std::runtime_error("The message does not have the "\
                                 "correct number of fields");
+    }
 
     size_t n_dims = reply[dims_idx].n_elements();
     std::vector<size_t> dims(n_dims);
 
-    for(size_t i=0; i<n_dims; i++) {
+    for (size_t i = 0; i < n_dims; i++) {
         dims[i] = reply[dims_idx][i].integer();
     }
 
@@ -63,20 +64,24 @@ std::vector<size_t> GetTensorCommand::get_dims(CommandReply& reply)
 // Returns a string of the tensor type
 TensorType GetTensorCommand::get_data_type(CommandReply& reply)
 {
-    if(reply.n_elements() < num_elements)
+    if (reply.n_elements() < num_elements) {
         throw std::runtime_error("The message does not have the correct "\
                                 "number of fields");
+    }
 
     return TENSOR_TYPE_MAP.at(std::string(reply[type_idx].str(),
-                                            reply[type_idx].str_len()));
+                                          reply[type_idx].str_len()));
 }
 
 // Returns a string view of the data tensor blob value
 std::string_view GetTensorCommand::get_data_blob(CommandReply& reply)
 {
-    if(reply.n_elements() < num_fields)
+    if (reply.n_elements() < num_fields) {
         throw std::runtime_error("The message does not have the "\
                                 "correct number of fields");
+    }
 
     return std::string_view(reply[blob_idx].str(), reply[blob_idx].str_len());
 }
+
+// EOF

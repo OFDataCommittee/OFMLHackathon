@@ -46,3 +46,5 @@ Command* AddressAnyCommand::clone()
     }
     return new_cmd;
 }
+
+// EOF

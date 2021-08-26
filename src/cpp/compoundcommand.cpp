@@ -46,3 +46,5 @@ Command* CompoundCommand::clone()
     }
     return new_cmd;
 }
+
+// EOF
