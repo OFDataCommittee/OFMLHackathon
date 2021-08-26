@@ -30,6 +30,7 @@
 #define SMARTREDIS_COMMAND_H
 
 #include "stdlib.h"
+#include "commandreply.h"
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -53,6 +54,9 @@ class Command;
 *          The Command.add_field_ptr() methods are ideal
 *          for large field values.
 */
+
+class RedisServer;
+
 class Command
 {
     public:
@@ -84,9 +88,31 @@ class Command
         Command& operator=(Command&& cmd) = default;
 
         /*!
+        *   \brief Deep copy operator
+        *   \details This method creates a new derived
+        *            type Command and returns a Command*
+        *            pointer.  The new derived type is
+        *            allocated on the heap.  Contents
+        *            are copied using the copy assignment
+        *            operator for the derived type. This is meant
+        *            to provide functionality to deep
+        *            copy a Command.
+        *   \returns A pointer to dynamically allocated
+        *            derived type cast to parent Command
+        *            type.
+        */
+        virtual Command* clone() = 0;
+
+        /*!
         *   \brief Command destructor
         */
-        ~Command();
+        virtual ~Command();
+
+        /*!
+        *   \brief Run this Command on the RedisServer.
+        *   \param server A pointer to the RedisServer
+        */
+        virtual CommandReply run_me(RedisServer* server) = 0;
 
         /*!
         *   \brief Add a field to the Command from a string.
@@ -192,37 +218,10 @@ class Command
                         std::string new_key);
 
         /*!
-        *   \brief Set address and port for command
-        *          to be executed on
-        *   \param address Address of database
-        *   \param port Port of database
-        */
-        void set_exec_address_port(std::string address,
-                                   uint16_t port);
-
-        /*!
-        *   \brief Get address that command will be
-        *          to be executed on
-        *   \return std::string of address
-        *           if an address hasn't been set,
-        *                 returns an empty string
-        */
-        std::string get_address();
-
-        /*!
-        *   \brief Get port that command will be
-        *          to be executed on
-        *   \return uint16_t of port
-        *           if port hasn't been set, returns 0
-        */
-        uint16_t get_port();
-
-        /*!
         *   \brief Get the value of the field field
         *   \returns std::string of the first Command field
         */
-        std::string first_field();
-
+        std::string first_field() const;
 
         /*!
         *   \brief Get a string of the entire Command
@@ -243,7 +242,6 @@ class Command
         */
         typedef std::vector<std::string_view>::const_iterator const_iterator;
 
-
         /*!
         *   \brief Returns an iterator pointing to the
         *          first field in the Command
@@ -256,7 +254,7 @@ class Command
         *          first field in the Command
         *   \returns const Command iterator to the first field
         */
-        const_iterator cbegin();
+        const_iterator cbegin() const;
 
         /*!
         *   \brief Returns an iterator pointing to the
@@ -271,7 +269,7 @@ class Command
         *          past-the-end field in the Command
         *   \returns const Command iterator to the past-the-end field
         */
-        const_iterator cend();
+        const_iterator cend() const;
 
     private:
 
@@ -295,16 +293,6 @@ class Command
         *          associated index in _fields
         */
         std::vector<std::pair<char*, size_t> > _ptr_fields;
-
-        /*!
-        *   \brief Address of database node
-        */
-        std::string _address;
-
-        /*!
-        *   \brief Port of database node
-        */
-        uint64_t _port;
 
         /*!
         *   \brief Unordered map of std::string_view to

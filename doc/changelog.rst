@@ -18,7 +18,6 @@ Description
  - Fortran and C interface improvements (PR93_) (PR94_) (PR95_) (PR99_)
  - Add Redis INFO command execution to the Python client (PR83_)
  - Add Redis CLUSTER INFO command execution to the Python client (PR105_)
-
 .. _PR52: https://github.com/CrayLabs/SmartRedis/pull/52
 .. _PR61: https://github.com/CrayLabs/SmartRedis/pull/61
 .. _PR65: https://github.com/CrayLabs/SmartRedis/pull/65

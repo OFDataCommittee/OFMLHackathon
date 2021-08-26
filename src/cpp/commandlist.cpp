@@ -35,8 +35,11 @@ CommandList::CommandList(const CommandList& cmd_lst)
 {
     std::vector<Command*>::const_iterator c_it = cmd_lst._commands.cbegin();
     for ( ; c_it != cmd_lst._commands.cend(); c_it++) {
-        Command* curr_command = new Command(**c_it);
-        _commands.push_back(curr_command);
+        Command* new_cmd = (*c_it)->clone();
+        if (new_cmd == NULL) {
+            throw std::runtime_error("Bad command found in CommandList constructore");
+        }
+        this->_commands.push_back(new_cmd);
     }
 }
 
@@ -56,8 +59,11 @@ CommandList& CommandList::operator=(const CommandList& cmd_lst)
     // Copy over the new contents
     std::vector<Command*>::const_iterator c_it = cmd_lst._commands.begin();
     for ( ; c_it != cmd_lst._commands.end(); c_it++) {
-        Command* curr_command = new Command(**c_it);
-        _commands.push_back(curr_command);
+        Command* new_cmd = (*c_it)->clone();
+        if (new_cmd == NULL) {
+            throw std::runtime_error("Bad command found in CommandList constructore");
+        }
+        _commands.push_back(new_cmd);
     }
 
     // Done
@@ -70,13 +76,6 @@ CommandList::~CommandList()
     std::vector<Command*>::iterator it = _commands.begin();
     for (; it != _commands.end(); it++)
         delete (*it);
-}
-
-// Dynamically allocate a new Command and return a pointer to the new Command
-Command* CommandList::add_command()
-{
-    _commands.push_back(new Command());
-    return _commands.back();
 }
 
 // Returns an iterator pointing to the first Command

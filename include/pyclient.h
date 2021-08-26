@@ -431,7 +431,7 @@ class PyClient
         *   \param addresses The addresses of the database nodes
         *   \returns A list of parsed_map objects containing all the
         *            information about the given database nodes
-	*   \throws std::runtime_error if the address is not addressable by this
+	    *   \throws std::runtime_error if the address is not addressable by this
         *           client.  In the case of using a cluster of database nodes,
         *           it is best practice to bind each node in the cluster
         *           to a specific adddress to avoid inconsistencies in
@@ -448,7 +448,7 @@ class PyClient
         *   \param addresses The addresses of the database nodes
         *   \returns A list of parsed_map objects containing all the cluster
         *            information about the given database nodes
-	*   \throws std::runtime_error if the address is not addressable by this
+	    *   \throws std::runtime_error if the address is not addressable by this
         *           client.  In the case of using a cluster of database nodes,
         *           it is best practice to bind each node in the cluster
         *           to a specific adddress to avoid inconsistencies in

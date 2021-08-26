@@ -174,11 +174,11 @@ void Command::add_fields(const std::vector<std::string>& fields, bool is_key)
 }
 
 // Get the value of the field field
-std::string Command::first_field()
+std::string Command::first_field() const
 {
-    if (begin() == end())
+    if (cbegin() == cend())
         throw std::runtime_error("No fields exist in the Command.");
-    return std::string(begin()->data(), begin()->size());
+    return std::string(cbegin()->data(), cbegin()->size());
 }
 
 // Get a string of the entire Command
@@ -197,8 +197,7 @@ Command::iterator Command::begin()
     return _fields.begin();
 }
 
-// Returns a const iterator pointing to the first field in the Command
-Command::const_iterator Command::cbegin()
+Command::const_iterator Command::cbegin() const
 {
     return _fields.cbegin();
 }
@@ -209,8 +208,7 @@ Command::iterator Command::end()
     return _fields.end();
 }
 
-// Returns a const iterator pointing to the past-the-end field in the Command
-Command::const_iterator Command::cend()
+Command::const_iterator Command::cend() const
 {
     return _fields.cend();
 }
@@ -255,24 +253,5 @@ void Command::make_empty()
     _fields.clear();
 }
 
-// Set address and port for command to be executed on
-void Command::set_exec_address_port(std::string address,
-                                    uint16_t port)
-{
-    _address = address;
-    _port = port;
-}
-
-// Get address that command will be to be executed on
-std::string Command::get_address()
-{
-    return _address;
-}
-
-// Get port that command will be to be executed on
-uint16_t Command::get_port()
-{
-    return _port;
-}
-
 // EOF
+

@@ -34,7 +34,7 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
 	INFO("SSDB must be set to a valid host and "\
 	     "port before running this test.");
 	REQUIRE(old_ssdb != NULL);
-	  
+
         TestSSDB test_ssdb;
 
         THEN("SSDB environment variable must exist "
