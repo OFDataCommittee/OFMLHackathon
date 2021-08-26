@@ -619,7 +619,7 @@ std::vector<py::dict> PyClient::get_db_cluster_info(std::vector<std::string> add
     return addresses_info;
 }
 
-// Delete all keys of all existing databases synchronously
+// Delete all keys of all existing databases
 std::string PyClient::flush_all_db()
 {
     std::string result;

@@ -460,7 +460,7 @@ class PyClient
         std::vector<py::dict> get_db_cluster_info(std::vector<std::string> addresses);
 
         /*!
-        *   \brief Delete all the keys of all existing databases synchronously
+        *   \brief Delete all the keys of all existing databases
         *   \returns "OK" if keys are successfully flushed
         */
         std::string flush_all_db();
@@ -468,7 +468,8 @@ class PyClient
         /*!
         *   \brief Read the configuration parameters of a running server.
         *   \param  expression Parameter used in the configuration or a
-        *                      glob pattern
+        *                      glob pattern (Use '*' to retrieve all
+        *                      configuration parameters)
         *   \param address The address of the database node execute on
         *   \returns The configuration parameters that match the specified expression
         */
