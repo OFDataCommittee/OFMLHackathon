@@ -715,7 +715,7 @@ std::string Client::flush_all_db()
     if (reply.has_error() > 0)
         throw std::runtime_error("FLUSHALL command failed");
 
-    return std::string(reply.str(), reply.str_len());
+    return std::string(reply.status_str(), reply.status_str_len());
 }
 
 // Read the configuration parameters of a running server
@@ -737,7 +737,7 @@ std::vector<std::pair<std::string, std::string>> Client::config_get(std::string 
 
     CommandReply reply = _run(cmd);
     if (reply.has_error() > 0)
-        throw std::runtime_error("FLUSHALL command failed");
+        throw std::runtime_error("CONFIG GET command failed");
 
     // parse reply
     size_t n_dims = reply.n_elements();
@@ -756,9 +756,10 @@ std::string Client::config_set(std::string config_param, std::string value, std:
     std::string host = address.substr(0, address.find(":"));
     uint64_t port = std::stoul(address.substr(address.find(":") + 1),
                                 nullptr, 0);
-    if (host.empty() or port == 0)
+    if (host.empty() or port == 0){
         throw std::runtime_error(std::string(address) +
                                  "is not a valid database node address.");
+    }
     AddressAtCommand cmd;
     cmd.set_exec_address_port(host, port);
 
@@ -769,9 +770,9 @@ std::string Client::config_set(std::string config_param, std::string value, std:
 
     CommandReply reply = _run(cmd);
     if (reply.has_error() > 0)
-        throw std::runtime_error("FLUSHALL command failed");
+        throw std::runtime_error("CONFIG SET command failed");
 
-    return std::string(reply.str(), reply.str_len());
+    return std::string(reply.status_str(), reply.status_str_len());
 
 }
 

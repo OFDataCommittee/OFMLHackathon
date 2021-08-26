@@ -624,7 +624,7 @@ std::string PyClient::flush_all_db()
 {
     std::string result;
     try {
-        result = this->_client->flush_all_db();
+        result = _client->flush_all_db();
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -643,7 +643,7 @@ std::vector<std::pair<std::string, std::string>> PyClient::config_get(std::strin
 {
     std::vector<std::pair<std::string, std::string>> result;
     try {
-        result = this->_client->config_get(expression, address);
+        result = _client->config_get(expression, address);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -661,7 +661,7 @@ std::string PyClient::config_set(std::string config_param, std::string value, st
 {
     std::string result;
     try {
-        result = this->_client->config_set(config_param, value, address);
+        result = _client->config_set(config_param, value, address);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());

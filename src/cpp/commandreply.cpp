@@ -82,13 +82,23 @@ CommandReply& CommandReply::operator=(CommandReply&& reply)
 
 char* CommandReply::str()
 {
-  if(this->_reply->type!=REDIS_REPLY_STRING
-     && this->_reply->type!=REDIS_REPLY_STATUS)
+  if(this->_reply->type!=REDIS_REPLY_STRING)
     throw std::runtime_error("A pointer to the reply str "\
                              "cannot be returned because the "\
                              "the reply type is " +
                              this->redis_reply_type());
   return this->_reply->str;
+}
+
+// Get string field of REDIS_REPLY_STATUS
+char* CommandReply::status_str()
+{
+  if(_reply->type!=REDIS_REPLY_STATUS)
+    throw std::runtime_error("A pointer to the reply str "\
+                             "cannot be returned because the "\
+                             "the reply type is " +
+                             redis_reply_type());
+  return _reply->str;
 }
 
 long long CommandReply::integer()
@@ -129,6 +139,17 @@ size_t CommandReply::str_len()
                              "the reply type is " +
                              this->redis_reply_type());
   return this->_reply->len;
+}
+
+// Get field length of REDIS_REPLY_STATUS
+size_t CommandReply::status_str_len()
+{
+  if(_reply->type!=REDIS_REPLY_STATUS)
+    throw std::runtime_error("The length of the reply str "\
+                             "cannot be returned because the "\
+                             "the reply type is " +
+                             redis_reply_type());
+  return _reply->len;
 }
 
 size_t CommandReply::n_elements()
