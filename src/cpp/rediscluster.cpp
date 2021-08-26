@@ -706,7 +706,7 @@ inline void RedisCluster::_parse_reply_for_slots(CommandReply& reply)
     size_t n_db_nodes = reply.n_elements();
     _db_nodes = std::vector<DBNode>(n_db_nodes);
 
-    for (int i = 0; i < n_db_nodes; i++) {
+    for (size_t i = 0; i < n_db_nodes; i++) {
         _db_nodes[i].lower_hash_slot = reply[i][0].integer();
         _db_nodes[i].upper_hash_slot = reply[i][1].integer();
         _db_nodes[i].ip = std::string(reply[i][2][0].str(),

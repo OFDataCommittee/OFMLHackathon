@@ -38,7 +38,7 @@ Tensor<T>::Tensor(const std::string& name,
                   const MemoryLayout mem_layout) :
                   TensorBase(name, data, dims, type, mem_layout)
 {
-    this->_set_tensor_data(data, dims, mem_layout);
+    _set_tensor_data(data, dims, mem_layout);
 }
 
 // Tensor copy constructor
@@ -49,18 +49,18 @@ Tensor<T>::Tensor(const Tensor<T>& tensor) : TensorBase(tensor)
     if (&tensor == this)
         return;
 
-    this->_set_tensor_data(tensor._data, tensor._dims,
+    _set_tensor_data(tensor._data, tensor._dims,
                            MemoryLayout::contiguous);
-    this->_c_mem_views = tensor._c_mem_views;
-    this->_f_mem_views = tensor._f_mem_views;
+    _c_mem_views = tensor._c_mem_views;
+    _f_mem_views = tensor._f_mem_views;
 }
 
 // Tensor move constructor
 template <class T>
 Tensor<T>::Tensor(Tensor<T>&& tensor) : TensorBase(std::move(tensor))
 {
-    this->_c_mem_views = std::move(tensor._c_mem_views);
-    this->_f_mem_views = std::move(tensor._f_mem_views);
+    _c_mem_views = std::move(tensor._c_mem_views);
+    _f_mem_views = std::move(tensor._f_mem_views);
 }
 
 // Tensor copy assignment operator
@@ -72,11 +72,11 @@ Tensor<T>& Tensor<T>::operator=(const Tensor<T>& tensor)
         return *this;
 
     // Deep copy tensor data
-    this->TensorBase::operator=(tensor);
-    this->_set_tensor_data(tensor._data, tensor._dims,
+    TensorBase::operator=(tensor);
+    _set_tensor_data(tensor._data, tensor._dims,
                             MemoryLayout::contiguous);
-    this->_c_mem_views = tensor._c_mem_views;
-    this->_f_mem_views = tensor._f_mem_views;
+    _c_mem_views = tensor._c_mem_views;
+    _f_mem_views = tensor._f_mem_views;
 
     // Done
     return *this;
@@ -91,9 +91,9 @@ Tensor<T>& Tensor<T>::operator=(Tensor<T>&& tensor)
         return *this;
 
     // Move data
-    this->TensorBase::operator=(std::move(tensor));
-    this->_c_mem_views = std::move(tensor._c_mem_views);
-    this->_f_mem_views = std::move(tensor._f_mem_views);
+    TensorBase::operator=(std::move(tensor));
+    _c_mem_views = std::move(tensor._c_mem_views);
+    _f_mem_views = std::move(tensor._f_mem_views);
 
     // Done
     return *this;
@@ -140,18 +140,18 @@ void* Tensor<T>::data_view(const MemoryLayout mem_layout)
 
     switch (mem_layout) {
         case MemoryLayout::contiguous:
-            ptr = this->_data;
+            ptr = _data;
             break;
         case MemoryLayout::fortran_contiguous:
-            ptr = this->_f_mem_views.allocate_bytes(
-                                     this->_n_data_bytes());
-            this->_c_to_f_memcpy((T*)ptr, (T*)this->_data, this->_dims);
+            ptr = _f_mem_views.allocate_bytes(
+                                     _n_data_bytes());
+            _c_to_f_memcpy((T*)ptr, (T*)_data, _dims);
             break;
         case MemoryLayout::nested:
-            this->_build_nested_memory(&ptr,
-                                       this->_dims.data(),
-                                       this->_dims.size(),
-                                       (T*)this->_data);
+            _build_nested_memory(&ptr,
+                                       _dims.data(),
+                                       _dims.size(),
+                                       (T*)_data);
             break;
         default:
             throw std::runtime_error(
@@ -167,7 +167,7 @@ void Tensor<T>::fill_mem_space(void* data,
                                std::vector<size_t> dims,
                                MemoryLayout mem_layout)
 {
-    if (this->_data == NULL) {
+    if (_data == NULL) {
         throw std::runtime_error("The tensor does not have "\
                                  "a data array to fill with.");
     }
@@ -188,7 +188,7 @@ void Tensor<T>::fill_mem_space(void* data,
 
     // Make sure there is space for all the data
     // ***WS*** TBD: we should be checking each dimension here as well
-    if (n_values != this->num_values()) {
+    if (n_values != num_values()) {
         throw std::runtime_error("The provided dimensions do "\
                                   "not match the size of the "\
                                   "tensor data array");
@@ -197,17 +197,17 @@ void Tensor<T>::fill_mem_space(void* data,
     // Copy over the data
     switch (mem_layout) {
         case MemoryLayout::fortran_contiguous:
-            this->_c_to_f_memcpy((T*)data, (T*)this->_data, this->_dims);
+            _c_to_f_memcpy((T*)data, (T*)_data, _dims);
             break;
         case MemoryLayout::contiguous:
-            std::memcpy(data, this->_data, this->_n_data_bytes());
+            std::memcpy(data, _data, _n_data_bytes());
             break;
         case MemoryLayout::nested: {
             size_t starting_position = 0;
-            this->_fill_nested_mem_with_data(data, dims.data(),
+            _fill_nested_mem_with_data(data, dims.data(),
                                              dims.size(),
                                              starting_position,
-                                             this->_data);
+                                             _data);
             }
             break;
         default:
@@ -228,7 +228,7 @@ void* Tensor<T>::_copy_nested_to_contiguous(void* src_data,
         T** current = (T**)src_data;
         for (size_t i = 0; i < dims[0]; i++) {
           dest_data =
-            this->_copy_nested_to_contiguous(*current, &dims[1],
+            _copy_nested_to_contiguous(*current, &dims[1],
                                              n_dims-1, dest_data);
           current++;
         }
@@ -251,7 +251,7 @@ void Tensor<T>::_fill_nested_mem_with_data(void* data,
     if (n_dims > 1) {
         T** current = (T**)data;
         for (size_t i = 0; i < dims[0]; i++, current++) {
-            this->_fill_nested_mem_with_data(
+            _fill_nested_mem_with_data(
                     *current, &dims[1], n_dims-1,
                     data_position, tensor_data);
         }
@@ -276,12 +276,12 @@ T* Tensor<T>::_build_nested_memory(void** data,
                                  "_build_nested_memory");
     }
     if (n_dims > 1) {
-        T** new_data = this->_c_mem_views.allocate(dims[0]);
+        T** new_data = _c_mem_views.allocate(dims[0]);
         if (new_data == NULL)
             throw std::bad_alloc();
         (*data) = reinterpret_cast<void*>(new_data);
         for (size_t i = 0; i < dims[0]; i++)
-            contiguous_mem = this->_build_nested_memory(
+            contiguous_mem = _build_nested_memory(
                 reinterpret_cast<void**>(&new_data[i]), &dims[1],
                 n_dims - 1, contiguous_mem);
     }
@@ -298,20 +298,20 @@ void Tensor<T>::_set_tensor_data(void* src_data,
                                  const std::vector<size_t>& dims,
                                  const MemoryLayout mem_layout)
 {
-    size_t n_values = this->num_values();
+    size_t n_values = num_values();
     size_t n_bytes = n_values * sizeof(T);
-    this->_data = new unsigned char[n_bytes];
+    _data = new unsigned char[n_bytes];
 
     switch (mem_layout) {
         case MemoryLayout::contiguous:
-            std::memcpy(this->_data, src_data, n_bytes);
+            std::memcpy(_data, src_data, n_bytes);
             break;
         case MemoryLayout::fortran_contiguous:
-            this->_f_to_c_memcpy((T*)this->_data, (T*) src_data, dims);
+            _f_to_c_memcpy((T*)_data, (T*) src_data, dims);
             break;
         case MemoryLayout::nested:
-            this->_copy_nested_to_contiguous(
-                src_data, dims.data(), dims.size(), this->_data);
+            _copy_nested_to_contiguous(
+                src_data, dims.data(), dims.size(), _data);
             break;
         default:
             throw std::runtime_error("Invalid memory layout in call "\
@@ -323,7 +323,7 @@ void Tensor<T>::_set_tensor_data(void* src_data,
 template <class T>
 size_t Tensor<T>::_n_data_bytes()
 {
-    return this->num_values() * sizeof(T);
+    return num_values() * sizeof(T);
 }
 // Copy a fortran memory space layout (col major) to a
 // c-style array memory space (row major)
@@ -370,11 +370,11 @@ void Tensor<T>::_f_to_c(T* c_data,
 
     for (size_t i = start; i < end; i++) {
         if (more_dims)
-            this->_f_to_c(c_data, f_data, dims, dim_positions,
+            _f_to_c(c_data, f_data, dims, dim_positions,
                           current_dim + 1);
         else {
-            size_t f_index = this->_f_index(dims, dim_positions);
-            size_t c_index = this->_c_index(dims, dim_positions);
+            size_t f_index = _f_index(dims, dim_positions);
+            size_t c_index = _c_index(dims, dim_positions);
             c_data[c_index] = f_data[f_index];
         }
         dim_positions[current_dim]++;
@@ -398,12 +398,12 @@ void Tensor<T>::_c_to_f(T* f_data,
 
     for (size_t i = start; i < end; i++) {
         if (more_dims) {
-            this->_c_to_f(f_data, c_data, dims, dim_positions,
+            _c_to_f(f_data, c_data, dims, dim_positions,
                           current_dim + 1);
         }
         else {
-            size_t f_index = this->_f_index(dims, dim_positions);
-            size_t c_index = this->_c_index(dims, dim_positions);
+            size_t f_index = _f_index(dims, dim_positions);
+            size_t c_index = _c_index(dims, dim_positions);
             f_data[f_index] = c_data[c_index];
         }
         dim_positions[current_dim]++;

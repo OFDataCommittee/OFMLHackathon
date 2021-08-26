@@ -34,7 +34,7 @@ template <class T>
 void SharedMemoryList<T>::add_allocation(size_t bytes, T* ptr)
 {
     std::shared_ptr<T> s_ptr(ptr);
-    this->_inventory.push_front(s_ptr);
+    _inventory.push_front(s_ptr);
 }
 
 // Allocate memory and record the allocation
@@ -42,7 +42,7 @@ template <class T>
 T* SharedMemoryList<T>::allocate_bytes(size_t bytes)
 {
     T* ptr = (T*)new unsigned char[bytes];
-    this->add_allocation(bytes, ptr);
+    add_allocation(bytes, ptr);
     return ptr;
 }
 
@@ -51,7 +51,7 @@ template <class T>
 T* SharedMemoryList<T>::allocate(size_t n_values)
 {
     size_t bytes = n_values * sizeof(T);
-    return this->allocate_bytes(bytes);
+    return allocate_bytes(bytes);
 }
 
 #endif //SMARTREDIS_SHAREDMEMORYLIST_TCC
