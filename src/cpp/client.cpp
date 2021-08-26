@@ -490,7 +490,7 @@ void Client::set_model(const std::string& key,
 
     const char* backends[] = { "TF", "TFLITE", "TORCH", "ONNX" };
     bool found = false;
-    for (int i = 0; i < sizeof(backends)/sizeof(backends[0]); i++)
+    for (size_t i = 0; i < sizeof(backends)/sizeof(backends[0]); i++)
         found = found || (backend.compare(backends[i]) != 0);
     if (!found) {
         throw std::runtime_error(std::string(backend) +
