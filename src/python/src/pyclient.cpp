@@ -68,7 +68,7 @@ void PyClient::put_tensor(std::string& key,
 
     // get dims
     std::vector<size_t> dims(buffer.ndim);
-    for (int i = 0; i < buffer.shape.size(); i++) {
+    for (size_t i = 0; i < buffer.shape.size(); i++) {
         dims[i] = (size_t)buffer.shape[i];
     }
 

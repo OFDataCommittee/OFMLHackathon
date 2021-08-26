@@ -57,7 +57,7 @@ void PyDataset::add_tensor(const std::string& name, py::array data, std::string&
 
   // get dims
   std::vector<size_t> dims(buffer.ndim);
-  for (int i=0; i < buffer.shape.size(); i++) {
+  for (size_t i=0; i < buffer.shape.size(); i++) {
       dims[i] = (size_t) buffer.shape[i];
   }
 
