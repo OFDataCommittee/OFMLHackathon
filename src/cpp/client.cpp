@@ -775,12 +775,16 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
                                                      reply.str_len()));
 }
 
-// Delete all keys of all existing databases synchronously
+// Delete all keys of all existing databases
 std::string Client::flush_all_db()
 {
     AddressAnyCommand cmd;
     cmd.add_field("FLUSHALL");
-    CommandReply reply = this->_run(cmd);
+
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw std::runtime_error("FLUSHALL command failed");
+
     return std::string(reply.str(), reply.str_len());
 }
 
@@ -801,12 +805,14 @@ std::vector<std::pair<std::string, std::string>> Client::config_get(std::string 
     cmd.add_field("GET");
     cmd.add_field(expression);
 
-    CommandReply reply = this->_run(cmd);
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw std::runtime_error("FLUSHALL command failed");
 
     // parse reply
     size_t n_dims = reply.n_elements();
     std::vector<std::pair<std::string, std::string>> reply_vect;
-    for(size_t i=0; i<n_dims; i+=2){
+    for(size_t i = 0; i < n_dims; i += 2){
         std::pair<std::string, std::string> param_value(reply[i].str(), reply[i+1].str());
         reply_vect.push_back(param_value);
     }
@@ -818,7 +824,7 @@ std::vector<std::pair<std::string, std::string>> Client::config_get(std::string 
 std::string Client::config_set(std::string config_param, std::string value, std::string address)
 {
     std::string host = address.substr(0, address.find(":"));
-    uint64_t port = std::stoul (address.substr(address.find(":") + 1),
+    uint64_t port = std::stoul(address.substr(address.find(":") + 1),
                                 nullptr, 0);
     if (host.empty() or port == 0)
         throw std::runtime_error(std::string(address) +
@@ -831,7 +837,10 @@ std::string Client::config_set(std::string config_param, std::string value, std:
     cmd.add_field(config_param);
     cmd.add_field(value);
 
-    CommandReply reply = this->_run(cmd);
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw std::runtime_error("FLUSHALL command failed");
+
     return std::string(reply.str(), reply.str_len());
 
 }
