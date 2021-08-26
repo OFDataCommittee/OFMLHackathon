@@ -725,9 +725,10 @@ std::vector<std::pair<std::string, std::string>> Client::config_get(std::string 
     std::string host = address.substr(0, address.find(":"));
     uint64_t port = std::stoul (address.substr(address.find(":") + 1),
                                 nullptr, 0);
-    if (host.empty() or port == 0)
+    if (host.empty() or port == 0){
         throw std::runtime_error(std::string(address) +
                                  "is not a valid database node address.");
+    }
     AddressAtCommand cmd;
     cmd.set_exec_address_port(host, port);
 
