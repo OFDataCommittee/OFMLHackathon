@@ -586,6 +586,31 @@ class Client
         */
         std::string flush_all_db();
 
+        /*!
+        *   \brief Read the configuration parameters of a running server.
+        *   \param  expression Parameter used in the configuration or a
+        *                      glob pattern
+        *   \param address The address of the database node execute on
+        *   \returns A vector of the configuration parameters that match the
+        *            specified expression and their values [param: value]
+        */
+        std::vector<std::pair<std::string, std::string>> config_get(std::string expression,
+                                                                    std::string address);
+
+        /*!
+        *   \brief Reconfigure the server. It can change both trivial
+        *          parameters or switch from one to another persistence option.
+        *          All the configuration parameters set using this command are
+        *          immediately loaded by Redis and will take effect starting with
+        *          the next command executed.
+        *   \param config_param A configuration parameter to set
+        *   \param value The value to assign to the configuration parameter
+        *   \param address The address of the database node execute on
+        *   \returns "OK" if the configuration change is valid,
+        *             otherwise returns an error
+        */
+        std::string config_set(std::string config_param, std::string value, std::string address);
+
     protected:
 
         /*!

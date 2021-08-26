@@ -622,5 +622,54 @@ std::vector<py::dict> PyClient::get_db_cluster_info(std::vector<std::string> add
 // Delete all keys of all existing databases synchronously
 std::string PyClient::flush_all_db()
 {
-  return this->_client->flush_all_db();
+    std::string result;
+    try {
+        result = this->_client->flush_all_db();
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "poll_tensor execution.");
+    }
+    return result;
+}
+
+// Read the configuration parameters of a running server
+std::vector<std::pair<std::string, std::string>> PyClient::config_get(std::string expression,
+                                                                      std::string address)
+{
+    std::vector<std::pair<std::string, std::string>> result;
+    try {
+        result = this->_client->config_get(expression, address);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "poll_tensor execution.");
+    }
+    return result;
+}
+
+// Reconfigure the server
+std::string PyClient::config_set(std::string config_param, std::string value, std::string address)
+{
+    std::string result;
+    try {
+        result = this->_client->config_set(config_param, value, address);
+    }
+    catch(const std::exception& e) {
+        throw std::runtime_error(e.what());
+    }
+    catch(...) {
+        throw std::runtime_error("A non-standard exception "\
+                                 "was encountered during client "\
+                                 "poll_tensor execution.");
+    }
+    return result;
 }

@@ -43,3 +43,21 @@ def test_flushall_command(use_cluster):
     reply = client.flush_all_db()
     assert not (client.key_exists("test_copy"))
     assert reply == "OK"
+
+
+def test_config_set_get_command(use_cluster):
+    # get env var to set through client init
+    # if cluster, only test first DB
+    ssdb = os.environ["SSDB"]
+
+    del os.environ["SSDB"]
+    # client init should fail if SSDB not set
+    client = Client(address=ssdb, cluster=use_cluster)
+
+    value = "6000"
+    set_reply = client.config_set("lua-time-limit", value, ssdb)
+    assert set_reply == "OK"
+
+    get_reply = client.config_get("lua-time-limit", ssdb)
+    assert len(get_reply) > 0
+    assert get_reply[0][1] == value

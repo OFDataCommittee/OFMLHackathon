@@ -714,6 +714,58 @@ std::string Client::flush_all_db()
     return std::string(reply.str(), reply.str_len());
 }
 
+// Read the configuration parameters of a running server
+std::vector<std::pair<std::string, std::string>> Client::config_get(std::string expression,
+                                                                    std::string address)
+{
+    std::string host = address.substr(0, address.find(":"));
+    uint64_t port = std::stoul (address.substr(address.find(":") + 1),
+                                nullptr, 0);
+    if (host.empty() or port == 0)
+        throw std::runtime_error(std::string(address) +
+                                 "is not a valid database node address.");
+    AddressAtCommand cmd;
+    cmd.set_exec_address_port(host, port);
+
+    cmd.add_field("CONFIG");
+    cmd.add_field("GET");
+    cmd.add_field(expression);
+
+    CommandReply reply = this->_run(cmd);
+
+    // parse reply
+    size_t n_dims = reply.n_elements();
+    std::vector<std::pair<std::string, std::string>> reply_vect;
+    for(size_t i=0; i<n_dims; i+=2){
+        std::pair<std::string, std::string> param_value(reply[i].str(), reply[i+1].str());
+        reply_vect.push_back(param_value);
+    }
+
+    return reply_vect;
+}
+
+// Reconfigure the server
+std::string Client::config_set(std::string config_param, std::string value, std::string address)
+{
+    std::string host = address.substr(0, address.find(":"));
+    uint64_t port = std::stoul (address.substr(address.find(":") + 1),
+                                nullptr, 0);
+    if (host.empty() or port == 0)
+        throw std::runtime_error(std::string(address) +
+                                 "is not a valid database node address.");
+    AddressAtCommand cmd;
+    cmd.set_exec_address_port(host, port);
+
+    cmd.add_field("CONFIG");
+    cmd.add_field("SET");
+    cmd.add_field(config_param);
+    cmd.add_field(value);
+
+    CommandReply reply = this->_run(cmd);
+    return std::string(reply.str(), reply.str_len());
+
+}
+
 void Client::_set_prefixes_from_env()
 {
     const char* keyout_p = std::getenv("SSKEYOUT");
