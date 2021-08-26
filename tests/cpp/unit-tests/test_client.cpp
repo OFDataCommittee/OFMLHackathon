@@ -500,7 +500,7 @@ SCENARIO("Testing FLUSHALL on Client Object", "[Client]")
             THEN("FLUSHALL deletes all keys in all the databases")
             {
                 std::string reply = client.flush_all_db();
-                
+
                 CHECK(client.key_exists("test_tensor") == false);
                 CHECK(client.key_exists("test_dataset") == false);
                 CHECK(client.key_exists("test_tensor2") == false);
@@ -510,3 +510,37 @@ SCENARIO("Testing FLUSHALL on Client Object", "[Client]")
     }
 }
 
+SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
+{
+
+    GIVEN("A Client object")
+    {
+        Client client(use_cluster());
+
+        WHEN("CONFIG GET or CONFIG SET are called on databases with "
+             "invalid addresses ")
+        {
+            THEN("An error is thrown")
+            {
+                std::string db_address = ":00";
+
+                CHECK_THROWS_AS(client.config_get("*max-*-entries*", db_address),
+                                std::runtime_error);
+                CHECK_THROWS_AS(client.config_set("dbfilename", "new_file.rdb", db_address),
+                                std::runtime_error);
+            }
+        }
+
+        AND_WHEN("CONFIG GET or CONFIG SET are called on databases with "
+                 "valid addresses ")
+        {
+            THEN("No error is thrown."){
+
+                std::string db_address = std::getenv("SSDB");
+
+                CHECK_NOTHROW(client.config_get("*max-*-entries*", db_address));
+                CHECK_NOTHROW(client.config_set("dbfilename", "new_file.rdb", db_address));
+            }
+        }
+    }
+}
