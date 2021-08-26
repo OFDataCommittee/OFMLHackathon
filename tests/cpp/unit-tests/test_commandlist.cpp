@@ -284,7 +284,7 @@ SCENARIO("Testing CommandList object on heap", "[CommandList]")
                 // Ensure that the state of the original
                 // CommandList object is preserved
                 while((it != it_end) && (cmd_count < fields.size())) {
-                    ((*it)->first_field() == fields[cmd_count]);
+                    CHECK((*it)->first_field() == fields[cmd_count]);
                     it++;
                     cmd_count++;
                 }
