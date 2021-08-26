@@ -306,7 +306,7 @@ void Client::unpack_tensor(const std::string& key,
     // Make sure we have the right dims to unpack into (Contiguous case)
     if (mem_layout == MemoryLayout::contiguous ||
         mem_layout == MemoryLayout::fortran_contiguous) {
-        int total_dims = 1;
+        size_t total_dims = 1;
         for (size_t i = 0; i < reply_dims.size(); i++) {
             total_dims *= reply_dims[i];
         }
