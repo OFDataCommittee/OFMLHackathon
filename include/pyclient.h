@@ -460,10 +460,11 @@ class PyClient
         std::vector<py::dict> get_db_cluster_info(std::vector<std::string> addresses);
 
         /*!
-        *   \brief Delete all the keys of all existing databases
+        *   \brief Delete all the keys of the given database
+        *   \param addresses The addresses of the database nodes
         *   \returns "OK" if keys are successfully flushed
         */
-        std::string flush_all_db();
+        std::string flush_db(std::vector<std::string> addresses);
 
         /*!
         *   \brief Read the configuration parameters of a running server.

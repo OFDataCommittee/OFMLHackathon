@@ -490,43 +490,38 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
     }
 }
 
-SCENARIO("Testing FLUSHALL on Client Object", "[Client]")
+SCENARIO("Testing FLUSHDB on Client Object", "[Client]")
 {
 
     GIVEN("A Client object")
     {
         Client client(use_cluster());
 
-        WHEN("The databases are populated with keys")
+        WHEN("FLUSHDB is called on database with "
+             "an invalid address")
         {
-            // Add tensor to Client
-            std::string key = "test_tensor";
-            float**** array = allocate_4D_array<float>(1,1,28,28);
-            client.put_tensor(key, array, {1,1,28,28},
-                        TensorType::flt, MemoryLayout::nested);
-
-            // Add dataset to Client
-            std::string dataset_name = "test_dataset";
-            DataSet dataset(dataset_name);
-            std::string tensor_name = "test_tensor2";
-            dataset.add_tensor(tensor_name, array, {1,1,28,28},
-                        TensorType::flt, MemoryLayout::nested);
-            client.put_dataset(dataset);
-
-            free_4D_array(array, 1, 1, 28);
-
-            THEN("FLUSHALL deletes all keys in all the databases")
+            THEN("An error is thrown")
             {
-                CHECK(client.tensor_exists("test_tensor"));
-                CHECK_NOTHROW(client.get_dataset("test_dataset"));
+                std::string db_address = ":00";
 
-                std::string reply = client.flush_all_db();
+                CHECK_THROWS_AS(client.flush_db(db_address),
+                                std::runtime_error);
+            }
+        }
 
-                CHECK(client.tensor_exists("test_tensor") == false);
-                CHECK_THROWS_AS(client.get_dataset("test_dataset"),
-                        std::runtime_error);
+        AND_WHEN("FLUSHDB is called on database with "
+                 "a valid address")
+        {
+            THEN("No errors are thrown")
+            {
+                std::string db_address = std::getenv("SSDB");
+
+                if (use_cluster())
+                    db_address = parse_SSDB(db_address);
+
+                std::string reply = client.flush_db(db_address);
+
                 CHECK(reply == "OK");
-
             }
         }
     }

@@ -620,19 +620,21 @@ std::vector<py::dict> PyClient::get_db_cluster_info(std::vector<std::string> add
 }
 
 // Delete all keys of all existing databases
-std::string PyClient::flush_all_db()
+std::string PyClient::flush_db(std::vector<std::string> addresses)
 {
     std::string result;
-    try {
-        result = _client->flush_all_db();
-    }
-    catch(const std::exception& e) {
-        throw std::runtime_error(e.what());
-    }
-    catch(...) {
-        throw std::runtime_error("A non-standard exception "\
-                                 "was encountered during client "\
-                                 "flush_all_db execution.");
+    for(size_t i=0; i<addresses.size(); i++) {
+        try {
+            result = _client->flush_db(addresses[i]);
+        }
+        catch(const std::exception& e) {
+            throw std::runtime_error(e.what());
+        }
+        catch(...) {
+            throw std::runtime_error("A non-standard exception "\
+                                    "was encountered during client "\
+                                    "flush_db execution.");
+        }
     }
     return result;
 }
