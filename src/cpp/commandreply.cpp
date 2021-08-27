@@ -62,8 +62,10 @@ CommandReply::CommandReply(redisReply*&& reply)
 
 CommandReply::CommandReply(CommandReply&& reply)
 {
-    _uptr_reply = std::move(reply._uptr_reply);
-    _reply = _uptr_reply.get();
+    if(this != &reply) {
+        _uptr_reply = std::move(reply._uptr_reply);
+        _reply = _uptr_reply.get();
+    }
     return;
 }
 
