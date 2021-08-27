@@ -769,15 +769,23 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
                                                      reply.str_len()));
 }
 
-// Delete all keys of all existing databases
-std::string Client::flush_all_db()
+// Delete all the keys of the given database
+std::string Client::flush_db(std::string address)
 {
-    AddressAnyCommand cmd;
-    cmd.add_field("FLUSHALL");
+    AddressAtCommand cmd;
+    std::string host = cmd.parse_host(address);
+    uint64_t port = cmd.parse_port(address);
+    if (host.empty() or port == 0){
+        throw std::runtime_error(std::string(address) +
+                                 "is not a valid database node address.");
+    }
+    cmd.set_exec_address_port(host, port);
+
+    cmd.add_field("FLUSHDB");
 
     CommandReply reply = _run(cmd);
     if (reply.has_error() > 0)
-        throw std::runtime_error("FLUSHALL command failed");
+        throw std::runtime_error("FLUSHDB command failed");
 
     return std::string(reply.status_str(), reply.status_str_len());
 }

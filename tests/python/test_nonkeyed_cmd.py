@@ -28,11 +28,15 @@ def test_dbnode_info_command(use_cluster):
             print(key, db[key])
 
 
-def test_flushall_command(use_cluster):
+def test_flushdb_command(use_cluster):
     # get env var to set through client init
     ssdb = os.environ["SSDB"]
-
+    if use_cluster:
+        addresses = ssdb.split(",")
+    else:
+        addresses = [ssdb]
     del os.environ["SSDB"]
+
     # client init should fail if SSDB not set
     client = Client(address=ssdb, cluster=use_cluster)
 
@@ -40,7 +44,7 @@ def test_flushall_command(use_cluster):
     tensor = np.array([1, 2])
     client.put_tensor("test_copy", tensor)
 
-    reply = client.flush_all_db()
+    reply = client.flush_db(addresses)
     with pytest.raises(RedisReplyError):
         client.get_tensor("test_copy")
     assert reply == "OK"

@@ -85,7 +85,7 @@ class AddressAtCommand : public NonKeyedCommand
         inline uint64_t parse_port(std::string address)
         {
             return std::stoul(address.substr(address.find(":") + 1),
-                              nullptr, 0);;
+                              nullptr, 0);
         }
 
 };
