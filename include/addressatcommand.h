@@ -66,6 +66,28 @@ class AddressAtCommand : public NonKeyedCommand
         *            type.
         */
         virtual Command* clone();
+
+        /*!
+        *   \brief Returns host of database node
+        *   \param address The address of the database node
+        *   \returns The host of the database node
+        */
+        inline std::string parse_host(std::string address)
+        {
+            return address.substr(0, address.find(":"));
+        }
+
+        /*!
+        *   \brief Returns port of database node
+        *   \param address The address of the database node
+        *   \returns The port of the database node
+        */
+        inline uint64_t parse_port(std::string address)
+        {
+            return std::stoul(address.substr(address.find(":") + 1),
+                              nullptr, 0);;
+        }
+
 };
 
 } //namespace SmartRedis

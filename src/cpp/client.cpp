@@ -670,14 +670,15 @@ void Client::use_tensor_ensemble_prefix(bool use_prefix)
 
 parsed_reply_nested_map Client::get_db_node_info(std::string address)
 {
-    std::string host = address.substr(0, address.find(":"));
-    uint64_t port = std::stoul (address.substr(address.find(":") + 1),
-                                nullptr, 0);
-    if (host.empty() or port == 0)
+    DBInfoCommand cmd;
+    std::string host = cmd.parse_host(address);
+    uint64_t port = cmd.parse_port(address);
+    if (host.empty() or port == 0){
         throw std::runtime_error(std::string(address) +
                                  "is not a valid database node address.");
-    DBInfoCommand cmd;
+    }
     cmd.set_exec_address_port(host, port);
+
     cmd.add_field("INFO");
     cmd.add_field("everything");
     CommandReply reply = this->_run(cmd);
@@ -690,14 +691,15 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
     if(this->_redis_cluster == NULL)
         throw std::runtime_error("Cannot run on non-cluster environment");
 
-    std::string host = address.substr(0, address.find(":"));
-    uint64_t port = std::stoul (address.substr(address.find(":") + 1),
-                                nullptr, 0);
-    if (host.empty() or port == 0)
+    ClusterInfoCommand cmd;
+    std::string host = cmd.parse_host(address);
+    uint64_t port = cmd.parse_port(address);
+    if (host.empty() or port == 0){
         throw std::runtime_error(std::string(address) +
                                  "is not a valid database node address.");
-    ClusterInfoCommand cmd;
+    }
     cmd.set_exec_address_port(host, port);
+
     cmd.add_field("CLUSTER");
     cmd.add_field("INFO");
     CommandReply reply = this->_run(cmd);
@@ -719,17 +721,16 @@ std::string Client::flush_all_db()
 }
 
 // Read the configuration parameters of a running server
-std::vector<std::pair<std::string, std::string>> Client::config_get(std::string expression,
-                                                                    std::string address)
+std::unordered_map<std::string,std::string> Client::config_get(std::string expression,
+                                                               std::string address)
 {
-    std::string host = address.substr(0, address.find(":"));
-    uint64_t port = std::stoul (address.substr(address.find(":") + 1),
-                                nullptr, 0);
+    AddressAtCommand cmd;
+    std::string host = cmd.parse_host(address);
+    uint64_t port = cmd.parse_port(address);
     if (host.empty() or port == 0){
         throw std::runtime_error(std::string(address) +
                                  "is not a valid database node address.");
     }
-    AddressAtCommand cmd;
     cmd.set_exec_address_port(host, port);
 
     cmd.add_field("CONFIG");
@@ -742,26 +743,24 @@ std::vector<std::pair<std::string, std::string>> Client::config_get(std::string 
 
     // parse reply
     size_t n_dims = reply.n_elements();
-    std::vector<std::pair<std::string, std::string>> reply_vect;
+    std::unordered_map<std::string,std::string> reply_map;
     for(size_t i = 0; i < n_dims; i += 2){
-        std::pair<std::string, std::string> param_value(reply[i].str(), reply[i+1].str());
-        reply_vect.push_back(param_value);
+        reply_map[reply[i].str()] = reply[i+1].str();
     }
 
-    return reply_vect;
+    return reply_map;
 }
 
 // Reconfigure the server
 std::string Client::config_set(std::string config_param, std::string value, std::string address)
 {
-    std::string host = address.substr(0, address.find(":"));
-    uint64_t port = std::stoul(address.substr(address.find(":") + 1),
-                                nullptr, 0);
+    AddressAtCommand cmd;
+    std::string host = cmd.parse_host(address);
+    uint64_t port = cmd.parse_port(address);
     if (host.empty() or port == 0){
         throw std::runtime_error(std::string(address) +
                                  "is not a valid database node address.");
     }
-    AddressAtCommand cmd;
     cmd.set_exec_address_port(host, port);
 
     cmd.add_field("CONFIG");

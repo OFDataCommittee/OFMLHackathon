@@ -2,6 +2,7 @@
 #include "client.h"
 #include "dataset.h"
 #include "../client_test_utils.h"
+#include <sstream>
 
 using namespace SmartRedis;
 
@@ -17,6 +18,16 @@ bool is_same_data(T* t1, T* t2, size_t length)
         t2++;
     }
     return true;
+}
+
+// helper function that returns the first address
+// if SSDB contains more than one
+std::string parse_SSDB(std::string addresses)
+{
+    std::stringstream address_stream(addresses);
+    std::string first_address;
+    getline(address_stream, first_address, ',');
+    return first_address;
 }
 
 // auxiliary function for testing the equivalence
@@ -453,6 +464,9 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
             {
                 std::string db_address = std::getenv("SSDB");
 
+                if (use_cluster())
+                    db_address = parse_SSDB(db_address);
+
                 CHECK_NOTHROW(client.get_db_node_info(db_address));
             }
         }
@@ -464,8 +478,10 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
             {
                 std::string db_address = std::getenv("SSDB");
 
-                if(use_cluster())
+                if(use_cluster()){
+                    db_address = parse_SSDB(db_address);
                     CHECK_NOTHROW(client.get_db_cluster_info(db_address));
+                }
                 else
                     CHECK_THROWS_AS(client.get_db_cluster_info(db_address),
                         std::runtime_error);
@@ -489,7 +505,7 @@ SCENARIO("Testing FLUSHALL on Client Object", "[Client]")
             client.put_tensor(key, array, {1,1,28,28},
                         TensorType::flt, MemoryLayout::nested);
 
-            // Add dataset to Client
+            // Add dataset to Client 
             std::string dataset_name = "test_dataset";
             DataSet dataset(dataset_name);
             std::string tensor_name = "test_tensor2";
@@ -497,14 +513,20 @@ SCENARIO("Testing FLUSHALL on Client Object", "[Client]")
                         TensorType::flt, MemoryLayout::nested);
             client.put_dataset(dataset);
 
+            free(array);
+
             THEN("FLUSHALL deletes all keys in all the databases")
             {
+                CHECK(client.tensor_exists("test_tensor"));
+                CHECK_NOTHROW(client.get_dataset("test_dataset"));
+
                 std::string reply = client.flush_all_db();
 
-                CHECK(client.key_exists("test_tensor") == false);
-                CHECK(client.key_exists("test_dataset") == false);
-                CHECK(client.key_exists("test_tensor2") == false);
+                CHECK(client.tensor_exists("test_tensor") == false);
+                CHECK_THROWS_AS(client.get_dataset("test_dataset"),
+                        std::runtime_error);
                 CHECK(reply == "OK");
+
             }
         }
     }
@@ -537,6 +559,9 @@ SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
             THEN("No error is thrown."){
 
                 std::string db_address = std::getenv("SSDB");
+
+                if (use_cluster())
+                    db_address = parse_SSDB(db_address);
 
                 CHECK_NOTHROW(client.config_get("*max-*-entries*", db_address));
                 CHECK_NOTHROW(client.config_set("dbfilename", "new_file.rdb", db_address));
