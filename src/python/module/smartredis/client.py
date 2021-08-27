@@ -696,6 +696,95 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "get_db_cluster_info")
 
+    def flush_db(self, addresses):
+        """Removes all keys from a specified db node.
+
+        :param addresses: The addresses of the database nodes
+        :type address: list[str]
+        :returns: "OK" if command is successfully executed
+        :rtype: str
+        :raises RedisReplyError: if there is an error in
+                  in command execution or the address
+                  is not reachable by the client.
+                  In the case of using a cluster of database nodes,
+                  it is best practice to bind each node in the cluster
+                  to a specific adddress to avoid inconsistencies in
+                  addresses retreived with the CLUSTER SLOTS command.
+                  Inconsistencies in node addresses across
+                  CLUSTER SLOTS comands will lead to RedisReplyError
+                  being thrown.
+
+        """
+        try:
+            return super().flush_db(addresses)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "flush_db")
+
+    def config_get(self, expression, address):
+        """Read the configuration parameters of a running server.
+        If the address does not correspond to a cluster node,
+        an empty dictionary is returned.
+
+        :param expression: Parameter used in the configuration or a
+                           glob pattern (Use '*' to retrieve all
+                           configuration parameters)
+        :type expression: str
+        :param address: The address of the database node
+        :type address: str
+        :returns: A dictionary that maps configuration parameters to
+                  their values
+        :rtype: dict
+        :raises RedisReplyError: if there is an error in
+                  in command execution or the address
+                  is not reachable by the client.
+                  In the case of using a cluster of database nodes,
+                  it is best practice to bind each node in the cluster
+                  to a specific adddress to avoid inconsistencies in
+                  addresses retreived with the CLUSTER SLOTS command.
+                  Inconsistencies in node addresses across
+                  CLUSTER SLOTS comands will lead to RedisReplyError
+                  being thrown.
+
+        """
+        try:
+            return super().config_get(expression, address)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "config_get")
+
+    def config_set(self, config_param, value, address):
+        """Reconfigure the server. It can change both trivial
+           parameters or switch from one to another persistence option.
+           All the configuration parameters set using this command are
+           immediately loaded by Redis and will take effect starting with
+            the next command executed.
+        If the address does not correspond to a cluster node,
+        an empty dictionary is returned.
+
+        :param config_param: A configuration parameter to set
+        :type config_param: str
+        :param value: The value to assign to the configuration parameter
+        :type value: str
+        :param address: The address of the database node
+        :type address: str
+        :returns: "OK" if command is successfully executed
+        :rtype: str
+        :raises RedisReplyError: if there is an error in
+                  in command execution or the address
+                  is not reachable by the client.
+                  In the case of using a cluster of database nodes,
+                  it is best practice to bind each node in the cluster
+                  to a specific adddress to avoid inconsistencies in
+                  addresses retreived with the CLUSTER SLOTS command.
+                  Inconsistencies in node addresses across
+                  CLUSTER SLOTS comands will lead to RedisReplyError
+                  being thrown.
+
+        """
+        try:
+            return super().config_set(config_param, value, address)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "config_set")
+
     # ---- helpers --------------------------------------------------------
 
     @staticmethod

@@ -69,7 +69,12 @@ CommandReply Redis::run(CompoundCommand& cmd){
 
 // Run an address-at Command on the server
 CommandReply Redis::run(AddressAtCommand& cmd){
-    return _run(cmd);
+    if (not is_addressable(cmd.get_address(), cmd.get_port())){
+        throw std::runtime_error("The provided host and port do not match "\
+                                 "the host and port used to initialize the "\
+                                 "non-cluster client connection.");
+    }
+    return this->_run(cmd);
 }
 
 // Run an address-any Command on the server
