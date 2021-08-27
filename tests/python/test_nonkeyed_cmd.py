@@ -1,7 +1,9 @@
 import os
 import numpy as np
+import pytest
 
 from smartredis import Client
+from smartredis.error import RedisReplyError
 
 
 def test_dbnode_info_command(use_cluster):
@@ -39,7 +41,8 @@ def test_flushall_command(use_cluster):
     client.put_tensor("test_copy", tensor)
 
     reply = client.flush_all_db()
-    assert not (client.key_exists("test_copy"))
+    with pytest.raises(RedisReplyError):
+        client.get_tensor("test_copy")
     assert reply == "OK"
 
 

@@ -505,7 +505,7 @@ SCENARIO("Testing FLUSHALL on Client Object", "[Client]")
             client.put_tensor(key, array, {1,1,28,28},
                         TensorType::flt, MemoryLayout::nested);
 
-            // Add dataset to Client 
+            // Add dataset to Client
             std::string dataset_name = "test_dataset";
             DataSet dataset(dataset_name);
             std::string tensor_name = "test_tensor2";
@@ -513,7 +513,7 @@ SCENARIO("Testing FLUSHALL on Client Object", "[Client]")
                         TensorType::flt, MemoryLayout::nested);
             client.put_dataset(dataset);
 
-            free(array);
+            free_4D_array(array, 1, 1, 28);
 
             THEN("FLUSHALL deletes all keys in all the databases")
             {
