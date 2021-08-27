@@ -602,11 +602,12 @@ class Client
         *                     glob pattern (Use '*' to retrieve all
         *                     configuration parameters)
         *   \param address The address of the database node execute on
-        *   \returns A vector of the configuration parameters that match the
-        *            specified expression and their values [param: value]
+        *   \returns An unordered map that maps configuration parameters to their values
+        *   \throws std::runtime_error if the address is not addressable by this
+        *           client
         */
-        std::vector<std::pair<std::string, std::string>> config_get(std::string expression,
-                                                                    std::string address);
+        std::unordered_map<std::string,std::string> config_get(std::string expression,
+                                                               std::string address);
 
         /*!
         *   \brief Reconfigure the server. It can change both trivial
@@ -617,8 +618,9 @@ class Client
         *   \param config_param A configuration parameter to set
         *   \param value The value to assign to the configuration parameter
         *   \param address The address of the database node execute on
-        *   \returns "OK" if the configuration change is valid,
-        *             otherwise returns an error
+        *   \returns "OK" if the configuration change is valid
+        *   \throws std::runtime_error if the address is not addressable by this
+        *           client or if command fails to execute
         */
         std::string config_set(std::string config_param, std::string value, std::string address);
 

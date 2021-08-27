@@ -6,7 +6,6 @@ from smartredis import Client
 
 def test_dbnode_info_command(use_cluster):
     # get env var to set through client init
-    # if cluster, only test first DB
     ssdb = os.environ["SSDB"]
     if use_cluster:
         db_info_addr = ssdb.split(",")
@@ -29,7 +28,6 @@ def test_dbnode_info_command(use_cluster):
 
 def test_flushall_command(use_cluster):
     # get env var to set through client init
-    # if cluster, only test first DB
     ssdb = os.environ["SSDB"]
 
     del os.environ["SSDB"]
@@ -47,7 +45,6 @@ def test_flushall_command(use_cluster):
 
 def test_config_set_get_command(use_cluster):
     # get env var to set through client init
-    # if cluster, only test first DB
     ssdb = os.environ["SSDB"]
 
     del os.environ["SSDB"]
@@ -60,4 +57,4 @@ def test_config_set_get_command(use_cluster):
 
     get_reply = client.config_get("lua-time-limit", ssdb)
     assert len(get_reply) > 0
-    assert get_reply[0][1] == value
+    assert get_reply["lua-time-limit"] == value

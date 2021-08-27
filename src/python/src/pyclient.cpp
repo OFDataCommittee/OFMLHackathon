@@ -611,18 +611,18 @@ std::string PyClient::flush_all_db()
     catch(...) {
         throw std::runtime_error("A non-standard exception "\
                                  "was encountered during client "\
-                                 "poll_tensor execution.");
+                                 "flush_all_db execution.");
     }
     return result;
 }
 
 // Read the configuration parameters of a running server
-std::vector<std::pair<std::string, std::string>> PyClient::config_get(std::string expression,
-                                                                      std::string address)
+py::dict PyClient::config_get(std::string expression, std::string address)
 {
-    std::vector<std::pair<std::string, std::string>> result;
+    py::dict result;
     try {
-        result = _client->config_get(expression, address);
+        std::unordered_map<std::string,std::string> result_map = _client->config_get(expression, address);
+        result = py::cast(result_map);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -630,7 +630,7 @@ std::vector<std::pair<std::string, std::string>> PyClient::config_get(std::strin
     catch(...) {
         throw std::runtime_error("A non-standard exception "\
                                  "was encountered during client "\
-                                 "poll_tensor execution.");
+                                 "config_get execution.");
     }
     return result;
 }
@@ -648,7 +648,7 @@ std::string PyClient::config_set(std::string config_param, std::string value, st
     catch(...) {
         throw std::runtime_error("A non-standard exception "\
                                  "was encountered during client "\
-                                 "poll_tensor execution.");
+                                 "config_set execution.");
     }
     return result;
 }
