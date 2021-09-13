@@ -405,11 +405,13 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
             {
                 int poll_freq = 10;
                 int num_tries = 4;
+                std::string prefix = get_prefix();
                 // polling keys that exist returns true
-                for(int i=0; i<num_of_tensors; i++)
-                    CHECK(true == client.poll_key(keys[i],
+                for(int i=0; i<num_of_tensors; i++) {
+                    CHECK(true == client.poll_key(prefix + keys[i],
                                                   poll_freq,
                                                   num_tries));
+                }
 
                 // polling a key that does not exist returns false
                 CHECK_FALSE(client.poll_key("DNE",
@@ -459,13 +461,10 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
         AND_WHEN("INFO is called on database with a valid address ")
         {
 
-            THEN("No errors with be thrown for both cluster or "
+            THEN("No errors with be thrown for both cluster and "
                  "non-cluster environemnts")
             {
-                std::string db_address = std::getenv("SSDB");
-
-                if (use_cluster())
-                    db_address = parse_SSDB(db_address);
+                std::string db_address = parse_SSDB(std::getenv("SSDB"));
 
                 CHECK_NOTHROW(client.get_db_node_info(db_address));
             }
@@ -476,24 +475,21 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
             THEN("No errors are thrown if called on a cluster environment "
                  "but errors are thrown if called on a non-cluster environment")
             {
-                std::string db_address = std::getenv("SSDB");
-
-                if(use_cluster()){
-                    db_address = parse_SSDB(db_address);
+                std::string db_address = parse_SSDB(std::getenv("SSDB"));
+                if (use_cluster())
                     CHECK_NOTHROW(client.get_db_cluster_info(db_address));
-                }
                 else
                     CHECK_THROWS_AS(client.get_db_cluster_info(db_address),
-                        std::runtime_error);
+                                    std::runtime_error);
             }
         }
     }
 }
 
-SCENARIO("Testing FLUSHDB on Client Object", "[Client]")
+SCENARIO("Testing FLUSHDB on empty Client Object", "[Client][FLUSHDB]")
 {
 
-    GIVEN("A Client object")
+    GIVEN("An empty non-cluster Client object")
     {
         Client client(use_cluster());
 
@@ -506,6 +502,9 @@ SCENARIO("Testing FLUSHDB on Client Object", "[Client]")
 
                 CHECK_THROWS_AS(client.flush_db(db_address),
                                 std::runtime_error);
+
+                CHECK_THROWS_AS(client.flush_db("123456678.345633.21:2345561"),
+                                std::runtime_error);
             }
         }
 
@@ -514,14 +513,54 @@ SCENARIO("Testing FLUSHDB on Client Object", "[Client]")
         {
             THEN("No errors are thrown")
             {
-                std::string db_address = std::getenv("SSDB");
-
-                if (use_cluster())
-                    db_address = parse_SSDB(db_address);
+                std::string db_address = parse_SSDB(std::getenv("SSDB"));
 
                 std::string reply = client.flush_db(db_address);
 
                 CHECK(reply == "OK");
+            }
+        }
+    }
+}
+
+SCENARIO("Testing FLUSHDB on Client Object", "[Client][FLUSHDB]")
+{
+
+    GIVEN("A non-cluster Client object")
+    {
+        // From within the testing framework, there is no way of knowing
+        // each db node that is being used, so skip if on cluster
+        if (use_cluster())
+            return;
+
+        Client client(use_cluster());
+        std::string dataset_name = "test_dataset_name";
+        DataSet dataset(dataset_name);
+        dataset.add_meta_string("meta_string_name", "meta_string_val");
+        std::string tensor_key = "dbl_tensor";
+        std::vector<double> tensor_dbl =
+                {std::numeric_limits<double>::min(),
+                 std::numeric_limits<double>::max()};
+        client.put_dataset(dataset);
+        client.put_tensor(tensor_key, (void*)tensor_dbl.data(), {2,1},
+                          TensorType::dbl, MemoryLayout::contiguous);
+        WHEN("FLUSHDB is called on databsase")
+        {
+
+            THEN("The database is flushed")
+            {
+                // ensure the database has things to flush
+                CHECK_NOTHROW(client.get_dataset(dataset_name));
+                CHECK(client.tensor_exists(tensor_key) == true);
+                // flush the database
+                std::string db_address = parse_SSDB(std::getenv("SSDB"));
+                std::string reply = client.flush_db(db_address);
+                CHECK(reply == "OK");
+
+                // ensure the database is empty
+                CHECK_THROWS_AS(client.get_dataset(dataset_name),
+                                std::runtime_error);
+                CHECK_FALSE(client.tensor_exists(tensor_key));
             }
         }
     }
@@ -543,7 +582,9 @@ SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
 
                 CHECK_THROWS_AS(client.config_get("*max-*-entries*", db_address),
                                 std::runtime_error);
-                CHECK_THROWS_AS(client.config_set("dbfilename", "new_file.rdb", db_address),
+                CHECK_THROWS_AS(client.config_set("dbfilename",
+                                                  "new_file.rdb",
+                                                  db_address),
                                 std::runtime_error);
             }
         }
@@ -553,13 +594,11 @@ SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
         {
             THEN("No error is thrown."){
 
-                std::string db_address = std::getenv("SSDB");
-
-                if (use_cluster())
-                    db_address = parse_SSDB(db_address);
+                std::string db_address = parse_SSDB(std::getenv("SSDB"));
 
                 CHECK_NOTHROW(client.config_get("*max-*-entries*", db_address));
-                CHECK_NOTHROW(client.config_set("dbfilename", "new_file.rdb", db_address));
+                std::string reply = client.config_set("dbfilename", "new_file.rdb", db_address);
+                CHECK(reply == "OK");
             }
         }
     }

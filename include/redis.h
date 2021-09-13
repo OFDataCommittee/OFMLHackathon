@@ -331,9 +331,17 @@ class Redis : public RedisServer
         inline CommandReply _run(const Command& cmd);
 
         /*!
+        *   \brief Inserts a string formatted as address:port
+                   into _address_node_map. Strips the protocol
+                   (tcp:// or unix://) before inserting.
+        *   \param A string formatted as protocol://address:port
+        */
+        inline void _add_to_address_map(std::string address_port);
+
+        /*!
         *   \brief Connect to the server at the address and port
         *   \param address_port A string formatted as
-        *                       tcp:://address:port
+        *                       tcp://address:port
         *                       for redis connection
         */
         inline void _connect(std::string address_port);

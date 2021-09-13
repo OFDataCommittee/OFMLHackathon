@@ -257,4 +257,35 @@ T get_floating_point_scalar()
   return distribution(generator);
 }
 
+inline std::string get_prefix()
+{
+        // get prefix, if it exists. Assumes Client._use_tensor_prefix
+    // defaults to true, which it does at time of implementation
+    std::string prefix = "";
+    char* sskeyin = std::getenv("SSKEYIN");
+    std::string sskeyin_str = "";
+
+    if (sskeyin != NULL) {
+        // get the first value
+        char* a = &sskeyin[0];
+        char* b = a;
+        char parse_char = ',';
+        while (*b) {
+            if(*b == parse_char) {
+                if (a != b) {
+                    sskeyin_str = std::string(a, b - a);
+                    break;
+                }
+                a = ++b;
+            }
+            else
+                b++;
+        }
+        if (sskeyin_str.length() == 0)
+            sskeyin_str = std::string(sskeyin);
+        prefix = sskeyin_str + ".";
+    }
+    return prefix;
+}
+
 #endif //SMARTREDIS_TEST_UTILS_H

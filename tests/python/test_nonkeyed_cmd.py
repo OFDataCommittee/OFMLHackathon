@@ -9,10 +9,7 @@ from smartredis.error import RedisReplyError
 def test_dbnode_info_command(use_cluster):
     # get env var to set through client init
     ssdb = os.environ["SSDB"]
-    if use_cluster:
-        db_info_addr = ssdb.split(",")
-    else:
-        db_info_addr = [ssdb]
+    db_info_addr = [ssdb]
     del os.environ["SSDB"]
 
     # client init should fail if SSDB not set
@@ -22,19 +19,33 @@ def test_dbnode_info_command(use_cluster):
 
     assert len(info) > 0
 
-    for db in info:
-        for key in db:
-            print("\n")
-            print(key, db[key])
 
-
-def test_flushdb_command(use_cluster):
+def test_dbcluster_info_command(use_cluster):
     # get env var to set through client init
     ssdb = os.environ["SSDB"]
+    address = [ssdb]
+    del os.environ["SSDB"]
+
+    # client init should fail if SSDB not set
+    client = Client(address=ssdb, cluster=use_cluster)
+
     if use_cluster:
-        addresses = ssdb.split(",")
+        info = client.get_db_cluster_info(address)
+        assert len(info) > 0
     else:
-        addresses = [ssdb]
+        # cannot call get_db_cluster_info in non-cluster environment
+        with pytest.raises(RedisReplyError):
+            client.get_db_cluster_info(address)
+
+def test_flushdb_command(use_cluster):
+    # from within the testing framework, there is no way
+    # of knowing each db node that is being used, so skip
+    # if on cluster
+    if use_cluster:
+        return
+    # get env var to set through client init
+    ssdb = os.environ["SSDB"]
+    address = [ssdb]
     del os.environ["SSDB"]
 
     # client init should fail if SSDB not set
@@ -44,9 +55,9 @@ def test_flushdb_command(use_cluster):
     tensor = np.array([1, 2])
     client.put_tensor("test_copy", tensor)
 
-    reply = client.flush_db(addresses)
-    with pytest.raises(RedisReplyError):
-        client.get_tensor("test_copy")
+    assert client.tensor_exists("test_copy")
+    reply = client.flush_db(address)
+    assert not client.tensor_exists("test_copy")
     assert reply == "OK"
 
 
