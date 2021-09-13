@@ -42,28 +42,98 @@ class PyDataset
 {
     public:
 
+        /*!
+        *   \brief PyDataset constructor
+        *   \param name The name of the dataset
+        */
         PyDataset(const std::string& name);
-        PyDataset(DataSet& dataset);
+
+        /*!
+        *   \brief PyDataset constructor from a
+        *          SmartRedis::DataSet object
+        *   \param dataset A SmartRedis::DataSet pointer to
+        *                  a SmartRedis::DataSet allocated on
+        *                  the heap.  The SmartRedis::DataSet
+        *                  will be deleted upton PyDataset
+        *                  deletion.
+        */
+        PyDataset(DataSet* dataset);
+
+        /*!
+        *   \brief PyDataset destructor
+        */
         ~PyDataset();
 
+        /*!
+        *   \brief Add a tensor to the PyDataset
+        *   \param name The name of the tensor
+        *   \param data A py::array containing the tensor data
+        *   \param type A std::string corresponding to the tensor
+        *               data type
+        */
         void add_tensor(const std::string& name,
                         py::array data,
                         std::string& type);
 
+        /*!
+        *   \brief Retrieve a tensor from the PyDataset
+        *   \param name The name of the tensor
+        *   \return py::array containing the tensor data
+        */
         py::array get_tensor(const std::string& name);
 
+        /*!
+        *   \brief Add a metadata scalar to the PyDataset.
+        *          If the field already exists, the value
+        *          will be appended to the field.
+        *   \param name The name of scalar field
+        *   \param data A py::array containing the
+        *               scalar value.  The array
+        *               must only be of length 1.
+        *   \param type The type associated with the
+        *               scalar.
+        */
         void add_meta_scalar(const std::string& name,
                             py::array data,
                             std::string& type);
 
+        /*!
+        *   \brief Add a metadata string to the PyDataset.
+        *          If the field already exists, the value
+        *          will be appended to the field.
+        *   \param name The name of string field
+        *   \param data The string to add
+        */
         void add_meta_string(const std::string& name,
                             const std::string& data);
 
+        /*!
+        *   \brief Get a metadata scalar field from the
+        *          PyDataset
+        *   \param name The name of the field
+        *   \returns A py::array with all of the field values
+        */
         py::array get_meta_scalars(const std::string& name);
 
+        /*!
+        *   \brief Get a metadata scalar field from the
+        *          PyDataset
+        *   \param name The name of the field
+        *   \returns A py::array with all of the field values
+        */
         py::list get_meta_strings(const std::string& name);
 
+        /*!
+        *   \brief Get the name of the PyDataset
+        *   \returns std::string of the PyDataset name
+        */
+        std::string get_name();
 
+        /*!
+        *   \brief Retrieve a pointer to the underlying
+        *          SmartRedis::DataSet object
+        *   \returns DataSet pointer within PyDataset
+        */
         DataSet* get();
 
     private:

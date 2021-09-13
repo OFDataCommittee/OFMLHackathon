@@ -243,7 +243,7 @@ PyDataset* PyClient::get_dataset(const std::string& name)
                                  "was encountered during client "\
                                  "get_dataset execution.");
     }
-    PyDataset* dataset = new PyDataset(*data);
+    PyDataset* dataset = new PyDataset(data);
     return dataset;
 }
 

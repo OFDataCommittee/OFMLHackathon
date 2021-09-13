@@ -76,6 +76,7 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("add_meta_scalar", &PyDataset::add_meta_scalar)
         .def("add_meta_string", &PyDataset::add_meta_string)
         .def("get_meta_scalars", &PyDataset::get_meta_scalars)
-        .def("get_meta_strings", &PyDataset::get_meta_strings);
+        .def("get_meta_strings", &PyDataset::get_meta_strings)
+        .def("get_name", &PyDataset::get_name);
 }
 
