@@ -101,7 +101,7 @@ class NonKeyedCommand : public Command
         *   \param port Port of database
         */
         void set_exec_address_port(std::string address,
-                                   uint16_t port);
+                                   uint64_t port);
 
         /*!
         *   \brief Get address that command will be
@@ -115,9 +115,9 @@ class NonKeyedCommand : public Command
         /*!
         *   \brief Get port that command will be
         *          to be executed on
-        *   \return uint16_t of port
+        *   \return uint64_t of port
         */
-        uint16_t get_port();
+        uint64_t get_port();
 
         /*!
         *   \brief Run this Command on the RedisServer.

@@ -689,7 +689,7 @@ parsed_reply_nested_map Client::get_db_node_info(std::string address)
 parsed_reply_map Client::get_db_cluster_info(std::string address)
 {
     if(this->_redis_cluster == NULL)
-        throw std::runtime_error("Cannot run on non-cluster environment");
+        throw std::runtime_error("Cannot run db cluster info on non-cluster environment");
 
     ClusterInfoCommand cmd;
     std::string host = cmd.parse_host(address);

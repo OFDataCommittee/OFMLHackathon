@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pytest
 
@@ -15,8 +16,8 @@ def test_copy_dataset(use_cluster):
 
     client.copy_dataset("test_dataset_copy", "test_dataset_copied")
 
-    assert client.key_exists("test_dataset_copy")
-    assert client.key_exists("test_dataset_copied")
+    # ensure copied dataset is the same after deleting the orig dataset
+    client.delete_dataset("test_dataset_copy")
     returned = client.get_dataset("test_dataset_copied")
 
     # assert copied array is the same
@@ -51,8 +52,8 @@ def test_rename_dataset(use_cluster):
 
     client.rename_dataset("dataset_rename", "dataset_renamed")
 
-    assert not (client.key_exists("dataset_rename"))
-    assert client.key_exists("dataset_renamed")
+    assert not (client.key_exists(get_prefix() + "dataset_rename"))
+    assert client.key_exists(get_prefix() + "dataset_renamed")
     returned = client.get_dataset("dataset_renamed")
 
     # assert copied array is the same
@@ -132,3 +133,13 @@ def create_dataset(name):
     dataset.add_meta_string("test_string", string)
     dataset.add_meta_scalar("test_scalar", scalar)
     return dataset
+
+
+def get_prefix():
+    # get prefix, if it exists. Assumes the client is using
+    # tensor prefix which is the default.
+    sskeyin = os.environ.get("SSKEYIN", None)
+    prefix = ""
+    if sskeyin:
+        prefix = sskeyin.split(",")[0] + "."
+    return prefix

@@ -33,12 +33,14 @@ using namespace SmartRedis;
 Redis::Redis() : RedisServer()
 {
     std::string address_port = this->_get_ssdb();
+    _add_to_address_map(address_port);
     this->_connect(address_port);
     return;
 }
 
 Redis::Redis(std::string address_port) : RedisServer()
 {
+    _add_to_address_map(address_port);
     this->_connect(address_port);
     return;
 }
@@ -62,11 +64,10 @@ CommandReply Redis::run(CompoundCommand& cmd){
 }
 
 CommandReply Redis::run(AddressAtCommand& cmd){
-    if (not is_addressable(cmd.get_address(), cmd.get_port())){
+    if (not is_addressable(cmd.get_address(), cmd.get_port()))
         throw std::runtime_error("The provided host and port do not match "\
                                  "the host and port used to initialize the "\
                                  "non-cluster client connection.");
-    }
     return this->_run(cmd);
 }
 
@@ -351,14 +352,18 @@ inline CommandReply Redis::_run(const Command& cmd)
     return reply;
 }
 
+inline void Redis::_add_to_address_map(std::string address_port)
+{
+    if (address_port.rfind("tcp://", 0) == 0)
+        address_port = address_port.substr(6, std::string::npos);
+    else if (address_port.rfind("unix://", 0) == 0)
+        address_port = address_port.substr(7, std::string::npos);
+
+    _address_node_map.insert({address_port, nullptr});
+}
+
 inline void Redis::_connect(std::string address_port)
 {
-    // Note that this logic flow differs from a cluster
-    // because the non-cluster Redis constructor
-    // does not form a connection until a command is run
-
-    this->_address_node_map.insert({address_port, nullptr});
-
     // Try to create the sw::redis::Redis object
     try {
         this->_redis = new sw::redis::Redis(address_port);
