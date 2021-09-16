@@ -146,7 +146,8 @@ class Client(PyClient):
         if not isinstance(dataset, Dataset):
             raise TypeError("Argument to put_dataset was not of type Dataset")
         try:
-            super().put_dataset(dataset)
+            pybind_dataset = dataset.get_data()
+            super().put_dataset(pybind_dataset)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "put_dataset") from None
 
@@ -161,7 +162,8 @@ class Client(PyClient):
         """
         try:
             dataset = super().get_dataset(key)
-            return dataset
+            python_dataset = Dataset.from_pybind(dataset)
+            return python_dataset
         except RuntimeError as e:
             raise RedisReplyError(str(e), "get_dataset", key=key) from None
 
@@ -635,7 +637,7 @@ class Client(PyClient):
         :rtype: list[dict]
         :raises RedisReplyError: if there is an error in
                   in command execution or the address
-                  is not reachable by the client.  
+                  is not reachable by the client.
                   In the case of using a cluster of database nodes,
                   it is best practice to bind each node in the cluster
                   to a specific adddress to avoid inconsistencies in

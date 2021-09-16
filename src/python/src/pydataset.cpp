@@ -38,12 +38,15 @@ PyDataset::PyDataset(const std::string& name) {
   this->_dataset = dataset;
 }
 
-PyDataset::PyDataset(DataSet& dataset) {
-  this->_dataset = &dataset;
+PyDataset::PyDataset(DataSet* dataset) {
+  this->_dataset = dataset;
 }
 
 PyDataset::~PyDataset() {
-  delete this->_dataset;
+    if(this->_dataset != NULL) {
+      delete this->_dataset;
+      this->_dataset = NULL;
+    }
 }
 
 DataSet* PyDataset::get() {
@@ -207,6 +210,10 @@ py::array PyDataset::get_meta_scalars(const std::string& name) {
       break;
   }
 
+}
+
+std::string PyDataset::get_name() {
+    return this->_dataset->name;
 }
 
 py::list PyDataset::get_meta_strings(const std::string& name) {

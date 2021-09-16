@@ -850,7 +850,10 @@ void Client::_append_dataset_metadata_commands(CommandList& cmd_list,
                                  "a DataSet into the database that "\
                                  "does not contain any fields or "\
                                  "tensors.");
-    // SingleKeyCommand* cmd = new SingleKeyCommand();
+    SingleKeyCommand* del_cmd = cmd_list.add_command<SingleKeyCommand>();
+    del_cmd->add_field("DEL");
+    del_cmd->add_field(meta_key, true);
+
     SingleKeyCommand* cmd = cmd_list.add_command<SingleKeyCommand>();
     cmd->add_field("HMSET");
     cmd->add_field (meta_key, true);
