@@ -22,6 +22,8 @@ def get_test_names():
 
 def get_run_command():
     """Get run command for specific platform"""
+    if which("aprun"):
+        return [which("aprun"), "--pes", f"{RANKS}"]
     if which("srun"):
         return [which("srun"), "-n", f"{RANKS}"]
     if which("mpirun"):
