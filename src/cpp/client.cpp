@@ -829,6 +829,23 @@ void Client::config_set(std::string config_param, std::string value, std::string
         throw std::runtime_error("CONFIG SET command failed");
 }
 
+std::string Client::save(std::string address)
+{
+    AddressAtCommand cmd;
+    std::string host = address.substr(0, address.find(":"));
+    uint64_t port = std::stoul(address.substr(address.find(":") + 1),
+                    nullptr, 0);
+    if (host.empty() or port == 0){
+        throw std::runtime_error(std::string(address) +
+                                "is not a valid database node address.");
+    }
+    cmd.set_exec_address_port(host, port);
+    cmd.add_field("SAVE");
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw std::runtime_error("SAVE command failed");
+    return std::string(reply.status_str(), reply.status_str_len());
+}
 // Set the prefixes that are used for set and get methods using SSKEYIN
 // and SSKEYOUT environment variables.
 void Client::_set_prefixes_from_env()
