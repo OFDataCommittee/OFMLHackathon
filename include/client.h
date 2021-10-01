@@ -451,7 +451,7 @@ class Client
         bool tensor_exists(const std::string& name);
 
         /*!
-        *   \brief Check if the ataset exists in the database
+        *   \brief Check if the dataset exists in the database
         *   \param name The name that will be checked in the database
         *               Depending on the current prefixing behavior,
         *               the name could be automatically prefixed
