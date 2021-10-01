@@ -547,7 +547,7 @@ bool key_exists(void* c_client,
 *                   to use for communication
 *   \param name The name of the entity that will be checked 
 *               in the database. The full key associated to
-*               \p name will formed according to the
+*               \p name will be formed according to the
 *               prefixing behavior
 *   \param name_length The length of the name c-string,
 *                      excluding null terminating character
@@ -563,7 +563,7 @@ bool tensor_exists(void* c_client,
 *                   to use for communication
 *   \param name The name of the entity that will be checked 
 *               in the database. The full key associated to
-*               \p name will formed according to the
+*               \p name will be formed according to the
 *               prefixing behavior
 *   \param name_length The length of the name c-string,
 *                      excluding null terminating character
@@ -579,7 +579,7 @@ bool model_exists(void* c_client,
 *                   to use for communication
 *   \param name The name of the entity that will be checked 
 *               in the database. The full key associated to
-*               \p name will formed according to the
+*               \p name will be formed according to the
 *               prefixing behavior
 *   \param name_length The length of the name c-string,
 *                      excluding null terminating character
@@ -621,7 +621,7 @@ bool poll_key(void* c_client,
 *                   to use for communication
 *   \param name The name of the entity that will be checked 
 *               in the database. The full key associated to
-*               \p name will formed according to the
+*               \p name will be formed according to the
 *               prefixing behavior
 *   \param name_length The length of the name c-string,
 *                     excluding null terminating character
@@ -648,7 +648,7 @@ bool poll_model(void* c_client,
 *                   to use for communication
 *   \param name The name of the entity that will be checked 
 *               in the database. The full key associated to
-*               \p name will formed according to the
+*               \p name will be formed according to the
 *               prefixing behavior
 *   \param name_length The length of the name c-string,
 *                     excluding null terminating character
