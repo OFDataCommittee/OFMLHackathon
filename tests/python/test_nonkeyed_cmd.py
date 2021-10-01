@@ -18,6 +18,7 @@ def test_dbnode_info_command(use_cluster):
 
     assert len(info) > 0
 
+<<<<<<< HEAD
 
 def test_dbcluster_info_command(use_cluster):
     # get env var to set through client init
@@ -95,3 +96,26 @@ def test_config_get_command_DNE(use_cluster):
     # CONFIG GET returns an empty dictionary if the config_param is unsupported
     get_reply = client.config_get("config_param_DNE", ssdb)
     assert get_reply == dict()
+=======
+    for db in info:
+        for key in db:
+            print("\n")
+            print(key, db[key])
+
+def test_save_command(use_cluster):
+    # get env var to set through client init
+    # if cluster, only test first DB
+    ssdb = os.environ["SSDB"]
+    if use_cluster:
+        addresses = ssdb.split(",")
+    else:
+        addresses = [ssdb]
+    del os.environ["SSDB"]
+
+    # client init should fail if SSDB not set
+    client = Client(address=ssdb, cluster=use_cluster)
+    assert len(addresses) == 3
+    response = client.save(addresses)
+
+    assert response == "OK"
+>>>>>>> Expose SAVE command to Python client

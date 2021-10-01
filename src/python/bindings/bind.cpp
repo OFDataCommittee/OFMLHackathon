@@ -70,7 +70,8 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("get_db_cluster_info", &PyClient::get_db_cluster_info)
         .def("flush_db", &PyClient::flush_db)
         .def("config_set", &PyClient::config_set)
-        .def("config_get", &PyClient::config_get);
+        .def("config_get", &PyClient::config_get),
+        .def("save", &PyClient::save);
 
     // Python Dataset class
     py::class_<PyDataset>(m, "PyDataset")
