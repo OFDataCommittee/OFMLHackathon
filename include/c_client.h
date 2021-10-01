@@ -586,8 +586,8 @@ bool model_exists(void* c_client,
 *   \returns Returns true if the key exists in the database
 */
 bool dataset_exists(void* c_client,
-                   const char* name,
-                   const size_t name_length);
+                    const char* name,
+                    const size_t name_length);
 
 /*!
 *   \brief Check if the key exists in the database at a
