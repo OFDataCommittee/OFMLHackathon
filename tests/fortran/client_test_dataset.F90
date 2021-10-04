@@ -1,8 +1,9 @@
 program main
 
   use iso_c_binding
+  use smartredis_client,  only : client_type
   use smartredis_dataset, only : dataset_type
-  use test_utils,   only : irand
+  use test_utils,         only : irand, use_cluster
 
   implicit none
 
@@ -40,6 +41,7 @@ program main
 
   integer :: i, j, k
   type(dataset_type) :: dataset
+  type(client_type) :: client
 
   integer :: err_code 
 
@@ -110,6 +112,13 @@ program main
   call dataset%get_meta_scalars(meta_int64, meta_int64_recv)
   if (.not. all(meta_int64_recv == meta_int64_vec)) stop 'meta_int64: FAILED'
 
+  ! test dataset_existence
+  call client%initialize(use_cluster())
+  if (client%dataset_exists("nonexistent")) stop 'non-existant dataset: FAILED'
+  call client%put_dataset(dataset)
+  if (.not. client%dataset_exists("test_dataset")) stop 'existant dataset: FAILED'
+
+  
   write(*,*) "Fortran Dataset: passed"
 
 end program main

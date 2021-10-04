@@ -59,6 +59,16 @@ interface
 end interface
 
 interface
+  function dataset_exists_c( client, dataset_name, dataset_name_length ) bind(c, name="dataset_exists")
+    use iso_c_binding, only : c_ptr, c_char, c_bool, c_size_t
+    logical(kind=c_bool)          :: dataset_exists_c
+    type(c_ptr),            value :: client
+    character(kind=c_char)        :: dataset_name(*)
+    integer(kind=c_size_t), value :: dataset_name_length
+  end function dataset_exists_c
+end interface
+
+interface
   function key_exists_c( client, key, key_length ) bind(c, name="key_exists")
     use iso_c_binding, only : c_ptr, c_char, c_bool, c_size_t
     logical(kind=c_bool)          :: key_exists_c

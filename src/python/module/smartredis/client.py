@@ -444,14 +444,14 @@ class Client(PyClient):
             raise RedisReplyError(str(e), "run_model")
 
     def tensor_exists(self, name):
-        """Check if a tensor or dataset exists in the database
+        """Check if a tensor exists in the database
 
         The key associated to the entity will be
         computed internally based on the current prefix behavior.
 
-        :param key: The tensor or dataset name that will be checked in the database
+        :param key: The tensor name that will be checked in the database
         :type key: str
-        :returns: Returns true if the tensor or dataset exists in the database
+        :returns: Returns true if the tensor exists in the database
         :rtype: bool
         :raises RedisReplyError: if `tensor_exists` fails (i.e. causes an error)
         """
@@ -459,6 +459,23 @@ class Client(PyClient):
             return super().tensor_exists(name)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "tensor_exists")
+
+    def dataset_exists(self, name):
+        """Check if a dataset exists in the database
+
+        The key associated to the entity will be
+        computed internally based on the current prefix behavior.
+
+        :param key: The dataset name that will be checked in the database
+        :type key: str
+        :returns: Returns true if the dataset exists in the database
+        :rtype: bool
+        :raises RedisReplyError: if `dataset_exists` fails (i.e. causes an error)
+        """
+        try:
+            return super().dataset_exists(name)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "dataset_exists")
 
     def model_exists(self, name):
         """Check if a model or script exists in the database
