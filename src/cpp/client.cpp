@@ -575,7 +575,7 @@ bool Client::tensor_exists(const std::string& name)
 bool Client::dataset_exists(const std::string& name)
 {
     // Same implementation as for tensors; the next line is NOT a type
-    std::string g_key = this->_build_tensor_key(name, true);
+    std::string g_key = _build_dataset_ack_key(name, true);
     return this->_redis_server->key_exists(g_key);
 }
 
