@@ -45,8 +45,7 @@ void DataSet::add_tensor(const std::string& name,
                          const TensorType type,
                          MemoryLayout mem_layout)
 {
-    _add_to_tensorpack(name, data, dims,
-                             type, mem_layout);
+    _add_to_tensorpack(name, data, dims, type, mem_layout);
     _metadata.add_string(".tensor_names", name);
 }
 
