@@ -47,66 +47,52 @@ enum class MetaDataType {
 
 //! Helper method to convert between MetaDataType and CMetaDataType
 inline CMetaDataType convert_metadata_type(MetaDataType type) {
-    CMetaDataType t;
     switch (type) {
+        case MetaDataType::invalid:
+            return CMetaDataType::c_meta_invalid;
         case MetaDataType::dbl:
-            t = CMetaDataType::c_meta_dbl;
-            break;
+            return CMetaDataType::c_meta_dbl;
         case MetaDataType::flt:
-            t = CMetaDataType::c_meta_flt;
-            break;
+            return CMetaDataType::c_meta_flt;
         case MetaDataType::int32:
-            t = CMetaDataType::c_meta_int32;
-            break;
+            return CMetaDataType::c_meta_int32;
         case MetaDataType::int64:
-            t = CMetaDataType::c_meta_int64;
-            break;
+            return CMetaDataType::c_meta_int64;
         case MetaDataType::uint32:
-            t = CMetaDataType::c_meta_uint32;
-            break;
+            return CMetaDataType::c_meta_uint32;
         case MetaDataType::uint64:
-            t = CMetaDataType::c_meta_uint64;
-            break;
+            return CMetaDataType::c_meta_uint64;
         case MetaDataType::string:
-            t = CMetaDataType::c_meta_string;
-            break;
+            return CMetaDataType::c_meta_string;
         default :
             throw std::runtime_error("Error converting MetaDataType "\
                                      "to CMetaDataType.");
     }
-    return t;
 }
 
 //! Helper method to convert between CMetaDataType and MetaDataType
 inline MetaDataType convert_metadata_type(CMetaDataType type) {
-    MetaDataType t;
     switch (type) {
+        case CMetaDataType::c_meta_invalid:
+            return MetaDataType::invalid;
         case CMetaDataType::c_meta_dbl:
-            t = MetaDataType::dbl;
-            break;
+            return MetaDataType::dbl;
         case CMetaDataType::c_meta_flt:
-            t = MetaDataType::flt;
-            break;
+            return MetaDataType::flt;
         case CMetaDataType::c_meta_int32:
-            t = MetaDataType::int32;
-            break;
+            return MetaDataType::int32;
         case CMetaDataType::c_meta_int64:
-            t = MetaDataType::int64;
-            break;
+            return MetaDataType::int64;
         case CMetaDataType::c_meta_uint32:
-            t = MetaDataType::uint32;
-            break;
+            return MetaDataType::uint32;
         case CMetaDataType::c_meta_uint64:
-            t = MetaDataType::uint64;
-            break;
+            return MetaDataType::uint64;
         case CMetaDataType::c_meta_string:
-            t = MetaDataType::string;
-            break;
+            return MetaDataType::string;
         default :
             throw std::runtime_error("Error converting CMetaDataType "\
                                      "to MetaDataType.");
     }
-    return t;
 }
 
 } //namespace SmartRedis
