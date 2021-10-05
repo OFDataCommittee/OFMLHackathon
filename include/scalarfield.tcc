@@ -31,8 +31,8 @@
 
 // ScalarField constructor
 template <class T>
-ScalarField<T>::ScalarField(const std::string& name, MetaDataType type) :
-    MetadataField(name, type)
+ScalarField<T>::ScalarField(const std::string& name, MetaDataType type)
+  : MetadataField(name, type)
 {
     // NOP
 }
