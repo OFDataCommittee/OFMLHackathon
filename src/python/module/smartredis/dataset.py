@@ -32,14 +32,56 @@ from .smartredisPy import PyDataset
 from .util import Dtypes
 
 
-class Dataset(PyDataset):
+class Dataset():
+
     def __init__(self, name):
         """Initialize a Dataset object
 
         :param name: name of dataset
         :type name: str
         """
-        super().__init__(name)
+        self._data = PyDataset(name)
+
+    @staticmethod
+    def from_pybind(dataset):
+        """Initialize a Dataset object from
+        a PyDataset object
+
+        :param dataset: The pybind PyDataset object
+                        to use for construction
+        :type dataset: PyDataset
+        :return: The newly constructor Dataset from
+                 the PyDataset
+        :rtype: Dataset
+        """
+
+        if not isinstance(dataset, PyDataset):
+            raise TypeError("Argument provided must be of "\
+                            "type PyDataset.")
+        new_dataset = Dataset(dataset.get_name())
+        new_dataset.set_data(dataset)
+        return new_dataset
+
+    def get_data(self):
+        """Return the PyDataset attribute
+
+        :return: The PyDataset attribute containing
+                 the dataset information
+        :rtype: PyDataset
+        """
+        return self._data
+
+    def set_data(self, dataset):
+        """Set the PyDataset attribute
+
+        :param dataset: The PyDataset object
+        :type dataset: PyDataset
+        """
+
+        if not isinstance(dataset, PyDataset):
+            raise TypeError("The parameter provided must "\
+                            "be of type PyDataset.")
+        self._data = dataset
 
     def add_tensor(self, name, data):
         """Add a named tensor to this dataset
@@ -52,7 +94,7 @@ class Dataset(PyDataset):
         if not isinstance(data, np.ndarray):
             raise TypeError("Argument provided was not a numpy array")
         dtype = Dtypes.tensor_from_numpy(data)
-        super().add_tensor(name, data, dtype)
+        self._data.add_tensor(name, data, dtype)
 
     def get_tensor(self, name):
         """Get a tensor from the Dataset
@@ -62,7 +104,7 @@ class Dataset(PyDataset):
         :return: a numpy array of tensor data
         :rtype: np.array
         """
-        return super().get_tensor(name)
+        return self._data.get_tensor(name)
 
     def add_meta_scalar(self, name, data):
         """Add metadata scalar field (non-string) with value to the DataSet
@@ -84,7 +126,7 @@ class Dataset(PyDataset):
             raise TypeError("Argument provided is not a scalar")
         # We keep dtype, in case data has a non-standard python format
         dtype = Dtypes.metadata_from_numpy(data_as_array)
-        super().add_meta_scalar(name, data_as_array, dtype)
+        self._data.add_meta_scalar(name, data_as_array, dtype)
 
     def add_meta_string(self, name, data):
         """Add metadata string field with value to the DataSet
@@ -99,7 +141,7 @@ class Dataset(PyDataset):
         :param data: The string to add to the field
         :type data: str
         """
-        super().add_meta_string(name, data)
+        self._data.add_meta_string(name, data)
 
     def get_meta_scalars(self, name):
         """Get the metadata scalar field values from the DataSet
@@ -108,7 +150,7 @@ class Dataset(PyDataset):
                      field in the DataSet
         :type name: str
         """
-        return super().get_meta_scalars(name)
+        return self._data.get_meta_scalars(name)
 
     def get_meta_strings(self, name):
         """Get the metadata scalar field values from the DataSet
@@ -117,4 +159,4 @@ class Dataset(PyDataset):
                         field in the DataSet
         :type name: str
         """
-        return super().get_meta_strings(name)
+        return self._data.get_meta_strings(name)

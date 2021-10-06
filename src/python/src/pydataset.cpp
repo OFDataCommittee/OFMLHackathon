@@ -43,7 +43,10 @@ PyDataset::PyDataset(DataSet& dataset) {
 }
 
 PyDataset::~PyDataset() {
-  delete _dataset;
+    if (_dataset != NULL) {
+      delete _dataset;
+      _dataset = NULL;
+    }
 }
 
 DataSet* PyDataset::get() {
@@ -182,6 +185,10 @@ py::array PyDataset::get_meta_scalars(const std::string& name) {
       // TODO throw python exception here
       throw std::runtime_error("Could not infer type");
   }
+}
+
+std::string PyDataset::get_name() {
+    return this->_dataset->name;
 }
 
 py::list PyDataset::get_meta_strings(const std::string& name) {

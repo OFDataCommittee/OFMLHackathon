@@ -609,6 +609,14 @@ bool Client::tensor_exists(const std::string& name)
     return _redis_server->key_exists(get_key);
 }
 
+// Check if the datyaset exists in the database
+bool Client::dataset_exists(const std::string& name)
+{
+    // Same implementation as for tensors; the next line is NOT a type
+    std::string g_key = _build_dataset_ack_key(name, true);
+    return this->_redis_server->key_exists(g_key);
+}
+
 // Check if the model (or the script) exists in the database
 bool Client::model_exists(const std::string& name)
 {
@@ -916,6 +924,10 @@ void Client::_append_dataset_metadata_commands(CommandList& cmd_list,
                                  "does not contain any fields or "\
                                  "tensors.");
     }
+
+    SingleKeyCommand* del_cmd = cmd_list.add_command<SingleKeyCommand>();
+    del_cmd->add_field("DEL");
+    del_cmd->add_field(meta_key, true);
 
     SingleKeyCommand* cmd = cmd_list.add_command<SingleKeyCommand>();
     if (cmd == NULL) {

@@ -626,6 +626,15 @@ bool tensor_exists(void* c_client, const char* name, const size_t name_length)
 
 // Delay until a key exists in the database
 extern "C"
+bool dataset_exists(void* c_client, const char* name, const size_t name_length)
+{
+  Client* s = reinterpret_cast<Client *>(c_client);
+  std::string name_str(name, name_length);
+
+  return s->dataset_exists(name_str);
+}
+
+extern "C"
 bool poll_key(void* c_client,
               const char* key,
               const size_t key_length,

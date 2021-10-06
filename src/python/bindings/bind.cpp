@@ -60,6 +60,7 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("poll_key", &PyClient::poll_key)
         .def("model_exists", &PyClient::model_exists)
         .def("tensor_exists", &PyClient::tensor_exists)
+        .def("dataset_exists", &PyClient::dataset_exists)
         .def("poll_model", &PyClient::poll_model)
         .def("poll_tensor", &PyClient::poll_tensor)
         .def("set_data_source", &PyClient::set_data_source)
@@ -76,6 +77,7 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("add_meta_scalar", &PyDataset::add_meta_scalar)
         .def("add_meta_string", &PyDataset::add_meta_string)
         .def("get_meta_scalars", &PyDataset::get_meta_scalars)
-        .def("get_meta_strings", &PyDataset::get_meta_strings);
+        .def("get_meta_strings", &PyDataset::get_meta_strings)
+        .def("get_name", &PyDataset::get_name);
 }
 

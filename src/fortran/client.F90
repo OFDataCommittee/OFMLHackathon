@@ -74,6 +74,8 @@ type, public :: client_type
   procedure :: tensor_exists
   !> Check the database for the existence of a specific key
   procedure :: key_exists
+  !> Check the database for the existence of a specific dataset
+  procedure :: dataset_exists
   !> Poll the database and return if the model exists
   procedure :: poll_model
   !> Poll the database and return if the tensor exists
@@ -203,6 +205,20 @@ logical function tensor_exists(self, tensor_name)
 
   tensor_exists = tensor_exists_c( self%client_ptr, c_tensor_name, c_tensor_name_length)
 end function tensor_exists
+
+!> Check if the specified dataset exists in the database
+logical function dataset_exists(this, dataset_name)
+  class(client_type), intent(in) :: this
+  character(len=*),   intent(in) :: dataset_name
+
+  character(kind=c_char, len=len_trim(dataset_name)) :: c_dataset_name
+  integer(kind=c_size_t) :: c_dataset_name_length
+
+  c_dataset_name = trim(dataset_name)
+  c_dataset_name_length = len_trim(dataset_name)
+
+  dataset_exists = dataset_exists_c(this%client_ptr, c_dataset_name, c_dataset_name_length)
+end function dataset_exists
 
 !> Repeatedly poll the database until the tensor exists or the number of tries is exceeded
 logical function poll_tensor( self, tensor_name, poll_frequency_ms, num_tries )
