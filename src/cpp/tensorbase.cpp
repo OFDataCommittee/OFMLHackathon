@@ -163,6 +163,8 @@ std::vector<size_t> TensorBase::dims()
 // Retrieve the total number of values in the tensor.
 size_t TensorBase::num_values()
 {
+    if (_dims.size() == 0)
+        throw std::runtime_error("Invalid dimensionality for tensor detected");
     size_t n_values = 1;
     for (size_t i = 0; i < _dims.size(); i++)
         n_values *= _dims[i];
@@ -223,3 +225,5 @@ inline void TensorBase::_check_inputs(const void* src_data,
         }
     }
 }
+
+// EOF

@@ -728,3 +728,5 @@ void use_tensor_ensemble_prefix(void* c_client, bool use_prefix)
 
   s->use_tensor_ensemble_prefix(use_prefix);
 }
+
+// EOF

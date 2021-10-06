@@ -97,7 +97,6 @@ DataSet Client::get_dataset(const std::string& name)
                                    type, MemoryLayout::contiguous);
     }
 
-    // ***WS*** FINDME: Passing objects by value causes unnecessary copies
     return dataset;
 }
 
@@ -221,7 +220,7 @@ void Client::put_tensor(const std::string& key,
         case TensorType::uint8:
             tensor = new Tensor<uint8_t>(p_key, data, dims, type, mem_layout);
             break;
-        default : // FINDME: Need to handle this case better
+        default:
             throw std::runtime_error("Invalid type for put_tensor");
     }
 
@@ -390,7 +389,7 @@ void Client::unpack_tensor(const std::string& key,
                                          reply_dims, reply_type,
                                          MemoryLayout::contiguous);
             break;
-        default : // FINDME: Need to handle this case better
+        default:
             throw std::runtime_error("Invalid type for unpack_tensor");
     }
 

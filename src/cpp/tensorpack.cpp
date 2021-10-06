@@ -40,11 +40,14 @@ TensorPack::TensorPack(const TensorPack& tp)
 // TensorPack copy assignment operator
 TensorPack& TensorPack::operator=(const TensorPack& tp)
 {
-    if (this != &tp) {
-        _all_tensors.clear();
-        _tensorbase_inventory.clear();
-        _copy_tensor_inventory(tp);
-    }
+    // Check for self-assignment
+    if (this == &tp)
+        return *this;
+
+    // Copy fields
+    _all_tensors.clear();
+    _tensorbase_inventory.clear();
+    _copy_tensor_inventory(tp);
     return *this;
 }
 
@@ -95,8 +98,8 @@ void TensorPack::add_tensor(const std::string& name,
             break;
         case TensorType::uint8:
             ptr = new Tensor<uint8_t>(name, data, dims, type, mem_layout);
-             break;
-        default :
+            break;
+        default:
             throw std::runtime_error("Unknown tensor type");
     }
 
@@ -129,7 +132,9 @@ TensorBase* TensorPack::get_tensor(const std::string& name)
 void* TensorPack::get_tensor_data(const std::string& name)
 {
     TensorBase* ptr = _tensorbase_inventory.at(name);
-    return (ptr == NULL ? ptr : ptr->data());
+    if (ptr == NULL)
+        throw std::runtime_error("Tensor not found: " + name);
+    return ptr->data();
 }
 
 // Check whether a tensor with a given name exists in the TensorPack

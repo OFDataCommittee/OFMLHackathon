@@ -38,8 +38,8 @@ PyDataset::PyDataset(const std::string& name) {
   _dataset = dataset;
 }
 
-PyDataset::PyDataset(DataSet& dataset) {
-  _dataset = &dataset;
+PyDataset::PyDataset(DataSet* dataset) {
+  _dataset = dataset;
 }
 
 PyDataset::~PyDataset() {

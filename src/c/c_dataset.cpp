@@ -223,3 +223,5 @@ void get_meta_strings(void* dataset,
   std::string key_str(name, name_length);
   d->get_meta_strings(key_str, *data, *n_strings, *lengths);
 }
+
+// EOF

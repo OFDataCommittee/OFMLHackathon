@@ -564,8 +564,10 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
         try {
             sw::redis::Redis db = _redis_cluster->redis(sv_prefix, false);
             reply = db.command(cmd.cbegin(), cmd.cend());
-            if (reply.has_error() == 0)
+            if (reply.has_error() == 0) {
+                _last_prefix = db_prefix;
                 return reply;
+            }
             break;
         }
         catch (sw::redis::IoError &e) {
