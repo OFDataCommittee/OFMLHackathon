@@ -114,8 +114,7 @@ def test_save_command(use_cluster):
 
     # client init should fail if SSDB not set
     client = Client(address=ssdb, cluster=use_cluster)
-    assert len(addresses) == 3
+
     response = client.save(addresses)
 
-    assert response == "OK"
->>>>>>> Expose SAVE command to Python client
+    assert response == "OK">>>>>>> Expose SAVE command to Python client
