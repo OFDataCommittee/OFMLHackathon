@@ -178,7 +178,7 @@ void TensorPack::_copy_tensor_inventory(const TensorPack& tp)
     for ( ; it != tp.tensor_cend(); it++) {
         TensorBase* ptr = (*it)->clone();
         if (ptr == NULL)
-            continue; // Skip over NULL entries
+            throw std::runtime_error("Invalid tensor found!");
         _all_tensors.push_front(ptr);
         _tensorbase_inventory[ptr->name()] = ptr;
     }
