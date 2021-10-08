@@ -146,7 +146,8 @@ class Client(PyClient):
         if not isinstance(dataset, Dataset):
             raise TypeError("Argument to put_dataset was not of type Dataset")
         try:
-            super().put_dataset(dataset)
+            pybind_dataset = dataset.get_data()
+            super().put_dataset(pybind_dataset)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "put_dataset") from None
 
@@ -161,7 +162,8 @@ class Client(PyClient):
         """
         try:
             dataset = super().get_dataset(key)
-            return dataset
+            python_dataset = Dataset.from_pybind(dataset)
+            return python_dataset
         except RuntimeError as e:
             raise RedisReplyError(str(e), "get_dataset", key=key) from None
 
@@ -442,14 +444,14 @@ class Client(PyClient):
             raise RedisReplyError(str(e), "run_model")
 
     def tensor_exists(self, name):
-        """Check if a tensor or dataset exists in the database
+        """Check if a tensor exists in the database
 
         The key associated to the entity will be
         computed internally based on the current prefix behavior.
 
-        :param key: The tensor or dataset name that will be checked in the database
+        :param key: The tensor name that will be checked in the database
         :type key: str
-        :returns: Returns true if the tensor or dataset exists in the database
+        :returns: Returns true if the tensor exists in the database
         :rtype: bool
         :raises RedisReplyError: if `tensor_exists` fails (i.e. causes an error)
         """
@@ -457,6 +459,23 @@ class Client(PyClient):
             return super().tensor_exists(name)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "tensor_exists")
+
+    def dataset_exists(self, name):
+        """Check if a dataset exists in the database
+
+        The key associated to the entity will be
+        computed internally based on the current prefix behavior.
+
+        :param key: The dataset name that will be checked in the database
+        :type key: str
+        :returns: Returns true if the dataset exists in the database
+        :rtype: bool
+        :raises RedisReplyError: if `dataset_exists` fails (i.e. causes an error)
+        """
+        try:
+            return super().dataset_exists(name)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "dataset_exists")
 
     def model_exists(self, name):
         """Check if a model or script exists in the database

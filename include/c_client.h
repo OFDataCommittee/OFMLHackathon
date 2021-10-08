@@ -543,12 +543,12 @@ bool key_exists(void* c_client,
                 const size_t key_length);
 
 /*!
-*   \brief Check if a tensor or dataset exists in the database
+*   \brief Check if a tensor exists in the database
 *   \param c_client A pointer to c client
 *                   to use for communication
 *   \param name The name of the entity that will be checked 
 *               in the database. The full key associated to
-*               \p name will formed according to the
+*               \p name will be formed according to the
 *               prefixing behavior
 *   \param name_length The length of the name c-string,
 *                      excluding null terminating character
@@ -564,7 +564,7 @@ bool tensor_exists(void* c_client,
 *                   to use for communication
 *   \param name The name of the entity that will be checked 
 *               in the database. The full key associated to
-*               \p name will formed according to the
+*               \p name will be formed according to the
 *               prefixing behavior
 *   \param name_length The length of the name c-string,
 *                      excluding null terminating character
@@ -573,6 +573,22 @@ bool tensor_exists(void* c_client,
 bool model_exists(void* c_client,
                   const char* name,
                   const size_t name_length);
+
+  /*!
+*   \brief Check if a dataset exists in the database
+*   \param c_client A pointer to c client
+*                   to use for communication
+*   \param name The name of the entity that will be checked 
+*               in the database. The full key associated to
+*               \p name will be formed according to the
+*               prefixing behavior
+*   \param name_length The length of the name c-string,
+*                      excluding null terminating character
+*   \returns Returns true if the key exists in the database
+*/
+bool dataset_exists(void* c_client,
+                    const char* name,
+                    const size_t name_length);
 
 /*!
 *   \brief Check if the key exists in the database at a
@@ -606,7 +622,7 @@ bool poll_key(void* c_client,
 *                   to use for communication
 *   \param name The name of the entity that will be checked 
 *               in the database. The full key associated to
-*               \p name will formed according to the
+*               \p name will be formed according to the
 *               prefixing behavior
 *   \param name_length The length of the name c-string,
 *                     excluding null terminating character
@@ -633,7 +649,7 @@ bool poll_model(void* c_client,
 *                   to use for communication
 *   \param name The name of the entity that will be checked 
 *               in the database. The full key associated to
-*               \p name will formed according to the
+*               \p name will be formed according to the
 *               prefixing behavior
 *   \param name_length The length of the name c-string,
 *                     excluding null terminating character

@@ -22,9 +22,13 @@ def get_test_names():
 
 def get_run_command():
     """Get run command for specific platform"""
+    if which("aprun"):
+        return [which("aprun"), "--pes", f"{RANKS}"]
     if which("srun"):
         return [which("srun"), "-n", f"{RANKS}"]
-    return [which("mpirun"),"-np", f"{RANKS}"]
+    if which("mpirun"):
+        return [which("mpirun"), "-np", f"{RANKS}"]
+    raise ModuleNotFoundError("mpirun is not installed (hint: install open-mpi)")
 
 @pytest.mark.parametrize("test", get_test_names())
 def test_unit_cpp_client(test, use_cluster):

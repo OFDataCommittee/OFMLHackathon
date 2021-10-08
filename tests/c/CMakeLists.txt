@@ -14,6 +14,14 @@ include_directories(SYSTEM
     ../../install/include
 )
 
+add_executable(client_test_dataset_exists
+	client_test_dataset_exists.c
+)
+
+target_link_libraries(client_test_dataset_exists
+	${SR_LIB}
+)
+
 add_executable(client_test_put_unpack_1D
 	client_test_put_unpack_1D.c
 )
