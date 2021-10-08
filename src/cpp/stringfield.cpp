@@ -88,5 +88,3 @@ const std::vector<std::string>& StringField::immutable_values()
 {
     return _vals;
 }
-
-// EOF

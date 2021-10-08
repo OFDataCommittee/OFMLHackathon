@@ -64,5 +64,3 @@ parsed_reply_nested_map DBInfoCommand::parse_db_node_info(std::string info)
 
     return info_map;
 }
-
-// EOF

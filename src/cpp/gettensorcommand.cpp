@@ -83,5 +83,3 @@ std::string_view GetTensorCommand::get_data_blob(CommandReply& reply)
 
     return std::string_view(reply[blob_idx].str(), reply[blob_idx].str_len());
 }
-
-// EOF

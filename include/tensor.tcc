@@ -104,8 +104,6 @@ template <class T>
 TensorBase* Tensor<T>::clone()
 {
     Tensor<T>* new_tensor = new Tensor<T>(*this);
-    if (new_tensor == NULL)
-        throw std::bad_alloc();
     (*new_tensor) = *this;
     return new_tensor;
 }

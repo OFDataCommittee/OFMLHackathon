@@ -1066,5 +1066,3 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
     }
     return ptr;
 }
-
-// EOF

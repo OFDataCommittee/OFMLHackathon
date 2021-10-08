@@ -183,5 +183,3 @@ void TensorPack::_copy_tensor_inventory(const TensorPack& tp)
         _tensorbase_inventory[ptr->name()] = ptr;
     }
 }
-
-// EOF

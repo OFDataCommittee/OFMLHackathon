@@ -89,5 +89,3 @@ void RedisServer::_check_ssdb_string(const std::string& env_str) {
         }
     }
 }
-
-// EOF

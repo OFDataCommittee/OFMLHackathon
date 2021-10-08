@@ -41,10 +41,5 @@ CommandReply SingleKeyCommand::run_me(RedisServer* server)
 Command* SingleKeyCommand::clone()
 {
     SingleKeyCommand* new_cmd = new SingleKeyCommand(*this);
-    if (new_cmd == NULL) {
-        throw std::bad_alloc();
-    }
     return new_cmd;
 }
-
-// EOF

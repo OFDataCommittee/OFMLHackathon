@@ -101,5 +101,3 @@ CommandList::const_iterator CommandList::cend()
 {
     return _commands.cend();
 }
-
-// EOF

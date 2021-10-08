@@ -41,10 +41,5 @@ CommandReply CompoundCommand::run_me(RedisServer* server)
 Command* CompoundCommand::clone()
 {
     CompoundCommand* new_cmd = new CompoundCommand(*this);
-    if (new_cmd == NULL) {
-        throw std::bad_alloc();
-    }
     return new_cmd;
 }
-
-// EOF

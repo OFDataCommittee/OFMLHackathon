@@ -49,5 +49,3 @@ uint16_t NonKeyedCommand::get_port()
 {
     return _port;
 }
-
-// EOF

@@ -987,5 +987,3 @@ DBNode* RedisCluster::_get_model_script_db(const std::string& name,
     }
     return db;
 }
-
-// EOF

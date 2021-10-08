@@ -48,5 +48,3 @@ MetaDataType MetadataField::type()
 {
     return _type;
 }
-
-// EOF

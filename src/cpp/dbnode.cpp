@@ -52,5 +52,3 @@ bool DBNode::operator<(const DBNode& db_node) const
 {
     return lower_hash_slot < db_node.lower_hash_slot;
 }
-
-// EOF

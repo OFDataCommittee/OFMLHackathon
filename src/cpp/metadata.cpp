@@ -380,16 +380,14 @@ void MetaData::_create_scalar_field(const std::string& field_name,
                                     const MetaDataType type)
 {
     MetadataField* mdf = new ScalarField<T>(field_name, type);
-    if (mdf != NULL)
-        _field_map[field_name] = mdf;
+    _field_map[field_name] = mdf;
 }
 
 // Create a new string metadata field and add it to the field map
 void MetaData::_create_string_field(const std::string& field_name)
 {
     MetadataField* mdf = new StringField(field_name);
-    if (mdf != NULL)
-        _field_map[field_name] = mdf;
+    _field_map[field_name] = mdf;
 }
 
 // Allocate new memory to hold metadata field values and return these values
@@ -564,5 +562,3 @@ void MetaData::_delete_fields()
     }
     _field_map.clear();
 }
-
-// EOF

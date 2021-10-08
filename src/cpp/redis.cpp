@@ -467,6 +467,3 @@ inline void Redis::_connect(std::string address_port)
     // Should never get here
     throw std::runtime_error("End of _connect reached unexpectedly");
 }
-
-// EOF
-

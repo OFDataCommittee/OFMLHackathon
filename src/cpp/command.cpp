@@ -61,8 +61,6 @@ Command& Command::operator=(const Command& cmd)
         // allocate memory and copy a local field
         size_t field_size = cmd._fields[local_it->second].size();
         char* f = new char[field_size];
-        if (f == NULL)
-            throw std::bad_alloc();
         std::memcpy(f, local_it->first, field_size);
         _local_fields.push_back(
             std::pair<char*, size_t>(f, local_it->second));
@@ -97,8 +95,6 @@ void Command::add_field(std::string field, bool is_key)
 
     size_t field_size = field.size();
     char* f = (char*)new unsigned char[field_size + 1];
-    if (f == NULL)
-        throw std::bad_alloc();
     field.copy(f, field_size, 0);
     f[field_size] = '\0';
     _local_fields.push_back({f, _fields.size()});
@@ -122,8 +118,6 @@ void Command::add_field(const char* field, bool is_key)
 
     size_t field_size = std::strlen(field);
     char* f = new char[field_size];
-    if (f == NULL)
-        throw std::bad_alloc();
     std::memcpy(f, field, field_size);
     _local_fields.push_back({f, _fields.size()});
     _fields.push_back(std::string_view(f, field_size));
@@ -252,6 +246,3 @@ void Command::make_empty()
     _cmd_keys.clear();
     _fields.clear();
 }
-
-// EOF
-

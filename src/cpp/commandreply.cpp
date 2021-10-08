@@ -264,5 +264,3 @@ void CommandReply::print_reply_structure(std::string index_tracker)
       std::cout << index_tracker << " value type not supported." << std::endl;
   }
 }
-
-// EOF

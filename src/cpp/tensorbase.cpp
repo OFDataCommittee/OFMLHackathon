@@ -225,5 +225,3 @@ inline void TensorBase::_check_inputs(const void* src_data,
         }
     }
 }
-
-// EOF
