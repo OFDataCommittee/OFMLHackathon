@@ -680,10 +680,7 @@ parsed_reply_nested_map Client::get_db_node_info(std::string address)
     DBInfoCommand cmd;
     std::string host = cmd.parse_host(address);
     uint64_t port = cmd.parse_port(address);
-    if (host.empty() or port == 0){
-        throw std::runtime_error(std::string(address) +
-                                 "is not a valid database node address.");
-    }
+
     cmd.set_exec_address_port(host, port);
 
     cmd.add_field("INFO");
@@ -701,10 +698,7 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
     ClusterInfoCommand cmd;
     std::string host = cmd.parse_host(address);
     uint64_t port = cmd.parse_port(address);
-    if (host.empty() or port == 0){
-        throw std::runtime_error(std::string(address) +
-                                 "is not a valid database node address.");
-    }
+
     cmd.set_exec_address_port(host, port);
 
     cmd.add_field("CLUSTER");
@@ -742,10 +736,7 @@ std::unordered_map<std::string,std::string> Client::config_get(std::string expre
     AddressAtCommand cmd;
     std::string host = cmd.parse_host(address);
     uint64_t port = cmd.parse_port(address);
-    if (host.empty() or port == 0){
-        throw std::runtime_error(std::string(address) +
-                                 "is not a valid database node address.");
-    }
+
     cmd.set_exec_address_port(host, port);
 
     cmd.add_field("CONFIG");
@@ -767,15 +758,12 @@ std::unordered_map<std::string,std::string> Client::config_get(std::string expre
 }
 
 // Reconfigure the server
-std::string Client::config_set(std::string config_param, std::string value, std::string address)
+void Client::config_set(std::string config_param, std::string value, std::string address)
 {
     AddressAtCommand cmd;
     std::string host = cmd.parse_host(address);
     uint64_t port = cmd.parse_port(address);
-    if (host.empty() or port == 0){
-        throw std::runtime_error(std::string(address) +
-                                 "is not a valid database node address.");
-    }
+
     cmd.set_exec_address_port(host, port);
 
     cmd.add_field("CONFIG");
@@ -786,9 +774,6 @@ std::string Client::config_set(std::string config_param, std::string value, std:
     CommandReply reply = _run(cmd);
     if (reply.has_error() > 0)
         throw std::runtime_error("CONFIG SET command failed");
-
-    return std::string(reply.status_str(), reply.status_str_len());
-
 }
 
 void Client::_set_prefixes_from_env()
