@@ -638,11 +638,11 @@ py::dict PyClient::config_get(std::string expression, std::string address)
 }
 
 // Reconfigure the server
-std::string PyClient::config_set(std::string config_param, std::string value, std::string address)
+void PyClient::config_set(std::string config_param, std::string value, std::string address)
 {
     std::string result;
     try {
-        result = _client->config_set(config_param, value, address);
+        _client->config_set(config_param, value, address);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -652,7 +652,7 @@ std::string PyClient::config_set(std::string config_param, std::string value, st
                                  "was encountered during client "\
                                  "config_set execution.");
     }
-    return result;
 }
 
 // EOF
+

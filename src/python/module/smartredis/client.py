@@ -526,7 +526,7 @@ class Client(PyClient):
                           polled indefinitely.
         :type num_tries: int
         :returns: Returns true if the key is found within the
-                 specified number of tries, otherwise false.
+                  specified number of tries, otherwise false.
         :rtype: bool
         :raises RedisReplyError: if key poll fails
         """
@@ -554,7 +554,7 @@ class Client(PyClient):
                           polled indefinitely.
         :type num_tries: int
         :returns: Returns true if the key is found within the
-                 specified number of tries, otherwise false.
+                  specified number of tries, otherwise false.
         :rtype: bool
         :raises RedisReplyError: if `poll_tensor` fails
         """
@@ -582,7 +582,7 @@ class Client(PyClient):
                           polled indefinitely.
         :type num_tries: int
         :returns: Returns true if the key is found within the
-                 specified number of tries, otherwise false.
+                  specified number of tries, otherwise false.
         :rtype: bool
         :raises RedisReplyError: if `poll_model` fails
         """
@@ -597,7 +597,6 @@ class Client(PyClient):
         :param source_id: The prefix for retrieval commands
         :type source_id: str
         :raises RedisReplyError: if set data
-
         """
         try:
             return super().set_data_source(source_id)
@@ -617,7 +616,6 @@ class Client(PyClient):
                            on models and scripts will use a prefix, if
                            available.
         :type use_prefix: bool
-
         """
         try:
             return super().use_model_ensemble_prefix(use_prefix)
@@ -637,7 +635,6 @@ class Client(PyClient):
                            on tensors and datasets will use a prefix, if
                            available.
         :type use_prefix: bool
-
         """
         try:
             return super().use_tensor_ensemble_prefix(use_prefix)
@@ -653,16 +650,15 @@ class Client(PyClient):
                   list corresponding to an address reply
         :rtype: list[dict]
         :raises RedisReplyError: if there is an error
-                  in command execution or the address
-                  is not reachable by the client.
-                  In the case of using a cluster of database nodes,
-                  it is best practice to bind each node in the cluster
-                  to a specific address to avoid inconsistencies in
-                  addresses retrieved with the CLUSTER SLOTS command.
-                  Inconsistencies in node addresses across
-                  CLUSTER SLOTS commands will lead to RedisReplyError
-                  being thrown.
-
+                in command execution or the address
+                is not reachable by the client.
+                In the case of using a cluster of database nodes,
+                it is best practice to bind each node in the cluster
+                to a specific address to avoid inconsistencies in
+                addresses retrieved with the CLUSTER SLOTS command.
+                Inconsistencies in node addresses across
+                CLUSTER SLOTS commands will lead to RedisReplyError
+                being thrown.
         """
         try:
             return super().get_db_node_info(addresses)
@@ -680,17 +676,16 @@ class Client(PyClient):
                   list corresponding to an address reply
         :rtype: list[dict]
         :raises RedisReplyError: if there is an error in
-                  in command execution or the address
-                  is not reachable by the client or if on a
-                  non-cluster environment.
-                  In the case of using a cluster of database nodes,
-                  it is best practice to bind each node in the cluster
-                  to a specific adddress to avoid inconsistencies in
-                  addresses retreived with the CLUSTER SLOTS command.
-                  Inconsistencies in node addresses across
-                  CLUSTER SLOTS comands will lead to RedisReplyError
-                  being thrown.
-
+                in command execution or the address
+                is not reachable by the client or if on a
+                non-cluster environment.
+                In the case of using a cluster of database nodes,
+                it is best practice to bind each node in the cluster
+                to a specific adddress to avoid inconsistencies in
+                addresses retreived with the CLUSTER SLOTS command.
+                Inconsistencies in node addresses across
+                CLUSTER SLOTS comands will lead to RedisReplyError
+                being thrown.
         """
         try:
             return super().get_db_cluster_info(addresses)
@@ -705,16 +700,15 @@ class Client(PyClient):
         :returns: "OK" if command is successfully executed
         :rtype: str
         :raises RedisReplyError: if there is an error in
-                  in command execution or the address
-                  is not reachable by the client.
-                  In the case of using a cluster of database nodes,
-                  it is best practice to bind each node in the cluster
-                  to a specific adddress to avoid inconsistencies in
-                  addresses retreived with the CLUSTER SLOTS command.
-                  Inconsistencies in node addresses across
-                  CLUSTER SLOTS comands will lead to RedisReplyError
-                  being thrown.
-
+                in command execution or the address
+                is not reachable by the client.
+                In the case of using a cluster of database nodes,
+                it is best practice to bind each node in the cluster
+                to a specific adddress to avoid inconsistencies in
+                addresses retreived with the CLUSTER SLOTS command.
+                Inconsistencies in node addresses across
+                CLUSTER SLOTS comands will lead to RedisReplyError
+                being thrown.
         """
         try:
             return super().flush_db(addresses)
@@ -733,19 +727,19 @@ class Client(PyClient):
         :param address: The address of the database node
         :type address: str
         :returns: A dictionary that maps configuration parameters to
-                  their values
+                  their values. If the provided expression does not
+                  exist, then an empty dictionary is returned.
         :rtype: dict
         :raises RedisReplyError: if there is an error in
-                  in command execution or the address
-                  is not reachable by the client.
-                  In the case of using a cluster of database nodes,
-                  it is best practice to bind each node in the cluster
-                  to a specific adddress to avoid inconsistencies in
-                  addresses retreived with the CLUSTER SLOTS command.
-                  Inconsistencies in node addresses across
-                  CLUSTER SLOTS comands will lead to RedisReplyError
-                  being thrown.
-
+                in command execution or the address
+                is not reachable by the client.
+                In the case of using a cluster of database nodes,
+                it is best practice to bind each node in the cluster
+                to a specific adddress to avoid inconsistencies in
+                addresses retreived with the CLUSTER SLOTS command.
+                Inconsistencies in node addresses across
+                CLUSTER SLOTS comands will lead to RedisReplyError
+                being thrown.
         """
         try:
             return super().config_get(expression, address)
@@ -754,10 +748,10 @@ class Client(PyClient):
 
     def config_set(self, config_param, value, address):
         """Reconfigure the server. It can change both trivial
-           parameters or switch from one to another persistence option.
-           All the configuration parameters set using this command are
-           immediately loaded by Redis and will take effect starting with
-            the next command executed.
+        parameters or switch from one to another persistence option.
+        All the configuration parameters set using this command are
+        immediately loaded by Redis and will take effect starting with
+        the next command executed.
         If the address does not correspond to a cluster node,
         an empty dictionary is returned.
 
@@ -767,22 +761,19 @@ class Client(PyClient):
         :type value: str
         :param address: The address of the database node
         :type address: str
-        :returns: "OK" if command is successfully executed
-        :rtype: str
         :raises RedisReplyError: if there is an error in
-                  in command execution or the address
-                  is not reachable by the client.
-                  In the case of using a cluster of database nodes,
-                  it is best practice to bind each node in the cluster
-                  to a specific adddress to avoid inconsistencies in
-                  addresses retreived with the CLUSTER SLOTS command.
-                  Inconsistencies in node addresses across
-                  CLUSTER SLOTS comands will lead to RedisReplyError
-                  being thrown.
-
+                in command execution or the address
+                is not reachable by the client or if the config_param
+                is unsupported. In the case of using a cluster of
+                database nodes, it is best practice to bind each node
+                in the cluster to a specific adddress to avoid inconsistencies
+                in addresses retreived with the CLUSTER SLOTS command.
+                Inconsistencies in node addresses across
+                CLUSTER SLOTS comands will lead to RedisReplyError
+                being thrown.
         """
         try:
-            return super().config_set(config_param, value, address)
+            super().config_set(config_param, value, address)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "config_set")
 

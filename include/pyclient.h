@@ -438,7 +438,8 @@ class PyClient
 
         /*!
         *   \brief Returns information about the given database nodes
-        *   \param addresses The addresses of the database nodes
+        *   \param addresses The addresses of the database nodes. Each address is
+        *                    formatted as address:port e.g. 127.0.0.1:6379
         *   \returns A list of parsed_map objects containing all the
         *            information about the given database nodes
 	    *   \throws std::runtime_error if the address is not addressable by this
@@ -455,7 +456,8 @@ class PyClient
         /*!
         *   \brief \brief Returns the CLUSTER INFO command reply addressed to one
         *                 or multiple cluster nodes.
-        *   \param addresses The addresses of the database nodes
+        *   \param addresses The addresses of the database nodes. Each address is
+        *                    formatted as address:port e.g. 127.0.0.1:6379
         *   \returns A list of parsed_map objects containing all the cluster
         *            information about the given database nodes
 	    *   \throws std::runtime_error if the address is not addressable by this
@@ -471,7 +473,8 @@ class PyClient
 
         /*!
         *   \brief Delete all the keys of the given database
-        *   \param addresses The addresses of the database nodes
+        *   \param addresses The addresses of the database nodes. Each address is
+        *                    formatted as address:port e.g. 127.0.0.1:6379
         *   \returns "OK" if keys are successfully flushed
         */
         std::string flush_db(std::vector<std::string> addresses);
@@ -483,6 +486,8 @@ class PyClient
         *                      configuration parameters)
         *   \param address The address of the database node execute on
         *   \returns A dictionary that maps configuration parameters to their values
+        *            If the provided expression does not exist, then an empty
+        *            dictionary is returned.
         *   \throws std::runtime_error if the address is not addressable by this
         *           client
         */
@@ -497,11 +502,11 @@ class PyClient
         *   \param config_param A configuration parameter to set
         *   \param value The value to assign to the configuration parameter
         *   \param address The address of the database node execute on
-        *   \returns "OK" if the configuration change is valid
         *   \throws std::runtime_error if the address is not addressable by this
-        *           client or if command fails to execute
+        *           client or if command fails to execute or if the config_param
+        *           is unsupported.
         */
-        std::string config_set(std::string config_param, std::string value, std::string address);
+        void config_set(std::string config_param, std::string value, std::string address);
 
     private:
 
