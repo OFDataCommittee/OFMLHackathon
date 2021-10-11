@@ -33,7 +33,7 @@
 #define SMARTREDIS_CTENSORTYPE_H
 
 typedef enum {
-	c_invalid_tensor = 0,
+    c_invalid_tensor = 0,
     c_dbl     = 1,
     c_flt     = 2,
     c_int8    = 3,

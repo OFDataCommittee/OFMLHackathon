@@ -74,7 +74,7 @@ Tensor<T>& Tensor<T>::operator=(const Tensor<T>& tensor)
     // Deep copy tensor data
     TensorBase::operator=(tensor);
     _set_tensor_data(tensor._data, tensor._dims,
-                            MemoryLayout::contiguous);
+                     MemoryLayout::contiguous);
     _c_mem_views = tensor._c_mem_views;
     _f_mem_views = tensor._f_mem_views;
 
@@ -141,15 +141,14 @@ void* Tensor<T>::data_view(const MemoryLayout mem_layout)
             ptr = _data;
             break;
         case MemoryLayout::fortran_contiguous:
-            ptr = _f_mem_views.allocate_bytes(
-                                     _n_data_bytes());
+            ptr = _f_mem_views.allocate_bytes(_n_data_bytes());
             _c_to_f_memcpy((T*)ptr, (T*)_data, _dims);
             break;
         case MemoryLayout::nested:
             _build_nested_memory(&ptr,
-                                       _dims.data(),
-                                       _dims.size(),
-                                       (T*)_data);
+                                 _dims.data(),
+                                 _dims.size(),
+                                 (T*)_data);
             break;
         default:
             throw std::runtime_error(
@@ -185,7 +184,6 @@ void Tensor<T>::fill_mem_space(void* data,
     }
 
     // Make sure there is space for all the data
-    // ***WS*** TBD: we should be checking each dimension here as well
     if (n_values != num_values()) {
         throw std::runtime_error("The provided dimensions do "\
                                   "not match the size of the "\
@@ -227,7 +225,7 @@ void* Tensor<T>::_copy_nested_to_contiguous(void* src_data,
         for (size_t i = 0; i < dims[0]; i++) {
           dest_data =
             _copy_nested_to_contiguous(*current, &dims[1],
-                                             n_dims-1, dest_data);
+                                       n_dims-1, dest_data);
           current++;
         }
     }

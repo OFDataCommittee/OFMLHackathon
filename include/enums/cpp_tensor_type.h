@@ -51,73 +51,56 @@ enum class TensorType{
 
 //! Helper method to convert between CTensorType and TensorType
 inline TensorType convert_tensor_type(CTensorType type) {
-    TensorType t;
-    switch (type) {
+    switch (type) {             
+        case CTensorType::c_invalid_tensor:
+            return TensorType::undefined;
         case CTensorType::c_dbl:
-            t = TensorType::dbl;
-            break;
+            return TensorType::dbl;
         case CTensorType::c_flt:
-            t = TensorType::flt;
-            break;
+            return TensorType::flt;
         case CTensorType::c_int8:
-            t = TensorType::int8;
-            break;
+            return TensorType::int8;
         case CTensorType::c_int16:
-            t = TensorType::int16;
-            break;
+            return TensorType::int16;
         case CTensorType::c_int32:
-            t = TensorType::int32;
-            break;
+            return TensorType::int32;
         case CTensorType::c_int64:
-            t = TensorType::int64;
-            break;
+            return TensorType::int64;
         case CTensorType::c_uint8:
-            t = TensorType::uint8;
-            break;
+            return TensorType::uint8;
         case CTensorType::c_uint16:
-            t = TensorType::uint16;
-            break;
+            return TensorType::uint16;
         default:
             throw std::runtime_error("Error converting CTensorType "\
                                      "to TensorType.");
     }
-    return t;
 }
 
 //! Helper method to convert between CTensorType and TensorType
 inline CTensorType convert_tensor_type(TensorType type) {
-    CTensorType t;
     switch (type) {
+        case TensorType::undefined:
+            return CTensorType::c_invalid_tensor;
         case TensorType::dbl:
-            t = CTensorType::c_dbl;
-            break;
+            return CTensorType::c_dbl;
         case TensorType::flt:
-            t = CTensorType::c_flt;
-            break;
+            return CTensorType::c_flt;
         case TensorType::int8:
-            t = CTensorType::c_int8;
-            break;
+            return CTensorType::c_int8;
         case TensorType::int16:
-            t = CTensorType::c_int16;
-            break;
+            return CTensorType::c_int16;
         case TensorType::int32:
-            t = CTensorType::c_int32;
-            break;
+            return CTensorType::c_int32;
         case TensorType::int64:
-            t = CTensorType::c_int64;
-            break;
+            return CTensorType::c_int64;
         case TensorType::uint8:
-            t = CTensorType::c_uint8;
-            break;
+            return CTensorType::c_uint8;
         case TensorType::uint16:
-            t = CTensorType::c_uint16;
-            break;
+            return CTensorType::c_uint16;
         default :
             throw std::runtime_error("Error converting TensorType "\
                                      "to CTensorType.");
     }
-    return t;
-
 }
 
 } //namespace SmartRedis
