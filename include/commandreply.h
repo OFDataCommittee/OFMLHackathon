@@ -78,15 +78,29 @@ class CommandReply {
 
         /*!
         *   \brief CommandReply copy constructor
-        *          not available
+        *   \param reply The CommandReply to copy
         */
-        CommandReply(const CommandReply& reply) = delete;
+        CommandReply(const CommandReply& reply);
 
         /*!
         *   \brief CommandReply copy assignment operator
-        *          not available
+        *   \param reply The CommandReply to copy
         */
-        CommandReply& operator=(const CommandReply& reply) = delete;
+        CommandReply& operator=(const CommandReply& reply);
+
+        /*!
+        *   \brief CommandReply copy assignment operator with
+        *          redisReply as input
+        *   \param reply The redisReply to copy
+        */
+        CommandReply& operator=(const redisReply* reply);
+
+        /*!
+        *   \brief CommandReply copy constructor with
+        *          redisReply as input
+        *   \param reply The redisReply to copy
+        */
+        CommandReply(const redisReply* reply);
 
         /*!
         *   \brief Move constructor with RedisReplyUPtr
@@ -212,10 +226,18 @@ class CommandReply {
     private:
 
         /*!
-        *   \brief CommandReply constructor from a redisReply.
+        *   \brief Helper function for getting a CommandReply
+        *          constructed from shallow copying a redisReply
         *   \param reply redisReply for construction
         */
-        CommandReply(redisReply* reply);
+        CommandReply shallow_clone(redisReply* reply);
+
+        /*!
+        *   \brief Helper function for doing a deep copy of a
+        *          redisReply
+        *   \param reply redisReply to copy
+        */
+        redisReply* deep_clone_reply(const redisReply* reply);
 
         /*!
         *   \brief RedisReplyUPtr that can hold redis reply data

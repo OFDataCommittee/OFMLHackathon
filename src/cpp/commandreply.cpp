@@ -30,34 +30,61 @@
 
 using namespace SmartRedis;
 
-// CommandReply constructor from a redisReply.
-CommandReply::CommandReply(redisReply* reply)
+CommandReply::CommandReply(const CommandReply& reply)
 {
-    _uptr_reply = NULL;
-    _reply = reply;
+    if (this != &reply) {
+        _uptr_reply = RedisReplyUPtr(deep_clone_reply(reply._reply), sw::redis::ReplyDeleter());
+        _reply = _uptr_reply.get();
+    }
+}
+
+CommandReply::CommandReply(const redisReply* reply)
+{
+    _uptr_reply = RedisReplyUPtr(deep_clone_reply(reply),
+                                 sw::redis::ReplyDeleter());
+    _reply = _uptr_reply.get();
 }
 
 // Move constructor with RedisReplyUPtr as input
 CommandReply::CommandReply(RedisReplyUPtr&& reply)
 {
-  _uptr_reply = std::move(reply);
-  _reply = _uptr_reply.get();
+    _uptr_reply = std::move(reply);
+    _reply = _uptr_reply.get();
 }
 
 // Move constructor with redisReply as input
 CommandReply::CommandReply(redisReply*&& reply)
 {
-  _uptr_reply = 0;
-  _reply = std::move(reply);
+    _uptr_reply = NULL;
+    _reply = std::move(reply);
 }
 
 // Move constructor with CommandReply as input
 CommandReply::CommandReply(CommandReply&& reply)
 {
-  if (this != &reply) {
-    _uptr_reply = std::move(reply._uptr_reply);
+    if (this != &reply) {
+        _uptr_reply = std::move(reply._uptr_reply);
+        _reply = _uptr_reply.get();
+    }
+}
+
+CommandReply& CommandReply::operator=(const CommandReply& reply)
+{
+    if (this != &reply) {
+        _uptr_reply.reset(NULL);
+        _uptr_reply = RedisReplyUPtr(deep_clone_reply(reply._reply), sw::redis::ReplyDeleter());
+        _reply = _uptr_reply.get();
+    }
+    return *this;
+}
+
+CommandReply& CommandReply::operator=(const redisReply* reply)
+{
+    _uptr_reply.reset(NULL);
+    _uptr_reply = RedisReplyUPtr(deep_clone_reply(reply),
+                                 sw::redis::ReplyDeleter());
     _reply = _uptr_reply.get();
-  }
+    return *this;
 }
 
 // Move assignment operator with RedisReplyUPtr as input
@@ -71,7 +98,7 @@ CommandReply& CommandReply::operator=(RedisReplyUPtr&& reply)
 // Move assignment operator with redisReply as input.
 CommandReply& CommandReply::operator=(redisReply*&& reply)
 {
-    _uptr_reply = 0;
+    _uptr_reply = NULL;
     _reply = std::move(reply);
     return *this;
 }
@@ -79,83 +106,85 @@ CommandReply& CommandReply::operator=(redisReply*&& reply)
 // Move assignment operator with CommandReply as input.
 CommandReply& CommandReply::operator=(CommandReply&& reply)
 {
-  if (this != &reply) {
-    _uptr_reply = std::move(reply._uptr_reply);
-    _reply = _uptr_reply.get();
-  }
-  return *this;
+    if (this !=& reply) {
+        _uptr_reply = std::move(reply._uptr_reply);
+        _reply = _uptr_reply.get();
+    }
+    return *this;
+}
+
+CommandReply CommandReply::shallow_clone(redisReply* reply)
+{
+    CommandReply r;
+    r._uptr_reply = NULL;
+    r._reply = reply;
+    return r;
 }
 
 // Get the string field of the reply
 char* CommandReply::str()
 {
-  if (_reply->type != REDIS_REPLY_STRING) {
-    throw std::runtime_error("A pointer to the reply str "\
-                             "cannot be returned because the "\
-                             "the reply type is " +
-                             redis_reply_type());
-  }
-  return _reply->str;
+    if (_reply->type != REDIS_REPLY_STRING)
+        throw std::runtime_error("A pointer to the reply str "\
+                                 "cannot be returned because "\
+                                 "the reply type is " +
+                                 redis_reply_type());
+    return _reply->str;
 }
 
 // Get the integer field of the reply
 long long CommandReply::integer()
 {
-  if (_reply->type != REDIS_REPLY_INTEGER) {
-    throw std::runtime_error("The reply integer "\
-                             "cannot be returned because the "\
-                             "the reply type is " +
-                             redis_reply_type());
-  }
-  return _reply->integer;
+    if (_reply->type != REDIS_REPLY_INTEGER)
+        throw std::runtime_error("The reply integer "\
+                                 "cannot be returned because "\
+                                 "the reply type is " +
+                                 redis_reply_type());
+    return _reply->integer;
 }
 
 // Get the double field of the reply
 double CommandReply::dbl()
 {
-  if (_reply->type!=REDIS_REPLY_DOUBLE) {
-    throw std::runtime_error("The reply double "\
-                             "cannot be returned because the "\
-                             "the reply type is " +
-                             redis_reply_type());
-  }
-  return _reply->dval;
+    if (_reply->type != REDIS_REPLY_DOUBLE)
+        throw std::runtime_error("The reply double "\
+                                 "cannot be returned because "\
+                                 "the reply type is " +
+                                 redis_reply_type());
+    return _reply->dval;
 }
 
 // Index operator for CommandReply that will return the indexed element of
 // the CommandReply if there are multiple elements
 CommandReply CommandReply::operator[](int index)
 {
-  if (_reply->type!=REDIS_REPLY_ARRAY) {
-    throw std::runtime_error("The reply cannot be indexed "\
-                             "because the reply type is " +
-                             redis_reply_type());
-  }
-  return CommandReply(_reply->element[index]);
+    if (_reply->type != REDIS_REPLY_ARRAY)
+        throw std::runtime_error("The reply cannot be indexed "\
+                                 "because the reply type is " +
+                                 redis_reply_type());
+    return shallow_clone(_reply->element[index]);
 }
 
 // Get the length of the CommandReply string field
 size_t CommandReply::str_len()
 {
-  if (_reply->type!=REDIS_REPLY_STRING) {
-    throw std::runtime_error("The length of the reply str "\
-                             "cannot be returned because the "\
-                             "the reply type is " +
-                             redis_reply_type());
-  }
-  return _reply->len;
+    if (_reply->type != REDIS_REPLY_STRING)
+        throw std::runtime_error("The length of the reply str "\
+                                 "cannot be returned because "\
+                                 "the reply type is " +
+                                 redis_reply_type());
+    return _reply->len;
 }
 
 // Get the number of elements in the CommandReply
 size_t CommandReply::n_elements()
 {
-  if (_reply->type!=REDIS_REPLY_ARRAY) {
-    throw std::runtime_error("The number of elements "\
-                             "cannot be returned because the "\
-                             "the reply type is " +
-                             redis_reply_type());
-  }
-  return _reply->elements;
+    if (_reply->type != REDIS_REPLY_ARRAY)
+        throw std::runtime_error("The number of elements "\
+                                 "cannot be returned because "\
+                                 "the reply type is " +
+                                 redis_reply_type());
+    return _reply->elements;
 }
 
 // Return the number of errors in the CommandReply and any nested CommandReply
@@ -166,8 +195,8 @@ int CommandReply::has_error()
         num_errors++;
     else if (_reply->type == REDIS_REPLY_ARRAY) {
         for (size_t i = 0; i < _reply->elements; i++) {
-          CommandReply tmp = (*this)[i];
-          num_errors += tmp.has_error();
+            CommandReply tmp = (*this)[i];
+            num_errors += tmp.has_error();
         }
     }
     return num_errors;
@@ -177,90 +206,139 @@ int CommandReply::has_error()
 void CommandReply::print_reply_error()
 {
     if (_reply->type == REDIS_REPLY_ERROR) {
-        std::string_view error(_reply->str, _reply->len);
-        std::cout << error << std::endl;
+        std::string_view error(_reply->str,
+                               _reply->len);
+        std::cout<<error<<std::endl;
     }
     else if (_reply->type == REDIS_REPLY_ARRAY) {
         for (size_t i = 0; i < _reply->elements; i++) {
-          CommandReply tmp = (*this)[i];
-          tmp.print_reply_error();
+            CommandReply tmp = (*this)[i];
+            tmp.print_reply_error();
         }
     }
-    return;
 }
 
 // Return the type of the CommandReply in the form of a string.
 std::string CommandReply::redis_reply_type()
 {
-  switch (_reply->type) {
-    case REDIS_REPLY_STRING:
-      return "REDIS_REPLY_STRING";
-    case REDIS_REPLY_ARRAY:
-      return "REDIS_REPLY_ARRAY";
-    case REDIS_REPLY_INTEGER:
-      return "REDIS_REPLY_INTEGER";
-    case REDIS_REPLY_NIL:
-      return "REDIS_REPLY_NIL";
-    case REDIS_REPLY_STATUS:
-      return "REDIS_REPLY_STATUS";
-    case REDIS_REPLY_ERROR:
-      return "REDIS_REPLY_ERROR";
-    case REDIS_REPLY_DOUBLE:
-      return "REDIS_REPLY_DOUBLE";
-    case REDIS_REPLY_BOOL:
-      return "REDIS_REPLY_BOOL";
-    case REDIS_REPLY_MAP:
-      return "REDIS_REPLY_MAP";
-    case REDIS_REPLY_SET:
-      return "REDIS_REPLY_SET";
-    case REDIS_REPLY_ATTR:
-      return "REDIS_REPLY_ATTR";
-    case REDIS_REPLY_PUSH:
-      return "REDIS_REPLY_PUSH";
-    case REDIS_REPLY_BIGNUM:
-      return "REDIS_REPLY_BIGNUM";
-    case REDIS_REPLY_VERB:
-      return "REDIS_REPLY_VERB";
-    default:
-      throw std::runtime_error("Invalid Redis reply type");
+    switch (_reply->type) {
+        case REDIS_REPLY_STRING:
+            return "REDIS_REPLY_STRING";
+        case REDIS_REPLY_ARRAY:
+            return "REDIS_REPLY_ARRAY";
+        case REDIS_REPLY_INTEGER:
+            return "REDIS_REPLY_INTEGER";
+        case REDIS_REPLY_NIL:
+            return "REDIS_REPLY_NIL";
+        case REDIS_REPLY_STATUS:
+            return "REDIS_REPLY_STATUS";
+        case REDIS_REPLY_ERROR:
+            return "REDIS_REPLY_ERROR";
+        case REDIS_REPLY_DOUBLE:
+            return "REDIS_REPLY_DOUBLE";
+        case REDIS_REPLY_BOOL:
+            return "REDIS_REPLY_BOOL";
+        case REDIS_REPLY_MAP:
+            return "REDIS_REPLY_MAP";
+        case REDIS_REPLY_SET:
+            return "REDIS_REPLY_SET";
+        case REDIS_REPLY_ATTR:
+            return "REDIS_REPLY_ATTR";
+        case REDIS_REPLY_PUSH:
+            return "REDIS_REPLY_PUSH";
+        case REDIS_REPLY_BIGNUM:
+            return "REDIS_REPLY_BIGNUM";
+        case REDIS_REPLY_VERB:
+            return "REDIS_REPLY_VERB";
+        default:
+            throw std::runtime_error("Invalid Redis reply type");
   }
 }
 
 // Print the reply structure of the CommandReply
 void CommandReply::print_reply_structure(std::string index_tracker)
 {
-  // TODO these recursive functions can't use 'this' unless
-  // we have a constructor that takes redisReply*
-  std::cout << index_tracker + " type: " << redis_reply_type() << std::endl;
-  switch (_reply->type) {
-    case REDIS_REPLY_STRING:
-      std::cout << index_tracker + " value: "
-               << std::string(str(), str_len()) <<std::endl;
-      break;
-    case REDIS_REPLY_ARRAY:
-      for (size_t i = 0; i < n_elements(); i++) {
-        std::string r_prefix = index_tracker + "[" + std::to_string(i) + "]";
-        CommandReply tmp = (*this)[i];
-        tmp.print_reply_structure(r_prefix);
-      }
-      break;
-    case REDIS_REPLY_INTEGER:
-      std::cout << index_tracker + " value: " << _reply->integer
-                << std::endl;
-      break;
-    case REDIS_REPLY_DOUBLE:
-      std::cout << index_tracker + " value: " << _reply->dval
-                << std::endl;
-      break;
-    case REDIS_REPLY_ERROR:
-      std::cout << index_tracker + " value: "
-                << std::string(str(), str_len()) << std::endl;
-      break;
-    case REDIS_REPLY_BOOL:
-      std::cout << index_tracker + " value: " << _reply->integer
-                << std::endl;
-      break;
-    default:
-      std::cout << index_tracker << " value type not supported." << std::endl;
-  }
+    //TODO these recursive functions can't use 'this' unless
+    //we have a constructor that takes redisReply*
+    std::cout << index_tracker + " type: "
+              << redis_reply_type()<<std::endl;
+    switch (_reply->type) {
+        case REDIS_REPLY_STRING:
+            std::cout << index_tracker + " value: "
+                      << std::string(str(), str_len())
+                      << std::endl;
+            break;
+        case REDIS_REPLY_ARRAY:
+            for (size_t i = 0; i < n_elements(); i++) {
+              std::string r_prefix = index_tracker + "[" +
+                                     std::to_string(i) + "]";
+              CommandReply tmp = (*this)[i];
+              tmp.print_reply_structure(r_prefix);
+            }
+            break;
+        case REDIS_REPLY_INTEGER:
+            std::cout << index_tracker + " value: "
+                      << _reply->integer << std::endl;
+            break;
+        case REDIS_REPLY_DOUBLE:
+            std::cout << index_tracker + " value: "
+                      << _reply->dval<<std::endl;
+            break;
+        case REDIS_REPLY_ERROR:
+            std::cout << index_tracker + " value: "
+                      << std::string(str(), str_len())
+                      << std::endl;
+            break;
+        case REDIS_REPLY_BOOL:
+            std::cout << index_tracker + " value: "
+                      << _reply->integer << std::endl;
+            break;
+        default:
+            std::cout << index_tracker
+                      <<"  value type not supported." << std::endl;
+    }
+}
+
+redisReply* CommandReply::deep_clone_reply(const redisReply* reply)
+{
+    if (reply == NULL)
+        return NULL;
+    redisReply* redis_reply = new redisReply;
+    *redis_reply = *reply;
+    redis_reply->str = NULL;
+    redis_reply->element = NULL;
+    switch (redis_reply->type) {
+        case REDIS_REPLY_ARRAY:
+        case REDIS_REPLY_MAP:
+        case REDIS_REPLY_SET:
+            // allocate memory for element and do deep copy
+            if(redis_reply->elements > 0) {
+                redis_reply->element = new redisReply*[redis_reply->elements]{NULL};
+                if(reply->element != NULL) {
+                    for(size_t i=0; i<reply->elements; i++)
+                        redis_reply->element[i] = deep_clone_reply(reply->element[i]);
+                }
+                else {
+                    throw std::runtime_error("The expected number of elements," +
+                                             std::to_string(redis_reply->elements) +
+                                             ", in the input redisReply is inconsistent "\
+                                             "with the actual number of elements in the "\
+                                             "input redisReply.");
+                }
+            }
+            break;
+        case REDIS_REPLY_ERROR:
+        case REDIS_REPLY_STATUS:
+        case REDIS_REPLY_STRING:
+        case REDIS_REPLY_DOUBLE:
+            // allocate memory for str and do deep copy
+            if (redis_reply->len > 0) {
+                redis_reply->str = new char[redis_reply->len];
+                std::memcpy(redis_reply->str, reply->str, redis_reply->len);
+            }
+            break;
+        default:
+            break;
+    }
+    return redis_reply;
 }
