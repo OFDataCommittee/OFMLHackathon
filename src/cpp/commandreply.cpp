@@ -32,8 +32,10 @@ using namespace SmartRedis;
 
 CommandReply::CommandReply(const CommandReply& reply)
 {
-    _uptr_reply = RedisReplyUPtr(deep_clone_reply(reply._uptr_reply.get()), sw::redis::ReplyDeleter());
-    _reply = _uptr_reply.get();
+    if (this != &reply) {
+        _uptr_reply = RedisReplyUPtr(deep_clone_reply(reply._reply), sw::redis::ReplyDeleter());
+        _reply = _uptr_reply.get();
+    }
 }
 
 CommandReply::CommandReply(const redisReply* reply)
@@ -65,9 +67,11 @@ CommandReply::CommandReply(CommandReply&& reply)
 
 CommandReply& CommandReply::operator=(const CommandReply& reply)
 {
-    _uptr_reply.reset(NULL);
-    _uptr_reply = RedisReplyUPtr(deep_clone_reply(reply._uptr_reply.get()), sw::redis::ReplyDeleter());
-    _reply = _uptr_reply.get();
+    if (this != &reply) {
+        _uptr_reply.reset(NULL);
+        _uptr_reply = RedisReplyUPtr(deep_clone_reply(reply._reply), sw::redis::ReplyDeleter());
+        _reply = _uptr_reply.get();
+    }
     return *this;
 }
 
@@ -105,7 +109,7 @@ CommandReply& CommandReply::operator=(CommandReply&& reply)
 CommandReply CommandReply::shallow_clone(redisReply* reply) // shallow clone
 {
     CommandReply r;
-    r._uptr_reply = 0;
+    r._uptr_reply = NULL;
     r._reply = reply;
     return r;
 }
@@ -308,10 +312,17 @@ redisReply* CommandReply::deep_clone_reply(const redisReply* reply)
         case REDIS_REPLY_SET:
             // allocate memory for element and do deep copy
             if(redis_reply->elements > 0) {
-                redis_reply->element = new redisReply*[redis_reply->elements];
+                redis_reply->element = new redisReply*[redis_reply->elements]{NULL};
                 if(reply->element != NULL) {
                     for(size_t i=0; i<reply->elements; i++)
                         redis_reply->element[i] = deep_clone_reply(reply->element[i]);
+                }
+                else {
+                    throw std::runtime_error("The expected number of elements," +
+                                             std::to_string(redis_reply->elements) +
+                                             ", in the input redisReply is inconsistent "\
+                                             "with the actual number of elements in the "\
+                                             "input redisReply.");
                 }
             }
             break;
@@ -322,7 +333,7 @@ redisReply* CommandReply::deep_clone_reply(const redisReply* reply)
             // allocate memory for str and do deep copy
             if(redis_reply->len > 0) {
                 redis_reply->str = new char[redis_reply->len];
-                std::strcpy(redis_reply->str, reply->str);
+                std::memcpy(redis_reply->str, reply->str, redis_reply->len);
             }
             break;
         default:

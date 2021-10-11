@@ -128,7 +128,7 @@ SCENARIO("Testing CommandReply object", "[CommandReply]")
 }
 
 SCENARIO("Test CommandReply copy assignment operator and copy "
-         "constructor on simple REDIS_REPLY_TYPES")
+         "constructor on simple REDIS_REPLY_TYPES", "[CommandReply]")
 {
 
     GIVEN("A CommandReply")
@@ -173,7 +173,7 @@ SCENARIO("Test CommandReply copy assignment operator and copy "
     }
 }
 
-SCENARIO("Test CommandReply::has_error")
+SCENARIO("Test CommandReply::has_error", "[CommandReply]")
 {
 
     GIVEN("A parent and child redisReply")
@@ -200,7 +200,7 @@ SCENARIO("Test CommandReply::has_error")
 }
 
 SCENARIO("CommandReply copy assignment operator preserves the state of the "
-         "rvalue and the lvalue when one of the objects are deleted")
+         "rvalue and the lvalue when one of the objects are deleted", "[CommandReply]")
 {
 
     GIVEN("Two dynamically allocated CommandReply. One with a complex "
@@ -288,7 +288,7 @@ SCENARIO("CommandReply copy assignment operator preserves the state of the "
     }
 }
 
-SCENARIO("Simple tests on CommandReply constructors that use redisReply*")
+SCENARIO("Simple tests on CommandReply constructors that use redisReply*", "[CommandReply]")
 {
 
     GIVEN("A redisReply")
@@ -334,6 +334,71 @@ SCENARIO("Simple tests on CommandReply constructors that use redisReply*")
                 // CHECK(cmd_reply.str_len() == 6);
                 // CHECK(std::strcmp(cmd_reply.str(), str) == 0);
 
+            }
+        }
+    }
+}
+
+SCENARIO("Test CommandReply copy constructor with an inconsistent redisReply", "[CommandReply]")
+{
+
+    GIVEN("An inconsistent redisReply where its 'elements' doesn't "\
+          "correspond to its 'element'")
+    {
+
+    redisReply* reply = new redisReply;
+    reply->type = REDIS_REPLY_ARRAY;
+    reply->elements = 5;
+    reply->element = NULL;
+
+        WHEN("The CommandReply is constructed with an inconsistent redisReply")
+        {
+
+            THEN("An error is thrown during construction")
+            {
+                CommandReply cmd_reply;
+                CHECK_THROWS_AS(cmd_reply = reply, std::runtime_error);
+
+                delete reply;
+            }
+        }
+    }
+}
+
+SCENARIO("Test CommandReply's redisReply deep copy on a shallow copy", "[CommandReply]")
+{
+
+    GIVEN("A CommandReply with redisReply type REDIS_REPLY_ARRAY")
+    {
+        char const* strs[] = {"zero", "one"};
+        int lens[] = {5, 4};
+        // reply is a REDIS_REPLY_ARRAY of length 2 where each element is a REDIS_REPLY_STRING
+        redisReply* reply = new redisReply;
+        fill_reply_array(reply, 2);
+        fill_reply_str(reply->element[0], REDIS_REPLY_STRING, strs[0], lens[0]);
+        fill_reply_str(reply->element[1], REDIS_REPLY_STRING, strs[1], lens[1]);
+
+        CommandReply* cmd_reply = new CommandReply(create_reply_uptr(reply));
+
+        WHEN("A second CommandReply is constructed by shallowly copying a redisReply from the first CommandReply")
+        {
+            CommandReply shallow_cmd_reply = (*cmd_reply)[0];
+            CHECK(shallow_cmd_reply.str_len() == lens[0]);
+            CHECK(std::strcmp(shallow_cmd_reply.str(), strs[0]) == 0);
+            CHECK(shallow_cmd_reply.redis_reply_type() == "REDIS_REPLY_STRING");
+
+            THEN("A third CommandReply can deeply copy the shallow copy")
+            {
+                CommandReply deep_cmd_reply = shallow_cmd_reply;
+
+                // Ensure the deep copy of the shallow copy has the correct data
+                CHECK(deep_cmd_reply.str_len() == lens[0]);
+                CHECK(std::strcmp(deep_cmd_reply.str(), strs[0]) == 0);
+
+                // Ensure deep_cmd_reply is independent of cmd_reply
+                delete cmd_reply;
+                CHECK(deep_cmd_reply.str_len() == lens[0]);
+                CHECK(std::strcmp(deep_cmd_reply.str(), strs[0]) == 0);
             }
         }
     }
