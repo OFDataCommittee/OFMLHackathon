@@ -31,4 +31,3 @@ Build SmartRedis from Source
 ============================
 
 .. include:: ./install/from_source.rst
-

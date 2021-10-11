@@ -7,9 +7,9 @@ template <typename T_send, typename T_recv>
 void put_get_dataset(
 		    void (*fill_array)(T_send***, int, int, int),
 		    std::vector<size_t> dims,
-            SmartRedis::TensorType type,
-            std::string key_suffix,
-            std::string dataset_name)
+		    SmartRedis::TensorType type,
+		    std::string key_suffix,
+		    std::string dataset_name)
 {
     T_send*** t_send_1 =
         allocate_3D_array<T_send>(dims[0], dims[1], dims[2]);
@@ -42,9 +42,20 @@ void put_get_dataset(
     sent_dataset.add_tensor(t_name_3, t_send_3,
                         dims, type, SmartRedis::MemoryLayout::nested);
 
+    // Make sure a nonexistant dataset doesn't exist
+    std::string nonexistant("nonexistant");
+    if (client.dataset_exists(nonexistant))
+      throw std::runtime_error("DataSet existence of a non-existant"\
+                                 "dataset failed.");
+
     //Put the DataSet into the database
     client.put_dataset(sent_dataset);
 
+    // Make sure it exists
+    if (!client.dataset_exists(dataset_name))
+      throw std::runtime_error("DataSet existence of a non-existant"\
+                                 "dataset failed.");
+    
     if(!client.tensor_exists(dataset_name))
         throw std::runtime_error("The DataSet "\
                                  "confirmation key is not set.");

@@ -314,14 +314,24 @@ class PyClient
         bool key_exists(const std::string& key);
 
         /*!
-        *   \brief Check if the tensor or dataset exists in the database
+        *   \brief Check if the tensor exists in the database
         *   \param name The name that will be checked in the database
         *               depending on the current prefixing
         *               behavior, the name will be automatically prefixed
         *               to form the corresponding key.
-        *   \returns Returns true if the tensor or dataset exists in the database
+        *   \returns Returns true if the tensor exists in the database
         */
         bool tensor_exists(const std::string& name);
+
+        /*!
+        *   \brief Check if the dataset exists in the database
+        *   \param name The name that will be checked in the database
+        *               Depending on the current prefixing
+        *               behavior, the name will be automatically prefixed
+        *               to form the corresponding key.
+        *   \returns Returns true if the dataset exists in the database
+        */
+        bool dataset_exists(const std::string& name);
 
         /*!
         *   \brief Check if the model or script exists in the database
@@ -431,6 +441,14 @@ class PyClient
         *   \param addresses The addresses of the database nodes
         *   \returns A list of parsed_map objects containing all the
         *            information about the given database nodes
+	    *   \throws std::runtime_error if the address is not addressable by this
+        *           client.  In the case of using a cluster of database nodes,
+        *           it is best practice to bind each node in the cluster
+        *           to a specific adddress to avoid inconsistencies in
+        *           addresses retreived with the CLUSTER SLOTS command.
+        *           Inconsistencies in node addresses across
+        *           CLUSTER SLOTS comands will lead to std::runtime_error
+        *           being thrown.
         */
         std::vector<py::dict> get_db_node_info(std::vector<std::string> addresses);
 
@@ -440,6 +458,14 @@ class PyClient
         *   \param addresses The addresses of the database nodes
         *   \returns A list of parsed_map objects containing all the cluster
         *            information about the given database nodes
+	    *   \throws std::runtime_error if the address is not addressable by this
+        *           client.  In the case of using a cluster of database nodes,
+        *           it is best practice to bind each node in the cluster
+        *           to a specific adddress to avoid inconsistencies in
+        *           addresses retreived with the CLUSTER SLOTS command.
+        *           Inconsistencies in node addresses across
+        *           CLUSTER SLOTS comands will lead to std::runtime_error
+        *           being thrown.
         */
         std::vector<py::dict> get_db_cluster_info(std::vector<std::string> addresses);
 

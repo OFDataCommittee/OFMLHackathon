@@ -88,15 +88,45 @@ class Redis : public RedisServer
         */
         Redis& operator=(Redis&& cluster) = default;
 
-        /*!
-        *   \brief Run a single-key or single-hash slot
-        *          Command on the server
-        *   \param cmd The single-key or single-hash
-        *              slot Comand to run
+       /*!
+        *   \brief Run a SingleKeyCommand on the server
+        *   \param cmd The SingleKeyCommand to run
         *   \returns The CommandReply from the
         *            command execution
         */
-        virtual CommandReply run(Command& cmd);
+        virtual CommandReply run(SingleKeyCommand& cmd);
+
+        /*!
+        *   \brief Run a MultiKeyCommand on the server
+        *   \param cmd The MultiKeyCommand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(MultiKeyCommand& cmd);
+
+        /*!
+        *   \brief Run a CompoundCommand on the server
+        *   \param cmd The CompoundCommand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(CompoundCommand& cmd);
+
+        /*!
+        *   \brief Run an AddressAtCommand on the server
+        *   \param cmd The AddressAtCommand command to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAtCommand& cmd);
+
+        /*!
+        *   \brief Run an AddressAnyCommand on the server
+        *   \param cmd The AddressAnyCommand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAnyCommand& cmd);
 
         /*!
         *   \brief Run multiple single-key or single-hash slot
@@ -105,10 +135,10 @@ class Redis : public RedisServer
         *   \param cmd The CommandList containing multiple
         *              single-key or single-hash
         *              slot Comand to run
-        *   \returns The CommandReply from the last
-        *            command execution
+        *   \returns A list of CommandReply for each Command
+        *            in the CommandList
         */
-        virtual CommandReply run(CommandList& cmd);
+        virtual std::vector<CommandReply> run(CommandList& cmd);
 
         /*!
         *   \brief Check if a key exists in the database. This
@@ -292,6 +322,14 @@ class Redis : public RedisServer
         *   \brief sw::redis::Redis object pointer
         */
         sw::redis::Redis* _redis;
+
+        /*!
+        *   \brief Run a Command on the server
+        *   \param cmd The Command to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        inline CommandReply _run(const Command& cmd);
 
         /*!
         *   \brief Connect to the server at the address and port

@@ -7,6 +7,10 @@ RAI_TF=${3:-1}
 RAI_TFL=${4:-0}
 RAI_ONNX=${5:-0}
 
+# Make third-party directory if it doesn't exist
+if [[ ! -d "./third-party" ]]; then
+    mkdir ./third-party
+fi
 cd ./third-party
 
 # build redis

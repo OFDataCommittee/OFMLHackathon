@@ -243,7 +243,7 @@ PyDataset* PyClient::get_dataset(const std::string& name)
                                  "was encountered during client "\
                                  "get_dataset execution.");
     }
-    PyDataset* dataset = new PyDataset(*data);
+    PyDataset* dataset = new PyDataset(data);
     return dataset;
 }
 
@@ -524,6 +524,11 @@ bool PyClient::tensor_exists(const std::string& name)
                                  "tensor_exists execution.");
     }
     return result;
+}
+
+bool PyClient::dataset_exists(const std::string& name)
+{
+  return this->_client->dataset_exists(name);
 }
 
 bool PyClient::poll_tensor(const std::string& name,

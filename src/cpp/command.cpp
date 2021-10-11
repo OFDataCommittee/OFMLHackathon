@@ -191,12 +191,12 @@ void Command::add_fields(const std::vector<std::string>& fields, bool is_key)
     return;
 }
 
-std::string Command::first_field()
+std::string Command::first_field() const
 {
-    if(this->begin() == this->end())
+    if(this->cbegin() == this->cend())
         throw std::runtime_error("No fields exist in the Command.");
-    return std::string(this->begin()->data(),
-                       this->begin()->size());
+    return std::string(this->cbegin()->data(),
+                       this->cbegin()->size());
 }
 
 std::string Command::to_string()
@@ -217,7 +217,7 @@ Command::iterator Command::begin()
     return this->_fields.begin();
 }
 
-Command::const_iterator Command::cbegin()
+Command::const_iterator Command::cbegin() const
 {
     return this->_fields.cbegin();
 }
@@ -227,7 +227,7 @@ Command::iterator Command::end()
     return this->_fields.end();
 }
 
-Command::const_iterator Command::cend()
+Command::const_iterator Command::cend() const
 {
     return this->_fields.cend();
 }
@@ -273,22 +273,4 @@ void Command::make_empty()
     this->_ptr_fields.clear();
     this->_cmd_keys.clear();
     this->_fields.clear();
-}
-
-void Command::set_exec_address_port(std::string address,
-                                    uint16_t port)
-{
-    this -> _address = address;
-    this -> _port = port;
-    return;
-}
-
-std::string Command::get_address()
-{
-    return this -> _address;
-}
-
-uint16_t Command::get_port()
-{
-    return this -> _port;
 }

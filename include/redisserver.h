@@ -34,10 +34,19 @@
 #include <sw/redis++/redis++.h>
 #include "command.h"
 #include "commandreply.h"
-#include "commandreplyparser.h"
 #include "commandlist.h"
 #include "tensorbase.h"
 #include "dbnode.h"
+#include "nonkeyedcommand.h"
+#include "keyedcommand.h"
+#include "multikeycommand.h"
+#include "singlekeycommand.h"
+#include "compoundcommand.h"
+#include "addressatcommand.h"
+#include "addressanycommand.h"
+#include "clusterinfocommand.h"
+#include "dbinfocommand.h"
+#include "gettensorcommand.h"
 
 ///@file
 
@@ -65,14 +74,48 @@ class RedisServer {
         virtual ~RedisServer() = default;
 
         /*!
-        *   \brief Run a single-key or single-hash slot
-        *          Command on the server
-        *   \param cmd The single-key or single-hash
-        *              slot Comand to run
+        *   \brief Run a single-key Command on the server
+        *   \param cmd The single-key Comand to run
         *   \returns The CommandReply from the
         *            command execution
         */
-        virtual CommandReply run(Command& cmd) = 0;
+        virtual CommandReply run(SingleKeyCommand& cmd) = 0;
+
+        /*!
+        *   \brief Run a multi-key Command on the server
+        *   \param cmd The multi-key Comand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(MultiKeyCommand& cmd) = 0;
+
+        /*!
+        *   \brief Run a compound Command on the server
+        *   \param cmd The compound Comand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(CompoundCommand& cmd) = 0;
+
+        /*!
+        *   \brief Run a non-keyed Command that
+        *          addresses the given db node on the server
+        *   \param cmd The non-keyed Command that
+        *              addresses the given db node
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAtCommand& cmd) = 0;
+
+        /*!
+        *   \brief Run a non-keyed Command that
+        *          addresses any db node on the server
+        *   \param cmd The non-keyed Command that
+        *              addresses any db node
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAnyCommand& cmd) = 0;
 
         /*!
         *   \brief Run multiple single-key or single-hash slot
@@ -81,10 +124,10 @@ class RedisServer {
         *   \param cmd The CommandList containing multiple
         *              single-key or single-hash
         *              slot Comand to run
-        *   \returns The CommandReply from the last
-        *            command execution
+        *   \returns A list of CommandReply for each Command
+        *            in the CommandList
         */
-        virtual CommandReply run(CommandList& cmd) = 0;
+        virtual std::vector<CommandReply> run(CommandList& cmd) = 0;
 
         /*!
         *   \brief Check if a key exists in the database
