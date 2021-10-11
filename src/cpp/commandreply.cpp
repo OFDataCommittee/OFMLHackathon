@@ -176,7 +176,7 @@ size_t CommandReply::n_elements()
 
 int CommandReply::has_error()
 {
-    int num_errors = NULL;
+    int num_errors = 0;
     if (_reply->type == REDIS_REPLY_ERROR)
         num_errors++;
     else if (_reply->type == REDIS_REPLY_ARRAY) {
