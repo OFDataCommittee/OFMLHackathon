@@ -38,9 +38,10 @@ is provided or requested by the user.
 
 namespace SmartRedis {
 
-enum class MemoryLayout{
-    nested = 1,
-    contiguous = 2,
+enum class MemoryLayout {
+    invalid            = 0,
+    nested             = 1,
+    contiguous         = 2,
     fortran_contiguous = 3
 };
 
@@ -51,19 +52,17 @@ inline MemoryLayout convert_layout(CMemoryLayout layout) {
   direct use of MemoryLayout.
   */
 
-  switch(layout) {
-    case(c_nested) :
+  switch (layout) {
+    case c_nested:
       return MemoryLayout::nested;
-      break;
-    case(c_contiguous) :
+    case c_contiguous:
       return MemoryLayout::contiguous;
-      break;
-    case(c_fortran_contiguous) :
+    case c_fortran_contiguous:
       return MemoryLayout::fortran_contiguous;
-      break;
-    default :
-      throw std::runtime_error("Unsupported enum "\
-                               "conversion.");
+    case c_invalid_layout:
+      return MemoryLayout::invalid;
+    default:
+      throw std::runtime_error("Unsupported enum conversion.");
   }
 }
 

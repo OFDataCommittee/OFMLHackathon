@@ -32,126 +32,152 @@
 
 using namespace SmartRedis;
 
-RedisCluster::RedisCluster() : RedisServer() {
-    std::string address_port = this->_get_ssdb();
-    this->_connect(address_port);
-    this->_map_cluster();
-    if (_address_node_map.count(address_port) > 0)
-        this->_last_prefix = _address_node_map.at(address_port)->prefix;
-    else if (this->_db_nodes.size() > 0)
-        this->_last_prefix = this->_db_nodes[0].prefix;
-    else
-        throw std::runtime_error("Cluster mapping failed in client initialization");
-}
-
-RedisCluster::RedisCluster(std::string address_port) :
-    RedisServer()
+// RedisCluster constructor
+RedisCluster::RedisCluster() : RedisServer()
 {
-    this->_connect(address_port);
-    this->_map_cluster();
+    std::string address_port = _get_ssdb();
+    _connect(address_port);
+    _map_cluster();
     if (_address_node_map.count(address_port) > 0)
-        this->_last_prefix = _address_node_map.at(address_port)->prefix;
-    else if (this->_db_nodes.size() > 0)
-        this->_last_prefix = this->_db_nodes[0].prefix;
+        _last_prefix = _address_node_map.at(address_port)->prefix;
+    else if (_db_nodes.size() > 0)
+        _last_prefix = _db_nodes[0].prefix;
     else
         throw std::runtime_error("Cluster mapping failed in client initialization");
 }
 
+// RedisCluster constructor. Uses address provided to constructor instead of
+// environment variables
+RedisCluster::RedisCluster(std::string address_port) : RedisServer()
+{
+    _connect(address_port);
+    _map_cluster();
+    if (_address_node_map.count(address_port) > 0)
+        _last_prefix = _address_node_map.at(address_port)->prefix;
+    else if (_db_nodes.size() > 0)
+        _last_prefix = _db_nodes[0].prefix;
+    else
+        throw std::runtime_error("Cluster mapping failed in client initialization");
+}
+
+// RedisCluster destructor
 RedisCluster::~RedisCluster()
 {
-    if(this->_redis_cluster)
-        delete this->_redis_cluster;
+    if (_redis_cluster != NULL) {
+        delete _redis_cluster;
+        _redis_cluster = NULL;
+    }
 }
 
+// Run a single-key Command on the server
 CommandReply RedisCluster::run(SingleKeyCommand& cmd)
 {
+    // Preprend the target database to the command
     std::string db_prefix;
     if (cmd.has_keys())
-        db_prefix = this->_get_db_node_prefix(cmd);
+        db_prefix = _get_db_node_prefix(cmd);
     else
         throw std::runtime_error("Redis has failed to find database");
 
-    return this->_run(cmd, db_prefix);
+    return _run(cmd, db_prefix);
 }
 
+// Run a compound Command on the server
 CommandReply RedisCluster::run(CompoundCommand& cmd)
 {
     std::string db_prefix;
     if (cmd.has_keys())
-        db_prefix = this->_get_db_node_prefix(cmd);
+        db_prefix = _get_db_node_prefix(cmd);
     else
         throw std::runtime_error("Redis has failed to find database");
 
-    return this->_run(cmd, db_prefix);
+    return _run(cmd, db_prefix);
 }
 
+// Run a compound Command on the server
 CommandReply RedisCluster::run(MultiKeyCommand& cmd)
 {
     std::string db_prefix;
     if (cmd.has_keys())
-        db_prefix = this->_get_db_node_prefix(cmd);
+        db_prefix = _get_db_node_prefix(cmd);
     else
         throw std::runtime_error("Redis has failed to find database");
 
-    return this->_run(cmd, db_prefix);
+    return _run(cmd, db_prefix);
 }
 
+// Run a non-keyed Command that addresses the given db node on the server
 CommandReply RedisCluster::run(AddressAtCommand& cmd)
 {
     std::string db_prefix;
-    if (this->is_addressable(cmd.get_address(), cmd.get_port()))
-        db_prefix = this->_address_node_map.at(cmd.get_address() + ":"
+    if (is_addressable(cmd.get_address(), cmd.get_port()))
+        db_prefix = _address_node_map.at(cmd.get_address() + ":"
                     + std::to_string(cmd.get_port()))->prefix;
     else
         throw std::runtime_error("Redis has failed to find database");
 
-    return this->_run(cmd, db_prefix);
+    return _run(cmd, db_prefix);
 }
 
+// Run a non-keyed Command that addresses any db node on the server
 CommandReply RedisCluster::run(AddressAnyCommand &cmd)
 {
-    return this->_run(cmd, _last_prefix);
+    return _run(cmd, _last_prefix);
 }
 
+// Run multiple single-key or single-hash slot Command on the server.
+// Each Command in the CommandList is run sequentially
 std::vector<CommandReply> RedisCluster::run(CommandList& cmds)
 {
     std::vector<CommandReply> replies;
     CommandList::iterator cmd = cmds.begin();
-    CommandList::iterator cmd_end = cmds.end();
-    while(cmd != cmd_end) {
+    for ( ; cmd != cmds.end(); cmd++) {
         replies.push_back(dynamic_cast<Command*>(*cmd)->run_me(this));
-        cmd++;
     }
     return replies;
 }
 
+// Check if a model or script key exists in the database
 bool RedisCluster::model_key_exists(const std::string& key)
 {
-    DBNode* node = &(this->_db_nodes[0]);
-    std::string prefixed_key = '{' + node->prefix +
-                               "}." + key;
+    // Add model prefix to the key
+    DBNode* node = &(_db_nodes[0]);
+    if (node == NULL)
+        return false;
+    std::string prefixed_key = '{' + node->prefix + "}." + key;
 
-    return this->key_exists(prefixed_key);
+    // And perform key existence check
+    return key_exists(prefixed_key);
 }
 
+// Check if a key exists in the database
 bool RedisCluster::key_exists(const std::string& key)
 {
+    // Build the command
     SingleKeyCommand cmd;
     cmd.add_field("EXISTS");
     cmd.add_field(key, true);
-    CommandReply reply = this->run(cmd);
-    return reply.integer();
+
+    // Run it
+    CommandReply reply = run(cmd);
+    if (reply.has_error() > 0)
+        throw std::runtime_error("Error encountered while checking "\
+                                 "for existence of key " + key);
+    return (bool)reply.integer();
 }
 
+// Check if a key exists in the database
 bool RedisCluster::is_addressable(const std::string& address,
                                   const uint64_t& port)
 {
-    return this->_address_node_map.find(address + ":" + std::to_string(port))
-                                    != this->_address_node_map.end();
+    std::string addr = address + ":" + std::to_string(port);
+    return _address_node_map.find(addr) != _address_node_map.end();
 }
 
+// Put a Tensor on the server
 CommandReply RedisCluster::put_tensor(TensorBase& tensor)
 {
+    // Build the command
     SingleKeyCommand cmd;
     cmd.add_field("AI.TENSORSET");
     cmd.add_field(tensor.name(), true);
@@ -159,62 +185,87 @@ CommandReply RedisCluster::put_tensor(TensorBase& tensor)
     cmd.add_fields(tensor.dims());
     cmd.add_field("BLOB");
     cmd.add_field_ptr(tensor.buf());
-    return this->run(cmd);
+
+    // Run it
+    return run(cmd);
 }
 
+// Get a Tensor from the server
 CommandReply RedisCluster::get_tensor(const std::string& key)
 {
+    // Build the command
     GetTensorCommand cmd;
     cmd.add_field("AI.TENSORGET");
     cmd.add_field(key, true);
     cmd.add_field("META");
     cmd.add_field("BLOB");
-    return this->run(cmd);
+
+    // Run it
+    return run(cmd);
 }
 
+// Rename a tensor in the database
 CommandReply RedisCluster::rename_tensor(const std::string& key,
                                          const std::string& new_key)
 {
+    // Check wehether we have to switch hash slots
+    uint16_t key_hash_slot = _get_hash_slot(key);
+    uint16_t new_key_hash_slot = _get_hash_slot(new_key);
+
+    // If not, we can use a simple RENAME command
     CommandReply reply;
-
-    uint16_t key_hash_slot = this->_get_hash_slot(key);
-    uint16_t new_key_hash_slot = this->_get_hash_slot(new_key);
-
-    if(key_hash_slot == new_key_hash_slot) {
+    if (key_hash_slot == new_key_hash_slot) {
+        // Build the command
         CompoundCommand cmd;
         cmd.add_field("RENAME");
         cmd.add_field(key, true);
         cmd.add_field(new_key, true);
-        reply = this->run(cmd);
+
+        // Run it
+        reply = run(cmd);
     }
+
+    // Otherwise we need to clone the tensor and then nuke the old one
     else {
-        this->copy_tensor(key, new_key);
-        reply = this->delete_tensor(key);
+        copy_tensor(key, new_key);
+        reply = delete_tensor(key);
     }
+
+    // Done
     return reply;
 }
 
+// Delete a tensor in the database
 CommandReply RedisCluster::delete_tensor(const std::string& key)
 {
+    // Build the command
     SingleKeyCommand cmd;
     cmd.add_field("UNLINK");
     cmd.add_field(key, true);
-    return this->run(cmd);
+
+    // Run it
+    return run(cmd);
 }
 
+// Copy a tensor from the source key to the destination key
 CommandReply RedisCluster::copy_tensor(const std::string& src_key,
                                        const std::string& dest_key)
 {
     //TODO can we do COPY for same hash slot or database (only for redis 6.2)?
-    CommandReply cmd_get_reply;
-    GetTensorCommand cmd_get;
 
+    // Build the GET command
+    GetTensorCommand cmd_get;
     cmd_get.add_field("AI.TENSORGET");
     cmd_get.add_field(src_key, true);
     cmd_get.add_field("META");
     cmd_get.add_field("BLOB");
-    cmd_get_reply = this->run(cmd_get);
 
+    // Run the GET command
+    CommandReply cmd_get_reply = run(cmd_get);
+    if (cmd_get_reply.has_error() > 0)
+        throw std::runtime_error("Failed to find tensor " + src_key);
+
+    // Decode the tensor
     std::vector<size_t> dims =
         cmd_get.get_dims(cmd_get_reply);
     std::string_view blob =
@@ -222,40 +273,48 @@ CommandReply RedisCluster::copy_tensor(const std::string& src_key,
     TensorType type =
         cmd_get.get_data_type(cmd_get_reply);
 
-    CommandReply cmd_put_reply;
+    // Build the PUT command
     MultiKeyCommand cmd_put;
-
     cmd_put.add_field("AI.TENSORSET");
     cmd_put.add_field(dest_key, true);
     cmd_put.add_field(TENSOR_STR_MAP.at(type));
     cmd_put.add_fields(dims);
     cmd_put.add_field("BLOB");
     cmd_put.add_field_ptr(blob);
-    cmd_put_reply = this->run(cmd_put);
 
-    return cmd_put_reply;
+    // Run the PUT command
+    return run(cmd_put);
 }
 
+// Copy a vector of tensors from source keys to destination keys
 CommandReply RedisCluster::copy_tensors(const std::vector<std::string>& src,
                                         const std::vector<std::string>& dest)
 {
-    std::vector<std::string>::const_iterator src_it = src.cbegin();
-    std::vector<std::string>::const_iterator src_it_end = src.cend();
-
-    std::vector<std::string>::const_iterator dest_it = dest.cbegin();
-    std::vector<std::string>::const_iterator dest_it_end = dest.cend();
-
-    CommandReply reply;
-
-    while(src_it!=src_it_end && dest_it!=dest_it_end)
-    {
-        reply = this->copy_tensor(*src_it, *dest_it);
-        src_it++;
-        dest_it++;
+    // Make sure vectors are the same length
+    if (src.size() != dest.size()) {
+        throw std::runtime_error("differing size vectors "\
+                                 "passed to copy_tensors");
     }
+
+    // Copy tensors one at a time. We only need to check one iterator
+    // for reaching the end since we know from above that they are the
+    // same length
+    std::vector<std::string>::const_iterator it_src = src.cbegin();
+    std::vector<std::string>::const_iterator it_dest = dest.cbegin();
+    CommandReply reply;
+    for ( ; it_src != src.cend(); it_src++, it_dest++) {
+        reply = copy_tensor(*it_src, *it_dest);
+        if (reply.has_error() > 0) {
+            throw std::runtime_error("tensor copy failed");
+        }
+
+    }
+
+    // Done
     return reply;
 }
 
+// Set a model from a string buffer in the database for future execution
 CommandReply RedisCluster::set_model(const std::string& model_name,
                                      std::string_view model,
                                      const std::string& backend,
@@ -264,83 +323,87 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
                                      int min_batch_size,
                                      const std::string& tag,
                                      const std::vector<std::string>& inputs,
-                                     const std::vector<std::string>& outputs
-                                     )
+                                     const std::vector<std::string>& outputs)
 {
-    std::string prefixed_key;
-    std::vector<DBNode>::const_iterator node =
-      this->_db_nodes.cbegin();
-    std::vector<DBNode>::const_iterator end_node =
-      this->_db_nodes.cend();
-
+    std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
     CommandReply reply;
+    for ( ; node != _db_nodes.cend(); node++) {
+        // Build the node prefix
+        std::string prefixed_key = "{" + node->prefix + "}." + model_name;
 
-    while(node!=end_node)
-    {
-        prefixed_key = "{" + node->prefix +
-                       "}." + model_name;
+        // Build the MODELSET commnd
         CompoundCommand cmd;
         cmd.add_field("AI.MODELSET");
         cmd.add_field(prefixed_key, true);
         cmd.add_field(backend);
         cmd.add_field(device);
-        if(tag.size()>0) {
+
+        // Add optional fields as requested
+        if (tag.size() > 0) {
             cmd.add_field("TAG");
             cmd.add_field(tag);
         }
-        if(batch_size>0) {
+        if (batch_size > 0) {
             cmd.add_field("BATCHSIZE");
             cmd.add_field(std::to_string(batch_size));
         }
-        if(min_batch_size>0) {
+        if (min_batch_size > 0) {
             cmd.add_field("MINBATCHSIZE");
             cmd.add_field(std::to_string(min_batch_size));
         }
-        if(inputs.size()>0) {
+        if ( inputs.size() > 0) {
             cmd.add_field("INPUTS");
             cmd.add_fields(inputs);
         }
-        if(outputs.size()>0) {
+        if (outputs.size() > 0) {
             cmd.add_field("OUTPUTS");
             cmd.add_fields(outputs);
         }
         cmd.add_field("BLOB");
         cmd.add_field_ptr(model);
-        reply = this->run(cmd);
-        node++;
+
+        // Run the command
+        reply = run(cmd);
+        if (reply.has_error() > 0) {
+            throw std::runtime_error("SetModel failed for node " + node->name);
+        }
     }
+
+    // Done
     return reply;
 }
 
+// Set a script from a string buffer in the database for future execution
 CommandReply RedisCluster::set_script(const std::string& key,
                                       const std::string& device,
                                       std::string_view script)
 {
-    std::string prefixed_key;
     CommandReply reply;
+    std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
+    for ( ; node != _db_nodes.cend(); node++) {
+        // Build the node prefix
+        std::string prefix_key = "{" + node->prefix + "}." + key;
 
-    std::vector<DBNode>::const_iterator node =
-        this->_db_nodes.cbegin();
-    std::vector<DBNode>::const_iterator end_node =
-        this->_db_nodes.cend();
-    while(node!=end_node) {
-        prefixed_key = "{" + node->prefix +
-                        "}." + std::string(key);
-
+        // Build the SCRIPTSET command
         SingleKeyCommand cmd;
         cmd.add_field("AI.SCRIPTSET");
-        cmd.add_field(prefixed_key, true);
+        cmd.add_field(prefix_key, true);
         cmd.add_field(device);
         cmd.add_field("SOURCE");
         cmd.add_field_ptr(script);
-        reply = this->run(cmd);
 
-        node++;
+        // Run the command
+        reply = run(cmd);
+        if (reply.has_error() > 0) {
+            throw std::runtime_error("SetModel failed for node " + node->name);
+        }
     }
 
+    // Done
     return reply;
 }
 
+// Run a model in the database using the specificed input and output tensors
 CommandReply RedisCluster::run_model(const std::string& key,
                                      std::vector<std::string> inputs,
                                      std::vector<std::string> outputs)
@@ -352,35 +415,43 @@ CommandReply RedisCluster::run_model(const std::string& key,
         We will choose it based on the db of the first input tensor.
     */
 
-    uint16_t hash_slot = this->_get_hash_slot(inputs[0]);
-    uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
-                                                this->_db_nodes.size()-1);
-    DBNode* db = &(this->_db_nodes[db_index]);
+    uint16_t hash_slot = _get_hash_slot(inputs[0]);
+    uint16_t db_index = _get_dbnode_index(hash_slot, 0,
+                                                _db_nodes.size()-1);
+    DBNode* db = &(_db_nodes[db_index]);
+    if (db == NULL) {
+        throw std::runtime_error("Missing DB node found in run_model");
+    }
 
-    //Generate temporary names so that all keys go to same slot
-    std::vector<std::string> tmp_inputs =
-        _get_tmp_names(inputs, db->prefix);
-    std::vector<std::string> tmp_outputs =
-        _get_tmp_names(outputs, db->prefix);
+    // Generate temporary names so that all keys go to same slot
+    std::vector<std::string> tmp_inputs = _get_tmp_names(inputs, db->prefix);
+    std::vector<std::string> tmp_outputs = _get_tmp_names(outputs, db->prefix);
 
-    //Copy all input tensors to temporary names to align hash slots
-    this->copy_tensors(inputs, tmp_inputs);
+    // Copy all input tensors to temporary names to align hash slots
+    copy_tensors(inputs, tmp_inputs);
 
-    std::string model_name = "{" + db->prefix +
-                            "}." + std::string(key);
-
+    // Build the MODELRUN command
+    std::string model_name = "{" + db->prefix + "}." + std::string(key);
     CompoundCommand cmd;
-    CommandReply reply;
     cmd.add_field("AI.MODELRUN");
     cmd.add_field(model_name, true);
     cmd.add_field("INPUTS");
     cmd.add_fields(tmp_inputs);
     cmd.add_field("OUTPUTS");
     cmd.add_fields(tmp_outputs);
-    reply = this->run(cmd);
 
-    this->copy_tensors(tmp_outputs, outputs);
+    // Run it
+    CommandReply reply = run(cmd);
+    if (reply.has_error() > 0) {
+        std::string error("run_model failed for node ");
+        error += db_index;
+        throw std::runtime_error(error);
+    }
 
+    // Store the outputs back to the database
+    copy_tensors(tmp_outputs, outputs);
+
+    // Clean up the temp keys
     std::vector<std::string> keys_to_delete;
     keys_to_delete.insert(keys_to_delete.end(),
                             tmp_outputs.begin(),
@@ -388,33 +459,36 @@ CommandReply RedisCluster::run_model(const std::string& key,
     keys_to_delete.insert(keys_to_delete.end(),
                             tmp_inputs.begin(),
                             tmp_inputs.end());
+    _delete_keys(keys_to_delete);
 
-    this->_delete_keys(keys_to_delete);
-
+    // Done
     return reply;
 }
 
+// Run a script function in the database using the specificed input
+// and output tensors
 CommandReply RedisCluster::run_script(const std::string& key,
                                       const std::string& function,
                                       std::vector<std::string> inputs,
                                       std::vector<std::string> outputs)
 {
-    uint16_t hash_slot = this->_get_hash_slot(inputs[0]);
-    uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
-                                                this->_db_nodes.size()-1);
-    DBNode* db = &(this->_db_nodes[db_index]);
+    // Locate the DB node for the script
+    uint16_t hash_slot = _get_hash_slot(inputs[0]);
+    uint16_t db_index = _get_dbnode_index(hash_slot, 0, _db_nodes.size() - 1);
+    DBNode* db = &(_db_nodes[db_index]);
+    if (db == NULL) {
+        throw std::runtime_error("Missing DB node found in run_script");
+    }
 
-    //Generate temporary names so that all keys go to same slot
-    std::vector<std::string> tmp_inputs =
-        _get_tmp_names(inputs, db->prefix);
-    std::vector<std::string> tmp_outputs =
-        _get_tmp_names(outputs, db->prefix);
+    // Generate temporary names so that all keys go to same slot
+    std::vector<std::string> tmp_inputs = _get_tmp_names(inputs, db->prefix);
+    std::vector<std::string> tmp_outputs = _get_tmp_names(outputs, db->prefix);
 
-    //Copy all input tensors to temporary names to align hash slots
-    this->copy_tensors(inputs, tmp_inputs);
+    // Copy all input tensors to temporary names to align hash slots
+    copy_tensors(inputs, tmp_inputs);
+    std::string script_name = "{" + db->prefix + "}." + std::string(key);
 
-    std::string script_name = "{" + db->prefix +
-                            "}." + std::string(key);
+    // Build the SCRIPTRUN command
     CompoundCommand cmd;
     CommandReply reply;
     cmd.add_field("AI.SCRIPTRUN");
@@ -424,10 +498,19 @@ CommandReply RedisCluster::run_script(const std::string& key,
     cmd.add_fields(tmp_inputs);
     cmd.add_field("OUTPUTS");
     cmd.add_fields(tmp_outputs);
-    reply = this->run(cmd);
 
-    this->copy_tensors(tmp_outputs, outputs);
+    // Run it
+    reply = run(cmd);
+    if (reply.has_error() > 0) {
+        std::string error("run_model failed for node ");
+        error += db_index;
+        throw std::runtime_error(error);
+    }
 
+    // Store the output back to the database
+    copy_tensors(tmp_outputs, outputs);
+
+    // Clean up temp keys
     std::vector<std::string> keys_to_delete;
     keys_to_delete.insert(keys_to_delete.end(),
                             tmp_outputs.begin(),
@@ -435,179 +518,186 @@ CommandReply RedisCluster::run_script(const std::string& key,
     keys_to_delete.insert(keys_to_delete.end(),
                             tmp_inputs.begin(),
                             tmp_inputs.end());
+    _delete_keys(keys_to_delete);
 
-    this->_delete_keys(keys_to_delete);
+    // Done
     return reply;
 }
 
+// Retrieve the model from the database
 CommandReply RedisCluster::get_model(const std::string& key)
 {
-    std::string prefixed_str =
-        "{" + this->_db_nodes[0].prefix +
-        "}." + key;
+    // Build the node prefix
+    std::string prefixed_str = "{" + _db_nodes[0].prefix + "}." + key;
 
+    // Build the MODELGET command
     SingleKeyCommand cmd;
     cmd.add_field("AI.MODELGET");
     cmd.add_field(prefixed_str, true);
     cmd.add_field("BLOB");
-    return this->run(cmd);
+
+    // Run it
+    return run(cmd);
 }
 
+// Retrieve the script from the database
 CommandReply RedisCluster::get_script(const std::string& key)
 {
-    std::string prefixed_str =
-        "{" + this->_db_nodes[0].prefix +
-        "}." + std::string(key);
+    std::string prefixed_str = "{" + _db_nodes[0].prefix + "}." + key;
 
     SingleKeyCommand cmd;
     cmd.add_field("AI.SCRIPTGET");
     cmd.add_field(prefixed_str, true);
     cmd.add_field("SOURCE");
-    return this->run(cmd);
+    return run(cmd);
 }
 
 inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix)
 {
     std::string_view sv_prefix(db_prefix.data(), db_prefix.size());
 
-    Command::const_iterator cmd_fields_start = cmd.cbegin();
-    Command::const_iterator cmd_fields_end = cmd.cend();
+    // Execute the commmand
     CommandReply reply;
-
     int n_trials = 100;
-
-    while (n_trials > 0) {
-
+    for (int trial = 0; trial < n_trials; trial++) {
+        bool do_sleep = false;
         try {
-            sw::redis::Redis db = this->_redis_cluster->redis(sv_prefix, false);
-            reply = db.command(cmd_fields_start, cmd_fields_end);
-
-            if(reply.has_error()==0){
+            sw::redis::Redis db = _redis_cluster->redis(sv_prefix, false);
+            reply = db.command(cmd.cbegin(), cmd.cend());
+            if (reply.has_error() == 0) {
                 _last_prefix = db_prefix;
                 return reply;
             }
-
-            n_trials = 0;
+            break;
         }
         catch (sw::redis::IoError &e) {
-            n_trials--;
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            do_sleep = true;
         }
         catch (sw::redis::ClosedError &e) {
-            n_trials--;
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            do_sleep = true;
         }
         catch (std::exception& e) {
             throw std::runtime_error(e.what());
         }
         catch (...) {
-            throw std::runtime_error("A non-standard exception "\
-                                     "encountered during command " +
-                                     cmd.first_field() +
+            throw std::runtime_error("A non-standard exception encountered "\
+                                     "during command " + cmd.first_field() +
                                      " execution.");
+        }
+
+        // Sleep before the next attempt
+        if (do_sleep) {
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+            do_sleep = false;
         }
     }
 
-    if (n_trials == 0) {
-        if(reply.has_error()>0)
-            reply.print_reply_error();
-        throw std::runtime_error("Redis failed to execute command: " +
-                                 cmd.first_field());
-    }
-
-    return reply;
-
+    // We should only get here on an error response
+    if (reply.has_error() > 0)
+        reply.print_reply_error();
+    throw std::runtime_error("Redis failed to execute command: " +
+                                cmd.first_field());
+    return reply; // never reached
 }
 
+// Connect to the cluster at the address and port
 inline void RedisCluster::_connect(std::string address_port)
 {
     int n_trials = 10;
-    bool run_sleep = false;
-
-    for(int i=1; i<=n_trials; i++) {
-        run_sleep = false;
+    for (int i = 1; i <= n_trials; i++) {
         try {
-            this->_redis_cluster =
-                new sw::redis::RedisCluster(address_port);
+            _redis_cluster = new sw::redis::RedisCluster(address_port);
             return;
         }
         catch (std::exception& e) {
-            this->_redis_cluster = 0;
-            if(i == n_trials) {
+            if (_redis_cluster != NULL) {
+                delete _redis_cluster;
+                _redis_cluster = NULL;
+            }
+            if (i == n_trials) {
                 throw std::runtime_error(e.what());
             }
-            run_sleep = true;
         }
         catch (...) {
-            this->_redis_cluster = 0;
-            if(i == n_trials) {
-                throw std::runtime_error("A non-standard exception "\
+            if (_redis_cluster != NULL) {
+                delete _redis_cluster;
+                _redis_cluster = NULL;
+            }
+            if (i == n_trials) {
+                throw std::runtime_error("A non-standard exception was "\
                                          "encountered during client "\
                                          "connection.");
             }
-            run_sleep = true;
         }
-        if(run_sleep)
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+
+        // Sleep before the next atttenpt
+        if (_redis_cluster != NULL) {
+            delete _redis_cluster;
+            _redis_cluster = NULL;
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(2));
     }
-    return;
 }
 
+// Map the RedisCluster via the CLUSTER SLOTS command
 inline void RedisCluster::_map_cluster()
 {
-    this->_db_nodes.clear();
-    this->_address_node_map.clear();
+    // Clear out our old map
+    _db_nodes.clear();
+    _address_node_map.clear();
 
+    // Build the CLUSTER SLOTS command
     AddressAnyCommand cmd;
     cmd.add_field("CLUSTER");
     cmd.add_field("SLOTS");
-    CommandReply reply(this->_redis_cluster->
+
+    // Run it
+    CommandReply reply(_redis_cluster->
                  command(cmd.begin(), cmd.end()));
-    this->_parse_reply_for_slots(reply);
-    return;
+    if (reply.has_error() > 0) {
+        throw std::runtime_error("CLUSTER SLOTS command failed");
+    }
+
+    // Process results
+    _parse_reply_for_slots(reply);
 }
 
+// Get the prefix that can be used to address the correct database
+// for a given command
 std::string RedisCluster::_get_db_node_prefix(Command& cmd)
 {
+    // Extract the keys from the command
     std::vector<std::string> keys = cmd.get_keys();
-
-    if(keys.size()==0)
+    if (keys.size() == 0) {
         throw std::runtime_error("Command " + cmd.to_string() +
                                  " does not have a key value.");
-
-    std::vector<std::string>::iterator key_it =
-        keys.begin();
-    std::vector<std::string>::iterator key_it_end =
-        keys.end();
-
-    uint16_t hash_slot;
-    uint16_t db_index;
-    std::string prefix;
-
-    while(key_it!=key_it_end) {
-        hash_slot = this->_get_hash_slot(*key_it);
-        db_index = this->_get_dbnode_index(hash_slot, 0,
-                                           this->_db_nodes.size()-1);
-        if(prefix.size()==0) {
-            prefix = this->_db_nodes[db_index].prefix;
-        }
-        else{
-            if(prefix!=this->_db_nodes[db_index].prefix) {
-                throw std::runtime_error("Multi-key commands are "\
-                                         "not valid: " +
-                                         cmd.to_string());
-            }
-        }
-        key_it++;
     }
+
+    // Walk through the keys to find the prefix
+    std::string prefix;
+    std::vector<std::string>::iterator key_it = keys.begin();
+    for ( ; key_it != keys.end(); key_it++) {
+        uint16_t hash_slot = _get_hash_slot(*key_it);
+        uint16_t db_index = _get_dbnode_index(hash_slot, 0,
+                                           _db_nodes.size() - 1);
+        if (prefix.size() == 0) {
+            prefix = _db_nodes[db_index].prefix;
+        }
+        else if (prefix != _db_nodes[db_index].prefix) {
+            throw std::runtime_error("Multi-key commands are "\
+                                        "not valid: " +
+                                        cmd.to_string());
+        }
+    }
+
+    // Done
     return prefix;
 }
 
+// Process the CommandReply for CLUSTER SLOTS to build DBNode information
 inline void RedisCluster::_parse_reply_for_slots(CommandReply& reply)
 {
-    /* This function parses a CommandReply for cluster slot
-    information.
-    Each reply element of the main message, of which there should
+    /* Each reply element of the main message, of which there should
     be n_db_nodes, is:
     0) (integer) min slot
     1) (integer) max slot
@@ -616,214 +706,215 @@ inline void RedisCluster::_parse_reply_for_slots(CommandReply& reply)
        2) "name"
     */
     size_t n_db_nodes = reply.n_elements();
-    this->_db_nodes = std::vector<DBNode>(n_db_nodes);
+    _db_nodes = std::vector<DBNode>(n_db_nodes);
 
-    for(int i=0; i<n_db_nodes; i++) {
-        this->_db_nodes[i].lower_hash_slot = reply[i][0].integer();
-        this->_db_nodes[i].upper_hash_slot = reply[i][1].integer();
-        this->_db_nodes[i].ip = std::string(reply[i][2][0].str(),
+    for (size_t i = 0; i < n_db_nodes; i++) {
+        _db_nodes[i].lower_hash_slot = reply[i][0].integer();
+        _db_nodes[i].upper_hash_slot = reply[i][1].integer();
+        _db_nodes[i].ip = std::string(reply[i][2][0].str(),
                                             reply[i][2][0].str_len());
-        this->_db_nodes[i].port = reply[i][2][1].integer();
-        this->_db_nodes[i].name = std::string(reply[i][2][2].str(),
+        _db_nodes[i].port = reply[i][2][1].integer();
+        _db_nodes[i].name = std::string(reply[i][2][2].str(),
                                               reply[i][2][2].str_len());
         bool acceptable_prefix = false;
-        int n_hashes = this->_db_nodes[i].upper_hash_slot -
-                       this->_db_nodes[i].lower_hash_slot + 1;
-        int k = 0;
-        while(!acceptable_prefix && k<=n_hashes) {
-            this->_db_nodes[i].prefix = this->_get_crc16_prefix(
-                                        this->_db_nodes[i].lower_hash_slot+k);
-            std::string prefix = this->_db_nodes[i].prefix;
+        uint64_t n_hashes = _db_nodes[i].upper_hash_slot -
+                       _db_nodes[i].lower_hash_slot + 1;
+        uint64_t k = 0;
+        for ( ; !acceptable_prefix && k <= n_hashes; k++) {
+            _db_nodes[i].prefix = _get_crc16_prefix(
+                                        _db_nodes[i].lower_hash_slot+k);
+            std::string prefix = _db_nodes[i].prefix;
             bool found_bracket = false;
-            for(int j=0; j<prefix.size(); j++) {
-                if(prefix[j] == '}')
-                found_bracket = true;
+            for (size_t j = 0; j < prefix.size(); j++) {
+                if (prefix[j] == '}') {
+                    found_bracket = true;
+                    break;
+                }
             }
-            if(!found_bracket)
-                acceptable_prefix=true;
-            k++;
+            if (!found_bracket)
+                acceptable_prefix = true;
         }
-        if(k>n_hashes)
+
+        if (k > n_hashes)
             throw std::runtime_error("A prefix could not be generated "\
                                      "for this cluster config.");
 
-        this->_address_node_map.insert({this->_db_nodes[i].ip + ":"
-                                    + std::to_string(this->_db_nodes[i].port),
-                                    &this->_db_nodes[i]});
+        _address_node_map.insert({_db_nodes[i].ip + ":"
+                                    + std::to_string(_db_nodes[i].port),
+                                    &_db_nodes[i]});
     }
+
     //Put the vector of db nodes in order based on lower hash slot
-    std::sort(this->_db_nodes.begin(), this->_db_nodes.end());
-    return;
+    std::sort(_db_nodes.begin(), _db_nodes.end());
 }
 
+// Get a DBNode prefix for the provided hash slot
 std::string RedisCluster::_get_crc16_prefix(uint64_t hash_slot)
 {
-    uint64_t byte_filter = 255;
-    uint64_t crc_out = this->_crc16_inverse(hash_slot);
+    uint64_t byte_filter = {255};
+    uint64_t crc_out = _crc16_inverse(hash_slot);
     crc_out = crc_out >> 16;
-    //Get the two character prefix
-    char* prefix = new char[2];
-    for(int i=1; i>=0; i--) {
-        prefix[i] = (crc_out&byte_filter);
-        crc_out = crc_out>>8;
+
+    // Get the two character prefix
+    char prefix[2] = {0};
+    for (int i = 1; i >= 0; i--) {
+        prefix[i] = (crc_out & byte_filter);
+        crc_out = crc_out >> 8;
     }
     std::string prefix_str = std::string(prefix, 2);
-    delete[] prefix;
     return prefix_str;
 }
 
+// Perform an inverse CRC16 calculation
 uint64_t RedisCluster::_crc16_inverse(uint64_t remainder)
 {
     uint64_t digit = 1;
     uint64_t poly = 69665; //x^16 + x^12 + x^5 + 1
 
-    for(int i=0; i<16; i++) {
-        if(remainder&digit)
-        remainder = remainder^poly;
-        digit=digit<<1;
-        poly=poly<<1;
+    for (int i = 0; i < 16; i++) {
+        if ((remainder & digit) != 0)
+        remainder ^= poly;
+        digit = digit << 1;
+        poly = poly << 1;
     }
     return remainder;
 }
 
+// Determine if the key has a substring enclosed by "{" and "}" characters
 bool RedisCluster::_has_hash_tag(const std::string& key)
 {
     size_t first = key.find('{');
     size_t second = key.find('}');
-    if(first == std::string::npos ||
-        second == std::string::npos)
-        return false;
-    else if(second < first)
-        return false;
-    else
-        return true;
+    return (first != std::string::npos && second != std::string::npos &&
+            second > first);
 }
 
+// Return the key enclosed by "{" and "}" characters
 std::string RedisCluster::_get_hash_tag(const std::string& key)
 {
+    // If no hash tag, bail
+    if (!_has_hash_tag(key))
+        return key;
+
+    // Extract the hash tag
     size_t first = key.find('{');
     size_t second = key.find('}');
-    if(first == std::string::npos ||
-        second == std::string::npos)
-        return key;
-    else if(second < first)
-        return key;
-    else
-        return key.substr(first+1,second-first-1);
+    return key.substr(first + 1, second - first - 1);
 }
 
+// Get the hash slot for a key
 uint16_t RedisCluster::_get_hash_slot(const std::string& key)
 {
-    std::string hash_key;
-    if(this->_has_hash_tag(key))
-        hash_key = this->_get_hash_tag(key);
-
-    else
-        hash_key = key;
-    return sw::redis::crc16(hash_key.c_str(),
-                            hash_key.size()) % 16384;
+    std::string hash_key = _get_hash_tag(key);
+    return sw::redis::crc16(hash_key.c_str(), hash_key.size()) % 16384;
 }
 
+// Get the index of the DBNode responsible for the hash slot
 uint16_t RedisCluster::_get_dbnode_index(uint16_t hash_slot,
                                    unsigned lhs, unsigned rhs)
 {
-    uint16_t m = (lhs + rhs)/2;
-    if(this->_db_nodes[m].lower_hash_slot<=hash_slot &&
-        this->_db_nodes[m].upper_hash_slot>=hash_slot) {
+    // Find the DBNode via binary search
+    uint16_t m = (lhs + rhs) / 2;
+
+    // If this is the correct slot, we're done
+    if (_db_nodes[m].lower_hash_slot <= hash_slot &&
+        _db_nodes[m].upper_hash_slot >= hash_slot) {
         return m;
-        }
+    }
+
+    // Otherwise search in the appropriate half
     else {
-        if(this->_db_nodes[m].lower_hash_slot > hash_slot)
-        return this->_get_dbnode_index(hash_slot, lhs, m-1);
+        if (_db_nodes[m].lower_hash_slot > hash_slot)
+            return _get_dbnode_index(hash_slot, lhs, m - 1);
         else
-        return this->_get_dbnode_index(hash_slot, m+1, rhs);
+            return _get_dbnode_index(hash_slot, m + 1, rhs);
     }
 }
 
+// Attaches a prefix and constant suffix to keys to enforce identical
+//  hash slot constraint
 std::vector<std::string>
 RedisCluster::_get_tmp_names(std::vector<std::string> names,
                              std::string db_prefix)
 {
     std::vector<std::string> tmp;
     std::vector<std::string>::iterator it = names.begin();
-    std::vector<std::string>::iterator it_end = names.end();
-    while(it!=it_end) {
-        std::string new_key = "{" + db_prefix + "}." +
-                            *it + ".TMP";
+    for ( ; it != names.end(); it++) {
+        std::string new_key = "{" + db_prefix + "}." + *it + ".TMP";
         tmp.push_back(new_key);
-        it++;
     }
     return tmp;
 }
 
+// Delete multiple keys (assumesthat all keys use the same hash slot)
 void RedisCluster::_delete_keys(std::vector<std::string> keys)
 {
-    CommandReply reply;
+    // Build the command
     MultiKeyCommand cmd;
     cmd.add_field("DEL");
     cmd.add_fields(keys, true);
-    reply = this->run(cmd);
-    return;
+
+    // Run it, ignoring failure
+    (void)run(cmd);
 }
 
+// Run a model in the database that uses dagrun
 void RedisCluster::__run_model_dagrun(const std::string& key,
                                       std::vector<std::string> inputs,
                                       std::vector<std::string> outputs)
 {
-    /*This function will run a RedisAI model.  Because the RedisAI
+    /* This function will run a RedisAI model.  Because the RedisAI
     AI.RUNMODEL and AI.DAGRUN commands assume that the tensors
     and model are all on the same node.  As a result, we will
     have to retrieve all input tensors that are not on the same
     node as the model and set temporary
     */
 
-    //TODO We need to make sure that no other clients are using the
-    //same keys and model because we may end up overwriting or having
-    //race conditions on who can use the model, etc.
+    // TODO We need to make sure that no other clients are using the
+    // same keys and model because we may end up overwriting or having
+    // race conditions on who can use the model, etc.
 
-    DBNode* db = this->_get_model_script_db(key, inputs, outputs);
+    DBNode* db = _get_model_script_db(key, inputs, outputs);
 
-    //Create list of input tensors that do not hash to db slots
+    // Create list of input tensors that do not hash to db slots
     std::unordered_set<std::string> remote_inputs;
-    for(int i=0; i<inputs.size(); i++) {
-        uint16_t hash_slot = this->_get_hash_slot(inputs[i]);
-        if(hash_slot < db->lower_hash_slot ||
-        hash_slot > db->upper_hash_slot)
-        remote_inputs.insert(inputs[i]);
-    }
-
-    //Retrieve tensors that do not hash to db,
-    //rename the tensors to {prefix}.tensor_name.TMP
-    //TODO we need to make sure users don't use the .TMP suffix
-    //or check that the key does not exist
-    for(int i=0; i<inputs.size(); i++) {
-        if(remote_inputs.count(inputs[i])>0) {
-        std::string new_key = "{" + db->prefix + "}." +
-                                inputs[i] + ".TMP";
-        this->copy_tensor(inputs[i], new_key);
-        remote_inputs.erase(inputs[i]);
-        remote_inputs.insert(new_key);
-        inputs[i] = new_key;
+    for (size_t i = 0; i < inputs.size(); i++) {
+        uint16_t hash_slot = _get_hash_slot(inputs[i]);
+        if (hash_slot < db->lower_hash_slot ||
+            hash_slot > db->upper_hash_slot) {
+            remote_inputs.insert(inputs[i]);
         }
     }
 
-    //Create a renaming scheme for output tensor
+    // Retrieve tensors that do not hash to db,
+    // rename the tensors to {prefix}.tensor_name.TMP
+    // TODO we need to make sure users don't use the .TMP suffix
+    // or check that the key does not exist
+    for (size_t i = 0; i < inputs.size(); i++) {
+        if (remote_inputs.count(inputs[i]) > 0) {
+            std::string new_key = "{" + db->prefix + "}." + inputs[i] + ".TMP";
+            copy_tensor(inputs[i], new_key);
+            remote_inputs.erase(inputs[i]);
+            remote_inputs.insert(new_key);
+            inputs[i] = new_key;
+        }
+    }
+
+    // Create a renaming scheme for output tensor
     std::unordered_map<std::string, std::string> remote_outputs;
-    for(int i=0; i<outputs.size(); i++) {
-        uint16_t hash_slot = this->_get_hash_slot(outputs[i]);
-        if(hash_slot < db->lower_hash_slot ||
-        hash_slot > db->upper_hash_slot) {
-            std::string tmp_name = "{" + db->prefix + "}." +
-                                outputs[i] + ".TMP";
-            remote_outputs.insert({outputs[i], tmp_name});
+    for (size_t i = 0; i < outputs.size(); i++) {
+        uint16_t hash_slot = _get_hash_slot(outputs[i]);
+        if (hash_slot < db->lower_hash_slot ||
+            hash_slot > db->upper_hash_slot) {
+            std::string tmp = "{" + db->prefix + "}." + outputs[i] + ".TMP";
+            remote_outputs.insert({outputs[i], tmp});
             outputs[i] = remote_outputs[outputs[i]];
         }
     }
 
-    std::string model_name = "{" + db->prefix +
-                            "}." + std::string(key);
+    // Build the DAGRUN command
+    std::string model_name = "{" + db->prefix + "}." + key;
     CompoundCommand cmd;
-
     cmd.add_field("AI.DAGRUN");
     cmd.add_field("LOAD");
     cmd.add_field(std::to_string(inputs.size()));
@@ -838,32 +929,28 @@ void RedisCluster::__run_model_dagrun(const std::string& key,
     cmd.add_fields(inputs);
     cmd.add_field("OUTPUTS");
     cmd.add_fields(outputs);
-    this->run(cmd);
 
-    //Delete temporary input tensors
-    std::unordered_set<std::string>::const_iterator i_it
-        = remote_inputs.begin();
-    std::unordered_set<std::string>::const_iterator i_it_end
-        = remote_inputs.end();
-    while(i_it!=i_it_end) {
-        this->delete_tensor(*i_it);
-        i_it++;
+    // Run it
+    CommandReply reply = run(cmd);
+    if (reply.has_error()) {
+        throw std::runtime_error("Failed to execute DAGRUN");
     }
 
-    //Move temporary output to the correct location and
-    //delete temporary output tensors
-    std::unordered_map<std::string, std::string>::const_iterator j_it
-        = remote_outputs.begin();
-    std::unordered_map<std::string, std::string>::const_iterator j_it_end
-        = remote_outputs.end();
-    while(j_it!=j_it_end) {
-        this->rename_tensor(j_it->second, j_it->first);
-        j_it++;
-    }
+    // Delete temporary input tensors
+    std::unordered_set<std::string>::const_iterator i_it =
+        remote_inputs.begin();
+    for ( ; i_it !=  remote_inputs.end(); i_it++)
+        delete_tensor(*i_it);
 
-    return;
+    // Move temporary output to the correct location and
+    // delete temporary output tensors
+    std::unordered_map<std::string, std::string>::const_iterator j_it =
+        remote_outputs.begin();
+    for ( ; j_it != remote_outputs.end(); j_it++)
+        rename_tensor(j_it->second, j_it->first);
 }
 
+// Retrieve the optimum model prefix for the set of inputs
 DBNode* RedisCluster::_get_model_script_db(const std::string& name,
                                            std::vector<std::string>& inputs,
                                            std::vector<std::string>& outputs)
@@ -873,32 +960,29 @@ DBNode* RedisCluster::_get_model_script_db(const std::string& name,
     the model name is returned, else a prefixed model name is returned.
     */
 
-    //TODO we should randomly choose the max if there are multiple
-    //maxes
+    // TODO we should randomly choose the max if there are multiple maxes
 
-    std::vector<int> hash_slot_tally(this->_db_nodes.size(), 0);
+    std::vector<int> hash_slot_tally(_db_nodes.size(), 0);
 
-    for(int i=0; i<inputs.size(); i++) {
-        uint16_t hash_slot = this->_get_hash_slot(inputs[i]);
-        uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
-                                                    this->_db_nodes.size());
+    for (size_t i = 0; i < inputs.size(); i++) {
+        uint16_t hash_slot = _get_hash_slot(inputs[i]);
+        uint16_t db_index = _get_dbnode_index(hash_slot, 0, _db_nodes.size());
         hash_slot_tally[db_index]++;
     }
 
-    for(int i=0; i<outputs.size(); i++) {
-        uint16_t hash_slot = this->_get_hash_slot(outputs[i]);
-        uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
-                                                    this->_db_nodes.size());
+    for (size_t i = 0; i < outputs.size(); i++) {
+        uint16_t hash_slot = _get_hash_slot(outputs[i]);
+        uint16_t db_index = _get_dbnode_index(hash_slot, 0, _db_nodes.size());
         hash_slot_tally[db_index]++;
     }
 
-    //Determine which DBNode has the most hashes
+    // Determine which DBNode has the most hashes
     int max_hash = -1;
-    DBNode* db = 0;
-    for(int i=0; i<this->_db_nodes.size(); i++) {
-        if(hash_slot_tally[i] > max_hash) {
-        max_hash = hash_slot_tally[i];
-        db = &(this->_db_nodes[i]);
+    DBNode* db = NULL;
+    for (size_t i = 0; i < _db_nodes.size(); i++) {
+        if (hash_slot_tally[i] > max_hash) {
+            max_hash = hash_slot_tally[i];
+            db = &(_db_nodes[i]);
         }
     }
     return db;

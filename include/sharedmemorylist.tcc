@@ -29,27 +29,29 @@
 #ifndef SMARTREDIS_SHAREDMEMORYLIST_TCC
 #define SMARTREDIS_SHAREDMEMORYLIST_TCC
 
+// Record a memory allocation
 template <class T>
 void SharedMemoryList<T>::add_allocation(size_t bytes, T* ptr)
 {
-    std::shared_ptr<T> s_ptr(ptr, free);
-    this->_inventory.push_front(s_ptr);
-    return;
+    std::shared_ptr<T> s_ptr(ptr);
+    _inventory.push_front(s_ptr);
 }
 
+// Allocate memory and record the allocation
 template <class T>
 T* SharedMemoryList<T>::allocate_bytes(size_t bytes)
 {
-    T* ptr = (T*)malloc(bytes);
-    this->add_allocation(bytes, ptr);
+    T* ptr = (T*)new unsigned char[bytes];
+    add_allocation(bytes, ptr);
     return ptr;
 }
 
+// Perform type-specific memory allocation
 template <class T>
 T* SharedMemoryList<T>::allocate(size_t n_values)
 {
     size_t bytes = n_values * sizeof(T);
-    return this->allocate_bytes(bytes);
+    return allocate_bytes(bytes);
 }
 
 #endif //SMARTREDIS_SHAREDMEMORYLIST_TCC

@@ -32,21 +32,20 @@
 using namespace SmartRedis;
 
 // Set address and port for command to be executed on
-void NonKeyedCommand::set_exec_address_port(std::string address,
-                                    uint16_t port)
+void NonKeyedCommand::set_exec_address_port(std::string address, uint16_t port)
 {
-    this->_address = address;
-    this->_port = port;
+    _address = address;
+    _port = port;
 }
 
 // Get address that command will be to be executed on
 std::string NonKeyedCommand::get_address()
 {
-    return this -> _address;
+    return _address;
 }
 
 // Get port that command will be to be executed on
 uint16_t NonKeyedCommand::get_port()
 {
-    return this -> _port;
+    return _port;
 }

@@ -30,56 +30,59 @@
 
 using namespace SmartRedis;
 
+// Command copy constructor
 Command::Command(const Command& cmd)
 {
     *this = cmd;
 }
 
+// Command copy assignment operator
 Command& Command::operator=(const Command& cmd)
 {
-    if(this!=&cmd) {
-        make_empty();
+    // Check for self-assignment
+    if (this == &cmd)
+        return *this; // we have met the enemy and he is us
 
-        this->_fields.resize(cmd._fields.size());
+    make_empty();
 
-        // copy pointer fields and put into _fields
-        this->_ptr_fields = cmd._ptr_fields;
-        std::vector<std::pair<char*, size_t> >::const_iterator ptr_it =
-            this->_ptr_fields.begin();
-        std::vector<std::pair<char*, size_t> >::const_iterator ptr_it_end =
-            this->_ptr_fields.end();
-        for(; ptr_it != ptr_it_end; ptr_it++)
-            this->_fields[ptr_it->second] = ptr_it->first;
+    _fields.resize(cmd._fields.size());
 
-        // copy _local_fields and _cmd_keys, and put the fields into _fields
-        std::vector<std::pair<char*, size_t> >::const_iterator local_it =
-            cmd._local_fields.begin();
-        std::vector<std::pair<char*, size_t> >::const_iterator local_it_end =
-            cmd._local_fields.end();
-        for(; local_it != local_it_end; local_it++) {
-            // allocate memory and copy a local field
-            int field_size = cmd._fields[local_it->second].size();
-            char* f = (char*) malloc(sizeof(char)*field_size);
-            std::memcpy(f, local_it->first, sizeof(char)*field_size);
-            this->_local_fields.push_back(std::pair<char*, size_t>
-                                         (f, local_it->second));
-            this->_fields[local_it->second] = std::string_view(f, field_size);
+    // copy pointer fields and put into _fields
+    _ptr_fields = cmd._ptr_fields;
+    std::vector<std::pair<char*, size_t> >::const_iterator ptr_it =
+        _ptr_fields.begin();
+    for (; ptr_it != _ptr_fields.end(); ptr_it++)
+        _fields[ptr_it->second] = ptr_it->first;
 
-            if(cmd._cmd_keys.count(cmd._fields[local_it->second]) != 0) {
-                // copy a command key
-                this->_cmd_keys[std::string_view(f, field_size)] =
-                    local_it->second;
-            }
+    // copy _local_fields and _cmd_keys, and put the fields into _fields
+    std::vector<std::pair<char*, size_t> >::const_iterator local_it =
+        cmd._local_fields.begin();
+    for (; local_it != cmd._local_fields.end(); local_it++) {
+        // allocate memory and copy a local field
+        size_t field_size = cmd._fields[local_it->second].size();
+        char* f = new char[field_size];
+        std::memcpy(f, local_it->first, field_size);
+        _local_fields.push_back(
+            std::pair<char*, size_t>(f, local_it->second));
+        _fields[local_it->second] = std::string_view(f, field_size);
+
+        if (cmd._cmd_keys.count(cmd._fields[local_it->second]) != 0) {
+            // copy a command key
+            _cmd_keys[std::string_view(f, field_size)] =
+                local_it->second;
         }
     }
+
     return *this;
 }
 
+// Command destructor
 Command::~Command()
 {
     make_empty();
 }
 
+// Add a field to the Command from a string.
 void Command::add_field(std::string field, bool is_key)
 {
     /* Copy the field string into a char* that is stored
@@ -90,43 +93,19 @@ void Command::add_field(std::string field, bool is_key)
     keys.
     */
 
-    int field_size = field.size();
-    char* f = (char*) malloc(sizeof(char)*(field_size+1));
+    size_t field_size = field.size();
+    char* f = (char*)new unsigned char[field_size + 1];
     field.copy(f, field_size, 0);
-    f[field_size]=0;
-    this->_local_fields.push_back({f, _fields.size()});
-    this->_fields.push_back(std::string_view(f, field_size));
+    f[field_size] = '\0';
+    _local_fields.push_back({f, _fields.size()});
+    _fields.push_back(std::string_view(f, field_size));
 
-    if(is_key)
-        this->_cmd_keys[std::string_view(f, field_size)] =
-            this->_fields.size()-1;
-
-    return;
+    if (is_key) {
+        _cmd_keys[std::string_view(f, field_size)] = _fields.size() - 1;
+    }
 }
 
-void Command::add_field(char* field, bool is_key)
-{
-    /* Copy the field char* into a char* that is stored
-    locally in the Command object.  The new string is not
-    null terminated because the fields vector is of type
-    string_view which stores the length of the string.
-    If is_key is true, the key will be added to the command
-    keys.
-    */
-
-    int field_size = std::strlen(field);
-    char* f = (char*) malloc(sizeof(char)*(field_size));
-    std::memcpy(f, field, sizeof(char)*field_size);
-    this->_local_fields.push_back({f, _fields.size()});
-    this->_fields.push_back(std::string_view(f, field_size));
-
-    if(is_key)
-        this->_cmd_keys[std::string_view(f, field_size)] =
-            this->_fields.size()-1;
-
-    return;
-}
-
+// Add a field to the Command from a c-string.
 void Command::add_field(const char* field, bool is_key)
 {
     /* Copy the field char* into a char* that is stored
@@ -137,19 +116,18 @@ void Command::add_field(const char* field, bool is_key)
     keys.
     */
 
-    int field_size = std::strlen(field);
-    char* f = (char*) malloc(sizeof(char)*(field_size));
-    std::memcpy(f, field, sizeof(char)*field_size);
-    this->_local_fields.push_back({f, _fields.size()});
-    this->_fields.push_back(std::string_view(f, field_size));
+    size_t field_size = std::strlen(field);
+    char* f = new char[field_size];
+    std::memcpy(f, field, field_size);
+    _local_fields.push_back({f, _fields.size()});
+    _fields.push_back(std::string_view(f, field_size));
 
-    if(is_key)
-        this->_cmd_keys[std::string_view(f, field_size)] =
-            this->_fields.size()-1;
-
-    return;
+    if (is_key) {
+        _cmd_keys[std::string_view(f, field_size)] = _fields.size() - 1;
+    }
 }
 
+// Add a field to the Command from a c-string without copying the data.
 void Command::add_field_ptr(char* field, size_t field_size)
 {
     /* This function adds a field to the fields data
@@ -158,11 +136,11 @@ void Command::add_field_ptr(char* field, size_t field_size)
     accessed.  This function should be used for very large
     fields.  Field pointers cannot act as Command keys.
     */
-    this->_ptr_fields.push_back({field, _fields.size()});
-    this->_fields.push_back(std::string_view(field, field_size));
-    return;
+    _ptr_fields.push_back({field, _fields.size()});
+    _fields.push_back(std::string_view(field, field_size));
 }
 
+// Add a field to the Command from a std::string_view without copying the data
 void Command::add_field_ptr(std::string_view field)
 {
     /* This function adds a field to the fields data
@@ -172,12 +150,11 @@ void Command::add_field_ptr(std::string_view field)
     fields.  If is_key is true, the key will be added to the
     command keys.  Field pointers cannot act as Command keys.
     */
-    this->_ptr_fields.push_back({(char*)field.data(), _fields.size()});
-
-    this->_fields.push_back(field);
-    return;
+    _ptr_fields.push_back({const_cast<char*>(field.data()), _fields.size()});
+    _fields.push_back(field);
 }
 
+// Add fields to the Command from a vector of strings.
 void Command::add_fields(const std::vector<std::string>& fields, bool is_key)
 {
     /* Copy field strings into a char* that is stored
@@ -185,58 +162,58 @@ void Command::add_fields(const std::vector<std::string>& fields, bool is_key)
     null terminated because the fields vector is of type
     string_view which stores the length of the string
     */
-    for(int i=0; i<fields.size(); i++) {
-        this->add_field(fields[i], is_key);
+    for (size_t i = 0; i < fields.size(); i++) {
+        add_field(fields[i], is_key);
     }
-    return;
 }
 
+// Get the value of the field field
 std::string Command::first_field() const
 {
-    if(this->cbegin() == this->cend())
+    if (cbegin() == cend())
         throw std::runtime_error("No fields exist in the Command.");
-    return std::string(this->cbegin()->data(),
-                       this->cbegin()->size());
+    return std::string(cbegin()->data(), cbegin()->size());
 }
 
+// Get a string of the entire Command
 std::string Command::to_string()
 {
-    Command::iterator it = this->begin();
-    Command::iterator it_end = this->end();
-
     std::string output;
-    while(it!=it_end) {
+    for (Command::iterator it = begin(); it != end(); it++) {
         output += " " + std::string(it->data(), it->size());
-        it++;
     }
     return output;
 }
 
+// Returns an iterator pointing to the first field in the Command
 Command::iterator Command::begin()
 {
-    return this->_fields.begin();
+    return _fields.begin();
 }
 
 Command::const_iterator Command::cbegin() const
 {
-    return this->_fields.cbegin();
+    return _fields.cbegin();
 }
 
+// Returns an iterator pointing to the past-the-end field in the Command
 Command::iterator Command::end()
 {
-    return this->_fields.end();
+    return _fields.end();
 }
 
 Command::const_iterator Command::cend() const
 {
-    return this->_fields.cend();
+    return _fields.cend();
 }
 
+// Return true if the Command has keys
 bool Command::has_keys()
 {
-    return (this->_cmd_keys.size()>0);
+    return (_cmd_keys.size()>0);
 }
 
+// Return a copy of all Command keys
 std::vector<std::string> Command::get_keys() {
     /* This function returns a vector of key copies
     to the user.  Original keys are not returned
@@ -245,32 +222,27 @@ std::vector<std::string> Command::get_keys() {
     may need to grow or decrease in size.
     */
     std::vector<std::string> keys;
-
     std::unordered_map<std::string_view,size_t>::iterator it =
-        this->_cmd_keys.begin();
-    std::unordered_map<std::string_view,size_t>::iterator it_end;
-        this->_cmd_keys.end();
-
-    while(it!=it_end) {
+        _cmd_keys.begin();
+    for ( ; it != _cmd_keys.end(); it++) {
         keys.push_back(std::string(it->first.data(), it->first.length()));
-        it++;
     }
     return keys;
-
 }
 
+// Helper function for emptying the Command
 void Command::make_empty()
 {
     std::vector<std::pair<char*, size_t> >::iterator it =
-        this->_local_fields.begin();
-    std::vector<std::pair<char*, size_t> >::iterator it_end =
-        this->_local_fields.end();
-    for(; it!=it_end; it++) {
-        free((*it).first);
-        *it = {NULL,0};
+        _local_fields.begin();
+
+    for ( ; it != _local_fields.end(); it++) {
+        if (it->first != NULL)
+            delete(it->first);
+        *it = {NULL, 0};
     }
-    this->_local_fields.clear();
-    this->_ptr_fields.clear();
-    this->_cmd_keys.clear();
-    this->_fields.clear();
+    _local_fields.clear();
+    _ptr_fields.clear();
+    _cmd_keys.clear();
+    _fields.clear();
 }
