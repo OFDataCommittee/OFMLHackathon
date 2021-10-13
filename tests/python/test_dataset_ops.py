@@ -52,8 +52,8 @@ def test_rename_dataset(use_cluster):
 
     client.rename_dataset("dataset_rename", "dataset_renamed")
 
-    assert not (client.key_exists(get_prefix() + "dataset_rename"))
-    assert client.key_exists(get_prefix() + "dataset_renamed")
+    assert not (client.dataset_exists("dataset_rename"))
+    assert client.dataset_exists("dataset_renamed")
     returned = client.get_dataset("dataset_renamed")
 
     # assert copied array is the same

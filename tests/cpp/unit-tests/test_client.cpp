@@ -550,7 +550,7 @@ SCENARIO("Testing FLUSHDB on Client Object", "[Client][FLUSHDB]")
             THEN("The database is flushed")
             {
                 // ensure the database has things to flush
-                CHECK_NOTHROW(client.get_dataset(dataset_name));
+                CHECK_FALSE(client.dataset_exists(dataset_name) == true);
                 CHECK(client.tensor_exists(tensor_key) == true);
                 // flush the database
                 std::string db_address = parse_SSDB(std::getenv("SSDB"));
@@ -558,8 +558,7 @@ SCENARIO("Testing FLUSHDB on Client Object", "[Client][FLUSHDB]")
                 CHECK(reply == "OK");
 
                 // ensure the database is empty
-                CHECK_THROWS_AS(client.get_dataset(dataset_name),
-                                std::runtime_error);
+                CHECK_FALSE(client.dataset_exists(dataset_name));
                 CHECK_FALSE(client.tensor_exists(tensor_key));
             }
         }
@@ -578,14 +577,17 @@ SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
         {
             THEN("An error is thrown")
             {
-                std::string db_address = ":00";
+                std::vector<std::string> db_addresses =
+                    {":00", "127.0.0.1:", "127.0.0.1", "127.0.0.1:18446744073709551616"};
 
-                CHECK_THROWS_AS(client.config_get("*max-*-entries*", db_address),
-                                std::runtime_error);
-                CHECK_THROWS_AS(client.config_set("dbfilename",
-                                                  "new_file.rdb",
-                                                  db_address),
-                                std::runtime_error);
+                for (size_t address_index = 0; address_index < db_addresses.size(); address_index++) {
+                    CHECK_THROWS_AS(client.config_get("*max-*-entries*", db_addresses[address_index]),
+                                    std::runtime_error);
+                    CHECK_THROWS_AS(client.config_set("dbfilename",
+                                                      "new_file.rdb",
+                                                      db_addresses[address_index]),
+                                    std::runtime_error);
+                }
             }
         }
 
@@ -595,10 +597,56 @@ SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
             THEN("No error is thrown."){
 
                 std::string db_address = parse_SSDB(std::getenv("SSDB"));
+                std::string config_param = "dbfilename";
+                std::string new_filename = "new_file.rdb";
 
-                CHECK_NOTHROW(client.config_get("*max-*-entries*", db_address));
-                std::string reply = client.config_set("dbfilename", "new_file.rdb", db_address);
-                CHECK(reply == "OK");
+                CHECK_NOTHROW(client.config_set(config_param, new_filename, db_address));
+                std::unordered_map<std::string,std::string> reply =
+                    client.config_get("dbfilename", db_address);
+
+                CHECK(reply.size() == 1);
+                REQUIRE(reply.count(config_param) > 0);
+                CHECK(reply[config_param] == new_filename);
+            }
+        }
+    }
+}
+
+SCENARIO("Test CONFIG GET on an unsupported command", "[Client]")
+{
+    GIVEN("A client object")
+    {
+        Client client(use_cluster());
+        std::string address = parse_SSDB(std::getenv("SSDB"));
+
+        WHEN("CONFIG GET is called with an unsupported command")
+        {
+            std::unordered_map<std::string,std::string> reply =
+                client.config_get("unsupported_cmd", address);
+
+            THEN("CONFIG GET returns an empty unordered map")
+            {
+                CHECK(reply.empty() == true);
+            }
+        }
+    }
+}
+
+SCENARIO("Test CONFIG SET on an unsupported command", "[Client]")
+{
+    GIVEN("A client object")
+    {
+        Client client(use_cluster());
+        std::string address = parse_SSDB(std::getenv("SSDB"));
+
+        WHEN("CONFIG SET is called with an unsupported command")
+        {
+
+            THEN("CONFIG SET throws a runtime error")
+            {
+                CHECK_THROWS_AS(
+                    client.config_set("unsupported_cmd", "100", address),
+                    std::runtime_error);
             }
         }
     }

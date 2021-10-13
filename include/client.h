@@ -601,8 +601,10 @@ class Client
         *   \param expression Parameter used in the configuration or a
         *                     glob pattern (Use '*' to retrieve all
         *                     configuration parameters)
-        *   \param address The address of the database node execute on
-        *   \returns An unordered map that maps configuration parameters to their values
+        *   \param address The address of the database node to execute on
+        *   \returns An unordered map that maps configuration parameters to their values.
+        *            If the provided expression does not exist, then an empty dictionary
+        *            is returned.
         *   \throws std::runtime_error if the address is not addressable by this
         *           client
         */
@@ -617,12 +619,12 @@ class Client
         *          the next command executed.
         *   \param config_param A configuration parameter to set
         *   \param value The value to assign to the configuration parameter
-        *   \param address The address of the database node execute on
-        *   \returns "OK" if the configuration change is valid
+        *   \param address The address of the database node to execute on
         *   \throws std::runtime_error if the address is not addressable by this
-        *           client or if command fails to execute
+        *           client or if command fails to execute or if the config_param
+        *           is not supported.
         */
-        std::string config_set(std::string config_param, std::string value, std::string address);
+        void config_set(std::string config_param, std::string value, std::string address);
 
     protected:
 
