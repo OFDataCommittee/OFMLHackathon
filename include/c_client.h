@@ -35,10 +35,17 @@
 #include "client.h"
 #include "enums/c_memory_layout.h"
 #include "enums/c_tensor_type.h"
+#include "srexception.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*!
+*   \brief Return the last error encountered
+*   \return The text data for the last error encountered
+*/
+const char *sr_get_last_error();
 
 /*!
 *   \brief C-client constructor
