@@ -29,71 +29,76 @@
 #ifndef SMARTREDIS_SCALARFIELD_TCC
 #define SMARTREDIS_SCALARFIELD_TCC
 
+// ScalarField constructor
 template <class T>
-ScalarField<T>::ScalarField(const std::string& name,
-                            MetaDataType type) :
-    MetadataField(name, type)
+ScalarField<T>::ScalarField(const std::string& name, MetaDataType type)
+  : MetadataField(name, type)
 {
-    return;
+    // NOP
 }
 
-template <class T>
-ScalarField<T>::ScalarField(const std::string& name,
-                            MetaDataType type,
-                            const std::vector<T>& vals) :
-    MetadataField(name, type)
-{
-    this->_vals = vals;
-    return;
-}
-
+// ScalarField constructor with data values
 template <class T>
 ScalarField<T>::ScalarField(const std::string& name,
                             MetaDataType type,
-                            std::vector<T>&& vals) :
-    MetadataField(name, type)
+                            const std::vector<T>& vals)
+    : MetadataField(name, type)
 {
-    this->_vals = std::move(vals);
-    return;
+    _vals = vals;
 }
 
+// ScalarField move constructor with data values
+template <class T>
+ScalarField<T>::ScalarField(const std::string& name,
+                            MetaDataType type,
+                            std::vector<T>&& vals)
+    : MetadataField(name, type)
+{
+    _vals = std::move(vals);
+}
+
+// Serialize a scalar
 template <class T>
 std::string ScalarField<T>::serialize()
 {
-    return MetadataBuffer::generate_scalar_buf<T>(this->type(),
-                                                  this->_vals);
+    return MetadataBuffer::generate_scalar_buf<T>(type(),
+                                                  _vals);
 }
 
+// Add a value to a scalar
 template <class T>
 void ScalarField<T>::append(const void* value)
 {
-    this->_vals.push_back(*((T*)(value)));
-    return;
+    if (value != NULL)
+        _vals.push_back(*((T*)value));
 }
 
+// Retrieve the number of values in a scalar
 template <class T>
 size_t ScalarField<T>::size()
 {
-    return this->_vals.size();
+    return _vals.size();
 }
 
+// Clear out all values from a scalar
 template <class T>
 void ScalarField<T>::clear()
 {
-    this->_vals.clear();
-    return;
+    _vals.clear();
 }
 
+// Retrieve the scalar data
 template <class T>
 void* ScalarField<T>::data()
 {
-    return this->_vals.data();
+    return _vals.data();
 }
 
+// Retrieve a pointer to the underlying value structure
 template <class T>
 const std::vector<T>& ScalarField<T>::immutable_values()
 {
-    return this->_vals;
+    return _vals;
 }
 
 #endif //SMARTREDIS_SCALARFIELD_TCC

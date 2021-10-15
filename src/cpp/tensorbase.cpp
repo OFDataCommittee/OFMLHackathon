@@ -30,6 +30,7 @@
 #include <iostream>
 using namespace SmartRedis;
 
+// TensorBase constructor
 TensorBase::TensorBase(const std::string& name,
                        void* data,
                        const std::vector<size_t>& dims,
@@ -42,119 +43,142 @@ TensorBase::TensorBase(const std::string& name,
     owned by the tensor.
     */
 
-    this->_check_inputs(data, name, dims);
-    this->_name = name;
-    this->_type = type;
-    this->_dims = dims;
+    _check_inputs(data, name, dims);
+    _name = name;
+    _type = type;
+    _dims = dims;
 }
 
+// TensorBase copy constructor
 TensorBase::TensorBase(const TensorBase& tb)
 {
-    /* This is the copy constructor for TensorBase.
-    A deep copy of the tensor data is performed here.
-    */
-    this->_dims = std::vector<size_t>(tb._dims);
-    this->_name = std::string(tb._name);
-    this->_type = TensorType(tb._type);
+    // check for self-assignment
+    if (&tb == this)
+        return;
+
+    // deep copy of tensor data
+    _dims = std::vector<size_t>(tb._dims);
+    _name = std::string(tb._name);
+    _type = TensorType(tb._type);
 }
 
+// TensorBase move constructor
 TensorBase::TensorBase(TensorBase&& tb)
 {
-    /* This is the move constructor for TensorBase.
-    */
-    this->_name = std::move(tb._name);
-    this->_type = std::move(tb._type);
-    this->_dims = std::move(tb._dims);
-    this->_data = tb._data;
-    tb._data = 0;
+    // check for self-assignment
+    if (&tb == this)
+        return;
+
+    // Move data
+    _name = std::move(tb._name);
+    _type = std::move(tb._type);
+    _dims = std::move(tb._dims);
+    _data = tb._data;
+
+    // Mark that the data is no longer owned by the source
+    tb._data = NULL;
 }
 
+// TensorBase destructor
 TensorBase::~TensorBase()
 {
-    if(this->_data)
-        free(this->_data);
+    if (_data != NULL) {
+        delete(reinterpret_cast<unsigned char *>(_data));
+        _data = NULL;
+    }
 }
 
+// TensorBase copy assignment operator
 TensorBase& TensorBase::operator=(const TensorBase& tb)
 {
-    /* This is the copy assignment operator for
-    TensorBase.  A deep copy of the tensor
-    data is performed.
-    */
-   if(this!=&tb) {
-        this->_name = tb._name;
-        this->_type = tb._type;
-        this->_dims = tb._dims;
-        if(this->_data)
-            free(this->_data);
-   }
+    // check for self-assignment
+    if (&tb == this)
+        return *this;
+
+    // deep copy tensor data
+    _name = tb._name;
+    _type = tb._type;
+    _dims = tb._dims;
+
+    // Erase our old data
+    if (_data != NULL) {
+        delete(reinterpret_cast<unsigned char *>(_data));
+        _data = NULL;
+    }
+
+    // NOTE: The actual tensor data will be copied by the child class
+    // (template) after it calls this assignment operator.
+    // This routine should never be called directly
+
+    // Done
    return *this;
 }
 
+// TensorBase move assignment operator
 TensorBase& TensorBase::operator=(TensorBase&& tb)
 {
-    /* This is the move assignment operator for
-    TensorBase.
-    */
-    if(this!=&tb) {
-        this->_name = std::move(tb._name);
-        this->_type = std::move(tb._type);
-        this->_dims = std::move(tb._dims);
-        if(this->_data)
-            free(this->_data);
-        this->_data = tb._data;
-        tb._data = 0;
-    }
+    // check for self-assignment
+    if (&tb == this)
+        return *this;
+
+    // Move tensor data
+    _name = std::move(tb._name);
+    _type = std::move(tb._type);
+    _dims = std::move(tb._dims);
+
+    // Erase our old data and assume ownership of tb's data
+    if (_data != NULL)
+        delete(reinterpret_cast<unsigned char *>(_data));
+    _data = tb._data;
+    tb._data = NULL;
+
+    // Done
     return *this;
 }
 
+// Retrieve the tensor name.
 std::string TensorBase::name()
 {
-    /* Return the tensor name.
-    */
-    return this->_name;
+    return _name;
 }
 
+// Retrieve the tensor type.
 TensorType TensorBase::type()
 {
-    /* Return the tensor type.
-    */
-   return this->_type;
+   return _type;
 }
 
-std::string TensorBase::type_str(){
-    /* Return the string version
-    of the tensor type.
-    */
-    return TENSOR_STR_MAP.at(this->type());
+// Retrieve the string version of the tensor type.
+std::string TensorBase::type_str()
+{
+    return TENSOR_STR_MAP.at(type());
 }
 
+// Retrieve the tensor dims.
 std::vector<size_t> TensorBase::dims()
 {
-    /* Return the tensor dims
-    */
-   return this->_dims;
+   return _dims;
 }
 
+// Retrieve the total number of values in the tensor.
 size_t TensorBase::num_values()
 {
-    /* Return the total number of values in the tensor
-    */
-    size_t n_values = this->_dims[0];
-    for(size_t i=1; i<this->_dims.size(); i++) {
-        n_values *= this->_dims[i];
-    }
+    if (_dims.size() == 0)
+        throw std::runtime_error("Invalid dimensionality for tensor detected");
+    size_t n_values = 1;
+    for (size_t i = 0; i < _dims.size(); i++)
+        n_values *= _dims[i];
+
     return n_values;
 }
 
+// Retrieve a pointer to the tensor data.
 void* TensorBase::data()
 {
-    /* This function returns a pointer to the
-    tensor data.
-    */
-   return this->_data;
+   return _data;
 }
 
+// Get a serialized buffer of the TensorBase data
 std::string_view TensorBase::buf()
 {
     /* This function returns a std::string_view of tensor
@@ -162,10 +186,10 @@ std::string_view TensorBase::buf()
     has not yet been created, the data buffer will be
     created before returning.
     */
-    return std::string_view((char*)this->_data,
-                            this->_n_data_bytes());
+    return std::string_view((char*)_data, _n_data_bytes());
 }
 
+// Validate inputs for a tensor
 inline void TensorBase::_check_inputs(const void* src_data,
                                       const std::string& name,
                                       const std::vector<size_t>& dims)
@@ -175,33 +199,29 @@ inline void TensorBase::_check_inputs(const void* src_data,
     make the constructor actions more clear.
     */
 
-    if(!src_data)
-        throw std::runtime_error("Must provide non-Null "\
-                                 "pointer to data.");
+    if (src_data == NULL) {
+        throw std::runtime_error("Must provide non-Null pointer to data.");
+    }
 
-    if(name.size()==0)
-        throw std::runtime_error("A name must be "\
-                                 "provided for the tensor");
+    if (name.size() == 0) {
+        throw std::runtime_error("A name must be provided for the tensor");
+    }
 
-    if(name.compare(".meta")==0)
-        throw std::runtime_error(".META is an internally "\
-                                 "reserved name that is not "\
-                                 "allowed.");
+    if (name.compare(".meta") == 0) {
+        throw std::runtime_error(".meta is an internally reserved name "\
+                                 "that is not allowed.");
+    }
 
-    if(dims.size()==0)
-        throw std::runtime_error("Must provide a dimensions "\
-                                 "vector with at least one "\
-                                 "dimension.");
+    if (dims.size() == 0) {
+        throw std::runtime_error("Must provide a dimensions vector with at "
+                                 "least one dimension.");
+    }
 
     std::vector<size_t>::const_iterator it = dims.cbegin();
-    std::vector<size_t>::const_iterator it_end = dims.cend();
-    while(it!=it_end) {
-        if((*it)<=0) {
+    for ( ; it != dims.cend(); it++) {
+        if (*it <= 0) {
             throw std::runtime_error("All tensor dimensions "\
                                      "must be positive.");
         }
-        it++;
     }
-
-    return;
 }

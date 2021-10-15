@@ -35,22 +35,22 @@ namespace py = pybind11;
 
 PyDataset::PyDataset(const std::string& name) {
   DataSet* dataset = new DataSet(name);
-  this->_dataset = dataset;
+  _dataset = dataset;
 }
 
 PyDataset::PyDataset(DataSet* dataset) {
-  this->_dataset = dataset;
+  _dataset = dataset;
 }
 
 PyDataset::~PyDataset() {
-    if(this->_dataset != NULL) {
-      delete this->_dataset;
-      this->_dataset = NULL;
+    if (_dataset != NULL) {
+      delete _dataset;
+      _dataset = NULL;
     }
 }
 
 DataSet* PyDataset::get() {
-  return this->_dataset;
+  return _dataset;
 }
 
 void PyDataset::add_tensor(const std::string& name, py::array data, std::string& type) {
@@ -60,20 +60,19 @@ void PyDataset::add_tensor(const std::string& name, py::array data, std::string&
 
   // get dims
   std::vector<size_t> dims(buffer.ndim);
-  for (int i=0; i < buffer.shape.size(); i++) {
+  for (size_t i=0; i < buffer.shape.size(); i++) {
       dims[i] = (size_t) buffer.shape[i];
   }
 
   TensorType ttype = TENSOR_TYPE_MAP.at(type);
-  this->_dataset->add_tensor(name, ptr, dims, ttype, MemoryLayout::contiguous);
-  return;
+  _dataset->add_tensor(name, ptr, dims, ttype, MemoryLayout::contiguous);
 }
 
 py::array PyDataset::get_tensor(const std::string& name) {
 
     TensorBase* tensor;
     try {
-        tensor = this->_dataset->_get_tensorbase_obj(name);
+        tensor = _dataset->_get_tensorbase_obj(name);
     }
     catch(const std::exception& e) {
         throw std::runtime_error(e.what());
@@ -81,63 +80,54 @@ py::array PyDataset::get_tensor(const std::string& name) {
 
     //Define py::capsule lambda function for destructor
     py::capsule free_when_done((void*)tensor, [](void *tensor) {
-            delete (TensorBase*)tensor;
+            delete reinterpret_cast<TensorBase*>(tensor);
             });
 
     // detect data type
-    switch(tensor->type()) {
-        case TensorType::dbl : {
-            double* data =
-                (double*)(tensor->data_view(MemoryLayout::contiguous));
+    switch (tensor->type()) {
+        case TensorType::dbl: {
+            double* data = reinterpret_cast<double*>(
+                tensor->data_view(MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
-            break;
         }
-        case TensorType::flt : {
-            float* data =
-                (float*)(tensor->data_view(MemoryLayout::contiguous));
+        case TensorType::flt: {
+            float* data = reinterpret_cast<float*>(
+                tensor->data_view(MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
-            break;
         }
-        case TensorType::int64 : {
-            int64_t* data =
-                (int64_t*)(tensor->data_view(MemoryLayout::contiguous));
+        case TensorType::int64: {
+            int64_t* data = reinterpret_cast<int64_t*>(
+                tensor->data_view(MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
-            break;
         }
         case TensorType::int32: {
-            int32_t* data =
-                (int32_t*)(tensor->data_view(MemoryLayout::contiguous));
+            int32_t* data = reinterpret_cast<int32_t*>(
+                tensor->data_view(MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
-            break;
         }
         case TensorType::int16: {
-            int16_t* data =
-                (int16_t*)(tensor->data_view(MemoryLayout::contiguous));
+            int16_t* data = reinterpret_cast<int16_t*>(
+                tensor->data_view(MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
-            break;
         }
         case TensorType::int8: {
-            int8_t* data =
-                (int8_t*)(tensor->data_view(MemoryLayout::contiguous));
+            int8_t* data = reinterpret_cast<int8_t*>(
+                tensor->data_view(MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
-            break;
         }
         case TensorType::uint16: {
-            uint16_t* data =
-                (uint16_t*)(tensor->data_view(MemoryLayout::contiguous));
+            uint16_t* data = reinterpret_cast<uint16_t*>(
+                tensor->data_view(MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
-            break;
         }
         case TensorType::uint8: {
-            uint8_t* data =
-                (uint8_t*)(tensor->data_view(MemoryLayout::contiguous));
+            uint8_t* data = reinterpret_cast<uint8_t*>(
+                tensor->data_view(MemoryLayout::contiguous));
             return py::array(tensor->dims(), data, free_when_done);
-            break;
         }
         default :
             throw std::runtime_error("Could not infer type in "\
                                      "PyDataSet::get_tensor().");
-            break;
     }
 }
 
@@ -147,69 +137,54 @@ void PyDataset::add_meta_scalar(const std::string& name, py::array data, std::st
   void* ptr = buffer.ptr;
 
   MetaDataType ttype = METADATA_TYPE_MAP.at(type);
-  this->_dataset->add_meta_scalar(name, ptr, ttype);
+  _dataset->add_meta_scalar(name, ptr, ttype);
 }
 
 void PyDataset::add_meta_string(const std::string& name, const std::string& data) {
 
-  this->_dataset->add_meta_string(name, data);
+  _dataset->add_meta_string(name, data);
 }
 
 py::array PyDataset::get_meta_scalars(const std::string& name) {
 
-  MetaDataType type;
-  size_t length;
-  void *ptr;
-
-  this->_dataset->get_meta_scalars(name, ptr, length, type);
+  MetaDataType type = MetaDataType::invalid;
+  size_t length = 0;
+  void *ptr = NULL;
+  _dataset->get_meta_scalars(name, ptr, length, type);
 
   // detect data type
-  switch(type) {
-    case MetaDataType::dbl : {
-      double* data;
-      data = (double*) ptr;
+  switch (type) {
+    case MetaDataType::dbl: {
+      double* data = reinterpret_cast<double*>(ptr);
       return py::array(length, data, py::none());
-      break;
     }
-    case MetaDataType::flt : {
-      float* data;
-      data = (float*) ptr;
+    case MetaDataType::flt: {
+      float* data = reinterpret_cast<float*>(ptr);
       return py::array(length, data, py::none());
-      break;
     }
-    case MetaDataType::int32 : {
-      int32_t* data;
-      data = (int32_t*) ptr;
+    case MetaDataType::int32: {
+      int32_t* data = reinterpret_cast<int32_t*>(ptr);
       return py::array(length, data, py::none());
-      break;
     }
-    case MetaDataType::int64 : {
-      int64_t* data;
-      data = (int64_t*) ptr;
+    case MetaDataType::int64: {
+      int64_t* data = reinterpret_cast<int64_t*>(ptr);
       return py::array(length, data, py::none());
-      break;
     }
-    case MetaDataType::uint32 : {
-      uint32_t* data;
-      data = (uint32_t*) ptr;
+    case MetaDataType::uint32: {
+      uint32_t* data = reinterpret_cast<uint32_t*>(ptr);
       return py::array(length, data, py::none());
-      break;
     }
-    case MetaDataType::uint64 : {
-      uint64_t* data;
-      data = (uint64_t*) ptr;
+    case MetaDataType::uint64: {
+      uint64_t* data = reinterpret_cast<uint64_t*>(ptr);
       return py::array(length, data, py::none());
-      break;
     }
-    case MetaDataType::string : {
+    case MetaDataType::string: {
       throw std::runtime_error("MetaData is of type string. Use get_meta_strings method.");
     }
     default :
       // TODO throw python exception here
       throw std::runtime_error("Could not infer type");
-      break;
   }
-
 }
 
 std::string PyDataset::get_name() {
@@ -219,5 +194,8 @@ std::string PyDataset::get_name() {
 py::list PyDataset::get_meta_strings(const std::string& name) {
 
   // We return a copy
-  return py::cast(this->_dataset->get_meta_strings(name));
+  return py::cast(_dataset->get_meta_strings(name));
 }
+
+// EOF
+

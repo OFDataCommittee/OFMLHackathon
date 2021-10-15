@@ -30,63 +30,74 @@
 
 using namespace SmartRedis;
 
+// CommandList copy constructor
 CommandList::CommandList(const CommandList& cmd_lst)
 {
     std::vector<Command*>::const_iterator c_it = cmd_lst._commands.cbegin();
-    std::vector<Command*>::const_iterator c_it_end = cmd_lst._commands.cend();
-    Command* new_cmd;
-    for(; c_it != c_it_end; c_it++) {
-        new_cmd = (*c_it)->clone();
+    for ( ; c_it != cmd_lst._commands.cend(); c_it++) {
+        Command* new_cmd = (*c_it)->clone();
+        if (new_cmd == NULL) {
+            throw std::runtime_error("Bad command found in CommandList constructore");
+        }
         this->_commands.push_back(new_cmd);
     }
 }
 
+// CommandList copy assignment operator
 CommandList& CommandList::operator=(const CommandList& cmd_lst)
 {
-    if(this!=&cmd_lst) {
-        std::vector<Command*>::iterator it = this->_commands.begin();
-        std::vector<Command*>::iterator it_end = this->_commands.end();
-        for(; it != it_end; it++)
-            delete (*it);
-        this->_commands.clear();
+    // Check for self-assignment
+    if (this == &cmd_lst)
+        return *this;
 
-        std::vector<Command*>::const_iterator c_it = cmd_lst._commands.begin();
-        std::vector<Command*>::const_iterator c_it_end = cmd_lst._commands.end();
-        Command* new_cmd;
-        while(c_it != c_it_end) {
-            new_cmd = (*c_it)->clone();
-            this->_commands.push_back(new_cmd);
-            c_it++;
+    // Remove my old contents
+    std::vector<Command*>::iterator it = _commands.begin();
+    for (; it != _commands.end(); it++)
+        delete (*it);
+    _commands.clear();
+
+    // Copy over the new contents
+    std::vector<Command*>::const_iterator c_it = cmd_lst._commands.begin();
+    for ( ; c_it != cmd_lst._commands.end(); c_it++) {
+        Command* new_cmd = (*c_it)->clone();
+        if (new_cmd == NULL) {
+            throw std::runtime_error("Bad command found in CommandList constructore");
         }
+        _commands.push_back(new_cmd);
     }
+
+    // Done
     return *this;
 }
 
+// Default CommandList destructor
 CommandList::~CommandList()
 {
-    std::vector<Command*>::iterator it = this->_commands.begin();
-    std::vector<Command*>::iterator it_end = this->_commands.end();
-    for(; it != it_end; it++)
+    std::vector<Command*>::iterator it = _commands.begin();
+    for (; it != _commands.end(); it++)
         delete (*it);
 }
 
-
+// Returns an iterator pointing to the first Command
 CommandList::iterator CommandList::begin()
 {
-    return this->_commands.begin();
+    return _commands.begin();
 }
 
+// Returns a const iterator pointing to the first Command
 CommandList::const_iterator CommandList::cbegin()
 {
-    return this->_commands.cbegin();
+    return _commands.cbegin();
 }
 
+// Returns an iterator pointing to the last Command
 CommandList::iterator CommandList::end()
 {
-    return this->_commands.end();
+    return _commands.end();
 }
 
+// Returns a const iterator pointing to the last Command
 CommandList::const_iterator CommandList::cend()
 {
-    return this->_commands.cend();
+    return _commands.cend();
 }

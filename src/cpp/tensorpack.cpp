@@ -30,152 +30,156 @@
 
 using namespace SmartRedis;
 
+// TensorPack copy constructor
 TensorPack::TensorPack(const TensorPack& tp)
 {
-    this->_copy_tensor_inventory(tp);
+    if (this != &tp)
+        _copy_tensor_inventory(tp);
 }
 
+// TensorPack copy assignment operator
 TensorPack& TensorPack::operator=(const TensorPack& tp)
 {
-    if(this!=&tp) {
-        this->_all_tensors.clear();
-        this->_tensorbase_inventory.clear();
-        this->_copy_tensor_inventory(tp);
-    }
+    // Check for self-assignment
+    if (this == &tp)
+        return *this;
+
+    // Copy fields
+    _all_tensors.clear();
+    _tensorbase_inventory.clear();
+    _copy_tensor_inventory(tp);
     return *this;
 }
 
+// Default TensorPack destructor
 TensorPack::~TensorPack()
 {
-    typename TensorPack::tensorbase_iterator it =
-        this->tensor_begin();
-    typename TensorPack::tensorbase_iterator it_end =
-        this->tensor_end();
-
-    while(it!=it_end) {
+    typename TensorPack::tensorbase_iterator it = tensor_begin();
+    for ( ; it != tensor_end(); it++)
         delete (*it);
-        it++;
-    }
 }
 
+// Add a tensor to the dataset
 void TensorPack::add_tensor(const std::string& name,
                             void* data,
                             const std::vector<size_t>& dims,
                             const TensorType type,
                             const MemoryLayout mem_layout)
 {
-
-    if(this->tensor_exists(name))
-        throw std::runtime_error("The tensor " +
-                                 std::string(name) +
+    // Check if it's already present
+    if (tensor_exists(name)) {
+        throw std::runtime_error("The tensor " + std::string(name) +
                                  " already exists");
-
-    TensorBase* ptr;
-
-    switch(type) {
-        case TensorType::dbl :
-            ptr = new Tensor<double>(name, data, dims,
-                                    type, mem_layout);
-            break;
-        case TensorType::flt :
-            ptr = new Tensor<float>(name, data, dims,
-                                    type, mem_layout);
-            break;
-        case TensorType::int64 :
-            ptr = new Tensor<int64_t>(name, data, dims,
-                                      type, mem_layout);
-            break;
-        case TensorType::int32 :
-            ptr = new Tensor<int32_t>(name, data, dims,
-                                      type, mem_layout);
-            break;
-        case TensorType::int16 :
-            ptr = new Tensor<int16_t>(name, data, dims,
-                                     type, mem_layout);
-            break;
-        case TensorType::int8 :
-            ptr = new Tensor<int8_t>(name, data, dims,
-                                     type, mem_layout);
-            break;
-        case TensorType::uint16 :
-            ptr = new Tensor<uint16_t>(name, data, dims,
-                                       type, mem_layout);
-            break;
-        case TensorType::uint8 :
-             ptr = new Tensor<uint8_t>(name, data, dims,
-                                       type, mem_layout);
-             break;
-        default :
-	  return; // FINDME: Handle this case better
     }
-    this->add_tensor(ptr);
-    return;
+
+    // Allocate memory for the tensor
+    TensorBase* ptr = NULL;
+    switch (type) {
+        case TensorType::dbl:
+            ptr = new Tensor<double>(name, data, dims, type, mem_layout);
+            break;
+        case TensorType::flt:
+            ptr = new Tensor<float>(name, data, dims, type, mem_layout);
+            break;
+        case TensorType::int64:
+            ptr = new Tensor<int64_t>(name, data, dims, type, mem_layout);
+            break;
+        case TensorType::int32:
+            ptr = new Tensor<int32_t>(name, data, dims, type, mem_layout);
+            break;
+        case TensorType::int16:
+            ptr = new Tensor<int16_t>(name, data, dims, type, mem_layout);
+            break;
+        case TensorType::int8:
+            ptr = new Tensor<int8_t>(name, data, dims, type, mem_layout);
+            break;
+        case TensorType::uint16:
+            ptr = new Tensor<uint16_t>(name, data, dims, type, mem_layout);
+            break;
+        case TensorType::uint8:
+            ptr = new Tensor<uint8_t>(name, data, dims, type, mem_layout);
+            break;
+        default:
+            throw std::runtime_error("Unknown tensor type");
+    }
+
+    // Add it
+    add_tensor(ptr);
 }
 
+// Method to add a tensor object that has already been created on the heap.
+// DO NOT add tensors allocated on the stack that may be deleted outside of
+// the tensor pack. This function will cast the TensorBase to the correct
+// Tensor<T> type.
 void TensorPack::add_tensor(TensorBase* tensor)
 {
     std::string name = tensor->name();
 
-    if(name.size()==0)
-        throw std::runtime_error("The tensor name must "\
-                                 "be greater than 0.");
+    if (name.size() == 0)
+        throw std::runtime_error("The tensor name must be nonempty.");
 
-    this->_tensorbase_inventory[name] = tensor;
-    this->_all_tensors.push_front(tensor);
-    return;
+    _tensorbase_inventory[name] = tensor;
+    _all_tensors.push_front(tensor);
 }
 
+// Return a TensorBase pointer based on name.
 TensorBase* TensorPack::get_tensor(const std::string& name)
 {
-    TensorBase* ptr = this->_tensorbase_inventory.at(name);
-    return ptr;
+    return _tensorbase_inventory.at(name);
 }
 
+// Retrieve a pointer to the tensor data memory space
 void* TensorPack::get_tensor_data(const std::string& name)
 {
-    TensorBase* ptr = this->_tensorbase_inventory.at(name);
+    TensorBase* ptr = _tensorbase_inventory.at(name);
+    if (ptr == NULL)
+        throw std::runtime_error("Tensor not found: " + name);
     return ptr->data();
 }
 
+// Check whether a tensor with a given name exists in the TensorPack
 bool TensorPack::tensor_exists(const std::string& name)
 {
-    return (this->_tensorbase_inventory.count(name)>0);
+    return (_tensorbase_inventory.count(name) > 0);
 }
 
+// Retrieve an iterator pointing to the first Tensor
 TensorPack::tensorbase_iterator TensorPack::tensor_begin()
 {
-    return this->_all_tensors.begin();
+    return _all_tensors.begin();
 }
 
+// Retrieve an iterator pointing to the last Tensor
 TensorPack::tensorbase_iterator TensorPack::tensor_end()
 {
-    return this->_all_tensors.end();
+    return _all_tensors.end();
 }
 
+// Retrieve a const iterator pointing to the first Tensor
 TensorPack::const_tensorbase_iterator TensorPack::tensor_cbegin() const
 {
-    return this->_all_tensors.cbegin();
+    return _all_tensors.cbegin();
 }
 
+// Retrieve a const iterator pointing to the last Tensor
 TensorPack::const_tensorbase_iterator TensorPack::tensor_cend() const
 {
-    return this->_all_tensors.cend();
+    return _all_tensors.cend();
 }
 
+// Copy the tensor inventory from one TensorPack to this TensorPack
 void TensorPack::_copy_tensor_inventory(const TensorPack& tp)
 {
-    typename TensorPack::const_tensorbase_iterator it =
-        tp.tensor_cbegin();
-    typename TensorPack::const_tensorbase_iterator it_end =
-        tp.tensor_cend();
+    // Check for self-copy
+    if (this == &tp)
+        return;
 
-    TensorBase* ptr;
-    while(it!=it_end) {
-        ptr = (*it)->clone();
-        this->_all_tensors.push_front(ptr);
-        this->_tensorbase_inventory[ptr->name()] = ptr;
-        it++;
+    typename TensorPack::const_tensorbase_iterator it = tp.tensor_cbegin();
+    for ( ; it != tp.tensor_cend(); it++) {
+        TensorBase* ptr = (*it)->clone();
+        if (ptr == NULL)
+            throw std::runtime_error("Invalid tensor found!");
+        _all_tensors.push_front(ptr);
+        _tensorbase_inventory[ptr->name()] = ptr;
     }
-    return;
 }
-
