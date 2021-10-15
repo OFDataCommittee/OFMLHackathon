@@ -548,7 +548,7 @@ SCENARIO("Testing FLUSHDB on Client Object", "[Client][FLUSHDB]")
             THEN("The database is flushed")
             {
                 // ensure the database has things to flush
-                CHECK_FALSE(client.dataset_exists(dataset_name) == true);
+                CHECK(client.dataset_exists(dataset_name) == true);
                 CHECK(client.tensor_exists(tensor_key) == true);
                 // flush the database
                 std::string db_address = parse_SSDB(std::getenv("SSDB"));
