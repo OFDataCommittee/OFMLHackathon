@@ -179,7 +179,7 @@ CommandReply CommandReply::operator[](int index)
 // Get the length of the CommandReply string field
 size_t CommandReply::str_len()
 {
-    if(this->_reply->type!=REDIS_REPLY_STRING)
+    if(_reply->type!=REDIS_REPLY_STRING)
         throw std::runtime_error("The length of the reply str "\
                                  "cannot be returned because the "\
                                  "the reply type is " +
