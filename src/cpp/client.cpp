@@ -764,7 +764,7 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
 }
 
 // Delete all the keys of the given database
-std::string Client::flush_db(std::string address)
+void Client::flush_db(std::string address)
 {
     AddressAtCommand cmd;
     std::string host = cmd.parse_host(address);
@@ -780,8 +780,6 @@ std::string Client::flush_db(std::string address)
     CommandReply reply = _run(cmd);
     if (reply.has_error() > 0)
         throw std::runtime_error("FLUSHDB command failed");
-
-    return std::string(reply.status_str(), reply.status_str_len());
 }
 
 // Read the configuration parameters of a running server

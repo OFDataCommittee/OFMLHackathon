@@ -599,12 +599,11 @@ std::vector<py::dict> PyClient::get_db_cluster_info(std::vector<std::string> add
 }
 
 // Delete all keys of all existing databases
-std::string PyClient::flush_db(std::vector<std::string> addresses)
+void PyClient::flush_db(std::vector<std::string> addresses)
 {
-    std::string result;
     for(size_t i=0; i<addresses.size(); i++) {
         try {
-            result = _client->flush_db(addresses[i]);
+            _client->flush_db(addresses[i]);
         }
         catch(const std::exception& e) {
             throw std::runtime_error(e.what());
@@ -615,7 +614,6 @@ std::string PyClient::flush_db(std::vector<std::string> addresses)
                                     "flush_db execution.");
         }
     }
-    return result;
 }
 
 // Read the configuration parameters of a running server
@@ -640,7 +638,6 @@ py::dict PyClient::config_get(std::string expression, std::string address)
 // Reconfigure the server
 void PyClient::config_set(std::string config_param, std::string value, std::string address)
 {
-    std::string result;
     try {
         _client->config_set(config_param, value, address);
     }

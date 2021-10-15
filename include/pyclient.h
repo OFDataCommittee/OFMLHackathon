@@ -475,9 +475,8 @@ class PyClient
         *   \brief Delete all the keys of the given database
         *   \param addresses The addresses of the database nodes. Each address is
         *                    formatted as address:port e.g. 127.0.0.1:6379
-        *   \returns "OK" if keys are successfully flushed
         */
-        std::string flush_db(std::vector<std::string> addresses);
+        void flush_db(std::vector<std::string> addresses);
 
         /*!
         *   \brief Read the configuration parameters of a running server.

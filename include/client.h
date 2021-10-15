@@ -592,9 +592,8 @@ class Client
         /*!
         *   \brief Delete all the keys of the given database
         *   \param address The address of the database node
-        *   \returns "OK" if keys are successfully flushed
         */
-        std::string flush_db(std::string address);
+        void flush_db(std::string address);
 
         /*!
         *   \brief Read the configuration parameters of a running server.

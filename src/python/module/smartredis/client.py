@@ -697,8 +697,6 @@ class Client(PyClient):
 
         :param addresses: The addresses of the database nodes
         :type address: list[str]
-        :returns: "OK" if command is successfully executed
-        :rtype: str
         :raises RedisReplyError: if there is an error in
                 in command execution or the address
                 is not reachable by the client.
@@ -711,7 +709,7 @@ class Client(PyClient):
                 being thrown.
         """
         try:
-            return super().flush_db(addresses)
+            super().flush_db(addresses)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "flush_db")
 

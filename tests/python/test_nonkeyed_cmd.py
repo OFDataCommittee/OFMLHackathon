@@ -53,9 +53,8 @@ def test_flushdb_command(use_cluster):
     client.put_tensor("test_copy", tensor)
 
     assert client.tensor_exists("test_copy")
-    reply = client.flush_db(address)
+    client.flush_db(address)
     assert not client.tensor_exists("test_copy")
-    assert reply == "OK"
 
 
 def test_config_set_get_command(use_cluster):
