@@ -132,7 +132,7 @@ SRError DeleteCClient(void* c_client)
 
 // Free the memory associated with the c client.
 extern "C"
-void DeleteCClient(void** c_client)
+SRError DeleteCClient(void** c_client)
 {
   SRError result = sr_ok;
 

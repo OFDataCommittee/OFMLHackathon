@@ -35,6 +35,7 @@
 #include "enums/c_memory_layout.h"
 #include "enums/c_tensor_type.h"
 #include "enums/c_metadata_type.h"
+#include "srexception.h"
 
 #ifdef __cplusplus
 extern "C" {
