@@ -41,7 +41,6 @@ Redis::Redis() : RedisServer()
 // Redis constructor. Uses address provided to constructor instead of environment variables
 Redis::Redis(std::string address_port) : RedisServer()
 {
-    _connect(address_port);
     _add_to_address_map(address_port);
     _connect(address_port);
 }
