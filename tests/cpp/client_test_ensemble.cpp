@@ -200,7 +200,7 @@ int main(int argc, char* argv[]) {
   std::vector<size_t> dims = {dim1};
 
   produce(dims,
-				  std::string("producer_0"),
+		  std::string("producer_0"),
           std::string("producer_0"));
 
   char keyin_env_get[] = "SSKEYIN=producer_1,producer_0";

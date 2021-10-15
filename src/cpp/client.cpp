@@ -723,18 +723,12 @@ void Client::use_tensor_ensemble_prefix(bool use_prefix)
 // Returns information about the given database node
 parsed_reply_nested_map Client::get_db_node_info(std::string address)
 {
-    // Validate the address
-    std::string host = address.substr(0, address.find(":"));
-    uint64_t port = std::stoul(address.substr(address.find(":") + 1),
-                               nullptr, 0);
-    if (host.empty() || port == 0) {
-        throw std::runtime_error(std::string(address) +
-                                 "is not a valid database node address.");
-    }
-
-    // Run an INFO EVERYTHING command to get node info
     DBInfoCommand cmd;
+    std::string host = cmd.parse_host(address);
+    uint64_t port = cmd.parse_port(address);
+
     cmd.set_exec_address_port(host, port);
+
     cmd.add_field("INFO");
     cmd.add_field("EVERYTHING");
     CommandReply reply = _run(cmd);
@@ -752,18 +746,12 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
     if (_redis_cluster == NULL)
         throw std::runtime_error("Cannot run on non-cluster environment");
 
-    // Validate the address
-    std::string host = address.substr(0, address.find(":"));
-    uint64_t port = std::stoul (address.substr(address.find(":") + 1),
-                                nullptr, 0);
-    if (host.empty() || port == 0) {
-        throw std::runtime_error(std::string(address) +
-                                 "is not a valid database node address.");
-    }
-
-    // Run the CLUSTER INFO command
     ClusterInfoCommand cmd;
+    std::string host = cmd.parse_host(address);
+    uint64_t port = cmd.parse_port(address);
+
     cmd.set_exec_address_port(host, port);
+
     cmd.add_field("CLUSTER");
     cmd.add_field("INFO");
     CommandReply reply = _run(cmd);
@@ -775,7 +763,73 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
                                                      reply.str_len()));
 }
 
-// Set the prefixes that are used for set and get methods using SSKEYIN 
+// Delete all the keys of the given database
+void Client::flush_db(std::string address)
+{
+    AddressAtCommand cmd;
+    std::string host = cmd.parse_host(address);
+    uint64_t port = cmd.parse_port(address);
+    if (host.empty() or port == 0){
+        throw std::runtime_error(std::string(address) +
+                                 "is not a valid database node address.");
+    }
+    cmd.set_exec_address_port(host, port);
+
+    cmd.add_field("FLUSHDB");
+
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw std::runtime_error("FLUSHDB command failed");
+}
+
+// Read the configuration parameters of a running server
+std::unordered_map<std::string,std::string> Client::config_get(std::string expression,
+                                                               std::string address)
+{
+    AddressAtCommand cmd;
+    std::string host = cmd.parse_host(address);
+    uint64_t port = cmd.parse_port(address);
+
+    cmd.set_exec_address_port(host, port);
+
+    cmd.add_field("CONFIG");
+    cmd.add_field("GET");
+    cmd.add_field(expression);
+
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw std::runtime_error("CONFIG GET command failed");
+
+    // parse reply
+    size_t n_dims = reply.n_elements();
+    std::unordered_map<std::string,std::string> reply_map;
+    for(size_t i = 0; i < n_dims; i += 2){
+        reply_map[reply[i].str()] = reply[i+1].str();
+    }
+
+    return reply_map;
+}
+
+// Reconfigure the server
+void Client::config_set(std::string config_param, std::string value, std::string address)
+{
+    AddressAtCommand cmd;
+    std::string host = cmd.parse_host(address);
+    uint64_t port = cmd.parse_port(address);
+
+    cmd.set_exec_address_port(host, port);
+
+    cmd.add_field("CONFIG");
+    cmd.add_field("SET");
+    cmd.add_field(config_param);
+    cmd.add_field(value);
+
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw std::runtime_error("CONFIG SET command failed");
+}
+
+// Set the prefixes that are used for set and get methods using SSKEYIN
 // and SSKEYOUT environment variables.
 void Client::_set_prefixes_from_env()
 {

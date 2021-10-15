@@ -438,7 +438,8 @@ class PyClient
 
         /*!
         *   \brief Returns information about the given database nodes
-        *   \param addresses The addresses of the database nodes
+        *   \param addresses The addresses of the database nodes. Each address is
+        *                    formatted as address:port e.g. 127.0.0.1:6379
         *   \returns A list of parsed_map objects containing all the
         *            information about the given database nodes
 	    *   \throws std::runtime_error if the address is not addressable by this
@@ -455,7 +456,8 @@ class PyClient
         /*!
         *   \brief \brief Returns the CLUSTER INFO command reply addressed to one
         *                 or multiple cluster nodes.
-        *   \param addresses The addresses of the database nodes
+        *   \param addresses The addresses of the database nodes. Each address is
+        *                    formatted as address:port e.g. 127.0.0.1:6379
         *   \returns A list of parsed_map objects containing all the cluster
         *            information about the given database nodes
 	    *   \throws std::runtime_error if the address is not addressable by this
@@ -468,6 +470,42 @@ class PyClient
         *           being thrown.
         */
         std::vector<py::dict> get_db_cluster_info(std::vector<std::string> addresses);
+
+        /*!
+        *   \brief Delete all the keys of the given database
+        *   \param addresses The addresses of the database nodes. Each address is
+        *                    formatted as address:port e.g. 127.0.0.1:6379
+        */
+        void flush_db(std::vector<std::string> addresses);
+
+        /*!
+        *   \brief Read the configuration parameters of a running server.
+        *   \param  expression Parameter used in the configuration or a
+        *                      glob pattern (Use '*' to retrieve all
+        *                      configuration parameters)
+        *   \param address The address of the database node execute on
+        *   \returns A dictionary that maps configuration parameters to their values
+        *            If the provided expression does not exist, then an empty
+        *            dictionary is returned.
+        *   \throws std::runtime_error if the address is not addressable by this
+        *           client
+        */
+        py::dict config_get(std::string expression,std::string address);
+
+        /*!
+        *   \brief Reconfigure the server. It can change both trivial
+        *          parameters or switch from one to another persistence option.
+        *          All the configuration parameters set using this command are
+        *          immediately loaded by Redis and will take effect starting with
+        *          the next command executed.
+        *   \param config_param A configuration parameter to set
+        *   \param value The value to assign to the configuration parameter
+        *   \param address The address of the database node execute on
+        *   \throws std::runtime_error if the address is not addressable by this
+        *           client or if command fails to execute or if the config_param
+        *           is unsupported.
+        */
+        void config_set(std::string config_param, std::string value, std::string address);
 
     private:
 

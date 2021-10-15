@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pytest
 
@@ -14,8 +15,8 @@ def test_copy_tensor(use_cluster):
 
     client.copy_tensor("test_copy", "test_copied")
 
-    assert client.key_exists("test_copy")
-    assert client.key_exists("test_copied")
+    assert client.key_exists(get_prefix() + "test_copy")
+    assert client.key_exists(get_prefix() + "test_copied")
     returned = client.get_tensor("test_copied")
     assert np.array_equal(tensor, returned)
 
@@ -29,8 +30,8 @@ def test_rename_tensor(use_cluster):
 
     client.rename_tensor("test_rename", "test_renamed")
 
-    assert not (client.key_exists("test_rename"))
-    assert client.key_exists("test_renamed")
+    assert not client.tensor_exists("test_rename")
+    assert client.tensor_exists("test_renamed")
     returned = client.get_tensor("test_renamed")
     assert np.array_equal(tensor, returned)
 
@@ -72,3 +73,16 @@ def test_copy_not_tensor(use_cluster):
     client.set_function("test_func", test_func)
     with pytest.raises(RedisReplyError):
         client.copy_tensor("test_func", "test_fork")
+
+
+# --------------- Helper Functions --------------------
+
+
+def get_prefix():
+    # get prefix, if it exists. Assumes the client is using
+    # tensor prefix which is the default.
+    sskeyin = os.environ.get("SSKEYIN", None)
+    prefix = ""
+    if sskeyin:
+        prefix = sskeyin.split(",")[0] + "."
+    return prefix
