@@ -515,9 +515,7 @@ SCENARIO("Testing FLUSHDB on empty Client Object", "[Client][FLUSHDB]")
             {
                 std::string db_address = parse_SSDB(std::getenv("SSDB"));
 
-                std::string reply = client.flush_db(db_address);
-
-                CHECK(reply == "OK");
+                CHECK_NOTHROW(client.flush_db(db_address));
             }
         }
     }
@@ -554,8 +552,7 @@ SCENARIO("Testing FLUSHDB on Client Object", "[Client][FLUSHDB]")
                 CHECK(client.tensor_exists(tensor_key) == true);
                 // flush the database
                 std::string db_address = parse_SSDB(std::getenv("SSDB"));
-                std::string reply = client.flush_db(db_address);
-                CHECK(reply == "OK");
+                CHECK_NOTHROW(client.flush_db(db_address));
 
                 // ensure the database is empty
                 CHECK_FALSE(client.dataset_exists(dataset_name));
