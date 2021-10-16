@@ -1,7 +1,7 @@
 import os
+
 import numpy as np
 import pytest
-
 from smartredis import Client
 from smartredis.error import RedisReplyError
 
@@ -18,7 +18,6 @@ def test_dbnode_info_command(use_cluster):
 
     assert len(info) > 0
 
-<<<<<<< HEAD
 
 def test_dbcluster_info_command(use_cluster):
     # get env var to set through client init
@@ -35,6 +34,7 @@ def test_dbcluster_info_command(use_cluster):
         # cannot call get_db_cluster_info in non-cluster environment
         with pytest.raises(RedisReplyError):
             client.get_db_cluster_info(address)
+
 
 def test_flushdb_command(use_cluster):
     # from within the testing framework, there is no way
@@ -73,6 +73,7 @@ def test_config_set_get_command(use_cluster):
     assert len(get_reply) > 0
     assert get_reply["lua-time-limit"] == value
 
+
 def test_config_set_command_DNE(use_cluster):
     # get env var to set through client init
     ssdb = os.environ["SSDB"]
@@ -85,6 +86,7 @@ def test_config_set_command_DNE(use_cluster):
     with pytest.raises(RedisReplyError):
         client.config_set("config_param_DNE", "10", ssdb)
 
+
 def test_config_get_command_DNE(use_cluster):
     # get env var to set through client init
     ssdb = os.environ["SSDB"]
@@ -96,15 +98,10 @@ def test_config_get_command_DNE(use_cluster):
     # CONFIG GET returns an empty dictionary if the config_param is unsupported
     get_reply = client.config_get("config_param_DNE", ssdb)
     assert get_reply == dict()
-=======
-    for db in info:
-        for key in db:
-            print("\n")
-            print(key, db[key])
+
 
 def test_save_command(use_cluster):
     # get env var to set through client init
-    # if cluster, only test first DB
     ssdb = os.environ["SSDB"]
     if use_cluster:
         addresses = ssdb.split(",")
@@ -115,6 +112,4 @@ def test_save_command(use_cluster):
     # client init should fail if SSDB not set
     client = Client(address=ssdb, cluster=use_cluster)
 
-    response = client.save(addresses)
-
-    assert response == "OK">>>>>>> Expose SAVE command to Python client
+    client.save(addresses)

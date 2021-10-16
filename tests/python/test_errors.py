@@ -2,7 +2,6 @@ import os
 
 import numpy as np
 import pytest
-
 from smartredis import Client, Dataset
 from smartredis.error import RedisConnectionError, RedisReplyError
 
@@ -138,6 +137,7 @@ def test_wrong_model_name_from_file(mock_data, mock_model, use_cluster):
     finally:
         os.remove("torch_cnn.pt")
 
+
 def test_set_data_wrong_type():
     """A call to Dataset.set_data is made with the wrong
     type (i.e. not Pydataset).
@@ -147,6 +147,7 @@ def test_set_data_wrong_type():
     with pytest.raises(TypeError):
         d.set_data(input_param)
 
+
 def test_from_pybind_wrong_type():
     """A call to Dataset.set_data is made with the wrong
     type (i.e. not Pydataset).
@@ -154,6 +155,7 @@ def test_from_pybind_wrong_type():
     input_param = Dataset("wrong_input_param")
     with pytest.raises(TypeError):
         d = Dataset.from_pybind(input_param)
+
 
 def bad_function(data):
     """Bad function which only raises an exception"""

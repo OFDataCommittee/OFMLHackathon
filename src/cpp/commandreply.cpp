@@ -143,17 +143,6 @@ char* CommandReply::status_str()
   return _reply->str;
 }
 
-// Get string field of REDIS_REPLY_STATUS
-char* CommandReply::status_str()
-{
-  if(_reply->type!=REDIS_REPLY_STATUS)
-    throw std::runtime_error("A pointer to the reply str "\
-                             "cannot be returned because the "\
-                             "the reply type is " +
-                             redis_reply_type());
-  return _reply->str;
-}
-
 // Get the integer field of the reply
 long long CommandReply::integer()
 {

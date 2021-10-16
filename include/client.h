@@ -629,11 +629,10 @@ class Client
         *   \brief Performs a synchronous save of the dataset producing a point in time snapshot
         *          of all the data inside the Redis instance  in the form of an RDB file.
         *   \param address The address of the database node (host:port)
-        *   \returns "OK" if the point in time snapshot of the redis instance is successful
         *   \throws std::runtime_error if the address is not addressable by this
         *           client or if command fails to execute
         */
-        std::string save(std::string address);
+        void save(std::string address);
 
     protected:
 

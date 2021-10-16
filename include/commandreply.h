@@ -204,14 +204,6 @@ class CommandReply {
         size_t str_len();
 
         /*!
-        *   \brief Get the length of the CommandReply field
-        *   \returns The length of the CommandReply field
-        *   \throw std::runtime_error if the CommandReply
-        *          does not have a status field
-        */
-        size_t status_str_len();
-
-        /*!
         *   \brief Get the number of elements in the CommandReply
         *   \returns The number of elements in the CommandReply
         *   \throw std::runtime_error if the CommandReply

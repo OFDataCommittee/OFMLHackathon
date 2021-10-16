@@ -794,7 +794,7 @@ class Client(PyClient):
                 being thrown.
         """
         try:
-            return super().save(addresses)
+            super().save(addresses)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "save")
 

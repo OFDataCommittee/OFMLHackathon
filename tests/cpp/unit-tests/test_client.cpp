@@ -670,11 +670,10 @@ SCENARIO("Testing SAVE command on Client Object", "[Client][SAVE]")
 
         WHEN("When SAVE is called for a given address")
         {
-            std::string save_response = client.save(address);
 
             THEN("Producing a point in time snapshot of the redis instance is successful")
             {
-                CHECK("OK" == save_response);
+                CHECK_NOTHROW(client.save(address));
             }
         }
     }
