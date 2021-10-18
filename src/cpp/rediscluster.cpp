@@ -267,12 +267,9 @@ CommandReply RedisCluster::copy_tensor(const std::string& src_key,
         throw smart_runtime_error("Failed to find tensor " + src_key);
 
     // Decode the tensor
-    std::vector<size_t> dims =
-        cmd_get.get_dims(cmd_get_reply);
-    std::string_view blob =
-        cmd_get.get_data_blob(cmd_get_reply);
-    TensorType type =
-        cmd_get.get_data_type(cmd_get_reply);
+    std::vector<size_t> dims = cmd_get.get_dims(cmd_get_reply);
+    std::string_view blob = cmd_get.get_data_blob(cmd_get_reply);
+    TensorType type = cmd_get.get_data_type(cmd_get_reply);
 
     // Build the PUT command
     MultiKeyCommand cmd_put;
@@ -581,7 +578,7 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
             throw smart_runtime_error(e.what());
         }
         catch (...) {
-            throw smart_runtime_error("A non-standard exception encountered "\
+            throw smart_unknown_error("A non-standard exception encountered "\
                                       "during command " + cmd.first_field() +
                                       " execution.");
         }
@@ -610,6 +607,12 @@ inline void RedisCluster::_connect(std::string address_port)
             _redis_cluster = new sw::redis::RedisCluster(address_port);
             return;
         }
+        catch (sw::redis::Error& e) {
+            _redis = NULL;
+            throw smart_database_error(std::string("Unable to connect to "\
+                                    "backend Redis database: ") +
+                                    e.what())
+        }
         catch (std::exception& e) {
             if (_redis_cluster != NULL) {
                 delete _redis_cluster;
@@ -625,7 +628,7 @@ inline void RedisCluster::_connect(std::string address_port)
                 _redis_cluster = NULL;
             }
             if (i == n_trials) {
-                throw smart_runtime_error("A non-standard exception was "\
+                throw smart_unknown_error("A non-standard exception was "\
                                           "encountered during client "\
                                           "connection.");
             }
@@ -988,5 +991,3 @@ DBNode* RedisCluster::_get_model_script_db(const std::string& name,
     }
     return db;
 }
-
-// EOF

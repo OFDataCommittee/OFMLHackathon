@@ -141,6 +141,6 @@ class _smart_unknown_error: public smart_error
 	}
 };
 
-#define smart_unknown_error() _smart_unknown_error("unknown error!", __FILE__, __LINE__)
+#define smart_unknown_error(txt) _smart_unknown_error(txt, __FILE__, __LINE__)
 
 #endif // SMARTREDIS_SMART_ERROR_H

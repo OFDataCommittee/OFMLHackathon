@@ -396,10 +396,9 @@ inline CommandReply Redis::_run(const Command& cmd)
             throw smart_runtime_error(e.what());
         }
         catch (...) {
-            throw smart_runtime_error("A non-standard exception "\
+            throw smart_unknown_error("Non-standard exception "\
                                       "encountered during command " +
-                                      cmd.first_field() +
-                                      " execution. ");
+                                      cmd.first_field() + " execution. ");
         }
 
         if (do_sleep) {
@@ -428,6 +427,12 @@ inline void Redis::_connect(std::string address_port)
     try {
         _redis = new sw::redis::Redis(address_port);
     }
+    catch (sw::redis::Error& e) {
+        _redis = NULL;
+        throw smart_database_error(std::string("Unable to connect to "\
+                                   "backend Redis database: ") +
+                                   e.what())
+    }
     catch (std::exception& e) {
         _redis = NULL;
         throw smart_runtime_error("Failed to create Redis object with error: " +
@@ -435,7 +440,7 @@ inline void Redis::_connect(std::string address_port)
     }
     catch (...) {
         _redis = NULL;
-        throw smart_runtime_error("A non-standard exception encountered "\
+        throw smart_unknown_error("A non-standard exception encountered "\
                                   "during client connection.");
     }
 
@@ -448,7 +453,9 @@ inline void Redis::_connect(std::string address_port)
                 return;
             }
             else if (i == n_trials) {
-                throw smart_runtime_error("Connection attempt failed");
+                throw smart_runtime_error(std::string("Connection attempt "\
+                                          "failed after ") +
+                                          std::to_string(n) + "tries");
             }
         }
         catch (std::exception& e) {

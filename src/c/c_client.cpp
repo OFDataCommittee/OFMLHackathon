@@ -109,7 +109,7 @@ SRError SmartRedisCClient(bool cluster, void **new_client)
   }
   catch (...) {
     *new_client = NULL;
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -148,7 +148,7 @@ SRError DeleteCClient(void** c_client)
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -175,7 +175,7 @@ SRError put_dataset(void* c_client, void* dataset)
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -234,7 +234,7 @@ SRError get_dataset(void* c_client, const char* name,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -264,7 +264,7 @@ SRError rename_dataset(void* c_client, const char* name,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -295,7 +295,7 @@ SRError copy_dataset(void* c_client, const char* src_name,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -321,7 +321,7 @@ SRError delete_dataset(void* c_client, const char* name, const size_t name_lengt
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -361,7 +361,7 @@ SRError put_tensor(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -400,7 +400,7 @@ SRError get_tensor(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -441,7 +441,7 @@ SRError unpack_tensor(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -471,7 +471,7 @@ SRError rename_tensor(void* c_client, const char* key,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -499,7 +499,7 @@ SRError delete_tensor(void* c_client, const char* key,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -531,7 +531,7 @@ SRError copy_tensor(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -612,7 +612,7 @@ SRError set_model_from_file(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -693,7 +693,7 @@ SRError set_model(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -748,7 +748,7 @@ SRError get_model(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -784,7 +784,7 @@ SRError set_script_from_file(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -821,7 +821,7 @@ SRError set_script(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -855,7 +855,7 @@ SRError get_script(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -923,7 +923,7 @@ SRError run_script(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -988,7 +988,7 @@ SRError run_model(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -1032,7 +1032,7 @@ SRError key_exists(void* c_client, const char* key, const size_t key_length,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -1076,7 +1076,7 @@ SRError model_exists(void* c_client, const char* name, const size_t name_length,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -1120,7 +1120,7 @@ SRError tensor_exists(void* c_client, const char* name, const size_t name_length
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -1164,7 +1164,7 @@ SRError dataset_exists(void* c_client, const char* name, const size_t name_lengt
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -1216,7 +1216,7 @@ SRError poll_key(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -1268,7 +1268,7 @@ SRError poll_model(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -1320,7 +1320,7 @@ SRError poll_tensor(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -1349,7 +1349,7 @@ SRError set_data_source(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -1374,7 +1374,7 @@ SRError use_model_ensemble_prefix(void* c_client, bool use_prefix)
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -1399,7 +1399,7 @@ SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix)
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 

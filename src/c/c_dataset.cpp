@@ -83,7 +83,7 @@ SRError CDataSet(const char* name, const size_t name_length, void** new_dataset)
   }
   catch (...) {
     *new_dataset = NULL;
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -123,7 +123,7 @@ SRError DeallocateeDataSet(void** dataset)
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -162,7 +162,7 @@ SRError add_tensor(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -194,7 +194,7 @@ SRError add_meta_scalar(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -226,7 +226,7 @@ SRError add_meta_string(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -267,7 +267,7 @@ SRError get_dataset_tensor(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -306,7 +306,7 @@ SRError unpack_dataset_tensor(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -371,7 +371,7 @@ SRError get_meta_scalars(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -405,7 +405,7 @@ SRError get_meta_strings(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error());
+    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
