@@ -347,7 +347,7 @@ SRError get_meta_scalars(void* dataset,
                        const size_t name_length,
                        size_t* length,
                        CMetaDataType* type,
-                       void** scalars)
+                       void** scalar_data)
 {
   SRError result = sr_ok;
   try
@@ -364,7 +364,7 @@ SRError get_meta_scalars(void* dataset,
     d->get_meta_scalars(key_str, data, *length, m_type);
 
     *type = convert_metadata_type(m_type);
-    *scalars = data;
+    *scalar_data = data;
   }
   catch (const smart_error& e) {
     sr_set_last_error(e);
