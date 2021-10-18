@@ -28,6 +28,7 @@
 
 #include <ctype.h>
 #include "redisserver.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -42,8 +43,8 @@ std::string RedisServer::_get_ssdb()
     // Retrieve the environment variable
     char* env_char = getenv("SSDB");
     if (env_char == NULL)
-        throw std::runtime_error("The environment variable SSDB "\
-                                "must be set to use the client.");
+        throw smart_runtime_error("The environment variable SSDB "\
+                                  "must be set to use the client.");
     std::string env_str = std::string(env_char);
     _check_ssdb_string(env_str);
 
@@ -84,8 +85,8 @@ void RedisServer::_check_ssdb_string(const std::string& env_str) {
     for (size_t i = 0; i < env_str.size(); i++) {
         char c = env_str[i];
         if (!isalnum(c) && c != '.' && c != ':' && c != ',') {
-            throw std::runtime_error("The provided SSDB value, " + env_str +
-                                     " is invalid because of character " + c);
+            throw smart_runtime_error("The provided SSDB value, " + env_str +
+                                      " is invalid because of character " + c);
         }
     }
 }

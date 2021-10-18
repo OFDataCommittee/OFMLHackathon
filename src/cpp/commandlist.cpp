@@ -27,6 +27,7 @@
  */
 
 #include "commandlist.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -37,7 +38,7 @@ CommandList::CommandList(const CommandList& cmd_lst)
     for ( ; c_it != cmd_lst._commands.cend(); c_it++) {
         Command* new_cmd = (*c_it)->clone();
         if (new_cmd == NULL) {
-            throw std::runtime_error("Bad command found in CommandList constructore");
+            throw smart_runtime_error("Bad command found in CommandList constructore");
         }
         this->_commands.push_back(new_cmd);
     }
@@ -61,7 +62,7 @@ CommandList& CommandList::operator=(const CommandList& cmd_lst)
     for ( ; c_it != cmd_lst._commands.end(); c_it++) {
         Command* new_cmd = (*c_it)->clone();
         if (new_cmd == NULL) {
-            throw std::runtime_error("Bad command found in CommandList constructore");
+            throw smart_runtime_error("Bad command found in CommandList constructore");
         }
         _commands.push_back(new_cmd);
     }

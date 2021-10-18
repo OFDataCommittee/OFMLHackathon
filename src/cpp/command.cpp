@@ -27,6 +27,7 @@
  */
 
 #include "command.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -171,7 +172,7 @@ void Command::add_fields(const std::vector<std::string>& fields, bool is_key)
 std::string Command::first_field() const
 {
     if (cbegin() == cend())
-        throw std::runtime_error("No fields exist in the Command.");
+        throw smart_runtime_error("No fields exist in the Command.");
     return std::string(cbegin()->data(), cbegin()->size());
 }
 

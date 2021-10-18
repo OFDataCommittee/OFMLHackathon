@@ -29,6 +29,8 @@
 #ifndef SMARTREDIS_TENSOR_TCC
 #define SMARTREDIS_TENSOR_TCC
 
+#include "srexception.h"
+
 // Tensor constructor
 template <class T>
 Tensor<T>::Tensor(const std::string& name,
@@ -151,7 +153,7 @@ void* Tensor<T>::data_view(const MemoryLayout mem_layout)
                                  (T*)_data);
             break;
         default:
-            throw std::runtime_error(
+            throw smart_runtime_error(
                 "Unsupported MemoryLayout value in "\
                 "Tensor<T>.data_view().");
     }
@@ -165,12 +167,12 @@ void Tensor<T>::fill_mem_space(void* data,
                                MemoryLayout mem_layout)
 {
     if (_data == NULL) {
-        throw std::runtime_error("The tensor does not have "\
-                                 "a data array to fill with.");
+        throw smart_runtime_error("The tensor does not have "\
+                                  "a data array to fill with.");
     }
 
     if (dims.size() == 0) {
-        throw std::runtime_error("The dimensions must have nonzero size");
+        throw smart_runtime_error("The dimensions must have nonzero size");
     }
 
     // Calculate size of memory buffer
@@ -178,14 +180,14 @@ void Tensor<T>::fill_mem_space(void* data,
     std::vector<size_t>::const_iterator it = dims.cbegin();
     for ( ; it != dims.cend(); it++) {
         if (*it <= 0) {
-            throw std::runtime_error("All dimensions must be greater than 0.");
+            throw smart_runtime_error("All dimensions must be greater than 0.");
         }
         n_values *= (*it);
     }
 
     // Make sure there is space for all the data
     if (n_values != num_values()) {
-        throw std::runtime_error("The provided dimensions do "\
+        throw smart_runtime_error("The provided dimensions do "\
                                   "not match the size of the "\
                                   "tensor data array");
     }
@@ -207,7 +209,7 @@ void Tensor<T>::fill_mem_space(void* data,
             }
             break;
         default:
-            throw std::runtime_error(
+            throw smart_runtime_error(
                 "Unsupported MemoryLayout value in "\
                 "Tensor<T>.fill_mem_space().");
     }
@@ -268,13 +270,13 @@ T* Tensor<T>::_build_nested_memory(void** data,
                                    T* contiguous_mem)
 {
     if (dims == NULL) {
-        throw std::runtime_error("Missing dims in call to "\
-                                 "_build_nested_memory");
+        throw smart_runtime_error("Missing dims in call to "\
+                                  "_build_nested_memory");
     }
     if (n_dims > 1) {
         T** new_data = _c_mem_views.allocate(dims[0]);
         if (new_data == NULL)
-            throw std::bad_alloc();
+            throw smart_bad_alloc("nested memory for tensor");
         (*data) = reinterpret_cast<void*>(new_data);
         for (size_t i = 0; i < dims[0]; i++)
             contiguous_mem = _build_nested_memory(
@@ -310,8 +312,8 @@ void Tensor<T>::_set_tensor_data(void* src_data,
                 src_data, dims.data(), dims.size(), _data);
             break;
         default:
-            throw std::runtime_error("Invalid memory layout in call "\
-                                     "to _set_tensor_data");
+            throw smart_runtime_error("Invalid memory layout in call "\
+                                      "to _set_tensor_data");
     }
 }
 
@@ -329,7 +331,7 @@ void Tensor<T>::_f_to_c_memcpy(T* c_data,
                                const std::vector<size_t>& dims)
 {
     if (c_data == NULL || f_data == NULL) {
-        throw std::runtime_error("Invalid buffer suppplied to _f_to_c_memcpy");
+        throw smart_runtime_error("Invalid buffer suppplied to _f_to_c_memcpy");
     }
     std::vector<size_t> dim_positions(dims.size(), 0);
     _f_to_c(c_data, f_data, dims, dim_positions, 0);
@@ -343,7 +345,7 @@ void Tensor<T>::_c_to_f_memcpy(T* f_data,
                                const std::vector<size_t>& dims)
 {
     if (c_data == NULL || f_data == NULL) {
-        throw std::runtime_error("Invalid buffer suppplied to _c_to_f_memcpy");
+        throw smart_runtime_error("Invalid buffer suppplied to _c_to_f_memcpy");
     }
     std::vector<size_t> dim_positions(dims.size(), 0);
     _c_to_f(f_data, c_data, dims, dim_positions, 0);
@@ -358,7 +360,7 @@ void Tensor<T>::_f_to_c(T* c_data,
                         size_t current_dim)
 {
     if (c_data == NULL || f_data == NULL) {
-        throw std::runtime_error("Invalid buffer suppplied to _f_to_c");
+        throw smart_runtime_error("Invalid buffer suppplied to _f_to_c");
     }
     size_t start = dim_positions[current_dim];
     size_t end = dims[current_dim];
@@ -386,7 +388,7 @@ void Tensor<T>::_c_to_f(T* f_data,
                         size_t current_dim)
 {
     if (c_data == NULL || f_data == NULL) {
-        throw std::runtime_error("Invalid buffer suppplied to _f_to_c");
+        throw smart_runtime_error("Invalid buffer suppplied to _f_to_c");
     }
     size_t start = dim_positions[current_dim];
     size_t end = dims[current_dim];

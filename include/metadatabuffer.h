@@ -33,6 +33,7 @@
 #include <vector>
 #include <string>
 #include <cstring>
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -53,10 +54,10 @@ typedef int8_t type_t;
 extern inline MetaDataType get_type(const std::string_view& buf)
 {
     if (buf.size() < sizeof(type_t))
-        throw std::runtime_error("The MetadataField type cannot "\
-                                 "be retrived from buffer of " +
-                                 std::to_string(buf.size()) +
-                                 "characters.");
+        throw smart_runtime_error("The MetadataField type cannot "\
+                                  "be retrived from buffer of " +
+                                  std::to_string(buf.size()) +
+                                  "characters.");
 
     type_t* data = (type_t*)(buf.data());
     return (MetaDataType)(*data);
@@ -108,7 +109,7 @@ extern inline bool safe_to_read(const size_t& byte_position,
 *   \param n_values The number of values to read
 *   \tparam T The data type that is to be read from buffer
 *   \return The value read from the buffer
-*   \throw std::runtime_error if an attempt is made to read
+*   \throw smart_runtime_error if an attempt is made to read
 *          beyond the buffer length.
 */
 template <typename T>
@@ -117,15 +118,15 @@ extern inline T read(void* buf,
                      const size_t& total_bytes)
 {
     if (!safe_to_read<T>(byte_position, total_bytes, 1))
-        throw std::runtime_error("A request to read one scalar value "
-                                 "from the metadata buffer "
-                                 "was made, but the buffer "
-                                 "contains insufficient bytes. "
-                                 "The buffer contains " +
-                                 std::to_string(total_bytes) +
-                                 "bytes and is currently at " +
-                                 "position " +
-                                 std::to_string(byte_position));
+        throw smart_runtime_error("A request to read one scalar value "
+                                  "from the metadata buffer "
+                                  "was made, but the buffer "
+                                  "contains insufficient bytes. "
+                                  "The buffer contains " +
+                                  std::to_string(total_bytes) +
+                                  "bytes and is currently at " +
+                                  "position " +
+                                  std::to_string(byte_position));
     return *((T*)buf);
 }
 
@@ -164,7 +165,7 @@ extern inline bool advance(void*& buf,
 *   \param n_chars The number of characters in the string
 *                  to be read
 *   \return The string read from the buffer
-*   \throw std::runtime_error if an attempt is made to read
+*   \throw smart_runtime_error if an attempt is made to read
 *          beyond the buffer length.
 */
 extern inline std::string read_string(void* buf,
@@ -173,15 +174,15 @@ extern inline std::string read_string(void* buf,
                                       const size_t& n_chars)
 {
     if (!safe_to_read<char>(byte_position, total_bytes, n_chars))
-        throw std::runtime_error("A request to read a string "
-                                 "from the metadata buffer "
-                                 "was made, but the buffer "
-                                 "contains insufficient bytes. "
-                                 "The buffer contains " +
-                                 std::to_string(total_bytes) +
-                                 "bytes and is currently at " +
-                                 "position " +
-                                 std::to_string(byte_position));
+        throw smart_runtime_error("A request to read a string "
+                                  "from the metadata buffer "
+                                  "was made, but the buffer "
+                                  "contains insufficient bytes. "
+                                  "The buffer contains " +
+                                  std::to_string(total_bytes) +
+                                  "bytes and is currently at " +
+                                  "position " +
+                                  std::to_string(byte_position));
     return std::string((char*)buf, n_chars);
 }
 
@@ -315,9 +316,9 @@ extern inline std::vector<std::string> unpack_string_buf(
     type_t type = read<type_t>(data, byte_position, total_bytes);
 
     if (type!=(type_t)MetaDataType::string)
-        throw std::runtime_error("The buffer string metadata type "\
-                                 "does not contain the expected "\
-                                 "type of string.");
+        throw smart_runtime_error("The buffer string metadata type "\
+                                  "does not contain the expected "\
+                                  "type of string.");
 
     std::vector<std::string> vals;
 
@@ -366,13 +367,13 @@ extern inline std::vector<T> unpack_scalar_buf(
         return std::vector<T>();
 
     if ( (total_bytes - byte_position) % sizeof(T))
-        throw std::runtime_error("The data portion of the provided "\
-                                 "metadata buffer does not contain "
-                                 "the correct number of bytes for "
-                                 "a " + std::to_string(sizeof(T)) +
-                                 " byte scalar type. It contains " +
-                                 std::to_string(total_bytes -
-                                 byte_position) + " bytes");
+        throw smart_runtime_error("The data portion of the provided "\
+                                  "metadata buffer does not contain "
+                                  "the correct number of bytes for "
+                                  "a " + std::to_string(sizeof(T)) +
+                                  " byte scalar type. It contains " +
+                                  std::to_string(total_bytes -
+                                  byte_position) + " bytes");
 
     size_t n_vals = (total_bytes - byte_position) / sizeof(T);
     std::vector<T> vals(n_vals);

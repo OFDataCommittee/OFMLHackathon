@@ -561,13 +561,13 @@ class Client
         *   \brief Returns information about the given database node
         *   \param address The address of the database node (host:port)
         *   \returns parsed_reply_nested_map containing the database node information
-        *   \throws std::runtime_error if the address is not addressable by this
+        *   \throws smart_runtime_error if the address is not addressable by this
         *           client.  In the case of using a cluster of database nodes,
         *           it is best practice to bind each node in the cluster
         *           to a specific adddress to avoid inconsistencies in
         *           addresses retreived with the CLUSTER SLOTS command.
         *           Inconsistencies in node addresses across
-        *           CLUSTER SLOTS comands will lead to std::runtime_error
+        *           CLUSTER SLOTS comands will lead to smart_runtime_error
         *           being thrown.
         */
         parsed_reply_nested_map get_db_node_info(std::string address);
@@ -579,13 +579,13 @@ class Client
         *   \returns parsed_reply_map containing the database cluster information.
         *            If this command is executed on a non-cluster database, an
         *            empty parsed_reply_map is returned.
-	    *   \throws std::runtime_error if the address is not addressable by this
+	    *   \throws smart_runtime_error if the address is not addressable by this
         *           client.  In the case of using a cluster of database nodes,
         *           it is best practice to bind each node in the cluster
         *           to a specific adddress to avoid inconsistencies in
         *           addresses retreived with the CLUSTER SLOTS command.
         *           Inconsistencies in node addresses across
-        *           CLUSTER SLOTS comands will lead to std::runtime_error
+        *           CLUSTER SLOTS comands will lead to smart_runtime_error
         *           being thrown.
         */
         parsed_reply_map get_db_cluster_info(std::string address);

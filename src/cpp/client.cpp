@@ -27,6 +27,7 @@
  */
 
 #include "client.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -76,8 +77,8 @@ DataSet Client::get_dataset(const std::string& name)
     // Get the metadata message and construct DataSet
     CommandReply reply = _get_dataset_metadata(name);
     if (reply.n_elements() == 0) {
-        throw std::runtime_error("The requested DataSet " +
-                                 name + " does not exist.");
+        throw smart_runtime_error("The requested DataSet " +
+                                  name + " does not exist.");
     }
 
     DataSet dataset(name);
@@ -115,8 +116,8 @@ void Client::copy_dataset(const std::string& src_name,
     // Extract metadata
     CommandReply reply = _get_dataset_metadata(src_name);
     if (reply.n_elements() == 0) {
-        throw std::runtime_error("The requested DataSet " +
-                                 src_name + " does not exist.");
+        throw smart_runtime_error("The requested DataSet " +
+                                  src_name + " does not exist.");
     }
     DataSet dataset(src_name);
     _unpack_dataset_metadata(dataset, reply);
@@ -151,8 +152,8 @@ void Client::delete_dataset(const std::string& name)
 {
     CommandReply reply = _get_dataset_metadata(name);
     if (reply.n_elements() == 0) {
-        throw std::runtime_error("The requested DataSet " +
-                                 name + " does not exist.");
+        throw smart_runtime_error("The requested DataSet " +
+                                  name + " does not exist.");
     }
 
     DataSet dataset(name);
@@ -221,7 +222,7 @@ void Client::put_tensor(const std::string& key,
             tensor = new Tensor<uint8_t>(p_key, data, dims, type, mem_layout);
             break;
         default:
-            throw std::runtime_error("Invalid type for put_tensor");
+            throw smart_runtime_error("Invalid type for put_tensor");
     }
 
     // Send the tensor
@@ -231,7 +232,7 @@ void Client::put_tensor(const std::string& key,
     delete tensor;
     tensor = NULL;
     if (reply.has_error())
-        throw std::runtime_error("put_tensor failed");
+        throw smart_runtime_error("put_tensor failed");
 }
 
 // Get the tensor data, dimensions, and type for the provided tensor key.
@@ -291,10 +292,10 @@ void Client::unpack_tensor(const std::string& key,
                            const MemoryLayout mem_layout)
 {
     if (mem_layout == MemoryLayout::contiguous && dims.size() > 1) {
-        throw std::runtime_error("The destination memory space "\
-                                "dimension vector should only "\
-                                "be of size one if the memory "\
-                                "layout is contiguous.");
+        throw smart_runtime_error("The destination memory space "\
+                                  "dimension vector should only "\
+                                  "be of size one if the memory "\
+                                  "layout is contiguous.");
     }
 
     std::string get_key = _build_tensor_key(key, true);
@@ -311,9 +312,9 @@ void Client::unpack_tensor(const std::string& key,
         }
         if (total_dims != dims[0] &&
             mem_layout == MemoryLayout::contiguous) {
-            throw std::runtime_error("The dimensions of the fetched "\
-                                "tensor do not match the length of "\
-                                "the contiguous memory space.");
+            throw smart_runtime_error("The dimensions of the fetched "\
+                                      "tensor do not match the length of "\
+                                      "the contiguous memory space.");
         }
     }
 
@@ -321,20 +322,20 @@ void Client::unpack_tensor(const std::string& key,
     if (mem_layout == MemoryLayout::nested) {
         if (dims.size() != reply_dims.size()) {
             // Same number of dimensions
-            throw std::runtime_error("The number of dimensions of the  "\
-                                    "fetched tensor, " +
-                                    std::to_string(reply_dims.size()) + " "\
-                                    "does not match the number of "\
-                                    "dimensions of the user memory space, " +
-                                    std::to_string(dims.size()));
+            throw smart_runtime_error("The number of dimensions of the  "\
+                                      "fetched tensor, " +
+                                      std::to_string(reply_dims.size()) + " "\
+                                      "does not match the number of "\
+                                      "dimensions of the user memory space, " +
+                                      std::to_string(dims.size()));
         }
 
         // Same size in each dimension
         for (size_t i = 0; i < reply_dims.size(); i++) {
             if (dims[i] != reply_dims[i]) {
-                throw std::runtime_error("The dimensions of the fetched tensor "\
-                                        "do not match the provided "\
-                                        "dimensions of the user memory space.");
+                throw smart_runtime_error("The dimensions of the fetched tensor "\
+                                          "do not match the provided "\
+                                          "dimensions of the user memory space.");
             }
         }
     }
@@ -342,8 +343,8 @@ void Client::unpack_tensor(const std::string& key,
     // Make sure we're unpacking the right type of data
     TensorType reply_type = GetTensorCommand::get_data_type(reply);
     if (type != reply_type)
-        throw std::runtime_error("The type of the fetched tensor "\
-                                "does not match the provided type");
+        throw smart_runtime_error("The type of the fetched tensor "\
+                                  "does not match the provided type");
 
     // Retrieve the tensor data into a Tensor
     std::string_view blob = GetTensorCommand::get_data_blob(reply);
@@ -390,7 +391,7 @@ void Client::unpack_tensor(const std::string& key,
                                          MemoryLayout::contiguous);
             break;
         default:
-            throw std::runtime_error("Invalid type for unpack_tensor");
+            throw smart_runtime_error("Invalid type for unpack_tensor");
     }
 
     // Unpack the tensor and reclaim it
@@ -407,7 +408,7 @@ void Client::rename_tensor(const std::string& key,
     std::string p_new_key = _build_tensor_key(new_key, false);
     CommandReply reply = _redis_server->rename_tensor(p_key, p_new_key);
     if (reply.has_error())
-        throw std::runtime_error("rename_tensor failed");
+        throw smart_runtime_error("rename_tensor failed");
 }
 
 // Delete a tensor from the database
@@ -416,7 +417,7 @@ void Client::delete_tensor(const std::string& key)
     std::string p_key = _build_tensor_key(key, true);
     CommandReply reply = _redis_server->delete_tensor(p_key);
     if (reply.has_error())
-        throw std::runtime_error("delete_tensor failed");
+        throw smart_runtime_error("delete_tensor failed");
 }
 
 // Copy the tensor from the source key to the destination key
@@ -427,7 +428,7 @@ void Client::copy_tensor(const std::string& src_key,
     std::string p_dest_key = _build_tensor_key(dest_key, false);
     CommandReply reply = _redis_server->copy_tensor(p_src_key, p_dest_key);
     if (reply.has_error())
-        throw std::runtime_error("copy_tensor failed");
+        throw smart_runtime_error("copy_tensor failed");
 }
 
 // Set a model from file in the database for future execution
@@ -441,9 +442,10 @@ void Client::set_model_from_file(const std::string& key,
                                  const std::vector<std::string>& inputs,
                                  const std::vector<std::string>& outputs)
 {
-    if (model_file.size() == 0)
-        throw std::runtime_error("model_file is a required "
-                                "parameter of set_model.");
+    if (model_file.size() == 0) {
+        throw smart_runtime_error("model_file is a required "
+                                 "parameter of set_model.");
+    }
 
     std::ifstream fin(model_file, std::ios::binary);
     std::ostringstream ostream;
@@ -468,22 +470,22 @@ void Client::set_model(const std::string& key,
                        const std::vector<std::string>& outputs)
 {
     if (key.size() == 0) {
-        throw std::runtime_error("key is a required parameter of set_model.");
+        throw smart_runtime_error("key is a required parameter of set_model.");
     }
 
     if (backend.size() == 0) {
-        throw std::runtime_error("backend is a required  "\
-                                 "parameter of set_model.");
+        throw smart_runtime_error("backend is a required  "\
+                                  "parameter of set_model.");
     }
 
     if (backend.compare("TF") != 0) {
         if (inputs.size() > 0) {
-            throw std::runtime_error("INPUTS in the model set command "\
-                                     "is only valid for TF models");
+            throw smart_runtime_error("INPUTS in the model set command "\
+                                      "is only valid for TF models");
         }
         if (outputs.size() > 0) {
-            throw std::runtime_error("OUTPUTS in the model set command "\
-                                     "is only valid for TF models");
+            throw smart_runtime_error("OUTPUTS in the model set command "\
+                                      "is only valid for TF models");
         }
     }
 
@@ -492,19 +494,19 @@ void Client::set_model(const std::string& key,
     for (size_t i = 0; i < sizeof(backends)/sizeof(backends[0]); i++)
         found = found || (backend.compare(backends[i]) != 0);
     if (!found) {
-        throw std::runtime_error(std::string(backend) +
-                                    " is not a valid backend.");
+        throw smart_runtime_error(std::string(backend) +
+                                  " is not a valid backend.");
     }
 
     if (device.size() == 0) {
-        throw std::runtime_error("device is a required "
-                                 "parameter of set_model.");
+        throw smart_runtime_error("device is a required "
+                                  "parameter of set_model.");
     }
 
     if (device.compare("CPU") != 0 &&
         std::string(device).find("GPU") == std::string::npos) {
-        throw std::runtime_error(std::string(backend) +
-                                 " is not a valid backend.");
+        throw smart_runtime_error(std::string(backend) +
+                                  " is not a valid backend.");
     }
 
     std::string p_key = _build_model_key(key, false);
@@ -519,11 +521,11 @@ std::string_view Client::get_model(const std::string& key)
     std::string get_key = _build_model_key(key, true);
     CommandReply reply = _redis_server->get_model(get_key);
     if (reply.has_error())
-        throw std::runtime_error("failed to get model from server");
+        throw smart_runtime_error("failed to get model from server");
 
     char* model = _model_queries.allocate(reply.str_len());
     if (model == NULL)
-        throw std::bad_alloc();
+        throw smart_bad_alloc("model query");
     std::memcpy(model, reply.str(), reply.str_len());
     return std::string_view(model, reply.str_len());
 }
@@ -561,7 +563,7 @@ std::string_view Client::get_script(const std::string& key)
     CommandReply reply = _redis_server->get_script(get_key);
     char* script = _model_queries.allocate(reply.str_len());
     if (script == NULL)
-        throw std::bad_alloc();
+        throw smart_bad_alloc("model query");
     std::memcpy(script, reply.str(), reply.str_len());
     return std::string_view(script, reply.str_len());
 }
@@ -687,10 +689,10 @@ void Client::set_data_source(std::string source_id)
     }
 
     if (!valid_prefix) {
-        throw std::runtime_error("Client error: data source " +
-                    std::string(source_id) +
-                    "could not be found during client "+
-                    "initialization.");
+        throw smart_runtime_error("Client error: data source " +
+                                  std::string(source_id) +
+                                  "could not be found during client "+
+                                  "initialization.");
     }
 
     // Save the prefix
@@ -728,8 +730,8 @@ parsed_reply_nested_map Client::get_db_node_info(std::string address)
     uint64_t port = std::stoul(address.substr(address.find(":") + 1),
                                nullptr, 0);
     if (host.empty() || port == 0) {
-        throw std::runtime_error(std::string(address) +
-                                 "is not a valid database node address.");
+        throw smart_runtime_error(std::string(address) +
+                                  "is not a valid database node address.");
     }
 
     // Run an INFO EVERYTHING command to get node info
@@ -739,7 +741,7 @@ parsed_reply_nested_map Client::get_db_node_info(std::string address)
     cmd.add_field("EVERYTHING");
     CommandReply reply = _run(cmd);
     if (reply.has_error())
-        throw std::runtime_error("INFO EVERYTHING command failed on server");
+        throw smart_runtime_error("INFO EVERYTHING command failed on server");
 
     // Parse the results
     return DBInfoCommand::parse_db_node_info(std::string(reply.str(),
@@ -750,15 +752,15 @@ parsed_reply_nested_map Client::get_db_node_info(std::string address)
 parsed_reply_map Client::get_db_cluster_info(std::string address)
 {
     if (_redis_cluster == NULL)
-        throw std::runtime_error("Cannot run on non-cluster environment");
+        throw smart_runtime_error("Cannot run on non-cluster environment");
 
     // Validate the address
     std::string host = address.substr(0, address.find(":"));
     uint64_t port = std::stoul (address.substr(address.find(":") + 1),
                                 nullptr, 0);
     if (host.empty() || port == 0) {
-        throw std::runtime_error(std::string(address) +
-                                 "is not a valid database node address.");
+        throw smart_runtime_error(std::string(address) +
+                                  "is not a valid database node address.");
     }
 
     // Run the CLUSTER INFO command
@@ -768,7 +770,7 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
     cmd.add_field("INFO");
     CommandReply reply = _run(cmd);
     if (reply.has_error())
-        throw std::runtime_error("CLUSTER INFO command failed on server");
+        throw smart_runtime_error("CLUSTER INFO command failed on server");
 
     // Parse the results
     return ClusterInfoCommand::parse_db_cluster_info(std::string(reply.str(),
@@ -918,10 +920,10 @@ void Client::_append_dataset_metadata_commands(CommandList& cmd_list,
     std::vector<std::pair<std::string, std::string>> mdf =
         dataset.get_metadata_serialization_map();
     if (mdf.size() == 0) {
-        throw std::runtime_error("An attempt was made to put "\
-                                 "a DataSet into the database that "\
-                                 "does not contain any fields or "\
-                                 "tensors.");
+        throw smart_runtime_error("An attempt was made to put "\
+                                  "a DataSet into the database that "\
+                                  "does not contain any fields or "\
+                                  "tensors.");
     }
 
     SingleKeyCommand* del_cmd = cmd_list.add_command<SingleKeyCommand>();
@@ -930,7 +932,7 @@ void Client::_append_dataset_metadata_commands(CommandList& cmd_list,
 
     SingleKeyCommand* cmd = cmd_list.add_command<SingleKeyCommand>();
     if (cmd == NULL) {
-        throw std::runtime_error("Failed to create singlekeycommande");
+        throw smart_runtime_error("Failed to create singlekeycommande");
     }
     cmd->add_field("HMSET");
     cmd->add_field (meta_key, true);
@@ -978,7 +980,7 @@ void Client::_unpack_dataset_metadata(DataSet& dataset, CommandReply& reply)
 {
     // Make sure we have paired elements
     if ((reply.n_elements() % 2) != 0)
-        throw std::runtime_error("The DataSet metadata reply "\
+        throw smart_runtime_error("The DataSet metadata reply "\
                                   "contains the wrong number of "\
                                   "elements.");
 
@@ -1001,24 +1003,24 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
     std::string get_key = _build_tensor_key(name, true);
     CommandReply reply = _redis_server->get_tensor(get_key);
     if (reply.has_error())
-        throw std::runtime_error("tensor retrieval failed");
+        throw smart_runtime_error("tensor retrieval failed");
 
     std::vector<size_t> dims = GetTensorCommand::get_dims(reply);
     if (dims.size() <= 0)
-        throw std::runtime_error("The number of dimensions of the "\
-                                "fetched tensor are invalid: " +
-                                std::to_string(dims.size()));
+        throw smart_runtime_error("The number of dimensions of the "\
+                                  "fetched tensor are invalid: " +
+                                  std::to_string(dims.size()));
 
     TensorType type = GetTensorCommand::get_data_type(reply);
     std::string_view blob = GetTensorCommand::get_data_blob(reply);
 
     for (size_t i = 0; i < dims.size(); i++) {
         if (dims[i] <= 0) {
-            throw std::runtime_error("Dimension " +
-                                     std::to_string(i) +
-                                     "of the fetched tensor is "\
-                                     "not valid: " +
-                                     std::to_string(dims[i]));
+            throw smart_runtime_error("Dimension " +
+                                      std::to_string(i) +
+                                      "of the fetched tensor is "\
+                                      "not valid: " +
+                                      std::to_string(dims[i]));
         }
     }
 
@@ -1057,11 +1059,11 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
                                       dims, type, MemoryLayout::contiguous);
             break;
         default :
-            throw std::runtime_error("An invalid TensorType was "\
-                                     "provided to "
-                                     "Client::_get_tensorbase_obj(). "
-                                     "The tensor could not be "\
-                                     "retrieved.");
+            throw smart_runtime_error("An invalid TensorType was "\
+                                      "provided to "
+                                      "Client::_get_tensorbase_obj(). "
+                                      "The tensor could not be "\
+                                      "retrieved.");
             break;
     }
     return ptr;

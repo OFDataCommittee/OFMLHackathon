@@ -31,6 +31,8 @@
 
 #include "enums/c_metadata_type.h"
 #include <stdexcept>
+#include "srexception.h"
+
 
 namespace SmartRedis {
 
@@ -65,8 +67,8 @@ inline CMetaDataType convert_metadata_type(MetaDataType type) {
         case MetaDataType::string:
             return CMetaDataType::c_meta_string;
         default :
-            throw std::runtime_error("Error converting MetaDataType "\
-                                     "to CMetaDataType.");
+            throw smart_runtime_error("Error converting MetaDataType "\
+                                      "to CMetaDataType.");
     }
 }
 
@@ -90,8 +92,8 @@ inline MetaDataType convert_metadata_type(CMetaDataType type) {
         case CMetaDataType::c_meta_string:
             return MetaDataType::string;
         default :
-            throw std::runtime_error("Error converting CMetaDataType "\
-                                     "to MetaDataType.");
+            throw smart_runtime_error("Error converting CMetaDataType "\
+                                      "to MetaDataType.");
     }
 }
 

@@ -28,6 +28,7 @@
 
 #include "gettensorcommand.h"
 #include "redisserver.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -47,8 +48,8 @@ CommandReply GetTensorCommand::run_me(RedisServer* server)
 std::vector<size_t> GetTensorCommand::get_dims(CommandReply& reply)
 {
     if (reply.n_elements() < num_fields) {
-        throw std::runtime_error("The message does not have the "\
-                                "correct number of fields");
+        throw smart_runtime_error("The message does not have the "\
+                                  "correct number of fields");
     }
 
     size_t n_dims = reply[dims_idx].n_elements();
@@ -65,8 +66,8 @@ std::vector<size_t> GetTensorCommand::get_dims(CommandReply& reply)
 TensorType GetTensorCommand::get_data_type(CommandReply& reply)
 {
     if (reply.n_elements() < num_elements) {
-        throw std::runtime_error("The message does not have the correct "\
-                                "number of fields");
+        throw smart_runtime_error("The message does not have the correct "\
+                                  "number of fields");
     }
 
     return TENSOR_TYPE_MAP.at(std::string(reply[type_idx].str(),
@@ -77,8 +78,8 @@ TensorType GetTensorCommand::get_data_type(CommandReply& reply)
 std::string_view GetTensorCommand::get_data_blob(CommandReply& reply)
 {
     if (reply.n_elements() < num_fields) {
-        throw std::runtime_error("The message does not have the "\
-                                "correct number of fields");
+        throw smart_runtime_error("The message does not have the "\
+                                  "correct number of fields");
     }
 
     return std::string_view(reply[blob_idx].str(), reply[blob_idx].str_len());

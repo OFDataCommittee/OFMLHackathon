@@ -374,7 +374,7 @@ class RedisCluster : public RedisServer
         *          the correct database for a given command
         *   \param cmd The Command to analyze for DBNode prefix
         *   \returns The DBNode prefix as a string
-        *   \throw std::runtime_error if the Command does not have
+        *   \throw smart_runtime_error if the Command does not have
         *          keys or if multiple keys have different prefixes
         */
         std::string _get_db_node_prefix(Command& cmd);
@@ -383,7 +383,7 @@ class RedisCluster : public RedisServer
         *   \brief Processes the CommandReply for CLUSTER SLOTS
         *          to build DBNode information
         *   \param reply The CommandReply for CLUSTER SLOTS
-        *   \throw std::runtime_error if there is an error
+        *   \throw smart_runtime_error if there is an error
         *          creating a prefix for a particular DBNode
         */
         inline void _parse_reply_for_slots(CommandReply& reply);
@@ -391,7 +391,7 @@ class RedisCluster : public RedisServer
         /*!
         *   \brief Get a DBNode prefix for the provided hash slot
         *   \param hash_slot The hash slot to get a prefix for
-        *   \throw std::runtime_error if there is an error
+        *   \throw smart_runtime_error if there is an error
         *          creating a prefix for a particular DBNode
         */
         std::string _get_crc16_prefix(uint64_t hash_slot);

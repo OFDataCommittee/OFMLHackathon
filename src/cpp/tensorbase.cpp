@@ -26,8 +26,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "tensorbase.h"
 #include <iostream>
+#include "tensorbase.h"
+#include "srexception.h"
+
 using namespace SmartRedis;
 
 // TensorBase constructor
@@ -164,7 +166,7 @@ std::vector<size_t> TensorBase::dims()
 size_t TensorBase::num_values()
 {
     if (_dims.size() == 0)
-        throw std::runtime_error("Invalid dimensionality for tensor detected");
+        throw smart_runtime_error("Invalid dimensionality for tensor detected");
     size_t n_values = 1;
     for (size_t i = 0; i < _dims.size(); i++)
         n_values *= _dims[i];
@@ -200,28 +202,28 @@ inline void TensorBase::_check_inputs(const void* src_data,
     */
 
     if (src_data == NULL) {
-        throw std::runtime_error("Must provide non-Null pointer to data.");
+        throw smart_runtime_error("Must provide non-Null pointer to data.");
     }
 
     if (name.size() == 0) {
-        throw std::runtime_error("A name must be provided for the tensor");
+        throw smart_runtime_error("A name must be provided for the tensor");
     }
 
     if (name.compare(".meta") == 0) {
-        throw std::runtime_error(".meta is an internally reserved name "\
-                                 "that is not allowed.");
+        throw smart_runtime_error(".meta is an internally reserved name "\
+                                  "that is not allowed.");
     }
 
     if (dims.size() == 0) {
-        throw std::runtime_error("Must provide a dimensions vector with at "
-                                 "least one dimension.");
+        throw smart_runtime_error("Must provide a dimensions vector with at "
+                                  "least one dimension.");
     }
 
     std::vector<size_t>::const_iterator it = dims.cbegin();
     for ( ; it != dims.cend(); it++) {
         if (*it <= 0) {
-            throw std::runtime_error("All tensor dimensions "\
-                                     "must be positive.");
+            throw smart_runtime_error("All tensor dimensions "\
+                                      "must be positive.");
         }
     }
 }

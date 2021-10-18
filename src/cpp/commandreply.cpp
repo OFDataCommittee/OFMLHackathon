@@ -27,6 +27,7 @@
  */
 
 #include "commandreply.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -125,10 +126,10 @@ CommandReply CommandReply::shallow_clone(redisReply* reply)
 char* CommandReply::str()
 {
     if (_reply->type != REDIS_REPLY_STRING)
-        throw std::runtime_error("A pointer to the reply str "\
-                                 "cannot be returned because "\
-                                 "the reply type is " +
-                                 redis_reply_type());
+        throw smart_runtime_error("A pointer to the reply str "\
+                                  "cannot be returned because "\
+                                  "the reply type is " +
+                                  redis_reply_type());
     return _reply->str;
 }
 
@@ -136,10 +137,10 @@ char* CommandReply::str()
 long long CommandReply::integer()
 {
     if (_reply->type != REDIS_REPLY_INTEGER)
-        throw std::runtime_error("The reply integer "\
-                                 "cannot be returned because "\
-                                 "the reply type is " +
-                                 redis_reply_type());
+        throw smart_runtime_error("The reply integer "\
+                                  "cannot be returned because "\
+                                  "the reply type is " +
+                                  redis_reply_type());
     return _reply->integer;
 }
 
@@ -147,10 +148,10 @@ long long CommandReply::integer()
 double CommandReply::dbl()
 {
     if (_reply->type != REDIS_REPLY_DOUBLE)
-        throw std::runtime_error("The reply double "\
-                                 "cannot be returned because "\
-                                 "the reply type is " +
-                                 redis_reply_type());
+        throw smart_runtime_error("The reply double "\
+                                  "cannot be returned because "\
+                                  "the reply type is " +
+                                  redis_reply_type());
     return _reply->dval;
 }
 
@@ -159,9 +160,9 @@ double CommandReply::dbl()
 CommandReply CommandReply::operator[](int index)
 {
     if (_reply->type != REDIS_REPLY_ARRAY)
-        throw std::runtime_error("The reply cannot be indexed "\
-                                 "because the reply type is " +
-                                 redis_reply_type());
+        throw smart_runtime_error("The reply cannot be indexed "\
+                                  "because the reply type is " +
+                                  redis_reply_type());
     return shallow_clone(_reply->element[index]);
 }
 
@@ -169,10 +170,10 @@ CommandReply CommandReply::operator[](int index)
 size_t CommandReply::str_len()
 {
     if (_reply->type != REDIS_REPLY_STRING)
-        throw std::runtime_error("The length of the reply str "\
-                                 "cannot be returned because "\
-                                 "the reply type is " +
-                                 redis_reply_type());
+        throw smart_runtime_error("The length of the reply str "\
+                                  "cannot be returned because "\
+                                  "the reply type is " +
+                                  redis_reply_type());
     return _reply->len;
 }
 
@@ -180,10 +181,10 @@ size_t CommandReply::str_len()
 size_t CommandReply::n_elements()
 {
     if (_reply->type != REDIS_REPLY_ARRAY)
-        throw std::runtime_error("The number of elements "\
-                                 "cannot be returned because "\
-                                 "the reply type is " +
-                                 redis_reply_type());
+        throw smart_runtime_error("The number of elements "\
+                                  "cannot be returned because "\
+                                  "the reply type is " +
+                                  redis_reply_type());
     return _reply->elements;
 }
 
@@ -251,7 +252,7 @@ std::string CommandReply::redis_reply_type()
         case REDIS_REPLY_VERB:
             return "REDIS_REPLY_VERB";
         default:
-            throw std::runtime_error("Invalid Redis reply type");
+            throw smart_runtime_error("Invalid Redis reply type");
   }
 }
 
@@ -319,11 +320,11 @@ redisReply* CommandReply::deep_clone_reply(const redisReply* reply)
                         redis_reply->element[i] = deep_clone_reply(reply->element[i]);
                 }
                 else {
-                    throw std::runtime_error("The expected number of elements," +
-                                             std::to_string(redis_reply->elements) +
-                                             ", in the input redisReply is inconsistent "\
-                                             "with the actual number of elements in the "\
-                                             "input redisReply.");
+                    throw smart_runtime_error("The expected number of elements," +
+                                              std::to_string(redis_reply->elements) +
+                                              ", in the input redisReply is inconsistent "\
+                                              "with the actual number of elements in the "\
+                                              "input redisReply.");
                 }
             }
             break;

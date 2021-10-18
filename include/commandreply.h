@@ -158,7 +158,7 @@ class CommandReply {
         /*!
         *   \brief Get the string field of the reply
         *   \returns C-str for the CommandReply field
-        *   \throw std::runtime_error if the CommandReply
+        *   \throw smart_runtime_error if the CommandReply
         *          does not have a string field
         */
         char* str();
@@ -166,7 +166,7 @@ class CommandReply {
         /*!
         *   \brief Get the integer field of the reply
         *   \returns long long for the integer CommandReply field
-        *   \throw std::runtime_error if the CommandReply
+        *   \throw smart_runtime_error if the CommandReply
         *          does not have an integer field
         */
         long long integer();
@@ -174,7 +174,7 @@ class CommandReply {
         /*!
         *   \brief Get the double field of the reply
         *   \returns The double CommandReply field
-        *   \throw std::runtime_error if the CommandReply
+        *   \throw smart_runtime_error if the CommandReply
         *          does not have a double field
         */
         double dbl();
@@ -182,7 +182,7 @@ class CommandReply {
         /*!
         *   \brief Get the length of the CommandReply string field
         *   \returns The length of the CommandReply string field
-        *   \throw std::runtime_error if the CommandReply
+        *   \throw smart_runtime_error if the CommandReply
         *          does not have a string field
         */
         size_t str_len();
@@ -190,7 +190,7 @@ class CommandReply {
         /*!
         *   \brief Get the number of elements in the CommandReply
         *   \returns The number of elements in the CommandReply
-        *   \throw std::runtime_error if the CommandReply
+        *   \throw smart_runtime_error if the CommandReply
         *          does not have a multiple elements (i.e.
         *          not a reply array).
         */

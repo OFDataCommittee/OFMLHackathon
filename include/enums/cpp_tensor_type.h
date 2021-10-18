@@ -35,6 +35,7 @@ enum should be used by users.
 #define SMARTSIM_TENSORTYPE_H
 
 #include "enums/c_tensor_type.h"
+#include "srexception.h"
 
 namespace SmartRedis {
 
@@ -51,7 +52,7 @@ enum class TensorType{
 
 //! Helper method to convert between CTensorType and TensorType
 inline TensorType convert_tensor_type(CTensorType type) {
-    switch (type) {             
+    switch (type) {
         case CTensorType::c_invalid_tensor:
             return TensorType::undefined;
         case CTensorType::c_dbl:
@@ -71,8 +72,8 @@ inline TensorType convert_tensor_type(CTensorType type) {
         case CTensorType::c_uint16:
             return TensorType::uint16;
         default:
-            throw std::runtime_error("Error converting CTensorType "\
-                                     "to TensorType.");
+            throw smart_runtime_error("Error converting CTensorType "\
+                                      "to TensorType.");
     }
 }
 
@@ -98,8 +99,8 @@ inline CTensorType convert_tensor_type(TensorType type) {
         case TensorType::uint16:
             return CTensorType::c_uint16;
         default :
-            throw std::runtime_error("Error converting TensorType "\
-                                     "to CTensorType.");
+            throw smart_runtime_error("Error converting TensorType "\
+                                      "to CTensorType.");
     }
 }
 

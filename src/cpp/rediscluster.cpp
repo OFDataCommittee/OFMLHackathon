@@ -29,6 +29,7 @@
 #include "rediscluster.h"
 #include "nonkeyedcommand.h"
 #include "keyedcommand.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -43,7 +44,7 @@ RedisCluster::RedisCluster() : RedisServer()
     else if (_db_nodes.size() > 0)
         _last_prefix = _db_nodes[0].prefix;
     else
-        throw std::runtime_error("Cluster mapping failed in client initialization");
+        throw smart_runtime_error("Cluster mapping failed in client initialization");
 }
 
 // RedisCluster constructor. Uses address provided to constructor instead of
@@ -57,7 +58,7 @@ RedisCluster::RedisCluster(std::string address_port) : RedisServer()
     else if (_db_nodes.size() > 0)
         _last_prefix = _db_nodes[0].prefix;
     else
-        throw std::runtime_error("Cluster mapping failed in client initialization");
+        throw smart_runtime_error("Cluster mapping failed in client initialization");
 }
 
 // RedisCluster destructor
@@ -77,7 +78,7 @@ CommandReply RedisCluster::run(SingleKeyCommand& cmd)
     if (cmd.has_keys())
         db_prefix = _get_db_node_prefix(cmd);
     else
-        throw std::runtime_error("Redis has failed to find database");
+        throw smart_runtime_error("Redis has failed to find database");
 
     return _run(cmd, db_prefix);
 }
@@ -89,7 +90,7 @@ CommandReply RedisCluster::run(CompoundCommand& cmd)
     if (cmd.has_keys())
         db_prefix = _get_db_node_prefix(cmd);
     else
-        throw std::runtime_error("Redis has failed to find database");
+        throw smart_runtime_error("Redis has failed to find database");
 
     return _run(cmd, db_prefix);
 }
@@ -101,7 +102,7 @@ CommandReply RedisCluster::run(MultiKeyCommand& cmd)
     if (cmd.has_keys())
         db_prefix = _get_db_node_prefix(cmd);
     else
-        throw std::runtime_error("Redis has failed to find database");
+        throw smart_runtime_error("Redis has failed to find database");
 
     return _run(cmd, db_prefix);
 }
@@ -114,7 +115,7 @@ CommandReply RedisCluster::run(AddressAtCommand& cmd)
         db_prefix = _address_node_map.at(cmd.get_address() + ":"
                     + std::to_string(cmd.get_port()))->prefix;
     else
-        throw std::runtime_error("Redis has failed to find database");
+        throw smart_runtime_error("Redis has failed to find database");
 
     return _run(cmd, db_prefix);
 }
@@ -161,8 +162,8 @@ bool RedisCluster::key_exists(const std::string& key)
     // Run it
     CommandReply reply = run(cmd);
     if (reply.has_error() > 0)
-        throw std::runtime_error("Error encountered while checking "\
-                                 "for existence of key " + key);
+        throw smart_runtime_error("Error encountered while checking "\
+                                  "for existence of key " + key);
     return (bool)reply.integer();
 }
 
@@ -263,7 +264,7 @@ CommandReply RedisCluster::copy_tensor(const std::string& src_key,
     // Run the GET command
     CommandReply cmd_get_reply = run(cmd_get);
     if (cmd_get_reply.has_error() > 0)
-        throw std::runtime_error("Failed to find tensor " + src_key);
+        throw smart_runtime_error("Failed to find tensor " + src_key);
 
     // Decode the tensor
     std::vector<size_t> dims =
@@ -292,8 +293,8 @@ CommandReply RedisCluster::copy_tensors(const std::vector<std::string>& src,
 {
     // Make sure vectors are the same length
     if (src.size() != dest.size()) {
-        throw std::runtime_error("differing size vectors "\
-                                 "passed to copy_tensors");
+        throw smart_runtime_error("differing size vectors "\
+                                  "passed to copy_tensors");
     }
 
     // Copy tensors one at a time. We only need to check one iterator
@@ -305,7 +306,7 @@ CommandReply RedisCluster::copy_tensors(const std::vector<std::string>& src,
     for ( ; it_src != src.cend(); it_src++, it_dest++) {
         reply = copy_tensor(*it_src, *it_dest);
         if (reply.has_error() > 0) {
-            throw std::runtime_error("tensor copy failed");
+            throw smart_runtime_error("tensor copy failed");
         }
 
     }
@@ -365,7 +366,7 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
         // Run the command
         reply = run(cmd);
         if (reply.has_error() > 0) {
-            throw std::runtime_error("SetModel failed for node " + node->name);
+            throw smart_runtime_error("SetModel failed for node " + node->name);
         }
     }
 
@@ -395,7 +396,7 @@ CommandReply RedisCluster::set_script(const std::string& key,
         // Run the command
         reply = run(cmd);
         if (reply.has_error() > 0) {
-            throw std::runtime_error("SetModel failed for node " + node->name);
+            throw smart_runtime_error("SetModel failed for node " + node->name);
         }
     }
 
@@ -420,7 +421,7 @@ CommandReply RedisCluster::run_model(const std::string& key,
                                                 _db_nodes.size()-1);
     DBNode* db = &(_db_nodes[db_index]);
     if (db == NULL) {
-        throw std::runtime_error("Missing DB node found in run_model");
+        throw smart_runtime_error("Missing DB node found in run_model");
     }
 
     // Generate temporary names so that all keys go to same slot
@@ -445,7 +446,7 @@ CommandReply RedisCluster::run_model(const std::string& key,
     if (reply.has_error() > 0) {
         std::string error("run_model failed for node ");
         error += db_index;
-        throw std::runtime_error(error);
+        throw smart_runtime_error(error);
     }
 
     // Store the outputs back to the database
@@ -477,7 +478,7 @@ CommandReply RedisCluster::run_script(const std::string& key,
     uint16_t db_index = _get_dbnode_index(hash_slot, 0, _db_nodes.size() - 1);
     DBNode* db = &(_db_nodes[db_index]);
     if (db == NULL) {
-        throw std::runtime_error("Missing DB node found in run_script");
+        throw smart_runtime_error("Missing DB node found in run_script");
     }
 
     // Generate temporary names so that all keys go to same slot
@@ -504,7 +505,7 @@ CommandReply RedisCluster::run_script(const std::string& key,
     if (reply.has_error() > 0) {
         std::string error("run_model failed for node ");
         error += db_index;
-        throw std::runtime_error(error);
+        throw smart_runtime_error(error);
     }
 
     // Store the output back to the database
@@ -577,12 +578,12 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
             do_sleep = true;
         }
         catch (std::exception& e) {
-            throw std::runtime_error(e.what());
+            throw smart_runtime_error(e.what());
         }
         catch (...) {
-            throw std::runtime_error("A non-standard exception encountered "\
-                                     "during command " + cmd.first_field() +
-                                     " execution.");
+            throw smart_runtime_error("A non-standard exception encountered "\
+                                      "during command " + cmd.first_field() +
+                                      " execution.");
         }
 
         // Sleep before the next attempt
@@ -595,8 +596,8 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
     // We should only get here on an error response
     if (reply.has_error() > 0)
         reply.print_reply_error();
-    throw std::runtime_error("Redis failed to execute command: " +
-                                cmd.first_field());
+    throw smart_runtime_error("Redis failed to execute command: " +
+                              cmd.first_field());
     return reply; // never reached
 }
 
@@ -615,7 +616,7 @@ inline void RedisCluster::_connect(std::string address_port)
                 _redis_cluster = NULL;
             }
             if (i == n_trials) {
-                throw std::runtime_error(e.what());
+                throw smart_runtime_error(e.what());
             }
         }
         catch (...) {
@@ -624,9 +625,9 @@ inline void RedisCluster::_connect(std::string address_port)
                 _redis_cluster = NULL;
             }
             if (i == n_trials) {
-                throw std::runtime_error("A non-standard exception was "\
-                                         "encountered during client "\
-                                         "connection.");
+                throw smart_runtime_error("A non-standard exception was "\
+                                          "encountered during client "\
+                                          "connection.");
             }
         }
 
@@ -655,7 +656,7 @@ inline void RedisCluster::_map_cluster()
     CommandReply reply(_redis_cluster->
                  command(cmd.begin(), cmd.end()));
     if (reply.has_error() > 0) {
-        throw std::runtime_error("CLUSTER SLOTS command failed");
+        throw smart_runtime_error("CLUSTER SLOTS command failed");
     }
 
     // Process results
@@ -669,8 +670,8 @@ std::string RedisCluster::_get_db_node_prefix(Command& cmd)
     // Extract the keys from the command
     std::vector<std::string> keys = cmd.get_keys();
     if (keys.size() == 0) {
-        throw std::runtime_error("Command " + cmd.to_string() +
-                                 " does not have a key value.");
+        throw smart_runtime_error("Command " + cmd.to_string() +
+                                  " does not have a key value.");
     }
 
     // Walk through the keys to find the prefix
@@ -684,9 +685,9 @@ std::string RedisCluster::_get_db_node_prefix(Command& cmd)
             prefix = _db_nodes[db_index].prefix;
         }
         else if (prefix != _db_nodes[db_index].prefix) {
-            throw std::runtime_error("Multi-key commands are "\
-                                        "not valid: " +
-                                        cmd.to_string());
+            throw smart_runtime_error("Multi-key commands are "\
+                                      "not valid: " +
+                                      cmd.to_string());
         }
     }
 
@@ -736,8 +737,8 @@ inline void RedisCluster::_parse_reply_for_slots(CommandReply& reply)
         }
 
         if (k > n_hashes)
-            throw std::runtime_error("A prefix could not be generated "\
-                                     "for this cluster config.");
+            throw smart_runtime_error("A prefix could not be generated "\
+                                      "for this cluster config.");
 
         _address_node_map.insert({_db_nodes[i].ip + ":"
                                     + std::to_string(_db_nodes[i].port),
@@ -933,7 +934,7 @@ void RedisCluster::__run_model_dagrun(const std::string& key,
     // Run it
     CommandReply reply = run(cmd);
     if (reply.has_error()) {
-        throw std::runtime_error("Failed to execute DAGRUN");
+        throw smart_runtime_error("Failed to execute DAGRUN");
     }
 
     // Delete temporary input tensors
@@ -987,3 +988,5 @@ DBNode* RedisCluster::_get_model_script_db(const std::string& name,
     }
     return db;
 }
+
+// EOF

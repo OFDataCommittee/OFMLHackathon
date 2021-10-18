@@ -30,6 +30,8 @@
 #define SMARTSIM_MEMORYLAYOUT_H
 
 #include "enums/c_memory_layout.h"
+#include "srexception.h"
+
 
 /* The MemoryLayout enum specifies
 the layout of the memory space that
@@ -62,7 +64,7 @@ inline MemoryLayout convert_layout(CMemoryLayout layout) {
     case c_invalid_layout:
       return MemoryLayout::invalid;
     default:
-      throw std::runtime_error("Unsupported enum conversion.");
+      throw smart_runtime_error("Unsupported enum conversion.");
   }
 }
 

@@ -27,6 +27,7 @@
  */
 
 #include "tensorpack.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -68,8 +69,8 @@ void TensorPack::add_tensor(const std::string& name,
 {
     // Check if it's already present
     if (tensor_exists(name)) {
-        throw std::runtime_error("The tensor " + std::string(name) +
-                                 " already exists");
+        throw smart_runtime_error("The tensor " + std::string(name) +
+                                  " already exists");
     }
 
     // Allocate memory for the tensor
@@ -100,7 +101,7 @@ void TensorPack::add_tensor(const std::string& name,
             ptr = new Tensor<uint8_t>(name, data, dims, type, mem_layout);
             break;
         default:
-            throw std::runtime_error("Unknown tensor type");
+            throw smart_runtime_error("Unknown tensor type");
     }
 
     // Add it
@@ -116,7 +117,7 @@ void TensorPack::add_tensor(TensorBase* tensor)
     std::string name = tensor->name();
 
     if (name.size() == 0)
-        throw std::runtime_error("The tensor name must be nonempty.");
+        throw smart_runtime_error("The tensor name must be nonempty.");
 
     _tensorbase_inventory[name] = tensor;
     _all_tensors.push_front(tensor);
@@ -133,7 +134,7 @@ void* TensorPack::get_tensor_data(const std::string& name)
 {
     TensorBase* ptr = _tensorbase_inventory.at(name);
     if (ptr == NULL)
-        throw std::runtime_error("Tensor not found: " + name);
+        throw smart_runtime_error("Tensor not found: " + name);
     return ptr->data();
 }
 
@@ -178,7 +179,7 @@ void TensorPack::_copy_tensor_inventory(const TensorPack& tp)
     for ( ; it != tp.tensor_cend(); it++) {
         TensorBase* ptr = (*it)->clone();
         if (ptr == NULL)
-            throw std::runtime_error("Invalid tensor found!");
+            throw smart_runtime_error("Invalid tensor found!");
         _all_tensors.push_front(ptr);
         _tensorbase_inventory[ptr->name()] = ptr;
     }

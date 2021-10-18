@@ -27,6 +27,7 @@
  */
 
 #include "redis.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -105,8 +106,8 @@ bool Redis::key_exists(const std::string& key)
     // Run it
     CommandReply reply = run(cmd);
     if (reply.has_error() > 0)
-        throw std::runtime_error("Error encountered while checking "\
-                                 "for existence of key " + key);
+        throw smart_runtime_error("Error encountered while checking "\
+                                  "for existence of key " + key);
     return (bool)reply.integer();
 }
 
@@ -190,8 +191,8 @@ CommandReply Redis::copy_tensor(const std::string& src_key,
     // Run the GET command
     CommandReply cmd_get_reply = run(cmd_get);
     if (cmd_get_reply.has_error() > 0) {
-        throw std::runtime_error("Failed to retrieve tensor " +
-                                 src_key + "from database");
+        throw smart_runtime_error("Failed to retrieve tensor " +
+                                  src_key + "from database");
     }
 
     // Decode the tensor
@@ -222,8 +223,8 @@ CommandReply Redis::copy_tensors(const std::vector<std::string>& src,
 {
     // Make sure vectors are the same length
     if (src.size() != dest.size()) {
-        throw std::runtime_error("differing size vectors "\
-                                 "passed to copy_tensors");
+        throw smart_runtime_error("differing size vectors "\
+                                  "passed to copy_tensors");
     }
 
     // Copy tensors one at a time. We only need to check one iterator
@@ -235,7 +236,7 @@ CommandReply Redis::copy_tensors(const std::vector<std::string>& src,
     for ( ; it_src != src.cend(); it_src++, it_dest++) {
         reply = copy_tensor(*it_src, *it_dest);
         if (reply.has_error() > 0) {
-            throw std::runtime_error("tensor copy failed");
+            throw smart_runtime_error("tensor copy failed");
         }
 
     }
@@ -392,13 +393,13 @@ inline CommandReply Redis::_run(const Command& cmd)
             do_sleep = true;
         }
         catch (std::exception& e) {
-            throw std::runtime_error(e.what());
+            throw smart_runtime_error(e.what());
         }
         catch (...) {
-            throw std::runtime_error("A non-standard exception "\
-                                     "encountered during command " +
-                                     cmd.first_field() +
-                                     " execution. ");
+            throw smart_runtime_error("A non-standard exception "\
+                                      "encountered during command " +
+                                      cmd.first_field() +
+                                      " execution. ");
         }
 
         if (do_sleep) {
@@ -408,8 +409,8 @@ inline CommandReply Redis::_run(const Command& cmd)
 
     if (reply.has_error() > 0)
         reply.print_reply_error();
-    throw std::runtime_error("Redis failed to execute command: " +
-                             cmd.first_field());
+    throw smart_runtime_error("Redis failed to execute command: " +
+                              cmd.first_field());
 
     return reply;
 }
@@ -429,13 +430,13 @@ inline void Redis::_connect(std::string address_port)
     }
     catch (std::exception& e) {
         _redis = NULL;
-        throw std::runtime_error("Failed to create Redis object with error: " +
-                                 std::string(e.what()));
+        throw smart_runtime_error("Failed to create Redis object with error: " +
+                                  std::string(e.what()));
     }
     catch (...) {
         _redis = NULL;
-        throw std::runtime_error("A non-standard exception encountered "\
-                                 "during client connection.");
+        throw smart_runtime_error("A non-standard exception encountered "\
+                                  "during client connection.");
     }
 
     // Attempt to have the sw::redis::Redis object
@@ -447,23 +448,23 @@ inline void Redis::_connect(std::string address_port)
                 return;
             }
             else if (i == n_trials) {
-                throw std::runtime_error("Connection attempt failed");
+                throw smart_runtime_error("Connection attempt failed");
             }
         }
         catch (std::exception& e) {
             if (i == n_trials) {
-                throw std::runtime_error(e.what());
+                throw smart_runtime_error(e.what());
             }
         }
         catch (...) {
             if (i == n_trials) {
-                throw std::runtime_error("A non-standard exception encountered"\
-                                         " during client connection.");
+                throw smart_runtime_error("A non-standard exception encountered"\
+                                          " during client connection.");
             }
         }
         std::this_thread::sleep_for(std::chrono::seconds(2));
     }
 
     // Should never get here
-    throw std::runtime_error("End of _connect reached unexpectedly");
+    throw smart_runtime_error("End of _connect reached unexpectedly");
 }

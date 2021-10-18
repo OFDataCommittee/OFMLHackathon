@@ -28,6 +28,7 @@
 
 #include <string_view>
 #include "dataset.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -81,7 +82,7 @@ void DataSet::get_tensor(const std::string& name,
     // Clone the tensor in the DataSet
     TensorBase* tensor = _get_tensorbase_obj(name);
     if (tensor == NULL) {
-        throw std::runtime_error("tensor creation failed");
+        throw smart_runtime_error("tensor creation failed");
     }
     _tensor_memory.add_tensor(tensor);
     type = tensor->type();
@@ -244,9 +245,9 @@ void DataSet::_add_serialized_field(const std::string& name,
 inline void DataSet::_enforce_tensor_exists(const std::string& name)
 {
     if (!_tensorpack.tensor_exists(name)) {
-        throw std::runtime_error("The tensor " + std::string(name) +
-                                 " does not exist in " + name +
-                                 " dataset.");
+        throw smart_runtime_error("The tensor " + std::string(name) +
+                                  " does not exist in " + name +
+                                  " dataset.");
     }
 }
 
