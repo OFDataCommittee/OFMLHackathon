@@ -328,6 +328,17 @@ class RedisCluster : public RedisServer
         */
         virtual CommandReply get_script(const std::string& key);
 
+    protected:
+
+        /*!
+        *   \brief Get a DBNode prefix for the provided hash slot
+        *   \param hash_slot The hash slot to get a prefix for
+        *   \throw std::runtime_error if there is an error
+        *          creating a prefix for a particular hash slot
+        *          or if hash_slot is greater than 16384.
+        */
+        std::string _get_crc16_prefix(uint64_t hash_slot);
+
     private:
 
         /*!
@@ -389,23 +400,35 @@ class RedisCluster : public RedisServer
         inline void _parse_reply_for_slots(CommandReply& reply);
 
         /*!
-        *   \brief Get a DBNode prefix for the provided hash slot
-        *   \param hash_slot The hash slot to get a prefix for
-        *   \throw std::runtime_error if there is an error
-        *          creating a prefix for a particular DBNode
+        *   \brief Perfrom an inverse XOR and shift using
+        *          the CRC16 polynomial starting at the bit
+        *          position specified by initial_shift.
+        *          The XOR shift will be performed on n_bits.
+        *   \param remainder The polynomial expression used
+        *          with the CRC16 polynomial.  remainder
+        *          is modified and contains the result of the
+        *          inverse CRC16 XOR shifts.
+        *   \param initial_shift An initial shift applied to
+        *          the polynomial so the inverse XOR shift can be
+        *          restarted at the initial_shift bit position.
+        *   \param n_bits The number of bits (e.g. the number of
+        *                 times) the XOR operation should be
+        *                 applied to remainder
         */
-        std::string _get_crc16_prefix(uint64_t hash_slot);
+        void _crc_xor_shift(uint64_t& remainder,
+                            const size_t initial_shift,
+                            const size_t n_bits);
 
         /*!
-        *   \brief Perform an inverse CRC16 calculation.
-        *   \details Given a remainder, this function will
-        *            calculate a number that when divded by
-        *            the CRC16 polynomial, yields the remainder.
-        *   \param remainder The polynomial remainder
-        *   \returns A 64-bit number that when divided by the
-        *            CRC16 polynomial yields the remainder.
+        *   \brief Check if the current CRC16 inverse
+        *          contains any forbidden characters
+        *   \param char_bits The character bits (current solution)
+        *   \param n_chars The current number of characters
+        *   \return True if the char_bits contain a forbidden
+        *           character, otherwise False.
         */
-        uint64_t _crc16_inverse(uint64_t remainder);
+        bool _is_valid_inverse(uint64_t char_bits,
+                               const size_t n_chars);
 
         /*!
         *   \brief Determine if the key has a substring

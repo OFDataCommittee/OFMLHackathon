@@ -4,6 +4,15 @@
 #include <typeinfo>
 #include <random>
 
+class RedisClusterTestObject : public RedisCluster
+{
+    public:
+        RedisClusterTestObject() : RedisCluster() {};
+
+        std::string get_crc16_prefix(uint64_t hash_slot)
+        { return _get_crc16_prefix(hash_slot); }
+};
+
 inline void to_lower(char* s) {
     /* This will turn each character in the
     c-str into the lowercase value.
