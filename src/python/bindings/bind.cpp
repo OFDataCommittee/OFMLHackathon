@@ -90,13 +90,16 @@ PYBIND11_MODULE(smartredisPy, m) {
             PyErr_SetString(PyExc_MemoryError, e.what());
         }
         catch (const _smart_database_error& e) {
-            PyErr_SetString(PyExc_ChildProcessError, e.what());
+            PyErr_SetString(PyExc_OSError, e.what());
         }
         catch (const _smart_runtime_error& e) {
             PyErr_SetString(PyExc_RunTimeError, e.what());
         }
         catch (const _smart_parameter_error& e) {
             PyErr_SetString(PyExc_ValueError, e.what());
+        }
+        catch (const _smart_timeout_error& e) {
+            PyErr_SetString(PyExc_TimeoutError, e.what());
         }
         catch (const _smart_internal_error& e) {
             PyErr_SetString(PyExc_SystemError, e.what());

@@ -68,24 +68,6 @@ const char *sr_get_last_error()  {
 
 // Return a pointer to a new Client.
 // The caller is responsible for deleting the client via DeleteClient().
-// Deprecated! This routine will be removed in the next revision of the
-// SmartRedis library in favor of the routine below
-extern "C"
-void* SmartRedisCClient(bool cluster)
-{
-  Client* s = NULL;
-
-  try {
-    s = new Client(cluster);
-  } catch (...) {
-    s = NULL;
-  }
-
-  return reinterpret_cast<void*>(s);
-}
-
-// Return a pointer to a new Client.
-// The caller is responsible for deleting the client via DeleteClient().
 extern "C"
 SRError SmartRedisCClient(bool cluster, void **new_client)
 {
@@ -109,25 +91,11 @@ SRError SmartRedisCClient(bool cluster, void **new_client)
   }
   catch (...) {
     *new_client = NULL;
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
   return result;
-}
-
-// Free the memory associated with the c client.
-// Deprecated! This routine will be removed in the next revision of the
-// SmartRedis library in favor of the routine below
-extern "C"
-SRError DeleteCClient(void* c_client)
-{
-  // Sanity check params
-  if (c_client == NULL)
-    return; // Nothing we can do, so just bail. (error reporting to come later)
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  delete s;
 }
 
 // Free the memory associated with the c client.
@@ -148,7 +116,7 @@ SRError DeleteCClient(void** c_client)
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -175,34 +143,11 @@ SRError put_dataset(void* c_client, void* dataset)
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
   return result;
-}
-
-// Return a pointer to a new dataset.  The user is
-// responsible for deleting the dataset via DeallocateeDataSet()
-// Deprecated! This routine will be removed in the next revision of the
-// SmartRedis library in favor of the routine below
-extern "C"
-void* get_dataset(void* c_client, const char* name, const size_t name_length)
-{
-  // Sanity check params
-  if (c_client == NULL || name == NULL)
-    return NULL; // Nothing we can do, so just bail. (error reporting to come later)
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string dataset_name(name, name_length);
-  DataSet* dataset = NULL;
-
-  try {
-    dataset = new DataSet(s->get_dataset(dataset_name));
-  } catch (...) {
-    dataset = NULL;
-  }
-  return reinterpret_cast<void*>(dataset);
 }
 
 // Return a pointer to a new dataset.  The user is
@@ -234,7 +179,7 @@ SRError get_dataset(void* c_client, const char* name,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -264,7 +209,7 @@ SRError rename_dataset(void* c_client, const char* name,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -295,7 +240,7 @@ SRError copy_dataset(void* c_client, const char* src_name,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -321,7 +266,7 @@ SRError delete_dataset(void* c_client, const char* name, const size_t name_lengt
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -361,7 +306,7 @@ SRError put_tensor(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -400,7 +345,7 @@ SRError get_tensor(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -441,7 +386,7 @@ SRError unpack_tensor(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -471,7 +416,7 @@ SRError rename_tensor(void* c_client, const char* key,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -499,7 +444,7 @@ SRError delete_tensor(void* c_client, const char* key,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -531,7 +476,7 @@ SRError copy_tensor(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -612,7 +557,7 @@ SRError set_model_from_file(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -693,32 +638,11 @@ SRError set_model(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
   return result;
-}
-
-// Retrieve the model and model length from the database
-// Deprecated! This routine will be removed in the next revision of the
-// SmartRedis library in favor of the routine below
-extern "C"
-const char* get_model(void* c_client,
-                      const char* key,
-                      const size_t key_length,
-                      size_t* model_length)
-{
-  // Sanity check params
-  if (c_client == NULL || key == NULL || model_length == NULL)
-    return NULL; // Nothing we can do, so just bail. (error reporting to come later)
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string key_str(key, key_length);
-  std::string_view model_str_view(s->get_model(key_str));
-
-  *model_length = model_str_view.size();
-  return model_str_view.data();
 }
 
 // Retrieve the model and model length from the database
@@ -748,7 +672,7 @@ SRError get_model(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -784,7 +708,7 @@ SRError set_script_from_file(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -821,7 +745,7 @@ SRError set_script(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -855,7 +779,7 @@ SRError get_script(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -923,7 +847,7 @@ SRError run_script(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -988,27 +912,11 @@ SRError run_model(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
   return result;
-}
-
-// Check whether a key exists in the database
-// Deprecated! This routine will be removed in the next revision of the
-// SmartRedis library in favor of the routine below
-extern "C"
-bool key_exists(void* c_client, const char* key, const size_t key_length)
-{
-  // Sanity check params
-  if (c_client == NULL || key == NULL)
-    return false;
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string key_str(key, key_length);
-
-  return s->key_exists(key_str);
 }
 
 // Check whether a key exists in the database
@@ -1032,27 +940,11 @@ SRError key_exists(void* c_client, const char* key, const size_t key_length,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
   return result;
-}
-
-// Check whether a model exists in the database
-// Deprecated! This routine will be removed in the next revision of the
-// SmartRedis library in favor of the routine below
-extern "C"
-bool model_exists(void* c_client, const char* name, const size_t name_length)
-{
-  // Sanity check params
-  if (c_client == NULL || name == NULL)
-    return false;
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
-
-  return s->model_exists(name_str);
 }
 
 // Check whether a model exists in the database
@@ -1076,27 +968,11 @@ SRError model_exists(void* c_client, const char* name, const size_t name_length,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
   return result;
-}
-
-// Check whether a tensor exists in the database
-// Deprecated! This routine will be removed in the next revision of the
-// SmartRedis library in favor of the routine below
-extern "C"
-bool tensor_exists(void* c_client, const char* name, const size_t name_length)
-{
-  // Sanity check params
-  if (c_client == NULL || name == NULL)
-    return false;
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
-
-  return s->tensor_exists(name_str);
 }
 
 // Check whether a tensor exists in the database
@@ -1120,27 +996,11 @@ SRError tensor_exists(void* c_client, const char* name, const size_t name_length
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
   return result;
-}
-
-// Delay until a dataset exists in the database
-// Deprecated! This routine will be removed in the next revision of the
-// SmartRedis library in favor of the routine below
-extern "C"
-bool dataset_exists(void* c_client, const char* name, const size_t name_length)
-{
-  // Sanity check params
-  if (c_client == NULL || name == NULL)
-    return false;
-
-  Client* s = reinterpret_cast<Client *>(c_client);
-  std::string name_str(name, name_length);
-
-  return s->dataset_exists(name_str);
 }
 
 // Delay until a dataset exists in the database
@@ -1164,31 +1024,11 @@ SRError dataset_exists(void* c_client, const char* name, const size_t name_lengt
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
   return result;
-}
-
-// Delay until a key exists in the database
-// Deprecated! This routine will be removed in the next revision of the
-// SmartRedis library in favor of the routine below
-extern "C"
-bool poll_key(void* c_client,
-              const char* key,
-              const size_t key_length,
-              const int poll_frequency_ms,
-              const int num_tries)
-{
-  // Sanity check params
-  if (c_client == NULL || key == NULL)
-    return false;
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string key_str(key, key_length);
-
-  return s->poll_key(key_str, poll_frequency_ms, num_tries);
 }
 
 // Delay until a key exists in the database
@@ -1216,31 +1056,11 @@ SRError poll_key(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
   return result;
-}
-
-// Delay until a model exists in the database
-// Deprecated! This routine will be removed in the next revision of the
-// SmartRedis library in favor of the routine below
-extern "C"
-bool poll_model(void* c_client,
-                const char* name,
-                const size_t name_length,
-                const int poll_frequency_ms,
-                const int num_tries)
-{
-  // Sanity check params
-  if (c_client == NULL || name == NULL)
-    return false;
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
-
-  return s->poll_model(name_str, poll_frequency_ms, num_tries);
 }
 
 // Delay until a model exists in the database
@@ -1268,31 +1088,11 @@ SRError poll_model(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
   return result;
-}
-
-// Delay until a tensor exists in the database
-// Deprecated! This routine will be removed in the next revision of the
-// SmartRedis library in favor of the routine below
-extern "C"
-bool poll_tensor(void* c_client,
-                 const char* name,
-                 const size_t name_length,
-                 const int poll_frequency_ms,
-                 const int num_tries)
-{
-  // Sanity check params
-  if (c_client == NULL || name == NULL)
-    return false;
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
-
-  return s->poll_tensor(name_str, poll_frequency_ms, num_tries);
 }
 
 // Delay until a tensor exists in the database
@@ -1320,7 +1120,7 @@ SRError poll_tensor(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -1349,7 +1149,7 @@ SRError set_data_source(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -1374,7 +1174,7 @@ SRError use_model_ensemble_prefix(void* c_client, bool use_prefix)
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -1399,7 +1199,7 @@ SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix)
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 

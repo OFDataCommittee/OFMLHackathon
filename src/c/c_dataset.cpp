@@ -36,29 +36,6 @@ void sr_set_last_error(const smart_error& last_error);
 
 // Create a new DataSet.
 // The user is responsible for deallocating the DataSet via DeallocateeDataSet()
-// Deprecated! This routine will be removed in the next revision of the
-// SmartRedis library in favor of the routine below
-extern "C"
-void* CDataSet(const char* name, const size_t name_length)
-{
-  // Sanity check parameters
-  if (name == NULL)
-    return NULL;
-
-  std::string name_str(name, name_length);
-
-  DataSet* dataset = NULL;
-  try {
-    dataset = new DataSet(name_str);
-  } catch (...) {
-    dataset = NULL;
-  }
-
-  return reinterpret_cast<void* >(dataset);
-}
-
-// Create a new DataSet.
-// The user is responsible for deallocating the DataSet via DeallocateeDataSet()
 extern "C"
 SRError CDataSet(const char* name, const size_t name_length, void** new_dataset)
 {
@@ -83,25 +60,11 @@ SRError CDataSet(const char* name, const size_t name_length, void** new_dataset)
   }
   catch (...) {
     *new_dataset = NULL;
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
   return result;
-}
-
-// Deallocate a DataSet
-// Deprecated! This routine will be removed in the next revision of the
-// SmartRedis library in favor of the routine below
-extern "C"
-void DeallocateeDataSet(void* dataset)
-{
-  // Sanity check parameters
-  if (dataset == NULL)
-    return;
-
-  DataSet* d = reinterpret_cast<DataSet*>(dataset);
-  delete d;
 }
 
 // Deallocate a DataSet
@@ -123,7 +86,7 @@ SRError DeallocateeDataSet(void** dataset)
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -162,7 +125,7 @@ SRError add_tensor(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -194,7 +157,7 @@ SRError add_meta_scalar(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -226,7 +189,7 @@ SRError add_meta_string(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -267,7 +230,7 @@ SRError get_dataset_tensor(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -306,37 +269,11 @@ SRError unpack_dataset_tensor(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
   return result;
-}
-
-// Get a meta data field. This method may allocate memory that is cleared when
-// the user deletes the DataSet object
-// Deprecated! This routine will be removed in the next revision of the
-// SmartRedis library in favor of the routine below
-extern "C"
-void* get_meta_scalars(void* dataset,
-                       const char* name,
-                       const size_t name_length,
-                       size_t* length,
-                       CMetaDataType* type)
-{
-  // Sanity check parameters
-  if (dataset == NULL || name == NULL || length == NULL || type == NULL)
-    return NULL;
-
-  DataSet* d = reinterpret_cast<DataSet*>(dataset);
-  std::string key_str(name, name_length);
-  void* data = NULL;
-  MetaDataType m_type;
-
-  d->get_meta_scalars(key_str, data, *length, m_type);
-
-  *type = convert_metadata_type(m_type);
-  return data;
 }
 
 // Get a meta data field. This method may allocate memory that is cleared when
@@ -371,7 +308,7 @@ SRError get_meta_scalars(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 
@@ -405,7 +342,7 @@ SRError get_meta_strings(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_unknown_error("Unknown exception occurred"));
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
     result = sr_unknown;
   }
 

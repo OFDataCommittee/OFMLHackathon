@@ -36,7 +36,8 @@ typedef enum {
     sr_internal  = 3, // Internal SmartRedis error
     sr_runtime   = 4, // Runtime error executing an operation
     sr_parameter = 5, // Bad parameter error
-    sr_invalid   = 6  // Uninitialized error variable
+	sr_timeout   = 6, // Timeout error
+    sr_invalid   = 7  // Uninitialized error variable
 } SRError;
 
 // Smart error: custom error class for the SmartRedis library
@@ -117,6 +118,20 @@ class _smart_parameter_error: public smart_error
 };
 
 #define smart_parameter_error(txt) _smart_parameter_error(txt, __FILE__, __LINE__)
+
+#define smart_runtime_error(txt) _smart_runtime_error(txt, __FILE__, __LINE__)
+
+// Timeout error
+class _smart_timeout_error: public smart_error
+{
+	using smart_error::smart_error;
+
+	virtual SRError to_error_code() const noexcept {
+		return sr_timeout;
+	}
+};
+
+#define smart_timeout_error(txt) _smart_timeout_error(txt, __FILE__, __LINE__)
 
 // Internal error
 class _smart_internal_error: public smart_error

@@ -42,17 +42,6 @@ extern "C" {
 #endif
 
 /*!
-*   \brief C-DataSet constructor (deprecated)
-*   \param name The name of the dataset
-*   \param name_length The length of the dataset name c-string,
-*                      excluding null terminating character
-*   \return Returns NULL on failure
-*/
-void* CDataSet(const char* name,
-               const size_t name_length);
-
-
-/*!
 *   \brief C-DataSet constructor
 *   \param name The name of the dataset
 *   \param name_length The length of the dataset name c-string,
@@ -63,12 +52,6 @@ void* CDataSet(const char* name,
 SRError CDataSet(const char* name,
                  const size_t name_length,
                  void** new_dataset);
-
-/*!
-*   \brief C-DataSet destructor (deprecated)
-*   \param dataset The dataset to release
-*/
-void DeallocateeDataSet(void* dataset);
 
 /*!
 *   \brief C-DataSet destructor
@@ -195,28 +178,6 @@ SRError unpack_dataset_tensor(void* dataset,
                               const size_t n_dims,
                               const CTensorType type,
                               const CMemoryLayout mem_layout);
-
-/*!
-*   \brief Get the metadata scalar field values from the DataSet.  The data
-*          pointer reference will be pointed to newly allocated memory that
-*          will contain all values in the metadata field. The length variable
-*          will be set to the number of entries in the allocated memory space
-*          to allow for iteration over the values.  The TensorType enum will
-*          be set to the type of the MetaData field. (deprecated)
-*   \param dataset A c-ptr to the dataset object
-*   \param name The name used to reference the metadata field in the DataSet
-*   \param name_length The length of the dataset name c-string,
-*                      excluding null terminating character
-*   \param length The number of values in the metadata field
-*   \param type The data type of the metadata field
-*   \returns Allocated memory containing the metadata; NULL on bad parameters
-*/
-void* get_meta_scalars(void* dataset,
-                      const char* name,
-                      const size_t name_length,
-                      size_t* length,
-                      CMetaDataType* type);
-
 
 /*!
 *   \brief Get the metadata scalar field values from the DataSet.  The data
