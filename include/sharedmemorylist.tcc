@@ -29,6 +29,8 @@
 #ifndef SMARTREDIS_SHAREDMEMORYLIST_TCC
 #define SMARTREDIS_SHAREDMEMORYLIST_TCC
 
+#include "srexception.h"
+
 // Record a memory allocation
 template <class T>
 void SharedMemoryList<T>::add_allocation(size_t bytes, T* ptr)
@@ -41,9 +43,14 @@ void SharedMemoryList<T>::add_allocation(size_t bytes, T* ptr)
 template <class T>
 T* SharedMemoryList<T>::allocate_bytes(size_t bytes)
 {
-    T* ptr = (T*)new unsigned char[bytes];
-    add_allocation(bytes, ptr);
-    return ptr;
+    try {
+        T* ptr = (T*)new unsigned char[bytes];
+        add_allocation(bytes, ptr);
+        return ptr;
+    }
+    catch (std::bad_alloc& e) {
+        throw smart_bad_alloc("shared memory buffer");
+    }
 }
 
 // Perform type-specific memory allocation

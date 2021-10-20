@@ -79,7 +79,7 @@ py::array PyDataset::get_tensor(const std::string& name) {
         throw smart_runtime_error(e.what());
     }
 
-    //Define py::capsule lambda function for destructor
+    // Define py::capsule lambda function for destructor
     py::capsule free_when_done((void*)tensor, [](void *tensor) {
             delete reinterpret_cast<TensorBase*>(tensor);
             });

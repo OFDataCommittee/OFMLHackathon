@@ -35,9 +35,9 @@ typedef enum {
     sr_dberr     = 2, // Backend database error
     sr_internal  = 3, // Internal SmartRedis error
     sr_runtime   = 4, // Runtime error executing an operation
-	sr_parameter = 5, // Bad parameter error
-	sr_unknown   = 6, // Unidentified error -- no further info available
-	sr_invalid   = 7  // Uninitialized error variable
+    sr_parameter = 5, // Bad parameter error
+    sr_unknown   = 6, // Unidentified error -- no further info available
+    sr_invalid   = 7  // Uninitialized error variable
 } SRError;
 
 // Smart error: custom error class for the SmartRedis library

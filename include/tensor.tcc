@@ -105,9 +105,14 @@ Tensor<T>& Tensor<T>::operator=(Tensor<T>&& tensor)
 template <class T>
 TensorBase* Tensor<T>::clone()
 {
-    Tensor<T>* new_tensor = new Tensor<T>(*this);
-    (*new_tensor) = *this;
-    return new_tensor;
+    try {
+        Tensor<T>* new_tensor = new Tensor<T>(*this);
+        (*new_tensor) = *this;
+        return new_tensor;
+    }
+    catch (std::bad_alloc& e) {
+        throw smart_bad_alloc("tnesor");
+    }
 }
 
 // Get a pointer to a specificed memory view of the Tensor data
@@ -298,7 +303,12 @@ void Tensor<T>::_set_tensor_data(void* src_data,
 {
     size_t n_values = num_values();
     size_t n_bytes = n_values * sizeof(T);
-    _data = new unsigned char[n_bytes];
+    try {
+        _data = new unsigned char[n_bytes];
+    }
+    catch (std::bad_alloc& e) {
+        throw smart_bad_alloc("tensor data");
+    }
 
     switch (mem_layout) {
         case MemoryLayout::contiguous:

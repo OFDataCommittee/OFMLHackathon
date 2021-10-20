@@ -28,6 +28,7 @@
 
 #include "compoundcommand.h"
 #include "redisserver.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -40,6 +41,11 @@ CommandReply CompoundCommand::run_me(RedisServer* server)
 // Deep copy operator
 Command* CompoundCommand::clone()
 {
-    CompoundCommand* new_cmd = new CompoundCommand(*this);
-    return new_cmd;
+    try {
+        CompoundCommand* new_cmd = new CompoundCommand(*this);
+        return new_cmd;
+    }
+    catch (std::bad_alloc& e) {
+        throw smart_bad_alloc("CompoundCommand clone");
+    }
 }

@@ -380,14 +380,26 @@ template <typename T>
 void MetaData::_create_scalar_field(const std::string& field_name,
                                     const MetaDataType type)
 {
-    MetadataField* mdf = new ScalarField<T>(field_name, type);
+    MetadataField* mdf = NULL;
+    try {
+        new ScalarField<T>(field_name, type);
+    }
+    catch (std::bad_alloc& e) {
+        throw smart_bad_alloc("scalar field");
+    }
     _field_map[field_name] = mdf;
 }
 
 // Create a new string metadata field and add it to the field map
 void MetaData::_create_string_field(const std::string& field_name)
 {
-    MetadataField* mdf = new StringField(field_name);
+    MetadataField* mdf = NULL;
+    try {
+        mdf = new StringField(field_name);
+    }
+    catch (std::bad_alloc& e) {
+        throw smart_bad_alloc("metadata field");
+    }
     _field_map[field_name] = mdf;
 }
 
@@ -507,43 +519,48 @@ void MetaData::add_serialized_field(const std::string& name,
 
     // Allocate memory for the field
     MetadataField* mdf = NULL;
-    switch (type) {
-        case MetaDataType::dbl:
-            mdf = new ScalarField<double>(
-                name, MetaDataType::dbl,
-                MetadataBuffer::unpack_scalar_buf<double>(buf_sv));
-            break;
-        case MetaDataType::flt:
-            mdf = new ScalarField<float>(
-                name, MetaDataType::flt,
-                MetadataBuffer::unpack_scalar_buf<float>(buf_sv));
-            break;
-        case MetaDataType::int64:
-            mdf = new ScalarField<int64_t>(
-                name, MetaDataType::int64,
-                MetadataBuffer::unpack_scalar_buf<int64_t>(buf_sv));
-            break;
-        case MetaDataType::uint64:
-            mdf = new ScalarField<uint64_t>(
-                name, MetaDataType::uint64,
-                MetadataBuffer::unpack_scalar_buf<uint64_t>(buf_sv));
-            break;
-        case MetaDataType::int32:
-            mdf = new ScalarField<int32_t>(
-                name, MetaDataType::int32,
-                MetadataBuffer::unpack_scalar_buf<int32_t>(buf_sv));
-            break;
-        case MetaDataType::uint32:
-            mdf = new ScalarField<uint32_t>(
-                name, MetaDataType::uint32,
-                MetadataBuffer::unpack_scalar_buf<uint32_t>(buf_sv));
-            break;
-        case MetaDataType::string:
-            mdf = new StringField(
-                name, MetadataBuffer::unpack_string_buf(buf_sv));
-            break;
-        default:
-            throw smart_runtime_error("unknown type in add_serialized_field");
+    try {
+        switch (type) {
+            case MetaDataType::dbl:
+                mdf = new ScalarField<double>(
+                    name, MetaDataType::dbl,
+                    MetadataBuffer::unpack_scalar_buf<double>(buf_sv));
+                break;
+            case MetaDataType::flt:
+                mdf = new ScalarField<float>(
+                    name, MetaDataType::flt,
+                    MetadataBuffer::unpack_scalar_buf<float>(buf_sv));
+                break;
+            case MetaDataType::int64:
+                mdf = new ScalarField<int64_t>(
+                    name, MetaDataType::int64,
+                    MetadataBuffer::unpack_scalar_buf<int64_t>(buf_sv));
+                break;
+            case MetaDataType::uint64:
+                mdf = new ScalarField<uint64_t>(
+                    name, MetaDataType::uint64,
+                    MetadataBuffer::unpack_scalar_buf<uint64_t>(buf_sv));
+                break;
+            case MetaDataType::int32:
+                mdf = new ScalarField<int32_t>(
+                    name, MetaDataType::int32,
+                    MetadataBuffer::unpack_scalar_buf<int32_t>(buf_sv));
+                break;
+            case MetaDataType::uint32:
+                mdf = new ScalarField<uint32_t>(
+                    name, MetaDataType::uint32,
+                    MetadataBuffer::unpack_scalar_buf<uint32_t>(buf_sv));
+                break;
+            case MetaDataType::string:
+                mdf = new StringField(
+                    name, MetadataBuffer::unpack_string_buf(buf_sv));
+                break;
+            default:
+                throw smart_runtime_error("unknown type in add_serialized_field");
+        }
+    }
+    catch (std::bad_alloc& e) {
+        throw smart_bad_alloc("metadata field buffer");
     }
 
     // Add the field

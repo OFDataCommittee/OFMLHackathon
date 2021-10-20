@@ -41,10 +41,16 @@ PyClient::PyClient(bool cluster)
     try {
         _client = new Client(cluster);
     }
-    catch(std::exception& e) {
-        throw smart_runtime_error(e.what());
+    catch (smart_error& e) {
+        // exception is already prepared for caller
+        throw e;
     }
-    catch(...) {
+    catch (std::exception& e) {
+        // should never happen
+        std::rethrow_exception(e);
+    }
+    catch (...) {
+        // should never happen
         throw smart_runtime_error("A non-standard exception "\
                                   "was encountered during client "\
                                   "construction.");

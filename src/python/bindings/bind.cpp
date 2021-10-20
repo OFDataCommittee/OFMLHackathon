@@ -27,6 +27,7 @@
  */
 
 #include "pyclient.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 namespace py = pybind11;
@@ -79,5 +80,30 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("get_meta_scalars", &PyDataset::get_meta_scalars)
         .def("get_meta_strings", &PyDataset::get_meta_strings)
         .def("get_name", &PyDataset::get_name);
+
+    // Register exception classes
+    py::register_exception_translator([](std::exception_ptr p) {
+        try {
+            if (p) std::rethrow_exception(p);
+        }
+        catch (const _smart_bad_alloc& e) {
+            PyErr_SetString(PyExc_MemoryError, e.what());
+        }
+        catch (const _smart_database_error& e) {
+            PyErr_SetString(PyExc_ChildProcessError, e.what());
+        }
+        catch (const _smart_runtime_error& e) {
+            PyErr_SetString(PyExc_RunTimeError, e.what());
+        }
+        catch (const _smart_parameter_error& e) {
+            PyErr_SetString(PyExc_ValueError, e.what());
+        }
+        catch (const _smart_internal_error& e) {
+            PyErr_SetString(PyExc_SystemError, e.what());
+        }
+        catch (const _smart_unknown_error& e) {
+            PyErr_SetString(PyExc_SystemError, e.what());
+        }
+    })
 }
 

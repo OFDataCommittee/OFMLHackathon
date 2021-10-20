@@ -433,6 +433,9 @@ inline void Redis::_connect(std::string address_port)
                                    "backend Redis database: ") +
                                    e.what())
     }
+    catch (std::bad_alloc& e) {
+        throw smart_bad_alloc("Redis connection");
+    }
     catch (std::exception& e) {
         _redis = NULL;
         throw smart_runtime_error("Failed to create Redis object with error: " +

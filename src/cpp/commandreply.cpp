@@ -302,9 +302,16 @@ void CommandReply::print_reply_structure(std::string index_tracker)
 
 redisReply* CommandReply::deep_clone_reply(const redisReply* reply)
 {
+    // GIGO
     if (reply == NULL)
         return NULL;
-    redisReply* redis_reply = new redisReply;
+    redisReply* redis_reply = NULL;
+    try {
+        redis_reply = new redisReply;
+    }
+    catch (std::bad_alloc& e) {
+        throw smart_bad_alloc("Redis reply deep clone");
+    }
     *redis_reply = *reply;
     redis_reply->str = NULL;
     redis_reply->element = NULL;
@@ -313,10 +320,15 @@ redisReply* CommandReply::deep_clone_reply(const redisReply* reply)
         case REDIS_REPLY_MAP:
         case REDIS_REPLY_SET:
             // allocate memory for element and do deep copy
-            if(redis_reply->elements > 0) {
-                redis_reply->element = new redisReply*[redis_reply->elements]{NULL};
-                if(reply->element != NULL) {
-                    for(size_t i=0; i<reply->elements; i++)
+            if (redis_reply->elements > 0) {
+                try {
+                    redis_reply->element = new redisReply*[redis_reply->elements]{NULL};
+                }
+                catch (std::bad_alloc& e) {
+                    throw smart_bad_alloc("redis reply element");
+                }
+                if (reply->element != NULL) {
+                    for(size_t i = 0; i < reply->elements; i++)
                         redis_reply->element[i] = deep_clone_reply(reply->element[i]);
                 }
                 else {
@@ -334,7 +346,12 @@ redisReply* CommandReply::deep_clone_reply(const redisReply* reply)
         case REDIS_REPLY_DOUBLE:
             // allocate memory for str and do deep copy
             if (redis_reply->len > 0) {
-                redis_reply->str = new char[redis_reply->len];
+                try {
+                    redis_reply->str = new char[redis_reply->len];
+                }
+                catch (std::bad_alloc& e) {
+                    throw smart_bad_alloc("redis reply buffer");
+                }
                 std::memcpy(redis_reply->str, reply->str, redis_reply->len);
             }
             break;

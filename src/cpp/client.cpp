@@ -36,6 +36,8 @@ Client::Client(bool cluster)
     : _redis_cluster(cluster ? new RedisCluster() : NULL),
       _redis(cluster ? NULL : new Redis())
 {
+    // A std::bad_alloc exception on the initializer will be caught
+    // by the call to new for the client
     if (cluster)
         _redis_server =  _redis_cluster;
     else
@@ -195,34 +197,39 @@ void Client::put_tensor(const std::string& key,
 {
     std::string p_key = _build_tensor_key(key, false);
 
-    TensorBase* tensor;
-    switch (type) {
-        case TensorType::dbl:
-            tensor = new Tensor<double>(p_key, data, dims, type, mem_layout);
-            break;
-        case TensorType::flt:
-            tensor = new Tensor<float>(p_key, data, dims, type, mem_layout);
-            break;
-        case TensorType::int64:
-            tensor = new Tensor<int64_t>(p_key, data, dims, type, mem_layout);
-            break;
-        case TensorType::int32:
-            tensor = new Tensor<int32_t>(p_key, data, dims, type, mem_layout);
-            break;
-        case TensorType::int16:
-            tensor = new Tensor<int16_t>(p_key, data, dims, type, mem_layout);
-            break;
-        case TensorType::int8:
-            tensor = new Tensor<int8_t>(p_key, data, dims, type, mem_layout);
-            break;
-        case TensorType::uint16:
-            tensor = new Tensor<uint16_t>(p_key, data, dims, type, mem_layout);
-            break;
-        case TensorType::uint8:
-            tensor = new Tensor<uint8_t>(p_key, data, dims, type, mem_layout);
-            break;
-        default:
-            throw smart_runtime_error("Invalid type for put_tensor");
+    TensorBase* tensor = NULL;
+    try {
+        switch (type) {
+            case TensorType::dbl:
+                tensor = new Tensor<double>(p_key, data, dims, type, mem_layout);
+                break;
+            case TensorType::flt:
+                tensor = new Tensor<float>(p_key, data, dims, type, mem_layout);
+                break;
+            case TensorType::int64:
+                tensor = new Tensor<int64_t>(p_key, data, dims, type, mem_layout);
+                break;
+            case TensorType::int32:
+                tensor = new Tensor<int32_t>(p_key, data, dims, type, mem_layout);
+                break;
+            case TensorType::int16:
+                tensor = new Tensor<int16_t>(p_key, data, dims, type, mem_layout);
+                break;
+            case TensorType::int8:
+                tensor = new Tensor<int8_t>(p_key, data, dims, type, mem_layout);
+                break;
+            case TensorType::uint16:
+                tensor = new Tensor<uint16_t>(p_key, data, dims, type, mem_layout);
+                break;
+            case TensorType::uint8:
+                tensor = new Tensor<uint8_t>(p_key, data, dims, type, mem_layout);
+                break;
+            default:
+                throw smart_runtime_error("Invalid type for put_tensor");
+        }
+    }
+    catch (std::bad_alloc& e) {
+        throw smart_bad_alloc("tensor");
     }
 
     // Send the tensor
@@ -349,49 +356,54 @@ void Client::unpack_tensor(const std::string& key,
     // Retrieve the tensor data into a Tensor
     std::string_view blob = GetTensorCommand::get_data_blob(reply);
     TensorBase* tensor = NULL;
-    switch (reply_type) {
-        case TensorType::dbl:
-            tensor = new Tensor<double>(get_key, (void*)blob.data(),
+    try {
+        switch (reply_type) {
+            case TensorType::dbl:
+                tensor = new Tensor<double>(get_key, (void*)blob.data(),
+                                            reply_dims, reply_type,
+                                            MemoryLayout::contiguous);
+                break;
+            case TensorType::flt:
+                tensor = new Tensor<float>(get_key, (void*)blob.data(),
                                         reply_dims, reply_type,
                                         MemoryLayout::contiguous);
-            break;
-        case TensorType::flt:
-            tensor = new Tensor<float>(get_key, (void*)blob.data(),
-                                       reply_dims, reply_type,
-                                       MemoryLayout::contiguous);
-            break;
-        case TensorType::int64:
-            tensor = new Tensor<int64_t>(get_key, (void*)blob.data(),
-                                         reply_dims, reply_type,
-                                         MemoryLayout::contiguous);
-            break;
-        case TensorType::int32:
-            tensor = new Tensor<int32_t>(get_key, (void*)blob.data(),
-                                         reply_dims, reply_type,
-                                         MemoryLayout::contiguous);
-            break;
-        case TensorType::int16:
-            tensor = new Tensor<int16_t>(get_key, (void*)blob.data(),
-                                         reply_dims, reply_type,
-                                         MemoryLayout::contiguous);
-            break;
-        case TensorType::int8:
-            tensor = new Tensor<int8_t>(get_key, (void*)blob.data(),
-                                        reply_dims, reply_type,
-                                        MemoryLayout::contiguous);
-            break;
-        case TensorType::uint16:
-            tensor = new Tensor<uint16_t>(get_key, (void*)blob.data(),
-                                          reply_dims, reply_type,
-                                          MemoryLayout::contiguous);
-            break;
-        case TensorType::uint8:
-            tensor = new Tensor<uint8_t>(get_key, (void*)blob.data(),
-                                         reply_dims, reply_type,
-                                         MemoryLayout::contiguous);
-            break;
-        default:
-            throw smart_runtime_error("Invalid type for unpack_tensor");
+                break;
+            case TensorType::int64:
+                tensor = new Tensor<int64_t>(get_key, (void*)blob.data(),
+                                            reply_dims, reply_type,
+                                            MemoryLayout::contiguous);
+                break;
+            case TensorType::int32:
+                tensor = new Tensor<int32_t>(get_key, (void*)blob.data(),
+                                            reply_dims, reply_type,
+                                            MemoryLayout::contiguous);
+                break;
+            case TensorType::int16:
+                tensor = new Tensor<int16_t>(get_key, (void*)blob.data(),
+                                            reply_dims, reply_type,
+                                            MemoryLayout::contiguous);
+                break;
+            case TensorType::int8:
+                tensor = new Tensor<int8_t>(get_key, (void*)blob.data(),
+                                            reply_dims, reply_type,
+                                            MemoryLayout::contiguous);
+                break;
+            case TensorType::uint16:
+                tensor = new Tensor<uint16_t>(get_key, (void*)blob.data(),
+                                            reply_dims, reply_type,
+                                            MemoryLayout::contiguous);
+                break;
+            case TensorType::uint8:
+                tensor = new Tensor<uint8_t>(get_key, (void*)blob.data(),
+                                            reply_dims, reply_type,
+                                            MemoryLayout::contiguous);
+                break;
+            default:
+                throw smart_runtime_error("Invalid type for unpack_tensor");
+        }
+    }
+    catch (std::bad_alloc& e) {
+        throw smart_bad_alloc("tensor");
     }
 
     // Unpack the tensor and reclaim it
@@ -1025,46 +1037,51 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
     }
 
     TensorBase* ptr = NULL;
-    switch (type) {
-        case TensorType::dbl:
-            ptr = new Tensor<double>(get_key, (void*)blob.data(),
-                                     dims, type, MemoryLayout::contiguous);
-            break;
-        case TensorType::flt:
-            ptr = new Tensor<float>(get_key, (void*)blob.data(),
-                                    dims, type, MemoryLayout::contiguous);
-            break;
-        case TensorType::int64:
-            ptr = new Tensor<int64_t>(get_key, (void*)blob.data(),
-                                      dims, type, MemoryLayout::contiguous);
-            break;
-        case TensorType::int32:
-            ptr = new Tensor<int32_t>(get_key, (void*)blob.data(),
-                                      dims, type, MemoryLayout::contiguous);
-            break;
-        case TensorType::int16:
-            ptr = new Tensor<int16_t>(get_key, (void*)blob.data(),
-                                      dims, type, MemoryLayout::contiguous);
-            break;
-        case TensorType::int8:
-            ptr = new Tensor<int8_t>(get_key, (void*)blob.data(),
-                                     dims, type, MemoryLayout::contiguous);
-            break;
-        case TensorType::uint16:
-            ptr = new Tensor<uint16_t>(get_key, (void*)blob.data(),
-                                       dims, type, MemoryLayout::contiguous);
-            break;
-        case TensorType::uint8:
-            ptr = new Tensor<uint8_t>(get_key, (void*)blob.data(),
-                                      dims, type, MemoryLayout::contiguous);
-            break;
-        default :
-            throw smart_runtime_error("An invalid TensorType was "\
-                                      "provided to "
-                                      "Client::_get_tensorbase_obj(). "
-                                      "The tensor could not be "\
-                                      "retrieved.");
-            break;
+    try {
+        switch (type) {
+            case TensorType::dbl:
+                ptr = new Tensor<double>(get_key, (void*)blob.data(),
+                                        dims, type, MemoryLayout::contiguous);
+                break;
+            case TensorType::flt:
+                ptr = new Tensor<float>(get_key, (void*)blob.data(),
+                                        dims, type, MemoryLayout::contiguous);
+                break;
+            case TensorType::int64:
+                ptr = new Tensor<int64_t>(get_key, (void*)blob.data(),
+                                        dims, type, MemoryLayout::contiguous);
+                break;
+            case TensorType::int32:
+                ptr = new Tensor<int32_t>(get_key, (void*)blob.data(),
+                                        dims, type, MemoryLayout::contiguous);
+                break;
+            case TensorType::int16:
+                ptr = new Tensor<int16_t>(get_key, (void*)blob.data(),
+                                        dims, type, MemoryLayout::contiguous);
+                break;
+            case TensorType::int8:
+                ptr = new Tensor<int8_t>(get_key, (void*)blob.data(),
+                                        dims, type, MemoryLayout::contiguous);
+                break;
+            case TensorType::uint16:
+                ptr = new Tensor<uint16_t>(get_key, (void*)blob.data(),
+                                        dims, type, MemoryLayout::contiguous);
+                break;
+            case TensorType::uint8:
+                ptr = new Tensor<uint8_t>(get_key, (void*)blob.data(),
+                                        dims, type, MemoryLayout::contiguous);
+                break;
+            default :
+                throw smart_runtime_error("An invalid TensorType was "\
+                                        "provided to "
+                                        "Client::_get_tensorbase_obj(). "
+                                        "The tensor could not be "\
+                                        "retrieved.");
+                break;
+        }
+    }
+    catch (std::bad_alloc& e) {
+        throw smart_bad_alloc("tensor");
     }
     return ptr;
 }
