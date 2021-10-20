@@ -716,29 +716,7 @@ inline void RedisCluster::_parse_reply_for_slots(CommandReply& reply)
         _db_nodes[i].port = reply[i][2][1].integer();
         _db_nodes[i].name = std::string(reply[i][2][2].str(),
                                               reply[i][2][2].str_len());
-        bool acceptable_prefix = false;
-        uint64_t n_hashes = _db_nodes[i].upper_hash_slot -
-                       _db_nodes[i].lower_hash_slot + 1;
-        uint64_t k = 0;
-        for ( ; !acceptable_prefix && k <= n_hashes; k++) {
-            _db_nodes[i].prefix = _get_crc16_prefix(
-                                        _db_nodes[i].lower_hash_slot+k);
-            std::string prefix = _db_nodes[i].prefix;
-            bool found_bracket = false;
-            for (size_t j = 0; j < prefix.size(); j++) {
-                if (prefix[j] == '}') {
-                    found_bracket = true;
-                    break;
-                }
-            }
-            if (!found_bracket)
-                acceptable_prefix = true;
-        }
-
-        if (k > n_hashes)
-            throw std::runtime_error("A prefix could not be generated "\
-                                     "for this cluster config.");
-
+        _db_nodes[i].prefix = _get_crc16_prefix(_db_nodes[i].lower_hash_slot);
         _address_node_map.insert({_db_nodes[i].ip + ":"
                                     + std::to_string(_db_nodes[i].port),
                                     &_db_nodes[i]});
