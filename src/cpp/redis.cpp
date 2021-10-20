@@ -396,9 +396,9 @@ inline CommandReply Redis::_run(const Command& cmd)
             throw smart_runtime_error(e.what());
         }
         catch (...) {
-            throw smart_unknown_error("Non-standard exception "\
-                                      "encountered during command " +
-                                      cmd.first_field() + " execution. ");
+            throw smart_internal_error("Non-standard exception "\
+                                       "encountered during command " +
+                                       cmd.first_field() + " execution. ");
         }
 
         if (do_sleep) {
@@ -443,8 +443,8 @@ inline void Redis::_connect(std::string address_port)
     }
     catch (...) {
         _redis = NULL;
-        throw smart_unknown_error("A non-standard exception encountered "\
-                                  "during client connection.");
+        throw smart_internal_error("A non-standard exception encountered "\
+                                   "during client connection.");
     }
 
     // Attempt to have the sw::redis::Redis object

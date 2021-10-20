@@ -101,9 +101,6 @@ PYBIND11_MODULE(smartredisPy, m) {
         catch (const _smart_internal_error& e) {
             PyErr_SetString(PyExc_SystemError, e.what());
         }
-        catch (const _smart_unknown_error& e) {
-            PyErr_SetString(PyExc_SystemError, e.what());
-        }
     })
 }
 

@@ -36,8 +36,7 @@ typedef enum {
     sr_internal  = 3, // Internal SmartRedis error
     sr_runtime   = 4, // Runtime error executing an operation
     sr_parameter = 5, // Bad parameter error
-    sr_unknown   = 6, // Unidentified error -- no further info available
-    sr_invalid   = 7  // Uninitialized error variable
+    sr_invalid   = 6  // Uninitialized error variable
 } SRError;
 
 // Smart error: custom error class for the SmartRedis library
@@ -130,17 +129,5 @@ class _smart_internal_error: public smart_error
 };
 
 #define smart_internal_error(txt) _smart_internal_error(txt, __FILE__, __LINE__)
-
-// Unknown error encountered
-class _smart_unknown_error: public smart_error
-{
-	using smart_error::smart_error;
-
-	virtual SRError to_error_code() const noexcept {
-		return sr_unknown;
-	}
-};
-
-#define smart_unknown_error(txt) _smart_unknown_error(txt, __FILE__, __LINE__)
 
 #endif // SMARTREDIS_SMART_ERROR_H

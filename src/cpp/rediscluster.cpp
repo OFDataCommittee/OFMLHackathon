@@ -578,9 +578,9 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
             throw smart_runtime_error(e.what());
         }
         catch (...) {
-            throw smart_unknown_error("A non-standard exception encountered "\
-                                      "during command " + cmd.first_field() +
-                                      " execution.");
+            throw smart_internal_error("A non-standard exception encountered "\
+                                       "during command " + cmd.first_field() +
+                                       " execution.");
         }
 
         // Sleep before the next attempt
@@ -631,9 +631,9 @@ inline void RedisCluster::_connect(std::string address_port)
                 _redis_cluster = NULL;
             }
             if (i == n_trials) {
-                throw smart_unknown_error("A non-standard exception was "\
-                                          "encountered during client "\
-                                          "connection.");
+                throw smart_internal_error("A non-standard exception was "\
+                                           "encountered during client "\
+                                           "connection.");
             }
         }
 
