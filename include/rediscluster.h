@@ -404,6 +404,10 @@ class RedisCluster : public RedisServer
         *          the CRC16 polynomial starting at the bit
         *          position specified by initial_shift.
         *          The XOR shift will be performed on n_bits.
+        *          The XOR operation is performed on every
+        *          non-zero bit starting from the right, following
+        *          the same pattern as the forward CRC16 calculation
+        *          (which starts on the left).
         *   \param remainder The polynomial expression used
         *          with the CRC16 polynomial.  remainder
         *          is modified and contains the result of the

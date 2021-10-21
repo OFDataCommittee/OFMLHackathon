@@ -738,13 +738,13 @@ void RedisCluster::_crc_xor_shift(uint64_t& remainder,
     digit = digit << initial_shift;
     poly = poly << initial_shift;
 
-    for(size_t i=0; i<n_bits; i++) {
+    for (size_t i = 0; i < n_bits; i++) {
         // Only do the xor if the bit position is 1
-        if(remainder&digit) {
-            remainder = remainder^poly;
+        if (remainder & digit) {
+            remainder = remainder ^ poly;
         }
-        digit=digit<<1;
-        poly=poly<<1;
+        digit = digit << 1;
+        poly = poly << 1;
     }
 }
 
@@ -777,10 +777,9 @@ std::string RedisCluster::_get_crc16_prefix(uint64_t hash_slot)
     }
 
     /*
-       The total number of XOR shifts is a minimum
-       of 16 (2 chars).  This shift is done first
-       and then subsequent shifts are performed if
-       the prefix contains forbidden characters.
+       The total number of XOR shifts is a minimum of 16
+       (2 chars).  This shift is done first and then subsequent
+       shifts are performed if the prefix contains forbidden characters.
     */
     uint64_t bit_shifts = 16;
     uint64_t n_chars = 2;
@@ -788,12 +787,10 @@ std::string RedisCluster::_get_crc16_prefix(uint64_t hash_slot)
     _crc_xor_shift(hash_slot, 0, bit_shifts);
 
     /*
-       Continue inverse XOR shifts until a valid
-       prefix is constructed.  Empirically we know
-       that no more than 8 additional operations
-       are required for 16384 hash slots, so an
-       error is thrown for more than 8 shifts
-       so we don't have an infinite loop programmed.
+       Continue inverse XOR shifts until a valid prefix is constructed.
+       Empirically we know that no more than 8 additional operations
+       are required for 16384 hash slots, so an error is thrown
+       for more than 8 shifts so we don't have an infinite loop programmed.
     */
     while (!_is_valid_inverse(hash_slot, n_chars)) {
         if (bit_shifts > 24) {
