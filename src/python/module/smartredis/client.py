@@ -776,9 +776,9 @@ class Client(PyClient):
             raise RedisReplyError(str(e), "config_set")
 
     def save(self, addresses):
-        """Performs a synchronous save of the dataset producing
-        a point in time snapshot of all the data inside the Redis
-        instance, in the form of an RBD file.
+        """Performs a synchronous save of the database shard
+        producinga point in time snapshot of all the data
+        inside the Redis instance, in the form of an RBD file.
 
         :param addresses: The addresses of the database nodes
         :type addresses: list[str]

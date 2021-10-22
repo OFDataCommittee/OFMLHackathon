@@ -55,7 +55,7 @@ class Dataset:
         """
 
         if not isinstance(dataset, PyDataset):
-            raise TypeError("Argument provided must be of " "type PyDataset.")
+            raise TypeError("Argument provided must be of type PyDataset.")
         new_dataset = Dataset(dataset.get_name())
         new_dataset.set_data(dataset)
         return new_dataset
@@ -77,7 +77,7 @@ class Dataset:
         """
 
         if not isinstance(dataset, PyDataset):
-            raise TypeError("The parameter provided must " "be of type PyDataset.")
+            raise TypeError("The parameter provided must be of type PyDataset.")
         self._data = dataset
 
     def add_tensor(self, name, data):

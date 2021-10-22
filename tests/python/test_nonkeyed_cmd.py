@@ -100,7 +100,7 @@ def test_config_get_command_DNE(use_cluster):
     assert get_reply == dict()
 
 
-def test_save_command(use_cluster):
+def test_save_command(use_cluster, mock_data):
     # get env var to set through client init
     ssdb = os.environ["SSDB"]
     if use_cluster:
@@ -112,4 +112,10 @@ def test_save_command(use_cluster):
     # client init should fail if SSDB not set
     client = Client(address=ssdb, cluster=use_cluster)
 
-    client.save(addresses)
+    # for each address, check that the timestamp of the last SAVE increases after calling Client::save
+    for address in addresses:
+        save_time_before = client.get_db_node_info([address])[0]["Persistence"]["rdb_last_save_time"]
+        client.save([address])
+        save_time_after = client.get_db_node_info([address])[0]["Persistence"]["rdb_last_save_time"]
+
+        assert save_time_before < save_time_after

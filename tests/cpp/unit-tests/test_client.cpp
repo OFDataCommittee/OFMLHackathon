@@ -673,8 +673,57 @@ SCENARIO("Testing SAVE command on Client Object", "[Client][SAVE]")
 
             THEN("Producing a point in time snapshot of the redis instance is successful")
             {
+                // get the timestamp of the last SAVE
+                parsed_reply_nested_map db_node_info_before = client.get_db_node_info(address);
+                std::string time_before_save = db_node_info_before["Persistence"]["rdb_last_save_time"];
+
                 CHECK_NOTHROW(client.save(address));
+
+                // check that the timestamp of the last SAVE has increased
+                parsed_reply_nested_map db_node_info_after = client.get_db_node_info(address);
+                std::string time_after_save = db_node_info_after["Persistence"]["rdb_last_save_time"];
+
+                CHECK(time_before_save.compare(time_after_save) < 0);
             }
         }
+    }
+}
+
+SCENARIO("Test that prefixing covers all hash slots of a cluster", "[Client]")
+{
+
+    if(use_cluster()==false)
+        return;
+
+    GIVEN("A test RedisCluster test object")
+    {
+        RedisClusterTestObject redis_cluster;
+
+        WHEN("A prefix is requested for a hash slot between 0 and 16384")
+        {
+            for(size_t hash_slot = 0; hash_slot <= 16384; hash_slot++) {
+
+                THEN("'{' and '}' do not appear in the prefix")
+                {
+                    std::string prefix = redis_cluster.get_crc16_prefix(hash_slot);
+                    CHECK(prefix.size() > 0);
+                    CHECK(prefix.find('{') == std::string::npos);
+                    CHECK(prefix.find('}') == std::string::npos);
+                    size_t redispp_hash_slot =
+                        sw::redis::crc16(prefix.c_str(), prefix.size())%16384;
+                    CHECK(hash_slot == redispp_hash_slot);
+                }
+            }
+        }
+
+        WHEN("A prefix is requested for a hash slot out of range")
+        {
+            THEN("A std::runtime_error is thrown")
+            {
+                CHECK_THROWS_AS(redis_cluster.get_crc16_prefix(16385),
+                                std::runtime_error);
+            }
+        }
+
     }
 }
