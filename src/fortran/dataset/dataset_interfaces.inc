@@ -25,9 +25,12 @@
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 interface
-  type(c_ptr) function dataset_constructor( name, name_length ) bind(c, name="CDataSet")
+  function dataset_constructor( name, name_length, dataset ) bind(c, name="CDataSet")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
-    character(kind=c_char) :: name !< Name of the dataset
+    import :: enum_kind
+    integer(kind=enum_kind)       :: dataset_constructor
+    character(kind=c_char)        :: name !< Name of the dataset
     integer(kind=c_size_t), value :: name_length !< How many characters in the dataset's name
+    type(c_ptr)                   :: dataset !< Receives the constructed dataset
   end function dataset_constructor
 end interface

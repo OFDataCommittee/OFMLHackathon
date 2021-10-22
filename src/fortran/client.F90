@@ -145,7 +145,7 @@ subroutine initialize_client( self, cluster )
 
   if (present(cluster)) self%cluster = cluster
   self%client_ptr = c_constructor(self%cluster)
-  self%is_initialized = .true. 
+  self%is_initialized = .true.
 end subroutine initialize_client
 
 logical function isinitialized(this)
