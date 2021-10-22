@@ -32,6 +32,8 @@
 #include "stdlib.h"
 #include <sw/redis++/redis++.h>
 #include <iostream>
+#include <vector>
+#include <queue>
 
 namespace SmartRedis {
 
@@ -164,12 +166,18 @@ class CommandReply {
         char* str();
 
         /*!
-        *   \brief Get the string field of the reply
-        *   \returns C-str for the CommandReply field
+        *   \brief Get the status string of the reply
+        *   \returns string for the CommandReply field
         *   \throw std::runtime_error if the CommandReply
         *          does not have a status field
         */
-        char* status_str();
+        std::string status_str();
+
+        std::string dbl_str();
+
+        std::string bignum_str();
+
+        std::string verb_str();
 
         /*!
         *   \brief Get the integer field of the reply
@@ -225,6 +233,8 @@ class CommandReply {
         *          or nested CommandReply.
         */
         void print_reply_error();
+
+        std::vector<std::string> get_reply_errors();
 
         /*!
         *   \brief Return the type of the CommandReply
