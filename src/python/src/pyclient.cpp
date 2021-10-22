@@ -651,4 +651,21 @@ void PyClient::config_set(std::string config_param, std::string value, std::stri
     }
 }
 
+void PyClient::save(std::vector<std::string> addresses)
+{
+    for (size_t address_index = 0; address_index < addresses.size(); address_index++) {
+        try {
+            _client->save(addresses[address_index]);
+        }
+        catch(const std::exception& e) {
+            throw std::runtime_error(e.what());
+        }
+        catch(...) {
+            throw std::runtime_error("A non-standard exception "\
+                                    "was encountered during client "\
+                                    "save execution.");
+        }
+    }
+}
+
 // EOF

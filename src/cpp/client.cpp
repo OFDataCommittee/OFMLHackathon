@@ -829,6 +829,20 @@ void Client::config_set(std::string config_param, std::string value, std::string
         throw std::runtime_error("CONFIG SET command failed");
 }
 
+void Client::save(std::string address)
+{
+    AddressAtCommand cmd;
+    std::string host = cmd.parse_host(address);
+    uint64_t port = cmd.parse_port(address);
+
+    cmd.set_exec_address_port(host, port);
+    cmd.add_field("SAVE");
+
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw std::runtime_error("SAVE command failed");
+}
+
 // Set the prefixes that are used for set and get methods using SSKEYIN
 // and SSKEYOUT environment variables.
 void Client::_set_prefixes_from_env()

@@ -675,16 +675,16 @@ class Client(PyClient):
         :returns: A list of dictionaries with each entry in the
                   list corresponding to an address reply
         :rtype: list[dict]
-        :raises RedisReplyError: if there is an error in
+        :raises RedisReplyError: if there is an error
                 in command execution or the address
                 is not reachable by the client or if on a
                 non-cluster environment.
                 In the case of using a cluster of database nodes,
                 it is best practice to bind each node in the cluster
-                to a specific adddress to avoid inconsistencies in
-                addresses retreived with the CLUSTER SLOTS command.
+                to a specific address to avoid inconsistencies in
+                addresses retrieved with the CLUSTER SLOTS command.
                 Inconsistencies in node addresses across
-                CLUSTER SLOTS comands will lead to RedisReplyError
+                CLUSTER SLOTS commands will lead to RedisReplyError
                 being thrown.
         """
         try:
@@ -697,15 +697,15 @@ class Client(PyClient):
 
         :param addresses: The addresses of the database nodes
         :type address: list[str]
-        :raises RedisReplyError: if there is an error in
+        :raises RedisReplyError: if there is an error
                 in command execution or the address
                 is not reachable by the client.
                 In the case of using a cluster of database nodes,
                 it is best practice to bind each node in the cluster
-                to a specific adddress to avoid inconsistencies in
-                addresses retreived with the CLUSTER SLOTS command.
+                to a specific address to avoid inconsistencies in
+                addresses retrieved with the CLUSTER SLOTS command.
                 Inconsistencies in node addresses across
-                CLUSTER SLOTS comands will lead to RedisReplyError
+                CLUSTER SLOTS commands will lead to RedisReplyError
                 being thrown.
         """
         try:
@@ -728,15 +728,15 @@ class Client(PyClient):
                   their values. If the provided expression does not
                   exist, then an empty dictionary is returned.
         :rtype: dict
-        :raises RedisReplyError: if there is an error in
+        :raises RedisReplyError: if there is an error
                 in command execution or the address
                 is not reachable by the client.
                 In the case of using a cluster of database nodes,
                 it is best practice to bind each node in the cluster
-                to a specific adddress to avoid inconsistencies in
-                addresses retreived with the CLUSTER SLOTS command.
+                to a specific address to avoid inconsistencies in
+                addresses retrieved with the CLUSTER SLOTS command.
                 Inconsistencies in node addresses across
-                CLUSTER SLOTS comands will lead to RedisReplyError
+                CLUSTER SLOTS commands will lead to RedisReplyError
                 being thrown.
         """
         try:
@@ -759,21 +759,44 @@ class Client(PyClient):
         :type value: str
         :param address: The address of the database node
         :type address: str
-        :raises RedisReplyError: if there is an error in
+        :raises RedisReplyError: if there is an error
                 in command execution or the address
                 is not reachable by the client or if the config_param
                 is unsupported. In the case of using a cluster of
                 database nodes, it is best practice to bind each node
-                in the cluster to a specific adddress to avoid inconsistencies
-                in addresses retreived with the CLUSTER SLOTS command.
+                in the cluster to a specific address to avoid inconsistencies
+                in addresses retrieved with the CLUSTER SLOTS command.
                 Inconsistencies in node addresses across
-                CLUSTER SLOTS comands will lead to RedisReplyError
+                CLUSTER SLOTS commands will lead to RedisReplyError
                 being thrown.
         """
         try:
             super().config_set(config_param, value, address)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "config_set")
+
+    def save(self, addresses):
+        """Performs a synchronous save of the database shard
+        producinga point in time snapshot of all the data
+        inside the Redis instance, in the form of an RBD file.
+
+        :param addresses: The addresses of the database nodes
+        :type addresses: list[str]
+        :raises RedisReplyError: if there is an error
+                in command execution or the address
+                is not reachable by the client.
+                In the case of using a cluster of database nodes,
+                it is best practice to bind each node in the cluster
+                to a specific address to avoid inconsistencies in
+                addresses retrieved with the CLUSTER SLOTS command.
+                Inconsistencies in node addresses across
+                CLUSTER SLOTS commands will lead to RedisReplyError
+                being thrown.
+        """
+        try:
+            super().save(addresses)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "save")
 
     # ---- helpers --------------------------------------------------------
 

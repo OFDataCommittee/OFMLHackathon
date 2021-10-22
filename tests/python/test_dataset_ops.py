@@ -1,7 +1,7 @@
 import os
+
 import numpy as np
 import pytest
-
 from smartredis import Client, Dataset
 from smartredis.error import RedisReplyError
 

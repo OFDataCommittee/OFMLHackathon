@@ -1,7 +1,7 @@
 import os
+
 import numpy as np
 import pytest
-
 from smartredis import Client
 from smartredis.error import RedisReplyError
 
@@ -34,6 +34,7 @@ def test_dbcluster_info_command(use_cluster):
         # cannot call get_db_cluster_info in non-cluster environment
         with pytest.raises(RedisReplyError):
             client.get_db_cluster_info(address)
+
 
 def test_flushdb_command(use_cluster):
     # from within the testing framework, there is no way
@@ -72,6 +73,7 @@ def test_config_set_get_command(use_cluster):
     assert len(get_reply) > 0
     assert get_reply["lua-time-limit"] == value
 
+
 def test_config_set_command_DNE(use_cluster):
     # get env var to set through client init
     ssdb = os.environ["SSDB"]
@@ -84,6 +86,7 @@ def test_config_set_command_DNE(use_cluster):
     with pytest.raises(RedisReplyError):
         client.config_set("config_param_DNE", "10", ssdb)
 
+
 def test_config_get_command_DNE(use_cluster):
     # get env var to set through client init
     ssdb = os.environ["SSDB"]
@@ -95,3 +98,24 @@ def test_config_get_command_DNE(use_cluster):
     # CONFIG GET returns an empty dictionary if the config_param is unsupported
     get_reply = client.config_get("config_param_DNE", ssdb)
     assert get_reply == dict()
+
+
+def test_save_command(use_cluster, mock_data):
+    # get env var to set through client init
+    ssdb = os.environ["SSDB"]
+    if use_cluster:
+        addresses = ssdb.split(",")
+    else:
+        addresses = [ssdb]
+    del os.environ["SSDB"]
+
+    # client init should fail if SSDB not set
+    client = Client(address=ssdb, cluster=use_cluster)
+
+    # for each address, check that the timestamp of the last SAVE increases after calling Client::save
+    for address in addresses:
+        save_time_before = client.get_db_node_info([address])[0]["Persistence"]["rdb_last_save_time"]
+        client.save([address])
+        save_time_after = client.get_db_node_info([address])[0]["Persistence"]["rdb_last_save_time"]
+
+        assert save_time_before < save_time_after

@@ -1,8 +1,8 @@
 import time
 
 import numpy as np
-
 from smartredis import Client, Dataset
+
 
 def test_put_get_dataset(mock_data, use_cluster):
     """test sending and recieving a dataset with 2D tensors
@@ -19,8 +19,10 @@ def test_put_get_dataset(mock_data, use_cluster):
 
     client = Client(None, use_cluster)
 
-    assert not client.dataset_exists("nonexistent-dataset"), "Existence of nonexistant dataset!"
-    
+    assert not client.dataset_exists(
+        "nonexistent-dataset"
+    ), "Existence of nonexistant dataset!"
+
     client.put_dataset(dataset)
 
     assert client.dataset_exists("test-dataset"), "Non-existance of real dataset!"
@@ -89,7 +91,6 @@ def test_augment_dataset(mock_data, use_cluster):
             rtensor,
             tensor,
             "Dataset returned from get_dataset not the same as sent dataset",
-
         )
 
     rtensor = aug_dataset.get_tensor("new_tensor")
@@ -97,11 +98,10 @@ def test_augment_dataset(mock_data, use_cluster):
         rtensor,
         new_tensor,
         "Dataset returned did not return the correct additional tensor",
-
     )
 
     # Check the accuracy of the metadat fields
-    assert(aug_dataset.get_meta_scalars(scalar_name).size==1)
-    assert(len(aug_dataset.get_meta_strings(string_name))==1)
-    assert(aug_dataset.get_meta_scalars(scalar_name)[0]==scalar_field)
-    assert(aug_dataset.get_meta_strings(string_name)[0]==string_field)
+    assert aug_dataset.get_meta_scalars(scalar_name).size == 1
+    assert len(aug_dataset.get_meta_strings(string_name)) == 1
+    assert aug_dataset.get_meta_scalars(scalar_name)[0] == scalar_field
+    assert aug_dataset.get_meta_strings(string_name)[0] == string_field

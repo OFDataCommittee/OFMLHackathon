@@ -649,6 +649,46 @@ SCENARIO("Test CONFIG SET on an unsupported command", "[Client]")
     }
 }
 
+SCENARIO("Testing SAVE command on Client Object", "[Client][SAVE]")
+{
+
+    GIVEN("A client object and some data")
+    {
+        Client client(use_cluster());
+        std::string dataset_name = "test_save_dataset";
+        DataSet dataset(dataset_name);
+        dataset.add_meta_string("meta_string_save_name", "meta_string_val");
+        std::string tensor_key = "save_dbl_tensor";
+        std::vector<double> tensor_dbl =
+                {std::numeric_limits<double>::min(),
+                 std::numeric_limits<double>::max()};
+        client.put_dataset(dataset);
+        client.put_tensor(tensor_key, (void*)tensor_dbl.data(), {2,1},
+                          TensorType::dbl, MemoryLayout::contiguous);
+
+        std::string address = parse_SSDB(std::getenv("SSDB"));
+
+        WHEN("When SAVE is called for a given address")
+        {
+
+            THEN("Producing a point in time snapshot of the redis instance is successful")
+            {
+                // get the timestamp of the last SAVE
+                parsed_reply_nested_map db_node_info_before = client.get_db_node_info(address);
+                std::string time_before_save = db_node_info_before["Persistence"]["rdb_last_save_time"];
+
+                CHECK_NOTHROW(client.save(address));
+
+                // check that the timestamp of the last SAVE has increased
+                parsed_reply_nested_map db_node_info_after = client.get_db_node_info(address);
+                std::string time_after_save = db_node_info_after["Persistence"]["rdb_last_save_time"];
+
+                CHECK(time_before_save.compare(time_after_save) < 0);
+            }
+        }
+    }
+}
+
 SCENARIO("Test that prefixing covers all hash slots of a cluster", "[Client]")
 {
 

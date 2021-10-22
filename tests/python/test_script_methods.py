@@ -3,7 +3,6 @@ import os.path as osp
 
 import numpy as np
 import torch
-
 from smartredis import Client
 
 file_path = osp.dirname(osp.abspath(__file__))
