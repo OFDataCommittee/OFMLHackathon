@@ -220,17 +220,6 @@ size_t CommandReply::str_len()
     return _reply->len;
 }
 
-// Get field length of REDIS_REPLY_STATUS
-size_t CommandReply::status_str_len()
-{
-  if(_reply->type!=REDIS_REPLY_STATUS)
-    throw std::runtime_error("The length of the reply str "\
-                             "cannot be returned because the "\
-                             "the reply type is " +
-                             redis_reply_type());
-  return _reply->len;
-}
-
 // Get the number of elements in the CommandReply
 size_t CommandReply::n_elements()
 {
@@ -280,7 +269,10 @@ std::vector<std::string> CommandReply::get_reply_errors()
     std::queue<redisReply*> q;
     q.push(_reply);
     while (q.size() > 0) {
-        redisReply* reply = q.pop();
+        redisReply* reply = q.front();
+        q.pop();
+        if (reply == NULL)
+            continue;
         if (reply->type == REDIS_REPLY_ERROR)
             errors.push_back(std::string(reply->str, reply->len));
         else if (reply->type == REDIS_REPLY_ARRAY) {

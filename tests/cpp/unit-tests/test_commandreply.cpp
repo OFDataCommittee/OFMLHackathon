@@ -29,8 +29,11 @@ void fill_reply_str(redisReply*& reply, int type, char const* str,
                     size_t len, double val=0.0)
 {
     if(type != REDIS_REPLY_STRING &&
+       type != REDIS_REPLY_STATUS &&
        type != REDIS_REPLY_DOUBLE &&
-       type != REDIS_REPLY_ERROR)
+       type != REDIS_REPLY_ERROR &&
+       type != REDIS_REPLY_BIGNUM &&
+       type != REDIS_REPLY_VERB)
         return;
     reply->type = type;
     reply->len = len;
@@ -294,6 +297,7 @@ SCENARIO("Simple tests on CommandReply constructors that use redisReply*", "[Com
     GIVEN("A redisReply")
     {
         char const* str = "100.0";
+        size_t str_len = 6;
         redisReply* reply = new redisReply;
         fill_reply_str(reply, REDIS_REPLY_DOUBLE, str, 6, 100.0);
 
@@ -308,10 +312,7 @@ SCENARIO("Simple tests on CommandReply constructors that use redisReply*", "[Com
             {
                 REQUIRE(cmd_reply.redis_reply_type() == "REDIS_REPLY_DOUBLE");
                 CHECK(cmd_reply.dbl() == 100.0);
-                // uncomment the following lines once CommandReply::str
-                // and CommandReply::str_len are fixed
-                // CHECK(cmd_reply.str_len() == 6);
-                // CHECK(std::strcmp(cmd_reply.str(), str) == 0);
+                CHECK(cmd_reply.dbl_str() == std::string(str, str_len));
             }
         }
 
@@ -329,10 +330,7 @@ SCENARIO("Simple tests on CommandReply constructors that use redisReply*", "[Com
             {
                 REQUIRE(cmd_reply.redis_reply_type() == "REDIS_REPLY_DOUBLE");
                 CHECK(cmd_reply.dbl() == 100.0);
-                // uncomment the following lines once CommandReply::str
-                // and CommandReply::str_len are fixed
-                // CHECK(cmd_reply.str_len() == 6);
-                // CHECK(std::strcmp(cmd_reply.str(), str) == 0);
+                CHECK(cmd_reply.dbl_str() == std::string(str, str_len));
 
             }
         }
@@ -400,6 +398,34 @@ SCENARIO("Test CommandReply's redisReply deep copy on a shallow copy", "[Command
                 CHECK(deep_cmd_reply.str_len() == lens[0]);
                 CHECK(std::strcmp(deep_cmd_reply.str(), strs[0]) == 0);
             }
+        }
+    }
+}
+
+SCENARIO("Test CommandReply string retrieval for non REDIS_REPLY_STRING")
+{
+    char const* strs[] = {"OK", "42.5", "99999999999999999999", "Verbatim string"};
+    int lens[] = {3, 5, 21, 16};
+    int types[] = {REDIS_REPLY_STATUS, REDIS_REPLY_DOUBLE, REDIS_REPLY_BIGNUM, REDIS_REPLY_VERB};
+
+    WHEN("A redisReply array is populated with strings for DOUBLE, ERROR, BIGNUM, and VERB")
+    {
+        redisReply* reply_array = new redisReply;
+        fill_reply_array(reply_array, 4);
+        for (size_t i = 0; i < reply_array->elements; i++)
+            fill_reply_str(reply_array->element[i], types[i], strs[i], lens[i]);
+
+        CommandReply* cmd_reply = new CommandReply(create_reply_uptr(reply_array));
+
+        THEN("The strings can be retrieved")
+        {
+
+            CHECK(cmd_reply[0][0].status_str() == std::string(strs[0], lens[0]));
+            CHECK(cmd_reply[0][1].dbl_str() == std::string(strs[1], lens[1]));
+            CHECK(cmd_reply[0][2].bignum_str() == std::string(strs[2], lens[2]));
+            CHECK(cmd_reply[0][3].verb_str() == std::string(strs[3], lens[3]));
+
+            delete cmd_reply;
         }
     }
 }

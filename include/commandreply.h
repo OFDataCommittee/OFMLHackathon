@@ -169,14 +169,32 @@ class CommandReply {
         *   \brief Get the status string of the reply
         *   \returns string for the CommandReply field
         *   \throw std::runtime_error if the CommandReply
-        *          does not have a status field
+        *          has a NULL str field
         */
         std::string status_str();
 
+        /*!
+        *   \brief Get the double string of the reply
+        *   \returns string for the CommandReply field
+        *   \throw std::runtime_error if the CommandReply
+        *          has a NULL str field
+        */
         std::string dbl_str();
 
+        /*!
+        *   \brief Get the bignum string of the reply
+        *   \returns string for the CommandReply field
+        *   \throw std::runtime_error if the CommandReply
+        *          has a NULL str field
+        */
         std::string bignum_str();
 
+        /*!
+        *   \brief Get the verbatim string of the reply
+        *   \returns string for the CommandReply field
+        *   \throw std::runtime_error if the CommandReply
+        *          has a NULL str field
+        */
         std::string verb_str();
 
         /*!
@@ -234,6 +252,11 @@ class CommandReply {
         */
         void print_reply_error();
 
+        /*!
+        *   \brief This will return all errors in the CommandReply
+        *          or nested CommandReply
+        *   \returns A vector of error strings
+        */
         std::vector<std::string> get_reply_errors();
 
         /*!
