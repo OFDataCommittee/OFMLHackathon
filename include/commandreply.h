@@ -254,7 +254,9 @@ class CommandReply {
 
         /*!
         *   \brief This will return all errors in the CommandReply
-        *          or nested CommandReply
+        *          or nested CommandReply. If there is more than one
+        *          error, the order in which the errors are retrieved is
+        *          done so through a level by level search.
         *   \returns A vector of error strings
         */
         std::vector<std::string> get_reply_errors();
