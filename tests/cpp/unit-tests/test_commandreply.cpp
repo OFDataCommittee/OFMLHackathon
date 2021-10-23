@@ -87,7 +87,7 @@ SCENARIO("Testing CommandReply object", "[CommandReply]")
             cmd_reply.print_reply_structure("0");
         }
 
-        AND_THEN("Various methods will throw errors since the CommandReply"
+        AND_THEN("Various methods will throw errors since the CommandReply "
                  "object doesn't have the correct type for those methods")
         {
             CHECK_THROWS_AS(cmd_reply.str(), std::runtime_error);
@@ -402,7 +402,7 @@ SCENARIO("Test CommandReply's redisReply deep copy on a shallow copy", "[Command
     }
 }
 
-SCENARIO("Test CommandReply string retrieval for non REDIS_REPLY_STRING")
+SCENARIO("Test CommandReply string retrieval for non REDIS_REPLY_STRING", "[CommandReply]")
 {
     char const* strs[] = {"OK", "42.5", "99999999999999999999", "Verbatim string"};
     int lens[] = {3, 5, 21, 16};
@@ -424,8 +424,64 @@ SCENARIO("Test CommandReply string retrieval for non REDIS_REPLY_STRING")
             CHECK(cmd_reply[0][1].dbl_str() == std::string(strs[1], lens[1]));
             CHECK(cmd_reply[0][2].bignum_str() == std::string(strs[2], lens[2]));
             CHECK(cmd_reply[0][3].verb_str() == std::string(strs[3], lens[3]));
+        }
 
-            delete cmd_reply;
+        AND_THEN("Errors are thrown if string retrieval methods "
+                 "are called on an incompatible redisReply type")
+        {
+            // Calling string retrieval methods on a REDIS_REPLY_ARRAY
+            CHECK_THROWS_AS(cmd_reply[0].status_str(), std::runtime_error);
+            CHECK_THROWS_AS(cmd_reply[0].dbl_str(), std::runtime_error);
+            CHECK_THROWS_AS(cmd_reply[0].bignum_str(), std::runtime_error);
+            CHECK_THROWS_AS(cmd_reply[0].verb_str(), std::runtime_error);
+        }
+        delete cmd_reply;
+    }
+}
+
+
+SCENARIO("Test REDIS_REPLY_ERROR retrieval from a CommandReply", "[CommandReply]")
+{
+    /*
+            CommanReply (ARRAY)     LEVEL 0
+            /    |    \
+        ARRAY   DBL   ERR1          LEVEL 1
+      /   |  \
+    DBL ERR2 ARRAY                  LEVEL 2
+               |
+              ERR3                  LEVEL 3
+    */
+    char const* strs[3] = {"ERR1", "ERR2", "ERR3"};
+    int str_len = 5;
+    double dbl_val = 1998.0;
+
+    GIVEN("A CommandReply with three REDIS_REPLY_ERROR")
+    {
+        redisReply* reply = new redisReply;
+        fill_reply_array(reply, 3);
+        // fill LEVEL 1
+        fill_reply_array(reply->element[0], 3);
+        fill_reply_str(reply->element[1], REDIS_REPLY_DOUBLE, "1998.0", 7, dbl_val);
+        fill_reply_str(reply->element[2], REDIS_REPLY_ERROR, strs[0], str_len);
+        // fill LEVEL 2
+        fill_reply_str(reply->element[0]->element[0], REDIS_REPLY_DOUBLE, "1998.0", 7, dbl_val);
+        fill_reply_str(reply->element[0]->element[1], REDIS_REPLY_ERROR, strs[1], str_len);
+        fill_reply_array(reply->element[0]->element[2], 1);
+        // fill LEVEL 3
+        fill_reply_str(reply->element[0]->element[2]->element[0], REDIS_REPLY_ERROR, strs[2], str_len);
+
+        CommandReply* cmd_reply = new CommandReply(create_reply_uptr(reply));
+
+        WHEN("The errors are retrieved")
+        {
+            std::vector<std::string> errors = cmd_reply->get_reply_errors();
+
+            THEN("The retrieved errors are as expected")
+            {
+                for (size_t i = 0; i < sizeof(strs)/sizeof(strs[0]); i++)
+                    CHECK(errors.at(i) == std::string(strs[i], str_len));
+                delete cmd_reply;
+            }
         }
     }
 }
