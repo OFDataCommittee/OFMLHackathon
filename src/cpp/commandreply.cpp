@@ -124,23 +124,56 @@ CommandReply CommandReply::shallow_clone(redisReply* reply)
 // Get the string field of the reply
 char* CommandReply::str()
 {
-    if(_reply->type!=REDIS_REPLY_STRING)
+    if(_reply->type != REDIS_REPLY_STRING)
         throw std::runtime_error("A pointer to the reply str "\
-                                 "cannot be returned because the "\
+                                 "cannot be returned because "\
                                  "the reply type is " +
                                  redis_reply_type());
   return _reply->str;
 }
 
 // Get string field of REDIS_REPLY_STATUS
-char* CommandReply::status_str()
+std::string CommandReply::status_str()
 {
-  if(_reply->type!=REDIS_REPLY_STATUS)
+  if(_reply->type != REDIS_REPLY_STATUS)
     throw std::runtime_error("A pointer to the reply str "\
-                             "cannot be returned because the "\
+                             "cannot be returned because "\
                              "the reply type is " +
                              redis_reply_type());
-  return _reply->str;
+  return std::string(_reply->str, _reply->len);
+}
+
+// Get string field of REDIS_REPLY_DOUBLE
+std::string CommandReply::dbl_str()
+{
+  if(_reply->type != REDIS_REPLY_DOUBLE)
+    throw std::runtime_error("A pointer to the reply str "\
+                             "cannot be returned because "\
+                             "the reply type is " +
+                             redis_reply_type());
+  return std::string(_reply->str, _reply->len);
+}
+
+// Get string field of REDIS_REPLY_BIGNUM
+std::string CommandReply::bignum_str()
+{
+  if(_reply->type != REDIS_REPLY_BIGNUM)
+    throw std::runtime_error("A pointer to the reply str "\
+                             "cannot be returned because "\
+                             "the reply type is " +
+                             redis_reply_type());
+  return std::string(_reply->str, _reply->len);
+}
+
+// Get string field of REDIS_REPLY_VERB
+std::string CommandReply::verb_str()
+{
+  if(_reply->type != REDIS_REPLY_VERB)
+    throw std::runtime_error("A pointer to the reply str "\
+                             "cannot be returned because "\
+                             "the reply type is " +
+                             redis_reply_type());
+  return std::string(_reply->str, _reply->len);
 }
 
 // Get the integer field of the reply
@@ -187,17 +220,6 @@ size_t CommandReply::str_len()
     return _reply->len;
 }
 
-// Get field length of REDIS_REPLY_STATUS
-size_t CommandReply::status_str_len()
-{
-  if(_reply->type!=REDIS_REPLY_STATUS)
-    throw std::runtime_error("The length of the reply str "\
-                             "cannot be returned because the "\
-                             "the reply type is " +
-                             redis_reply_type());
-  return _reply->len;
-}
-
 // Get the number of elements in the CommandReply
 size_t CommandReply::n_elements()
 {
@@ -238,6 +260,27 @@ void CommandReply::print_reply_error()
             tmp.print_reply_error();
         }
     }
+}
+
+// This will return any errors in the CommandReply or nested CommandReply.
+std::vector<std::string> CommandReply::get_reply_errors()
+{
+    std::vector<std::string> errors;
+    std::queue<redisReply*> q;
+    q.push(_reply);
+    while (q.size() > 0) {
+        redisReply* reply = q.front();
+        q.pop();
+        if (reply == NULL)
+            continue;
+        if (reply->type == REDIS_REPLY_ERROR)
+            errors.push_back(std::string(reply->str, reply->len));
+        else if (reply->type == REDIS_REPLY_ARRAY) {
+            for (size_t i = 0; i < reply->elements; i++)
+                q.push(reply->element[i]);
+        }
+    }
+    return errors;
 }
 
 // Return the type of the CommandReply in the form of a string.

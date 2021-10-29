@@ -32,6 +32,8 @@
 #include "stdlib.h"
 #include <sw/redis++/redis++.h>
 #include <iostream>
+#include <vector>
+#include <queue>
 
 namespace SmartRedis {
 
@@ -164,12 +166,36 @@ class CommandReply {
         char* str();
 
         /*!
-        *   \brief Get the string field of the reply
-        *   \returns C-str for the CommandReply field
+        *   \brief Get the status string of the reply
+        *   \returns string for the CommandReply field
         *   \throw std::runtime_error if the CommandReply
-        *          does not have a status field
+        *          has a NULL str field
         */
-        char* status_str();
+        std::string status_str();
+
+        /*!
+        *   \brief Get the double string of the reply
+        *   \returns string for the CommandReply field
+        *   \throw std::runtime_error if the CommandReply
+        *          has a NULL str field
+        */
+        std::string dbl_str();
+
+        /*!
+        *   \brief Get the bignum string of the reply
+        *   \returns string for the CommandReply field
+        *   \throw std::runtime_error if the CommandReply
+        *          has a NULL str field
+        */
+        std::string bignum_str();
+
+        /*!
+        *   \brief Get the verbatim string of the reply
+        *   \returns string for the CommandReply field
+        *   \throw std::runtime_error if the CommandReply
+        *          has a NULL str field
+        */
+        std::string verb_str();
 
         /*!
         *   \brief Get the length of the CommandReply field
@@ -225,6 +251,15 @@ class CommandReply {
         *          or nested CommandReply.
         */
         void print_reply_error();
+
+        /*!
+        *   \brief This will return all errors in the CommandReply
+        *          or nested CommandReply. If there is more than one
+        *          error, the order in which the errors are retrieved is
+        *          done so through a level by level search.
+        *   \returns A vector of error strings
+        */
+        std::vector<std::string> get_reply_errors();
 
         /*!
         *   \brief Return the type of the CommandReply
