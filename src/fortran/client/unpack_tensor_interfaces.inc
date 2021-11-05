@@ -25,10 +25,12 @@
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 interface
-  subroutine unpack_tensor_c(c_client, key, key_length, result, dims, n_dims, data_type, mem_layout) &
+  function unpack_tensor_c(c_client, key, key_length, result, dims, n_dims, data_type, mem_layout) &
       bind(c, name="unpack_tensor")
     use iso_c_binding, only: c_ptr, c_char, c_size_t
     import :: enum_kind
+    import :: enum_kind
+    integer(kind=enum_kind)                                    :: unpack_tensor_c
     type(c_ptr),                          value, intent(in)    :: c_client   !< Pointer to the initialized client
     character(kind=c_char),                      intent(in)    :: key(*)     !< The key to use to place the tensor
     integer(kind=c_size_t),               value, intent(in)    :: key_length !< The length of the key c-string,
@@ -39,5 +41,5 @@ interface
     integer(kind=c_size_t),               value, intent(in)    :: n_dims     !< The number of dimensions of the tensor
     integer(kind=enum_kind),              value, intent(in)    :: data_type  !< The data type of the tensor
     integer(kind=enum_kind),              value, intent(in)    :: mem_layout !< The memory layout of the data
-  end subroutine unpack_tensor_c
+  end function unpack_tensor_c
 end interface

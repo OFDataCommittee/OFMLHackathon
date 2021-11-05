@@ -26,31 +26,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "client.h"
-#include "dataset.h"
-#include "client_test_utils.h"
-#include "dataset_test_utils.h"
+#include "c_client.h"
+#include "srexception.h"
+#include "srassert.h"
 
-void put_get_empty_dataset(std::string dataset_name)
+using namespace SmartRedis;
+
+// The last error encountered
+static smart_error __last_error = smart_error("no error");
+
+// Store the last error encountered
+extern "C"
+void sr_set_last_error(const smart_error& last_error)
 {
-    //Create Client and DataSet
-    SmartRedis::Client client(use_cluster());
-    SmartRedis::DataSet sent_dataset(dataset_name);
+  // Check environment for debug level if we haven't done so yet
+  static bool __debug_level_verbose = false;
+  static bool __debug_level_checked = false;
+  if (!__debug_level_checked)
+  {
+    __debug_level_checked = true;
+     std::string dbgLevel(getenv("SMARTREDIS_DEBUG_LEVEL"));
+     __debug_level_verbose = dbgLevel.compare("VERBOSE") == 0;
+  }
 
-    //Put the DataSet into the database
-    try {
-        client.put_dataset(sent_dataset);
-    }
-    catch(std::runtime_error) {
-        return;
-    }
+  // Print out the error message if verbose
+  if (__debug_level_verbose && sr_ok != last_error.to_error_code()) {
+    printf("%s\n", last_error.what());
+  }
 
-    throw std::runtime_error("Failed to throw error "
-                             "for empty DataSet.");
+  // Store the last error
+  __last_error = last_error;
 }
 
-int main(int argc, char* argv[]) {
-
-    put_get_empty_dataset("dataset_empty");
-    return 0;
+// Return the last error encountered
+extern "C"
+const char* sr_get_last_error()  {
+  return __last_error.what();
 }

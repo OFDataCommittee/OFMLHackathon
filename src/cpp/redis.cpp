@@ -431,7 +431,7 @@ inline void Redis::_connect(std::string address_port)
         _redis = NULL;
         throw smart_database_error(std::string("Unable to connect to "\
                                    "backend Redis database: ") +
-                                   e.what())
+                                   e.what());
     }
     catch (std::bad_alloc& e) {
         throw smart_bad_alloc("Redis connection");
@@ -458,7 +458,7 @@ inline void Redis::_connect(std::string address_port)
             else if (i == n_trials) {
                 throw smart_runtime_error(std::string("Connection attempt "\
                                           "failed after ") +
-                                          std::to_string(n) + "tries");
+                                          std::to_string(i) + "tries");
             }
         }
         catch (std::exception& e) {

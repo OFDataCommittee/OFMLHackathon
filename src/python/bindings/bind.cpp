@@ -93,7 +93,7 @@ PYBIND11_MODULE(smartredisPy, m) {
             PyErr_SetString(PyExc_OSError, e.what());
         }
         catch (const _smart_runtime_error& e) {
-            PyErr_SetString(PyExc_RunTimeError, e.what());
+            PyErr_SetString(PyExc_RuntimeError, e.what());
         }
         catch (const _smart_parameter_error& e) {
             PyErr_SetString(PyExc_ValueError, e.what());
@@ -104,6 +104,6 @@ PYBIND11_MODULE(smartredisPy, m) {
         catch (const _smart_internal_error& e) {
             PyErr_SetString(PyExc_SystemError, e.what());
         }
-    })
+    });
 }
 

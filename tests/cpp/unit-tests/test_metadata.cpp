@@ -1,5 +1,34 @@
+/*
+ * BSD 2-Clause License
+ *
+ * Copyright (c) 2021, Hewlett Packard Enterprise
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "../../../third-party/catch/catch.hpp"
 #include "metadata.h"
+#include "srexception.h"
 
 // helper function for checking if the MetaData object was copied correctly
 void check_metadata_copied_correctly(MetaData metadata, MetaData metadata_cpy)
@@ -183,13 +212,13 @@ SCENARIO("Test MetaData", "[MetaData]")
                 CHECK_THROWS_AS(
                     metadata.get_scalar_values("DNE", (void*&)data,
                                                 length, type),
-                    std::runtime_error);
+                    _smart_runtime_error);
 
                 INFO("Cannot retrieve a scalar through "
                      "get_string_values method");
                 CHECK_THROWS_AS(
                     metadata.get_string_values("uint32_scalar"),
-                    std::runtime_error);
+                    _smart_runtime_error);
             }
 
             AND_THEN("The MetaData object can be copied "
@@ -263,13 +292,13 @@ SCENARIO("Test MetaData", "[MetaData]")
                 CHECK_THROWS_AS(
                     metadata.add_scalar("str_scalar", &str_val,
                                          MetaDataType::string),
-                    std::runtime_error);
+                    _smart_runtime_error);
                 INFO("The existing metadata field has a different "
                      "type from MetaDataType::dbl");
                 CHECK_THROWS_AS(
                     metadata.add_scalar("str_scalar", &str_val,
                                          MetaDataType::dbl),
-                    std::runtime_error);
+                    _smart_runtime_error);
             }
         }
 
@@ -305,11 +334,11 @@ SCENARIO("Test MetaData", "[MetaData]")
                 CHECK_THROWS_AS(
                     metadata.get_scalar_values("str_field", (void*&)str_data,
                                                 length, type),
-                    std::runtime_error);
+                    _smart_runtime_error);
                 INFO("Cannot retrieve a string value that does not exist");
                 CHECK_THROWS_AS(
                     metadata.get_string_values("DNE"),
-                    std::runtime_error
+                    _smart_runtime_error
                 );
 
             }
@@ -322,7 +351,7 @@ SCENARIO("Test MetaData", "[MetaData]")
                      "is called on the MetaData object");
                 CHECK_THROWS_AS(
                     metadata.get_string_values("str_field"),
-                    std::runtime_error);
+                    _smart_runtime_error);
             }
         }
     }

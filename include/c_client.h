@@ -516,7 +516,7 @@ SRError key_exists(void* c_client,
 */
 SRError tensor_exists(void* c_client,
                       const char* name,
-                      const size_t name_length
+                      const size_t name_length,
                       bool* exists);
 
 /*!
@@ -566,12 +566,12 @@ SRError dataset_exists(void* c_client,
 *                 specified number of tries
 *   \return Returns sr_ok on success
 */
-bool poll_key(void* c_client,
-              const char* key,
-              const size_t key_length,
-              const int poll_frequency_ms,
-              const int num_tries,
-              bool* exists);
+SRError poll_key(void* c_client,
+                 const char* key,
+                 const size_t key_length,
+                 const int poll_frequency_ms,
+                 const int num_tries,
+                 bool* exists);
 
 /*!
 *   \brief Check if a model or script exists in the database at a specified

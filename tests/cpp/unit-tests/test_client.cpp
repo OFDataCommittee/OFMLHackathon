@@ -1,7 +1,36 @@
+/*
+ * BSD 2-Clause License
+ *
+ * Copyright (c) 2021, Hewlett Packard Enterprise
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "../../../third-party/catch/catch.hpp"
 #include "client.h"
 #include "dataset.h"
 #include "../client_test_utils.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -62,13 +91,13 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
         {
             CHECK_THROWS_AS(
                 client.get_dataset("DNE"),
-                std::runtime_error);
+                _smart_runtime_error);
             CHECK_THROWS_AS(
                 client.rename_dataset("DNE", "rename_DNE"),
-                std::runtime_error);
+               _smart_runtime_error);
             CHECK_THROWS_AS(
                 client.copy_dataset("src_DNE", "dest_DNE"),
-                std::runtime_error);
+                _smart_runtime_error);
         }
 
         WHEN("A dataset is created and put into the Client")
@@ -125,7 +154,7 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
                 // original name no longer exists after renaming
                 CHECK_THROWS_AS(
                     client.get_dataset(dataset_name),
-                    std::runtime_error);
+                    _smart_runtime_error);
 
                 // the dataset with new name can be retrieved
                 double* retrieved_meta_data;
@@ -285,7 +314,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
                     client.unpack_tensor(keys[0], contig_retrieved_data,
                                          dims[0], TensorType::dbl,
                                          MemoryLayout::contiguous),
-                    std::runtime_error);
+                    _smart_runtime_error);
 
                 free(contig_retrieved_data);
 
@@ -416,7 +445,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
                     client.unpack_tensor(keys[0], retrieved_data,
                                          incorrect_dims, types[0],
                                          mem_layout),
-                    std::runtime_error);
+                    _smart_runtime_error);
 
                 free(retrieved_data);
             }
@@ -439,9 +468,9 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
                 std::string db_address = ":00";
 
                 CHECK_THROWS_AS(client.get_db_node_info(db_address),
-                                std::runtime_error);
+                                _smart_runtime_error);
                 CHECK_THROWS_AS(client.get_db_cluster_info(db_address),
-                                std::runtime_error);
+                                _smart_runtime_error);
             }
         }
 
@@ -468,7 +497,7 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
                     CHECK_NOTHROW(client.get_db_cluster_info(db_address));
                 else
                     CHECK_THROWS_AS(client.get_db_cluster_info(db_address),
-                        std::runtime_error);
+                        _smart_runtime_error);
             }
         }
     }

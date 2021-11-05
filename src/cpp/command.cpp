@@ -61,16 +61,17 @@ Command& Command::operator=(const Command& cmd)
     for (; local_it != cmd._local_fields.end(); local_it++) {
         // allocate memory and copy a local field
         size_t field_size = cmd._fields[local_it->second].size();
+        char* f = NULL;
         try {
-            char* f = new char[field_size];
-            std::memcpy(f, local_it->first, field_size);
-            _local_fields.push_back(
-                std::pair<char*, size_t>(f, local_it->second));
-            _fields[local_it->second] = std::string_view(f, field_size);
+            f = new char[field_size];
         }
         catch (std::bad_alloc& e) {
             throw smart_bad_alloc("field data");
         }
+        std::memcpy(f, local_it->first, field_size);
+        _local_fields.push_back(
+            std::pair<char*, size_t>(f, local_it->second));
+        _fields[local_it->second] = std::string_view(f, field_size);
 
         if (cmd._cmd_keys.count(cmd._fields[local_it->second]) != 0) {
             // copy a command key

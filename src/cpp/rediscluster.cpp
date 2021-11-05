@@ -608,10 +608,10 @@ inline void RedisCluster::_connect(std::string address_port)
             return;
         }
         catch (sw::redis::Error& e) {
-            _redis = NULL;
+            _redis_cluster = NULL;
             throw smart_database_error(std::string("Unable to connect to "\
                                     "backend Redis database: ") +
-                                    e.what())
+                                    e.what());
         }
         catch (std::bad_alloc& e) {
             throw smart_bad_alloc("RedisCluster connection");

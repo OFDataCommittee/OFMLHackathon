@@ -28,11 +28,9 @@
 
 #include "c_dataset.h"
 #include "srexception.h"
+#include "srassert.h"
 
 using namespace SmartRedis;
-
-// Store an error encountered
-void sr_set_last_error(const smart_error& last_error);
 
 // Create a new DataSet.
 // The user is responsible for deallocating the DataSet via DeallocateeDataSet()
@@ -61,7 +59,7 @@ SRError CDataSet(const char* name, const size_t name_length, void** new_dataset)
   catch (...) {
     *new_dataset = NULL;
     sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_unknown;
+    result = sr_internal;
   }
 
   return result;
@@ -87,7 +85,7 @@ SRError DeallocateeDataSet(void** dataset)
   }
   catch (...) {
     sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_unknown;
+    result = sr_internal;
   }
 
   return result;
@@ -126,7 +124,7 @@ SRError add_tensor(void* dataset,
   }
   catch (...) {
     sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_unknown;
+    result = sr_internal;
   }
 
   return result;
@@ -158,7 +156,7 @@ SRError add_meta_scalar(void* dataset,
   }
   catch (...) {
     sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_unknown;
+    result = sr_internal;
   }
 
   return result;
@@ -190,7 +188,7 @@ SRError add_meta_string(void* dataset,
   }
   catch (...) {
     sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_unknown;
+    result = sr_internal;
   }
 
   return result;
@@ -214,7 +212,7 @@ SRError get_dataset_tensor(void* dataset,
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(dataset != NULL && name != NULL && data != NULL) &&
+    SR_CHECK_PARAMS(dataset != NULL && name != NULL && data != NULL &&
                     dims != NULL && n_dims != NULL && type != NULL);
 
     DataSet* d = (DataSet* )dataset;
@@ -231,7 +229,7 @@ SRError get_dataset_tensor(void* dataset,
   }
   catch (...) {
     sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_unknown;
+    result = sr_internal;
   }
 
   return result;
@@ -270,7 +268,7 @@ SRError unpack_dataset_tensor(void* dataset,
   }
   catch (...) {
     sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_unknown;
+    result = sr_internal;
   }
 
   return result;
@@ -291,7 +289,7 @@ SRError get_meta_scalars(void* dataset,
   {
     // Sanity check params
     SR_CHECK_PARAMS(dataset != NULL && name != NULL && length != NULL &&
-                    type != NULL && scalars != NULL);
+                    type != NULL && scalar_data != NULL);
 
     DataSet* d = reinterpret_cast<DataSet*>(dataset);
     std::string key_str(name, name_length);
@@ -309,7 +307,7 @@ SRError get_meta_scalars(void* dataset,
   }
   catch (...) {
     sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_unknown;
+    result = sr_internal;
   }
 
   return result;
@@ -343,7 +341,7 @@ SRError get_meta_strings(void* dataset,
   }
   catch (...) {
     sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_unknown;
+    result = sr_internal;
   }
 
   return result;

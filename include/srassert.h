@@ -31,20 +31,20 @@
 
 #include "srexception.h"
 
-inline bool throw_runtime_error(const char *txt, const char *file, int line)
+inline bool throw_runtime_error(const std::string &txt, const char *file, int line)
 {
     throw _smart_runtime_error(txt, file, line);
 }
 
-inline bool throw_param_error(const char *txt, const char *file, int line)
+inline bool throw_param_error(const std::string &txt, const char *file, int line)
 {
     throw _smart_parameter_error(txt, file, line);
 }
 
 #define SR_ASSERT(condition) \
-    ((condition) || throw_runtime_error("Assertion failed!" + #condition, __FILE__, __LINE__)
+    ((condition) || throw_runtime_error(std::string("Assertion failed!") + #condition, __FILE__, __LINE__))
 
 #define SR_CHECK_PARAMS(condition) \
-    ((condition) || throw_param_error("Assertion failed!" + #condition, __FILE__, __LINE__)
+    ((condition) || throw_param_error(std::string("Assertion failed!") + #condition, __FILE__, __LINE__))
 
 #endif // SMARTREDIS_ASSERT_H

@@ -47,7 +47,7 @@ PyClient::PyClient(bool cluster)
     }
     catch (std::exception& e) {
         // should never happen
-        std::rethrow_exception(e);
+        throw e;
     }
     catch (...) {
         // should never happen
