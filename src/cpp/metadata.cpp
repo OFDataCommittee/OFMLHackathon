@@ -382,7 +382,7 @@ void MetaData::_create_scalar_field(const std::string& field_name,
 {
     MetadataField* mdf = NULL;
     try {
-        new ScalarField<T>(field_name, type);
+        mdf = new ScalarField<T>(field_name, type);
     }
     catch (std::bad_alloc& e) {
         throw smart_bad_alloc("scalar field");
