@@ -29,8 +29,6 @@
 #if !defined(SMARTREDIS_SMART_ERROR_H)
 #define SMARTREDIS_SMART_ERROR_H
 
-#include <string>
-
 typedef enum {
     sr_ok        = 0, // No error
     sr_badalloc  = 1, // Memory allocation error
@@ -41,6 +39,17 @@ typedef enum {
 	sr_timeout   = 6, // Timeout error
     sr_invalid   = 7  // Uninitialized error variable
 } SRError;
+
+
+// Retrieve the last error encountered
+#ifdef __cplusplus
+extern "C"
+#endif
+const char* sr_get_last_error();
+
+#ifdef __cplusplus
+
+#include <string>
 
 // Smart error: custom error class for the SmartRedis library
 class smart_error: public std::runtime_error
@@ -147,14 +156,9 @@ class _smart_internal_error: public smart_error
 
 #define smart_internal_error(txt) _smart_internal_error(txt, __FILE__, __LINE__)
 
-
-// Retrieve the last error encountered
-extern "C"
-const char* sr_get_last_error();
-
 // Store the last error encountered
 extern "C"
 void sr_set_last_error(const smart_error& last_error);
 
-
+#endif // __cplusplus
 #endif // SMARTREDIS_SMART_ERROR_H

@@ -41,7 +41,7 @@ bool cluster = true;
 int missing_dataset(char *dataset_name, size_t dataset_name_len)
 {
   void *client = NULL;
-  if (sr_ok != SmartRedisCClient(use_cluster(), &client)
+  if (sr_ok != SmartRedisCClient(use_cluster(), &client))
     return -1;
 
   bool exists = false;
@@ -137,6 +137,6 @@ int main(int argc, char* argv[])
   dataset_name = "present_dataset";
   result += present_dataset(dataset_name, strlen(dataset_name));
 
-  printf("%s","Test passed: %s\n", result == 0 ? "YES" : "NO");
+  printf("Test passed: %s\n", result == 0 ? "YES" : "NO");
   return result;
 }

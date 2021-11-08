@@ -121,8 +121,8 @@ int put_unpack_1D_tensor_float(size_t* dims, size_t n_dims,
   for(size_t i=0; i<dims[0]; i++)
     tensor[i] = ((float)rand())/RAND_MAX;
 
-  int rvalue = put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                                    c_flt, key_suffix, key_suffix_length);
+  int r_value = put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
+                                     c_flt, key_suffix, key_suffix_length);
 
   if (!is_equal_1D_tensor_flt(tensor, result, dims[0])) {
       printf("%s", "The float tensors do not match!\n");
@@ -151,8 +151,8 @@ int put_unpack_1D_tensor_i8(size_t* dims, size_t n_dims,
       tensor[i] *= -1;
   }
 
-  int rvalue = put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                                    c_int8, key_suffix, key_suffix_length);
+  int r_value = put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
+                                     c_int8, key_suffix, key_suffix_length);
   if (!is_equal_1D_tensor_i8(tensor, result, dims[0])) {
       printf("%s", "The i8 tensors do not match!\n");
       r_value = -1;
