@@ -193,7 +193,7 @@ void MetaData::get_scalar_values(const std::string& name,
     // Make sure the field exists
     if (_field_map[name] == NULL) {
         throw smart_runtime_error("The metadata field " + name +
-                                 " does not exist.");
+                                  " does not exist.");
     }
 
     // Get values for the field

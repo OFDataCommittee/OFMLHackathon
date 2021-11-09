@@ -83,7 +83,7 @@ void put_get_dataset(
     if (!client.dataset_exists(dataset_name))
       throw std::runtime_error("DataSet existence of a non-existant"\
                                  "dataset failed.");
-    
+
     if(!client.tensor_exists(dataset_name))
         throw std::runtime_error("The DataSet "\
                                  "confirmation key is not set.");
