@@ -29,7 +29,6 @@ interface
       bind(c, name="unpack_tensor")
     use iso_c_binding, only: c_ptr, c_char, c_size_t
     import :: enum_kind
-    import :: enum_kind
     integer(kind=enum_kind)                                    :: unpack_tensor_c
     type(c_ptr),                          value, intent(in)    :: c_client   !< Pointer to the initialized client
     character(kind=c_char),                      intent(in)    :: key(*)     !< The key to use to place the tensor

@@ -25,7 +25,7 @@
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 interface
-  function put_dataset_c( client, dataset ) bind(C, name="put_dataset")
+  function put_dataset_c(client, dataset) bind(C, name="put_dataset")
     use iso_c_binding, only : c_ptr
     import :: enum_kind
     integer(kind=enum_kind)        :: put_dataset_c
@@ -34,7 +34,7 @@ interface
   end function put_dataset_c
 end interface
 interface
-  function get_dataset_c( client, c_name, name_length, dataset ) bind(C, name="get_dataset")
+  function get_dataset_c(client, c_name, name_length, dataset) bind(C, name="get_dataset")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: get_dataset_c
@@ -45,7 +45,7 @@ interface
   end function get_dataset_c
 end interface
 interface
-  function rename_dataset_c( client, c_name, name_length, c_new_name, new_name_length ) &
+  function rename_dataset_c(client, c_name, name_length, c_new_name, new_name_length) &
     bind(C, name="rename_dataset")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
@@ -58,7 +58,7 @@ interface
   end function rename_dataset_c
 end interface
 interface
-  function copy_dataset_c( client, c_name, name_length, c_new_name, new_name_length ) &
+  function copy_dataset_c(client, c_name, name_length, c_new_name, new_name_length) &
     bind(C, name="copy_dataset")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
@@ -71,7 +71,7 @@ interface
   end function copy_dataset_c
 end interface
 interface
-  function delete_dataset_c( client, c_name, name_length ) bind(C, name="delete_dataset")
+  function delete_dataset_c(client, c_name, name_length) bind(C, name="delete_dataset")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: delete_dataset_c

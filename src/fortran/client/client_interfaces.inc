@@ -25,7 +25,7 @@
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 interface
-  function c_constructor( cluster, new_client ) bind(c, name="SmartRedisCClient")
+  function c_constructor(cluster, new_client) bind(c, name="SmartRedisCClient")
     use iso_c_binding, only : c_ptr, c_bool
     import :: enum_kind
     integer(kind=enum_kind)     :: c_constructor
@@ -35,7 +35,7 @@ interface
 end interface
 
 interface
-  function c_destructor( client ) bind(c, name="DeleteCClient")
+  function c_destructor(client) bind(c, name="DeleteCClient")
     use iso_c_binding, only : c_ptr
     import :: enum_kind
     integer(kind=enum_kind)     :: c_destructor
@@ -44,7 +44,7 @@ interface
 end interface
 
 interface
-  function model_exists_c( client, model_name, model_name_length ) bind(c, name="model_exists")
+  function model_exists_c(client, model_name, model_name_length, exists) bind(c, name="model_exists")
     use iso_c_binding, only : c_ptr, c_char, c_bool, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: model_exists_c
@@ -56,7 +56,7 @@ interface
 end interface
 
 interface
-  function tensor_exists_c( client, tensor_name, tensor_name_length ) bind(c, name="tensor_exists")
+  function tensor_exists_c(client, tensor_name, tensor_name_length, exists) bind(c, name="tensor_exists")
     use iso_c_binding, only : c_ptr, c_char, c_bool, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: tensor_exists_c
@@ -68,7 +68,7 @@ interface
 end interface
 
 interface
-  function dataset_exists_c( client, dataset_name, dataset_name_length ) bind(c, name="dataset_exists")
+  function dataset_exists_c(client, dataset_name, dataset_name_length, exists) bind(c, name="dataset_exists")
     use iso_c_binding, only : c_ptr, c_char, c_bool, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: dataset_exists_c
@@ -80,7 +80,7 @@ interface
 end interface
 
 interface
-  function key_exists_c( client, key, key_length ) bind(c, name="key_exists")
+  function key_exists_c(client, key, key_length, exists) bind(c, name="key_exists")
     use iso_c_binding, only : c_ptr, c_char, c_bool, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: key_exists_c
@@ -92,7 +92,7 @@ interface
 end interface
 
 interface
-  function poll_model_c( client, model_name, model_name_length, poll_frequency_ms, num_tries ) bind(c, name="poll_model")
+  function poll_model_c(client, model_name, model_name_length, poll_frequency_ms, num_tries, exists) bind(c, name="poll_model")
     use iso_c_binding, only : c_ptr, c_char, c_bool, c_size_t, c_int
     import :: enum_kind
     integer(kind=enum_kind)       :: poll_model_c
@@ -106,7 +106,7 @@ interface
 end interface
 
 interface
-  function poll_tensor_c( client, tensor_name, tensor_name_length, poll_frequency_ms, num_tries ) bind(c, name="poll_tensor")
+  function poll_tensor_c(client, tensor_name, tensor_name_length, poll_frequency_ms, num_tries, exists) bind(c, name="poll_tensor")
     use iso_c_binding, only : c_ptr, c_char, c_bool, c_size_t, c_int
     import :: enum_kind
     integer(kind=enum_kind)       :: poll_tensor_c
@@ -120,7 +120,7 @@ interface
 end interface
 
 interface
-  function poll_key_c( client, key, key_length, poll_frequency_ms, num_tries ) bind(c, name="poll_key")
+  function poll_key_c(client, key, key_length, poll_frequency_ms, num_tries, exists) bind(c, name="poll_key")
     use iso_c_binding, only : c_ptr, c_char, c_bool, c_size_t, c_int
     import :: enum_kind
     integer(kind=enum_kind)       :: poll_key_c

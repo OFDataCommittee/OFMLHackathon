@@ -33,6 +33,8 @@ program main
 
   implicit none
 
+#include "enums/enum_fortran.inc"
+
   integer, parameter :: dim1 = 10
   integer, parameter :: dim2 = 20
   integer, parameter :: dim3 = 30
@@ -51,10 +53,10 @@ program main
   integer(kind=c_int32_t), dimension(dim1, dim2, dim3) :: true_array_integer_32
   integer(kind=c_int64_t), dimension(dim1, dim2, dim3) :: true_array_integer_64
 
-  character(len=16) :: meta_dbl = 'meta_dbl'
-  character(len=16) :: meta_flt = 'meta_flt'
-  character(len=16) :: meta_int32 = 'meta_int32'
-  character(len=16) :: meta_int64 = 'meta_int64'
+  character(len=16) :: str_meta_dbl = 'meta_dbl'
+  character(len=16) :: str_meta_flt = 'meta_flt'
+  character(len=16) :: str_meta_int32 = 'meta_int32'
+  character(len=16) :: str_meta_int64 = 'meta_int64'
 
   real(kind=c_float),  dimension(dim1) :: meta_flt_vec
   real(kind=c_float), dimension(:), pointer :: meta_flt_recv
@@ -69,7 +71,9 @@ program main
   type(dataset_type) :: dataset
   type(client_type) :: client
 
-  integer :: err_code 
+  integer :: err_code
+  integer(kind=enum_kind) :: result
+  logical(kind=c_bool) :: exists
 
   call random_number(true_array_real_32)
   call random_number(true_array_real_64)
@@ -89,31 +93,44 @@ program main
     recv_array_integer_64(i,j,k) = irand()
   enddo; enddo; enddo
 
-  call dataset%initialize( "test_dataset" )
+  result = dataset%initialize( "test_dataset" )
+  if (result .ne. sr_ok) stop
 
   ! Test adding and retrieving a tensor of every supported type
-  call dataset%add_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))
-  call dataset%unpack_dataset_tensor("true_array_real_32", recv_array_real_32, shape(recv_array_real_32))
+  result = dataset%add_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))
+  if (result .ne. sr_ok) stop
+  result = dataset%unpack_dataset_tensor("true_array_real_32", recv_array_real_32, shape(recv_array_real_32))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_real_32 == recv_array_real_32)) stop 'true_array_real_32: FAILED'
 
-  call dataset%add_tensor("true_array_real_64", true_array_real_64, shape(true_array_real_64))
-  call dataset%unpack_dataset_tensor("true_array_real_64", recv_array_real_64, shape(recv_array_real_64))
+  result = dataset%add_tensor("true_array_real_64", true_array_real_64, shape(true_array_real_64))
+  if (result .ne. sr_ok) stop
+  result = dataset%unpack_dataset_tensor("true_array_real_64", recv_array_real_64, shape(recv_array_real_64))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_real_64 == recv_array_real_64)) stop 'true_array_real_64: FAILED'
 
-  call dataset%add_tensor("true_array_integer_8", true_array_integer_8, shape(true_array_integer_8))
-  call dataset%unpack_dataset_tensor("true_array_integer_8", recv_array_integer_8, shape(recv_array_integer_8))
+  result = dataset%add_tensor("true_array_integer_8", true_array_integer_8, shape(true_array_integer_8))
+  if (result .ne. sr_ok) stop
+  result = dataset%unpack_dataset_tensor("true_array_integer_8", recv_array_integer_8, shape(recv_array_integer_8))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_integer_8 == recv_array_integer_8)) stop 'true_array_integer_8: FAILED'
 
-  call dataset%add_tensor("true_array_integer_16", true_array_integer_16, shape(true_array_integer_16))
-  call dataset%unpack_dataset_tensor("true_array_integer_16", recv_array_integer_16, shape(recv_array_integer_16))
+  result = dataset%add_tensor("true_array_integer_16", true_array_integer_16, shape(true_array_integer_16))
+  if (result .ne. sr_ok) stop
+  result = dataset%unpack_dataset_tensor("true_array_integer_16", recv_array_integer_16, shape(recv_array_integer_16))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_integer_16 == recv_array_integer_16)) stop 'true_array_integer_16: FAILED'
 
-  call dataset%add_tensor("true_array_integer_32", true_array_integer_32, shape(true_array_integer_32))
-  call dataset%unpack_dataset_tensor("true_array_integer_32", recv_array_integer_32, shape(recv_array_integer_32))
+  result = dataset%add_tensor("true_array_integer_32", true_array_integer_32, shape(true_array_integer_32))
+  if (result .ne. sr_ok) stop
+  result = dataset%unpack_dataset_tensor("true_array_integer_32", recv_array_integer_32, shape(recv_array_integer_32))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_integer_32 == recv_array_integer_32)) stop 'true_array_integer_32: FAILED'
 
-  call dataset%add_tensor("true_array_integer_64", true_array_integer_64, shape(true_array_integer_64))
-  call dataset%unpack_dataset_tensor("true_array_integer_64", recv_array_integer_64, shape(recv_array_integer_64))
+  result = dataset%add_tensor("true_array_integer_64", true_array_integer_64, shape(true_array_integer_64))
+  if (result .ne. sr_ok) stop
+  result = dataset%unpack_dataset_tensor("true_array_integer_64", recv_array_integer_64, shape(recv_array_integer_64))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_integer_64 == recv_array_integer_64)) stop 'true_array_integer_64: FAILED'
 
   ! Test adding scalar metadata of all supported types to the dataset
@@ -123,28 +140,42 @@ program main
   meta_int64_vec(:) = nint(255.*meta_flt_vec)
 
   do i=1,dim1
-    call dataset%add_meta_scalar(meta_dbl, meta_dbl_vec(i))
-    call dataset%add_meta_scalar(meta_flt, meta_flt_vec(i))
-    call dataset%add_meta_scalar(meta_int32, meta_int32_vec(i))
-    call dataset%add_meta_scalar(meta_int64, meta_int64_vec(i))
+    result = dataset%add_meta_scalar(str_meta_dbl, meta_dbl_vec(i))
+    if (result .ne. sr_ok) stop
+    result = dataset%add_meta_scalar(str_meta_flt, meta_flt_vec(i))
+    if (result .ne. sr_ok) stop
+    result = dataset%add_meta_scalar(str_meta_int32, meta_int32_vec(i))
+    if (result .ne. sr_ok) stop
+    result = dataset%add_meta_scalar(str_meta_int64, meta_int64_vec(i))
+    if (result .ne. sr_ok) stop
   enddo
 
-  call dataset%get_meta_scalars(meta_dbl, meta_dbl_recv)
+  result = dataset%get_meta_scalars(str_meta_dbl, meta_dbl_recv)
+  if (result .ne. sr_ok) stop
   if (.not. all(meta_dbl_recv == meta_dbl_vec)) stop 'meta_dbl: FAILED'
-  call dataset%get_meta_scalars(meta_flt, meta_flt_recv)
+  result = dataset%get_meta_scalars(str_meta_flt, meta_flt_recv)
+  if (result .ne. sr_ok) stop
   if (.not. all(meta_flt_recv == meta_flt_vec)) stop 'meta_flt: FAILED'
-  call dataset%get_meta_scalars(meta_int32, meta_int32_recv)
+  result = dataset%get_meta_scalars(str_meta_int32, meta_int32_recv)
+  if (result .ne. sr_ok) stop
   if (.not. all(meta_int32_recv == meta_int32_vec)) stop 'meta_int32: FAILED'
-  call dataset%get_meta_scalars(meta_int64, meta_int64_recv)
+  result = dataset%get_meta_scalars(str_meta_int64, meta_int64_recv)
+  if (result .ne. sr_ok) stop
   if (.not. all(meta_int64_recv == meta_int64_vec)) stop 'meta_int64: FAILED'
 
   ! test dataset_existence
-  call client%initialize(use_cluster())
-  if (client%dataset_exists("nonexistent")) stop 'non-existant dataset: FAILED'
-  call client%put_dataset(dataset)
-  if (.not. client%dataset_exists("test_dataset")) stop 'existant dataset: FAILED'
+  result = client%initialize(use_cluster())
+  if (result .ne. sr_ok) stop
+  result = client%dataset_exists("nonexistent", exists)
+  if (result .ne. sr_ok) stop
+  if (exists) stop 'non-existant dataset: FAILED'
+  result = client%put_dataset(dataset)
+  if (result .ne. sr_ok) stop
+  result = client%dataset_exists("test_dataset", exists)
+  if (result .ne. sr_ok) stop
+  if (.not. exists) stop 'existant dataset: FAILED'
 
-  
+
   write(*,*) "Fortran Dataset: passed"
 
 end program main

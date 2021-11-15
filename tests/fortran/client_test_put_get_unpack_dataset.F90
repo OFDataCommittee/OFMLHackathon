@@ -33,6 +33,8 @@ program main
 
   implicit none
 
+#include "enums/enum_fortran.inc"
+
   integer, parameter :: dim1 = 10
   integer, parameter :: dim2 = 20
   integer, parameter :: dim3 = 30
@@ -54,10 +56,13 @@ program main
   integer :: i, j, k
   type(client_type)  :: client
   type(dataset_type) :: send_dataset, recv_dataset
+  integer(kind=enum_kind) :: result
+  logical(kind=c_bool) :: exists
 
   integer :: err_code
 
-  call client%initialize(use_cluster())
+  result = client%initialize(use_cluster())
+  if (result .ne. sr_ok) stop
 
   call random_number(true_array_real_32)
   call random_number(true_array_real_64)
@@ -77,29 +82,44 @@ program main
     recv_array_integer_64(i,j,k) = irand()
   enddo; enddo; enddo
 
-  call send_dataset%initialize( "test_dataset" )
+  result = send_dataset%initialize( "test_dataset" )
+  if (result .ne. sr_ok) stop
 
-  call send_dataset%add_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))
-  call send_dataset%add_tensor("true_array_real_64", true_array_real_64, shape(true_array_real_64))
-  call send_dataset%add_tensor("true_array_integer_8",  true_array_integer_8, shape(true_array_integer_8))
-  call send_dataset%add_tensor("true_array_integer_16", true_array_integer_16, shape(true_array_integer_16))
-  call send_dataset%add_tensor("true_array_integer_32", true_array_integer_32, shape(true_array_integer_32))
-  call send_dataset%add_tensor("true_array_integer_64", true_array_integer_64, shape(true_array_integer_64))
+  result = send_dataset%add_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))
+  if (result .ne. sr_ok) stop
+  result = send_dataset%add_tensor("true_array_real_64", true_array_real_64, shape(true_array_real_64))
+  if (result .ne. sr_ok) stop
+  result = send_dataset%add_tensor("true_array_integer_8",  true_array_integer_8, shape(true_array_integer_8))
+  if (result .ne. sr_ok) stop
+  result = send_dataset%add_tensor("true_array_integer_16", true_array_integer_16, shape(true_array_integer_16))
+  if (result .ne. sr_ok) stop
+  result = send_dataset%add_tensor("true_array_integer_32", true_array_integer_32, shape(true_array_integer_32))
+  if (result .ne. sr_ok) stop
+  result = send_dataset%add_tensor("true_array_integer_64", true_array_integer_64, shape(true_array_integer_64))
+  if (result .ne. sr_ok) stop
 
-  call client%put_dataset( send_dataset )
-  recv_dataset = client%get_dataset( "test_dataset" )
+  result = client%put_dataset(send_dataset)
+  if (result .ne. sr_ok) stop
+  result = client%get_dataset("test_dataset", recv_dataset)
+  if (result .ne. sr_ok) stop
 
-  call recv_dataset%unpack_dataset_tensor("true_array_real_32", recv_array_real_32, shape(recv_array_real_32))
+  result = recv_dataset%unpack_dataset_tensor("true_array_real_32", recv_array_real_32, shape(recv_array_real_32))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_real_32 == recv_array_real_32)) stop 'true_array_real_32: FAILED'
-  call recv_dataset%unpack_dataset_tensor("true_array_real_64", recv_array_real_64, shape(recv_array_real_64))
+  result = recv_dataset%unpack_dataset_tensor("true_array_real_64", recv_array_real_64, shape(recv_array_real_64))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_real_64 == recv_array_real_64)) stop 'true_array_real_64: FAILED'
-  call recv_dataset%unpack_dataset_tensor("true_array_integer_8", recv_array_integer_8, shape(recv_array_integer_8))
+  result = recv_dataset%unpack_dataset_tensor("true_array_integer_8", recv_array_integer_8, shape(recv_array_integer_8))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_integer_8 == recv_array_integer_8)) stop 'true_array_integer_8: FAILED'
-  call recv_dataset%unpack_dataset_tensor("true_array_integer_16", recv_array_integer_16, shape(recv_array_integer_16))
+  result = recv_dataset%unpack_dataset_tensor("true_array_integer_16", recv_array_integer_16, shape(recv_array_integer_16))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_integer_16 == recv_array_integer_16)) stop 'true_array_integer_16: FAILED'
-  call recv_dataset%unpack_dataset_tensor("true_array_integer_32", recv_array_integer_32, shape(recv_array_integer_32))
+  result = recv_dataset%unpack_dataset_tensor("true_array_integer_32", recv_array_integer_32, shape(recv_array_integer_32))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_integer_32 == recv_array_integer_32)) stop 'true_array_integer_32: FAILED'
-  call recv_dataset%unpack_dataset_tensor("true_array_integer_64", recv_array_integer_64, shape(recv_array_integer_64))
+  result = recv_dataset%unpack_dataset_tensor("true_array_integer_64", recv_array_integer_64, shape(recv_array_integer_64))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_integer_64 == recv_array_integer_64)) stop 'true_array_integer_64: FAILED'
 
   print *, "Fortran Client put/get/unpack dataset: passed"

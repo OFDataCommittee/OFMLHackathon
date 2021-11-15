@@ -31,8 +31,11 @@ program main
   use smartredis_client,  only : client_type
   use smartredis_dataset, only : dataset_type
   use test_utils,   only : use_cluster
+  use iso_fortran_env, only : STDERR => error_unit
 
   implicit none
+
+#include "enums/enum_fortran.inc"
 
   type(client_type)  :: client
   type(dataset_type) :: send_dataset
@@ -40,20 +43,35 @@ program main
   real, dimension(10,10,10) :: array
 
   integer :: err_code
+  integer(kind=enum_kind) :: result
+  logical(kind=c_bool) :: exists
 
-  call client%initialize(use_cluster())
+  result = client%initialize(use_cluster())
+  if (result .ne. sr_ok) stop
+
   print *, "Putting tensor"
-  call client%put_tensor( "test_initial", array, shape(array) )
+  result = client%put_tensor( "test_initial", array, shape(array) )
+  if (result .ne. sr_ok) stop
 
   print *, "Renaming tensor"
-  call client%rename_tensor( "test_initial", "test_rename" )
-  if (.not. client%key_exists( "test_rename" )) stop 'Renamed tensor does not exist'
+  result = client%rename_tensor( "test_initial", "test_rename" )
+  if (result .ne. sr_ok) stop
+  result = client%key_exists("test_rename", exists)
+  if (result .ne. sr_ok) stop
+  if (.not. exists) stop 'Renamed tensor does not exist'
 
-  call client%copy_tensor( "test_rename", "test_copy" )
-  if (.not. client%key_exists( "test_copy" )) stop 'Copied tensor does not exist'
+  result = client%copy_tensor("test_rename", "test_copy")
+  if (result .ne. sr_ok) stop
 
-  call client%delete_tensor( "test_copy" )
-  if (client%key_exists( "test_copy" )) stop 'Copied tensor incorrectly exists'
+  result = client%key_exists("test_copy", exists)
+  if (result .ne. sr_ok) stop
+  if (.not. exists) stop 'Copied tensor does not exist'
+
+  result = client%delete_tensor("test_copy")
+  if (result .ne. sr_ok) stop
+  result = client%key_exists("test_copy", exists)
+  if (result .ne. sr_ok) stop
+  if (exists) stop 'Copied tensor incorrectly exists'
 
   print *, "Fortran Client misc tensor: passed"
 

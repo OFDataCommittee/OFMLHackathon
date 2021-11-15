@@ -29,6 +29,15 @@
 #include "../../../third-party/catch/catch.hpp"
 #include "dataset.h"
 #include "srexception.h"
+#include <cxxabi.h>
+
+using namespace SmartRedis;
+
+const char *currentExceptionTypeName() {
+    int status;
+//    return abi::__cxa_demangle(abi::__cxa_current_exception_type()->name(), 0, 0, &status);
+    return abi::__cxa_current_exception_type()->name();
+}
 
 SCENARIO("Testing DataSet object", "[DataSet]")
 {
@@ -126,11 +135,29 @@ SCENARIO("Testing DataSet object", "[DataSet]")
                 std::vector<size_t> retrieved_dims;
                 TensorType retrieved_type;
 
+#if 1
                 CHECK_THROWS_AS(
                     dataset.get_tensor("does_not_exist", retrieved_data,
                                        retrieved_dims, retrieved_type,
                                        mem_layout),
-                    _smart_runtime_error);
+                    std::runtime_error);
+#else
+                try {
+                    dataset.get_tensor("does_not_exist", retrieved_data,
+                                       retrieved_dims, retrieved_type,
+                                       mem_layout);
+                } catch (_smart_runtime_error const&) {
+                    throw std::runtime_error("We can catch an _smart_runtime_error, but Catch cannot detect it");
+                } catch (std::exception &e) {
+                    std::string foo("thrown: \"");
+                    foo += currentExceptionTypeName();
+                    foo += "\"; _smart_runtime_error: \"";
+                    _smart_runtime_error e2("test");
+                    foo += typeid(e2).name();
+                    foo += "\"";
+                    throw std::runtime_error(foo);
+                }
+#endif
             }
         }
 
@@ -167,7 +194,7 @@ SCENARIO("Testing DataSet object", "[DataSet]")
                     dataset.get_meta_scalars(meta_scalar_name,
                                             (void*&)retrieved_data,
                                              retrieved_length, type),
-                    _smart_runtime_error);
+                    std::runtime_error);
             }
         }
 

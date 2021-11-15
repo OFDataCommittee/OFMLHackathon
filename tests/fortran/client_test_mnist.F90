@@ -26,10 +26,13 @@
 
 program mnist_test
 
+  use iso_c_binding
   use smartredis_client, only : client_type
   use test_utils,  only : use_cluster
 
   implicit none
+
+#include "enums/enum_fortran.inc"
 
   character(len=*), parameter :: model_key = "mnist_model"
   character(len=*), parameter :: model_file = "../../cpp/mnist_data/mnist_cnn.pt"
@@ -39,11 +42,15 @@ program mnist_test
   type(client_type) :: client
   integer :: err_code
   character(len=2) :: key_suffix
+  integer(kind=enum_kind) :: result
 
-  call client%initialize(use_cluster())
+  result = client%initialize(use_cluster())
+  if (result .ne. sr_ok) stop
 
-  call client%set_model_from_file(model_key, model_file, "TORCH", "CPU")
-  call client%set_script_from_file(script_key, "CPU", script_file)
+  result = client%set_model_from_file(model_key, model_file, "TORCH", "CPU")
+  if (result .ne. sr_ok) stop
+  result = client%set_script_from_file(script_key, "CPU", script_file)
+  if (result .ne. sr_ok) stop
 
   call run_mnist(client, model_key, script_key)
 
@@ -67,6 +74,7 @@ subroutine run_mnist( client, model_name, script_name )
 
   character(len=255), dimension(1) :: inputs
   character(len=255), dimension(1) :: outputs
+  integer(kind=enum_kind) :: call_result
 
   ! Construct the keys used for the specifiying inputs and outputs
   in_key = "mnist_input"
@@ -75,17 +83,21 @@ subroutine run_mnist( client, model_name, script_name )
 
   ! Generate some fake data for inference
   call random_number(array)
-  call client%put_tensor(in_key, array, shape(array))
+  call_result = client%put_tensor(in_key, array, shape(array))
+  if (call_result .ne. sr_ok) stop
 
   ! Prepare the script inputs and outputs
   inputs(1) = in_key
   outputs(1) = script_out_key
-  call client%run_script(script_name, "pre_process", inputs, outputs)
+  call_result = client%run_script(script_name, "pre_process", inputs, outputs)
+  if (call_result .ne. sr_ok) stop
   inputs(1) = script_out_key
   outputs(1) = out_key
-  call client%run_model(model_name, inputs, outputs)
+  call_result = client%run_model(model_name, inputs, outputs)
+  if (call_result .ne. sr_ok) stop
   result(:,:) = 0.
-  call client%unpack_tensor(out_key, result, shape(result))
+  call_result = client%unpack_tensor(out_key, result, shape(result))
+  if (call_result .ne. sr_ok) stop
 
   print *, "Result: ", result
   print *, "Fortran test mnist: passed"

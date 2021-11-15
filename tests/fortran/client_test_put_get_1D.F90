@@ -31,6 +31,8 @@ program main
 
   implicit none
 
+#include "enums/enum_fortran.inc"
+
   integer, parameter :: dim1 = 10
 
   real(kind=4),    dimension(dim1) :: recv_array_real_32
@@ -51,6 +53,7 @@ program main
   type(client_type) :: client
 
   integer :: err_code
+  integer(kind=enum_kind) :: result
 
   call random_number(true_array_real_32)
   call random_number(true_array_real_64)
@@ -70,30 +73,43 @@ program main
     recv_array_integer_64(i) = irand()
   enddo
 
-  call client%initialize(use_cluster())
+  result = client%initialize(use_cluster())
+  if (result .ne. sr_ok) stop
 
-  call client%put_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))
-  call client%unpack_tensor("true_array_real_32", recv_array_real_32, shape(recv_array_real_32))
+  result = client%put_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))
+  if (result .ne. sr_ok) stop
+  result = client%unpack_tensor("true_array_real_32", recv_array_real_32, shape(recv_array_real_32))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_real_32 == recv_array_real_32)) stop 'true_array_real_32: FAILED'
 
-  call client%put_tensor("true_array_real_64", true_array_real_64, shape(true_array_real_64))
-  call client%unpack_tensor("true_array_real_64", recv_array_real_64, shape(recv_array_real_64))
+  result = client%put_tensor("true_array_real_64", true_array_real_64, shape(true_array_real_64))
+  if (result .ne. sr_ok) stop
+  result = client%unpack_tensor("true_array_real_64", recv_array_real_64, shape(recv_array_real_64))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_real_64 == recv_array_real_64)) stop 'true_array_real_64: FAILED'
 
-  call client%put_tensor("true_array_integer_8", true_array_integer_8, shape(true_array_integer_8))
-  call client%unpack_tensor("true_array_integer_8", recv_array_integer_8, shape(recv_array_integer_8))
+  result = client%put_tensor("true_array_integer_8", true_array_integer_8, shape(true_array_integer_8))
+  if (result .ne. sr_ok) stop
+  result = client%unpack_tensor("true_array_integer_8", recv_array_integer_8, shape(recv_array_integer_8))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_integer_8 == recv_array_integer_8)) stop 'true_array_integer_8: FAILED'
 
-  call client%put_tensor("true_array_integer_16", true_array_integer_16, shape(true_array_integer_16))
-  call client%unpack_tensor("true_array_integer_16", recv_array_integer_16, shape(recv_array_integer_16))
+  result = client%put_tensor("true_array_integer_16", true_array_integer_16, shape(true_array_integer_16))
+  if (result .ne. sr_ok) stop
+  result = client%unpack_tensor("true_array_integer_16", recv_array_integer_16, shape(recv_array_integer_16))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_integer_16 == recv_array_integer_16)) stop 'true_array_integer_16: FAILED'
 
-  call client%put_tensor("true_array_integer_32", true_array_integer_32, shape(true_array_integer_32))
-  call client%unpack_tensor("true_array_integer_32", recv_array_integer_32, shape(recv_array_integer_32))
+  result = client%put_tensor("true_array_integer_32", true_array_integer_32, shape(true_array_integer_32))
+  if (result .ne. sr_ok) stop
+  result = client%unpack_tensor("true_array_integer_32", recv_array_integer_32, shape(recv_array_integer_32))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_integer_32 == recv_array_integer_32)) stop 'true_array_integer_32: FAILED'
 
-  call client%put_tensor("true_array_integer_64", true_array_integer_64, shape(true_array_integer_64))
-  call client%unpack_tensor("true_array_integer_64", recv_array_integer_64, shape(recv_array_integer_64))
+  result = client%put_tensor("true_array_integer_64", true_array_integer_64, shape(true_array_integer_64))
+  if (result .ne. sr_ok) stop
+  result = client%unpack_tensor("true_array_integer_64", recv_array_integer_64, shape(recv_array_integer_64))
+  if (result .ne. sr_ok) stop
   if (.not. all(true_array_integer_64 == recv_array_integer_64)) stop 'true_array_integer_64: FAILED'
 
   write(*,*) "1D put/get: passed"
