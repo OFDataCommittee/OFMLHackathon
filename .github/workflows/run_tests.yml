@@ -34,13 +34,11 @@ jobs:
       FC: gfortran-${{ matrix.gcc_v }}
       GCC_V: ${{ matrix.gcc_v }}
 
-
-    # Service containers to run with `container-job`
     services:
       # Label used to access the service container
       redis:
         # Docker Hub image
-        image: ${{ matrix.rai }}-cpu-xenial
+        image: redislabs/redisai:${{ matrix.rai }}-cpu-xenial
 
         # Set health checks to wait until redis has started
         options: >-
