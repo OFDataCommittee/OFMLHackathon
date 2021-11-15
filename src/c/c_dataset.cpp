@@ -99,8 +99,8 @@ SRError add_tensor(void* dataset,
                    void* data,
                    const size_t* dims,
                    const size_t n_dims,
-                   const CTensorType type,
-                   const CMemoryLayout mem_layout)
+                   const SRTensorType type,
+                   const SRMemoryLayout mem_layout)
 {
   SRError result = sr_ok;
   try
@@ -114,9 +114,7 @@ SRError add_tensor(void* dataset,
     std::vector<size_t> dims_vec;
     dims_vec.assign(dims, dims + n_dims);
 
-    d->add_tensor(tensor_name_str, data, dims_vec,
-                  convert_tensor_type(type),
-                  convert_layout(mem_layout));
+    d->add_tensor(tensor_name_str, data, dims_vec, type, mem_layout);
   }
   catch (const smart_error& e) {
     sr_set_last_error(e);
@@ -136,7 +134,7 @@ SRError add_meta_scalar(void* dataset,
                         const char* name,
                         const size_t name_length,
                         const void* data,
-                        const CMetaDataType type)
+                        const SRMetaDataType type)
 {
   SRError result = sr_ok;
   try
@@ -147,8 +145,7 @@ SRError add_meta_scalar(void* dataset,
     DataSet* d = reinterpret_cast<DataSet*>(dataset);
     std::string name_str(name, name_length);
 
-    d->add_meta_scalar(name_str, data,
-                      convert_metadata_type(type));
+    d->add_meta_scalar(name_str, data, type);
   }
    catch (const smart_error& e) {
     sr_set_last_error(e);
@@ -205,8 +202,8 @@ SRError get_dataset_tensor(void* dataset,
                            void** data,
                            size_t** dims,
                            size_t* n_dims,
-                           CTensorType* type,
-                           const CMemoryLayout mem_layout)
+                           SRTensorType* type,
+                           const SRMemoryLayout mem_layout)
 {
   SRError result = sr_ok;
   try
@@ -218,10 +215,8 @@ SRError get_dataset_tensor(void* dataset,
     DataSet* d = (DataSet* )dataset;
     std::string name_str(name, name_length);
 
-    TensorType t_type = TensorType::undefined;
-    d->get_tensor(name_str,* data,* dims,* n_dims,
-                  t_type, convert_layout(mem_layout));
-    *type = convert_tensor_type(t_type);
+    *type = sr_tensor_invalid;
+    d->get_tensor(name_str, *data, *dims, *n_dims, *type, mem_layout);
   }
   catch (const smart_error& e) {
     sr_set_last_error(e);
@@ -243,8 +238,8 @@ SRError unpack_dataset_tensor(void* dataset,
                               void* data,
                               const size_t* dims,
                               const size_t n_dims,
-                              const CTensorType type,
-                              const CMemoryLayout mem_layout)
+                              const SRTensorType type,
+                              const SRMemoryLayout mem_layout)
 {
   SRError result = sr_ok;
   try
@@ -258,9 +253,7 @@ SRError unpack_dataset_tensor(void* dataset,
     std::vector<size_t> dims_vec;
     dims_vec.assign(dims, dims + n_dims);
 
-    d->unpack_tensor(name_str, data, dims_vec,
-                    convert_tensor_type(type),
-                    convert_layout(mem_layout));
+    d->unpack_tensor(name_str, data, dims_vec, type, mem_layout);
   }
   catch (const smart_error& e) {
     sr_set_last_error(e);
@@ -281,7 +274,7 @@ SRError get_meta_scalars(void* dataset,
                        const char* name,
                        const size_t name_length,
                        size_t* length,
-                       CMetaDataType* type,
+                       SRMetaDataType* type,
                        void** scalar_data)
 {
   SRError result = sr_ok;
@@ -295,10 +288,8 @@ SRError get_meta_scalars(void* dataset,
     std::string key_str(name, name_length);
 
     void* data = NULL;
-    MetaDataType m_type;
-    d->get_meta_scalars(key_str, data, *length, m_type);
+    d->get_meta_scalars(key_str, data, *length, *type);
 
-    *type = convert_metadata_type(m_type);
     *scalar_data = data;
   }
   catch (const smart_error& e) {

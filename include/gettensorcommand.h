@@ -31,7 +31,7 @@
 
 #include "singlekeycommand.h"
 #include "tensorbase.h"
-#include "enums/cpp_tensor_type.h"
+#include "sr_enums.h"
 
 ///@file
 
@@ -77,7 +77,7 @@ class GetTensorCommand : public SingleKeyCommand
         *   \param reply CommandReply from running "AI.TENSORGET"
         *   \return string of the tensor type
         */
-       static TensorType get_data_type(CommandReply& reply);
+       static SRTensorType get_data_type(CommandReply& reply);
 };
 
 } //namespace SmartRedis

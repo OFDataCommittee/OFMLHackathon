@@ -60,8 +60,8 @@ class Tensor : public TensorBase
         Tensor(const std::string& name,
                void* data,
                const std::vector<size_t>& dims,
-               const TensorType type,
-               const MemoryLayout mem_layout);
+               const SRTensorType type,
+               const SRMemoryLayout mem_layout);
 
         /*!
         *   \brief Tensor copy constructor
@@ -117,7 +117,7 @@ class Tensor : public TensorBase
         *   \param mem_layout The MemoryLayout enum describing
         *          the layout of data view
         */
-        virtual void* data_view(const MemoryLayout mem_layout);
+        virtual void* data_view(const SRMemoryLayout mem_layout);
 
         /*!
         *   \brief Fill a user provided memory space with
@@ -128,7 +128,7 @@ class Tensor : public TensorBase
         */
         virtual void fill_mem_space(void* data,
                                     std::vector<size_t> dims,
-                                    MemoryLayout mem_layout);
+                                    SRMemoryLayout mem_layout);
 
     protected:
 
@@ -213,7 +213,7 @@ class Tensor : public TensorBase
         */
         virtual void _set_tensor_data(void* src_data,
                                       const std::vector<size_t>& dims,
-                                      const MemoryLayout mem_layout);
+                                      const SRMemoryLayout mem_layout);
 
         /*!
         *   \brief This function will copy a fortran array

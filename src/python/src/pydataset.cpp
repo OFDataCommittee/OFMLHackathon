@@ -34,16 +34,19 @@ using namespace SmartRedis;
 
 namespace py = pybind11;
 
-PyDataset::PyDataset(const std::string& name) {
+PyDataset::PyDataset(const std::string& name)
+{
   DataSet* dataset = new DataSet(name);
   _dataset = dataset;
 }
 
-PyDataset::PyDataset(DataSet* dataset) {
+PyDataset::PyDataset(DataSet* dataset)
+{
   _dataset = dataset;
 }
 
-PyDataset::~PyDataset() {
+PyDataset::~PyDataset()
+{
     if (_dataset != NULL) {
       delete _dataset;
       _dataset = NULL;
@@ -54,8 +57,8 @@ DataSet* PyDataset::get() {
   return _dataset;
 }
 
-void PyDataset::add_tensor(const std::string& name, py::array data, std::string& type) {
-
+void PyDataset::add_tensor(const std::string& name, py::array data, std::string& type)
+{
   auto buffer = data.request();
   void* ptr = buffer.ptr;
 
@@ -65,12 +68,12 @@ void PyDataset::add_tensor(const std::string& name, py::array data, std::string&
       dims[i] = (size_t) buffer.shape[i];
   }
 
-  TensorType ttype = TENSOR_TYPE_MAP.at(type);
-  _dataset->add_tensor(name, ptr, dims, ttype, MemoryLayout::contiguous);
+  SRTensorType ttype = TENSOR_TYPE_MAP.at(type);
+  _dataset->add_tensor(name, ptr, dims, ttype, sr_layout_contiguous);
 }
 
-py::array PyDataset::get_tensor(const std::string& name) {
-
+py::array PyDataset::get_tensor(const std::string& name)
+{
     TensorBase* tensor;
     try {
         tensor = _dataset->_get_tensorbase_obj(name);
@@ -86,44 +89,44 @@ py::array PyDataset::get_tensor(const std::string& name) {
 
     // detect data type
     switch (tensor->type()) {
-        case TensorType::dbl: {
+        case sr_tensor_dbl: {
             double* data = reinterpret_cast<double*>(
-                tensor->data_view(MemoryLayout::contiguous));
+                tensor->data_view(sr_layout_contiguous));
             return py::array(tensor->dims(), data, free_when_done);
         }
-        case TensorType::flt: {
+        case sr_tensor_flt: {
             float* data = reinterpret_cast<float*>(
-                tensor->data_view(MemoryLayout::contiguous));
+                tensor->data_view(sr_layout_contiguous));
             return py::array(tensor->dims(), data, free_when_done);
         }
-        case TensorType::int64: {
+        case sr_tensor_int64: {
             int64_t* data = reinterpret_cast<int64_t*>(
-                tensor->data_view(MemoryLayout::contiguous));
+                tensor->data_view(sr_layout_contiguous));
             return py::array(tensor->dims(), data, free_when_done);
         }
-        case TensorType::int32: {
+        case sr_tensor_int32: {
             int32_t* data = reinterpret_cast<int32_t*>(
-                tensor->data_view(MemoryLayout::contiguous));
+                tensor->data_view(sr_layout_contiguous));
             return py::array(tensor->dims(), data, free_when_done);
         }
-        case TensorType::int16: {
+        case sr_tensor_int16: {
             int16_t* data = reinterpret_cast<int16_t*>(
-                tensor->data_view(MemoryLayout::contiguous));
+                tensor->data_view(sr_layout_contiguous));
             return py::array(tensor->dims(), data, free_when_done);
         }
-        case TensorType::int8: {
+        case sr_tensor_int8: {
             int8_t* data = reinterpret_cast<int8_t*>(
-                tensor->data_view(MemoryLayout::contiguous));
+                tensor->data_view(sr_layout_contiguous));
             return py::array(tensor->dims(), data, free_when_done);
         }
-        case TensorType::uint16: {
+        case sr_tensor_uint16: {
             uint16_t* data = reinterpret_cast<uint16_t*>(
-                tensor->data_view(MemoryLayout::contiguous));
+                tensor->data_view(sr_layout_contiguous));
             return py::array(tensor->dims(), data, free_when_done);
         }
-        case TensorType::uint8: {
+        case sr_tensor_uint8: {
             uint8_t* data = reinterpret_cast<uint8_t*>(
-                tensor->data_view(MemoryLayout::contiguous));
+                tensor->data_view(sr_layout_contiguous));
             return py::array(tensor->dims(), data, free_when_done);
         }
         default :
@@ -132,54 +135,54 @@ py::array PyDataset::get_tensor(const std::string& name) {
     }
 }
 
-void PyDataset::add_meta_scalar(const std::string& name, py::array data, std::string& type) {
-
+void PyDataset::add_meta_scalar(const std::string& name, py::array data, std::string& type)
+{
   auto buffer = data.request();
   void* ptr = buffer.ptr;
 
-  MetaDataType ttype = METADATA_TYPE_MAP.at(type);
+  SRMetaDataType ttype = METADATA_TYPE_MAP.at(type);
   _dataset->add_meta_scalar(name, ptr, ttype);
 }
 
-void PyDataset::add_meta_string(const std::string& name, const std::string& data) {
-
+void PyDataset::add_meta_string(const std::string& name, const std::string& data)
+{
   _dataset->add_meta_string(name, data);
 }
 
-py::array PyDataset::get_meta_scalars(const std::string& name) {
-
-  MetaDataType type = MetaDataType::invalid;
+py::array PyDataset::get_meta_scalars(const std::string& name)
+{
+  SRMetaDataType type = sr_meta_invalid;
   size_t length = 0;
   void *ptr = NULL;
   _dataset->get_meta_scalars(name, ptr, length, type);
 
   // detect data type
   switch (type) {
-    case MetaDataType::dbl: {
+    case sr_meta_dbl: {
       double* data = reinterpret_cast<double*>(ptr);
       return py::array(length, data, py::none());
     }
-    case MetaDataType::flt: {
+    case sr_meta_flt: {
       float* data = reinterpret_cast<float*>(ptr);
       return py::array(length, data, py::none());
     }
-    case MetaDataType::int32: {
+    case sr_meta_int32: {
       int32_t* data = reinterpret_cast<int32_t*>(ptr);
       return py::array(length, data, py::none());
     }
-    case MetaDataType::int64: {
+    case sr_meta_int64: {
       int64_t* data = reinterpret_cast<int64_t*>(ptr);
       return py::array(length, data, py::none());
     }
-    case MetaDataType::uint32: {
+    case sr_meta_uint32: {
       uint32_t* data = reinterpret_cast<uint32_t*>(ptr);
       return py::array(length, data, py::none());
     }
-    case MetaDataType::uint64: {
+    case sr_meta_uint64: {
       uint64_t* data = reinterpret_cast<uint64_t*>(ptr);
       return py::array(length, data, py::none());
     }
-    case MetaDataType::string: {
+    case sr_meta_string: {
       throw smart_runtime_error("MetaData is of type string. Use get_meta_strings method.");
     }
     default :
@@ -188,12 +191,13 @@ py::array PyDataset::get_meta_scalars(const std::string& name) {
   }
 }
 
-std::string PyDataset::get_name() {
-    return this->_dataset->name;
+std::string PyDataset::get_name()
+{
+    return _dataset->name;
 }
 
-py::list PyDataset::get_meta_strings(const std::string& name) {
-
+py::list PyDataset::get_meta_strings(const std::string& name)
+{
   // We return a copy
   return py::cast(_dataset->get_meta_strings(name));
 }

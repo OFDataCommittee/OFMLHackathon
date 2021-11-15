@@ -51,7 +51,7 @@ typedef int8_t type_t;
 *   \param buf The metadata buffer
 *   \return The MetaDataType embedded in the buffer
 */
-extern inline MetaDataType get_type(const std::string_view& buf)
+extern inline SRMetaDataType get_type(const std::string_view& buf)
 {
     if (buf.size() < sizeof(type_t))
         throw smart_runtime_error("The MetadataField type cannot "\
@@ -60,7 +60,7 @@ extern inline MetaDataType get_type(const std::string_view& buf)
                                   "characters.");
 
     type_t* data = (type_t*)(buf.data());
-    return (MetaDataType)(*data);
+    return (SRMetaDataType)(*data);
 }
 
 /*!
@@ -194,7 +194,7 @@ extern inline std::string read_string(void* buf,
 *   \return std::string of the serialized data
 */
 template <typename T>
-extern inline std::string generate_scalar_buf(MetaDataType type,
+extern inline std::string generate_scalar_buf(SRMetaDataType type,
                                               const std::vector<T>& data)
 {
     /*
@@ -275,7 +275,7 @@ extern inline std::string generate_string_buf(
     size_t pos = 0;
 
     // Add the type ID
-    type_t type_id = (type_t)MetaDataType::string;
+    type_t type_id = (type_t)sr_meta_string;
     n_bytes = sizeof(type_t);
     add_buf_data(buf, pos, &type_id, n_bytes);
     pos += n_bytes;
@@ -315,7 +315,7 @@ extern inline std::vector<std::string> unpack_string_buf(
 
     type_t type = read<type_t>(data, byte_position, total_bytes);
 
-    if (type!=(type_t)MetaDataType::string)
+    if (type != (type_t)sr_meta_string)
         throw smart_runtime_error("The buffer string metadata type "\
                                   "does not contain the expected "\
                                   "type of string.");

@@ -101,8 +101,8 @@ class TensorPack
         void add_tensor(const std::string& name,
                         void* data,
                         const std::vector<size_t>& dims,
-                        const TensorType type,
-                        const MemoryLayout mem_layout);
+                        const SRTensorType type,
+                        const SRMemoryLayout mem_layout);
 
         /*!
         *   \brief Method to add a tensor object that has

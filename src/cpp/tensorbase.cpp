@@ -36,8 +36,8 @@ using namespace SmartRedis;
 TensorBase::TensorBase(const std::string& name,
                        void* data,
                        const std::vector<size_t>& dims,
-                       const TensorType type,
-                       const MemoryLayout mem_layout)
+                       const SRTensorType type,
+                       const SRMemoryLayout mem_layout)
 {
     /* The TensorBase constructor makes a copy of the
     name, type, and dims associated with the tensor.
@@ -61,7 +61,7 @@ TensorBase::TensorBase(const TensorBase& tb)
     // deep copy of tensor data
     _dims = std::vector<size_t>(tb._dims);
     _name = std::string(tb._name);
-    _type = TensorType(tb._type);
+    _type = SRTensorType(tb._type);
 }
 
 // TensorBase move constructor
@@ -145,7 +145,7 @@ std::string TensorBase::name()
 }
 
 // Retrieve the tensor type.
-TensorType TensorBase::type()
+SRTensorType TensorBase::type()
 {
    return _type;
 }

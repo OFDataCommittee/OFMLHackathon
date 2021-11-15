@@ -63,7 +63,7 @@ std::vector<size_t> GetTensorCommand::get_dims(CommandReply& reply)
 }
 
 // Returns a string of the tensor type
-TensorType GetTensorCommand::get_data_type(CommandReply& reply)
+SRTensorType GetTensorCommand::get_data_type(CommandReply& reply)
 {
     if (reply.n_elements() < num_elements) {
         throw smart_runtime_error("The message does not have the correct "\

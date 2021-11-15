@@ -32,9 +32,7 @@
 ///@file
 ///\brief C-wrappers for the C++ DataSet class
 #include "dataset.h"
-#include "enums/c_memory_layout.h"
-#include "enums/c_tensor_type.h"
-#include "enums/c_metadata_type.h"
+#include "sr_enums.h"
 #include "srexception.h"
 
 #ifdef __cplusplus
@@ -79,8 +77,8 @@ SRError add_tensor(void* dataset,
                    void* data,
                    const size_t* dims,
                    const size_t n_dims,
-                   const CTensorType type,
-                   const CMemoryLayout mem_layout);
+                   const SRTensorType type,
+                   const SRMemoryLayout mem_layout);
 
 /*!
 *   \brief Add metadata scalar field (non-string) with value to the DataSet.  If
@@ -98,7 +96,7 @@ SRError add_meta_scalar(void* dataset,
                         const char* name,
                         const size_t name_length,
                         const void* data,
-                        const CMetaDataType type);
+                        const SRMetaDataType type);
 
 
 /*!
@@ -150,8 +148,8 @@ SRError get_dataset_tensor(void* dataset,
                            void** data,
                            size_t** dims,
                            size_t* n_dims,
-                           CTensorType* type,
-                           const CMemoryLayout mem_layout);
+                           SRTensorType* type,
+                           const SRMemoryLayout mem_layout);
 
 /*!
 *   \brief Get tensor data and fill an already allocated array memory space
@@ -176,8 +174,8 @@ SRError unpack_dataset_tensor(void* dataset,
                               void* data,
                               const size_t* dims,
                               const size_t n_dims,
-                              const CTensorType type,
-                              const CMemoryLayout mem_layout);
+                              const SRTensorType type,
+                              const SRMemoryLayout mem_layout);
 
 /*!
 *   \brief Get the metadata scalar field values from the DataSet.  The data
@@ -199,7 +197,7 @@ SRError get_meta_scalars(void* dataset,
                          const char* name,
                          const size_t name_length,
                          size_t* length,
-                         CMetaDataType* type,
+                         SRMetaDataType* type,
                          void** scalar_data);
 
 

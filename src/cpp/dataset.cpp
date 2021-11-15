@@ -43,8 +43,8 @@ DataSet::DataSet(const std::string& _name)
 void DataSet::add_tensor(const std::string& name,
                          void* data,
                          const std::vector<size_t>& dims,
-                         const TensorType type,
-                         MemoryLayout mem_layout)
+                         const SRTensorType type,
+                         SRMemoryLayout mem_layout)
 {
     _add_to_tensorpack(name, data, dims, type, mem_layout);
     _metadata.add_string(".tensor_names", name);
@@ -55,7 +55,7 @@ void DataSet::add_tensor(const std::string& name,
 // the value will be appended to existing field.
 void DataSet::add_meta_scalar(const std::string& name,
                               const void* data,
-                              const MetaDataType type)
+                              const SRMetaDataType type)
 {
     _metadata.add_scalar(name, data, type);
 }
@@ -75,8 +75,8 @@ void DataSet::add_meta_string(const std::string& name,
 void DataSet::get_tensor(const std::string& name,
                          void*& data,
                          std::vector<size_t>& dims,
-                         TensorType& type,
-                         MemoryLayout mem_layout)
+                         SRTensorType& type,
+                         SRMemoryLayout mem_layout)
 {
     _enforce_tensor_exists(name);
     // Clone the tensor in the DataSet
@@ -97,8 +97,8 @@ void DataSet::get_tensor(const std::string&  name,
                          void*& data,
                          size_t*& dims,
                          size_t& n_dims,
-                         TensorType& type,
-                         MemoryLayout mem_layout)
+                         SRTensorType& type,
+                         SRMemoryLayout mem_layout)
 {
     std::vector<size_t> dims_vec;
     get_tensor(name, data, dims_vec, type, mem_layout);
@@ -122,8 +122,8 @@ void DataSet::get_tensor(const std::string&  name,
 void DataSet::unpack_tensor(const std::string& name,
                             void* data,
                             const std::vector<size_t>& dims,
-                            const TensorType type,
-                            MemoryLayout mem_layout)
+                            const SRTensorType type,
+                            SRMemoryLayout mem_layout)
 {
     _enforce_tensor_exists(name);
     _tensorpack.get_tensor(name)->fill_mem_space(data, dims, mem_layout);
@@ -137,7 +137,7 @@ void DataSet::unpack_tensor(const std::string& name,
 void DataSet::get_meta_scalars(const std::string& name,
                                void*& data,
                                size_t& length,
-                               MetaDataType& type)
+                               SRMetaDataType& type)
 {
     _metadata.get_scalar_values(name, data, length, type);
 }
@@ -186,7 +186,7 @@ std::vector<std::string> DataSet::get_meta_strings(const std::string& name)
 }
 
 // Get the Tensor type of the Tensor
-TensorType DataSet::get_tensor_type(const std::string& name)
+SRTensorType DataSet::get_tensor_type(const std::string& name)
 {
     return _tensorpack.get_tensor(name)->type();
 }
@@ -195,8 +195,8 @@ TensorType DataSet::get_tensor_type(const std::string& name)
 void DataSet::_add_to_tensorpack(const std::string& name,
                                  void* data,
                                  const std::vector<size_t>& dims,
-                                 const TensorType type,
-                                 const MemoryLayout mem_layout)
+                                 const SRTensorType type,
+                                 const SRMemoryLayout mem_layout)
 {
     _tensorpack.add_tensor(name, data, dims, type, mem_layout);
 }

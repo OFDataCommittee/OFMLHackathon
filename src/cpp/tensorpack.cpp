@@ -64,8 +64,8 @@ TensorPack::~TensorPack()
 void TensorPack::add_tensor(const std::string& name,
                             void* data,
                             const std::vector<size_t>& dims,
-                            const TensorType type,
-                            const MemoryLayout mem_layout)
+                            const SRTensorType type,
+                            const SRMemoryLayout mem_layout)
 {
     // Check if it's already present
     if (tensor_exists(name)) {
@@ -77,28 +77,28 @@ void TensorPack::add_tensor(const std::string& name,
     TensorBase* ptr = NULL;
     try {
         switch (type) {
-            case TensorType::dbl:
+            case sr_tensor_dbl:
                 ptr = new Tensor<double>(name, data, dims, type, mem_layout);
                 break;
-            case TensorType::flt:
+            case sr_tensor_flt:
                 ptr = new Tensor<float>(name, data, dims, type, mem_layout);
                 break;
-            case TensorType::int64:
+            case sr_tensor_int64:
                 ptr = new Tensor<int64_t>(name, data, dims, type, mem_layout);
                 break;
-            case TensorType::int32:
+            case sr_tensor_int32:
                 ptr = new Tensor<int32_t>(name, data, dims, type, mem_layout);
                 break;
-            case TensorType::int16:
+            case sr_tensor_int16:
                 ptr = new Tensor<int16_t>(name, data, dims, type, mem_layout);
                 break;
-            case TensorType::int8:
+            case sr_tensor_int8:
                 ptr = new Tensor<int8_t>(name, data, dims, type, mem_layout);
                 break;
-            case TensorType::uint16:
+            case sr_tensor_uint16:
                 ptr = new Tensor<uint16_t>(name, data, dims, type, mem_layout);
                 break;
-            case TensorType::uint8:
+            case sr_tensor_uint8:
                 ptr = new Tensor<uint8_t>(name, data, dims, type, mem_layout);
                 break;
             default:

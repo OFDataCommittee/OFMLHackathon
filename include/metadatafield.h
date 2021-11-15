@@ -31,7 +31,7 @@
 
 #include <vector>
 #include <string>
-#include "enums/cpp_metadata_type.h"
+#include "sr_enums.h"
 
 namespace SmartRedis {
 
@@ -50,7 +50,7 @@ class MetadataField {
     *   \param name The name used to reference the metadata field
     *   \param MetaDataType The metadata type for this field
     */
-    MetadataField(const std::string& name, MetaDataType type);
+    MetadataField(const std::string& name, SRMetaDataType type);
 
     /*!
     *   \brief Default MetadataField destructor
@@ -73,7 +73,7 @@ class MetadataField {
     *   \brief Retrieve the Metadatafield type
     *   \returns MetadataField type
     */
-    MetaDataType type();
+    SRMetaDataType type();
 
     /*!
     *   \brief Retrieve the number of values in the field
@@ -96,7 +96,7 @@ class MetadataField {
     /*!
     *   \brief The field type.
     */
-    MetaDataType _type;
+    SRMetaDataType _type;
 
 };
 

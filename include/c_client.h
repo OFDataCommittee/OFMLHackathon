@@ -33,8 +33,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "client.h"
-#include "enums/c_memory_layout.h"
-#include "enums/c_tensor_type.h"
+#include "sr_enums.h"
 #include "srexception.h"
 
 #ifdef __cplusplus
@@ -150,8 +149,8 @@ SRError put_tensor(void* c_client,
                    void* data,
                    const size_t* dims,
                    const size_t n_dims,
-                   CTensorType type,
-                   CMemoryLayout mem_layout);
+                   SRTensorType type,
+                   SRMemoryLayout mem_layout);
 
 /*!
 *   \brief Get a tensor from the database.  This method will allocate memory
@@ -179,8 +178,8 @@ SRError get_tensor(void* c_client,
                    void** data,
                    size_t** dims,
                    size_t* n_dims,
-                   CTensorType* type,
-                   CMemoryLayout mem_layout);
+                   SRTensorType* type,
+                   SRMemoryLayout mem_layout);
 /*!
 *   \brief Get a tensor from the database and fill the provided memory space
 *          (result) that is layed out as defined by dims
@@ -201,8 +200,8 @@ SRError unpack_tensor(void* c_client,
                      void* result,
                      const size_t* dims,
                      const size_t n_dims,
-                     CTensorType type,
-                     CMemoryLayout mem_layout);
+                     SRTensorType type,
+                     SRMemoryLayout mem_layout);
 
 /*!
 *   \brief Move a tensor to a new key

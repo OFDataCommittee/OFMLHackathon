@@ -196,12 +196,9 @@ CommandReply Redis::copy_tensor(const std::string& src_key,
     }
 
     // Decode the tensor
-    std::vector<size_t> dims =
-        cmd_get.get_dims(cmd_get_reply);
-    std::string_view blob =
-        cmd_get.get_data_blob(cmd_get_reply);
-    TensorType type =
-        cmd_get.get_data_type(cmd_get_reply);
+    std::vector<size_t> dims = cmd_get.get_dims(cmd_get_reply);
+    std::string_view blob = cmd_get.get_data_blob(cmd_get_reply);
+    SRTensorType type = cmd_get.get_data_type(cmd_get_reply);
 
     // Build a PUT command to send the tensor back to the database
     // under the new key

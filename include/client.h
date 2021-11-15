@@ -47,8 +47,7 @@
 #include "commandreply.h"
 #include "tensorbase.h"
 #include "tensor.h"
-#include "enums/cpp_tensor_type.h"
-#include "enums/cpp_memory_layout.h"
+#include "sr_enums.h"
 
 ///@file
 
@@ -160,8 +159,8 @@ class Client
         void put_tensor(const std::string& key,
                         void* data,
                         const std::vector<size_t>& dims,
-                        const TensorType type,
-                        const MemoryLayout mem_layout);
+                        const SRTensorType type,
+                        const SRMemoryLayout mem_layout);
 
         /*!
         *   \brief Get the tensor data, dimensions,
@@ -195,8 +194,8 @@ class Client
         void get_tensor(const std::string& key,
                         void*& data,
                         std::vector<size_t>& dims,
-                        TensorType& type,
-                        const MemoryLayout mem_layout);
+                        SRTensorType& type,
+                        const SRMemoryLayout mem_layout);
 
 
         /*!
@@ -237,8 +236,8 @@ class Client
                         void*& data,
                         size_t*& dims,
                         size_t& n_dims,
-                        TensorType& type,
-                        const MemoryLayout mem_layout);
+                        SRTensorType& type,
+                        const SRMemoryLayout mem_layout);
 
         /*!
         *   \brief Get tensor data and fill an already allocated
@@ -260,8 +259,8 @@ class Client
         void unpack_tensor(const std::string& key,
                            void* data,
                            const std::vector<size_t>& dims,
-                           const TensorType type,
-                           const MemoryLayout mem_layout);
+                           const SRTensorType type,
+                           const SRMemoryLayout mem_layout);
 
         /*!
         *   \brief Move a tensor from one key to another key

@@ -31,7 +31,7 @@
 
 // ScalarField constructor
 template <class T>
-ScalarField<T>::ScalarField(const std::string& name, MetaDataType type)
+ScalarField<T>::ScalarField(const std::string& name, SRMetaDataType type)
   : MetadataField(name, type)
 {
     // NOP
@@ -40,7 +40,7 @@ ScalarField<T>::ScalarField(const std::string& name, MetaDataType type)
 // ScalarField constructor with data values
 template <class T>
 ScalarField<T>::ScalarField(const std::string& name,
-                            MetaDataType type,
+                            SRMetaDataType type,
                             const std::vector<T>& vals)
     : MetadataField(name, type)
 {
@@ -50,7 +50,7 @@ ScalarField<T>::ScalarField(const std::string& name,
 // ScalarField move constructor with data values
 template <class T>
 ScalarField<T>::ScalarField(const std::string& name,
-                            MetaDataType type,
+                            SRMetaDataType type,
                             std::vector<T>&& vals)
     : MetadataField(name, type)
 {

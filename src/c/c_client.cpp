@@ -250,14 +250,14 @@ SRError put_tensor(void* c_client,
                   void* data,
                   const size_t* dims,
                   const size_t n_dims,
-                  const CTensorType type,
-                  const CMemoryLayout mem_layout)
+                  const SRTensorType type,
+                  const SRMemoryLayout mem_layout)
 {
   SRError result = sr_ok;
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && 
+    SR_CHECK_PARAMS(c_client != NULL && key != NULL &&
                     data != NULL && dims != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
@@ -266,9 +266,7 @@ SRError put_tensor(void* c_client,
     std::vector<size_t> dims_vec;
     dims_vec.assign(dims, dims + n_dims);
 
-    s->put_tensor(key_str, data, dims_vec,
-                  convert_tensor_type(type),
-                  convert_layout(mem_layout));
+    s->put_tensor(key_str, data, dims_vec, type, mem_layout);
   }
   catch (const smart_error& e) {
     sr_set_last_error(e);
@@ -290,8 +288,8 @@ SRError get_tensor(void* c_client,
                   void** result,
                   size_t** dims,
                   size_t* n_dims,
-                  CTensorType* type,
-                  const CMemoryLayout mem_layout)
+                  SRTensorType* type,
+                  const SRMemoryLayout mem_layout)
 {
   SRError outcome = sr_ok;
   try
@@ -303,11 +301,7 @@ SRError get_tensor(void* c_client,
     Client* s = reinterpret_cast<Client*>(c_client);
     std::string key_str(key, key_length);
 
-    TensorType t_type;
-    s->get_tensor(key_str, *result, *dims, *n_dims,
-                  t_type, convert_layout(mem_layout));
-
-    *type = convert_tensor_type(t_type);
+    s->get_tensor(key_str, *result, *dims, *n_dims, *type, mem_layout);
   }
   catch (const smart_error& e) {
     sr_set_last_error(e);
@@ -330,8 +324,8 @@ SRError unpack_tensor(void* c_client,
                      void* result,
                      const size_t* dims,
                      const size_t n_dims,
-                     const CTensorType type,
-                     const CMemoryLayout mem_layout)
+                     const SRTensorType type,
+                     const SRMemoryLayout mem_layout)
 {
   SRError outcome = sr_ok;
   try
@@ -346,9 +340,7 @@ SRError unpack_tensor(void* c_client,
     std::vector<size_t> dims_vec;
     dims_vec.assign(dims, dims + n_dims);
 
-    s->unpack_tensor(key_str, result, dims_vec,
-                    convert_tensor_type(type),
-                    convert_layout(mem_layout));
+    s->unpack_tensor(key_str, result, dims_vec, type, mem_layout);
   }
   catch (const smart_error& e) {
     sr_set_last_error(e);

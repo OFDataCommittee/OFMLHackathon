@@ -78,10 +78,10 @@ void PyClient::put_tensor(std::string& key,
         dims[i] = (size_t)buffer.shape[i];
     }
 
-    TensorType ttype = TENSOR_TYPE_MAP.at(type);
+    SRTensorType ttype = TENSOR_TYPE_MAP.at(type);
 
     try {
-        _client->put_tensor(key, ptr, dims, ttype, MemoryLayout::contiguous);
+        _client->put_tensor(key, ptr, dims, ttype, sr_layout_contiguous);
     }
     catch(const std::exception& e) {
         throw smart_runtime_error(e.what());
@@ -115,44 +115,44 @@ py::array PyClient::get_tensor(const std::string& key)
 
     // detect data type
     switch (tensor->type()) {
-        case TensorType::dbl: {
+        case sr_tensor_dbl: {
             double* data = reinterpret_cast<double*>(tensor->data_view(
-                MemoryLayout::contiguous));
+                sr_layout_contiguous));
             return py::array(tensor->dims(), data, free_when_done);
         }
-        case TensorType::flt: {
+        case sr_tensor_flt: {
             float* data = reinterpret_cast<float*>(tensor->data_view(
-                MemoryLayout::contiguous));
+                sr_layout_contiguous));
             return py::array(tensor->dims(), data, free_when_done);
         }
-        case TensorType::int64: {
+        case sr_tensor_int64: {
             int64_t* data = reinterpret_cast<int64_t*>(tensor->data_view(
-                MemoryLayout::contiguous));
+                sr_layout_contiguous));
             return py::array(tensor->dims(), data, free_when_done);
         }
-        case TensorType::int32: {
+        case sr_tensor_int32: {
             int32_t* data = reinterpret_cast<int32_t*>(tensor->data_view(
-                MemoryLayout::contiguous));
+                sr_layout_contiguous));
             return py::array(tensor->dims(), data, free_when_done);
         }
-        case TensorType::int16: {
+        case sr_tensor_int16: {
             int16_t* data = reinterpret_cast<int16_t*>(tensor->data_view(
-                MemoryLayout::contiguous));
+                sr_layout_contiguous));
             return py::array(tensor->dims(), data, free_when_done);
         }
-        case TensorType::int8: {
+        case sr_tensor_int8: {
             int8_t* data = reinterpret_cast<int8_t*>(tensor->data_view(
-                MemoryLayout::contiguous));
+                sr_layout_contiguous));
             return py::array(tensor->dims(), data, free_when_done);
         }
-        case TensorType::uint16: {
+        case sr_tensor_uint16: {
             uint16_t* data = reinterpret_cast<uint16_t*>(tensor->data_view(
-                MemoryLayout::contiguous));
+                sr_layout_contiguous));
             return py::array(tensor->dims(), data, free_when_done);
         }
-        case TensorType::uint8: {
+        case sr_tensor_uint8: {
             uint8_t* data = reinterpret_cast<uint8_t*>(tensor->data_view(
-                MemoryLayout::contiguous));
+                sr_layout_contiguous));
             return py::array(tensor->dims(), data, free_when_done);
         }
         default :
