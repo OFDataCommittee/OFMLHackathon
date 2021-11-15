@@ -20,25 +20,16 @@ def get_test_names():
     #test_names = [("build/test", "unit_tests")]
     return test_names
 
-def get_run_command():
-    """Get run command for specific platform"""
-    if which("aprun"):
-        return [which("aprun"), "--pes", f"{RANKS}"]
-    if which("srun"):
-        return [which("srun"), "-n", f"{RANKS}"]
-    if which("mpirun"):
-        return [which("mpirun"), "-np", f"{RANKS}"]
-    raise ModuleNotFoundError("mpirun is not installed (hint: install open-mpi)")
 
 @pytest.mark.parametrize("test", get_test_names())
 def test_unit_cpp_client(test, use_cluster):
-    cmd = get_run_command()
+    cmd = []
     cmd.append(test)
     print(f"Running test: {osp.basename(test)}")
     print(f"Test command {' '.join(cmd)}")
     print(f"Using cluster: {use_cluster}")
     execute_cmd(cmd)
-    time.sleep(2)
+    time.sleep(1)
 
 def execute_cmd(cmd_list):
     """Execute a command """

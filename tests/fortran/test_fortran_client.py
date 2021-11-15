@@ -18,15 +18,6 @@ def get_test_names():
                                 id=osp.basename(test))) for test in test_names]
     return test_names
 
-def get_run_command():
-    """Get run command for specific platform"""
-    if which("aprun"):
-        return [which("aprun"), "--pes", f"{RANKS}"]
-    if which("srun"):
-        return [which("srun"), "-n", f"{RANKS}"]
-    if which("mpirun"):
-        return [which("mpirun"), "-np", f"{RANKS}"]
-    raise ModuleNotFoundError("mpirun is not installed (hint: install open-mpi)")
 
 @pytest.mark.parametrize("test", get_test_names())
 def test_fortran_client(test):
@@ -36,12 +27,12 @@ def test_fortran_client(test):
     :param test: a path to a test to run
     :type test: str
     """
-    cmd = get_run_command()
+    cmd = []
     cmd.append(test)
     print(f"Running test: {osp.basename(test)}")
     print(f"Test command {' '.join(cmd)}")
     execute_cmd(cmd)
-    time.sleep(2)
+    time.sleep(1)
 
 def execute_cmd(cmd_list):
     """Execute a command """
@@ -74,4 +65,3 @@ def execute_cmd(cmd_list):
         print("OUTPUT:", output.decode("utf-8"))
         print("ERROR:", errs.decode("utf-8"))
         assert(False)
-
