@@ -35,7 +35,7 @@ template <typename T_send, typename T_recv>
 void get_multiple_tensors(
 		    void (*fill_array)(T_send***, int, int, int),
 		    std::vector<size_t> dims,
-            SmartRedis::TensorType type,
+            SRTensorType type,
             std::string key_suffix,
             std::string dataset_name)
 {
@@ -63,12 +63,9 @@ void get_multiple_tensors(
     std::string t_name_2 = "tensor_2";
     std::string t_name_3 = "tensor_3";
 
-    sent_dataset.add_tensor(t_name_1, t_send_1,
-                        dims, type, SmartRedis::MemoryLayout::nested);
-    sent_dataset.add_tensor(t_name_2, t_send_2,
-                        dims, type, SmartRedis::MemoryLayout::nested);
-    sent_dataset.add_tensor(t_name_3, t_send_3,
-                        dims, type, SmartRedis::MemoryLayout::nested);
+    sent_dataset.add_tensor(t_name_1, t_send_1, dims, type, sr_layout_nested);
+    sent_dataset.add_tensor(t_name_2, t_send_2, dims, type, sr_layout_nested);
+    sent_dataset.add_tensor(t_name_3, t_send_3, dims, type, sr_layout_nested);
 
     //Put the DataSet into the database
     client.put_dataset(sent_dataset);
@@ -102,11 +99,11 @@ void get_multiple_tensors(
     //tensors retrievals.
     double*** r_t1_data;
     std::vector<size_t> r_t1_dims;
-    SmartRedis::TensorType r_t1_type;
+    SRTensorType r_t1_type = sr_tensor_invalid;
 
     retrieved_dataset.get_tensor(t_name_1, (void*&)r_t1_data,
                                  r_t1_dims, r_t1_type,
-                                 SmartRedis::MemoryLayout::nested);
+                                 sr_layout_nested);
 
     for(size_t i=0; i<r_t1_dims[0]; i++)
         for(size_t j=0; j<r_t1_dims[1]; j++)
@@ -115,27 +112,25 @@ void get_multiple_tensors(
 
     double*** r_t2_data;
     std::vector<size_t> r_t2_dims;
-    SmartRedis::TensorType r_t2_type;
+    SRTensorType r_t2_type = sr_tensor_invalid;
 
     retrieved_dataset.get_tensor(t_name_1, (void*&)r_t2_data,
                                  r_t2_dims, r_t2_type,
-                                 SmartRedis::MemoryLayout::nested);
+                                 sr_layout_nested);
 
     assert(is_equal_3D_array(t_send_1, r_t2_data, dims[0], dims[1], dims[2]));
     assert(!is_equal_3D_array(r_t1_data, r_t2_data, dims[0], dims[1], dims[2]));
-
-    return;
 }
 
-int main(int argc, char* argv[]) {
-
+int main(int argc, char* argv[])
+{
     //Declare the dimensions for the 3D arrays
     std::vector<size_t> dims{5,4,17};
 
     std::string dataset_name = "dataset_multiple_gets";
     get_multiple_tensors<double,double>(
                     &set_3D_array_floating_point_values<double>,
-                    dims, SmartRedis::TensorType::dbl,
+                    dims, sr_tensor_dbl,
                     "_dbl", dataset_name);
 
     return 0;

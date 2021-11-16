@@ -35,7 +35,7 @@ template <typename T_send, typename T_recv>
 void rename_dataset(
 		    void (*fill_array)(T_send***, int, int, int),
 		    std::vector<size_t> dims,
-            SmartRedis::TensorType type,
+            SRTensorType type,
             std::string key_suffix,
             std::string dataset_name)
 {
@@ -63,12 +63,9 @@ void rename_dataset(
     std::string t_name_2 = "tensor_2";
     std::string t_name_3 = "tensor_3";
 
-    sent_dataset.add_tensor(t_name_1, t_send_1,
-                        dims, type, SmartRedis::MemoryLayout::nested);
-    sent_dataset.add_tensor(t_name_2, t_send_2,
-                        dims, type, SmartRedis::MemoryLayout::nested);
-    sent_dataset.add_tensor(t_name_3, t_send_3,
-                        dims, type, SmartRedis::MemoryLayout::nested);
+    sent_dataset.add_tensor(t_name_1, t_send_1, dims, type, sr_layout_nested);
+    sent_dataset.add_tensor(t_name_2, t_send_2, dims, type, sr_layout_nested);
+    sent_dataset.add_tensor(t_name_3, t_send_3, dims, type, sr_layout_nested);
 
     //Put the DataSet into the database
     client.put_dataset(sent_dataset);
@@ -126,8 +123,6 @@ void rename_dataset(
 
     //Check that the metadata values are correct for the metadata
     DATASET_TEST_UTILS::check_dataset_metadata(retrieved_dataset);
-
-    return;
 }
 
 int main(int argc, char* argv[]) {
@@ -140,7 +135,7 @@ int main(int argc, char* argv[]) {
   dataset_name = "3D_dbl_dataset_rank";
   rename_dataset<double,double>(
 				  &set_3D_array_floating_point_values<double>,
-				  dims, SmartRedis::TensorType::dbl, "_dbl", dataset_name);
+				  dims, sr_tensor_dbl, "_dbl", dataset_name);
 
   return 0;
 }

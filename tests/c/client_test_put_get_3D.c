@@ -49,7 +49,7 @@ int put_get_3D_tensor(void* client,
                       void** result,
                       char* key_suffix,
                       size_t key_suffix_length,
-                      CTensorType type)
+                      SRTensorType type)
 {
   char* prefix_str = "3D_tensor_test";
 
@@ -66,11 +66,11 @@ int put_get_3D_tensor(void* client,
   pos += key_suffix_length;
   key[pos] = 0;
 
-  CTensorType g_type;
+  SRTensorType g_type;
   size_t* g_dims;
   size_t g_n_dims;
 
-  CMemoryLayout layout = c_nested;
+  SRMemoryLayout layout = sr_layout_nested;
   if (sr_ok != put_tensor(client, key, key_length,
                           (void*)tensor, dims, n_dims, type, layout)) {
     return -1;
@@ -140,7 +140,7 @@ int put_get_3D_tensor_double(size_t* dims, size_t n_dims,
   r_value = put_get_3D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_dbl);
+                              sr_tensor_dbl);
 
   for(size_t i=0; i<dims[0]; i++) {
     for(size_t j=0; j<dims[1]; j++) {
@@ -197,7 +197,7 @@ int put_get_3D_tensor_float(size_t* dims, size_t n_dims,
   r_value = put_get_3D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_flt);
+                              sr_tensor_flt);
 
   for(size_t i=0; i<dims[0]; i++) {
     for(size_t j=0; j<dims[1]; j++) {
@@ -258,7 +258,7 @@ int put_get_3D_tensor_i8(size_t* dims, size_t n_dims,
   r_value = put_get_3D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_int8);
+                              sr_tensor_int8);
   for(size_t i=0; i<dims[0]; i++) {
     for(size_t j=0; j<dims[1]; j++) {
       for(size_t k=0; k<dims[2]; k++) {
@@ -318,7 +318,7 @@ int put_get_3D_tensor_i16(size_t* dims, size_t n_dims,
   r_value = put_get_3D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_int16);
+                              sr_tensor_int16);
 
   for(size_t i=0; i<dims[0]; i++) {
     for(size_t j=0; j<dims[1]; j++) {
@@ -379,7 +379,7 @@ int put_get_3D_tensor_i32(size_t* dims, size_t n_dims,
   r_value = put_get_3D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_int32);
+                              sr_tensor_int32);
 
   for(size_t i=0; i<dims[0]; i++) {
     for(size_t j=0; j<dims[1]; j++) {
@@ -440,7 +440,7 @@ int put_get_3D_tensor_i64(size_t* dims, size_t n_dims,
   r_value = put_get_3D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_int64);
+                              sr_tensor_int64);
 
   for(size_t i=0; i<dims[0]; i++) {
     for(size_t j=0; j<dims[1]; j++) {
@@ -501,7 +501,7 @@ int put_get_3D_tensor_ui8(size_t* dims, size_t n_dims,
   r_value = put_get_3D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_uint8);
+                              sr_tensor_uint8);
 
   for(size_t i=0; i<dims[0]; i++) {
     for(size_t j=0; j<dims[1]; j++) {
@@ -562,7 +562,7 @@ int put_get_3D_tensor_ui16(size_t* dims, size_t n_dims,
   r_value = put_get_3D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_uint16);
+                              sr_tensor_uint16);
 
   for(size_t i=0; i<dims[0]; i++) {
     for(size_t j=0; j<dims[1]; j++) {

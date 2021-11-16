@@ -35,7 +35,7 @@ template <typename T_send, typename T_recv>
 void put_get_dataset(
 		    void (*fill_array)(T_send***, int, int, int),
 		    std::vector<size_t> dims,
-            SmartRedis::TensorType type,
+            SRTensorType type,
             std::string key_suffix,
             std::string dataset_name)
 {
@@ -60,12 +60,9 @@ void put_get_dataset(
     std::string t_name_2 = "tensor_2";
     std::string t_name_3 = "tensor_3";
 
-    sent_dataset.add_tensor(t_name_1, t_send_1,
-                        dims, type, SmartRedis::MemoryLayout::nested);
-    sent_dataset.add_tensor(t_name_2, t_send_2,
-                        dims, type, SmartRedis::MemoryLayout::nested);
-    sent_dataset.add_tensor(t_name_3, t_send_3,
-                        dims, type, SmartRedis::MemoryLayout::nested);
+    sent_dataset.add_tensor(t_name_1, t_send_1, dims, type, sr_layout_nested);
+    sent_dataset.add_tensor(t_name_2, t_send_2, dims, type, sr_layout_nested);
+    sent_dataset.add_tensor(t_name_3, t_send_3, dims, type, sr_layout_nested);
 
     //Put the DataSet into the database
     client.put_dataset(sent_dataset);
@@ -89,8 +86,6 @@ void put_get_dataset(
     DATASET_TEST_UTILS::check_nested_3D_tensor(retrieved_dataset,
                                                t_name_3,
                                                type, t_send_3, dims);
-
-    return;
 }
 
 int main(int argc, char* argv[]) {
@@ -100,7 +95,7 @@ int main(int argc, char* argv[]) {
 
     put_get_dataset<double,double>(
                     &set_3D_array_floating_point_values<double>,
-                    dims, SmartRedis::TensorType::dbl,
+                    dims, sr_tensor_dbl,
                     "_dbl", "dataset_no_meta");
 
     return 0;

@@ -34,7 +34,7 @@ use iso_c_binding, only : c_int8_t, c_int16_t, c_int32_t, c_int64_t, c_float, c_
 
 implicit none
 
-#include "enums/enum_fortran.inc"
+#include "enum_fortran.inc"
 
 character(len=255) :: ensemble_keyout, ensemble_keyin
 character(len=255) :: tensor_key, model_key, script_key

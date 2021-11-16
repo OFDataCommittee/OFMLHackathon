@@ -109,7 +109,7 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
             // Add meta scalar to DataSet
             std::string meta_scalar_name = "dbl_field";
             const double dbl_meta = std::numeric_limits<double>::max();
-            MetaDataType meta_type = MetaDataType::dbl;
+            SRMetaDataType meta_type = sr_meta_dbl;
             dataset.add_meta_scalar(meta_scalar_name,
                                      &dbl_meta,
                                      meta_type);
@@ -117,11 +117,11 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
             // Add tensor to DataSet
             std::string tensor_name = "test_tensor";
             std::vector<size_t> dims = {1, 2, 3};
-            TensorType type = TensorType::flt;
+            SRTensorType type = sr_tensor_flt;
             size_t tensor_size = dims.at(0) * dims.at(1) * dims.at(2);
             std::vector<float> tensor(tensor_size, 2.0);
             void* data = tensor.data();
-            MemoryLayout mem_layout = MemoryLayout::contiguous;
+            SRMemoryLayout mem_layout = sr_layout_contiguous;
             dataset.add_tensor(tensor_name, data, dims, type, mem_layout);
 
             // Put the DataSet into the Client
@@ -184,7 +184,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
 
         AND_WHEN("Tensors of each type are created and put into the Client")
         {
-            MemoryLayout mem_layout = MemoryLayout::contiguous;
+            SRMemoryLayout mem_layout = sr_layout_contiguous;
             const int num_of_tensors = 8;
             std::vector<std::vector<size_t> > dims(num_of_tensors, {2, 1});
             size_t tensors_size = dims[0][0] * dims[0][1];
@@ -192,11 +192,11 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
                                               "int64_key", "int32_key",
                                               "int16_key", "int8_key",
                                               "uint16_key", "uint8_key"};
-            std::vector<TensorType> types =
-                {TensorType::dbl, TensorType::flt,
-                 TensorType::int64, TensorType::int32,
-                 TensorType::int16, TensorType::int8,
-                 TensorType::uint16, TensorType::uint8};
+            std::vector<SRTensorType> types =
+                {sr_tensor_dbl, sr_tensor_flt,
+                 sr_tensor_int64, sr_tensor_int32,
+                 sr_tensor_int16, sr_tensor_int8,
+                 sr_tensor_uint16, sr_tensor_uint8};
 
             std::vector<double> dbl_tensor =
                 {std::numeric_limits<double>::min(),
@@ -236,7 +236,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
 
             THEN("The Tensors can be retrieved")
             {
-                TensorType retrieved_type;
+                SRTensorType retrieved_type;
                 std::vector<void*> retrieved_datas(num_of_tensors);
                 std::vector<std::vector<size_t>>
                     retrieved_dims(num_of_tensors);
@@ -257,7 +257,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
                 std::vector<void*> retrieved_datas(num_of_tensors);
                 std::vector<size_t*> retrieved_dims(num_of_tensors);
                 std::vector<size_t> retrieved_n_dims(num_of_tensors);
-                TensorType retrieved_type;
+                SRTensorType retrieved_type;
 
                 // Get the tensors and ensure the correct data is retrieved
                 for(int i=0; i<num_of_tensors; i++) {
@@ -312,8 +312,8 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
                 // match the dimensions that were fetched)
                 CHECK_THROWS_AS(
                     client.unpack_tensor(keys[0], contig_retrieved_data,
-                                         dims[0], TensorType::dbl,
-                                         MemoryLayout::contiguous),
+                                         dims[0], sr_tensor_dbl,
+                                         sr_layout_contiguous),
                     _smart_runtime_error);
 
                 free(contig_retrieved_data);
@@ -332,7 +332,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
                 }
 
                 // Ensure the tensors were correctly migrated to their new name
-                TensorType retrieved_type;
+                SRTensorType retrieved_type;
                 std::vector<void*> retrieved_datas(num_of_tensors);
                 std::vector<std::vector<size_t>>
                     retrieved_dims(num_of_tensors);
@@ -370,7 +370,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
 
                 // ensure the copied tensors contain
                 // the correct data, dims, type
-                TensorType copied_type;
+                SRTensorType copied_type;
                 std::vector<void*> copied_datas(num_of_tensors);
                 std::vector<std::vector<size_t>> copied_dims(num_of_tensors);
 
@@ -388,7 +388,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
                 for(int i=0; i<num_of_tensors; i++)
                     client.delete_tensor("copied_" + keys[i]);
 
-                TensorType retrieved_type;
+                SRTensorType retrieved_type;
                 std::vector<void*> retrieved_datas(num_of_tensors);
                 std::vector<std::vector<size_t>>
                     retrieved_dims(num_of_tensors);

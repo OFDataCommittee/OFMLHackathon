@@ -35,7 +35,7 @@ template <typename T_send, typename T_recv>
 void put_get_2D_array(
 		    void (*fill_array)(T_send**, int, int),
 		    std::vector<size_t> dims,
-        SmartRedis::TensorType type,
+        SRTensorType type,
         std::string key_suffix="")
 {
 
@@ -46,8 +46,7 @@ void put_get_2D_array(
   T_recv** u_result = allocate_2D_array<T_recv>(dims[0], dims[1]);
   fill_array(array, dims[0], dims[1]);
 
-  std::string key = "2D_tensor_test" +
-                    key_suffix;
+  std::string key = "2D_tensor_test" + key_suffix;
 
   /*
   for(int i = 0; i < dims[0]; i++) {
@@ -59,10 +58,8 @@ void put_get_2D_array(
   }
   */
 
-  client.put_tensor(key, (void*)array, dims,
-                    type, SmartRedis::MemoryLayout::nested);
-  client.unpack_tensor(key, u_result, dims,
-                       type, SmartRedis::MemoryLayout::nested);
+  client.put_tensor(key, (void*)array, dims, type, sr_layout_nested);
+  client.unpack_tensor(key, u_result, dims, type, sr_layout_nested);
 
   /*
   for(int i = 0; i < dims[0]; i++) {
@@ -80,11 +77,10 @@ void put_get_2D_array(
 	  throw std::runtime_error("The results do not match for "\
 				                     "the 2D put and get test!");
 
-  SmartRedis::TensorType g_type;
+  SRTensorType g_type;
   std::vector<size_t> g_dims;
   void* g_result;
-  client.get_tensor(key, g_result, g_dims,
-                    g_type, SmartRedis::MemoryLayout::nested);
+  client.get_tensor(key, g_result, g_dims, g_type, sr_layout_nested);
   T_recv** g_type_result = (T_recv**)g_result;
 
   if(type!=g_type)
@@ -126,35 +122,35 @@ int main(int argc, char* argv[]) {
 
   put_get_2D_array<double,double>(
 				  &set_2D_array_floating_point_values<double>,
-				  dims, SmartRedis::TensorType::dbl, "_dbl");
+				  dims, sr_tensor_dbl, "_dbl");
 
   put_get_2D_array<float,float>(
 				&set_2D_array_floating_point_values<float>,
-				dims, SmartRedis::TensorType::flt, "_flt");
+				dims, sr_tensor_flt, "_flt");
 
   put_get_2D_array<int64_t,int64_t>(
 				    &set_2D_array_integral_values<int64_t>,
-				    dims, SmartRedis::TensorType::int64, "_i64");
+				    dims, sr_tensor_int64, "_i64");
 
   put_get_2D_array<int32_t,int32_t>(
 				    &set_2D_array_integral_values<int32_t>,
-				    dims, SmartRedis::TensorType::int32, "_i32");
+				    dims, sr_tensor_int32, "_i32");
 
   put_get_2D_array<int16_t,int16_t>(
 				      &set_2D_array_integral_values<int16_t>,
-				      dims, SmartRedis::TensorType::int16, "_i16");
+				      dims, sr_tensor_int16, "_i16");
 
   put_get_2D_array<int8_t,int8_t>(
 				      &set_2D_array_integral_values<int8_t>,
-				      dims, SmartRedis::TensorType::int8, "_i8");
+				      dims, sr_tensor_int8, "_i8");
 
   put_get_2D_array<uint16_t,uint16_t>(
 				      &set_2D_array_integral_values<uint16_t>,
-				      dims, SmartRedis::TensorType::uint16, "_ui16");
+				      dims, sr_tensor_uint16, "_ui16");
 
   put_get_2D_array<uint8_t,uint8_t>(
 				      &set_2D_array_integral_values<uint8_t>,
-				      dims, SmartRedis::TensorType::uint8, "_ui8");
+				      dims, sr_tensor_uint8, "_ui8");
 
   std::cout<<"2D put and get test complete."<<std::endl;
 

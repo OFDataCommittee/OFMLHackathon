@@ -33,7 +33,7 @@ program main
 
   implicit none
 
-#include "enums/enum_fortran.inc"
+#include "enum_fortran.inc"
 
   integer, parameter :: dim1 = 10
   integer, parameter :: dim2 = 20

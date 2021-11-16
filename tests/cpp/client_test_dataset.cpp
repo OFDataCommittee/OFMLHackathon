@@ -35,7 +35,7 @@ template <typename T_send, typename T_recv>
 void put_get_dataset(
 		    void (*fill_array)(T_send***, int, int, int),
 		    std::vector<size_t> dims,
-		    SmartRedis::TensorType type,
+		    SRTensorType type,
 		    std::string key_suffix,
 		    std::string dataset_name)
 {
@@ -63,12 +63,9 @@ void put_get_dataset(
     std::string t_name_2 = "tensor_2";
     std::string t_name_3 = "tensor_3";
 
-    sent_dataset.add_tensor(t_name_1, t_send_1,
-                        dims, type, SmartRedis::MemoryLayout::nested);
-    sent_dataset.add_tensor(t_name_2, t_send_2,
-                        dims, type, SmartRedis::MemoryLayout::nested);
-    sent_dataset.add_tensor(t_name_3, t_send_3,
-                        dims, type, SmartRedis::MemoryLayout::nested);
+    sent_dataset.add_tensor(t_name_1, t_send_1, dims, type, sr_layout_nested);
+    sent_dataset.add_tensor(t_name_2, t_send_2, dims, type, sr_layout_nested);
+    sent_dataset.add_tensor(t_name_3, t_send_3, dims, type, sr_layout_nested);
 
     // Make sure a nonexistant dataset doesn't exist
     std::string nonexistant("nonexistant");
@@ -120,49 +117,49 @@ int main(int argc, char* argv[]) {
     dataset_name = "3D_dbl_dataset_put_get";
     put_get_dataset<double,double>(
                     &set_3D_array_floating_point_values<double>,
-                    dims, SmartRedis::TensorType::dbl,
+                    dims, sr_tensor_dbl,
                     "_dbl", dataset_name);
 
     dataset_name = "3D_flt_dataset_put_get";
     put_get_dataset<float,float>(
                     &set_3D_array_floating_point_values<float>,
-                    dims, SmartRedis::TensorType::flt,
+                    dims, sr_tensor_flt,
                     "_flt", dataset_name);
 
     dataset_name = "3D_i64_dataset_put_get";
     put_get_dataset<int64_t,int64_t>(
                         &set_3D_array_integral_values<int64_t>,
-                        dims, SmartRedis::TensorType::int64,
+                        dims, sr_tensor_int64,
                         "_i64", dataset_name);
 
     dataset_name = "3D_i32_dataset_put_get";
     put_get_dataset<int32_t,int32_t>(
                         &set_3D_array_integral_values<int32_t>,
-                        dims, SmartRedis::TensorType::int32,
+                        dims, sr_tensor_int32,
                         "_i32", dataset_name);
 
     dataset_name = "3D_i16_dataset_put_get";
     put_get_dataset<int16_t,int16_t>(
                         &set_3D_array_integral_values<int16_t>,
-                        dims, SmartRedis::TensorType::int16,
+                        dims, sr_tensor_int16,
                         "_i16", dataset_name);
 
     dataset_name = "3D_i8_dataset_put_get";
     put_get_dataset<int8_t,int8_t>(
                         &set_3D_array_integral_values<int8_t>,
-                        dims, SmartRedis::TensorType::int8,
+                        dims, sr_tensor_int8,
                         "_i8", dataset_name);
 
     dataset_name = "3D_ui16_dataset_put_get";
     put_get_dataset<uint16_t,uint16_t>(
                         &set_3D_array_integral_values<uint16_t>,
-                        dims, SmartRedis::TensorType::uint16,
+                        dims, sr_tensor_uint16,
                         "_ui16", dataset_name);
 
     dataset_name = "3D_ui8_dataset_put_get";
     put_get_dataset<uint8_t,uint8_t>(
                         &set_3D_array_integral_values<uint8_t>,
-                        dims, SmartRedis::TensorType::uint8,
+                        dims, sr_tensor_uint8,
                         "_ui8", dataset_name);
 
     return 0;

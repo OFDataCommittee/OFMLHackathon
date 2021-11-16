@@ -35,7 +35,7 @@ template <typename T_send, typename T_recv>
 void put_and_copy_dataset(
 		    void (*fill_array)(T_send***, int, int, int),
 		    std::vector<size_t> dims,
-            SmartRedis::TensorType type,
+            SRTensorType type,
             std::string key_suffix,
             std::string dataset_name)
 {
@@ -63,12 +63,9 @@ void put_and_copy_dataset(
     std::string t_name_2 = "tensor_2";
     std::string t_name_3 = "tensor_3";
 
-    source_dataset.add_tensor(t_name_1, t_send_1,
-                        dims, type, SmartRedis::MemoryLayout::nested);
-    source_dataset.add_tensor(t_name_2, t_send_2,
-                        dims, type, SmartRedis::MemoryLayout::nested);
-    source_dataset.add_tensor(t_name_3, t_send_3,
-                        dims, type, SmartRedis::MemoryLayout::nested);
+    source_dataset.add_tensor(t_name_1, t_send_1, dims, type, sr_layout_nested);
+    source_dataset.add_tensor(t_name_2, t_send_2, dims, type, sr_layout_nested);
+    source_dataset.add_tensor(t_name_3, t_send_3, dims, type, sr_layout_nested);
 
     //Put the DataSet into the database
     client.put_dataset(source_dataset);
@@ -88,20 +85,15 @@ void put_and_copy_dataset(
                                     {t_name_1, t_name_2, t_name_3});
 
     //Check that the tensors are the same
-    DATASET_TEST_UTILS::check_nested_3D_tensor(DestDataSet,
-                                               t_name_1,
+    DATASET_TEST_UTILS::check_nested_3D_tensor(DestDataSet, t_name_1,
                                                type, t_send_1, dims);
-    DATASET_TEST_UTILS::check_nested_3D_tensor(DestDataSet,
-                                               t_name_2,
+    DATASET_TEST_UTILS::check_nested_3D_tensor(DestDataSet, t_name_2,
                                                type, t_send_2, dims);
-    DATASET_TEST_UTILS::check_nested_3D_tensor(DestDataSet,
-                                               t_name_3,
+    DATASET_TEST_UTILS::check_nested_3D_tensor(DestDataSet, t_name_3,
                                                type, t_send_3, dims);
 
     //Check that the metadata values are correct for the metadata
     DATASET_TEST_UTILS::check_dataset_metadata(DestDataSet);
-
-    return;
 }
 
 int main(int argc, char* argv[]) {
@@ -114,7 +106,7 @@ int main(int argc, char* argv[]) {
     dataset_name = "3D_dbl_dataset_rank";
     put_and_copy_dataset<double,double>(
                     &set_3D_array_floating_point_values<double>,
-                    dims, SmartRedis::TensorType::dbl, "_dbl", dataset_name);
+                    dims, sr_tensor_dbl, "_dbl", dataset_name);
 
     return 0;
 }

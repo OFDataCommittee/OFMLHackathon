@@ -49,7 +49,7 @@ int put_get_1D_tensor(void* client,
                       void** result,
                       char* key_suffix,
                       size_t key_suffix_length,
-                      CTensorType type)
+                      SRTensorType type)
 {
   char* prefix_str = "1D_tensor_test";
 
@@ -66,11 +66,11 @@ int put_get_1D_tensor(void* client,
   pos += key_suffix_length;
   key[pos] = 0;
 
-  CTensorType g_type;
+  SRTensorType g_type;
   size_t* g_dims;
   size_t g_n_dims;
 
-  CMemoryLayout layout = c_nested;
+  SRMemoryLayout layout = sr_layout_nested;
   if (sr_ok != put_tensor(client, key, key_length,
                           (void*)tensor, dims, n_dims, type, layout)) {
     return -1;
@@ -130,7 +130,7 @@ int put_get_1D_tensor_double(size_t* dims, size_t n_dims,
   r_value = put_get_1D_tensor(client,(void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_dbl);
+                              sr_tensor_dbl);
 
   if(!is_equal_1D_tensor_dbl(tensor, result, dims[0])) {
       printf("%s", "The double tensors do not match!\n");
@@ -165,7 +165,7 @@ int put_get_1D_tensor_float(size_t* dims, size_t n_dims,
   r_value = put_get_1D_tensor(client,(void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_flt);
+                              sr_tensor_flt);
 
   free(tensor);
   if (sr_ok != DeleteCClient(&client))
@@ -198,7 +198,7 @@ int put_get_1D_tensor_i8(size_t* dims, size_t n_dims,
   r_value = put_get_1D_tensor(client,(void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_int8);
+                              sr_tensor_int8);
 
   if(!is_equal_1D_tensor_i8(tensor, result, dims[0])) {
       printf("%s", "The i8 tensors do not match!\n");
@@ -236,7 +236,7 @@ int put_get_1D_tensor_i16(size_t* dims, size_t n_dims,
   r_value = put_get_1D_tensor(client,(void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_int16);
+                              sr_tensor_int16);
 
   if(!is_equal_1D_tensor_i16(tensor, result, dims[0])) {
       printf("%s", "The i16 tensors do not match!\n");
@@ -274,7 +274,7 @@ int put_get_1D_tensor_i32(size_t* dims, size_t n_dims,
   r_value = put_get_1D_tensor(client,(void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_int32);
+                              sr_tensor_int32);
 
   if(!is_equal_1D_tensor_i32(tensor, result, dims[0])) {
       printf("%s", "The i32 tensors do not match!\n");
@@ -312,7 +312,7 @@ int put_get_1D_tensor_i64(size_t* dims, size_t n_dims,
   r_value = put_get_1D_tensor(client,(void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_int64);
+                              sr_tensor_int64);
 
   if(!is_equal_1D_tensor_i64(tensor, result, dims[0])) {
       printf("%s", "The i64 tensors do not match!\n");
@@ -347,7 +347,7 @@ int put_get_1D_tensor_ui8(size_t* dims, size_t n_dims,
   r_value = put_get_1D_tensor(client,(void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_uint8);
+                              sr_tensor_uint8);
 
   if(!is_equal_1D_tensor_ui8(tensor, result, dims[0])) {
       printf("%s", "The ui8 tensors do not match!\n");
@@ -382,7 +382,7 @@ int put_get_1D_tensor_ui16(size_t* dims, size_t n_dims,
   r_value = put_get_1D_tensor(client,(void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_uint16);
+                              sr_tensor_uint16);
 
   if(!is_equal_1D_tensor_ui16(tensor, result, dims[0])) {
       printf("%s", "The ui16 tensors do not match!\n");

@@ -32,7 +32,7 @@ program mnist_test
 
   implicit none
 
-#include "enums/enum_fortran.inc"
+#include "enum_fortran.inc"
 
   character(len=*), parameter :: model_key = "mnist_model"
   character(len=*), parameter :: model_file = "../../cpp/mnist_data/mnist_cnn.pt"

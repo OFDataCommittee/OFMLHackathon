@@ -55,14 +55,8 @@ void rename_dataset(std::string keyout)
     std::string t_name_1 = "tensor_1";
     std::string t_name_2 = "tensor_2";
 
-    dataset.add_tensor(t_name_1, t_send_1, dims,
-                       SmartRedis::TensorType::dbl,
-                       SmartRedis::MemoryLayout::nested);
-
-    dataset.add_tensor(t_name_2, t_send_2, dims,
-                       SmartRedis::TensorType::dbl,
-                       SmartRedis::MemoryLayout::nested);
-
+    dataset.add_tensor(t_name_1, t_send_1, dims, sr_tensor_dbl, sr_layout_nested);
+    dataset.add_tensor(t_name_2, t_send_2, dims, sr_tensor_dbl, sr_layout_nested);
 
     client.put_dataset(dataset);
 
@@ -104,11 +98,11 @@ void rename_dataset(std::string keyout)
     //Check that the tensors are the same
     DATASET_TEST_UTILS::check_nested_3D_tensor(retrieved_dataset,
                                                t_name_1,
-                                               SmartRedis::TensorType::dbl,
+                                               sr_tensor_dbl,
                                                t_send_1, dims);
     DATASET_TEST_UTILS::check_nested_3D_tensor(retrieved_dataset,
                                                t_name_2,
-                                               SmartRedis::TensorType::dbl,
+                                               sr_tensor_dbl,
                                                t_send_2, dims);
 
     //Check that the metadata values are correct for the metadata

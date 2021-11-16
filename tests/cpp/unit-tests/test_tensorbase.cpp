@@ -35,10 +35,10 @@ using namespace SmartRedis;
 
 SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
 {
-    TensorType tensor_type = GENERATE(TensorType::dbl, TensorType::flt,
-                                      TensorType::int64, TensorType::int32,
-                                      TensorType::int16, TensorType::int8,
-                                      TensorType::uint16, TensorType::uint8);
+    SRTensorType tensor_type = GENERATE(sr_tensor_dbl, sr_tensor_flt,
+                                        sr_tensor_int64, sr_tensor_int32,
+                                        sr_tensor_int16, sr_tensor_int8,
+                                        sr_tensor_uint16, sr_tensor_uint8);
 
     GIVEN("A TensorPack object")
     {
@@ -55,7 +55,7 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
             void* data = tensor.data();
             tp.add_tensor(name, data, dims,
                           tensor_type,
-                          MemoryLayout::contiguous);
+                          sr_layout_contiguous);
 
             THEN("The tensor and its data members can be retrieved")
             {
@@ -139,8 +139,8 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
                 CHECK_THROWS_AS(
                     tp.add_tensor(name, data, dims,
                                   tensor_type,
-                                  MemoryLayout::contiguous),
-                    _smart_runtime_error
+                                  sr_layout_contiguous),
+                    std::runtime_error
                 );
             }
         }
@@ -161,8 +161,8 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
                 CHECK_THROWS_AS(
                     tp.add_tensor(name, data, dims,
                                   tensor_type,
-                                  MemoryLayout::contiguous),
-                    _smart_runtime_error
+                                  sr_layout_contiguous),
+                    std::runtime_error
                 );
             }
         }
@@ -183,8 +183,8 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
                 CHECK_THROWS_AS(
                     tp.add_tensor(name, data, dims,
                                  tensor_type,
-                                 MemoryLayout::contiguous),
-                    _smart_runtime_error
+                                 sr_layout_contiguous),
+                    std::runtime_error
                 );
             }
         }
@@ -203,8 +203,8 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
                 CHECK_THROWS_AS(
                     tp.add_tensor(name, data, dims,
                                   tensor_type,
-                                  MemoryLayout::contiguous),
-                    _smart_runtime_error
+                                  sr_layout_contiguous),
+                    std::runtime_error
                 );
             }
         }
@@ -224,8 +224,8 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
                 CHECK_THROWS_AS(
                     tp.add_tensor(name, data, dims,
                                   tensor_type,
-                                  MemoryLayout::contiguous),
-                    _smart_runtime_error);
+                                  sr_layout_contiguous),
+                    std::runtime_error);
             }
         }
     }

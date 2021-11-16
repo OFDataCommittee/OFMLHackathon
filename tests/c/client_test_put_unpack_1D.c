@@ -42,7 +42,7 @@ the type is not known.
 */
 int put_unpack_1D_tensor(void* tensor, size_t* dims, size_t n_dims,
                        void* result,
-                       CTensorType type,
+                       SRTensorType type,
                        char* key_suffix,
                        size_t key_suffix_length)
 {
@@ -64,7 +64,7 @@ int put_unpack_1D_tensor(void* tensor, size_t* dims, size_t n_dims,
   pos += key_suffix_length;
   key[pos] = 0;
 
-  CMemoryLayout layout = c_nested;
+  SRMemoryLayout layout = sr_layout_nested;
   if (sr_ok != put_tensor(client, key, key_length,
              (void*)tensor, dims, n_dims, type, layout))
   {
@@ -95,7 +95,7 @@ int put_unpack_1D_tensor_double(size_t* dims, size_t n_dims,
     tensor[i] = ((double)rand())/RAND_MAX;
 
   int r_value = put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                                     c_dbl, key_suffix, key_suffix_length);
+                                     sr_tensor_dbl, key_suffix, key_suffix_length);
 
   if (!is_equal_1D_tensor_dbl(tensor, result, dims[0])) {
       printf("%s", "The double tensors do not match!\n");
@@ -122,7 +122,7 @@ int put_unpack_1D_tensor_float(size_t* dims, size_t n_dims,
     tensor[i] = ((float)rand())/RAND_MAX;
 
   int r_value = put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                                     c_flt, key_suffix, key_suffix_length);
+                                     sr_tensor_flt, key_suffix, key_suffix_length);
 
   if (!is_equal_1D_tensor_flt(tensor, result, dims[0])) {
       printf("%s", "The float tensors do not match!\n");
@@ -152,7 +152,7 @@ int put_unpack_1D_tensor_i8(size_t* dims, size_t n_dims,
   }
 
   int r_value = put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                                     c_int8, key_suffix, key_suffix_length);
+                                     sr_tensor_int8, key_suffix, key_suffix_length);
   if (!is_equal_1D_tensor_i8(tensor, result, dims[0])) {
       printf("%s", "The i8 tensors do not match!\n");
       r_value = -1;
@@ -181,7 +181,7 @@ int put_unpack_1D_tensor_i16(size_t* dims, size_t n_dims,
   }
 
   int r_value = put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                                     c_int16, key_suffix, key_suffix_length);
+                                     sr_tensor_int16, key_suffix, key_suffix_length);
   if (!is_equal_1D_tensor_i16(tensor, result, dims[0])) {
       printf("%s", "The i16 tensors do not match!\n");
       r_value = -1;
@@ -213,7 +213,7 @@ int put_unpack_1D_tensor_i32(size_t* dims, size_t n_dims,
   size_t type_length = strlen(type);
 
   int r_value = put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                                     c_int32, key_suffix, key_suffix_length);
+                                     sr_tensor_int32, key_suffix, key_suffix_length);
   if(!is_equal_1D_tensor_i32(tensor, result, dims[0])) {
       printf("%s", "The i32 tensors do not match!\n");
       r_value = -1;
@@ -245,7 +245,7 @@ int put_unpack_1D_tensor_i64(size_t* dims, size_t n_dims,
   size_t type_length = strlen(type);
 
   int r_value = put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                                     c_int64, key_suffix, key_suffix_length);
+                                     sr_tensor_int64, key_suffix, key_suffix_length);
   if (!is_equal_1D_tensor_i64(tensor, result, dims[0])) {
       printf("%s", "The i64 tensors do not match!\n");
       r_value = -1;
@@ -274,7 +274,7 @@ int put_unpack_1D_tensor_ui8(size_t* dims, size_t n_dims,
   size_t type_length = strlen(type);
 
   int r_value = put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                                     c_uint8, key_suffix, key_suffix_length);
+                                     sr_tensor_uint8, key_suffix, key_suffix_length);
   if (!is_equal_1D_tensor_ui8(tensor, result, dims[0])) {
       printf("%s", "The ui8 tensors do not match!\n");
       r_value = -1;
@@ -303,7 +303,7 @@ int put_unpack_1D_tensor_ui16(size_t* dims, size_t n_dims,
   size_t type_length = strlen(type);
 
   int r_value = put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
-                                     c_uint16, key_suffix, key_suffix_length);
+                                     sr_tensor_uint16, key_suffix, key_suffix_length);
   if (!is_equal_1D_tensor_ui16(tensor, result, dims[0])) {
       printf("%s", "The ui16 tensors do not match!\n");
       r_value = -1;

@@ -49,7 +49,7 @@ int put_get_2D_tensor(void* client,
                       void** result,
                       char* key_suffix,
                       size_t key_suffix_length,
-                      CTensorType type)
+                      SRTensorType type)
 {
   char* prefix_str = "2D_tensor_test";
 
@@ -67,11 +67,11 @@ int put_get_2D_tensor(void* client,
   pos += key_suffix_length;
   key[pos] = 0;
 
-  CTensorType g_type;
+  SRTensorType g_type;
   size_t* g_dims;
   size_t g_n_dims;
 
-  CMemoryLayout layout = c_nested;
+  SRMemoryLayout layout = sr_layout_nested;
   if (sr_ok != put_tensor(client, key, key_length,
                           (void*)tensor, dims, n_dims, type, layout)) {
     return -1;
@@ -115,7 +115,7 @@ values.  If the sent and received tensors do not match,
 a non-zero value is returned.
 */
 int put_get_2D_tensor_double(size_t* dims, int n_dims,
-                  char* key_suffix, int key_suffix_length)
+                             char* key_suffix, int key_suffix_length)
 {
   void* client = NULL;
   if (sr_ok != SmartRedisCClient(use_cluster(), &client))
@@ -136,7 +136,7 @@ int put_get_2D_tensor_double(size_t* dims, int n_dims,
   r_value = put_get_2D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_dbl);
+                              sr_tensor_dbl);
 
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++) {
@@ -183,7 +183,7 @@ int put_get_2D_tensor_float(size_t* dims, int n_dims,
   r_value = put_get_2D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_flt);
+                              sr_tensor_flt);
 
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++) {
@@ -234,7 +234,7 @@ int put_get_2D_tensor_i8(size_t* dims, int n_dims,
   r_value = put_get_2D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_int8);
+                              sr_tensor_int8);
 
 for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){
@@ -285,7 +285,7 @@ int put_get_2D_tensor_i16(size_t* dims, int n_dims,
   r_value = put_get_2D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_int16);
+                              sr_tensor_int16);
 
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){
@@ -336,7 +336,7 @@ int put_get_2D_tensor_i32(size_t* dims, int n_dims,
   r_value = put_get_2D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_int32);
+                              sr_tensor_int32);
 
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){
@@ -387,7 +387,7 @@ int put_get_2D_tensor_i64(size_t* dims, int n_dims,
   r_value = put_get_2D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_int64);
+                              sr_tensor_int64);
 
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){
@@ -436,7 +436,7 @@ int put_get_2D_tensor_ui8(size_t* dims, int n_dims,
   r_value = put_get_2D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_uint8);
+                              sr_tensor_uint8);
 
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){
@@ -485,7 +485,7 @@ int put_get_2D_tensor_ui16(size_t* dims, int n_dims,
   r_value = put_get_2D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_uint16);
+                              sr_tensor_uint16);
 
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){

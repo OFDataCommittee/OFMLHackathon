@@ -55,24 +55,19 @@ template <typename T_send, typename T_recv>
 void put_get_3D_array(
 		    void (*fill_array)(T_send*, int),
 		    std::vector<size_t> dims,
-        SmartRedis::TensorType type,
-        std::string key_suffix="",
-        SmartRedis::MemoryLayout send_direction=SmartRedis::MemoryLayout::contiguous,
-        SmartRedis::MemoryLayout recv_direction=SmartRedis::MemoryLayout::contiguous)
+        SRTensorType type,
+        std::string key_suffix = "",
+        SRMemoryLayout send_direction = sr_layout_contiguous,
+        SRMemoryLayout recv_direction = sr_layout_contiguous)
 {
   SmartRedis::Client client(use_cluster());
 
   //Allocate and fill arrays
-  T_send* array =
-    (T_send*)malloc(dims[0]*dims[1]*dims[2]*sizeof(T_send));
-
-  T_recv* u_array =
-    (T_recv*)malloc(dims[0]*dims[1]*dims[2]*sizeof(T_recv));
+  T_send* array = (T_send*)malloc(dims[0]*dims[1]*dims[2]*sizeof(T_send));
+  T_recv* u_array = (T_recv*)malloc(dims[0]*dims[1]*dims[2]*sizeof(T_recv));
 
   fill_array(array, dims[0]*dims[1]*dims[2]);
-
-  std::string key = "3d_tensor_transpose_test" +
-                    key_suffix;
+  std::string key = "3d_tensor_transpose_test" + key_suffix;
 
   /*
   size_t c=0;
@@ -88,9 +83,7 @@ void put_get_3D_array(
   }
   */
 
-  client.put_tensor(key, (void*)array, dims, type,
-                    send_direction);
-
+  client.put_tensor(key, (void*)array, dims, type, send_direction);
   client.unpack_tensor(key, u_array,
                        {dims[0]*dims[1]*dims[2]}, type,
                        recv_direction);
@@ -116,13 +109,13 @@ void put_get_3D_array(
   for(size_t i = 0; i < dims[0]; i++) {
     for(size_t j = 0; j < dims[1]; j++) {
       for(size_t k = 0; k < dims[2]; k++) {
-        if(send_direction == SmartRedis::MemoryLayout::fortran_contiguous &&
-           recv_direction == SmartRedis::MemoryLayout::contiguous) {
+        if(send_direction == sr_layout_fortran_contiguous &&
+           recv_direction == sr_layout_contiguous) {
           u_index = _c_index(dims, {i,j,k});
           index = _c_index(r_dims, {k,j,i});
         }
-        else if(send_direction == SmartRedis::MemoryLayout::contiguous &&
-                recv_direction == SmartRedis::MemoryLayout::fortran_contiguous) {
+        else if(send_direction == sr_layout_contiguous &&
+                recv_direction == sr_layout_fortran_contiguous) {
           index = _c_index(dims, {i,j,k});
           u_index = _c_index(r_dims, {k,j,i});
         }
@@ -137,7 +130,7 @@ void put_get_3D_array(
     }
   }
 
-  SmartRedis::TensorType g_type_transpose;
+  SRTensorType g_type_transpose;
   std::vector<size_t> g_dims_transpose;
   void* g_array;
   client.get_tensor(key, g_array,
@@ -159,13 +152,13 @@ void put_get_3D_array(
   for(size_t i = 0; i < dims[0]; i++) {
     for(size_t j = 0; j < dims[1]; j++) {
       for(size_t k = 0; k < dims[2]; k++) {
-        if(send_direction == SmartRedis::MemoryLayout::fortran_contiguous &&
-           recv_direction == SmartRedis::MemoryLayout::contiguous) {
+        if(send_direction == sr_layout_fortran_contiguous &&
+           recv_direction == sr_layout_contiguous) {
           g_index = _c_index(dims, {i,j,k});
           index = _c_index(r_dims, {k,j,i});
         }
-        else if(send_direction == SmartRedis::MemoryLayout::contiguous &&
-          recv_direction == SmartRedis::MemoryLayout::fortran_contiguous) {
+        else if(send_direction == sr_layout_contiguous &&
+          recv_direction == sr_layout_fortran_contiguous) {
           index = _c_index(dims, {i,j,k});
           g_index = _c_index(r_dims, {k,j,i});
         }
@@ -182,11 +175,10 @@ void put_get_3D_array(
 
   free(array);
   free(u_array);
-  return;
 }
 
-int main(int argc, char* argv[]) {
-
+int main(int argc, char* argv[])
+{
   /* This tests whether the conversion from
   column major to row major is implemented
   correctly in the client.  To do this,
@@ -207,101 +199,101 @@ int main(int argc, char* argv[]) {
   */
   put_get_3D_array<double,double>(
 				  &set_1D_array_floating_point_values<double>,
-				  dims, SmartRedis::TensorType::dbl, "_dbl",
-          SmartRedis::MemoryLayout::fortran_contiguous,
-          SmartRedis::MemoryLayout::contiguous);
+				  dims, sr_tensor_dbl, "_dbl",
+          sr_layout_fortran_contiguous,
+          sr_layout_contiguous);
 
   put_get_3D_array<float,float>(
 				&set_1D_array_floating_point_values<float>,
-				dims, SmartRedis::TensorType::flt, "_flt",
-        SmartRedis::MemoryLayout::fortran_contiguous,
-        SmartRedis::MemoryLayout::contiguous);
+				dims, sr_tensor_flt, "_flt",
+        sr_layout_fortran_contiguous,
+        sr_layout_contiguous);
 
   put_get_3D_array<int64_t,int64_t>(
 				    &set_1D_array_integral_values<int64_t>,
-				    dims, SmartRedis::TensorType::int64, "_i64",
-            SmartRedis::MemoryLayout::fortran_contiguous,
-            SmartRedis::MemoryLayout::contiguous);
+				    dims, sr_tensor_int64, "_i64",
+            sr_layout_fortran_contiguous,
+            sr_layout_contiguous);
 
   put_get_3D_array<int32_t,int32_t>(
 				    &set_1D_array_integral_values<int32_t>,
-				    dims, SmartRedis::TensorType::int32, "_i32",
-            SmartRedis::MemoryLayout::fortran_contiguous,
-            SmartRedis::MemoryLayout::contiguous);
+				    dims, sr_tensor_int32, "_i32",
+            sr_layout_fortran_contiguous,
+            sr_layout_contiguous);
 
   put_get_3D_array<int16_t,int16_t>(
 				      &set_1D_array_integral_values<int16_t>,
-				      dims, SmartRedis::TensorType::int16, "_i16",
-              SmartRedis::MemoryLayout::fortran_contiguous,
-              SmartRedis::MemoryLayout::contiguous);
+				      dims, sr_tensor_int16, "_i16",
+              sr_layout_fortran_contiguous,
+              sr_layout_contiguous);
 
   put_get_3D_array<int8_t,int8_t>(
 				      &set_1D_array_integral_values<int8_t>,
-				      dims, SmartRedis::TensorType::int8, "_i8",
-              SmartRedis::MemoryLayout::fortran_contiguous,
-              SmartRedis::MemoryLayout::contiguous);
+				      dims, sr_tensor_int8, "_i8",
+              sr_layout_fortran_contiguous,
+              sr_layout_contiguous);
 
   put_get_3D_array<uint16_t,uint16_t>(
 				      &set_1D_array_integral_values<uint16_t>,
-				      dims, SmartRedis::TensorType::uint16, "_ui16",
-              SmartRedis::MemoryLayout::fortran_contiguous,
-              SmartRedis::MemoryLayout::contiguous);
+				      dims, sr_tensor_uint16, "_ui16",
+              sr_layout_fortran_contiguous,
+              sr_layout_contiguous);
 
   put_get_3D_array<uint8_t,uint8_t>(
 				      &set_1D_array_integral_values<uint8_t>,
-				      dims, SmartRedis::TensorType::uint8, "_ui8",
-              SmartRedis::MemoryLayout::fortran_contiguous,
-              SmartRedis::MemoryLayout::contiguous);
+				      dims, sr_tensor_uint8, "_ui8",
+              sr_layout_fortran_contiguous,
+              sr_layout_contiguous);
 
   /* Test conversion on the get side
   */
   put_get_3D_array<double,double>(
 				  &set_1D_array_floating_point_values<double>,
-				  dims, SmartRedis::TensorType::dbl, "_dbl",
-          SmartRedis::MemoryLayout::contiguous,
-          SmartRedis::MemoryLayout::fortran_contiguous);
+				  dims, sr_tensor_dbl, "_dbl",
+          sr_layout_contiguous,
+          sr_layout_fortran_contiguous);
 
   put_get_3D_array<float,float>(
 				&set_1D_array_floating_point_values<float>,
-				dims, SmartRedis::TensorType::flt, "_flt",
-        SmartRedis::MemoryLayout::contiguous,
-        SmartRedis::MemoryLayout::fortran_contiguous);
+				dims, sr_tensor_flt, "_flt",
+        sr_layout_contiguous,
+        sr_layout_fortran_contiguous);
 
   put_get_3D_array<int64_t,int64_t>(
 				    &set_1D_array_integral_values<int64_t>,
-				    dims, SmartRedis::TensorType::int64, "_i64",
-            SmartRedis::MemoryLayout::contiguous,
-            SmartRedis::MemoryLayout::fortran_contiguous);
+				    dims, sr_tensor_int64, "_i64",
+            sr_layout_contiguous,
+            sr_layout_fortran_contiguous);
 
   put_get_3D_array<int32_t,int32_t>(
 				    &set_1D_array_integral_values<int32_t>,
-				    dims, SmartRedis::TensorType::int32, "_i32",
-            SmartRedis::MemoryLayout::contiguous,
-            SmartRedis::MemoryLayout::fortran_contiguous);
+				    dims, sr_tensor_int32, "_i32",
+            sr_layout_contiguous,
+            sr_layout_fortran_contiguous);
 
   put_get_3D_array<int16_t,int16_t>(
 				      &set_1D_array_integral_values<int16_t>,
-				      dims, SmartRedis::TensorType::int16, "_i16",
-              SmartRedis::MemoryLayout::contiguous,
-              SmartRedis::MemoryLayout::fortran_contiguous);
+				      dims, sr_tensor_int16, "_i16",
+              sr_layout_contiguous,
+              sr_layout_fortran_contiguous);
 
   put_get_3D_array<int8_t,int8_t>(
 				      &set_1D_array_integral_values<int8_t>,
-				      dims, SmartRedis::TensorType::int8, "_i8",
-              SmartRedis::MemoryLayout::contiguous,
-              SmartRedis::MemoryLayout::fortran_contiguous);
+				      dims, sr_tensor_int8, "_i8",
+              sr_layout_contiguous,
+              sr_layout_fortran_contiguous);
 
   put_get_3D_array<uint16_t,uint16_t>(
 				      &set_1D_array_integral_values<uint16_t>,
-				      dims, SmartRedis::TensorType::uint16, "_ui16",
-              SmartRedis::MemoryLayout::contiguous,
-              SmartRedis::MemoryLayout::fortran_contiguous);
+				      dims, sr_tensor_uint16, "_ui16",
+              sr_layout_contiguous,
+              sr_layout_fortran_contiguous);
 
   put_get_3D_array<uint8_t,uint8_t>(
 				      &set_1D_array_integral_values<uint8_t>,
-				      dims, SmartRedis::TensorType::uint8, "_ui8",
-              SmartRedis::MemoryLayout::contiguous,
-              SmartRedis::MemoryLayout::fortran_contiguous);
+				      dims, sr_tensor_uint8, "_ui8",
+              sr_layout_contiguous,
+              sr_layout_fortran_contiguous);
 
   std::cout<<"3D put and get to test matrix "\
              "transpose complete."<<std::endl;

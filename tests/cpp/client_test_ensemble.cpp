@@ -66,9 +66,7 @@ void produce(
 
   std::string key = "ensemble_test";
 
-  client.put_tensor(key, (void*)array,
-                    dims, SmartRedis::TensorType::flt,
-                    SmartRedis::MemoryLayout::nested);
+  client.put_tensor(key, (void*)array, dims, sr_tensor_flt, sr_layout_nested);
 
   if(!client.tensor_exists(key))
     throw std::runtime_error("The tensor key does not exist in the database.");
@@ -76,7 +74,7 @@ void produce(
     throw std::runtime_error("The tensor key does not exist in the database.");
 
   free_1D_array(array);
- 
+
   // Models
   std::string model_key = "mnist_model";
   std::string model_file = "./../mnist_data/mnist_cnn.pt";
@@ -102,8 +100,7 @@ void produce(
   std::string script_out_key = "mnist_processed_input";
   std::string model_name = "mnist_model";
   std::string script_name = "mnist_script";
-  client.put_tensor(in_key, mnist_array, {1,1,28,28}, SmartRedis::TensorType::flt,
-                    SmartRedis::MemoryLayout::nested);
+  client.put_tensor(in_key, mnist_array, {1,1,28,28}, sr_tensor_flt, sr_layout_nested);
   client.run_script(script_name, "pre_process", {in_key}, {script_out_key});
   client.run_model(model_name, {script_out_key}, {out_key});
 
@@ -114,11 +111,9 @@ void produce(
 
   std::string dataset_name = "mnist_input_dataset_ds";
   SmartRedis::DataSet dataset = SmartRedis::DataSet(dataset_name);
-  dataset.add_tensor(in_key_ds, mnist_array, {1,1,28,28},
-                     SmartRedis::TensorType::flt,
-                     SmartRedis::MemoryLayout::nested);
+  dataset.add_tensor(in_key_ds, mnist_array, {1,1,28,28}, sr_tensor_flt, sr_layout_nested);
   client.put_dataset(dataset);
-  
+
   if(!client.tensor_exists(dataset_name))
     throw std::runtime_error("The dataset key does not exist in the database.");
 
@@ -127,7 +122,6 @@ void produce(
   client.run_model(model_name, {script_out_key_ds}, {out_key_ds});
 
   free_4D_array(mnist_array, 1, 1, 28);
-  return;
 }
 
 void consume(std::vector<size_t> dims,
@@ -156,17 +150,16 @@ void consume(std::vector<size_t> dims,
     throw std::runtime_error("The key does not exist in the database.");
 
   client.unpack_tensor(tensor_key, u_result, dims,
-                       SmartRedis::TensorType::flt,
-                       SmartRedis::MemoryLayout::nested);
+                       sr_tensor_flt, sr_layout_nested);
 
-  SmartRedis::TensorType g_type;
+  SRTensorType g_type;
   std::vector<size_t> g_dims;
   void* g_result;
   client.get_tensor(tensor_key, g_result, g_dims,
-                    g_type, SmartRedis::MemoryLayout::nested);
+                    g_type, sr_layout_nested);
   float* g_type_result = (float*)g_result;
 
-  if(SmartRedis::TensorType::flt!=g_type)
+  if(sr_tensor_flt!=g_type)
     throw std::runtime_error("The tensor type "\
                              "retrieved with client.get_tensor() "\
                              "does not match the known type.");
@@ -185,7 +178,7 @@ void consume(std::vector<size_t> dims,
   // Check for false positives
   if(client.model_exists(model_key))
     throw std::runtime_error("The model key should not exist in the database.");
-  
+
   client.set_data_source("producer_0");
   std::string_view model = client.get_model(model_key);
 
@@ -204,16 +197,11 @@ void consume(std::vector<size_t> dims,
   float** mnist_result = allocate_2D_array<float>(1, 10);
 
   std::string out_key = "mnist_output";
-  client.unpack_tensor(out_key, mnist_result, {1,10}, SmartRedis::TensorType::flt,
-                       SmartRedis::MemoryLayout::nested);
+  client.unpack_tensor(out_key, mnist_result, {1,10}, sr_tensor_flt, sr_layout_nested);
 
   std::string out_key_ds = "mnist_output_ds";
-  client.unpack_tensor(out_key_ds, mnist_result, {1,10},
-                       SmartRedis::TensorType::flt,
-                       SmartRedis::MemoryLayout::nested);
+  client.unpack_tensor(out_key_ds, mnist_result, {1,10}, sr_tensor_flt, sr_layout_nested);
   free_2D_array(mnist_result, 1);
-
-  return;
 }
 
 int main(int argc, char* argv[]) {
@@ -222,8 +210,8 @@ int main(int argc, char* argv[]) {
   const char* old_keyout = std::getenv("SSKEYOUT");
   char keyin_env_put[] = "SSKEYIN=producer_0,producer_1";
   char keyout_env_put[] = "SSKEYOUT=producer_0";
-  putenv( keyin_env_put ); 
-  putenv( keyout_env_put ); 
+  putenv( keyin_env_put );
+  putenv( keyout_env_put );
   size_t dim1 = 10;
   std::vector<size_t> dims = {dim1};
 
@@ -233,8 +221,8 @@ int main(int argc, char* argv[]) {
 
   char keyin_env_get[] = "SSKEYIN=producer_1,producer_0";
   char keyout_env_get[] = "SSKEYOUT=producer_1";
-  putenv( keyin_env_get ); 
-  putenv( keyout_env_get ); 
+  putenv(keyin_env_get);
+  putenv(keyout_env_get);
   consume(dims,
           std::string("producer_1"),
           std::string("producer_0"));
@@ -244,8 +232,8 @@ int main(int argc, char* argv[]) {
     char* reset_keyin_c = new char[reset_keyin.size() + 1];
     std::copy(reset_keyin.begin(), reset_keyin.end(), reset_keyin_c);
     reset_keyin_c[reset_keyin.size()] = '\0';
-    putenv( reset_keyin_c); 
-    delete [] reset_keyin_c;
+    putenv( reset_keyin_c);
+    delete[] reset_keyin_c;
   }
   else {
     unsetenv("SSKEYIN");
@@ -255,8 +243,8 @@ int main(int argc, char* argv[]) {
     char* reset_keyout_c = new char[reset_keyout.size() + 1];
     std::copy(reset_keyout.begin(), reset_keyout.end(), reset_keyout_c);
     reset_keyout_c[reset_keyout.size()] = '\0';
-    putenv( reset_keyout_c); 
-    delete [] reset_keyout_c;
+    putenv( reset_keyout_c);
+    delete[] reset_keyout_c;
   }
   else {
     unsetenv("SSKEYOUT");

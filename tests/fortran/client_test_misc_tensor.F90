@@ -35,7 +35,7 @@ program main
 
   implicit none
 
-#include "enums/enum_fortran.inc"
+#include "enum_fortran.inc"
 
   type(client_type)  :: client
   type(dataset_type) :: send_dataset

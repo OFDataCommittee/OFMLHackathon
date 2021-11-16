@@ -90,7 +90,7 @@ int present_dataset(char *dataset_name, size_t dataset_name_len)
       }
     }
   }
-  if (sr_ok != add_tensor(dataset, t1, strlen(t1), tensor, dims, n_dims, c_int16, c_nested))
+  if (sr_ok != add_tensor(dataset, t1, strlen(t1), tensor, dims, n_dims, sr_tensor_int16, sr_layout_nested))
     return -1;
 
   for (i = 0; i < dims[0]; i++) {
@@ -100,7 +100,7 @@ int present_dataset(char *dataset_name, size_t dataset_name_len)
       }
     }
   }
-  if (sr_ok != add_tensor(dataset, t2, strlen(t2), tensor, dims, n_dims, c_int16, c_nested))
+  if (sr_ok != add_tensor(dataset, t2, strlen(t2), tensor, dims, n_dims, sr_tensor_int16, sr_layout_nested))
     return -1;
 
   for (i = 0; i < dims[0]; i++) {
@@ -110,7 +110,7 @@ int present_dataset(char *dataset_name, size_t dataset_name_len)
       }
     }
   }
-  if (sr_ok != add_tensor(dataset, t3, strlen(t3), tensor, dims, n_dims, c_int16, c_nested))
+  if (sr_ok != add_tensor(dataset, t3, strlen(t3), tensor, dims, n_dims, sr_tensor_int16, sr_layout_nested))
     return -1;
 
   // Put the DataSet into the database
