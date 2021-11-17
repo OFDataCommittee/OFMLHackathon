@@ -24,8 +24,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import os
 import numpy as np
-
 from smartredis import Client
 
 # ----- Tests -----------------------------------------------------------
@@ -68,8 +68,14 @@ def send_get_arrays(client, data):
     for index, array in enumerate(data):
         key = f"array_{str(index)}"
         client.put_tensor(key, array)
-        assert client.tensor_exists(key) == True
-        assert client.key_exists(key) == True
+        assert client.tensor_exists(key)
+        # get prefix, if it exists. Assumes the client is using
+        # tensor prefix which is the default.
+        sskeyin = os.environ.get("SSKEYIN", None)
+        prefix = ""
+        if sskeyin:
+            prefix = sskeyin.split(",")[0] + "."
+        assert client.key_exists(prefix + key)
 
     # get from database
     for index, array in enumerate(data):

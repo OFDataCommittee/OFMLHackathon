@@ -32,6 +32,16 @@
 #include <typeinfo>
 #include <random>
 
+class RedisClusterTestObject : public RedisCluster
+{
+    public:
+        RedisClusterTestObject() : RedisCluster() {};
+
+        std::string get_crc16_prefix(uint64_t hash_slot) {
+            return _get_crc16_prefix(hash_slot);
+        }
+};
+
 inline void to_lower(char* s) {
     /* This will turn each character in the
     c-str into the lowercase value.
@@ -283,6 +293,37 @@ T get_floating_point_scalar()
   std::default_random_engine generator;
   std::uniform_real_distribution<T> distribution;
   return distribution(generator);
+}
+
+inline std::string get_prefix()
+{
+        // get prefix, if it exists. Assumes Client._use_tensor_prefix
+    // defaults to true, which it does at time of implementation
+    std::string prefix = "";
+    char* sskeyin = std::getenv("SSKEYIN");
+    std::string sskeyin_str = "";
+
+    if (sskeyin != NULL) {
+        // get the first value
+        char* a = &sskeyin[0];
+        char* b = a;
+        char parse_char = ',';
+        while (*b) {
+            if(*b == parse_char) {
+                if (a != b) {
+                    sskeyin_str = std::string(a, b - a);
+                    break;
+                }
+                a = ++b;
+            }
+            else
+                b++;
+        }
+        if (sskeyin_str.length() == 0)
+            sskeyin_str = std::string(sskeyin);
+        prefix = sskeyin_str + ".";
+    }
+    return prefix;
 }
 
 #endif //SMARTREDIS_TEST_UTILS_H

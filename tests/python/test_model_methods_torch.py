@@ -27,7 +27,6 @@
 import os
 
 import torch
-
 from smartredis import Client
 
 

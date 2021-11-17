@@ -58,7 +58,7 @@ void put_get_1D_array(
   */
   client.put_tensor(key, (void*)array, dims, type, sr_layout_nested);
 
-  if(!client.key_exists(key))
+  if(!client.key_exists(get_prefix() + key))
     throw std::runtime_error("The key does not exist in the database.");
 
   client.unpack_tensor(key, u_result, dims, type, sr_layout_nested);

@@ -52,7 +52,7 @@ MetaData& MetaData::operator=(MetaData&& metadata)
         return *this;
 
     // Clear out fields
-        _delete_fields();
+    _delete_fields();
 
     // Migrate data
     _field_map = std::move(metadata._field_map);

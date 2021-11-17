@@ -603,3 +603,75 @@ std::vector<py::dict> PyClient::get_db_cluster_info(std::vector<std::string> add
     }
     return addresses_info;
 }
+
+// Delete all keys of all existing databases
+void PyClient::flush_db(std::vector<std::string> addresses)
+{
+    for(size_t i=0; i<addresses.size(); i++) {
+        try {
+            _client->flush_db(addresses[i]);
+        }
+        catch(const std::exception& e) {
+            throw smart_runtime_error(e.what());
+        }
+        catch(...) {
+            throw smart_runtime_error("A non-standard exception "\
+                                      "was encountered during client "\
+                                      "flush_db execution.");
+        }
+    }
+}
+
+// Read the configuration parameters of a running server
+py::dict PyClient::config_get(std::string expression, std::string address)
+{
+    py::dict result;
+    try {
+        std::unordered_map<std::string,std::string> result_map = _client->config_get(expression, address);
+        result = py::cast(result_map);
+    }
+        catch(const std::exception& e) {
+            throw smart_runtime_error(e.what());
+        }
+        catch(...) {
+            throw smart_runtime_error("A non-standard exception "\
+                                      "was encountered during client "\
+                                      "config_get execution.");
+    }
+    return result;
+}
+
+// Reconfigure the server
+void PyClient::config_set(std::string config_param, std::string value, std::string address)
+{
+    try {
+        _client->config_set(config_param, value, address);
+    }
+        catch(const std::exception& e) {
+            throw smart_runtime_error(e.what());
+        }
+        catch(...) {
+            throw smart_runtime_error("A non-standard exception "\
+                                      "was encountered during client "\
+                                      "config_set execution.");
+    }
+}
+
+void PyClient::save(std::vector<std::string> addresses)
+{
+    for (size_t address_index = 0; address_index < addresses.size(); address_index++) {
+        try {
+            _client->save(addresses[address_index]);
+        }
+            catch(const std::exception& e) {
+                throw smart_runtime_error(e.what());
+            }
+            catch(...) {
+                throw smart_runtime_error("A non-standard exception "\
+                                          "was encountered during client "\
+                                          "save execution.");
+        }
+    }
+}
+
+// EOF

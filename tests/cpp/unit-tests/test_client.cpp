@@ -31,6 +31,7 @@
 #include "dataset.h"
 #include "../client_test_utils.h"
 #include "srexception.h"
+#include <sstream>
 
 using namespace SmartRedis;
 
@@ -46,6 +47,16 @@ bool is_same_data(T* t1, T* t2, size_t length)
         t2++;
     }
     return true;
+}
+
+// helper function that returns the first address
+// if SSDB contains more than one
+std::string parse_SSDB(std::string addresses)
+{
+    std::stringstream address_stream(addresses);
+    std::string first_address;
+    getline(address_stream, first_address, ',');
+    return first_address;
 }
 
 // auxiliary function for testing the equivalence
@@ -423,11 +434,13 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
             {
                 int poll_freq = 10;
                 int num_tries = 4;
+                std::string prefix = get_prefix();
                 // polling keys that exist returns true
-                for(int i=0; i<num_of_tensors; i++)
-                    CHECK(true == client.poll_key(keys[i],
+                for(int i=0; i<num_of_tensors; i++) {
+                    CHECK(true == client.poll_key(prefix + keys[i],
                                                   poll_freq,
                                                   num_tries));
+                }
 
                 // polling a key that does not exist returns false
                 CHECK_FALSE(client.poll_key("DNE",
@@ -477,10 +490,10 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
         AND_WHEN("INFO is called on database with a valid address ")
         {
 
-            THEN("No errors with be thrown for both cluster or "
+            THEN("No errors with be thrown for both cluster and "
                  "non-cluster environemnts")
             {
-                std::string db_address = std::getenv("SSDB");
+                std::string db_address = parse_SSDB(std::getenv("SSDB"));
 
                 CHECK_NOTHROW(client.get_db_node_info(db_address));
             }
@@ -491,14 +504,253 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
             THEN("No errors are thrown if called on a cluster environment "
                  "but errors are thrown if called on a non-cluster environment")
             {
-                std::string db_address = std::getenv("SSDB");
-
-                if(use_cluster())
+                std::string db_address = parse_SSDB(std::getenv("SSDB"));
+                if (use_cluster())
                     CHECK_NOTHROW(client.get_db_cluster_info(db_address));
                 else
                     CHECK_THROWS_AS(client.get_db_cluster_info(db_address),
-                        _smart_runtime_error);
+                                    _smart_runtime_error);
             }
         }
+    }
+}
+
+SCENARIO("Testing FLUSHDB on empty Client Object", "[Client][FLUSHDB]")
+{
+
+    GIVEN("An empty non-cluster Client object")
+    {
+        Client client(use_cluster());
+
+        WHEN("FLUSHDB is called on database with "
+             "an invalid address")
+        {
+            THEN("An error is thrown")
+            {
+                std::string db_address = ":00";
+
+                CHECK_THROWS_AS(client.flush_db(db_address),
+                                _smart_runtime_error);
+
+                CHECK_THROWS_AS(client.flush_db("123456678.345633.21:2345561"),
+                                _smart_runtime_error);
+            }
+        }
+
+        AND_WHEN("FLUSHDB is called on database with "
+                 "a valid address")
+        {
+            THEN("No errors are thrown")
+            {
+                std::string db_address = parse_SSDB(std::getenv("SSDB"));
+
+                CHECK_NOTHROW(client.flush_db(db_address));
+            }
+        }
+    }
+}
+
+SCENARIO("Testing FLUSHDB on Client Object", "[Client][FLUSHDB]")
+{
+
+    GIVEN("A non-cluster Client object")
+    {
+        // From within the testing framework, there is no way of knowing
+        // each db node that is being used, so skip if on cluster
+        if (use_cluster())
+            return;
+
+        Client client(use_cluster());
+        std::string dataset_name = "test_dataset_name";
+        DataSet dataset(dataset_name);
+        dataset.add_meta_string("meta_string_name", "meta_string_val");
+        std::string tensor_key = "dbl_tensor";
+        std::vector<double> tensor_dbl =
+                {std::numeric_limits<double>::min(),
+                 std::numeric_limits<double>::max()};
+        client.put_dataset(dataset);
+        client.put_tensor(tensor_key, (void*)tensor_dbl.data(), {2,1},
+                          sr_tensor_dbl, sr_layout_contiguous);
+        WHEN("FLUSHDB is called on databsase")
+        {
+
+            THEN("The database is flushed")
+            {
+                // ensure the database has things to flush
+                CHECK(client.dataset_exists(dataset_name) == true);
+                CHECK(client.tensor_exists(tensor_key) == true);
+                // flush the database
+                std::string db_address = parse_SSDB(std::getenv("SSDB"));
+                CHECK_NOTHROW(client.flush_db(db_address));
+
+                // ensure the database is empty
+                CHECK_FALSE(client.dataset_exists(dataset_name));
+                CHECK_FALSE(client.tensor_exists(tensor_key));
+            }
+        }
+    }
+}
+
+SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
+{
+
+    GIVEN("A Client object")
+    {
+        Client client(use_cluster());
+
+        WHEN("CONFIG GET or CONFIG SET are called on databases with "
+             "invalid addresses ")
+        {
+            THEN("An error is thrown")
+            {
+                std::vector<std::string> db_addresses =
+                    {":00", "127.0.0.1:", "127.0.0.1", "127.0.0.1:18446744073709551616"};
+
+                for (size_t address_index = 0; address_index < db_addresses.size(); address_index++) {
+                    CHECK_THROWS_AS(client.config_get("*max-*-entries*", db_addresses[address_index]),
+                                    _smart_runtime_error);
+                    CHECK_THROWS_AS(client.config_set("dbfilename", "new_file.rdb", db_addresses[address_index]),
+                                    _smart_runtime_error);
+                }
+            }
+        }
+
+        AND_WHEN("CONFIG GET or CONFIG SET are called on databases with "
+                 "valid addresses ")
+        {
+            THEN("No error is thrown."){
+
+                std::string db_address = parse_SSDB(std::getenv("SSDB"));
+                std::string config_param = "dbfilename";
+                std::string new_filename = "new_file.rdb";
+
+                CHECK_NOTHROW(client.config_set(config_param, new_filename, db_address));
+                std::unordered_map<std::string,std::string> reply =
+                    client.config_get("dbfilename", db_address);
+
+                CHECK(reply.size() == 1);
+                REQUIRE(reply.count(config_param) > 0);
+                CHECK(reply[config_param] == new_filename);
+            }
+        }
+    }
+}
+
+SCENARIO("Test CONFIG GET on an unsupported command", "[Client]")
+{
+    GIVEN("A client object")
+    {
+        Client client(use_cluster());
+        std::string address = parse_SSDB(std::getenv("SSDB"));
+
+        WHEN("CONFIG GET is called with an unsupported command")
+        {
+            std::unordered_map<std::string,std::string> reply =
+                client.config_get("unsupported_cmd", address);
+
+            THEN("CONFIG GET returns an empty unordered map")
+            {
+                CHECK(reply.empty() == true);
+            }
+        }
+    }
+}
+
+SCENARIO("Test CONFIG SET on an unsupported command", "[Client]")
+{
+    GIVEN("A client object")
+    {
+        Client client(use_cluster());
+        std::string address = parse_SSDB(std::getenv("SSDB"));
+
+        WHEN("CONFIG SET is called with an unsupported command")
+        {
+
+            THEN("CONFIG SET throws a runtime error")
+            {
+                CHECK_THROWS_AS(
+                    client.config_set("unsupported_cmd", "100", address),
+                    _smart_runtime_error);
+            }
+        }
+    }
+}
+
+SCENARIO("Testing SAVE command on Client Object", "[Client][SAVE]")
+{
+
+    GIVEN("A client object and some data")
+    {
+        Client client(use_cluster());
+        std::string dataset_name = "test_save_dataset";
+        DataSet dataset(dataset_name);
+        dataset.add_meta_string("meta_string_save_name", "meta_string_val");
+        std::string tensor_key = "save_dbl_tensor";
+        std::vector<double> tensor_dbl =
+                {std::numeric_limits<double>::min(),
+                 std::numeric_limits<double>::max()};
+        client.put_dataset(dataset);
+        client.put_tensor(tensor_key, (void*)tensor_dbl.data(), {2,1},
+                          sr_tensor_dbl, sr_layout_contiguous);
+
+        std::string address = parse_SSDB(std::getenv("SSDB"));
+
+        WHEN("When SAVE is called for a given address")
+        {
+
+            THEN("Producing a point in time snapshot of the redis instance is successful")
+            {
+                // get the timestamp of the last SAVE
+                parsed_reply_nested_map db_node_info_before = client.get_db_node_info(address);
+                std::string time_before_save = db_node_info_before["Persistence"]["rdb_last_save_time"];
+
+                CHECK_NOTHROW(client.save(address));
+
+                // check that the timestamp of the last SAVE has increased
+                parsed_reply_nested_map db_node_info_after = client.get_db_node_info(address);
+                std::string time_after_save = db_node_info_after["Persistence"]["rdb_last_save_time"];
+
+                CHECK(time_before_save.compare(time_after_save) < 0);
+            }
+        }
+    }
+}
+
+SCENARIO("Test that prefixing covers all hash slots of a cluster", "[Client]")
+{
+
+    if(use_cluster()==false)
+        return;
+
+    GIVEN("A test RedisCluster test object")
+    {
+        RedisClusterTestObject redis_cluster;
+
+        WHEN("A prefix is requested for a hash slot between 0 and 16384")
+        {
+            for(size_t hash_slot = 0; hash_slot <= 16384; hash_slot++) {
+
+                THEN("'{' and '}' do not appear in the prefix")
+                {
+                    std::string prefix = redis_cluster.get_crc16_prefix(hash_slot);
+                    CHECK(prefix.size() > 0);
+                    CHECK(prefix.find('{') == std::string::npos);
+                    CHECK(prefix.find('}') == std::string::npos);
+                    size_t redispp_hash_slot =
+                        sw::redis::crc16(prefix.c_str(), prefix.size())%16384;
+                    CHECK(hash_slot == redispp_hash_slot);
+                }
+            }
+        }
+
+        WHEN("A prefix is requested for a hash slot out of range")
+        {
+            THEN("A std::runtime_error is thrown")
+            {
+                CHECK_THROWS_AS(redis_cluster.get_crc16_prefix(16385),
+                                _smart_runtime_error);
+            }
+        }
+
     }
 }
