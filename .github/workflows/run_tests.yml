@@ -16,8 +16,8 @@ env:
   HOMEBREW_NO_BOTTLE_SOURCE_FALLBACK: "ON"
   HOMEBREW_NO_GITHUB_API: "ON"
   HOMEBREW_NO_INSTALL_CLEANUP: "ON"
-  SMARTREDIS_TEST_CLUSTER: "False"
   SSDB: "127.0.0.1:6379"
+  SMARTREDIS_TEST_CLUSTER: False
 
 jobs:
 
@@ -29,16 +29,17 @@ jobs:
       matrix:
         os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
         gcc_v: [8] # Version of gcc/gfortran we want to use.
-        rai: [1.2.4] # currently supported verison of RedisAI
+        rai_v: [1.2.4] # currently supported verison of RedisAI
     env:
       FC: gfortran-${{ matrix.gcc_v }}
       GCC_V: ${{ matrix.gcc_v }}
 
+    # Service containers to run with `container-job`
     services:
       # Label used to access the service container
       redis:
         # Docker Hub image
-        image: redislabs/redisai:${{ matrix.rai }}-cpu-xenial
+        image: redislabs/redisai:${{ matrix.rai_v }}-cpu-xenial
 
         # Set health checks to wait until redis has started
         options: >-
@@ -47,10 +48,11 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         ports:
-          # Maps port 6379 on service container to the host
+          # map port 6379 on service container to the host
           - 6379:6379
 
     steps:
+      # download a copy of SmartRedis before running CI tests
       - uses: actions/checkout@v2
 
       - uses: actions/setup-python@v2
@@ -69,16 +71,30 @@ jobs:
           sudo apt-get install -y gcc-${GCC_V} gfortran-${GCC_V} &&
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_V} 100 \
           --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V}
-
       - name: Build SmartRedis python and install
         run: python -m pip install -e .[dev]
 
-      - name: Run tests
+      - name: Build and run tests
         run: |
-            mkdir -p ./third-party && cd ./third-party &&
+            mkdir -p ./third-party &&
+            cd ./third-party &&
             bash ../build-scripts/build-lcov.sh &&
             bash ../build-scripts/build-catch.sh &&
-            cd ../ && make test-verbose
-        env:
-          SSDB: "127.0.0.1:6379"
-          SMARTREDIS_TEST_CLUSTER: False
+            cd ../ &&
+            make test-verbose
+
+      - name: Run Python coverage tests
+        run: python -m pytest --cov=./src/python/module/smartredis/ --cov-report=xml --cov-append -vv ./tests/python/
+
+      - name: Run C++ coverage tests # unit tests already built
+        run: bash ./build-scripts/build_cpp_cov.sh
+
+      - name: Upload Python coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          files: ./coverage.xml
+
+      - name: Upload C++ coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          files: ./tests/cpp/unit-tests/build/CMakeFiles/cpp_unit_tests.dir/coverage.info
