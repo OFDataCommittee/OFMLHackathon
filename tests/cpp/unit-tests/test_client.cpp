@@ -649,7 +649,7 @@ SCENARIO("Test CONFIG SET on an unsupported command", "[Client]")
     }
 }
 
-SCENARIO("Testing SAVE command on Client Object", "[Client][SAVE]")
+SCENARIO("Testing SAVE command on Client Object", "[!mayfail][Client][SAVE]")
 {
 
     GIVEN("A client object and some data")
