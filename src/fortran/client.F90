@@ -35,7 +35,7 @@ use fortran_c_interop, only : convert_char_array_to_c
 
 implicit none; private
 
-#include "enums/enum_fortran.inc"
+#include "enum_fortran.inc"
 #include "client/client_interfaces.inc"
 #include "client/put_tensor_interfaces.inc"
 #include "client/unpack_tensor_interfaces.inc"
