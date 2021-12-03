@@ -23,7 +23,7 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/smartredis)
 ![Language](https://img.shields.io/github/languages/top/CrayLabs/SmartRedis)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-
+[![codecov](https://codecov.io/gh/CrayLabs/SmartRedis/branch/develop/graph/badge.svg?token=XSS8CCJ2KR)](https://codecov.io/gh/CrayLabs/SmartRedis)
 ----------
 # SmartRedis
 
