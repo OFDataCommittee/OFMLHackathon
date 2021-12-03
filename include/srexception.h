@@ -36,7 +36,7 @@ typedef enum {
     sr_internal  = 3, // Internal SmartRedis error
     sr_runtime   = 4, // Runtime error executing an operation
     sr_parameter = 5, // Bad parameter error
-	sr_timeout   = 6, // Timeout error
+    sr_timeout   = 6, // Timeout error
     sr_invalid   = 7  // Uninitialized error variable
 } SRError;
 

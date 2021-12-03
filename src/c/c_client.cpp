@@ -38,7 +38,7 @@ using namespace SmartRedis;
 // Return a pointer to a new Client.
 // The caller is responsible for deleting the client via DeleteClient().
 extern "C"
-SRError SmartRedisCClient(bool cluster, void **new_client)
+SRError SmartRedisCClient(bool cluster, void** new_client)
 {
   SRError result = sr_ok;
   try {

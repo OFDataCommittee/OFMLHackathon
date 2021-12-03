@@ -566,7 +566,7 @@ class Client
         *           to a specific address to avoid inconsistencies in
         *           addresses retrieved with the CLUSTER SLOTS command.
         *           Inconsistencies in node addresses across
-        *           CLUSTER SLOTS comands will lead to smart_runtime_error
+        *           CLUSTER SLOTS commands will lead to smart_runtime_error
         *           being thrown.
         */
         parsed_reply_nested_map get_db_node_info(std::string address);
@@ -595,7 +595,7 @@ class Client
         *   \returns parsed_reply_map containing the database cluster information.
         *            If this command is executed on a non-cluster database, an
         *            empty parsed_reply_map is returned.
-	    *   \throws smart_runtime_error if the address is not addressable by this
+        *   \throws smart_runtime_error if the address is not addressable by this
         *           client.  In the case of using a cluster of database nodes,
         *           it is best practice to bind each node in the cluster
         *           to a specific address to avoid inconsistencies in

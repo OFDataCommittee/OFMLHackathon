@@ -109,7 +109,7 @@ TensorBase* Tensor<T>::clone()
         return new_tensor;
     }
     catch (std::bad_alloc& e) {
-        throw smart_bad_alloc("tnesor");
+        throw smart_bad_alloc("tensor");
     }
 }
 

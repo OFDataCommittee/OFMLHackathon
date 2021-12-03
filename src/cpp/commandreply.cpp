@@ -367,7 +367,7 @@ void CommandReply::print_reply_structure(std::string index_tracker)
 
 redisReply* CommandReply::deep_clone_reply(const redisReply* reply)
 {
-    // GIGO
+    // GIGO: if the input is NULL, cloning it is easy
     if (reply == NULL)
         return NULL;
     redisReply* redis_reply = NULL;
