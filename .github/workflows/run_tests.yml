@@ -27,7 +27,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
+        os: [ubuntu-20.04, ubuntu-18.04] # cannot test on macOS as docker isn't supported on Mac
         gcc_v: [8] # Version of gcc/gfortran we want to use.
         rai_v: [1.2.4] # currently supported verison of RedisAI
     env:
