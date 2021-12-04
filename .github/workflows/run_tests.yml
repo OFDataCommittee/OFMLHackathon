@@ -22,18 +22,18 @@ env:
 jobs:
 
   run_tests:
-    name: Run smartredis tests using ${{ matrix.os }}, Python ${{ matrix.py_v }}, and RedisAI ${{ matrix.rai_v }}
+    name: Run smartredis tests using ${{ matrix.os }}, Python ${{ matrix.py_v }}, RedisAI ${{ matrix.rai_v }}, and compiler ${{ matrix.compiler }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
-        gcc_v: [8] # Version of gcc/gfortran we want to use.
-        rai_v: [1.2.4, 1.2.5] # currently supported verison of RedisAI
-        py_v: ['3.7.x', '3.8.x', '3.9.x']
+        compiler: [intel, 8, 9, 10] # intel compiler, and versions of GNU compiler
+        rai_v: [1.2.4, 1.2.5] # verisons of RedisAI
+        py_v: ['3.7.x', '3.8.x', '3.9.x'] # versions of Python
     env:
-      FC: gfortran-${{ matrix.gcc_v }}
-      GCC_V: ${{ matrix.gcc_v }}
+      FC: gfortran-${{ matrix.compiler }}
+      GCC_V: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
 
     # Service containers to run with `container-job`
     services:
@@ -64,6 +64,7 @@ jobs:
         run: python -m pip install --upgrade cmake
 
       - name: Install GFortran Linux
+        if: "!contains( matrix.compiler, 'intel' )" # if using GNU compiler
         run: |
           sudo apt-get update &&
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test &&
@@ -71,6 +72,21 @@ jobs:
           sudo apt-get install -y gcc-${GCC_V} gfortran-${GCC_V} &&
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_V} 100 \
           --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V}
+
+      - name: Install Intel compiler
+        if: "contains( matrix.compiler, 'intel' )" # if using intel compiler
+        run: |
+          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
+          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
+          rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
+          echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list &&
+          sudo apt-get update &&
+          sudo apt-get install intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
+          source /opt/intel/oneapi/setvars.sh &&
+          printenv >> $GITHUB_ENV &&
+          echo "CC=icc" >> $GITHUB_ENV &&
+          echo "CXX=icpc" >> $GITHUB_ENV &&
+          echo "FC=ifort" >> $GITHUB_ENV
 
       - name: Build SmartRedis python and install
         run: python -m pip install -e .[dev]
