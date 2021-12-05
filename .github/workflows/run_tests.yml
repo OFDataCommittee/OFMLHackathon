@@ -28,7 +28,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
-        compiler: [intel, 8, 9, 10] # intel compiler, and versions of GNU compiler
+        compiler: [intel, 8, 9, 10, 11] # intel compiler, and versions of GNU compiler
         rai_v: [1.2.4, 1.2.5] # verisons of RedisAI
         py_v: ['3.7.x', '3.8.x', '3.9.x'] # versions of Python
     env:
