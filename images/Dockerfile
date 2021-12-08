@@ -33,7 +33,8 @@ FROM ubuntu:21.04 as builder
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -q -y --no-install-recommends \
     ca-certificates git \
-    make cmake gcc g++ libc6-dev python3 libpython3-dev pip
+    make cmake gcc g++ libc6-dev python3 libpython3-dev pip && \
+    rm -rf /var/lib/apt/lists/*
 RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN pip3 install cmake
 
@@ -44,8 +45,11 @@ RUN git clone https://github.com/CrayLabs/SmartRedis.git
 
 # Compile and install
 WORKDIR /usr/local/src/SmartRedis
-RUN make lib
+RUN make lib && pip install .
 
-## Runtime image
-FROM ubuntu:21.04
-COPY --from=builder /usr/local/src/SmartRedis/install/lib/libsmartredis.so /usr/local/lib/
+# Copy install files and directories to /usr/local/lib and
+# usr/local/include and delete unnecessary build files
+RUN cp -r /usr/local/src/SmartRedis/install/lib/* /usr/local/lib/ && \
+    mkdir /usr/local/include/smartredis && \
+    cp -r /usr/local/src/SmartRedis/install/include/* /usr/local/include/smartredis/ && \
+    rm -r /usr/local/src/SmartRedis
