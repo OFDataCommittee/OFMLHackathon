@@ -119,11 +119,11 @@ SCENARIO("Testing CommandReply object", "[CommandReply]")
         AND_THEN("Various methods will throw errors since the CommandReply "
                  "object doesn't have the correct type for those methods")
         {
-            CHECK_THROWS_AS(cmd_reply.str(), _smart_runtime_error);
-            CHECK_THROWS_AS(cmd_reply.dbl(), _smart_runtime_error);
-            CHECK_THROWS_AS(cmd_reply[1], _smart_runtime_error);
-            CHECK_THROWS_AS(cmd_reply.str_len(), _smart_runtime_error);
-            CHECK_THROWS_AS(cmd_reply.n_elements(), _smart_runtime_error);
+            CHECK_THROWS_AS(cmd_reply.str(), _SRRuntimeError);
+            CHECK_THROWS_AS(cmd_reply.dbl(), _SRRuntimeError);
+            CHECK_THROWS_AS(cmd_reply[1], _SRRuntimeError);
+            CHECK_THROWS_AS(cmd_reply.str_len(), _SRRuntimeError);
+            CHECK_THROWS_AS(cmd_reply.n_elements(), _SRRuntimeError);
         }
     }
 
@@ -141,7 +141,7 @@ SCENARIO("Testing CommandReply object", "[CommandReply]")
 
         THEN("Cannot call integer method on a REDIS_REPLY_BOOL")
         {
-            CHECK_THROWS_AS(cmd_reply.integer(), _smart_runtime_error);
+            CHECK_THROWS_AS(cmd_reply.integer(), _SRRuntimeError);
         }
     }
 
@@ -154,7 +154,7 @@ SCENARIO("Testing CommandReply object", "[CommandReply]")
         THEN("An error is thrown when the redis reply"
              "type is attempted to be retrieved")
         {
-            CHECK_THROWS_AS(cmd_reply.redis_reply_type(), _smart_runtime_error);
+            CHECK_THROWS_AS(cmd_reply.redis_reply_type(), _SRRuntimeError);
         }
     }
 }
@@ -384,7 +384,7 @@ SCENARIO("Test CommandReply copy constructor with an inconsistent redisReply", "
             THEN("An error is thrown during construction")
             {
                 CommandReply cmd_reply;
-                CHECK_THROWS_AS(cmd_reply = reply, _smart_runtime_error);
+                CHECK_THROWS_AS(cmd_reply = reply, _SRRuntimeError);
 
                 delete reply;
             }

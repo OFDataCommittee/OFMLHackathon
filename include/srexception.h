@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined(SMARTREDIS_SMART_ERROR_H)
-#define SMARTREDIS_SMART_ERROR_H
+#if !defined(SMARTREDIS_SREXCEPTION_H)
+#define SMARTREDIS_SREXCEPTION_H
 
 typedef enum {
     sr_ok        = 0, // No error
@@ -41,38 +41,43 @@ typedef enum {
 } SRError;
 
 
-// Retrieve the last error encountered
+/*!
+*   \brief Return the last error encountered
+*   \return The text data for the last error encountered
+*/
 #ifdef __cplusplus
 extern "C"
 #endif
-const char* sr_get_last_error();
+const char* SRGetLastError();
 
 #ifdef __cplusplus
 
 #include <string>
 
 // Smart error: custom error class for the SmartRedis library
-class smart_error: public std::runtime_error
+class SRException: public std::runtime_error
 {
 	// Inherit all the standard constructors
 	using std::runtime_error::runtime_error;
 
 
 	public:
-	smart_error(const char* what_arg, const char* file, int line)
-	  : std::runtime_error(std::string(what_arg) + "\n" + file + ":" + std::to_string(line))
+	SRException(const char* what_arg, const char* file, int line)
+	  : std::runtime_error(what_arg)
 	{
-	    // NOP
+		_loc = file;
+	    _loc += ":" + std::to_string(line);
 	}
 
-	smart_error(const std::string& what_arg, const char* file, int line)
-	  : std::runtime_error(std::string(what_arg) + "\n" + file + ":" + std::to_string(line))
+	SRException(const std::string& what_arg, const char* file, int line)
+	  : std::runtime_error(what_arg)
 	{
-	    // NOP
+		_loc = file;
+	    _loc += ":" + std::to_string(line);
 	}
 
-	smart_error(const smart_error& other) noexcept
-	  : std::runtime_error(other)
+	SRException(const SRException& other) noexcept
+	  : std::runtime_error(other), _loc(other._loc)
 	{
 		// NOP
 	}
@@ -80,85 +85,102 @@ class smart_error: public std::runtime_error
 	virtual SRError to_error_code() const noexcept {
 		return sr_invalid;
 	}
+
+	virtual const char* what() const noexcept{
+		std::string output(what());
+		output += "\n" + _loc;
+		return output.c_str();
+	}
+
+	virtual const char* what(bool hideLocation) const noexcept {
+		return hideLocation ? std::runtime_error::what() : what();
+	}
+
+	virtual const char* where() const noexcept {
+		return _loc.c_str();
+	}
+
+	protected:
+	std::string _loc;
 };
 
 // Memory allocation error
-class _smart_bad_alloc: public smart_error
+class _SRBadAlloc: public SRException
 {
-	using smart_error::smart_error;
+	using SRException::SRException;
 
 	virtual SRError to_error_code() const noexcept {
 		return sr_badalloc;
 	}
 };
 
-#define smart_bad_alloc(txt) _smart_bad_alloc(txt, __FILE__, __LINE__)
+#define SRBadAlloc(txt) _SRBadAlloc(txt, __FILE__, __LINE__)
 
 //  Back-end database error
-class _smart_database_error: public smart_error
+class _SRDatabaseError: public SRException
 {
-	using smart_error::smart_error;
+	using SRException::SRException;
 
 	virtual SRError to_error_code() const noexcept {
 		return sr_dberr;
 	}
 };
 
-#define smart_database_error(txt) _smart_database_error(txt, __FILE__, __LINE__)
+#define SRDatabaseError(txt) _SRDatabaseError(txt, __FILE__, __LINE__)
 
 // Runtime error
-class _smart_runtime_error: public smart_error
+class _SRRuntimeError: public SRException
 {
-	using smart_error::smart_error;
+	using SRException::SRException;
 
 	virtual SRError to_error_code() const noexcept {
 		return sr_runtime;
 	}
 };
 
-#define smart_runtime_error(txt) _smart_runtime_error(txt, __FILE__, __LINE__)
+#define SRRuntimeError(txt) _SRRuntimeError(txt, __FILE__, __LINE__)
 
 // Parameter error
-class _smart_parameter_error: public smart_error
+class _SRParameterError: public SRException
 {
-	using smart_error::smart_error;
+	using SRException::SRException;
 
 	virtual SRError to_error_code() const noexcept {
 		return sr_parameter;
 	}
 };
 
-#define smart_parameter_error(txt) _smart_parameter_error(txt, __FILE__, __LINE__)
+#define SRParameterError(txt) _SRParameterError(txt, __FILE__, __LINE__)
 
-#define smart_runtime_error(txt) _smart_runtime_error(txt, __FILE__, __LINE__)
+#define SRRuntimeError(txt) _SRRuntimeError(txt, __FILE__, __LINE__)
 
 // Timeout error
-class _smart_timeout_error: public smart_error
+class _SRTimeoutError: public SRException
 {
-	using smart_error::smart_error;
+	using SRException::SRException;
 
 	virtual SRError to_error_code() const noexcept {
 		return sr_timeout;
 	}
 };
 
-#define smart_timeout_error(txt) _smart_timeout_error(txt, __FILE__, __LINE__)
+#define SRTimeoutError(txt) _SRTimeoutError(txt, __FILE__, __LINE__)
 
 // Internal error
-class _smart_internal_error: public smart_error
+class _SRInternalError: public SRException
 {
-	using smart_error::smart_error;
+	using SRException::SRException;
 
 	virtual SRError to_error_code() const noexcept {
 		return sr_internal;
 	}
 };
 
-#define smart_internal_error(txt) _smart_internal_error(txt, __FILE__, __LINE__)
+#define SRInternalError(txt) _SRInternalError(txt, __FILE__, __LINE__)
 
 // Store the last error encountered
 extern "C"
-void sr_set_last_error(const smart_error& last_error);
+void SRSetLastError(const SRException& last_error);
 
 #endif // __cplusplus
-#endif // SMARTREDIS_SMART_ERROR_H
+#endif // SMARTREDIS_SREXCEPTION_H

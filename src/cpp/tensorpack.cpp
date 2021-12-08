@@ -69,7 +69,7 @@ void TensorPack::add_tensor(const std::string& name,
 {
     // Check if it's already present
     if (tensor_exists(name)) {
-        throw smart_runtime_error("The tensor " + std::string(name) +
+        throw SRRuntimeError("The tensor " + std::string(name) +
                                   " already exists");
     }
 
@@ -102,11 +102,11 @@ void TensorPack::add_tensor(const std::string& name,
                 ptr = new Tensor<uint8_t>(name, data, dims, type, mem_layout);
                 break;
             default:
-                throw smart_runtime_error("Unknown tensor type");
+                throw SRRuntimeError("Unknown tensor type");
         }
     }
     catch (std::bad_alloc& e) {
-        throw smart_bad_alloc("tensor data buffer");
+        throw SRBadAlloc("tensor data buffer");
     }
 
     // Add it
@@ -122,7 +122,7 @@ void TensorPack::add_tensor(TensorBase* tensor)
     std::string name = tensor->name();
 
     if (name.size() == 0)
-        throw smart_runtime_error("The tensor name must be nonempty.");
+        throw SRRuntimeError("The tensor name must be nonempty.");
 
     _tensorbase_inventory[name] = tensor;
     _all_tensors.push_front(tensor);
@@ -139,7 +139,7 @@ void* TensorPack::get_tensor_data(const std::string& name)
 {
     TensorBase* ptr = _tensorbase_inventory.at(name);
     if (ptr == NULL)
-        throw smart_runtime_error("Tensor not found: " + name);
+        throw SRRuntimeError("Tensor not found: " + name);
     return ptr->data();
 }
 
@@ -184,7 +184,7 @@ void TensorPack::_copy_tensor_inventory(const TensorPack& tp)
     for ( ; it != tp.tensor_cend(); it++) {
         TensorBase* ptr = (*it)->clone();
         if (ptr == NULL)
-            throw smart_runtime_error("Invalid tensor found!");
+            throw SRRuntimeError("Invalid tensor found!");
         _all_tensors.push_front(ptr);
         _tensorbase_inventory[ptr->name()] = ptr;
     }

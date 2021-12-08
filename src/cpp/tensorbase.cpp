@@ -166,7 +166,7 @@ std::vector<size_t> TensorBase::dims()
 size_t TensorBase::num_values()
 {
     if (_dims.size() == 0)
-        throw smart_runtime_error("Invalid dimensionality for tensor detected");
+        throw SRRuntimeError("Invalid dimensionality for tensor detected");
     size_t n_values = 1;
     for (size_t i = 0; i < _dims.size(); i++)
         n_values *= _dims[i];
@@ -202,28 +202,28 @@ inline void TensorBase::_check_inputs(const void* src_data,
     */
 
     if (src_data == NULL) {
-        throw smart_runtime_error("Must provide non-Null pointer to data.");
+        throw SRRuntimeError("Must provide non-Null pointer to data.");
     }
 
     if (name.size() == 0) {
-        throw smart_runtime_error("A name must be provided for the tensor");
+        throw SRRuntimeError("A name must be provided for the tensor");
     }
 
     if (name.compare(".meta") == 0) {
-        throw smart_runtime_error(".meta is an internally reserved name "\
-                                  "that is not allowed.");
+        throw SRRuntimeError(".meta is an internally reserved name "\
+                             "that is not allowed.");
     }
 
     if (dims.size() == 0) {
-        throw smart_runtime_error("Must provide a dimensions vector with at "
-                                  "least one dimension.");
+        throw SRRuntimeError("Must provide a dimensions vector with at "
+                             "least one dimension.");
     }
 
     std::vector<size_t>::const_iterator it = dims.cbegin();
     for ( ; it != dims.cend(); it++) {
         if (*it <= 0) {
-            throw smart_runtime_error("All tensor dimensions "\
-                                      "must be positive.");
+            throw SRRuntimeError("All tensor dimensions "\
+                                 "must be positive.");
         }
     }
 }

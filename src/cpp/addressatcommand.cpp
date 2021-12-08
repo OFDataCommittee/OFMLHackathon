@@ -46,6 +46,6 @@ Command* AddressAtCommand::clone()
         return new_cmd;
     }
     catch (std::bad_alloc& e) {
-        throw smart_bad_alloc("AddressAtCommand clone");
+        throw SRBadAlloc("AddressAtCommand clone");
     }
 }

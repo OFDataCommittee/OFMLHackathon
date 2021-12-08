@@ -48,17 +48,17 @@ SRError CDataSet(const char* name, const size_t name_length, void** new_dataset)
   }
   catch (const std::bad_alloc& e) {
     *new_dataset = NULL;
-    sr_set_last_error(smart_bad_alloc("client allocation"));
+    SRSetLastError(SRBadAlloc("client allocation"));
     result = sr_badalloc;
   }
-  catch (const smart_error& e) {
+  catch (const SRException& e) {
     *new_dataset = NULL;
-    sr_set_last_error(e);
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
     *new_dataset = NULL;
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
+    SRSetLastError(SRInternalError("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -79,12 +79,12 @@ SRError DeallocateeDataSet(void** dataset)
     delete d;
     *dataset = NULL;
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const SRException& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
+    SRSetLastError(SRInternalError("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -116,12 +116,12 @@ SRError add_tensor(void* dataset,
 
     d->add_tensor(tensor_name_str, data, dims_vec, type, mem_layout);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const SRException& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
+    SRSetLastError(SRInternalError("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -147,12 +147,12 @@ SRError add_meta_scalar(void* dataset,
 
     d->add_meta_scalar(name_str, data, type);
   }
-   catch (const smart_error& e) {
-    sr_set_last_error(e);
+   catch (const SRException& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
+    SRSetLastError(SRInternalError("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -179,12 +179,12 @@ SRError add_meta_string(void* dataset,
 
     d->add_meta_string(name_str, data_str);
   }
-   catch (const smart_error& e) {
-    sr_set_last_error(e);
+   catch (const SRException& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
+    SRSetLastError(SRInternalError("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -218,12 +218,12 @@ SRError get_dataset_tensor(void* dataset,
     *type = sr_tensor_invalid;
     d->get_tensor(name_str, *data, *dims, *n_dims, *type, mem_layout);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const SRException& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
+    SRSetLastError(SRInternalError("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -255,12 +255,12 @@ SRError unpack_dataset_tensor(void* dataset,
 
     d->unpack_tensor(name_str, data, dims_vec, type, mem_layout);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const SRException& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
+    SRSetLastError(SRInternalError("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -292,12 +292,12 @@ SRError get_meta_scalars(void* dataset,
 
     *scalar_data = data;
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const SRException& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
+    SRSetLastError(SRInternalError("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -326,12 +326,12 @@ SRError get_meta_strings(void* dataset,
     std::string key_str(name, name_length);
     d->get_meta_strings(key_str, *data, *n_strings, *lengths);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const SRException& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
+    SRSetLastError(SRInternalError("Unknown exception occurred"));
     result = sr_internal;
   }
 

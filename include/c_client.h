@@ -41,12 +41,6 @@ extern "C" {
 #endif
 
 /*!
-*   \brief Return the last error encountered
-*   \return The text data for the last error encountered
-*/
-const char *sr_get_last_error();
-
-/*!
 *   \brief C-client constructor
 *   \param cluster Flag to indicate if a database cluster is being used
 *   \param new_client Receives the new client

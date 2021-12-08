@@ -148,7 +148,7 @@ void copy_assignment(
     //Check that the metadata values are correct for ui32
     //TODO we should add a method to DataSet to check if a field exists
     //and confirm that the other fields have not been added.  Currently
-    //if we get a field that does not exist we will get a smart_runtime_error.
+    //if we get a field that does not exist we will get a SRRuntimeError.
     //Currently the test that there is only one entry in ui32_field_1
     //is sufficient.
     SmartRedis::DataSet partial_dataset = client.get_dataset(dataset_name);

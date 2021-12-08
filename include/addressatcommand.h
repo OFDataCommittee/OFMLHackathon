@@ -72,7 +72,7 @@ class AddressAtCommand : public NonKeyedCommand
         *   \brief Returns host of database node
         *   \param address The address of the database node
         *   \returns The host of the database node
-        *   \throws smart_runtime_error if ':' is at the start of address,
+        *   \throws SRRuntimeError if ':' is at the start of address,
         *           or if ':' is not found in address, or if allocating
         *           storage for the host string fails.
         */
@@ -82,7 +82,7 @@ class AddressAtCommand : public NonKeyedCommand
             size_t end_position = address.find(":");
 
             if (end_position == 0 || end_position == std::string::npos) {
-                throw smart_runtime_error(std::string(address) +
+                throw SRRuntimeError(std::string(address) +
                                          " is not a valid database node address.");
             }
 
@@ -90,7 +90,7 @@ class AddressAtCommand : public NonKeyedCommand
                 host = address.substr(0, end_position);
             }
             catch (std::bad_alloc& ba) {
-                throw smart_bad_alloc(ba.what());
+                throw SRBadAlloc(ba.what());
             }
             return host;
         }
@@ -99,7 +99,7 @@ class AddressAtCommand : public NonKeyedCommand
         *   \brief Returns port of database node
         *   \param address The address of the database node
         *   \returns The port of the database node
-        *   \throws smart_runtime_error if ':' is at the end of the address,
+        *   \throws SRRuntimeError if ':' is at the end of the address,
         *           or if ':' is not found in address, or if the port conversion
         *           to unint64_t cannot be performed, or if the string representation
         *           of the port is out of the range of representable values by an uint_64
@@ -108,7 +108,7 @@ class AddressAtCommand : public NonKeyedCommand
         {
             size_t start_position = address.find(":");
             if ((start_position >= address.size() - 1) || (start_position == std::string::npos)) {
-                throw smart_runtime_error(std::string(address) +
+                throw SRRuntimeError(std::string(address) +
                                           " is not a valid database node address.");
             }
 
@@ -119,13 +119,13 @@ class AddressAtCommand : public NonKeyedCommand
                 port = std::stoul(port_string, nullptr, 0);
             }
             catch (std::bad_alloc& ba) {
-                throw smart_bad_alloc(ba.what());
+                throw SRBadAlloc(ba.what());
             }
             catch (std::invalid_argument& ia) {
-                throw smart_runtime_error(ia.what());
+                throw SRRuntimeError(ia.what());
             }
             catch (std::out_of_range& oor) {
-                throw smart_runtime_error(oor.what());
+                throw SRRuntimeError(oor.what());
             }
             return port;
         }

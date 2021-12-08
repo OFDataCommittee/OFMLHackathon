@@ -48,7 +48,7 @@ CommandReply GetTensorCommand::run_me(RedisServer* server)
 std::vector<size_t> GetTensorCommand::get_dims(CommandReply& reply)
 {
     if (reply.n_elements() < num_fields) {
-        throw smart_runtime_error("The message does not have the "\
+        throw SRRuntimeError("The message does not have the "\
                                   "correct number of fields");
     }
 
@@ -66,7 +66,7 @@ std::vector<size_t> GetTensorCommand::get_dims(CommandReply& reply)
 SRTensorType GetTensorCommand::get_data_type(CommandReply& reply)
 {
     if (reply.n_elements() < num_elements) {
-        throw smart_runtime_error("The message does not have the correct "\
+        throw SRRuntimeError("The message does not have the correct "\
                                   "number of fields");
     }
 
@@ -78,7 +78,7 @@ SRTensorType GetTensorCommand::get_data_type(CommandReply& reply)
 std::string_view GetTensorCommand::get_data_blob(CommandReply& reply)
 {
     if (reply.n_elements() < num_fields) {
-        throw smart_runtime_error("The message does not have the "\
+        throw SRRuntimeError("The message does not have the "\
                                   "correct number of fields");
     }
 

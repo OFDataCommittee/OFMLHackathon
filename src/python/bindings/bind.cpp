@@ -90,23 +90,23 @@ PYBIND11_MODULE(smartredisPy, m) {
         try {
             if (p) std::rethrow_exception(p);
         }
-        catch (const _smart_bad_alloc& e) {
-            PyErr_SetString(PyExc_MemoryError, e.what());
+        catch (const _SRBadAlloc& e) {
+            PyErr_SetString(PyExc_MemoryError, e.what(true));
         }
-        catch (const _smart_database_error& e) {
-            PyErr_SetString(PyExc_OSError, e.what());
+        catch (const _SRDatabaseError& e) {
+            PyErr_SetString(PyExc_OSError, e.what(true));
         }
-        catch (const _smart_runtime_error& e) {
-            PyErr_SetString(PyExc_RuntimeError, e.what());
+        catch (const _SRRuntimeError& e) {
+            PyErr_SetString(PyExc_RuntimeError, e.what(true));
         }
-        catch (const _smart_parameter_error& e) {
-            PyErr_SetString(PyExc_ValueError, e.what());
+        catch (const _SRParameterError& e) {
+            PyErr_SetString(PyExc_ValueError, e.what(true));
         }
-        catch (const _smart_timeout_error& e) {
-            PyErr_SetString(PyExc_TimeoutError, e.what());
+        catch (const _SRTimeoutError& e) {
+            PyErr_SetString(PyExc_TimeoutError, e.what(true));
         }
-        catch (const _smart_internal_error& e) {
-            PyErr_SetString(PyExc_SystemError, e.what());
+        catch (const _SRInternalError& e) {
+            PyErr_SetString(PyExc_SystemError, e.what(true));
         }
     });
 }

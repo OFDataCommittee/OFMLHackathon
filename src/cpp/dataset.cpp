@@ -82,7 +82,7 @@ void DataSet::get_tensor(const std::string& name,
     // Clone the tensor in the DataSet
     TensorBase* tensor = _get_tensorbase_obj(name);
     if (tensor == NULL) {
-        throw smart_runtime_error("tensor creation failed");
+        throw SRRuntimeError("tensor creation failed");
     }
     _tensor_memory.add_tensor(tensor);
     type = tensor->type();
@@ -245,7 +245,7 @@ void DataSet::_add_serialized_field(const std::string& name,
 inline void DataSet::_enforce_tensor_exists(const std::string& name)
 {
     if (!_tensorpack.tensor_exists(name)) {
-        throw smart_runtime_error("The tensor " + std::string(name) +
+        throw SRRuntimeError("The tensor " + std::string(name) +
                                   " does not exist in " + name +
                                   " dataset.");
     }

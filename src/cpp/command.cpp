@@ -66,7 +66,7 @@ Command& Command::operator=(const Command& cmd)
             f = new char[field_size];
         }
         catch (std::bad_alloc& e) {
-            throw smart_bad_alloc("field data");
+            throw SRBadAlloc("field data");
         }
         std::memcpy(f, local_it->first, field_size);
         _local_fields.push_back(
@@ -106,7 +106,7 @@ void Command::add_field(std::string field, bool is_key)
         f = (char*)new unsigned char[field_size + 1];
     }
     catch (std::bad_alloc& e) {
-        throw smart_bad_alloc("field");
+        throw SRBadAlloc("field");
     }
 
     field.copy(f, field_size, 0);
@@ -136,7 +136,7 @@ void Command::add_field(const char* field, bool is_key)
         f = new char[field_size];
     }
     catch (std::bad_alloc& e) {
-        throw smart_bad_alloc("field");
+        throw SRBadAlloc("field");
     }
     std::memcpy(f, field, field_size);
     _local_fields.push_back({f, _fields.size()});
@@ -191,7 +191,7 @@ void Command::add_fields(const std::vector<std::string>& fields, bool is_key)
 std::string Command::first_field() const
 {
     if (cbegin() == cend())
-        throw smart_runtime_error("No fields exist in the Command.");
+        throw SRRuntimeError("No fields exist in the Command.");
     return std::string(cbegin()->data(), cbegin()->size());
 }
 

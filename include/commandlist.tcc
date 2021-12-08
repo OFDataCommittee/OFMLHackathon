@@ -40,7 +40,7 @@ T* CommandList::add_command()
         return new_cmd;
     }
     catch (std::bad_alloc &e) {
-        throw smart_bad_alloc("command");
+        throw SRBadAlloc("command");
     }
 };
 

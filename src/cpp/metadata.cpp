@@ -122,13 +122,13 @@ void MetaData::add_scalar(const std::string& field_name,
     // Get the field
     MetadataField* mdf = _field_map[field_name];
     if (mdf == NULL) {
-        throw smart_runtime_error("Metadata field was not found");
+        throw SRRuntimeError("Metadata field was not found");
     }
 
     // Get its type
     SRMetaDataType existing_type = mdf->type();
     if (existing_type != type) {
-        throw smart_runtime_error("The existing metadata field "\
+        throw SRRuntimeError("The existing metadata field "\
                                   "has a different type. ");
     }
 
@@ -154,7 +154,7 @@ void MetaData::add_scalar(const std::string& field_name,
             break;
         case sr_meta_string:
         default:
-            throw smart_runtime_error("Invalid MetaDataType used in "\
+            throw SRRuntimeError("Invalid MetaDataType used in "\
                                       "MetaData.add_scalar().");
     }
 }
@@ -172,12 +172,12 @@ void MetaData::add_string(const std::string& field_name,
     // Get the field
     MetadataField* mdf = _field_map[field_name];
     if (mdf == NULL) {
-        throw smart_runtime_error("Internal error: Metadata field not found");
+        throw SRRuntimeError("Internal error: Metadata field not found");
     }
 
     // Double-check its type
     if (mdf->type() != sr_meta_string) {
-        throw smart_runtime_error("The metadata field isn't a string type.");
+        throw SRRuntimeError("The metadata field isn't a string type.");
     }
 
     // Add the value
@@ -192,7 +192,7 @@ void MetaData::get_scalar_values(const std::string& name,
 {
     // Make sure the field exists
     if (_field_map[name] == NULL) {
-        throw smart_runtime_error("The metadata field " + name +
+        throw SRRuntimeError("The metadata field " + name +
                                   " does not exist.");
     }
 
@@ -224,11 +224,11 @@ void MetaData::get_scalar_values(const std::string& name,
                 (name, data, length, _uint32_mem_mgr);
             break;
         case sr_meta_string:
-            throw smart_runtime_error("MetaData.get_scalar_values() "\
+            throw SRRuntimeError("MetaData.get_scalar_values() "\
                                       "requested invalid MetaDataType.");
             break;
         default:
-            throw smart_runtime_error("MetaData.get_scalar_values() "\
+            throw SRRuntimeError("MetaData.get_scalar_values() "\
                                       "requested unknown MetaDataType.");
             break;
     }
@@ -248,17 +248,17 @@ void MetaData::get_string_values(const std::string& name,
     n_strings = 0; // Set to zero until all data copied
     data = _char_array_mem_mgr.allocate(field_strings.size());
     if (data == NULL)
-        throw smart_bad_alloc("field strings array");
+        throw SRBadAlloc("field strings array");
     lengths = _str_len_mem_mgr.allocate(field_strings.size());
     if (lengths == NULL)
-        throw smart_bad_alloc("field string lengths");
+        throw SRBadAlloc("field string lengths");
 
     // Copy each metadata string into the string buffer
     for (size_t i = 0; i < field_strings.size(); i++) {
         size_t size = field_strings[i].size();
         char* cstr = _char_mem_mgr.allocate(size + 1);
         if (cstr == NULL)
-            throw smart_bad_alloc("field string data");
+            throw SRBadAlloc("field string data");
         field_strings[i].copy(cstr, size, 0);
         cstr[size] = '\0';
         data[i] = cstr;
@@ -276,13 +276,13 @@ MetaData::get_string_values(const std::string& name)
     // Get the field
     MetadataField* mdf = _field_map[name];
     if (mdf == NULL) {
-        throw smart_runtime_error("The metadata field " + name +
+        throw SRRuntimeError("The metadata field " + name +
                                   " does not exist.");
     }
 
     // Double-check its type
     if (mdf->type() != sr_meta_string) {
-        throw smart_runtime_error("The metadata field " + name +
+        throw SRRuntimeError("The metadata field " + name +
                                   " is not a string field.");
     }
 
@@ -333,7 +333,7 @@ void MetaData::_create_field(const std::string& field_name,
             _create_scalar_field<uint32_t>(field_name,type);
             break;
         default:
-            throw smart_runtime_error("Unknown field type in _create_field");
+            throw SRRuntimeError("Unknown field type in _create_field");
     }
 }
 
@@ -371,7 +371,7 @@ void MetaData::_deep_copy_field(MetadataField* dest_field,
                 *(dynamic_cast<ScalarField<uint32_t>*>(src_field));
             break;
         default:
-            throw smart_runtime_error("Unknown field type in _deep_copy_field");
+            throw SRRuntimeError("Unknown field type in _deep_copy_field");
     }
 }
 
@@ -385,7 +385,7 @@ void MetaData::_create_scalar_field(const std::string& field_name,
         mdf = new ScalarField<T>(field_name, type);
     }
     catch (std::bad_alloc& e) {
-        throw smart_bad_alloc("scalar field");
+        throw SRBadAlloc("scalar field");
     }
     _field_map[field_name] = mdf;
 }
@@ -398,7 +398,7 @@ void MetaData::_create_string_field(const std::string& field_name)
         mdf = new StringField(field_name);
     }
     catch (std::bad_alloc& e) {
-        throw smart_bad_alloc("metadata field");
+        throw SRBadAlloc("metadata field");
     }
     _field_map[field_name] = mdf;
 }
@@ -414,7 +414,7 @@ void MetaData::_get_numeric_field_values(const std::string& name,
     // Make sure the field exists
     MetadataField* mdf = _field_map[name];
     if (mdf == NULL) {
-        throw smart_runtime_error("Field " + name + " does not exist.");
+        throw SRRuntimeError("Field " + name + " does not exist.");
     }
 
     // Perform type-specific allocation
@@ -424,7 +424,7 @@ void MetaData::_get_numeric_field_values(const std::string& name,
             n_values = sdf->size();
             data = reinterpret_cast<void*>(mem_list.allocate(n_values));
             if (data == NULL)
-                throw smart_bad_alloc("double tensor");
+                throw SRBadAlloc("double tensor");
             std::memcpy(data, sdf->data(), n_values * sizeof(T));
             }
             break;
@@ -433,7 +433,7 @@ void MetaData::_get_numeric_field_values(const std::string& name,
             n_values = sdf->size();
             data = reinterpret_cast<void*>(mem_list.allocate(n_values));
             if (data == NULL)
-                throw smart_bad_alloc("float tensor");
+                throw SRBadAlloc("float tensor");
             std::memcpy(data, sdf->data(), n_values*sizeof(T));
             }
             break;
@@ -442,7 +442,7 @@ void MetaData::_get_numeric_field_values(const std::string& name,
             n_values = sdf->size();
             data = reinterpret_cast<void*>(mem_list.allocate(n_values));
             if (data == NULL)
-                throw smart_bad_alloc("int64 tensor");
+                throw SRBadAlloc("int64 tensor");
             std::memcpy(data, sdf->data(), n_values*sizeof(T));
             }
             break;
@@ -451,7 +451,7 @@ void MetaData::_get_numeric_field_values(const std::string& name,
             n_values = sdf->size();
             data = reinterpret_cast<void*>(mem_list.allocate(n_values));
             if (data == NULL)
-                throw smart_bad_alloc("uint64 tensor");
+                throw SRBadAlloc("uint64 tensor");
             std::memcpy(data, sdf->data(), n_values*sizeof(T));
             }
             break;
@@ -460,7 +460,7 @@ void MetaData::_get_numeric_field_values(const std::string& name,
             n_values = sdf->size();
             data = reinterpret_cast<void*>(mem_list.allocate(n_values));
             if (data == NULL)
-                throw smart_bad_alloc("int32 tensor");
+                throw SRBadAlloc("int32 tensor");
             std::memcpy(data, sdf->data(), n_values*sizeof(T));
             }
             break;
@@ -469,16 +469,16 @@ void MetaData::_get_numeric_field_values(const std::string& name,
             n_values = sdf->size();
             data = reinterpret_cast<void*>(mem_list.allocate(n_values));
             if (data == NULL)
-                throw smart_bad_alloc("uint32 tensor");
+                throw SRBadAlloc("uint32 tensor");
             std::memcpy(data, sdf->data(), n_values*sizeof(T));
             }
             break;
         case sr_meta_string:
-            throw smart_runtime_error("Invalid MetaDataType used in "\
+            throw SRRuntimeError("Invalid MetaDataType used in "\
                                       "MetaData.add_scalar().");
             break;
         default:
-            throw smart_runtime_error("Unknown MetaDataType found in "\
+            throw SRRuntimeError("Unknown MetaDataType found in "\
                                       "MetaData.add_scalar().");
 
     }
@@ -506,7 +506,7 @@ void MetaData::add_serialized_field(const std::string& name,
 {
     // Sanity check
     if (buf == NULL)
-        throw smart_runtime_error("invalid buffer supplied");
+        throw SRRuntimeError("invalid buffer supplied");
 
     // Determine the type of the serialized data
     std::string_view buf_sv(buf, buf_size);
@@ -514,7 +514,7 @@ void MetaData::add_serialized_field(const std::string& name,
 
     // Make sure we don't already have a field with this name
     if (has_field(name))
-        throw smart_runtime_error("Cannot add serialized field if "\
+        throw SRRuntimeError("Cannot add serialized field if "\
                                   "already exists.");
 
     // Allocate memory for the field
@@ -556,11 +556,11 @@ void MetaData::add_serialized_field(const std::string& name,
                     name, MetadataBuffer::unpack_string_buf(buf_sv));
                 break;
             default:
-                throw smart_runtime_error("unknown type in add_serialized_field");
+                throw SRRuntimeError("unknown type in add_serialized_field");
         }
     }
     catch (std::bad_alloc& e) {
-        throw smart_bad_alloc("metadata field buffer");
+        throw SRBadAlloc("metadata field buffer");
     }
 
     // Add the field

@@ -33,11 +33,11 @@
 using namespace SmartRedis;
 
 // The last error encountered
-static smart_error __last_error = smart_error("no error");
+static SRException __lastError = SRException("no error");
 
 // Store the last error encountered
 extern "C"
-void sr_set_last_error(const smart_error& last_error)
+void SRSetLastError(const SRException& last_error)
 {
   // Check environment for debug level if we haven't done so yet
   static bool __debug_level_verbose = false;
@@ -55,11 +55,11 @@ void sr_set_last_error(const smart_error& last_error)
   }
 
   // Store the last error
-  __last_error = last_error;
+  __lastError = last_error;
 }
 
 // Return the last error encountered
 extern "C"
-const char* sr_get_last_error()  {
-  return __last_error.what();
+const char* SRGetLastError()  {
+  return __lastError.what();
 }
