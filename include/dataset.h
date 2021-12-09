@@ -446,7 +446,7 @@ class DataSet
         /*!
         *   \brief Check and enforce that a tensor must exist or
         *          throw an error.
-        *   \throw SRRuntimeError if the tensor is not
+        *   \throw SRRuntimeException if the tensor is not
         *          in the DataSet.
         */
         inline void _enforce_tensor_exists(const std::string& name);

@@ -38,7 +38,7 @@ CommandList::CommandList(const CommandList& cmd_lst)
     for ( ; c_it != cmd_lst._commands.cend(); c_it++) {
         Command* new_cmd = (*c_it)->clone();
         if (new_cmd == NULL) {
-            throw SRRuntimeError("Bad command found in CommandList constructor");
+            throw SRRuntimeException("Bad command found in CommandList constructor");
         }
         this->_commands.push_back(new_cmd);
     }
@@ -62,7 +62,7 @@ CommandList& CommandList::operator=(const CommandList& cmd_lst)
     for ( ; c_it != cmd_lst._commands.end(); c_it++) {
         Command* new_cmd = (*c_it)->clone();
         if (new_cmd == NULL) {
-            throw SRRuntimeError("Bad command found in CommandList constructor");
+            throw SRRuntimeException("Bad command found in CommandList constructor");
         }
         _commands.push_back(new_cmd);
     }

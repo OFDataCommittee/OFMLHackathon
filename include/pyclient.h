@@ -74,7 +74,7 @@ class PyClient
         *              in the database
         *   \param type The data type of the tensor
         *   \param data Numpy array with Pybind*
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         void put_tensor(std::string& key,
                         std::string& type,
@@ -93,14 +93,14 @@ class PyClient
         *            use PyClient.unpack_tensor() for large tensor
         *            data and to limit memory use by the PyClient.
         *   \param key The name used to reference the tensor
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         py::array get_tensor(const std::string& key);
 
         /*!
         *   \brief delete a tensor stored in the database
         *   \param key The key of tensor to delete
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         void delete_tensor(const std::string& key);
 
@@ -108,7 +108,7 @@ class PyClient
         *   \brief rename a tensor stored in the database
         *   \param key The key of tensor to rename
         *   \param new_key the new name of the tensor
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         void rename_tensor(const std::string& key,
                            const std::string& new_key);
@@ -117,7 +117,7 @@ class PyClient
         *   \brief copy a tensor to a new key
         *   \param key The key of tensor to copy
         *   \param dest_key the key to store tensor copy at
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         void copy_tensor(const std::string& key,
                          const std::string& dest_key);
@@ -126,7 +126,7 @@ class PyClient
         /*!
         *   \brief Send a PyDataSet object to the database
         *   \param dataset The PyDataSet object to send to the database
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         void put_dataset(PyDataset& dataset);
 
@@ -136,7 +136,7 @@ class PyClient
         *   \param name The name of the dataset to retrieve
         *   \returns Pointer to the PyDataSet
         *            object retrieved from the database
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         PyDataset* get_dataset(const std::string& name);
 
@@ -144,7 +144,7 @@ class PyClient
         /*!
         *   \brief delete a dataset stored in the database
         *   \param key The key of dataset to delete
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         void delete_dataset(const std::string& key);
 
@@ -152,7 +152,7 @@ class PyClient
         *   \brief rename a dataset stored in the database
         *   \param key The key of dataset to rename
         *   \param new_key the new name of the dataset
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         void rename_dataset(const std::string& key, const std::string& new_key);
 
@@ -160,7 +160,7 @@ class PyClient
         *   \brief copy a dataset to a new key
         *   \param key The key of datalset to copy
         *   \param dest_key the key to store dataset copy at
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         void copy_dataset(const std::string& key, const std::string& dest_key);
 
@@ -172,7 +172,7 @@ class PyClient
         *   \param device The name of the device for execution
         *                 (e.g. CPU or GPU)
         *   \param script_file The source file for the script
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         void set_script_from_file(const std::string& key,
                                 const std::string& device,
@@ -185,7 +185,7 @@ class PyClient
         *   \param device The name of the device for execution
         *                 (e.g. CPU or GPU)
         *   \param script The script source in a std::string_view
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         void set_script(const std::string& key,
                         const std::string& device,
@@ -198,7 +198,7 @@ class PyClient
         *            The memory associated with the script
         *            is managed by the PyClient and is valid
         *            until the destruction of the PyClient.
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         std::string_view get_script(const std::string& key);
 
@@ -212,7 +212,7 @@ class PyClient
         *                 in the script
         *   \param outputs The keys of output tensors that
         *                 will be used to save script results
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         void run_script(const std::string& key,
                         const std::string& function,
@@ -237,7 +237,7 @@ class PyClient
         *                 (TF models only)
         *   \param outputs One or more names of model output nodes
         *                 (TF models only)
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         void set_model(const std::string& key,
                         const std::string_view& model,
@@ -269,7 +269,7 @@ class PyClient
         *                 (TF models only)
         *   \param outputs One or more names of model output nodes
         *                 (TF models only)
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         void set_model_from_file(const std::string& key,
                                 const std::string& model_file,
@@ -291,7 +291,7 @@ class PyClient
         *                 in the model
         *   \param outputs The keys of output tensors that
         *                 will be used to save model results
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         void run_model(const std::string& key,
                         std::vector<std::string> inputs,
@@ -301,7 +301,7 @@ class PyClient
         *   \brief Retrieve the model from the database
         *   \param key The key associated with the model
         *   \returns A py:bytes object containing the model
-        *   \throw SRRuntimeError for all client errors
+        *   \throw SRRuntimeException for all client errors
         */
         py::bytes get_model(const std::string& key);
 
@@ -442,13 +442,13 @@ class PyClient
         *                    formatted as address:port e.g. 127.0.0.1:6379
         *   \returns A list of parsed_map objects containing all the
         *            information about the given database nodes
-	    *   \throws SRRuntimeError if the address is not addressable by this
+	    *   \throws SRRuntimeException if the address is not addressable by this
         *           client.  In the case of using a cluster of database nodes,
         *           it is best practice to bind each node in the cluster
         *           to a specific adddress to avoid inconsistencies in
         *           addresses retreived with the CLUSTER SLOTS command.
         *           Inconsistencies in node addresses across
-        *           CLUSTER SLOTS comands will lead to SRRuntimeError
+        *           CLUSTER SLOTS comands will lead to SRRuntimeException
         *           being thrown.
         */
         std::vector<py::dict> get_db_node_info(std::vector<std::string> addresses);
@@ -460,13 +460,13 @@ class PyClient
         *                    formatted as address:port e.g. 127.0.0.1:6379
         *   \returns A list of parsed_map objects containing all the cluster
         *            information about the given database nodes
-	    *   \throws SRRuntimeError if the address is not addressable by this
+	    *   \throws SRRuntimeException if the address is not addressable by this
         *           client.  In the case of using a cluster of database nodes,
         *           it is best practice to bind each node in the cluster
         *           to a specific adddress to avoid inconsistencies in
         *           addresses retreived with the CLUSTER SLOTS command.
         *           Inconsistencies in node addresses across
-        *           CLUSTER SLOTS comands will lead to SRRuntimeError
+        *           CLUSTER SLOTS comands will lead to SRRuntimeException
         *           being thrown.
         */
         std::vector<py::dict> get_db_cluster_info(std::vector<std::string> addresses);
@@ -487,7 +487,7 @@ class PyClient
         *   \returns A dictionary that maps configuration parameters to their values
         *            If the provided expression does not exist, then an empty
         *            dictionary is returned.
-        *   \throws SRRuntimeError if the address is not addressable by this
+        *   \throws SRRuntimeException if the address is not addressable by this
         *           client
         */
         py::dict config_get(std::string expression,std::string address);
@@ -501,7 +501,7 @@ class PyClient
         *   \param config_param A configuration parameter to set
         *   \param value The value to assign to the configuration parameter
         *   \param address The address of the database node execute on
-        *   \throws SRRuntimeError if the address is not addressable by this
+        *   \throws SRRuntimeException if the address is not addressable by this
         *           client or if command fails to execute or if the config_param
         *           is unsupported.
         */
@@ -512,7 +512,7 @@ class PyClient
         *          time snapshot of all the data inside the Redis instance  in the form of
         *          an RDB file.
         *   \param address The address of the database node (host:port)
-        *   \throws SRRuntimeError if the address is not addressable by this
+        *   \throws SRRuntimeException if the address is not addressable by this
         *           client or if command fails to execute
         */
         void save(std::vector<std::string> addresses);

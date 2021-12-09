@@ -79,7 +79,7 @@ py::array PyDataset::get_tensor(const std::string& name)
         tensor = _dataset->_get_tensorbase_obj(name);
     }
     catch(const std::exception& e) {
-        throw SRRuntimeError(e.what());
+        throw SRRuntimeException(e.what());
     }
 
     // Define py::capsule lambda function for destructor
@@ -130,7 +130,7 @@ py::array PyDataset::get_tensor(const std::string& name)
             return py::array(tensor->dims(), data, free_when_done);
         }
         default :
-            throw SRRuntimeError("Could not infer type in "\
+            throw SRRuntimeException("Could not infer type in "\
                                       "PyDataSet::get_tensor().");
     }
 }
@@ -183,11 +183,11 @@ py::array PyDataset::get_meta_scalars(const std::string& name)
       return py::array(length, data, py::none());
     }
     case sr_meta_string: {
-      throw SRRuntimeError("MetaData is of type string. Use get_meta_strings method.");
+      throw SRRuntimeException("MetaData is of type string. Use get_meta_strings method.");
     }
     default :
       // TODO throw python exception here
-      throw SRRuntimeError("Could not infer type");
+      throw SRRuntimeException("Could not infer type");
   }
 }
 

@@ -48,7 +48,7 @@ SRError CDataSet(const char* name, const size_t name_length, void** new_dataset)
   }
   catch (const std::bad_alloc& e) {
     *new_dataset = NULL;
-    SRSetLastError(SRBadAlloc("client allocation"));
+    SRSetLastError(SRBadAllocException("client allocation"));
     result = sr_badalloc;
   }
   catch (const SRException& e) {
@@ -58,7 +58,7 @@ SRError CDataSet(const char* name, const size_t name_length, void** new_dataset)
   }
   catch (...) {
     *new_dataset = NULL;
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -84,7 +84,7 @@ SRError DeallocateeDataSet(void** dataset)
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -121,7 +121,7 @@ SRError add_tensor(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -152,7 +152,7 @@ SRError add_meta_scalar(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -184,7 +184,7 @@ SRError add_meta_string(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -223,7 +223,7 @@ SRError get_dataset_tensor(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -260,7 +260,7 @@ SRError unpack_dataset_tensor(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -297,7 +297,7 @@ SRError get_meta_scalars(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -331,7 +331,7 @@ SRError get_meta_strings(void* dataset,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 

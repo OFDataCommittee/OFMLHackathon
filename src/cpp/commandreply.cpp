@@ -126,7 +126,7 @@ CommandReply CommandReply::shallow_clone(redisReply* reply)
 char* CommandReply::str()
 {
     if (_reply->type != REDIS_REPLY_STRING)
-        throw SRRuntimeError("A pointer to the reply str "\
+        throw SRRuntimeException("A pointer to the reply str "\
                                   "cannot be returned because "\
                                   "the reply type is " +
                                   redis_reply_type());
@@ -137,7 +137,7 @@ char* CommandReply::str()
 std::string CommandReply::status_str()
 {
   if(_reply->type != REDIS_REPLY_STATUS)
-    throw SRRuntimeError("A pointer to the reply str "\
+    throw SRRuntimeException("A pointer to the reply str "\
                               "cannot be returned because "\
                               "the reply type is " +
                               redis_reply_type());
@@ -148,7 +148,7 @@ std::string CommandReply::status_str()
 std::string CommandReply::dbl_str()
 {
   if(_reply->type != REDIS_REPLY_DOUBLE)
-    throw SRRuntimeError("A pointer to the reply str "\
+    throw SRRuntimeException("A pointer to the reply str "\
                               "cannot be returned because "\
                               "the reply type is " +
                               redis_reply_type());
@@ -159,7 +159,7 @@ std::string CommandReply::dbl_str()
 std::string CommandReply::bignum_str()
 {
   if(_reply->type != REDIS_REPLY_BIGNUM)
-    throw SRRuntimeError("A pointer to the reply str "\
+    throw SRRuntimeException("A pointer to the reply str "\
                               "cannot be returned because "\
                               "the reply type is " +
                               redis_reply_type());
@@ -170,7 +170,7 @@ std::string CommandReply::bignum_str()
 std::string CommandReply::verb_str()
 {
   if(_reply->type != REDIS_REPLY_VERB)
-    throw SRRuntimeError("A pointer to the reply str "\
+    throw SRRuntimeException("A pointer to the reply str "\
                               "cannot be returned because "\
                               "the reply type is " +
                               redis_reply_type());
@@ -181,7 +181,7 @@ std::string CommandReply::verb_str()
 long long CommandReply::integer()
 {
     if (_reply->type != REDIS_REPLY_INTEGER)
-        throw SRRuntimeError("The reply integer "\
+        throw SRRuntimeException("The reply integer "\
                                   "cannot be returned because "\
                                   "the reply type is " +
                                   redis_reply_type());
@@ -192,7 +192,7 @@ long long CommandReply::integer()
 double CommandReply::dbl()
 {
     if (_reply->type != REDIS_REPLY_DOUBLE)
-        throw SRRuntimeError("The reply double "\
+        throw SRRuntimeException("The reply double "\
                                   "cannot be returned because "\
                                   "the reply type is " +
                                   redis_reply_type());
@@ -204,7 +204,7 @@ double CommandReply::dbl()
 CommandReply CommandReply::operator[](int index)
 {
     if (_reply->type != REDIS_REPLY_ARRAY)
-        throw SRRuntimeError("The reply cannot be indexed "\
+        throw SRRuntimeException("The reply cannot be indexed "\
                                   "because the reply type is " +
                                   redis_reply_type());
     return shallow_clone(_reply->element[index]);
@@ -214,7 +214,7 @@ CommandReply CommandReply::operator[](int index)
 size_t CommandReply::str_len()
 {
     if (_reply->type != REDIS_REPLY_STRING)
-        throw SRRuntimeError("The length of the reply str "\
+        throw SRRuntimeException("The length of the reply str "\
                                   "cannot be returned because "\
                                   "the reply type is " +
                                   redis_reply_type());
@@ -225,7 +225,7 @@ size_t CommandReply::str_len()
 size_t CommandReply::n_elements()
 {
     if (_reply->type != REDIS_REPLY_ARRAY)
-        throw SRRuntimeError("The number of elements "\
+        throw SRRuntimeException("The number of elements "\
                                   "cannot be returned because "\
                                   "the reply type is " +
                                   redis_reply_type());
@@ -317,7 +317,7 @@ std::string CommandReply::redis_reply_type()
         case REDIS_REPLY_VERB:
             return "REDIS_REPLY_VERB";
         default:
-            throw SRRuntimeError("Invalid Redis reply type");
+            throw SRRuntimeException("Invalid Redis reply type");
   }
 }
 
@@ -375,7 +375,7 @@ redisReply* CommandReply::deep_clone_reply(const redisReply* reply)
         redis_reply = new redisReply;
     }
     catch (std::bad_alloc& e) {
-        throw SRBadAlloc("Redis reply deep clone");
+        throw SRBadAllocException("Redis reply deep clone");
     }
     *redis_reply = *reply;
     redis_reply->str = NULL;
@@ -390,14 +390,14 @@ redisReply* CommandReply::deep_clone_reply(const redisReply* reply)
                     redis_reply->element = new redisReply*[redis_reply->elements]{NULL};
                 }
                 catch (std::bad_alloc& e) {
-                    throw SRBadAlloc("redis reply element");
+                    throw SRBadAllocException("redis reply element");
                 }
                 if (reply->element != NULL) {
                     for(size_t i = 0; i < reply->elements; i++)
                         redis_reply->element[i] = deep_clone_reply(reply->element[i]);
                 }
                 else {
-                    throw SRRuntimeError("The expected number of elements," +
+                    throw SRRuntimeException("The expected number of elements," +
                                               std::to_string(redis_reply->elements) +
                                               ", in the input redisReply is inconsistent "\
                                               "with the actual number of elements in the "\
@@ -415,7 +415,7 @@ redisReply* CommandReply::deep_clone_reply(const redisReply* reply)
                     redis_reply->str = new char[redis_reply->len];
                 }
                 catch (std::bad_alloc& e) {
-                    throw SRBadAlloc("redis reply buffer");
+                    throw SRBadAllocException("redis reply buffer");
                 }
                 std::memcpy(redis_reply->str, reply->str, redis_reply->len);
             }

@@ -136,11 +136,10 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
 
             THEN("A runtime error is thrown during TensorType initialization")
             {
-                CHECK_THROWS_AS(
+                CHECK_THROWS(
                     tp.add_tensor(name, data, dims,
                                   tensor_type,
-                                  sr_layout_contiguous),
-                    std::runtime_error
+                                  sr_layout_contiguous)
                 );
             }
         }
@@ -158,11 +157,10 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
 
             THEN("A runtime error is thrown")
             {
-                CHECK_THROWS_AS(
+                CHECK_THROWS(
                     tp.add_tensor(name, data, dims,
                                   tensor_type,
-                                  sr_layout_contiguous),
-                    std::runtime_error
+                                  sr_layout_contiguous)
                 );
             }
         }
@@ -180,11 +178,10 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
 
             THEN("A runtime error is thrown")
             {
-                CHECK_THROWS_AS(
+                CHECK_THROWS(
                     tp.add_tensor(name, data, dims,
                                  tensor_type,
-                                 sr_layout_contiguous),
-                    std::runtime_error
+                                 sr_layout_contiguous)
                 );
             }
         }
@@ -200,11 +197,10 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
 
             THEN("A runtime error is thrown")
             {
-                CHECK_THROWS_AS(
+                CHECK_THROWS(
                     tp.add_tensor(name, data, dims,
                                   tensor_type,
-                                  sr_layout_contiguous),
-                    std::runtime_error
+                                  sr_layout_contiguous)
                 );
             }
         }
@@ -221,11 +217,11 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
 
             THEN("A runtime error is thrown")
             {
-                CHECK_THROWS_AS(
+                CHECK_THROWS(
                     tp.add_tensor(name, data, dims,
                                   tensor_type,
-                                  sr_layout_contiguous),
-                    std::runtime_error);
+                                  sr_layout_contiguous)
+                );
             }
         }
     }

@@ -119,11 +119,11 @@ SCENARIO("Testing CommandReply object", "[CommandReply]")
         AND_THEN("Various methods will throw errors since the CommandReply "
                  "object doesn't have the correct type for those methods")
         {
-            CHECK_THROWS_AS(cmd_reply.str(), _SRRuntimeError);
-            CHECK_THROWS_AS(cmd_reply.dbl(), _SRRuntimeError);
-            CHECK_THROWS_AS(cmd_reply[1], _SRRuntimeError);
-            CHECK_THROWS_AS(cmd_reply.str_len(), _SRRuntimeError);
-            CHECK_THROWS_AS(cmd_reply.n_elements(), _SRRuntimeError);
+            CHECK_THROWS_AS(cmd_reply.str(), _SRRuntimeException);
+            CHECK_THROWS_AS(cmd_reply.dbl(), _SRRuntimeException);
+            CHECK_THROWS_AS(cmd_reply[1], _SRRuntimeException);
+            CHECK_THROWS_AS(cmd_reply.str_len(), _SRRuntimeException);
+            CHECK_THROWS_AS(cmd_reply.n_elements(), _SRRuntimeException);
         }
     }
 
@@ -141,7 +141,7 @@ SCENARIO("Testing CommandReply object", "[CommandReply]")
 
         THEN("Cannot call integer method on a REDIS_REPLY_BOOL")
         {
-            CHECK_THROWS_AS(cmd_reply.integer(), _SRRuntimeError);
+            CHECK_THROWS_AS(cmd_reply.integer(), _SRRuntimeException);
         }
     }
 
@@ -154,7 +154,7 @@ SCENARIO("Testing CommandReply object", "[CommandReply]")
         THEN("An error is thrown when the redis reply"
              "type is attempted to be retrieved")
         {
-            CHECK_THROWS_AS(cmd_reply.redis_reply_type(), _SRRuntimeError);
+            CHECK_THROWS_AS(cmd_reply.redis_reply_type(), _SRRuntimeException);
         }
     }
 }
@@ -384,7 +384,7 @@ SCENARIO("Test CommandReply copy constructor with an inconsistent redisReply", "
             THEN("An error is thrown during construction")
             {
                 CommandReply cmd_reply;
-                CHECK_THROWS_AS(cmd_reply = reply, _SRRuntimeError);
+                CHECK_THROWS_AS(cmd_reply = reply, _SRRuntimeException);
 
                 delete reply;
             }
@@ -459,10 +459,10 @@ SCENARIO("Test CommandReply string retrieval for non REDIS_REPLY_STRING", "[Comm
                  "are called on an incompatible redisReply type")
         {
             // Calling string retrieval methods on a REDIS_REPLY_ARRAY
-            CHECK_THROWS_AS(cmd_reply[0].status_str(), std::runtime_error);
-            CHECK_THROWS_AS(cmd_reply[0].dbl_str(), std::runtime_error);
-            CHECK_THROWS_AS(cmd_reply[0].bignum_str(), std::runtime_error);
-            CHECK_THROWS_AS(cmd_reply[0].verb_str(), std::runtime_error);
+            CHECK_THROWS_AS(cmd_reply[0].status_str(), _SRRuntimeException);
+            CHECK_THROWS_AS(cmd_reply[0].dbl_str(), _SRRuntimeException);
+            CHECK_THROWS_AS(cmd_reply[0].bignum_str(), _SRRuntimeException);
+            CHECK_THROWS_AS(cmd_reply[0].verb_str(), _SRRuntimeException);
         }
         delete cmd_reply;
     }

@@ -29,6 +29,9 @@
 #if !defined(SMARTREDIS_SREXCEPTION_H)
 #define SMARTREDIS_SREXCEPTION_H
 
+#include <stdio.h>
+#include <stdlib.h>
+
 typedef enum {
     sr_ok        = 0, // No error
     sr_badalloc  = 1, // Memory allocation error
@@ -55,45 +58,59 @@ const char* SRGetLastError();
 #include <string>
 
 // Smart error: custom error class for the SmartRedis library
-class SRException: public std::runtime_error
+class SRException: public std::exception
 {
 	// Inherit all the standard constructors
-	using std::runtime_error::runtime_error;
+	// using std::exception::exception;
 
 
 	public:
-	SRException(const char* what_arg, const char* file, int line)
-	  : std::runtime_error(what_arg)
+	SRException(const char* what_arg)
+	  : _msg(what_arg)
 	{
-		_loc = file;
-	    _loc += ":" + std::to_string(line);
+	    // NOP
+	}
+
+	SRException(const char* what_arg, const char* file, int line)
+	  : _msg(what_arg), _loc(file + std::string(":") + std::to_string(line))
+	{
+	    // NOP
 	}
 
 	SRException(const std::string& what_arg, const char* file, int line)
-	  : std::runtime_error(what_arg)
+	  : _msg(what_arg), _loc(file + std::string(":") + std::to_string(line))
 	{
-		_loc = file;
-	    _loc += ":" + std::to_string(line);
+	    // NOP
 	}
 
 	SRException(const SRException& other) noexcept
-	  : std::runtime_error(other), _loc(other._loc)
+	  : _msg(other._msg), _loc(other._loc)
 	{
 		// NOP
 	}
+
+	SRException(const std::exception& other) noexcept
+	  : _msg(other.what())
+	{
+		// NOP
+	}
+
+    SRException& operator=(const SRException &) = default;
+    SRException(SRException &&) = default;
+    SRException& operator=(SRException &&) = default;
+    virtual ~SRException() override = default;
 
 	virtual SRError to_error_code() const noexcept {
 		return sr_invalid;
 	}
 
 	virtual const char* what() const noexcept{
-		std::string output(what());
-		output += "\n" + _loc;
+		std::string output = _msg + "\n" + _loc;
 		return output.c_str();
 	}
 
 	virtual const char* what(bool hideLocation) const noexcept {
-		return hideLocation ? std::runtime_error::what() : what();
+		return hideLocation ? _msg.c_str() : what();
 	}
 
 	virtual const char* where() const noexcept {
@@ -101,11 +118,13 @@ class SRException: public std::runtime_error
 	}
 
 	protected:
+	std::string _msg;
 	std::string _loc;
 };
 
-// Memory allocation error
-class _SRBadAlloc: public SRException
+//////////////////////////////////////////////////
+// Memory allocation exception
+class _SRBadAllocException: public SRException
 {
 	using SRException::SRException;
 
@@ -114,10 +133,11 @@ class _SRBadAlloc: public SRException
 	}
 };
 
-#define SRBadAlloc(txt) _SRBadAlloc(txt, __FILE__, __LINE__)
+#define SRBadAllocException(txt) _SRBadAllocException(txt, __FILE__, __LINE__)
 
-//  Back-end database error
-class _SRDatabaseError: public SRException
+//////////////////////////////////////////////////
+//  Back-end database exception
+class _SRDatabaseException: public SRException
 {
 	using SRException::SRException;
 
@@ -126,10 +146,11 @@ class _SRDatabaseError: public SRException
 	}
 };
 
-#define SRDatabaseError(txt) _SRDatabaseError(txt, __FILE__, __LINE__)
+#define SRDatabaseException(txt) _SRDatabaseException(txt, __FILE__, __LINE__)
 
-// Runtime error
-class _SRRuntimeError: public SRException
+//////////////////////////////////////////////////
+// Runtime exception
+class _SRRuntimeException: public SRException
 {
 	using SRException::SRException;
 
@@ -138,10 +159,11 @@ class _SRRuntimeError: public SRException
 	}
 };
 
-#define SRRuntimeError(txt) _SRRuntimeError(txt, __FILE__, __LINE__)
+#define SRRuntimeException(txt) _SRRuntimeException(txt, __FILE__, __LINE__)
 
-// Parameter error
-class _SRParameterError: public SRException
+//////////////////////////////////////////////////
+// Parameter exception
+class _SRParameterException: public SRException
 {
 	using SRException::SRException;
 
@@ -150,12 +172,11 @@ class _SRParameterError: public SRException
 	}
 };
 
-#define SRParameterError(txt) _SRParameterError(txt, __FILE__, __LINE__)
+#define SRParameterException(txt) _SRParameterException(txt, __FILE__, __LINE__)
 
-#define SRRuntimeError(txt) _SRRuntimeError(txt, __FILE__, __LINE__)
-
-// Timeout error
-class _SRTimeoutError: public SRException
+//////////////////////////////////////////////////
+// Timeout exception
+class _SRTimeoutException: public SRException
 {
 	using SRException::SRException;
 
@@ -164,10 +185,11 @@ class _SRTimeoutError: public SRException
 	}
 };
 
-#define SRTimeoutError(txt) _SRTimeoutError(txt, __FILE__, __LINE__)
+#define SRTimeoutException(txt) _SRTimeoutException(txt, __FILE__, __LINE__)
 
-// Internal error
-class _SRInternalError: public SRException
+//////////////////////////////////////////////////
+// Internal exception
+class _SRInternalException: public SRException
 {
 	using SRException::SRException;
 
@@ -176,8 +198,9 @@ class _SRInternalError: public SRException
 	}
 };
 
-#define SRInternalError(txt) _SRInternalError(txt, __FILE__, __LINE__)
+#define SRInternalException(txt) _SRInternalException(txt, __FILE__, __LINE__)
 
+//////////////////////////////////////////////////
 // Store the last error encountered
 extern "C"
 void SRSetLastError(const SRException& last_error);

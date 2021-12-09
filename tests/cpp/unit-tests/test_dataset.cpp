@@ -136,23 +136,23 @@ SCENARIO("Testing DataSet object", "[DataSet]")
                 SRTensorType retrieved_type;
 
 #if 1
-                CHECK_THROWS_AS(
+                CHECK_THROWS(
                     dataset.get_tensor("does_not_exist", retrieved_data,
                                        retrieved_dims, retrieved_type,
-                                       mem_layout),
-                    std::runtime_error);
+                                       mem_layout)
+                );
 #else
                 try {
                     dataset.get_tensor("does_not_exist", retrieved_data,
                                        retrieved_dims, retrieved_type,
                                        mem_layout);
-                } catch (_SRRuntimeError const&) {
-                    throw std::runtime_error("We can catch an _SRRuntimeError, but Catch cannot detect it");
+                } catch (_SRRuntimeException const&) {
+                    throw std::runtime_error("We can catch an _SRRuntimeException, but Catch cannot detect it");
                 } catch (std::exception &e) {
                     std::string foo("thrown: \"");
                     foo += currentExceptionTypeName();
-                    foo += "\"; _SRRuntimeError: \"";
-                    _SRRuntimeError e2("test");
+                    foo += "\"; _SRRuntimeException: \"";
+                    _SRRuntimeException e2("test");
                     foo += typeid(e2).name();
                     foo += "\"";
                     throw std::runtime_error(foo);
@@ -190,11 +190,11 @@ SCENARIO("Testing DataSet object", "[DataSet]")
                 dataset.clear_field(meta_scalar_name);
 
                 // The meta scalar no longer exists
-                CHECK_THROWS_AS(
+                CHECK_THROWS(
                     dataset.get_meta_scalars(meta_scalar_name,
                                             (void*&)retrieved_data,
-                                             retrieved_length, type),
-                    std::runtime_error);
+                                             retrieved_length, type)
+                );
             }
         }
 

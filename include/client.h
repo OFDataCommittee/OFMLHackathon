@@ -560,13 +560,13 @@ class Client
         *   \brief Returns information about the given database node
         *   \param address The address of the database node (host:port)
         *   \returns parsed_reply_nested_map containing the database node information
-        *   \throws SRRuntimeError if the address is not addressable by this
+        *   \throws SRRuntimeException if the address is not addressable by this
         *           client.  In the case of using a cluster of database nodes,
         *           it is best practice to bind each node in the cluster
         *           to a specific address to avoid inconsistencies in
         *           addresses retrieved with the CLUSTER SLOTS command.
         *           Inconsistencies in node addresses across
-        *           CLUSTER SLOTS commands will lead to SRRuntimeError
+        *           CLUSTER SLOTS commands will lead to SRRuntimeException
         *           being thrown.
         */
         parsed_reply_nested_map get_db_node_info(std::string address);
@@ -576,14 +576,14 @@ class Client
         *          cluster node.
         *   \param address The address of the database node (host:port)
         *   \returns parsed_reply_map containing the database cluster information.
-	    *   \throws SRRuntimeError if on a non-cluster environment or
+	    *   \throws SRRuntimeException if on a non-cluster environment or
         *           if the address is not addressable by this
         *           client. In the case of using a cluster of database nodes,
         *           it is best practice to bind each node in the cluster
         *           to a specific address to avoid inconsistencies in
         *           addresses retrieved with the CLUSTER SLOTS command.
         *           Inconsistencies in node addresses across
-        *           CLUSTER SLOTS commands will lead to SRRuntimeError
+        *           CLUSTER SLOTS commands will lead to SRRuntimeException
         *           being thrown.
         */
         parsed_reply_map get_db_cluster_info(std::string address);
@@ -595,13 +595,13 @@ class Client
         *   \returns parsed_reply_map containing the database cluster information.
         *            If this command is executed on a non-cluster database, an
         *            empty parsed_reply_map is returned.
-        *   \throws SRRuntimeError if the address is not addressable by this
+        *   \throws SRRuntimeException if the address is not addressable by this
         *           client.  In the case of using a cluster of database nodes,
         *           it is best practice to bind each node in the cluster
         *           to a specific address to avoid inconsistencies in
         *           addresses retrieved with the CLUSTER SLOTS command.
         *           Inconsistencies in node addresses across
-        *           CLUSTER SLOTS comands will lead to SRRuntimeError
+        *           CLUSTER SLOTS comands will lead to SRRuntimeException
         *           being thrown.
         parsed_reply_map get_db_cluster_info(std::string address);
         *   \param address The address of the database node
@@ -617,7 +617,7 @@ class Client
         *   \returns An unordered map that maps configuration parameters to their values.
         *            If the provided expression does not exist, then an empty dictionary
         *            is returned.
-        *   \throws SRRuntimeError if the address is not addressable by this
+        *   \throws SRRuntimeException if the address is not addressable by this
         *           client
         */
         std::unordered_map<std::string,std::string> config_get(std::string expression,
@@ -632,7 +632,7 @@ class Client
         *   \param config_param A configuration parameter to set
         *   \param value The value to assign to the configuration parameter
         *   \param address The address of the database node to execute on
-        *   \throws SRRuntimeError if the address is not addressable by this
+        *   \throws SRRuntimeException if the address is not addressable by this
         *           client or if command fails to execute or if the config_param
         *           is not supported.
         */
@@ -643,7 +643,7 @@ class Client
         *          time snapshot of all the data inside the Redis instance  in the form of
         *          an RDB file.
         *   \param address The address of the database node (host:port)
-        *   \throws SRRuntimeError if the address is not addressable by this
+        *   \throws SRRuntimeException if the address is not addressable by this
         *           client or if command fails to execute
         */
         void save(std::string address);

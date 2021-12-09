@@ -45,6 +45,6 @@ Command* MultiKeyCommand::clone()
         return new MultiKeyCommand(*this);
     }
     catch (std::bad_alloc& e) {
-        throw SRBadAlloc("MultiKeyCommand clone");
+        throw SRBadAllocException("MultiKeyCommand clone");
     }
 }

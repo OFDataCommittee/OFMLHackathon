@@ -50,7 +50,7 @@ SRError SmartRedisCClient(bool cluster, void** new_client)
   }
   catch (const std::bad_alloc& e) {
     *new_client = NULL;
-    SRSetLastError(SRBadAlloc("client allocation"));
+    SRSetLastError(SRBadAllocException("client allocation"));
     result = sr_badalloc;
   }
   catch (const SRException& e) {
@@ -60,7 +60,7 @@ SRError SmartRedisCClient(bool cluster, void** new_client)
   }
   catch (...) {
     *new_client = NULL;
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -85,7 +85,7 @@ SRError DeleteCClient(void** c_client)
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -112,7 +112,7 @@ SRError put_dataset(void* c_client, void* dataset)
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -140,7 +140,7 @@ SRError get_dataset(void* c_client, const char* name,
       *dataset = reinterpret_cast<void*>(d);
     } catch (const std::bad_alloc& e) {
       *dataset = NULL;
-      throw SRBadAlloc("client allocation");
+      throw SRBadAllocException("client allocation");
     }
   }
   catch (const SRException& e) {
@@ -148,7 +148,7 @@ SRError get_dataset(void* c_client, const char* name,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -178,7 +178,7 @@ SRError rename_dataset(void* c_client, const char* name,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -209,7 +209,7 @@ SRError copy_dataset(void* c_client, const char* src_name,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -235,7 +235,7 @@ SRError delete_dataset(void* c_client, const char* name, const size_t name_lengt
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -273,7 +273,7 @@ SRError put_tensor(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -308,7 +308,7 @@ SRError get_tensor(void* c_client,
     outcome = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     outcome = sr_internal;
   }
 
@@ -347,7 +347,7 @@ SRError unpack_tensor(void* c_client,
     outcome = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     outcome = sr_internal;
   }
 
@@ -377,7 +377,7 @@ SRError rename_tensor(void* c_client, const char* key,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -405,7 +405,7 @@ SRError delete_tensor(void* c_client, const char* key,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -437,7 +437,7 @@ SRError copy_tensor(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -473,7 +473,7 @@ SRError set_model_from_file(void* c_client,
     if (n_inputs != 1 && input_lengths[0] != 0) {
       for (size_t i = 0; i < n_inputs; i++){
         if (inputs[i] == NULL || input_lengths[i] == 0) {
-          throw SRParameterError(
+          throw SRParameterException(
             std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
         }
       }
@@ -481,7 +481,7 @@ SRError set_model_from_file(void* c_client,
     if (n_outputs != 1 && output_lengths[0] != 0) {
       for (size_t i = 0; i < n_outputs; i++) {
         if (outputs[i] == NULL || output_lengths[i] == 0) {
-          throw SRParameterError(
+          throw SRParameterException(
             std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
         }
       }
@@ -518,7 +518,7 @@ SRError set_model_from_file(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -554,7 +554,7 @@ SRError set_model(void* c_client,
     if (n_inputs != 1 && input_lengths[0] != 0) {
       for (size_t i = 0; i < n_inputs; i++){
         if (inputs[i] == NULL || input_lengths[i] == 0) {
-          throw SRParameterError(
+          throw SRParameterException(
             std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
         }
       }
@@ -562,7 +562,7 @@ SRError set_model(void* c_client,
     if (n_outputs != 1 && output_lengths[0] != 0) {
       for (size_t i = 0; i < n_outputs; i++) {
         if (outputs[i] == NULL || output_lengths[i] == 0) {
-          throw SRParameterError(
+          throw SRParameterException(
             std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
         }
       }
@@ -599,7 +599,7 @@ SRError set_model(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -633,7 +633,7 @@ SRError get_model(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -669,7 +669,7 @@ SRError set_script_from_file(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -706,7 +706,7 @@ SRError set_script(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -740,7 +740,7 @@ SRError get_script(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -772,13 +772,13 @@ SRError run_script(void* c_client,
     // Inputs and outputs are mandatory for run_script
     for (size_t i = 0; i < n_inputs; i++){
       if (inputs[i] == NULL || input_lengths[i] == 0) {
-        throw SRParameterError(
+        throw SRParameterException(
           std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
       }
     }
     for (size_t i = 0; i < n_outputs; i++) {
       if (outputs[i] == NULL || output_lengths[i] == 0) {
-        throw SRParameterError(
+        throw SRParameterException(
           std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
       }
     }
@@ -808,7 +808,7 @@ SRError run_script(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -838,13 +838,13 @@ SRError run_model(void* c_client,
     // Inputs and outputs are mandatory for run_script
     for (size_t i = 0; i < n_inputs; i++){
       if (inputs[i] == NULL || input_lengths[i] == 0) {
-        throw SRParameterError(
+        throw SRParameterException(
           std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
       }
     }
     for (size_t i = 0; i < n_outputs; i++) {
       if (outputs[i] == NULL || output_lengths[i] == 0) {
-        throw SRParameterError(
+        throw SRParameterException(
           std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
       }
     }
@@ -873,7 +873,7 @@ SRError run_model(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -901,7 +901,7 @@ SRError key_exists(void* c_client, const char* key, const size_t key_length,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -929,7 +929,7 @@ SRError model_exists(void* c_client, const char* name, const size_t name_length,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -957,7 +957,7 @@ SRError tensor_exists(void* c_client, const char* name, const size_t name_length
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -985,7 +985,7 @@ SRError dataset_exists(void* c_client, const char* name, const size_t name_lengt
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -1017,7 +1017,7 @@ SRError poll_key(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -1049,7 +1049,7 @@ SRError poll_model(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -1081,7 +1081,7 @@ SRError poll_tensor(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -1110,7 +1110,7 @@ SRError set_data_source(void* c_client,
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -1135,7 +1135,7 @@ SRError use_model_ensemble_prefix(void* c_client, bool use_prefix)
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 
@@ -1160,7 +1160,7 @@ SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix)
     result = e.to_error_code();
   }
   catch (...) {
-    SRSetLastError(SRInternalError("Unknown exception occurred"));
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = sr_internal;
   }
 

@@ -49,7 +49,7 @@ T* SharedMemoryList<T>::allocate_bytes(size_t bytes)
         return ptr;
     }
     catch (std::bad_alloc& e) {
-        throw SRBadAlloc("shared memory buffer");
+        throw SRBadAllocException("shared memory buffer");
     }
 }
 

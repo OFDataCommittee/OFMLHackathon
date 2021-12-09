@@ -46,6 +46,6 @@ Command* CompoundCommand::clone()
         return new_cmd;
     }
     catch (std::bad_alloc& e) {
-        throw SRBadAlloc("CompoundCommand clone");
+        throw SRBadAllocException("CompoundCommand clone");
     }
 }

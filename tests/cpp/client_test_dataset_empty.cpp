@@ -30,6 +30,7 @@
 #include "dataset.h"
 #include "client_test_utils.h"
 #include "dataset_test_utils.h"
+#include "srexception.h"
 
 void put_get_empty_dataset(std::string dataset_name)
 {
@@ -41,12 +42,11 @@ void put_get_empty_dataset(std::string dataset_name)
     try {
         client.put_dataset(sent_dataset);
     }
-    catch(std::runtime_error) {
+    catch(_SRRuntimeException) {
         return;
     }
 
-    throw std::runtime_error("Failed to throw error "
-                             "for empty DataSet.");
+    throw std::runtime_error("Failed to throw error for empty DataSet.");
 }
 
 int main(int argc, char* argv[]) {
