@@ -380,41 +380,44 @@ CommandReply Redis::get_script(const std::string& key)
 inline CommandReply Redis::_run(const Command& cmd)
 {
     CommandReply reply;
-    bool do_sleep = false;
+    bool executed = false;
     for (int n_trial = 0; n_trial < 100; n_trial++) {
-        do_sleep = false;
         try {
             reply = _redis->command(cmd.cbegin(), cmd.cend());
             if (reply.has_error() == 0)
                 return reply;
+            executed = true;
             break;
         }
         catch (sw::redis::IoError &e) {
-            do_sleep = true;
+            // Fall through for a retry
         }
         catch (sw::redis::ClosedError &e) {
-            do_sleep = true;
+            // Fall through for a retry
         }
         catch (std::exception& e) {
             throw SRRuntimeException(e.what());
         }
         catch (...) {
             throw SRInternalException("Non-standard exception "\
-                                       "encountered during command " +
-                                       cmd.first_field() + " execution. ");
+                                      "encountered during command " +
+                                      cmd.first_field() + " execution. ");
         }
 
-        if (do_sleep) {
-            std::this_thread::sleep_for(std::chrono::seconds(2));
-        }
+        std::this_thread::sleep_for(std::chrono::seconds(2));
     }
 
-    if (reply.has_error() > 0)
-        reply.print_reply_error();
-    throw SRRuntimeException("Redis failed to execute command: " +
-                              cmd.first_field());
+    // If we get here, we've either run out of retry attempts or gotten
+    // a failure back from the database
+    if (executed) {
+        if (reply.has_error() > 0)
+            reply.print_reply_error();
+        throw SRRuntimeException("Redis failed to execute command: " +
+                                cmd.first_field());
+    }
 
-    return reply;
+    // Since we didn't execute, we must have run out of retry attempts
+    throw SRTimeoutException("Unable to execute command" + cmd.first_field());
 }
 
 inline void Redis::_add_to_address_map(std::string address_port)
@@ -455,16 +458,16 @@ inline void Redis::_connect(std::string address_port)
 
     // Attempt to have the sw::redis::Redis object
     // make a connection using the PING command
-    int n_trials = 10;
+    const int n_trials = 10;
     for (int i = 1; i <= n_trials; i++) {
         try {
             if (_redis->ping().compare("PONG") == 0) {
                 return;
             }
             else if (i == n_trials) {
-                throw SRRuntimeException(std::string("Connection attempt "\
-                                          "failed after ") +
-                                          std::to_string(i) + "tries");
+                throw SRTimeoutException(std::string("Connection attempt "\
+                                         "failed after ") +
+                                         std::to_string(i) + "tries");
             }
         }
         catch (std::exception& e) {
@@ -482,5 +485,5 @@ inline void Redis::_connect(std::string address_port)
     }
 
     // Should never get here
-    throw SRRuntimeException("End of _connect reached unexpectedly");
+    throw SRInternalException("End of _connect reached unexpectedly");
 }

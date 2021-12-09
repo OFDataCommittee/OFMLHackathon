@@ -40,7 +40,8 @@ typedef enum {
     SRRuntimeError   = 4, // Runtime error executing an operation
     SRParameterError = 5, // Bad parameter error
     SRTimeoutError   = 6, // Timeout error
-    SRInvalidError   = 7  // Uninitialized error variable
+	SRKeyError       = 7, // Key error
+    SRInvalidError   = 8  // Uninitialized error variable
 } SRError;
 
 
@@ -199,6 +200,19 @@ class _SRInternalException: public SRException
 };
 
 #define SRInternalException(txt) _SRInternalException(txt, __FILE__, __LINE__)
+
+//////////////////////////////////////////////////
+// Key exception
+class _SRKeyException: public SRException
+{
+	using SRException::SRException;
+
+	virtual SRError to_error_code() const noexcept {
+		return SRKeyError;
+	}
+};
+
+#define SRKeyException(txt) _SRKeyException(txt, __FILE__, __LINE__)
 
 //////////////////////////////////////////////////
 // Store the last error encountered

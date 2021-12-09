@@ -552,13 +552,13 @@ CommandReply RedisCluster::get_script(const std::string& key)
 
 inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix)
 {
+    const int n_trials = 100;
     std::string_view sv_prefix(db_prefix.data(), db_prefix.size());
 
     // Execute the commmand
     CommandReply reply;
-    int n_trials = 100;
+    bool executed = false;
     for (int trial = 0; trial < n_trials; trial++) {
-        bool do_sleep = false;
         try {
             sw::redis::Redis db = _redis_cluster->redis(sv_prefix, false);
             reply = db.command(cmd.cbegin(), cmd.cend());
@@ -566,13 +566,14 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
                 _last_prefix = db_prefix;
                 return reply;
             }
+            executed = true;
             break;
         }
         catch (sw::redis::IoError &e) {
-            do_sleep = true;
+            // Fall through for a retry
         }
         catch (sw::redis::ClosedError &e) {
-            do_sleep = true;
+            // Fall through for a retry
         }
         catch (std::exception& e) {
             throw SRRuntimeException(e.what());
@@ -584,24 +585,26 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
         }
 
         // Sleep before the next attempt
-        if (do_sleep) {
-            std::this_thread::sleep_for(std::chrono::seconds(2));
-            do_sleep = false;
-        }
+        std::this_thread::sleep_for(std::chrono::seconds(2));
     }
 
-    // We should only get here on an error response
-    if (reply.has_error() > 0)
-        reply.print_reply_error();
-    throw SRRuntimeException("Redis failed to execute command: " +
-                              cmd.first_field());
-    return reply; // never reached
+    // If we get here, we've either run out of retry attempts or gotten
+    // a failure back from the database
+    if (executed) {
+        if (reply.has_error() > 0)
+            reply.print_reply_error();
+        throw SRRuntimeException("Redis failed to execute command: " +
+                                cmd.first_field());
+    }
+
+    // Since we didn't execute, we must have run out of retry attempts
+    throw SRTimeoutException("Unable to execute command" + cmd.first_field());
 }
 
 // Connect to the cluster at the address and port
 inline void RedisCluster::_connect(std::string address_port)
 {
-    int n_trials = 10;
+    const int n_trials = 10;
     for (int i = 1; i <= n_trials; i++) {
         try {
             _redis_cluster = new sw::redis::RedisCluster(address_port);
@@ -637,13 +640,17 @@ inline void RedisCluster::_connect(std::string address_port)
             }
         }
 
-        // Sleep before the next atttenpt
+        // Sleep before the next attempt
         if (_redis_cluster != NULL) {
             delete _redis_cluster;
             _redis_cluster = NULL;
         }
         std::this_thread::sleep_for(std::chrono::seconds(2));
     }
+
+    // If we get here, we failed to establish a connection
+    throw SRTimeoutException(std::string("Connection attempt failed after ") +
+                                         std::to_string(n_trials) + "tries");
 }
 
 // Map the RedisCluster via the CLUSTER SLOTS command
