@@ -47,30 +47,30 @@ program main
   logical(kind=c_bool) :: exists
 
   result = client%initialize(use_cluster())
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
 
   print *, "Putting tensor"
   result = client%put_tensor( "test_initial", array, shape(array) )
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
 
   print *, "Renaming tensor"
   result = client%rename_tensor( "test_initial", "test_rename" )
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
   result = client%key_exists("test_rename", exists)
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
   if (.not. exists) stop 'Renamed tensor does not exist'
 
   result = client%copy_tensor("test_rename", "test_copy")
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
 
   result = client%key_exists("test_copy", exists)
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
   if (.not. exists) stop 'Copied tensor does not exist'
 
   result = client%delete_tensor("test_copy")
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
   result = client%key_exists("test_copy", exists)
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
   if (exists) stop 'Copied tensor incorrectly exists'
 
   print *, "Fortran Client misc tensor: passed"

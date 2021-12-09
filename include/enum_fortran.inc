@@ -70,12 +70,12 @@ end enum
 
 ! SRError
 enum, bind(c)
-  enumerator :: sr_ok        = 0
-  enumerator :: sr_badalloc  = 1
-  enumerator :: sr_dberr     = 2
-  enumerator :: sr_internal  = 3
-  enumerator :: sr_runtime   = 4
-  enumerator :: sr_parameter = 5
-  enumerator :: sr_timeout   = 6
-  enumerator :: sr_invalid   = -1
+  enumerator :: SRNoError        = 0
+  enumerator :: SRBadAllocError  = 1
+  enumerator :: SRDatabaseError     = 2
+  enumerator :: SRInternalError  = 3
+  enumerator :: SRRuntimeError   = 4
+  enumerator :: SRParameterError = 5
+  enumerator :: SRTimeoutError   = 6
+  enumerator :: SRInvalidError   = -1
 end enum

@@ -72,29 +72,29 @@ inline void fill_dataset_with_metadata(SmartRedis::DataSet& dataset)
 {
     //Add metadata fields to the DataSet.  _meta_1 and _meta_2
     //values added to _field_1 and _meta_3 is added to _field_2.
-    dataset.add_meta_scalar("dbl_field_1", &dbl_meta_1, sr_meta_dbl);
-    dataset.add_meta_scalar("dbl_field_1", &dbl_meta_2, sr_meta_dbl);
-    dataset.add_meta_scalar("dbl_field_2", &dbl_meta_3, sr_meta_dbl);
+    dataset.add_meta_scalar("dbl_field_1", &dbl_meta_1, SRMetadataTypeDouble);
+    dataset.add_meta_scalar("dbl_field_1", &dbl_meta_2, SRMetadataTypeDouble);
+    dataset.add_meta_scalar("dbl_field_2", &dbl_meta_3, SRMetadataTypeDouble);
 
-    dataset.add_meta_scalar("flt_field_1", &flt_meta_1, sr_meta_flt);
-    dataset.add_meta_scalar("flt_field_1", &flt_meta_2, sr_meta_flt);
-    dataset.add_meta_scalar("flt_field_2", &flt_meta_3, sr_meta_flt);
+    dataset.add_meta_scalar("flt_field_1", &flt_meta_1, SRMetadataTypeFloat);
+    dataset.add_meta_scalar("flt_field_1", &flt_meta_2, SRMetadataTypeFloat);
+    dataset.add_meta_scalar("flt_field_2", &flt_meta_3, SRMetadataTypeFloat);
 
-    dataset.add_meta_scalar("i64_field_1", &i64_meta_1, sr_meta_int64);
-    dataset.add_meta_scalar("i64_field_1", &i64_meta_2, sr_meta_int64);
-    dataset.add_meta_scalar("i64_field_2", &i64_meta_3, sr_meta_int64);
+    dataset.add_meta_scalar("i64_field_1", &i64_meta_1, SRMetadataTypeInt64);
+    dataset.add_meta_scalar("i64_field_1", &i64_meta_2, SRMetadataTypeInt64);
+    dataset.add_meta_scalar("i64_field_2", &i64_meta_3, SRMetadataTypeInt64);
 
-    dataset.add_meta_scalar("i32_field_1", &i32_meta_1, sr_meta_int32);
-    dataset.add_meta_scalar("i32_field_1", &i32_meta_2, sr_meta_int32);
-    dataset.add_meta_scalar("i32_field_2", &i32_meta_3, sr_meta_int32);
+    dataset.add_meta_scalar("i32_field_1", &i32_meta_1, SRMetadataTypeInt32);
+    dataset.add_meta_scalar("i32_field_1", &i32_meta_2, SRMetadataTypeInt32);
+    dataset.add_meta_scalar("i32_field_2", &i32_meta_3, SRMetadataTypeInt32);
 
-    dataset.add_meta_scalar("ui64_field_1", &ui64_meta_1, sr_meta_uint64);
-    dataset.add_meta_scalar("ui64_field_1", &ui64_meta_2, sr_meta_uint64);
-    dataset.add_meta_scalar("ui64_field_2", &ui64_meta_3, sr_meta_uint64);
+    dataset.add_meta_scalar("ui64_field_1", &ui64_meta_1, SRMetadataTypeUint64);
+    dataset.add_meta_scalar("ui64_field_1", &ui64_meta_2, SRMetadataTypeUint64);
+    dataset.add_meta_scalar("ui64_field_2", &ui64_meta_3, SRMetadataTypeUint64);
 
-    dataset.add_meta_scalar("ui32_field_1", &ui32_meta_1, sr_meta_uint32);
-    dataset.add_meta_scalar("ui32_field_1", &ui32_meta_2, sr_meta_uint32);
-    dataset.add_meta_scalar("ui32_field_2", &ui32_meta_3, sr_meta_uint32);
+    dataset.add_meta_scalar("ui32_field_1", &ui32_meta_1, SRMetadataTypeUint32);
+    dataset.add_meta_scalar("ui32_field_1", &ui32_meta_2, SRMetadataTypeUint32);
+    dataset.add_meta_scalar("ui32_field_2", &ui32_meta_3, SRMetadataTypeUint32);
 
     dataset.add_meta_string("str_field_1", str_meta_1);
     dataset.add_meta_string("str_field_1", str_meta_2);
@@ -128,7 +128,7 @@ void check_nested_3D_tensor(SmartRedis::DataSet& dataset,
 
     T*** t_unpack = allocate_3D_array<T>(dims[0], dims[1], dims[2]);
 
-    dataset.unpack_tensor(tensor_name, t_unpack, dims, type, sr_layout_nested);
+    dataset.unpack_tensor(tensor_name, t_unpack, dims, type, SRMemLayoutNested);
 
     //Check that the tensor values are correct
     if(is_equal_3D_array(vals, t_unpack, dims[0], dims[1], dims[2])) {
@@ -150,7 +150,7 @@ void check_nested_3D_tensor(SmartRedis::DataSet& dataset,
 
     dataset.get_tensor(tensor_name, (void*&)t_get,
                        get_dims, get_type,
-                       sr_layout_nested);
+                       SRMemLayoutNested);
 
     if(get_type!=type)
         throw std::runtime_error("Retrieved type for " +
@@ -194,7 +194,7 @@ void check_meta_field(SmartRedis::DataSet& dataset,
 {
     T* retrieved_vals;
     size_t retrieved_length;
-    SRMetaDataType retrieved_type = sr_meta_invalid;
+    SRMetaDataType retrieved_type = SRMetadataTypeInvalid;
 
     dataset.get_meta_scalars(field_name,
                             (void*&)retrieved_vals,
@@ -271,39 +271,39 @@ void check_tensor_names(SmartRedis::DataSet& dataset,
 void check_dataset_metadata(SmartRedis::DataSet& dataset)
 {
     //Check that the metadata values are correct for dbl
-    check_meta_field<double>(dataset, "dbl_field_1", sr_meta_dbl,
+    check_meta_field<double>(dataset, "dbl_field_1", SRMetadataTypeDouble,
                             {dbl_meta_1, dbl_meta_2});
-    check_meta_field<double>(dataset, "dbl_field_2", sr_meta_dbl,
+    check_meta_field<double>(dataset, "dbl_field_2", SRMetadataTypeDouble,
                             {dbl_meta_3});
 
     //Check that the metadata values are correct for flt
-    check_meta_field<float>(dataset, "flt_field_1", sr_meta_flt,
+    check_meta_field<float>(dataset, "flt_field_1", SRMetadataTypeFloat,
                             {flt_meta_1, flt_meta_2});
-    check_meta_field<float>(dataset, "flt_field_2", sr_meta_flt,
+    check_meta_field<float>(dataset, "flt_field_2", SRMetadataTypeFloat,
                             {flt_meta_3});
 
     //Check that the metadata values are correct for i64
-    check_meta_field<int64_t>(dataset, "i64_field_1", sr_meta_int64,
+    check_meta_field<int64_t>(dataset, "i64_field_1", SRMetadataTypeInt64,
                               {i64_meta_1, i64_meta_2});
-    check_meta_field<int64_t>(dataset, "i64_field_2", sr_meta_int64,
+    check_meta_field<int64_t>(dataset, "i64_field_2", SRMetadataTypeInt64,
                               {i64_meta_3});
 
     //Check that the metadata values are correct for i32
-    check_meta_field<int32_t>(dataset, "i32_field_1", sr_meta_int32,
+    check_meta_field<int32_t>(dataset, "i32_field_1", SRMetadataTypeInt32,
                               {i32_meta_1, i32_meta_2});
-    check_meta_field<int32_t>(dataset, "i32_field_2", sr_meta_int32,
+    check_meta_field<int32_t>(dataset, "i32_field_2", SRMetadataTypeInt32,
                               {i32_meta_3});
 
     //Check that the metadata values are correct for ui64
-    check_meta_field<uint64_t>(dataset, "ui64_field_1", sr_meta_uint64,
+    check_meta_field<uint64_t>(dataset, "ui64_field_1", SRMetadataTypeUint64,
                                {ui64_meta_1, ui64_meta_2});
-    check_meta_field<uint64_t>(dataset, "ui64_field_2", sr_meta_uint64,
+    check_meta_field<uint64_t>(dataset, "ui64_field_2", SRMetadataTypeUint64,
                                {ui64_meta_3});
 
     //Check that the metadata values are correct for ui32
-    check_meta_field<uint32_t>(dataset, "ui32_field_1", sr_meta_uint32,
+    check_meta_field<uint32_t>(dataset, "ui32_field_1", SRMetadataTypeUint32,
                                {ui32_meta_1, ui32_meta_2});
-    check_meta_field<uint32_t>(dataset, "ui32_field_2", sr_meta_uint32,
+    check_meta_field<uint32_t>(dataset, "ui32_field_2", SRMetadataTypeUint32,
                                {ui32_meta_3});
 
     std::vector<std::string> str_meta_field_1 =

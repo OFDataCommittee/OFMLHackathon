@@ -97,7 +97,7 @@ DataSet Client::get_dataset(const std::string& name)
         SRTensorType type = GetTensorCommand::get_data_type(reply);
         dataset._add_to_tensorpack(tensor_names[i],
                                    (void*)blob.data(), reply_dims,
-                                   type, sr_layout_contiguous);
+                                   type, SRMemLayoutContiguous);
     }
 
     return dataset;
@@ -200,28 +200,28 @@ void Client::put_tensor(const std::string& key,
     TensorBase* tensor = NULL;
     try {
         switch (type) {
-            case sr_tensor_dbl:
+            case SRTensorTypeDouble:
                 tensor = new Tensor<double>(p_key, data, dims, type, mem_layout);
                 break;
-            case sr_tensor_flt:
+            case SRTensorTypeFloat:
                 tensor = new Tensor<float>(p_key, data, dims, type, mem_layout);
                 break;
-            case sr_tensor_int64:
+            case SRTensorTypeInt64:
                 tensor = new Tensor<int64_t>(p_key, data, dims, type, mem_layout);
                 break;
-            case sr_tensor_int32:
+            case SRTensorTypeInt32:
                 tensor = new Tensor<int32_t>(p_key, data, dims, type, mem_layout);
                 break;
-            case sr_tensor_int16:
+            case SRTensorTypeInt16:
                 tensor = new Tensor<int16_t>(p_key, data, dims, type, mem_layout);
                 break;
-            case sr_tensor_int8:
+            case SRTensorTypeInt8:
                 tensor = new Tensor<int8_t>(p_key, data, dims, type, mem_layout);
                 break;
-            case sr_tensor_uint16:
+            case SRTensorTypeUint16:
                 tensor = new Tensor<uint16_t>(p_key, data, dims, type, mem_layout);
                 break;
-            case sr_tensor_uint8:
+            case SRTensorTypeUint8:
                 tensor = new Tensor<uint8_t>(p_key, data, dims, type, mem_layout);
                 break;
             default:
@@ -298,7 +298,7 @@ void Client::unpack_tensor(const std::string& key,
                            const SRTensorType type,
                            const SRMemoryLayout mem_layout)
 {
-    if (mem_layout == sr_layout_contiguous && dims.size() > 1) {
+    if (mem_layout == SRMemLayoutContiguous && dims.size() > 1) {
         throw SRRuntimeException("The destination memory space "\
                                   "dimension vector should only "\
                                   "be of size one if the memory "\
@@ -311,14 +311,14 @@ void Client::unpack_tensor(const std::string& key,
     std::vector<size_t> reply_dims = GetTensorCommand::get_dims(reply);
 
     // Make sure we have the right dims to unpack into (Contiguous case)
-    if (mem_layout == sr_layout_contiguous ||
-        mem_layout == sr_layout_fortran_contiguous) {
+    if (mem_layout == SRMemLayoutContiguous ||
+        mem_layout == SRMemLayoutFortranContiguous) {
         size_t total_dims = 1;
         for (size_t i = 0; i < reply_dims.size(); i++) {
             total_dims *= reply_dims[i];
         }
         if (total_dims != dims[0] &&
-            mem_layout == sr_layout_contiguous) {
+            mem_layout == SRMemLayoutContiguous) {
             throw SRRuntimeException("The dimensions of the fetched "\
                                       "tensor do not match the length of "\
                                       "the contiguous memory space.");
@@ -326,7 +326,7 @@ void Client::unpack_tensor(const std::string& key,
     }
 
     // Make sure we have the right dims to unpack into (Nested case)
-    if (mem_layout == sr_layout_nested) {
+    if (mem_layout == SRMemLayoutNested) {
         if (dims.size() != reply_dims.size()) {
             // Same number of dimensions
             throw SRRuntimeException("The number of dimensions of the  "\
@@ -358,45 +358,45 @@ void Client::unpack_tensor(const std::string& key,
     TensorBase* tensor = NULL;
     try {
         switch (reply_type) {
-            case sr_tensor_dbl:
+            case SRTensorTypeDouble:
                 tensor = new Tensor<double>(get_key, (void*)blob.data(),
                                             reply_dims, reply_type,
-                                            sr_layout_contiguous);
+                                            SRMemLayoutContiguous);
                 break;
-            case sr_tensor_flt:
+            case SRTensorTypeFloat:
                 tensor = new Tensor<float>(get_key, (void*)blob.data(),
                                            reply_dims, reply_type,
-                                           sr_layout_contiguous);
+                                           SRMemLayoutContiguous);
                 break;
-            case sr_tensor_int64:
+            case SRTensorTypeInt64:
                 tensor = new Tensor<int64_t>(get_key, (void*)blob.data(),
                                             reply_dims, reply_type,
-                                            sr_layout_contiguous);
+                                            SRMemLayoutContiguous);
                 break;
-            case sr_tensor_int32:
+            case SRTensorTypeInt32:
                 tensor = new Tensor<int32_t>(get_key, (void*)blob.data(),
                                             reply_dims, reply_type,
-                                            sr_layout_contiguous);
+                                            SRMemLayoutContiguous);
                 break;
-            case sr_tensor_int16:
+            case SRTensorTypeInt16:
                 tensor = new Tensor<int16_t>(get_key, (void*)blob.data(),
                                             reply_dims, reply_type,
-                                            sr_layout_contiguous);
+                                            SRMemLayoutContiguous);
                 break;
-            case sr_tensor_int8:
+            case SRTensorTypeInt8:
                 tensor = new Tensor<int8_t>(get_key, (void*)blob.data(),
                                             reply_dims, reply_type,
-                                            sr_layout_contiguous);
+                                            SRMemLayoutContiguous);
                 break;
-            case sr_tensor_uint16:
+            case SRTensorTypeUint16:
                 tensor = new Tensor<uint16_t>(get_key, (void*)blob.data(),
                                             reply_dims, reply_type,
-                                            sr_layout_contiguous);
+                                            SRMemLayoutContiguous);
                 break;
-            case sr_tensor_uint8:
+            case SRTensorTypeUint8:
                 tensor = new Tensor<uint8_t>(get_key, (void*)blob.data(),
                                             reply_dims, reply_type,
-                                            sr_layout_contiguous);
+                                            SRMemLayoutContiguous);
                 break;
             default:
                 throw SRRuntimeException("Invalid type for unpack_tensor");
@@ -1109,37 +1109,37 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
     TensorBase* ptr = NULL;
     try {
         switch (type) {
-            case sr_tensor_dbl:
+            case SRTensorTypeDouble:
                 ptr = new Tensor<double>(get_key, (void*)blob.data(),
-                                        dims, type, sr_layout_contiguous);
+                                        dims, type, SRMemLayoutContiguous);
                 break;
-            case sr_tensor_flt:
+            case SRTensorTypeFloat:
                 ptr = new Tensor<float>(get_key, (void*)blob.data(),
-                                        dims, type, sr_layout_contiguous);
+                                        dims, type, SRMemLayoutContiguous);
                 break;
-            case sr_tensor_int64:
+            case SRTensorTypeInt64:
                 ptr = new Tensor<int64_t>(get_key, (void*)blob.data(),
-                                        dims, type, sr_layout_contiguous);
+                                        dims, type, SRMemLayoutContiguous);
                 break;
-            case sr_tensor_int32:
+            case SRTensorTypeInt32:
                 ptr = new Tensor<int32_t>(get_key, (void*)blob.data(),
-                                        dims, type, sr_layout_contiguous);
+                                        dims, type, SRMemLayoutContiguous);
                 break;
-            case sr_tensor_int16:
+            case SRTensorTypeInt16:
                 ptr = new Tensor<int16_t>(get_key, (void*)blob.data(),
-                                        dims, type, sr_layout_contiguous);
+                                        dims, type, SRMemLayoutContiguous);
                 break;
-            case sr_tensor_int8:
+            case SRTensorTypeInt8:
                 ptr = new Tensor<int8_t>(get_key, (void*)blob.data(),
-                                        dims, type, sr_layout_contiguous);
+                                        dims, type, SRMemLayoutContiguous);
                 break;
-            case sr_tensor_uint16:
+            case SRTensorTypeUint16:
                 ptr = new Tensor<uint16_t>(get_key, (void*)blob.data(),
-                                        dims, type, sr_layout_contiguous);
+                                        dims, type, SRMemLayoutContiguous);
                 break;
-            case sr_tensor_uint8:
+            case SRTensorTypeUint8:
                 ptr = new Tensor<uint8_t>(get_key, (void*)blob.data(),
-                                        dims, type, sr_layout_contiguous);
+                                        dims, type, SRMemLayoutContiguous);
                 break;
             default :
                 throw SRRuntimeException("An invalid TensorType was "\

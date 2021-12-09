@@ -37,7 +37,7 @@ using namespace SmartRedis;
 extern "C"
 SRError CDataSet(const char* name, const size_t name_length, void** new_dataset)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try {
     // Sanity check params
     SR_CHECK_PARAMS(name != NULL && new_dataset != NULL);
@@ -49,7 +49,7 @@ SRError CDataSet(const char* name, const size_t name_length, void** new_dataset)
   catch (const std::bad_alloc& e) {
     *new_dataset = NULL;
     SRSetLastError(SRBadAllocException("client allocation"));
-    result = sr_badalloc;
+    result = SRBadAllocError;
   }
   catch (const SRException& e) {
     *new_dataset = NULL;
@@ -59,7 +59,7 @@ SRError CDataSet(const char* name, const size_t name_length, void** new_dataset)
   catch (...) {
     *new_dataset = NULL;
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -69,7 +69,7 @@ SRError CDataSet(const char* name, const size_t name_length, void** new_dataset)
 extern "C"
 SRError DeallocateeDataSet(void** dataset)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -85,7 +85,7 @@ SRError DeallocateeDataSet(void** dataset)
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -102,7 +102,7 @@ SRError add_tensor(void* dataset,
                    const SRTensorType type,
                    const SRMemoryLayout mem_layout)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -122,7 +122,7 @@ SRError add_tensor(void* dataset,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -136,7 +136,7 @@ SRError add_meta_scalar(void* dataset,
                         const void* data,
                         const SRMetaDataType type)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -153,7 +153,7 @@ SRError add_meta_scalar(void* dataset,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -167,7 +167,7 @@ SRError add_meta_string(void* dataset,
                         const char* data,
                         const size_t data_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -185,7 +185,7 @@ SRError add_meta_string(void* dataset,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -205,7 +205,7 @@ SRError get_dataset_tensor(void* dataset,
                            SRTensorType* type,
                            const SRMemoryLayout mem_layout)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -215,7 +215,7 @@ SRError get_dataset_tensor(void* dataset,
     DataSet* d = (DataSet* )dataset;
     std::string name_str(name, name_length);
 
-    *type = sr_tensor_invalid;
+    *type = SRTensorTypeInvalid;
     d->get_tensor(name_str, *data, *dims, *n_dims, *type, mem_layout);
   }
   catch (const SRException& e) {
@@ -224,7 +224,7 @@ SRError get_dataset_tensor(void* dataset,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -241,7 +241,7 @@ SRError unpack_dataset_tensor(void* dataset,
                               const SRTensorType type,
                               const SRMemoryLayout mem_layout)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -261,7 +261,7 @@ SRError unpack_dataset_tensor(void* dataset,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -277,7 +277,7 @@ SRError get_meta_scalars(void* dataset,
                        SRMetaDataType* type,
                        void** scalar_data)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -298,7 +298,7 @@ SRError get_meta_scalars(void* dataset,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -315,7 +315,7 @@ SRError get_meta_strings(void* dataset,
                          size_t* n_strings,
                          size_t** lengths)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -332,7 +332,7 @@ SRError get_meta_strings(void* dataset,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;

@@ -33,14 +33,14 @@
 #include <stdlib.h>
 
 typedef enum {
-    sr_ok        = 0, // No error
-    sr_badalloc  = 1, // Memory allocation error
-    sr_dberr     = 2, // Backend database error
-    sr_internal  = 3, // Internal SmartRedis error
-    sr_runtime   = 4, // Runtime error executing an operation
-    sr_parameter = 5, // Bad parameter error
-    sr_timeout   = 6, // Timeout error
-    sr_invalid   = 7  // Uninitialized error variable
+    SRNoError        = 0, // No error
+    SRBadAllocError  = 1, // Memory allocation error
+    SRDatabaseError  = 2, // Backend database error
+    SRInternalError  = 3, // Internal SmartRedis error
+    SRRuntimeError   = 4, // Runtime error executing an operation
+    SRParameterError = 5, // Bad parameter error
+    SRTimeoutError   = 6, // Timeout error
+    SRInvalidError   = 7  // Uninitialized error variable
 } SRError;
 
 
@@ -101,7 +101,7 @@ class SRException: public std::exception
     virtual ~SRException() override = default;
 
 	virtual SRError to_error_code() const noexcept {
-		return sr_invalid;
+		return SRInvalidError;
 	}
 
 	virtual const char* what() const noexcept{
@@ -129,7 +129,7 @@ class _SRBadAllocException: public SRException
 	using SRException::SRException;
 
 	virtual SRError to_error_code() const noexcept {
-		return sr_badalloc;
+		return SRBadAllocError;
 	}
 };
 
@@ -142,7 +142,7 @@ class _SRDatabaseException: public SRException
 	using SRException::SRException;
 
 	virtual SRError to_error_code() const noexcept {
-		return sr_dberr;
+		return SRDatabaseError;
 	}
 };
 
@@ -155,7 +155,7 @@ class _SRRuntimeException: public SRException
 	using SRException::SRException;
 
 	virtual SRError to_error_code() const noexcept {
-		return sr_runtime;
+		return SRRuntimeError;
 	}
 };
 
@@ -168,7 +168,7 @@ class _SRParameterException: public SRException
 	using SRException::SRException;
 
 	virtual SRError to_error_code() const noexcept {
-		return sr_parameter;
+		return SRParameterError;
 	}
 };
 
@@ -181,7 +181,7 @@ class _SRTimeoutException: public SRException
 	using SRException::SRException;
 
 	virtual SRError to_error_code() const noexcept {
-		return sr_timeout;
+		return SRTimeoutError;
 	}
 };
 
@@ -194,7 +194,7 @@ class _SRInternalException: public SRException
 	using SRException::SRException;
 
 	virtual SRError to_error_code() const noexcept {
-		return sr_internal;
+		return SRInternalError;
 	}
 };
 

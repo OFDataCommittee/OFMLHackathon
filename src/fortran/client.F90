@@ -149,7 +149,7 @@ function initialize_client(self, cluster)
 
   if (present(cluster)) self%cluster = cluster
   result = c_constructor(self%cluster, self%client_ptr)
-  self%is_initialized = result .eq. sr_ok
+  self%is_initialized = result .eq. SRNoError
   initialize_client = result
 end function initialize_client
 

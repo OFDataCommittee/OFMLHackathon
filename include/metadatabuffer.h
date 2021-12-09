@@ -275,7 +275,7 @@ extern inline std::string generate_string_buf(
     size_t pos = 0;
 
     // Add the type ID
-    type_t type_id = (type_t)sr_meta_string;
+    type_t type_id = (type_t)SRMetadataTypeString;
     n_bytes = sizeof(type_t);
     add_buf_data(buf, pos, &type_id, n_bytes);
     pos += n_bytes;
@@ -315,7 +315,7 @@ extern inline std::vector<std::string> unpack_string_buf(
 
     type_t type = read<type_t>(data, byte_position, total_bytes);
 
-    if (type != (type_t)sr_meta_string)
+    if (type != (type_t)SRMetadataTypeString)
         throw SRRuntimeException("The buffer string metadata type "\
                                   "does not contain the expected "\
                                   "type of string.");

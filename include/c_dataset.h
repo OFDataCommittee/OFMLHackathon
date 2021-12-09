@@ -45,7 +45,7 @@ extern "C" {
 *   \param name_length The length of the dataset name c-string,
 *                      excluding null terminating character
 *   \param new_dataset Receives the new dataset
-*   \return Returns sr_ok on success or an error code on failure
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError CDataSet(const char* name,
                  const size_t name_length,
@@ -54,7 +54,7 @@ SRError CDataSet(const char* name,
 /*!
 *   \brief C-DataSet destructor
 *   \param dataset A pointer to the dataset to release
-*   \return Returns sr_ok on success or an error code on failure
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError DeallocateeDataSet(void** dataset);
 
@@ -69,7 +69,7 @@ SRError DeallocateeDataSet(void** dataset);
 *   \param n_dims The number of dimensions of the tensor
 *   \param type The data type of the tensor data
 *   \param mem_layout Memory layout of the provided tensor data
-*   \return Returns sr_ok on success or an error code on failure
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError add_tensor(void* dataset,
                    const char* name,
@@ -90,7 +90,7 @@ SRError add_tensor(void* dataset,
 *                      excluding null terminating character
 *   \param data A c-ptr to the metadata field data
 *   \param type The data type of the metadata
-*   \return Returns sr_ok on success or an error code on failure
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError add_meta_scalar(void* dataset,
                         const char* name,
@@ -109,7 +109,7 @@ SRError add_meta_scalar(void* dataset,
 *                      excluding null terminating character
 *   \param data The string to add to the field
 *   \param data_length The length of the metadata string value
-*   \return Returns sr_ok on success or an error code on failure
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError add_meta_string(void* dataset,
                         const char* name,
@@ -140,7 +140,7 @@ SRError add_meta_string(void* dataset,
 *   \param n_dims The number of dimensions of the tensor
 *   \param type Receives the retrieved tensor type
 *   \param mem_layout The layout the newly allocated memory should conform to
-*   \return Returns sr_ok on success or an error code on failure
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError get_dataset_tensor(void* dataset,
                            const char* name,
@@ -166,7 +166,7 @@ SRError get_dataset_tensor(void* dataset,
 *   \param n_dims The number of dimensions of the tensor in the memory space
 *   \param type The TensorType matching the data type of the memory space
 *   \param mem_layout The MemoryLayout of the provided memory space.
-*   \return Returns sr_ok on success or an error code on failure
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError unpack_dataset_tensor(void* dataset,
                               const char* name,
@@ -191,7 +191,7 @@ SRError unpack_dataset_tensor(void* dataset,
 *   \param length The number of values in the metadata field
 *   \param type The data type of the metadata field
 *   \param scalar_data Receives allocated memory containing the metadata
-*   \return Returns sr_ok on success or an error code on failure
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError get_meta_scalars(void* dataset,
                          const char* name,
@@ -218,7 +218,7 @@ SRError get_meta_scalars(void* dataset,
 *   \param n_strings The number of strings returned in \p data
 *   \param lengths Recieves an array containing the lengths of the strings
 *                  returned in \p data
-*   \return Returns sr_ok on success or an error code on failure
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError get_meta_strings(void* dataset,
                          const char* name,

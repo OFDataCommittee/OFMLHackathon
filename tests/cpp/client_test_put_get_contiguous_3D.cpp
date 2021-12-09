@@ -69,13 +69,13 @@ void put_get_3D_array(
   }
   */
 
-  client.put_tensor(key, (void*)array, dims, type, sr_layout_contiguous);
+  client.put_tensor(key, (void*)array, dims, type, SRMemLayoutContiguous);
 
   client.unpack_tensor(key, u_contig_result,
                        {dims[0]*dims[1]*dims[2]}, type,
-                       sr_layout_contiguous);
+                       SRMemLayoutContiguous);
 
-  client.unpack_tensor(key, u_nested_result, dims, type, sr_layout_nested);
+  client.unpack_tensor(key, u_nested_result, dims, type, SRMemLayoutNested);
 
   /*
   int d = 0;
@@ -117,7 +117,7 @@ void put_get_3D_array(
   void* g_nested_result;
   client.get_tensor(key, g_nested_result,
                     g_dims_nested, g_type_nested,
-                    sr_layout_nested);
+                    SRMemLayoutNested);
   T_recv*** g_type_nested_result = (T_recv***)g_nested_result;
 
   if(type!=g_type_nested)
@@ -160,7 +160,7 @@ void put_get_3D_array(
   void* g_contig_result;
   client.get_tensor(key, g_contig_result,
                     g_dims_contig, g_type_contig,
-                    sr_layout_contiguous);
+                    SRMemLayoutContiguous);
 
   if(g_dims_contig!=dims)
     throw std::runtime_error("The tensor dimensions retrieved "\
@@ -198,35 +198,35 @@ int main(int argc, char* argv[]) {
 
   put_get_3D_array<double,double>(
 				  &set_1D_array_floating_point_values<double>,
-				  dims, sr_tensor_dbl, "_dbl");
+				  dims, SRTensorTypeDouble, "_dbl");
 
   put_get_3D_array<float,float>(
 				&set_1D_array_floating_point_values<float>,
-				dims, sr_tensor_flt, "_flt");
+				dims, SRTensorTypeFloat, "_flt");
 
   put_get_3D_array<int64_t,int64_t>(
 				    &set_1D_array_integral_values<int64_t>,
-				    dims, sr_tensor_int64, "_i64");
+				    dims, SRTensorTypeInt64, "_i64");
 
   put_get_3D_array<int32_t,int32_t>(
 				    &set_1D_array_integral_values<int32_t>,
-				    dims, sr_tensor_int32, "_i32");
+				    dims, SRTensorTypeInt32, "_i32");
 
   put_get_3D_array<int16_t,int16_t>(
 				      &set_1D_array_integral_values<int16_t>,
-				      dims, sr_tensor_int16, "_i16");
+				      dims, SRTensorTypeInt16, "_i16");
 
   put_get_3D_array<int8_t,int8_t>(
 				      &set_1D_array_integral_values<int8_t>,
-				      dims, sr_tensor_int8, "_i8");
+				      dims, SRTensorTypeInt8, "_i8");
 
   put_get_3D_array<uint16_t,uint16_t>(
 				      &set_1D_array_integral_values<uint16_t>,
-				      dims, sr_tensor_uint16, "_ui16");
+				      dims, SRTensorTypeUint16, "_ui16");
 
   put_get_3D_array<uint8_t,uint8_t>(
 				      &set_1D_array_integral_values<uint8_t>,
-				      dims, sr_tensor_uint8, "_ui8");
+				      dims, SRTensorTypeUint8, "_ui8");
 
   std::cout<<"3D put and get with contiguous "\
              "data test complete."<<std::endl;

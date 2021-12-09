@@ -35,10 +35,10 @@ using namespace SmartRedis;
 
 SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
 {
-    SRTensorType tensor_type = GENERATE(sr_tensor_dbl, sr_tensor_flt,
-                                        sr_tensor_int64, sr_tensor_int32,
-                                        sr_tensor_int16, sr_tensor_int8,
-                                        sr_tensor_uint16, sr_tensor_uint8);
+    SRTensorType tensor_type = GENERATE(SRTensorTypeDouble, SRTensorTypeFloat,
+                                        SRTensorTypeInt64, SRTensorTypeInt32,
+                                        SRTensorTypeInt16, SRTensorTypeInt8,
+                                        SRTensorTypeUint16, SRTensorTypeUint8);
 
     GIVEN("A TensorPack object")
     {
@@ -55,7 +55,7 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
             void* data = tensor.data();
             tp.add_tensor(name, data, dims,
                           tensor_type,
-                          sr_layout_contiguous);
+                          SRMemLayoutContiguous);
 
             THEN("The tensor and its data members can be retrieved")
             {
@@ -139,7 +139,7 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
                 CHECK_THROWS(
                     tp.add_tensor(name, data, dims,
                                   tensor_type,
-                                  sr_layout_contiguous)
+                                  SRMemLayoutContiguous)
                 );
             }
         }
@@ -160,7 +160,7 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
                 CHECK_THROWS(
                     tp.add_tensor(name, data, dims,
                                   tensor_type,
-                                  sr_layout_contiguous)
+                                  SRMemLayoutContiguous)
                 );
             }
         }
@@ -181,7 +181,7 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
                 CHECK_THROWS(
                     tp.add_tensor(name, data, dims,
                                  tensor_type,
-                                 sr_layout_contiguous)
+                                 SRMemLayoutContiguous)
                 );
             }
         }
@@ -200,7 +200,7 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
                 CHECK_THROWS(
                     tp.add_tensor(name, data, dims,
                                   tensor_type,
-                                  sr_layout_contiguous)
+                                  SRMemLayoutContiguous)
                 );
             }
         }
@@ -220,7 +220,7 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
                 CHECK_THROWS(
                     tp.add_tensor(name, data, dims,
                                   tensor_type,
-                                  sr_layout_contiguous)
+                                  SRMemLayoutContiguous)
                 );
             }
         }

@@ -60,9 +60,9 @@ void dataset_delete(
     std::string t_name_2 = "tensor_2";
     std::string t_name_3 = "tensor_3";
 
-    dataset->add_tensor(t_name_1, t_send_1, dims, type, sr_layout_nested);
-    dataset->add_tensor(t_name_2, t_send_2, dims, type, sr_layout_nested);
-    dataset->add_tensor(t_name_3, t_send_3, dims, type, sr_layout_nested);
+    dataset->add_tensor(t_name_1, t_send_1, dims, type, SRMemLayoutNested);
+    dataset->add_tensor(t_name_2, t_send_2, dims, type, SRMemLayoutNested);
+    dataset->add_tensor(t_name_3, t_send_3, dims, type, SRMemLayoutNested);
 
     //Add metadata to the DataSet
     DATASET_TEST_UTILS::fill_dataset_with_metadata(*dataset);
@@ -130,7 +130,7 @@ int main(int argc, char* argv[]) {
   dataset_name = "3D_dbl_dataset_delete";
   dataset_delete<double,double>(
 				  &set_3D_array_floating_point_values<double>,
-				  dims, sr_tensor_dbl, "_dbl", dataset_name);
+				  dims, SRTensorTypeDouble, "_dbl", dataset_name);
 
   return 0;
 }

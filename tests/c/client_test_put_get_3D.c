@@ -70,12 +70,12 @@ int put_get_3D_tensor(void* client,
   size_t* g_dims;
   size_t g_n_dims;
 
-  SRMemoryLayout layout = sr_layout_nested;
-  if (sr_ok != put_tensor(client, key, key_length,
+  SRMemoryLayout layout = SRMemLayoutNested;
+  if (SRNoError != put_tensor(client, key, key_length,
                           (void*)tensor, dims, n_dims, type, layout)) {
     return -1;
   }
-  if (sr_ok != get_tensor(client, key, key_length,
+  if (SRNoError != get_tensor(client, key, key_length,
                           result, &g_dims, &g_n_dims,
                           &g_type, layout)) {
     return -1;
@@ -118,7 +118,7 @@ int put_get_3D_tensor_double(size_t* dims, size_t n_dims,
                   char* key_suffix, size_t key_suffix_length)
 {
   void* client = NULL;
-  if (sr_ok != SmartRedisCClient(use_cluster(), &client))
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
     return -1;
 
   double*** tensor = (double***)malloc(dims[0]*sizeof(double**));
@@ -140,7 +140,7 @@ int put_get_3D_tensor_double(size_t* dims, size_t n_dims,
   r_value = put_get_3D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              sr_tensor_dbl);
+                              SRTensorTypeDouble);
 
   for(size_t i=0; i<dims[0]; i++) {
     for(size_t j=0; j<dims[1]; j++) {
@@ -160,7 +160,7 @@ int put_get_3D_tensor_double(size_t* dims, size_t n_dims,
     }
     free(tensor[i]);
   }
-  if (sr_ok != DeleteCClient(&client))
+  if (SRNoError != DeleteCClient(&client))
     return -1;
   free(tensor);
   return r_value;
@@ -175,7 +175,7 @@ int put_get_3D_tensor_float(size_t* dims, size_t n_dims,
                            size_t key_suffix_length)
 {
   void* client = NULL;
-  if (sr_ok != SmartRedisCClient(use_cluster(), &client))
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
     return -1;
 
   float*** tensor = (float***)malloc(dims[0]*sizeof(float**));
@@ -197,7 +197,7 @@ int put_get_3D_tensor_float(size_t* dims, size_t n_dims,
   r_value = put_get_3D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              sr_tensor_flt);
+                              SRTensorTypeFloat);
 
   for(size_t i=0; i<dims[0]; i++) {
     for(size_t j=0; j<dims[1]; j++) {
@@ -217,7 +217,7 @@ int put_get_3D_tensor_float(size_t* dims, size_t n_dims,
     free(tensor[i]);
   }
   free(tensor);
-  if (sr_ok != DeleteCClient(&client))
+  if (SRNoError != DeleteCClient(&client))
     return -1;
   return r_value;
 }
@@ -231,7 +231,7 @@ int put_get_3D_tensor_i8(size_t* dims, size_t n_dims,
                          size_t key_suffix_length)
 {
   void* client = NULL;
-  if (sr_ok != SmartRedisCClient(use_cluster(), &client))
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
     return -1;
 
   int8_t*** tensor = (int8_t***)malloc(dims[0]*sizeof(int8_t**));
@@ -258,7 +258,7 @@ int put_get_3D_tensor_i8(size_t* dims, size_t n_dims,
   r_value = put_get_3D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              sr_tensor_int8);
+                              SRTensorTypeInt8);
   for(size_t i=0; i<dims[0]; i++) {
     for(size_t j=0; j<dims[1]; j++) {
       for(size_t k=0; k<dims[2]; k++) {
@@ -277,7 +277,7 @@ int put_get_3D_tensor_i8(size_t* dims, size_t n_dims,
     free(tensor[i]);
   }
   free(tensor);
-  if (sr_ok != DeleteCClient(&client))
+  if (SRNoError != DeleteCClient(&client))
     return -1;
   return r_value;
 }
@@ -291,7 +291,7 @@ int put_get_3D_tensor_i16(size_t* dims, size_t n_dims,
                          size_t key_suffix_length)
 {
   void* client = NULL;
-  if (sr_ok != SmartRedisCClient(use_cluster(), &client))
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
     return -1;
 
   int16_t*** tensor = (int16_t***)malloc(dims[0]*sizeof(int16_t**));
@@ -318,7 +318,7 @@ int put_get_3D_tensor_i16(size_t* dims, size_t n_dims,
   r_value = put_get_3D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              sr_tensor_int16);
+                              SRTensorTypeInt16);
 
   for(size_t i=0; i<dims[0]; i++) {
     for(size_t j=0; j<dims[1]; j++) {
@@ -338,7 +338,7 @@ int put_get_3D_tensor_i16(size_t* dims, size_t n_dims,
     free(tensor[i]);
   }
   free(tensor);
-  if (sr_ok != DeleteCClient(&client))
+  if (SRNoError != DeleteCClient(&client))
     return -1;
   return r_value;
 }
@@ -352,7 +352,7 @@ int put_get_3D_tensor_i32(size_t* dims, size_t n_dims,
                          size_t key_suffix_length)
 {
   void* client = NULL;
-  if (sr_ok != SmartRedisCClient(use_cluster(), &client))
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
     return -1;
 
   int32_t*** tensor = (int32_t***)malloc(dims[0]*sizeof(int32_t**));
@@ -379,7 +379,7 @@ int put_get_3D_tensor_i32(size_t* dims, size_t n_dims,
   r_value = put_get_3D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              sr_tensor_int32);
+                              SRTensorTypeInt32);
 
   for(size_t i=0; i<dims[0]; i++) {
     for(size_t j=0; j<dims[1]; j++) {
@@ -399,7 +399,7 @@ int put_get_3D_tensor_i32(size_t* dims, size_t n_dims,
     free(tensor[i]);
   }
   free(tensor);
-  if (sr_ok != DeleteCClient(&client))
+  if (SRNoError != DeleteCClient(&client))
     return -1;
   return r_value;
 }
@@ -413,7 +413,7 @@ int put_get_3D_tensor_i64(size_t* dims, size_t n_dims,
                          size_t key_suffix_length)
 {
   void* client = NULL;
-  if (sr_ok != SmartRedisCClient(use_cluster(), &client))
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
     return -1;
 
   int64_t*** tensor = (int64_t***)malloc(dims[0]*sizeof(int64_t**));
@@ -440,7 +440,7 @@ int put_get_3D_tensor_i64(size_t* dims, size_t n_dims,
   r_value = put_get_3D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              sr_tensor_int64);
+                              SRTensorTypeInt64);
 
   for(size_t i=0; i<dims[0]; i++) {
     for(size_t j=0; j<dims[1]; j++) {
@@ -460,7 +460,7 @@ int put_get_3D_tensor_i64(size_t* dims, size_t n_dims,
     free(tensor[i]);
   }
   free(tensor);
-  if (sr_ok != DeleteCClient(&client))
+  if (SRNoError != DeleteCClient(&client))
     return -1;
   return r_value;
 }
@@ -474,7 +474,7 @@ int put_get_3D_tensor_ui8(size_t* dims, size_t n_dims,
                           size_t key_suffix_length)
 {
   void* client = NULL;
-  if (sr_ok != SmartRedisCClient(use_cluster(), &client))
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
     return -1;
 
   uint8_t*** tensor = (uint8_t***)malloc(dims[0]*sizeof(uint8_t**));
@@ -501,7 +501,7 @@ int put_get_3D_tensor_ui8(size_t* dims, size_t n_dims,
   r_value = put_get_3D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              sr_tensor_uint8);
+                              SRTensorTypeUint8);
 
   for(size_t i=0; i<dims[0]; i++) {
     for(size_t j=0; j<dims[1]; j++) {
@@ -521,7 +521,7 @@ int put_get_3D_tensor_ui8(size_t* dims, size_t n_dims,
     free(tensor[i]);
   }
   free(tensor);
-  if (sr_ok != DeleteCClient(&client))
+  if (SRNoError != DeleteCClient(&client))
     return -1;
   return r_value;
 }
@@ -535,7 +535,7 @@ int put_get_3D_tensor_ui16(size_t* dims, size_t n_dims,
                           size_t key_suffix_length)
 {
   void* client = NULL;
-  if (sr_ok != SmartRedisCClient(use_cluster(), &client))
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
     return -1;
 
   uint16_t*** tensor = (uint16_t***)malloc(dims[0]*sizeof(uint16_t**));
@@ -562,7 +562,7 @@ int put_get_3D_tensor_ui16(size_t* dims, size_t n_dims,
   r_value = put_get_3D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              sr_tensor_uint16);
+                              SRTensorTypeUint16);
 
   for(size_t i=0; i<dims[0]; i++) {
     for(size_t j=0; j<dims[1]; j++) {
@@ -582,7 +582,7 @@ int put_get_3D_tensor_ui16(size_t* dims, size_t n_dims,
     free(tensor[i]);
   }
   free(tensor);
-  if (sr_ok != DeleteCClient(&client))
+  if (SRNoError != DeleteCClient(&client))
     return -1;
   return r_value;
 }

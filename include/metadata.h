@@ -57,13 +57,13 @@ static std::string DATATYPE_METADATA_STR_STRING = "STRING";
 
 static const std::unordered_map<std::string, SRMetaDataType>
     METADATA_TYPE_MAP{
-        {DATATYPE_METADATA_STR_DOUBLE, sr_meta_dbl},
-        {DATATYPE_METADATA_STR_FLOAT, sr_meta_flt},
-        {DATATYPE_METADATA_STR_INT32, sr_meta_int32},
-        {DATATYPE_METADATA_STR_INT64, sr_meta_int64},
-        {DATATYPE_METADATA_STR_UINT32, sr_meta_uint32},
-        {DATATYPE_METADATA_STR_UINT64, sr_meta_uint64},
-        {DATATYPE_METADATA_STR_STRING, sr_meta_string} };
+        {DATATYPE_METADATA_STR_DOUBLE, SRMetadataTypeDouble},
+        {DATATYPE_METADATA_STR_FLOAT, SRMetadataTypeFloat},
+        {DATATYPE_METADATA_STR_INT32, SRMetadataTypeInt32},
+        {DATATYPE_METADATA_STR_INT64, SRMetadataTypeInt64},
+        {DATATYPE_METADATA_STR_UINT32, SRMetadataTypeUint32},
+        {DATATYPE_METADATA_STR_UINT64, SRMetadataTypeUint64},
+        {DATATYPE_METADATA_STR_STRING, SRMetadataTypeString} };
 
 class MetaData;
 

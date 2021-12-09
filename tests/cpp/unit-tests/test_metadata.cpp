@@ -147,17 +147,17 @@ SCENARIO("Test MetaData", "[MetaData]")
             uint32_t uint32_val = std::numeric_limits<uint32_t>::max();
 
             metadata.add_scalar(keys[0], &dbl_val,
-                                 sr_meta_dbl);
+                                 SRMetadataTypeDouble);
             metadata.add_scalar(keys[1], &flt_val,
-                                 sr_meta_flt);
+                                 SRMetadataTypeFloat);
             metadata.add_scalar(keys[2], &int64_val,
-                                 sr_meta_int64);
+                                 SRMetadataTypeInt64);
             metadata.add_scalar(keys[3], &uint64_val,
-                                 sr_meta_uint64);
+                                 SRMetadataTypeUint64);
             metadata.add_scalar(keys[4], &int32_val,
-                                 sr_meta_int32);
+                                 SRMetadataTypeInt32);
             metadata.add_scalar(keys[5], &uint32_val,
-                                 sr_meta_uint32);
+                                 SRMetadataTypeUint32);
 
             double* dbl_data;
             float* flt_data;
@@ -174,32 +174,32 @@ SCENARIO("Test MetaData", "[MetaData]")
                                             length, type);
                 CHECK(*dbl_data == dbl_val);
                 CHECK(length == 1);
-                CHECK(type == sr_meta_dbl);
+                CHECK(type == SRMetadataTypeDouble);
                 metadata.get_scalar_values(keys[1], (void*&)flt_data,
                                             length, type);
                 CHECK(*flt_data == flt_val);
                 CHECK(length == 1);
-                CHECK(type == sr_meta_flt);
+                CHECK(type == SRMetadataTypeFloat);
                 metadata.get_scalar_values(keys[2], (void*&)int64_data,
                                             length, type);
                 CHECK(*int64_data == int64_val);
                 CHECK(length == 1);
-                CHECK(type == sr_meta_int64);
+                CHECK(type == SRMetadataTypeInt64);
                 metadata.get_scalar_values(keys[3], (void*&)uint64_data,
                                             length, type);
                 CHECK(*uint64_data == uint64_val);
                 CHECK(length == 1);
-                CHECK(type == sr_meta_uint64);
+                CHECK(type == SRMetadataTypeUint64);
                 metadata.get_scalar_values(keys[4], (void*&)int32_data,
                                             length, type);
                 CHECK(*int32_data == int32_val);
                 CHECK(length == 1);
-                CHECK(type == sr_meta_int32);
+                CHECK(type == SRMetadataTypeInt32);
                 metadata.get_scalar_values(keys[5], (void*&)uint32_data,
                                             length, type);
                 CHECK(*uint32_data == uint32_val);
                 CHECK(length == 1);
-                CHECK(type == sr_meta_uint32);
+                CHECK(type == SRMetadataTypeUint32);
             }
 
             AND_THEN("The scalers can be retrieved incorrectly")
@@ -253,32 +253,32 @@ SCENARIO("Test MetaData", "[MetaData]")
                                             length, type);
                 CHECK(*dbl_data == dbl_val);
                 CHECK(length == 1);
-                CHECK(type == sr_meta_dbl);
+                CHECK(type == SRMetadataTypeDouble);
                 metadata_2.get_scalar_values(keys[1], (void*&)flt_data,
                                             length, type);
                 CHECK(*flt_data == flt_val);
                 CHECK(length == 1);
-                CHECK(type == sr_meta_flt);
+                CHECK(type == SRMetadataTypeFloat);
                 metadata_2.get_scalar_values(keys[2], (void*&)int64_data,
                                             length, type);
                 CHECK(*int64_data == int64_val);
                 CHECK(length == 1);
-                CHECK(type == sr_meta_int64);
+                CHECK(type == SRMetadataTypeInt64);
                 metadata_2.get_scalar_values(keys[3], (void*&)uint64_data,
                                             length, type);
                 CHECK(*uint64_data == uint64_val);
                 CHECK(length == 1);
-                CHECK(type == sr_meta_uint64);
+                CHECK(type == SRMetadataTypeUint64);
                 metadata_2.get_scalar_values(keys[4], (void*&)int32_data,
                                             length, type);
                 CHECK(*int32_data == int32_val);
                 CHECK(length == 1);
-                CHECK(type == sr_meta_int32);
+                CHECK(type == SRMetadataTypeInt32);
                 metadata_2.get_scalar_values(keys[5], (void*&)uint32_data,
                                             length, type);
                 CHECK(*uint32_data == uint32_val);
                 CHECK(length == 1);
-                CHECK(type == sr_meta_uint32);
+                CHECK(type == SRMetadataTypeUint32);
             }
         }
 
@@ -291,13 +291,13 @@ SCENARIO("Test MetaData", "[MetaData]")
                 INFO("Cannot add a string with add_scalar method");
                 CHECK_THROWS_AS(
                     metadata.add_scalar("str_scalar", &str_val,
-                                         sr_meta_string),
+                                         SRMetadataTypeString),
                     _SRRuntimeException);
                 INFO("The existing metadata field has a different "
-                     "type from sr_meta_dbl");
+                     "type from SRMetadataTypeDouble");
                 CHECK_THROWS_AS(
                     metadata.add_scalar("str_scalar", &str_val,
-                                         sr_meta_dbl),
+                                         SRMetadataTypeDouble),
                     _SRRuntimeException);
             }
         }

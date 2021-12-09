@@ -39,25 +39,25 @@ SCENARIO("Testing Tensor", "[Tensor]")
         // Create first tensor
         std::string name = "test_tensor";
         std::vector<size_t> dims = {1, 2, 3};
-        SRTensorType type = sr_tensor_flt;
+        SRTensorType type = SRTensorTypeFloat;
         size_t tensor_size = dims.at(0) * dims.at(1) * dims.at(2);
         std::vector<float> tensor(tensor_size, 0);
         for (size_t i=0; i<tensor_size; i++)
             tensor[i] = 2.0*rand()/RAND_MAX -1.0;
         void* data = tensor.data();
-        SRMemoryLayout mem_layout = sr_layout_contiguous;
+        SRMemoryLayout mem_layout = SRMemLayoutContiguous;
         Tensor<float> t(name, data, dims, type, mem_layout);
 
         // Create second tensor
         std::string name_2 = "test_tensor_2";
         std::vector<size_t> dims_2 = {3, 2, 2};
-        SRTensorType type_2 = sr_tensor_flt;
+        SRTensorType type_2 = SRTensorTypeFloat;
         size_t tensor_size_2 = dims_2.at(0) * dims_2.at(1) * dims_2.at(2);
         std::vector<float> tensor_2(tensor_size_2, 0);
         for (size_t i=0; i<tensor_size_2; i++)
             tensor_2[i] = 2.0*rand()/RAND_MAX -1.0;
         void* data_2 = tensor_2.data();
-        SRMemoryLayout mem_layout_2 = sr_layout_contiguous;
+        SRMemoryLayout mem_layout_2 = SRMemLayoutContiguous;
         Tensor<float> t_2(name_2, data_2, dims_2, type_2, mem_layout_2);
 
         WHEN("A tensor is copied with the assignment operator")

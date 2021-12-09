@@ -63,9 +63,9 @@ void rename_dataset(
     std::string t_name_2 = "tensor_2";
     std::string t_name_3 = "tensor_3";
 
-    sent_dataset.add_tensor(t_name_1, t_send_1, dims, type, sr_layout_nested);
-    sent_dataset.add_tensor(t_name_2, t_send_2, dims, type, sr_layout_nested);
-    sent_dataset.add_tensor(t_name_3, t_send_3, dims, type, sr_layout_nested);
+    sent_dataset.add_tensor(t_name_1, t_send_1, dims, type, SRMemLayoutNested);
+    sent_dataset.add_tensor(t_name_2, t_send_2, dims, type, SRMemLayoutNested);
+    sent_dataset.add_tensor(t_name_3, t_send_3, dims, type, SRMemLayoutNested);
 
     //Put the DataSet into the database
     client.put_dataset(sent_dataset);
@@ -135,7 +135,7 @@ int main(int argc, char* argv[]) {
   dataset_name = "3D_dbl_dataset_rank";
   rename_dataset<double,double>(
 				  &set_3D_array_floating_point_values<double>,
-				  dims, sr_tensor_dbl, "_dbl", dataset_name);
+				  dims, SRTensorTypeDouble, "_dbl", dataset_name);
 
   return 0;
 }

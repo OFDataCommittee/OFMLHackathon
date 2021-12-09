@@ -32,36 +32,36 @@
 
 // Memory layout of tensor data
 typedef enum {
-    sr_layout_invalid            = 0,
-    sr_layout_nested             = 1,
-    sr_layout_contiguous         = 2,
-    sr_layout_fortran_nested     = 3,
-    sr_layout_fortran_contiguous = 4
+    SRMemLayoutInvalid           = 0,
+    SRMemLayoutNested            = 1,
+    SRMemLayoutContiguous        = 2,
+    SRMemLayoutFortranNested     = 3,
+    SRMemLayoutFortranContiguous = 4
 } SRMemoryLayout;
 
 // Metadata types
 typedef enum {
-    sr_meta_invalid = 0,
-    sr_meta_dbl     = 1,
-    sr_meta_flt     = 2,
-    sr_meta_int32   = 3,
-    sr_meta_int64   = 4,
-    sr_meta_uint32  = 5,
-    sr_meta_uint64  = 6,
-    sr_meta_string  = 7
+    SRMetadataTypeInvalid = 0,
+    SRMetadataTypeDouble  = 1,
+    SRMetadataTypeFloat   = 2,
+    SRMetadataTypeInt32   = 3,
+    SRMetadataTypeInt64   = 4,
+    SRMetadataTypeUint32  = 5,
+    SRMetadataTypeUint64  = 6,
+    SRMetadataTypeString  = 7
 } SRMetaDataType;
 
 // Tensor types
 typedef enum {
-    sr_tensor_invalid = 0,
-    sr_tensor_dbl     = 1,
-    sr_tensor_flt     = 2,
-    sr_tensor_int8    = 3,
-    sr_tensor_int16   = 4,
-    sr_tensor_int32   = 5,
-    sr_tensor_int64   = 6,
-    sr_tensor_uint8   = 7,
-    sr_tensor_uint16  = 8
+    SRTensorTypeInvalid = 0,
+    SRTensorTypeDouble  = 1,
+    SRTensorTypeFloat   = 2,
+    SRTensorTypeInt8    = 3,
+    SRTensorTypeInt16   = 4,
+    SRTensorTypeInt32   = 5,
+    SRTensorTypeInt64   = 6,
+    SRTensorTypeUint8   = 7,
+    SRTensorTypeUint16  = 8
 } SRTensorType;
 
 #endif // SMARTREDIS_ENUMS_H

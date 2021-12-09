@@ -66,7 +66,7 @@ void produce(
 
   std::string key = "ensemble_test";
 
-  client.put_tensor(key, (void*)array, dims, sr_tensor_flt, sr_layout_nested);
+  client.put_tensor(key, (void*)array, dims, SRTensorTypeFloat, SRMemLayoutNested);
 
   if(!client.tensor_exists(key))
     throw std::runtime_error("The tensor key does not exist in the database.");
@@ -100,7 +100,7 @@ void produce(
   std::string script_out_key = "mnist_processed_input";
   std::string model_name = "mnist_model";
   std::string script_name = "mnist_script";
-  client.put_tensor(in_key, mnist_array, {1,1,28,28}, sr_tensor_flt, sr_layout_nested);
+  client.put_tensor(in_key, mnist_array, {1,1,28,28}, SRTensorTypeFloat, SRMemLayoutNested);
   client.run_script(script_name, "pre_process", {in_key}, {script_out_key});
   client.run_model(model_name, {script_out_key}, {out_key});
 
@@ -111,7 +111,7 @@ void produce(
 
   std::string dataset_name = "mnist_input_dataset_ds";
   SmartRedis::DataSet dataset = SmartRedis::DataSet(dataset_name);
-  dataset.add_tensor(in_key_ds, mnist_array, {1,1,28,28}, sr_tensor_flt, sr_layout_nested);
+  dataset.add_tensor(in_key_ds, mnist_array, {1,1,28,28}, SRTensorTypeFloat, SRMemLayoutNested);
   client.put_dataset(dataset);
 
   if(!client.tensor_exists(dataset_name))
@@ -150,16 +150,16 @@ void consume(std::vector<size_t> dims,
     throw std::runtime_error("The key does not exist in the database.");
 
   client.unpack_tensor(tensor_key, u_result, dims,
-                       sr_tensor_flt, sr_layout_nested);
+                       SRTensorTypeFloat, SRMemLayoutNested);
 
   SRTensorType g_type;
   std::vector<size_t> g_dims;
   void* g_result;
   client.get_tensor(tensor_key, g_result, g_dims,
-                    g_type, sr_layout_nested);
+                    g_type, SRMemLayoutNested);
   float* g_type_result = (float*)g_result;
 
-  if(sr_tensor_flt!=g_type)
+  if(SRTensorTypeFloat!=g_type)
     throw std::runtime_error("The tensor type "\
                              "retrieved with client.get_tensor() "\
                              "does not match the known type.");
@@ -197,10 +197,10 @@ void consume(std::vector<size_t> dims,
   float** mnist_result = allocate_2D_array<float>(1, 10);
 
   std::string out_key = "mnist_output";
-  client.unpack_tensor(out_key, mnist_result, {1,10}, sr_tensor_flt, sr_layout_nested);
+  client.unpack_tensor(out_key, mnist_result, {1,10}, SRTensorTypeFloat, SRMemLayoutNested);
 
   std::string out_key_ds = "mnist_output_ds";
-  client.unpack_tensor(out_key_ds, mnist_result, {1,10}, sr_tensor_flt, sr_layout_nested);
+  client.unpack_tensor(out_key_ds, mnist_result, {1,10}, SRTensorTypeFloat, SRMemLayoutNested);
   free_2D_array(mnist_result, 1);
 }
 

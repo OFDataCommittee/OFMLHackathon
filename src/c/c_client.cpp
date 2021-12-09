@@ -40,7 +40,7 @@ using namespace SmartRedis;
 extern "C"
 SRError SmartRedisCClient(bool cluster, void** new_client)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try {
     // Sanity check params
     SR_CHECK_PARAMS(new_client != NULL);
@@ -51,7 +51,7 @@ SRError SmartRedisCClient(bool cluster, void** new_client)
   catch (const std::bad_alloc& e) {
     *new_client = NULL;
     SRSetLastError(SRBadAllocException("client allocation"));
-    result = sr_badalloc;
+    result = SRBadAllocError;
   }
   catch (const SRException& e) {
     *new_client = NULL;
@@ -61,7 +61,7 @@ SRError SmartRedisCClient(bool cluster, void** new_client)
   catch (...) {
     *new_client = NULL;
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -71,7 +71,7 @@ SRError SmartRedisCClient(bool cluster, void** new_client)
 extern "C"
 SRError DeleteCClient(void** c_client)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
 
   try {
     // Sanity check params
@@ -86,7 +86,7 @@ SRError DeleteCClient(void** c_client)
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -96,7 +96,7 @@ SRError DeleteCClient(void** c_client)
 extern "C"
 SRError put_dataset(void* c_client, void* dataset)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
 
   try {
     // Sanity check params
@@ -113,7 +113,7 @@ SRError put_dataset(void* c_client, void* dataset)
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -125,7 +125,7 @@ extern "C"
 SRError get_dataset(void* c_client, const char* name,
                     const size_t name_length, void **dataset)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
 
   try {
     // Sanity check params
@@ -149,7 +149,7 @@ SRError get_dataset(void* c_client, const char* name,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -161,7 +161,7 @@ SRError rename_dataset(void* c_client, const char* name,
                        const size_t name_length, const char* new_name,
                        const size_t new_name_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -179,7 +179,7 @@ SRError rename_dataset(void* c_client, const char* name,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -192,7 +192,7 @@ SRError copy_dataset(void* c_client, const char* src_name,
                     const size_t src_name_length, const char* dest_name,
                     const size_t dest_name_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -210,7 +210,7 @@ SRError copy_dataset(void* c_client, const char* src_name,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -220,7 +220,7 @@ SRError copy_dataset(void* c_client, const char* src_name,
 extern "C"
 SRError delete_dataset(void* c_client, const char* name, const size_t name_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -236,7 +236,7 @@ SRError delete_dataset(void* c_client, const char* name, const size_t name_lengt
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -253,7 +253,7 @@ SRError put_tensor(void* c_client,
                   const SRTensorType type,
                   const SRMemoryLayout mem_layout)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -274,7 +274,7 @@ SRError put_tensor(void* c_client,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -291,7 +291,7 @@ SRError get_tensor(void* c_client,
                   SRTensorType* type,
                   const SRMemoryLayout mem_layout)
 {
-  SRError outcome = sr_ok;
+  SRError outcome = SRNoError;
   try
   {
     // Sanity check params
@@ -309,7 +309,7 @@ SRError get_tensor(void* c_client,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    outcome = sr_internal;
+    outcome = SRInternalError;
   }
 
   return outcome;
@@ -327,7 +327,7 @@ SRError unpack_tensor(void* c_client,
                      const SRTensorType type,
                      const SRMemoryLayout mem_layout)
 {
-  SRError outcome = sr_ok;
+  SRError outcome = SRNoError;
   try
   {
     // Sanity check params
@@ -348,7 +348,7 @@ SRError unpack_tensor(void* c_client,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    outcome = sr_internal;
+    outcome = SRInternalError;
   }
 
   return outcome;
@@ -360,7 +360,7 @@ SRError rename_tensor(void* c_client, const char* key,
                      const size_t key_length, const char* new_key,
                      const size_t new_key_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -378,7 +378,7 @@ SRError rename_tensor(void* c_client, const char* key,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -389,7 +389,7 @@ extern "C"
 SRError delete_tensor(void* c_client, const char* key,
                       const size_t key_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -406,7 +406,7 @@ SRError delete_tensor(void* c_client, const char* key,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -420,7 +420,7 @@ SRError copy_tensor(void* c_client,
                    const char* dest_name,
                    const size_t dest_name_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -438,7 +438,7 @@ SRError copy_tensor(void* c_client,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -458,7 +458,7 @@ SRError set_model_from_file(void* c_client,
                            const char** outputs, const size_t* output_lengths,
                            const size_t n_outputs)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -519,7 +519,7 @@ SRError set_model_from_file(void* c_client,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -539,7 +539,7 @@ SRError set_model(void* c_client,
                  const char** outputs, const size_t* output_lengths,
                  const size_t n_outputs)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -600,7 +600,7 @@ SRError set_model(void* c_client,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -614,7 +614,7 @@ SRError get_model(void* c_client,
                   size_t* model_length,
                   const char** model)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -634,7 +634,7 @@ SRError get_model(void* c_client,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -650,7 +650,7 @@ SRError set_script_from_file(void* c_client,
                             const char* script_file,
                             const size_t script_file_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -670,7 +670,7 @@ SRError set_script_from_file(void* c_client,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -686,7 +686,7 @@ SRError set_script(void* c_client,
                   const char* script,
                   const size_t script_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -707,7 +707,7 @@ SRError set_script(void* c_client,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -721,7 +721,7 @@ SRError get_script(void* c_client,
                   const char** script,
                   size_t* script_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -741,7 +741,7 @@ SRError get_script(void* c_client,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -761,7 +761,7 @@ SRError run_script(void* c_client,
                   const size_t* output_lengths,
                   const size_t n_outputs)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -809,7 +809,7 @@ SRError run_script(void* c_client,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -827,7 +827,7 @@ SRError run_model(void* c_client,
                  const size_t* output_lengths,
                  const size_t n_outputs)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -874,7 +874,7 @@ SRError run_model(void* c_client,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -885,7 +885,7 @@ extern "C"
 SRError key_exists(void* c_client, const char* key, const size_t key_length,
                    bool* exists)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -902,7 +902,7 @@ SRError key_exists(void* c_client, const char* key, const size_t key_length,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -913,7 +913,7 @@ extern "C"
 SRError model_exists(void* c_client, const char* name, const size_t name_length,
                      bool* exists)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -930,7 +930,7 @@ SRError model_exists(void* c_client, const char* name, const size_t name_length,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -941,7 +941,7 @@ extern "C"
 SRError tensor_exists(void* c_client, const char* name, const size_t name_length,
                       bool* exists)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -958,7 +958,7 @@ SRError tensor_exists(void* c_client, const char* name, const size_t name_length
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -969,7 +969,7 @@ extern "C"
 SRError dataset_exists(void* c_client, const char* name, const size_t name_length,
                        bool* exists)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -986,7 +986,7 @@ SRError dataset_exists(void* c_client, const char* name, const size_t name_lengt
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -1001,7 +1001,7 @@ SRError poll_key(void* c_client,
                  const int num_tries,
                  bool* exists)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -1018,7 +1018,7 @@ SRError poll_key(void* c_client,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -1033,7 +1033,7 @@ SRError poll_model(void* c_client,
                    const int num_tries,
                    bool* exists)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -1050,7 +1050,7 @@ SRError poll_model(void* c_client,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -1065,7 +1065,7 @@ SRError poll_tensor(void* c_client,
                  const int num_tries,
                  bool* exists)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -1082,7 +1082,7 @@ SRError poll_tensor(void* c_client,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -1094,7 +1094,7 @@ SRError set_data_source(void* c_client,
                         const char* source_id,
                         const size_t source_id_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -1111,7 +1111,7 @@ SRError set_data_source(void* c_client,
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -1121,7 +1121,7 @@ SRError set_data_source(void* c_client,
 extern "C"
 SRError use_model_ensemble_prefix(void* c_client, bool use_prefix)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -1136,7 +1136,7 @@ SRError use_model_ensemble_prefix(void* c_client, bool use_prefix)
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;
@@ -1146,7 +1146,7 @@ SRError use_model_ensemble_prefix(void* c_client, bool use_prefix)
 extern "C"
 SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -1161,7 +1161,7 @@ SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix)
   }
   catch (...) {
     SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = sr_internal;
+    result = SRInternalError;
   }
 
   return result;

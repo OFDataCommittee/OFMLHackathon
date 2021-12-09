@@ -57,25 +57,25 @@ static std::string DATATYPE_TENSOR_STR_UINT16 = "UINT16";
 
 static const std::unordered_map<std::string, SRTensorType>
     TENSOR_TYPE_MAP{
-        {DATATYPE_TENSOR_STR_DOUBLE, sr_tensor_dbl},
-        {DATATYPE_TENSOR_STR_FLOAT, sr_tensor_flt},
-        {DATATYPE_TENSOR_STR_INT64, sr_tensor_int64},
-        {DATATYPE_TENSOR_STR_INT32, sr_tensor_int32},
-        {DATATYPE_TENSOR_STR_INT16, sr_tensor_int16},
-        {DATATYPE_TENSOR_STR_INT8, sr_tensor_int8},
-        {DATATYPE_TENSOR_STR_UINT16, sr_tensor_uint16},
-        {DATATYPE_TENSOR_STR_UINT8, sr_tensor_uint8} };
+        {DATATYPE_TENSOR_STR_DOUBLE, SRTensorTypeDouble},
+        {DATATYPE_TENSOR_STR_FLOAT, SRTensorTypeFloat},
+        {DATATYPE_TENSOR_STR_INT64, SRTensorTypeInt64},
+        {DATATYPE_TENSOR_STR_INT32, SRTensorTypeInt32},
+        {DATATYPE_TENSOR_STR_INT16, SRTensorTypeInt16},
+        {DATATYPE_TENSOR_STR_INT8, SRTensorTypeInt8},
+        {DATATYPE_TENSOR_STR_UINT16, SRTensorTypeUint16},
+        {DATATYPE_TENSOR_STR_UINT8, SRTensorTypeUint8} };
 
 static const std::unordered_map<SRTensorType, std::string>
     TENSOR_STR_MAP{
-        {sr_tensor_dbl, DATATYPE_TENSOR_STR_DOUBLE},
-        {sr_tensor_flt, DATATYPE_TENSOR_STR_FLOAT},
-        {sr_tensor_int64, DATATYPE_TENSOR_STR_INT64},
-        {sr_tensor_int32, DATATYPE_TENSOR_STR_INT32},
-        {sr_tensor_int16, DATATYPE_TENSOR_STR_INT16},
-        {sr_tensor_int8, DATATYPE_TENSOR_STR_INT8},
-        {sr_tensor_uint16, DATATYPE_TENSOR_STR_UINT16},
-        {sr_tensor_uint8, DATATYPE_TENSOR_STR_UINT8} };
+        {SRTensorTypeDouble, DATATYPE_TENSOR_STR_DOUBLE},
+        {SRTensorTypeFloat, DATATYPE_TENSOR_STR_FLOAT},
+        {SRTensorTypeInt64, DATATYPE_TENSOR_STR_INT64},
+        {SRTensorTypeInt32, DATATYPE_TENSOR_STR_INT32},
+        {SRTensorTypeInt16, DATATYPE_TENSOR_STR_INT16},
+        {SRTensorTypeInt8, DATATYPE_TENSOR_STR_INT8},
+        {SRTensorTypeUint16, DATATYPE_TENSOR_STR_UINT16},
+        {SRTensorTypeUint8, DATATYPE_TENSOR_STR_UINT8} };
 
 class TensorBase;
 

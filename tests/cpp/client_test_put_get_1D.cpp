@@ -56,12 +56,12 @@ void put_get_1D_array(
                <<std::fixed<<array[i]<<std::endl;
   }
   */
-  client.put_tensor(key, (void*)array, dims, type, sr_layout_nested);
+  client.put_tensor(key, (void*)array, dims, type, SRMemLayoutNested);
 
   if(!client.key_exists(get_prefix() + key))
     throw std::runtime_error("The key does not exist in the database.");
 
-  client.unpack_tensor(key, u_result, dims, type, sr_layout_nested);
+  client.unpack_tensor(key, u_result, dims, type, SRMemLayoutNested);
   /*
   for(int i = 0; i < dims[0]; i++) {
       std::cout<< "Value " << i
@@ -78,7 +78,7 @@ void put_get_1D_array(
   SRTensorType g_type;
   std::vector<size_t> g_dims;
   void* g_result;
-  client.get_tensor(key, g_result, g_dims, g_type, sr_layout_nested);
+  client.get_tensor(key, g_result, g_dims, g_type, SRMemLayoutNested);
   T_recv* g_type_result = (T_recv*)g_result;
 
   /*
@@ -113,35 +113,35 @@ int main(int argc, char* argv[]) {
 
   put_get_1D_array<double,double>(
 				  &set_1D_array_floating_point_values<double>,
-				  dims, sr_tensor_dbl, "_dbl");
+				  dims, SRTensorTypeDouble, "_dbl");
 
   put_get_1D_array<float,float>(
 				&set_1D_array_floating_point_values<float>,
-				dims, sr_tensor_flt, "_flt");
+				dims, SRTensorTypeFloat, "_flt");
 
   put_get_1D_array<int64_t,int64_t>(
 				    &set_1D_array_integral_values<int64_t>,
-				    dims, sr_tensor_int64, "_i64");
+				    dims, SRTensorTypeInt64, "_i64");
 
   put_get_1D_array<int32_t,int32_t>(
 				    &set_1D_array_integral_values<int32_t>,
-				    dims, sr_tensor_int32, "_i32");
+				    dims, SRTensorTypeInt32, "_i32");
 
   put_get_1D_array<int16_t,int16_t>(
 				      &set_1D_array_integral_values<int16_t>,
-				      dims, sr_tensor_int16, "_i16");
+				      dims, SRTensorTypeInt16, "_i16");
 
   put_get_1D_array<int8_t,int8_t>(
 				      &set_1D_array_integral_values<int8_t>,
-				      dims, sr_tensor_int8, "_i8");
+				      dims, SRTensorTypeInt8, "_i8");
 
   put_get_1D_array<uint16_t,uint16_t>(
 				      &set_1D_array_integral_values<uint16_t>,
-				      dims, sr_tensor_uint16, "_ui16");
+				      dims, SRTensorTypeUint16, "_ui16");
 
   put_get_1D_array<uint8_t,uint8_t>(
 				      &set_1D_array_integral_values<uint8_t>,
-				      dims, sr_tensor_uint8, "_ui8");
+				      dims, SRTensorTypeUint8, "_ui8");
 
   std::cout<<"1D put and test complete"<<std::endl;
 

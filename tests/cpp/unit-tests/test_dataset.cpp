@@ -52,11 +52,11 @@ SCENARIO("Testing DataSet object", "[DataSet]")
         {
             std::string tensor_name = "test_tensor";
             std::vector<size_t> dims = {1, 2, 3};
-            SRTensorType type = sr_tensor_flt;
+            SRTensorType type = SRTensorTypeFloat;
             size_t tensor_size = dims.at(0) * dims.at(1) * dims.at(2);
             std::vector<float> tensor(tensor_size, 2.0);
             void* data = tensor.data();
-            SRMemoryLayout mem_layout = sr_layout_contiguous;
+            SRMemoryLayout mem_layout = SRMemLayoutContiguous;
             dataset.add_tensor(tensor_name, data, dims, type, mem_layout);
 
             THEN("The tensor name can be retrieved")
@@ -165,7 +165,7 @@ SCENARIO("Testing DataSet object", "[DataSet]")
         {
             std::string meta_scalar_name = "flt_meta_scalars";
             float meta_scalar = 10.0;
-            SRMetaDataType type = sr_meta_flt;
+            SRMetaDataType type = SRMetadataTypeFloat;
 
             CHECK(dataset.has_field(meta_scalar_name) == false);
             dataset.add_meta_scalar(meta_scalar_name, &meta_scalar, type);

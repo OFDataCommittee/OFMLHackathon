@@ -75,42 +75,42 @@ program main
   enddo; enddo
 
   result = client%initialize(use_cluster())
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
 
   result = client%put_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
   result = client%unpack_tensor("true_array_real_32", recv_array_real_32, shape(recv_array_real_32))
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
   if (.not. all(true_array_real_32 == recv_array_real_32)) stop 'true_array_real_32: FAILED'
 
   result = client%put_tensor("true_array_real_64", true_array_real_64, shape(true_array_real_64))
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
   result = client%unpack_tensor("true_array_real_64", recv_array_real_64, shape(recv_array_real_64))
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
   if (.not. all(true_array_real_64 == recv_array_real_64)) stop 'true_array_real_64: FAILED'
 
   result = client%put_tensor("true_array_integer_8", true_array_integer_8, shape(true_array_integer_8))
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
   result = client%unpack_tensor("true_array_integer_8", recv_array_integer_8, shape(recv_array_integer_8))
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
   if (.not. all(true_array_integer_8 == recv_array_integer_8)) stop 'true_array_integer_8: FAILED'
 
   result = client%put_tensor("true_array_integer_16", true_array_integer_16, shape(true_array_integer_16))
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
   result = client%unpack_tensor("true_array_integer_16", recv_array_integer_16, shape(recv_array_integer_16))
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
   if (.not. all(true_array_integer_16 == recv_array_integer_16)) stop 'true_array_integer_16: FAILED'
 
   result = client%put_tensor("true_array_integer_32", true_array_integer_32, shape(true_array_integer_32))
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
   result = client%unpack_tensor("true_array_integer_32", recv_array_integer_32, shape(recv_array_integer_32))
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
   if (.not. all(true_array_integer_32 == recv_array_integer_32)) stop 'true_array_integer_32: FAILED'
 
   result = client%put_tensor("true_array_integer_64", true_array_integer_64, shape(true_array_integer_64))
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
   result = client%unpack_tensor("true_array_integer_64", recv_array_integer_64, shape(recv_array_integer_64))
-  if (result .ne. sr_ok) stop
+  if (result .ne. SRNoError) stop
   if (.not. all(true_array_integer_64 == recv_array_integer_64)) stop 'true_array_integer_64: FAILED'
 
   write(*,*) "2D put/get: passed"

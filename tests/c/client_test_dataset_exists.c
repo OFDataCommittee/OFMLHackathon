@@ -41,11 +41,11 @@ bool cluster = true;
 int missing_dataset(char *dataset_name, size_t dataset_name_len)
 {
   void *client = NULL;
-  if (sr_ok != SmartRedisCClient(use_cluster(), &client))
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
     return -1;
 
   bool exists = false;
-  if (sr_ok != dataset_exists(client, dataset_name, dataset_name_len, &exists))
+  if (SRNoError != dataset_exists(client, dataset_name, dataset_name_len, &exists))
     return -1;
   return exists ? 1 : 0;
 }
@@ -64,9 +64,9 @@ int present_dataset(char *dataset_name, size_t dataset_name_len)
   bool exists = false;
 
   // Initialize client and dataset
-  if (sr_ok != SmartRedisCClient(use_cluster(), &client) || NULL == client)
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client) || NULL == client)
     return -1;
-  if (sr_ok != CDataSet(dataset_name, dataset_name_len, &dataset) || NULL == dataset)
+  if (SRNoError != CDataSet(dataset_name, dataset_name_len, &dataset) || NULL == dataset)
     return -1;
 
   // Allocate memory for tensors
@@ -90,7 +90,7 @@ int present_dataset(char *dataset_name, size_t dataset_name_len)
       }
     }
   }
-  if (sr_ok != add_tensor(dataset, t1, strlen(t1), tensor, dims, n_dims, sr_tensor_int16, sr_layout_nested))
+  if (SRNoError != add_tensor(dataset, t1, strlen(t1), tensor, dims, n_dims, SRTensorTypeInt16, SRMemLayoutNested))
     return -1;
 
   for (i = 0; i < dims[0]; i++) {
@@ -100,7 +100,7 @@ int present_dataset(char *dataset_name, size_t dataset_name_len)
       }
     }
   }
-  if (sr_ok != add_tensor(dataset, t2, strlen(t2), tensor, dims, n_dims, sr_tensor_int16, sr_layout_nested))
+  if (SRNoError != add_tensor(dataset, t2, strlen(t2), tensor, dims, n_dims, SRTensorTypeInt16, SRMemLayoutNested))
     return -1;
 
   for (i = 0; i < dims[0]; i++) {
@@ -110,15 +110,15 @@ int present_dataset(char *dataset_name, size_t dataset_name_len)
       }
     }
   }
-  if (sr_ok != add_tensor(dataset, t3, strlen(t3), tensor, dims, n_dims, sr_tensor_int16, sr_layout_nested))
+  if (SRNoError != add_tensor(dataset, t3, strlen(t3), tensor, dims, n_dims, SRTensorTypeInt16, SRMemLayoutNested))
     return -1;
 
   // Put the DataSet into the database
-  if (sr_ok != put_dataset(client, dataset))
+  if (SRNoError != put_dataset(client, dataset))
     return -1;
 
   // Make sure it exists
-  if (sr_ok != dataset_exists(client, dataset_name, dataset_name_len, &exists))
+  if (SRNoError != dataset_exists(client, dataset_name, dataset_name_len, &exists))
     return -1;
   return exists ? 0 : -1;
 }

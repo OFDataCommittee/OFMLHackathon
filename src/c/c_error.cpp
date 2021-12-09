@@ -50,7 +50,7 @@ void SRSetLastError(const SRException& last_error)
   }
 
   // Print out the error message if verbose
-  if (__debug_level_verbose && sr_ok != last_error.to_error_code()) {
+  if (__debug_level_verbose && SRNoError != last_error.to_error_code()) {
     printf("%s\n", last_error.what());
   }
 

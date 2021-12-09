@@ -51,7 +51,7 @@ Tensor<T>::Tensor(const Tensor<T>& tensor) : TensorBase(tensor)
     if (&tensor == this)
         return;
 
-    _set_tensor_data(tensor._data, tensor._dims, sr_layout_contiguous);
+    _set_tensor_data(tensor._data, tensor._dims, SRMemLayoutContiguous);
     _c_mem_views = tensor._c_mem_views;
     _f_mem_views = tensor._f_mem_views;
 }
@@ -74,7 +74,7 @@ Tensor<T>& Tensor<T>::operator=(const Tensor<T>& tensor)
 
     // Deep copy tensor data
     TensorBase::operator=(tensor);
-    _set_tensor_data(tensor._data, tensor._dims, sr_layout_contiguous);
+    _set_tensor_data(tensor._data, tensor._dims, SRMemLayoutContiguous);
     _c_mem_views = tensor._c_mem_views;
     _f_mem_views = tensor._f_mem_views;
 
@@ -142,14 +142,14 @@ void* Tensor<T>::data_view(const SRMemoryLayout mem_layout)
     void* ptr = NULL;
 
     switch (mem_layout) {
-        case sr_layout_contiguous:
+        case SRMemLayoutContiguous:
             ptr = _data;
             break;
-        case sr_layout_fortran_contiguous:
+        case SRMemLayoutFortranContiguous:
             ptr = _f_mem_views.allocate_bytes(_n_data_bytes());
             _c_to_f_memcpy((T*)ptr, (T*)_data, _dims);
             break;
-        case sr_layout_nested:
+        case SRMemLayoutNested:
             _build_nested_memory(&ptr,
                                  _dims.data(),
                                  _dims.size(),
@@ -197,13 +197,13 @@ void Tensor<T>::fill_mem_space(void* data,
 
     // Copy over the data
     switch (mem_layout) {
-        case sr_layout_fortran_contiguous:
+        case SRMemLayoutFortranContiguous:
             _c_to_f_memcpy((T*)data, (T*)_data, _dims);
             break;
-        case sr_layout_contiguous:
+        case SRMemLayoutContiguous:
             std::memcpy(data, _data, _n_data_bytes());
             break;
-        case sr_layout_nested: {
+        case SRMemLayoutNested: {
             size_t starting_position = 0;
             _fill_nested_mem_with_data(data, dims.data(),
                                              dims.size(),
@@ -309,13 +309,13 @@ void Tensor<T>::_set_tensor_data(void* src_data,
     }
 
     switch (mem_layout) {
-        case sr_layout_contiguous:
+        case SRMemLayoutContiguous:
             std::memcpy(_data, src_data, n_bytes);
             break;
-        case sr_layout_fortran_contiguous:
+        case SRMemLayoutFortranContiguous:
             _f_to_c_memcpy((T*)_data, (T*) src_data, dims);
             break;
-        case sr_layout_nested:
+        case SRMemLayoutNested:
             _copy_nested_to_contiguous(
                 src_data, dims.data(), dims.size(), _data);
             break;

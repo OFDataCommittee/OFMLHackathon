@@ -63,9 +63,9 @@ void put_get_dataset(
     std::string t_name_2 = "tensor_2";
     std::string t_name_3 = "tensor_3";
 
-    sent_dataset.add_tensor(t_name_1, t_send_1, dims, type, sr_layout_nested);
-    sent_dataset.add_tensor(t_name_2, t_send_2, dims, type, sr_layout_nested);
-    sent_dataset.add_tensor(t_name_3, t_send_3, dims, type, sr_layout_nested);
+    sent_dataset.add_tensor(t_name_1, t_send_1, dims, type, SRMemLayoutNested);
+    sent_dataset.add_tensor(t_name_2, t_send_2, dims, type, SRMemLayoutNested);
+    sent_dataset.add_tensor(t_name_3, t_send_3, dims, type, SRMemLayoutNested);
 
     // Make sure a nonexistant dataset doesn't exist
     std::string nonexistant("nonexistant");
@@ -117,49 +117,49 @@ int main(int argc, char* argv[]) {
     dataset_name = "3D_dbl_dataset_put_get";
     put_get_dataset<double,double>(
                     &set_3D_array_floating_point_values<double>,
-                    dims, sr_tensor_dbl,
+                    dims, SRTensorTypeDouble,
                     "_dbl", dataset_name);
 
     dataset_name = "3D_flt_dataset_put_get";
     put_get_dataset<float,float>(
                     &set_3D_array_floating_point_values<float>,
-                    dims, sr_tensor_flt,
+                    dims, SRTensorTypeFloat,
                     "_flt", dataset_name);
 
     dataset_name = "3D_i64_dataset_put_get";
     put_get_dataset<int64_t,int64_t>(
                         &set_3D_array_integral_values<int64_t>,
-                        dims, sr_tensor_int64,
+                        dims, SRTensorTypeInt64,
                         "_i64", dataset_name);
 
     dataset_name = "3D_i32_dataset_put_get";
     put_get_dataset<int32_t,int32_t>(
                         &set_3D_array_integral_values<int32_t>,
-                        dims, sr_tensor_int32,
+                        dims, SRTensorTypeInt32,
                         "_i32", dataset_name);
 
     dataset_name = "3D_i16_dataset_put_get";
     put_get_dataset<int16_t,int16_t>(
                         &set_3D_array_integral_values<int16_t>,
-                        dims, sr_tensor_int16,
+                        dims, SRTensorTypeInt16,
                         "_i16", dataset_name);
 
     dataset_name = "3D_i8_dataset_put_get";
     put_get_dataset<int8_t,int8_t>(
                         &set_3D_array_integral_values<int8_t>,
-                        dims, sr_tensor_int8,
+                        dims, SRTensorTypeInt8,
                         "_i8", dataset_name);
 
     dataset_name = "3D_ui16_dataset_put_get";
     put_get_dataset<uint16_t,uint16_t>(
                         &set_3D_array_integral_values<uint16_t>,
-                        dims, sr_tensor_uint16,
+                        dims, SRTensorTypeUint16,
                         "_ui16", dataset_name);
 
     dataset_name = "3D_ui8_dataset_put_get";
     put_get_dataset<uint8_t,uint8_t>(
                         &set_3D_array_integral_values<uint8_t>,
-                        dims, sr_tensor_uint8,
+                        dims, SRTensorTypeUint8,
                         "_ui8", dataset_name);
 
     return 0;

@@ -77,28 +77,28 @@ void TensorPack::add_tensor(const std::string& name,
     TensorBase* ptr = NULL;
     try {
         switch (type) {
-            case sr_tensor_dbl:
+            case SRTensorTypeDouble:
                 ptr = new Tensor<double>(name, data, dims, type, mem_layout);
                 break;
-            case sr_tensor_flt:
+            case SRTensorTypeFloat:
                 ptr = new Tensor<float>(name, data, dims, type, mem_layout);
                 break;
-            case sr_tensor_int64:
+            case SRTensorTypeInt64:
                 ptr = new Tensor<int64_t>(name, data, dims, type, mem_layout);
                 break;
-            case sr_tensor_int32:
+            case SRTensorTypeInt32:
                 ptr = new Tensor<int32_t>(name, data, dims, type, mem_layout);
                 break;
-            case sr_tensor_int16:
+            case SRTensorTypeInt16:
                 ptr = new Tensor<int16_t>(name, data, dims, type, mem_layout);
                 break;
-            case sr_tensor_int8:
+            case SRTensorTypeInt8:
                 ptr = new Tensor<int8_t>(name, data, dims, type, mem_layout);
                 break;
-            case sr_tensor_uint16:
+            case SRTensorTypeUint16:
                 ptr = new Tensor<uint16_t>(name, data, dims, type, mem_layout);
                 break;
-            case sr_tensor_uint8:
+            case SRTensorTypeUint8:
                 ptr = new Tensor<uint8_t>(name, data, dims, type, mem_layout);
                 break;
             default:

@@ -120,7 +120,7 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
             // Add meta scalar to DataSet
             std::string meta_scalar_name = "dbl_field";
             const double dbl_meta = std::numeric_limits<double>::max();
-            SRMetaDataType meta_type = sr_meta_dbl;
+            SRMetaDataType meta_type = SRMetadataTypeDouble;
             dataset.add_meta_scalar(meta_scalar_name,
                                      &dbl_meta,
                                      meta_type);
@@ -128,11 +128,11 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
             // Add tensor to DataSet
             std::string tensor_name = "test_tensor";
             std::vector<size_t> dims = {1, 2, 3};
-            SRTensorType type = sr_tensor_flt;
+            SRTensorType type = SRTensorTypeFloat;
             size_t tensor_size = dims.at(0) * dims.at(1) * dims.at(2);
             std::vector<float> tensor(tensor_size, 2.0);
             void* data = tensor.data();
-            SRMemoryLayout mem_layout = sr_layout_contiguous;
+            SRMemoryLayout mem_layout = SRMemLayoutContiguous;
             dataset.add_tensor(tensor_name, data, dims, type, mem_layout);
 
             // Put the DataSet into the Client
@@ -195,7 +195,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
 
         AND_WHEN("Tensors of each type are created and put into the Client")
         {
-            SRMemoryLayout mem_layout = sr_layout_contiguous;
+            SRMemoryLayout mem_layout = SRMemLayoutContiguous;
             const int num_of_tensors = 8;
             std::vector<std::vector<size_t> > dims(num_of_tensors, {2, 1});
             size_t tensors_size = dims[0][0] * dims[0][1];
@@ -204,10 +204,10 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
                                               "int16_key", "int8_key",
                                               "uint16_key", "uint8_key"};
             std::vector<SRTensorType> types =
-                {sr_tensor_dbl, sr_tensor_flt,
-                 sr_tensor_int64, sr_tensor_int32,
-                 sr_tensor_int16, sr_tensor_int8,
-                 sr_tensor_uint16, sr_tensor_uint8};
+                {SRTensorTypeDouble, SRTensorTypeFloat,
+                 SRTensorTypeInt64, SRTensorTypeInt32,
+                 SRTensorTypeInt16, SRTensorTypeInt8,
+                 SRTensorTypeUint16, SRTensorTypeUint8};
 
             std::vector<double> dbl_tensor =
                 {std::numeric_limits<double>::min(),
@@ -323,8 +323,8 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
                 // match the dimensions that were fetched)
                 CHECK_THROWS_AS(
                     client.unpack_tensor(keys[0], contig_retrieved_data,
-                                         dims[0], sr_tensor_dbl,
-                                         sr_layout_contiguous),
+                                         dims[0], SRTensorTypeDouble,
+                                         SRMemLayoutContiguous),
                     _SRRuntimeException);
 
                 free(contig_retrieved_data);
@@ -570,7 +570,7 @@ SCENARIO("Testing FLUSHDB on Client Object", "[Client][FLUSHDB]")
                  std::numeric_limits<double>::max()};
         client.put_dataset(dataset);
         client.put_tensor(tensor_key, (void*)tensor_dbl.data(), {2,1},
-                          sr_tensor_dbl, sr_layout_contiguous);
+                          SRTensorTypeDouble, SRMemLayoutContiguous);
         WHEN("FLUSHDB is called on databsase")
         {
 
@@ -691,7 +691,7 @@ SCENARIO("Testing SAVE command on Client Object", "[Client][SAVE]")
                  std::numeric_limits<double>::max()};
         client.put_dataset(dataset);
         client.put_tensor(tensor_key, (void*)tensor_dbl.data(), {2,1},
-                          sr_tensor_dbl, sr_layout_contiguous);
+                          SRTensorTypeDouble, SRMemLayoutContiguous);
 
         std::string address = parse_SSDB(std::getenv("SSDB"));
 
