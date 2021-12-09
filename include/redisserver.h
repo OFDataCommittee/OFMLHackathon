@@ -335,7 +335,7 @@ class RedisServer {
         /*!
         *   \brief Check that the SSDB environment variable
         *          value does not have any errors
-        *   \throw SRRuntimeException fi there is an error
+        *   \throw SRRuntimeException if there is an error
         *          in SSDB environment variable format
         */
         void _check_ssdb_string(const std::string& env_str);
