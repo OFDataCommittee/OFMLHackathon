@@ -87,7 +87,7 @@ endif
 model_key = "ensemble_model"
 model_file = "../../cpp/mnist_data/mnist_cnn.pt"
 result = client%set_model_from_file(model_key, model_file, "TORCH", "CPU")
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) stop 'set_model_from_file failed'
 result = client%model_exists(model_key, exists)
 if (result .ne. SRNoError) stop
 if (.not. exists) then

@@ -444,6 +444,21 @@ SRError copy_tensor(void* c_client,
   return result;
 }
 
+bool CompareCaseInsensitive(const char* a,const char* b) {
+  while (*a != '\0' && *b != '\0') {
+    // Check current character
+    if (toupper(*a) != toupper(*b))
+      return false;
+
+    // Advance to next character
+    a++;
+    b++;
+  }
+
+  // Make sure there is no additional data in b
+  return (*a == *b);
+}
+
 // Set a model stored in a binary file.
 extern "C"
 SRError set_model_from_file(void* c_client,
@@ -461,28 +476,36 @@ SRError set_model_from_file(void* c_client,
   SRError result = SRNoError;
   try
   {
-    // Sanity check params
+    // Sanity check params. Tag is strictly optional, and inputs/outputs are
+    // mandatory IFF backend is TensorFlow (TF or TFLITE)
     SR_CHECK_PARAMS(c_client != NULL && key != NULL && model_file != NULL &&
-                    backend != NULL && device != NULL && tag != NULL &&
-                    inputs != NULL && input_lengths != NULL &&
-                    outputs != NULL && output_lengths != NULL);
+                    backend != NULL && device != NULL);
+    bool isTensorFlow = CompareCaseInsensitive(backend, "TF") || CompareCaseInsensitive(backend, "TFLITE");
+    if (isTensorFlow) {
+      if (inputs == NULL || input_lengths == NULL ||
+          outputs == NULL || output_lengths == NULL) {
+        throw SRParameterException("Inputs and outputs are required with TensorFlow");
+      }
+    }
 
     // For the inputs and outputs arrays, a single empty string is ok (this means
     // that the array should be skipped) but if more than one entry is present, the
     // strings must be nonzero length
-    if (n_inputs != 1 && input_lengths[0] != 0) {
-      for (size_t i = 0; i < n_inputs; i++){
-        if (inputs[i] == NULL || input_lengths[i] == 0) {
-          throw SRParameterException(
-            std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
+    if (isTensorFlow) {
+      if (n_inputs != 1 && input_lengths[0] != 0) {
+        for (size_t i = 0; i < n_inputs; i++){
+          if (inputs[i] == NULL || input_lengths[i] == 0) {
+            throw SRParameterException(
+              std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
+          }
         }
       }
-    }
-    if (n_outputs != 1 && output_lengths[0] != 0) {
-      for (size_t i = 0; i < n_outputs; i++) {
-        if (outputs[i] == NULL || output_lengths[i] == 0) {
-          throw SRParameterException(
-            std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
+      if (n_outputs != 1 && output_lengths[0] != 0) {
+        for (size_t i = 0; i < n_outputs; i++) {
+          if (outputs[i] == NULL || output_lengths[i] == 0) {
+            throw SRParameterException(
+              std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
+          }
         }
       }
     }
@@ -496,16 +519,20 @@ SRError set_model_from_file(void* c_client,
 
     // Catch the case where an empty string was sent (default C++ client behavior)
     std::vector<std::string> input_vec;
-    if (n_inputs != 1 || input_lengths[0] != 0) {
-      for (size_t i = 0; i < n_inputs; i++) {
-        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+    if (isTensorFlow) {
+      if (n_inputs != 1 || input_lengths[0] != 0) {
+        for (size_t i = 0; i < n_inputs; i++) {
+          input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+        }
       }
     }
 
     std::vector<std::string> output_vec;
-    if (n_outputs != 1 || output_lengths[0] != 0) {
-      for (size_t i = 0; i < n_outputs; i++) {
-        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+    if (isTensorFlow) {
+      if (n_outputs != 1 || output_lengths[0] != 0) {
+        for (size_t i = 0; i < n_outputs; i++) {
+          output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+        }
       }
     }
 
@@ -542,28 +569,36 @@ SRError set_model(void* c_client,
   SRError result = SRNoError;
   try
   {
-    // Sanity check params
+    // Sanity check params. Tag is strictly optional, and inputs/outputs are
+    // mandatory IFF backend is TensorFlow (TF or TFLITE)
     SR_CHECK_PARAMS(c_client != NULL && key != NULL && model != NULL &&
-                    backend != NULL && device != NULL && tag != NULL &&
-                    inputs != NULL && input_lengths != NULL &&
-                    outputs != NULL && output_lengths != NULL);
+                    backend != NULL && device != NULL);
+    bool isTensorFlow = CompareCaseInsensitive(backend, "TF") || CompareCaseInsensitive(backend, "TFLITE");
+    if (isTensorFlow) {
+      if (inputs == NULL || input_lengths == NULL ||
+          outputs == NULL || output_lengths == NULL) {
+        throw SRParameterException("Inputs and outputs are required with TensorFlow");
+      }
+    }
 
     // For the inputs and outputs arrays, a single empty string is ok (this means
     // that the array should be skipped) but if more than one entry is present, the
     // strings must be nonzero length
-    if (n_inputs != 1 && input_lengths[0] != 0) {
-      for (size_t i = 0; i < n_inputs; i++){
-        if (inputs[i] == NULL || input_lengths[i] == 0) {
-          throw SRParameterException(
-            std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
+    if (isTensorFlow) {
+      if (n_inputs != 1 && input_lengths[0] != 0) {
+        for (size_t i = 0; i < n_inputs; i++){
+          if (inputs[i] == NULL || input_lengths[i] == 0) {
+            throw SRParameterException(
+              std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
+          }
         }
       }
-    }
-    if (n_outputs != 1 && output_lengths[0] != 0) {
-      for (size_t i = 0; i < n_outputs; i++) {
-        if (outputs[i] == NULL || output_lengths[i] == 0) {
-          throw SRParameterException(
-            std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
+      if (n_outputs != 1 && output_lengths[0] != 0) {
+        for (size_t i = 0; i < n_outputs; i++) {
+          if (outputs[i] == NULL || output_lengths[i] == 0) {
+            throw SRParameterException(
+              std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
+          }
         }
       }
     }
@@ -577,16 +612,20 @@ SRError set_model(void* c_client,
 
     // Catch the case where an empty string was sent (default C++ client behavior)
     std::vector<std::string> input_vec;
-    if (n_inputs != 1 || input_lengths[0] != 0) {
-      for (size_t i = 0; i < n_inputs; i++) {
-        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+    if (isTensorFlow) {
+      if (n_inputs != 1 || input_lengths[0] != 0) {
+        for (size_t i = 0; i < n_inputs; i++) {
+          input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+        }
       }
     }
 
     std::vector<std::string> output_vec;
-    if (n_outputs != 1 || output_lengths[0] != 0) {
-      for (size_t i = 0; i < n_outputs; i++) {
-        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+    if (isTensorFlow) {
+      if (n_outputs != 1 || output_lengths[0] != 0) {
+        for (size_t i = 0; i < n_outputs; i++) {
+          output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+        }
       }
     }
 
