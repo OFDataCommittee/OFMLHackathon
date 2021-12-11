@@ -70,7 +70,7 @@ void TensorPack::add_tensor(const std::string& name,
     // Check if it's already present
     if (tensor_exists(name)) {
         throw SRRuntimeException("The tensor " + std::string(name) +
-                                  " already exists");
+                                 " already exists");
     }
 
     // Allocate memory for the tensor

@@ -80,7 +80,7 @@ DataSet Client::get_dataset(const std::string& name)
     CommandReply reply = _get_dataset_metadata(name);
     if (reply.n_elements() == 0) {
         throw SRRuntimeException("The requested DataSet " +
-                                  name + " does not exist.");
+                                 name + " does not exist.");
     }
 
     DataSet dataset(name);
@@ -119,7 +119,7 @@ void Client::copy_dataset(const std::string& src_name,
     CommandReply reply = _get_dataset_metadata(src_name);
     if (reply.n_elements() == 0) {
         throw SRRuntimeException("The requested DataSet " +
-                             src_name + " does not exist.");
+                                 src_name + " does not exist.");
     }
     DataSet dataset(src_name);
     _unpack_dataset_metadata(dataset, reply);
@@ -155,7 +155,7 @@ void Client::delete_dataset(const std::string& name)
     CommandReply reply = _get_dataset_metadata(name);
     if (reply.n_elements() == 0) {
         throw SRRuntimeException("The requested DataSet " +
-                                  name + " does not exist.");
+                                 name + " does not exist.");
     }
 
     DataSet dataset(name);
@@ -300,9 +300,9 @@ void Client::unpack_tensor(const std::string& key,
 {
     if (mem_layout == SRMemLayoutContiguous && dims.size() > 1) {
         throw SRRuntimeException("The destination memory space "\
-                                  "dimension vector should only "\
-                                  "be of size one if the memory "\
-                                  "layout is contiguous.");
+                                 "dimension vector should only "\
+                                 "be of size one if the memory "\
+                                 "layout is contiguous.");
     }
 
     std::string get_key = _build_tensor_key(key, true);
@@ -320,8 +320,8 @@ void Client::unpack_tensor(const std::string& key,
         if (total_dims != dims[0] &&
             mem_layout == SRMemLayoutContiguous) {
             throw SRRuntimeException("The dimensions of the fetched "\
-                                      "tensor do not match the length of "\
-                                      "the contiguous memory space.");
+                                     "tensor do not match the length of "\
+                                     "the contiguous memory space.");
         }
     }
 
@@ -330,19 +330,19 @@ void Client::unpack_tensor(const std::string& key,
         if (dims.size() != reply_dims.size()) {
             // Same number of dimensions
             throw SRRuntimeException("The number of dimensions of the  "\
-                                      "fetched tensor, " +
-                                      std::to_string(reply_dims.size()) + " "\
-                                      "does not match the number of "\
-                                      "dimensions of the user memory space, " +
-                                      std::to_string(dims.size()));
+                                     "fetched tensor, " +
+                                     std::to_string(reply_dims.size()) + " "\
+                                     "does not match the number of "\
+                                     "dimensions of the user memory space, " +
+                                     std::to_string(dims.size()));
         }
 
         // Same size in each dimension
         for (size_t i = 0; i < reply_dims.size(); i++) {
             if (dims[i] != reply_dims[i]) {
                 throw SRRuntimeException("The dimensions of the fetched tensor "\
-                                          "do not match the provided "\
-                                          "dimensions of the user memory space.");
+                                         "do not match the provided "\
+                                         "dimensions of the user memory space.");
             }
         }
     }
@@ -351,7 +351,7 @@ void Client::unpack_tensor(const std::string& key,
     SRTensorType reply_type = GetTensorCommand::get_data_type(reply);
     if (type != reply_type)
         throw SRRuntimeException("The type of the fetched tensor "\
-                                  "does not match the provided type");
+                                 "does not match the provided type");
 
     // Retrieve the tensor data into a Tensor
     std::string_view blob = GetTensorCommand::get_data_blob(reply);
@@ -486,18 +486,18 @@ void Client::set_model(const std::string& key,
     }
 
     if (backend.size() == 0) {
-        throw SRRuntimeException("backend is a required  "\
-                                  "parameter of set_model.");
+        throw SRParameterException("backend is a required  "\
+                                   "parameter of set_model.");
     }
 
     if (backend.compare("TF") != 0) {
         if (inputs.size() > 0) {
             throw SRRuntimeException("INPUTS in the model set command "\
-                                      "is only valid for TF models");
+                                     "is only valid for TF models");
         }
         if (outputs.size() > 0) {
             throw SRRuntimeException("OUTPUTS in the model set command "\
-                                      "is only valid for TF models");
+                                     "is only valid for TF models");
         }
     }
 
@@ -506,19 +506,17 @@ void Client::set_model(const std::string& key,
     for (size_t i = 0; i < sizeof(backends)/sizeof(backends[0]); i++)
         found = found || (backend.compare(backends[i]) != 0);
     if (!found) {
-        throw SRRuntimeException(std::string(backend) +
-                                  " is not a valid backend.");
+        throw SRRuntimeException(backend + " is not a valid backend.");
     }
 
     if (device.size() == 0) {
-        throw SRRuntimeException("device is a required "
-                                  "parameter of set_model.");
+        throw SRParameterException("device is a required "
+                                   "parameter of set_model.");
     }
 
     if (device.compare("CPU") != 0 &&
         std::string(device).find("GPU") == std::string::npos) {
-        throw SRRuntimeException(std::string(backend) +
-                                  " is not a valid backend.");
+        throw SRRuntimeException(backend + " is not a valid backend.");
     }
 
     std::string p_key = _build_model_key(key, false);
@@ -702,9 +700,9 @@ void Client::set_data_source(std::string source_id)
 
     if (!valid_prefix) {
         throw SRRuntimeException("Client error: data source " +
-                                  std::string(source_id) +
-                                  "could not be found during client "+
-                                  "initialization.");
+                                 std::string(source_id) +
+                                 "could not be found during client "+
+                                 "initialization.");
     }
 
     // Save the prefix
@@ -1003,9 +1001,9 @@ void Client::_append_dataset_metadata_commands(CommandList& cmd_list,
         dataset.get_metadata_serialization_map();
     if (mdf.size() == 0) {
         throw SRRuntimeException("An attempt was made to put "\
-                                  "a DataSet into the database that "\
-                                  "does not contain any fields or "\
-                                  "tensors.");
+                                 "a DataSet into the database that "\
+                                 "does not contain any fields or "\
+                                 "tensors.");
     }
 
     SingleKeyCommand* del_cmd = cmd_list.add_command<SingleKeyCommand>();
@@ -1063,8 +1061,8 @@ void Client::_unpack_dataset_metadata(DataSet& dataset, CommandReply& reply)
     // Make sure we have paired elements
     if ((reply.n_elements() % 2) != 0)
         throw SRRuntimeException("The DataSet metadata reply "\
-                                  "contains the wrong number of "\
-                                  "elements.");
+                                 "contains the wrong number of "\
+                                 "elements.");
 
     // Process each pair of response fields
     for (size_t i = 0; i < reply.n_elements(); i += 2) {
@@ -1090,8 +1088,8 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
     std::vector<size_t> dims = GetTensorCommand::get_dims(reply);
     if (dims.size() <= 0)
         throw SRRuntimeException("The number of dimensions of the "\
-                                  "fetched tensor are invalid: " +
-                                  std::to_string(dims.size()));
+                                 "fetched tensor are invalid: " +
+                                 std::to_string(dims.size()));
 
     SRTensorType type = GetTensorCommand::get_data_type(reply);
     std::string_view blob = GetTensorCommand::get_data_blob(reply);
@@ -1099,10 +1097,10 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
     for (size_t i = 0; i < dims.size(); i++) {
         if (dims[i] <= 0) {
             throw SRRuntimeException("Dimension " +
-                                      std::to_string(i) +
-                                      "of the fetched tensor is "\
-                                      "not valid: " +
-                                      std::to_string(dims[i]));
+                                     std::to_string(i) +
+                                     "of the fetched tensor is "\
+                                     "not valid: " +
+                                     std::to_string(dims[i]));
         }
     }
 
@@ -1143,10 +1141,10 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
                 break;
             default :
                 throw SRRuntimeException("An invalid TensorType was "\
-                                        "provided to "
-                                        "Client::_get_tensorbase_obj(). "
-                                        "The tensor could not be "\
-                                        "retrieved.");
+                                         "provided to "
+                                         "Client::_get_tensorbase_obj(). "
+                                         "The tensor could not be "\
+                                         "retrieved.");
                 break;
         }
     }

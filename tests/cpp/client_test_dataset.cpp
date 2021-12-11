@@ -71,7 +71,7 @@ void put_get_dataset(
     std::string nonexistant("nonexistant");
     if (client.dataset_exists(nonexistant))
       throw std::runtime_error("DataSet existence of a non-existant"\
-                                 "dataset failed.");
+                               "dataset failed.");
 
     //Put the DataSet into the database
     client.put_dataset(sent_dataset);
@@ -79,7 +79,7 @@ void put_get_dataset(
     // Make sure it exists
     if (!client.dataset_exists(dataset_name))
       throw std::runtime_error("DataSet existence of a non-existant"\
-                                 "dataset failed.");
+                               "dataset failed.");
 
     if(!client.tensor_exists(dataset_name))
         throw std::runtime_error("The DataSet "\

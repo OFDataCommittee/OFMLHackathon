@@ -211,19 +211,19 @@ inline void TensorBase::_check_inputs(const void* src_data,
 
     if (name.compare(".meta") == 0) {
         throw SRRuntimeException(".meta is an internally reserved name "\
-                             "that is not allowed.");
+                                 "that is not allowed.");
     }
 
     if (dims.size() == 0) {
         throw SRRuntimeException("Must provide a dimensions vector with at "
-                             "least one dimension.");
+                                 "least one dimension.");
     }
 
     std::vector<size_t>::const_iterator it = dims.cbegin();
     for ( ; it != dims.cend(); it++) {
         if (*it <= 0) {
             throw SRRuntimeException("All tensor dimensions "\
-                                 "must be positive.");
+                                     "must be positive.");
         }
     }
 }

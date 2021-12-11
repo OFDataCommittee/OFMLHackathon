@@ -44,7 +44,7 @@ std::string RedisServer::_get_ssdb()
     char* env_char = getenv("SSDB");
     if (env_char == NULL)
         throw SRRuntimeException("The environment variable SSDB "\
-                                  "must be set to use the client.");
+                                 "must be set to use the client.");
     std::string env_str = std::string(env_char);
     _check_ssdb_string(env_str);
 
@@ -86,7 +86,7 @@ void RedisServer::_check_ssdb_string(const std::string& env_str) {
         char c = env_str[i];
         if (!isalnum(c) && c != '.' && c != ':' && c != ',') {
             throw SRRuntimeException("The provided SSDB value, " + env_str +
-                                      " is invalid because of character " + c);
+                                     " is invalid because of character " + c);
         }
     }
 }

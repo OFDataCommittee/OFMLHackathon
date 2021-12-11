@@ -246,8 +246,8 @@ inline void DataSet::_enforce_tensor_exists(const std::string& name)
 {
     if (!_tensorpack.tensor_exists(name)) {
         throw SRRuntimeException("The tensor " + std::string(name) +
-                                  " does not exist in " + name +
-                                  " dataset.");
+                                 " does not exist in " + name +
+                                 " dataset.");
     }
 }
 

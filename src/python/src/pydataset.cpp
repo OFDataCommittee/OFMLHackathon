@@ -131,7 +131,7 @@ py::array PyDataset::get_tensor(const std::string& name)
         }
         default :
             throw SRRuntimeException("Could not infer type in "\
-                                      "PyDataSet::get_tensor().");
+                                     "PyDataSet::get_tensor().");
     }
 }
 

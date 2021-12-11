@@ -156,9 +156,8 @@ void* Tensor<T>::data_view(const SRMemoryLayout mem_layout)
                                  (T*)_data);
             break;
         default:
-            throw SRRuntimeException(
-                "Unsupported MemoryLayout value in "\
-                "Tensor<T>.data_view().");
+            throw SRRuntimeException("Unsupported MemoryLayout value in "\
+                                     "Tensor<T>.data_view().");
     }
     return ptr;
 }
@@ -171,7 +170,7 @@ void Tensor<T>::fill_mem_space(void* data,
 {
     if (_data == NULL) {
         throw SRRuntimeException("The tensor does not have "\
-                                  "a data array to fill with.");
+                                 "a data array to fill with.");
     }
 
     if (dims.size() == 0) {
@@ -191,8 +190,8 @@ void Tensor<T>::fill_mem_space(void* data,
     // Make sure there is space for all the data
     if (n_values != num_values()) {
         throw SRRuntimeException("The provided dimensions do "\
-                             "not match the size of the "\
-                             "tensor data array");
+                                 "not match the size of the "\
+                                 "tensor data array");
     }
 
     // Copy over the data
@@ -212,9 +211,8 @@ void Tensor<T>::fill_mem_space(void* data,
             }
             break;
         default:
-            throw SRRuntimeException(
-                "Unsupported MemoryLayout value in "\
-                "Tensor<T>.fill_mem_space().");
+            throw SRRuntimeException("Unsupported MemoryLayout value in "\
+                                     "Tensor<T>.fill_mem_space().");
     }
 }
 
@@ -274,7 +272,7 @@ T* Tensor<T>::_build_nested_memory(void** data,
 {
     if (dims == NULL) {
         throw SRRuntimeException("Missing dims in call to "\
-                                  "_build_nested_memory");
+                                 "_build_nested_memory");
     }
     if (n_dims > 1) {
         T** new_data = _c_mem_views.allocate(dims[0]);
@@ -321,7 +319,7 @@ void Tensor<T>::_set_tensor_data(void* src_data,
             break;
         default:
             throw SRRuntimeException("Invalid memory layout in call "\
-                                      "to _set_tensor_data");
+                                     "to _set_tensor_data");
     }
 }
 

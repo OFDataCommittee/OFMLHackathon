@@ -55,9 +55,9 @@ extern inline SRMetaDataType get_type(const std::string_view& buf)
 {
     if (buf.size() < sizeof(type_t))
         throw SRRuntimeException("The MetadataField type cannot "\
-                                  "be retrived from buffer of " +
-                                  std::to_string(buf.size()) +
-                                  "characters.");
+                                 "be retrived from buffer of " +
+                                 std::to_string(buf.size()) +
+                                 "characters.");
 
     type_t* data = (type_t*)(buf.data());
     return (SRMetaDataType)(*data);
@@ -119,14 +119,14 @@ extern inline T read(void* buf,
 {
     if (!safe_to_read<T>(byte_position, total_bytes, 1))
         throw SRRuntimeException("A request to read one scalar value "
-                                  "from the metadata buffer "
-                                  "was made, but the buffer "
-                                  "contains insufficient bytes. "
-                                  "The buffer contains " +
-                                  std::to_string(total_bytes) +
-                                  "bytes and is currently at " +
-                                  "position " +
-                                  std::to_string(byte_position));
+                                 "from the metadata buffer "
+                                 "was made, but the buffer "
+                                 "contains insufficient bytes. "
+                                 "The buffer contains " +
+                                 std::to_string(total_bytes) +
+                                 "bytes and is currently at " +
+                                 "position " +
+                                 std::to_string(byte_position));
     return *((T*)buf);
 }
 
@@ -175,14 +175,14 @@ extern inline std::string read_string(void* buf,
 {
     if (!safe_to_read<char>(byte_position, total_bytes, n_chars))
         throw SRRuntimeException("A request to read a string "
-                                  "from the metadata buffer "
-                                  "was made, but the buffer "
-                                  "contains insufficient bytes. "
-                                  "The buffer contains " +
-                                  std::to_string(total_bytes) +
-                                  "bytes and is currently at " +
-                                  "position " +
-                                  std::to_string(byte_position));
+                                 "from the metadata buffer "
+                                 "was made, but the buffer "
+                                 "contains insufficient bytes. "
+                                 "The buffer contains " +
+                                 std::to_string(total_bytes) +
+                                 "bytes and is currently at " +
+                                 "position " +
+                                 std::to_string(byte_position));
     return std::string((char*)buf, n_chars);
 }
 
@@ -317,8 +317,8 @@ extern inline std::vector<std::string> unpack_string_buf(
 
     if (type != (type_t)SRMetadataTypeString)
         throw SRRuntimeException("The buffer string metadata type "\
-                                  "does not contain the expected "\
-                                  "type of string.");
+                                 "does not contain the expected "\
+                                 "type of string.");
 
     std::vector<std::string> vals;
 
@@ -368,12 +368,12 @@ extern inline std::vector<T> unpack_scalar_buf(
 
     if ( (total_bytes - byte_position) % sizeof(T))
         throw SRRuntimeException("The data portion of the provided "\
-                                  "metadata buffer does not contain "
-                                  "the correct number of bytes for "
-                                  "a " + std::to_string(sizeof(T)) +
-                                  " byte scalar type. It contains " +
-                                  std::to_string(total_bytes -
-                                  byte_position) + " bytes");
+                                 "metadata buffer does not contain "
+                                 "the correct number of bytes for "
+                                 "a " + std::to_string(sizeof(T)) +
+                                 " byte scalar type. It contains " +
+                                 std::to_string(total_bytes -
+                                 byte_position) + " bytes");
 
     size_t n_vals = (total_bytes - byte_position) / sizeof(T);
     std::vector<T> vals(n_vals);

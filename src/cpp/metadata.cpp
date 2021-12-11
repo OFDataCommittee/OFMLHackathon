@@ -129,7 +129,7 @@ void MetaData::add_scalar(const std::string& field_name,
     SRMetaDataType existing_type = mdf->type();
     if (existing_type != type) {
         throw SRRuntimeException("The existing metadata field "\
-                                  "has a different type. ");
+                                 "has a different type. ");
     }
 
     // Add the value
@@ -155,7 +155,7 @@ void MetaData::add_scalar(const std::string& field_name,
         case SRMetadataTypeString:
         default:
             throw SRRuntimeException("Invalid MetaDataType used in "\
-                                      "MetaData.add_scalar().");
+                                     "MetaData.add_scalar().");
     }
 }
 
@@ -193,7 +193,7 @@ void MetaData::get_scalar_values(const std::string& name,
     // Make sure the field exists
     if (_field_map[name] == NULL) {
         throw SRRuntimeException("The metadata field " + name +
-                                  " does not exist.");
+                                 " does not exist.");
     }
 
     // Get values for the field
@@ -225,11 +225,11 @@ void MetaData::get_scalar_values(const std::string& name,
             break;
         case SRMetadataTypeString:
             throw SRRuntimeException("MetaData.get_scalar_values() "\
-                                      "requested invalid MetaDataType.");
+                                     "requested invalid MetaDataType.");
             break;
         default:
             throw SRRuntimeException("MetaData.get_scalar_values() "\
-                                      "requested unknown MetaDataType.");
+                                     "requested unknown MetaDataType.");
             break;
     }
 }
@@ -277,13 +277,13 @@ MetaData::get_string_values(const std::string& name)
     MetadataField* mdf = _field_map[name];
     if (mdf == NULL) {
         throw SRRuntimeException("The metadata field " + name +
-                                  " does not exist.");
+                                 " does not exist.");
     }
 
     // Double-check its type
     if (mdf->type() != SRMetadataTypeString) {
         throw SRRuntimeException("The metadata field " + name +
-                                  " is not a string field.");
+                                 " is not a string field.");
     }
 
     // Return the values
@@ -475,11 +475,11 @@ void MetaData::_get_numeric_field_values(const std::string& name,
             break;
         case SRMetadataTypeString:
             throw SRRuntimeException("Invalid MetaDataType used in "\
-                                      "MetaData.add_scalar().");
+                                     "MetaData.add_scalar().");
             break;
         default:
             throw SRRuntimeException("Unknown MetaDataType found in "\
-                                      "MetaData.add_scalar().");
+                                     "MetaData.add_scalar().");
 
     }
 }
@@ -515,7 +515,7 @@ void MetaData::add_serialized_field(const std::string& name,
     // Make sure we don't already have a field with this name
     if (has_field(name))
         throw SRRuntimeException("Cannot add serialized field if "\
-                                  "already exists.");
+                                 "already exists.");
 
     // Allocate memory for the field
     MetadataField* mdf = NULL;

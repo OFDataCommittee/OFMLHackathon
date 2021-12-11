@@ -109,7 +109,7 @@ class AddressAtCommand : public NonKeyedCommand
             size_t start_position = address.find(":");
             if ((start_position >= address.size() - 1) || (start_position == std::string::npos)) {
                 throw SRRuntimeException(std::string(address) +
-                                          " is not a valid database node address.");
+                                         " is not a valid database node address.");
             }
 
             uint64_t port;

@@ -127,27 +127,27 @@ char* CommandReply::str()
 {
     if (_reply->type != REDIS_REPLY_STRING)
         throw SRRuntimeException("A pointer to the reply str "\
-                                  "cannot be returned because "\
-                                  "the reply type is " +
-                                  redis_reply_type());
+                                 "cannot be returned because "\
+                                 "the reply type is " +
+                                 redis_reply_type());
     return _reply->str;
 }
 
 // Get string field of REDIS_REPLY_STATUS
 std::string CommandReply::status_str()
 {
-  if(_reply->type != REDIS_REPLY_STATUS)
+  if (_reply->type != REDIS_REPLY_STATUS)
     throw SRRuntimeException("A pointer to the reply str "\
-                              "cannot be returned because "\
-                              "the reply type is " +
-                              redis_reply_type());
+                             "cannot be returned because "\
+                             "the reply type is " +
+                             redis_reply_type());
   return std::string(_reply->str, _reply->len);
 }
 
 // Get string field of REDIS_REPLY_DOUBLE
 std::string CommandReply::dbl_str()
 {
-  if(_reply->type != REDIS_REPLY_DOUBLE)
+  if (_reply->type != REDIS_REPLY_DOUBLE)
     throw SRRuntimeException("A pointer to the reply str "\
                               "cannot be returned because "\
                               "the reply type is " +
@@ -158,7 +158,7 @@ std::string CommandReply::dbl_str()
 // Get string field of REDIS_REPLY_BIGNUM
 std::string CommandReply::bignum_str()
 {
-  if(_reply->type != REDIS_REPLY_BIGNUM)
+  if (_reply->type != REDIS_REPLY_BIGNUM)
     throw SRRuntimeException("A pointer to the reply str "\
                               "cannot be returned because "\
                               "the reply type is " +
@@ -169,7 +169,7 @@ std::string CommandReply::bignum_str()
 // Get string field of REDIS_REPLY_VERB
 std::string CommandReply::verb_str()
 {
-  if(_reply->type != REDIS_REPLY_VERB)
+  if (_reply->type != REDIS_REPLY_VERB)
     throw SRRuntimeException("A pointer to the reply str "\
                               "cannot be returned because "\
                               "the reply type is " +
@@ -182,9 +182,9 @@ long long CommandReply::integer()
 {
     if (_reply->type != REDIS_REPLY_INTEGER)
         throw SRRuntimeException("The reply integer "\
-                                  "cannot be returned because "\
-                                  "the reply type is " +
-                                  redis_reply_type());
+                                 "cannot be returned because "\
+                                 "the reply type is " +
+                                 redis_reply_type());
     return _reply->integer;
 }
 
@@ -193,9 +193,9 @@ double CommandReply::dbl()
 {
     if (_reply->type != REDIS_REPLY_DOUBLE)
         throw SRRuntimeException("The reply double "\
-                                  "cannot be returned because "\
-                                  "the reply type is " +
-                                  redis_reply_type());
+                                 "cannot be returned because "\
+                                 "the reply type is " +
+                                 redis_reply_type());
     return _reply->dval;
 }
 
@@ -205,8 +205,8 @@ CommandReply CommandReply::operator[](int index)
 {
     if (_reply->type != REDIS_REPLY_ARRAY)
         throw SRRuntimeException("The reply cannot be indexed "\
-                                  "because the reply type is " +
-                                  redis_reply_type());
+                                 "because the reply type is " +
+                                 redis_reply_type());
     return shallow_clone(_reply->element[index]);
 }
 
@@ -215,9 +215,9 @@ size_t CommandReply::str_len()
 {
     if (_reply->type != REDIS_REPLY_STRING)
         throw SRRuntimeException("The length of the reply str "\
-                                  "cannot be returned because "\
-                                  "the reply type is " +
-                                  redis_reply_type());
+                                 "cannot be returned because "\
+                                 "the reply type is " +
+                                 redis_reply_type());
     return _reply->len;
 }
 
@@ -226,9 +226,9 @@ size_t CommandReply::n_elements()
 {
     if (_reply->type != REDIS_REPLY_ARRAY)
         throw SRRuntimeException("The number of elements "\
-                                  "cannot be returned because "\
-                                  "the reply type is " +
-                                  redis_reply_type());
+                                 "cannot be returned because "\
+                                 "the reply type is " +
+                                 redis_reply_type());
     return _reply->elements;
 }
 
@@ -398,10 +398,10 @@ redisReply* CommandReply::deep_clone_reply(const redisReply* reply)
                 }
                 else {
                     throw SRRuntimeException("The expected number of elements," +
-                                              std::to_string(redis_reply->elements) +
-                                              ", in the input redisReply is inconsistent "\
-                                              "with the actual number of elements in the "\
-                                              "input redisReply.");
+                                             std::to_string(redis_reply->elements) +
+                                             ", in the input redisReply is inconsistent "\
+                                             "with the actual number of elements in the "\
+                                             "input redisReply.");
                 }
             }
             break;

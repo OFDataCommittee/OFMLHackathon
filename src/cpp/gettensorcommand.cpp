@@ -49,7 +49,7 @@ std::vector<size_t> GetTensorCommand::get_dims(CommandReply& reply)
 {
     if (reply.n_elements() < num_fields) {
         throw SRRuntimeException("The message does not have the "\
-                                  "correct number of fields");
+                                 "correct number of fields");
     }
 
     size_t n_dims = reply[dims_idx].n_elements();
@@ -67,7 +67,7 @@ SRTensorType GetTensorCommand::get_data_type(CommandReply& reply)
 {
     if (reply.n_elements() < num_elements) {
         throw SRRuntimeException("The message does not have the correct "\
-                                  "number of fields");
+                                 "number of fields");
     }
 
     return TENSOR_TYPE_MAP.at(std::string(reply[type_idx].str(),
@@ -79,7 +79,7 @@ std::string_view GetTensorCommand::get_data_blob(CommandReply& reply)
 {
     if (reply.n_elements() < num_fields) {
         throw SRRuntimeException("The message does not have the "\
-                                  "correct number of fields");
+                                 "correct number of fields");
     }
 
     return std::string_view(reply[blob_idx].str(), reply[blob_idx].str_len());
