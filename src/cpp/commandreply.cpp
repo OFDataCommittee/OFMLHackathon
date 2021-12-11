@@ -27,7 +27,7 @@
  */
 
 #include "commandreply.h"
-#include "srexception.h"
+#include "SRException.h"
 
 using namespace SmartRedis;
 

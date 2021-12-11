@@ -28,7 +28,7 @@
 
 #include "gettensorcommand.h"
 #include "redisserver.h"
-#include "srexception.h"
+#include "SRException.h"
 
 using namespace SmartRedis;
 

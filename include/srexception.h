@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined(SMARTREDIS_SREXCEPTION_H)
-#define SMARTREDIS_SREXCEPTION_H
+#if !defined(SMARTREDIS_SRException_H)
+#define SMARTREDIS_SRException_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,51 +55,51 @@ extern "C"
 const char* SRGetLastError();
 
 #ifdef __cplusplus
-
 #include <string>
+namespace SR {
 
 // Smart error: custom error class for the SmartRedis library
-class SRException: public std::exception
+class Exception: public std::exception
 {
 	// Inherit all the standard constructors
 	// using std::exception::exception;
 
 
 	public:
-	SRException(const char* what_arg)
+	Exception(const char* what_arg)
 	  : _msg(what_arg)
 	{
 	    // NOP
 	}
 
-	SRException(const char* what_arg, const char* file, int line)
+	Exception(const char* what_arg, const char* file, int line)
 	  : _msg(what_arg), _loc(file + std::string(":") + std::to_string(line))
 	{
 	    // NOP
 	}
 
-	SRException(const std::string& what_arg, const char* file, int line)
+	Exception(const std::string& what_arg, const char* file, int line)
 	  : _msg(what_arg), _loc(file + std::string(":") + std::to_string(line))
 	{
 	    // NOP
 	}
 
-	SRException(const SRException& other) noexcept
+	Exception(const Exception& other) noexcept
 	  : _msg(other._msg), _loc(other._loc)
 	{
 		// NOP
 	}
 
-	SRException(const std::exception& other) noexcept
+	Exception(const std::exception& other) noexcept
 	  : _msg(other.what())
 	{
 		// NOP
 	}
 
-    SRException& operator=(const SRException &) = default;
-    SRException(SRException &&) = default;
-    SRException& operator=(SRException &&) = default;
-    virtual ~SRException() override = default;
+    Exception& operator=(const SR::Exception &) = default;
+    Exception(SR::Exception &&) = default;
+    Exception& operator=(Exception &&) = default;
+    virtual ~Exception() override = default;
 
 	virtual SRError to_error_code() const noexcept {
 		return SRInvalidError;
@@ -125,99 +125,101 @@ class SRException: public std::exception
 
 //////////////////////////////////////////////////
 // Memory allocation exception
-class _SRBadAllocException: public SRException
+class BadAllocException: public Exception
 {
-	using SRException::SRException;
+	using SR::Exception::Exception;
 
 	virtual SRError to_error_code() const noexcept {
 		return SRBadAllocError;
 	}
 };
 
-#define SRBadAllocException(txt) _SRBadAllocException(txt, __FILE__, __LINE__)
+#define SRBadAllocException(txt) SR::BadAllocException(txt, __FILE__, __LINE__)
 
 //////////////////////////////////////////////////
 //  Back-end database exception
-class _SRDatabaseException: public SRException
+class DatabaseException: public Exception
 {
-	using SRException::SRException;
+	using Exception::Exception;
 
 	virtual SRError to_error_code() const noexcept {
 		return SRDatabaseError;
 	}
 };
 
-#define SRDatabaseException(txt) _SRDatabaseException(txt, __FILE__, __LINE__)
+#define SRDatabaseException(txt) SR::DatabaseException(txt, __FILE__, __LINE__)
 
 //////////////////////////////////////////////////
 // Runtime exception
-class _SRRuntimeException: public SRException
+class RuntimeException: public Exception
 {
-	using SRException::SRException;
+	using Exception::Exception;
 
 	virtual SRError to_error_code() const noexcept {
 		return SRRuntimeError;
 	}
 };
 
-#define SRRuntimeException(txt) _SRRuntimeException(txt, __FILE__, __LINE__)
+#define SRRuntimeException(txt) SR::RuntimeException(txt, __FILE__, __LINE__)
 
 //////////////////////////////////////////////////
 // Parameter exception
-class _SRParameterException: public SRException
+class ParameterException: public Exception
 {
-	using SRException::SRException;
+	using Exception::Exception;
 
 	virtual SRError to_error_code() const noexcept {
 		return SRParameterError;
 	}
 };
 
-#define SRParameterException(txt) _SRParameterException(txt, __FILE__, __LINE__)
+#define SRParameterException(txt) SR::ParameterException(txt, __FILE__, __LINE__)
 
 //////////////////////////////////////////////////
 // Timeout exception
-class _SRTimeoutException: public SRException
+class TimeoutException: public Exception
 {
-	using SRException::SRException;
+	using Exception::Exception;
 
 	virtual SRError to_error_code() const noexcept {
 		return SRTimeoutError;
 	}
 };
 
-#define SRTimeoutException(txt) _SRTimeoutException(txt, __FILE__, __LINE__)
+#define SRTimeoutException(txt) SR::TimeoutException(txt, __FILE__, __LINE__)
 
 //////////////////////////////////////////////////
 // Internal exception
-class _SRInternalException: public SRException
+class InternalException: public Exception
 {
-	using SRException::SRException;
+	using Exception::Exception;
 
 	virtual SRError to_error_code() const noexcept {
 		return SRInternalError;
 	}
 };
 
-#define SRInternalException(txt) _SRInternalException(txt, __FILE__, __LINE__)
+#define SRInternalException(txt) SR::InternalException(txt, __FILE__, __LINE__)
 
 //////////////////////////////////////////////////
 // Key exception
-class _SRKeyException: public SRException
+class KeyException: public Exception
 {
-	using SRException::SRException;
+	using Exception::Exception;
 
 	virtual SRError to_error_code() const noexcept {
 		return SRKeyError;
 	}
 };
 
-#define SRKeyException(txt) _SRKeyException(txt, __FILE__, __LINE__)
+#define SRKeyException(txt) SR::KeyException(txt, __FILE__, __LINE__)
 
 //////////////////////////////////////////////////
 // Store the last error encountered
 extern "C"
-void SRSetLastError(const SRException& last_error);
+void SRSetLastError(const Exception& last_error);
+
+} // namespace SR
 
 #endif // __cplusplus
-#endif // SMARTREDIS_SREXCEPTION_H
+#endif // SMARTREDIS_SRException_H

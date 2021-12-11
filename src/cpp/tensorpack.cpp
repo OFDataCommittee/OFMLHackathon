@@ -27,7 +27,7 @@
  */
 
 #include "tensorpack.h"
-#include "srexception.h"
+#include "SRException.h"
 
 using namespace SmartRedis;
 

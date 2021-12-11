@@ -28,7 +28,7 @@
 
 #include "../../../third-party/catch/catch.hpp"
 #include "singlekeycommand.h"
-#include "srexception.h"
+#include "SRException.h"
 
 
 using namespace SmartRedis;
@@ -45,7 +45,7 @@ SCENARIO("Retrieve field to empty SingleKeyCommand", "[SingleKeyCommand]")
 
             THEN("A runtime error is thrown")
             {
-                CHECK_THROWS_AS(cmd.first_field(), _SRRuntimeException);
+                CHECK_THROWS_AS(cmd.first_field(), SR::RuntimeException);
             }
         }
     }

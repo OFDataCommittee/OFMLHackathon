@@ -34,7 +34,7 @@
 #include <stdbool.h>
 #include "client.h"
 #include "sr_enums.h"
-#include "srexception.h"
+#include "SRException.h"
 
 #ifdef __cplusplus
 extern "C" {

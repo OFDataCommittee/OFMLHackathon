@@ -27,7 +27,7 @@
  */
 
 #include "c_dataset.h"
-#include "srexception.h"
+#include "SRException.h"
 #include "srassert.h"
 
 using namespace SmartRedis;
@@ -51,7 +51,7 @@ SRError CDataSet(const char* name, const size_t name_length, void** new_dataset)
     SRSetLastError(SRBadAllocException("client allocation"));
     result = SRBadAllocError;
   }
-  catch (const SRException& e) {
+  catch (const SR::Exception& e) {
     *new_dataset = NULL;
     SRSetLastError(e);
     result = e.to_error_code();
@@ -79,7 +79,7 @@ SRError DeallocateeDataSet(void** dataset)
     delete d;
     *dataset = NULL;
   }
-  catch (const SRException& e) {
+  catch (const SR::Exception& e) {
     SRSetLastError(e);
     result = e.to_error_code();
   }
@@ -116,7 +116,7 @@ SRError add_tensor(void* dataset,
 
     d->add_tensor(tensor_name_str, data, dims_vec, type, mem_layout);
   }
-  catch (const SRException& e) {
+  catch (const SR::Exception& e) {
     SRSetLastError(e);
     result = e.to_error_code();
   }
@@ -147,7 +147,7 @@ SRError add_meta_scalar(void* dataset,
 
     d->add_meta_scalar(name_str, data, type);
   }
-   catch (const SRException& e) {
+   catch (const SR::Exception& e) {
     SRSetLastError(e);
     result = e.to_error_code();
   }
@@ -179,7 +179,7 @@ SRError add_meta_string(void* dataset,
 
     d->add_meta_string(name_str, data_str);
   }
-   catch (const SRException& e) {
+   catch (const SR::Exception& e) {
     SRSetLastError(e);
     result = e.to_error_code();
   }
@@ -218,7 +218,7 @@ SRError get_dataset_tensor(void* dataset,
     *type = SRTensorTypeInvalid;
     d->get_tensor(name_str, *data, *dims, *n_dims, *type, mem_layout);
   }
-  catch (const SRException& e) {
+  catch (const SR::Exception& e) {
     SRSetLastError(e);
     result = e.to_error_code();
   }
@@ -255,7 +255,7 @@ SRError unpack_dataset_tensor(void* dataset,
 
     d->unpack_tensor(name_str, data, dims_vec, type, mem_layout);
   }
-  catch (const SRException& e) {
+  catch (const SR::Exception& e) {
     SRSetLastError(e);
     result = e.to_error_code();
   }
@@ -292,7 +292,7 @@ SRError get_meta_scalars(void* dataset,
 
     *scalar_data = data;
   }
-  catch (const SRException& e) {
+  catch (const SR::Exception& e) {
     SRSetLastError(e);
     result = e.to_error_code();
   }
@@ -326,7 +326,7 @@ SRError get_meta_strings(void* dataset,
     std::string key_str(name, name_length);
     d->get_meta_strings(key_str, *data, *n_strings, *lengths);
   }
-  catch (const SRException& e) {
+  catch (const SR::Exception& e) {
     SRSetLastError(e);
     result = e.to_error_code();
   }

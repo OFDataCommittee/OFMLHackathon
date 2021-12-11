@@ -27,7 +27,7 @@
  */
 
 #include "pyclient.h"
-#include "srexception.h"
+#include "SRException.h"
 
 using namespace SmartRedis;
 namespace py = pybind11;
@@ -90,22 +90,22 @@ PYBIND11_MODULE(smartredisPy, m) {
         try {
             if (p) std::rethrow_exception(p);
         }
-        catch (const _SRBadAllocException& e) {
+        catch (const SR::BadAllocException& e) {
             PyErr_SetString(PyExc_MemoryError, e.what(true));
         }
-        catch (const _SRDatabaseException& e) {
+        catch (const SR::DatabaseException& e) {
             PyErr_SetString(PyExc_OSError, e.what(true));
         }
-        catch (const _SRRuntimeException& e) {
+        catch (const SR::RuntimeException& e) {
             PyErr_SetString(PyExc_RuntimeError, e.what(true));
         }
-        catch (const _SRParameterException& e) {
+        catch (const SR::ParameterException& e) {
             PyErr_SetString(PyExc_ValueError, e.what(true));
         }
-        catch (const _SRTimeoutException& e) {
+        catch (const SR::TimeoutException& e) {
             PyErr_SetString(PyExc_TimeoutError, e.what(true));
         }
-        catch (const _SRInternalException& e) {
+        catch (const SR::InternalException& e) {
             PyErr_SetString(PyExc_SystemError, e.what(true));
         }
     });

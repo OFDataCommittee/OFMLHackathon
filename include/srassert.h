@@ -29,16 +29,16 @@
 #if !defined(SMARTREDIS_ASSERT_H)
 #define SMARTREDIS_ASSERT_H
 
-#include "srexception.h"
+#include "SRException.h"
 
 inline bool throw_runtime_error(const std::string &txt, const char *file, int line)
 {
-    throw _SRRuntimeException(txt, file, line);
+    throw SR::RuntimeException(txt, file, line);
 }
 
 inline bool throw_param_error(const std::string &txt, const char *file, int line)
 {
-    throw _SRParameterException(txt, file, line);
+    throw SR::ParameterException(txt, file, line);
 }
 
 #define SR_ASSERT(condition) \

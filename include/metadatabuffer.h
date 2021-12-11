@@ -33,7 +33,7 @@
 #include <vector>
 #include <string>
 #include <cstring>
-#include "srexception.h"
+#include "SRException.h"
 
 using namespace SmartRedis;
 

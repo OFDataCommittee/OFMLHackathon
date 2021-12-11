@@ -30,7 +30,7 @@
 #define SMARTREDIS_ADDRESSATCOMMAND_H
 
 #include "nonkeyedcommand.h"
-#include "srexception.h"
+#include "SRException.h"
 
 ///@file
 

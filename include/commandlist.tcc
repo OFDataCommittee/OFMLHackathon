@@ -29,7 +29,7 @@
 #ifndef SMARTREDIS_COMMANDLIST_TCC
 #define SMARTREDIS_COMMANDLIST_TCC
 
-#include "srexception.h"
+#include "SRException.h"
 
 template <class T>
 T* CommandList::add_command()

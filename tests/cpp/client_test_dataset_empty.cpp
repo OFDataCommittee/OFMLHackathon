@@ -30,7 +30,7 @@
 #include "dataset.h"
 #include "client_test_utils.h"
 #include "dataset_test_utils.h"
-#include "srexception.h"
+#include "SRException.h"
 
 void put_get_empty_dataset(std::string dataset_name)
 {
@@ -42,7 +42,7 @@ void put_get_empty_dataset(std::string dataset_name)
     try {
         client.put_dataset(sent_dataset);
     }
-    catch(_SRRuntimeException) {
+    catch(SR::RuntimeException) {
         return;
     }
 

@@ -29,7 +29,7 @@
 #include "pyclient.h"
 #include "tensorbase.h"
 #include "tensor.h"
-#include "srexception.h"
+#include "SRException.h"
 
 using namespace SmartRedis;
 
@@ -41,7 +41,7 @@ PyClient::PyClient(bool cluster)
     try {
         _client = new Client(cluster);
     }
-    catch (SRException& e) {
+    catch (SR::Exception& e) {
         // exception is already prepared for caller
         throw e;
     }

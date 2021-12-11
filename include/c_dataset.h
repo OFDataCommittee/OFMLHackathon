@@ -33,7 +33,7 @@
 ///\brief C-wrappers for the C++ DataSet class
 #include "dataset.h"
 #include "sr_enums.h"
-#include "srexception.h"
+#include "SRException.h"
 
 #ifdef __cplusplus
 extern "C" {

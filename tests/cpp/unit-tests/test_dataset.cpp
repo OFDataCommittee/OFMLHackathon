@@ -28,7 +28,7 @@
 
 #include "../../../third-party/catch/catch.hpp"
 #include "dataset.h"
-#include "srexception.h"
+#include "SRException.h"
 #include <cxxabi.h>
 
 using namespace SmartRedis;
@@ -146,13 +146,13 @@ SCENARIO("Testing DataSet object", "[DataSet]")
                     dataset.get_tensor("does_not_exist", retrieved_data,
                                        retrieved_dims, retrieved_type,
                                        mem_layout);
-                } catch (_SRRuntimeException const&) {
-                    throw std::runtime_error("We can catch an _SRRuntimeException, but Catch cannot detect it");
+                } catch (SR::RuntimeException const&) {
+                    throw std::runtime_error("We can catch an SR::RuntimeException, but Catch cannot detect it");
                 } catch (std::exception &e) {
                     std::string foo("thrown: \"");
                     foo += currentExceptionTypeName();
-                    foo += "\"; _SRRuntimeException: \"";
-                    _SRRuntimeException e2("test");
+                    foo += "\"; SR::RuntimeException: \"";
+                    SR::RuntimeException e2("test");
                     foo += typeid(e2).name();
                     foo += "\"";
                     throw std::runtime_error(foo);

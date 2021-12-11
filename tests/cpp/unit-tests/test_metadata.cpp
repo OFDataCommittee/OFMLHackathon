@@ -28,7 +28,7 @@
 
 #include "../../../third-party/catch/catch.hpp"
 #include "metadata.h"
-#include "srexception.h"
+#include "SRException.h"
 
 // helper function for checking if the MetaData object was copied correctly
 void check_metadata_copied_correctly(MetaData metadata, MetaData metadata_cpy)
@@ -212,13 +212,13 @@ SCENARIO("Test MetaData", "[MetaData]")
                 CHECK_THROWS_AS(
                     metadata.get_scalar_values("DNE", (void*&)data,
                                                 length, type),
-                    _SRRuntimeException);
+                    SR::RuntimeException);
 
                 INFO("Cannot retrieve a scalar through "
                      "get_string_values method");
                 CHECK_THROWS_AS(
                     metadata.get_string_values("uint32_scalar"),
-                    _SRRuntimeException);
+                    SR::RuntimeException);
             }
 
             AND_THEN("The MetaData object can be copied "
@@ -292,13 +292,13 @@ SCENARIO("Test MetaData", "[MetaData]")
                 CHECK_THROWS_AS(
                     metadata.add_scalar("str_scalar", &str_val,
                                          SRMetadataTypeString),
-                    _SRRuntimeException);
+                    SR::RuntimeException);
                 INFO("The existing metadata field has a different "
                      "type from SRMetadataTypeDouble");
                 CHECK_THROWS_AS(
                     metadata.add_scalar("str_scalar", &str_val,
                                          SRMetadataTypeDouble),
-                    _SRRuntimeException);
+                    SR::RuntimeException);
             }
         }
 
@@ -334,11 +334,11 @@ SCENARIO("Test MetaData", "[MetaData]")
                 CHECK_THROWS_AS(
                     metadata.get_scalar_values("str_field", (void*&)str_data,
                                                 length, type),
-                    _SRRuntimeException);
+                    SR::RuntimeException);
                 INFO("Cannot retrieve a string value that does not exist");
                 CHECK_THROWS_AS(
                     metadata.get_string_values("DNE"),
-                    _SRRuntimeException
+                    SR::RuntimeException
                 );
 
             }
@@ -351,7 +351,7 @@ SCENARIO("Test MetaData", "[MetaData]")
                      "is called on the MetaData object");
                 CHECK_THROWS_AS(
                     metadata.get_string_values("str_field"),
-                    _SRRuntimeException);
+                    SR::RuntimeException);
             }
         }
     }

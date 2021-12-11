@@ -27,17 +27,17 @@
  */
 
 #include "c_client.h"
-#include "srexception.h"
+#include "SRException.h"
 #include "srassert.h"
 
 using namespace SmartRedis;
 
 // The last error encountered
-static SRException __lastError = SRException("no error");
+static SR::Exception __lastError = SR::Exception("no error");
 
 // Store the last error encountered
 extern "C"
-void SRSetLastError(const SRException& last_error)
+void SRSetLastError(const SR::Exception& last_error)
 {
   // Check environment for debug level if we haven't done so yet
   static bool __debug_level_verbose = false;
