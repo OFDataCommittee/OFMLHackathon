@@ -32,7 +32,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "stdint.h"
-#include "SRException.h"
+#include "srexception.h"
 
 /* This function is a data type agnostic put and
 get for 1D tensors.  The result vector

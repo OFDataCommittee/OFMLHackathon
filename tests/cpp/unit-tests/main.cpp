@@ -28,4 +28,4 @@
 
 #define CATCH_CONFIG_MAIN
 #include "../../../third-party/catch/catch.hpp"
-#include "SRException.h"
+#include "srexception.h"

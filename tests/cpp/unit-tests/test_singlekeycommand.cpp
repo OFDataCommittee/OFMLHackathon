@@ -28,7 +28,7 @@
 
 #include "../../../third-party/catch/catch.hpp"
 #include "singlekeycommand.h"
-#include "SRException.h"
+#include "srexception.h"
 
 
 using namespace SmartRedis;

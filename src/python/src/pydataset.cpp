@@ -28,7 +28,7 @@
 
 
 #include "pydataset.h"
-#include "SRException.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 

@@ -29,7 +29,7 @@
 #include "../../../third-party/catch/catch.hpp"
 #include "tensorbase.h"
 #include "tensorpack.h"
-#include "SRException.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 

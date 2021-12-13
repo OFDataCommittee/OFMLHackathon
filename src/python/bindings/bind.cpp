@@ -27,7 +27,7 @@
  */
 
 #include "pyclient.h"
-#include "SRException.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 namespace py = pybind11;

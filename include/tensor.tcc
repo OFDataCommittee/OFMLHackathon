@@ -29,7 +29,7 @@
 #ifndef SMARTREDIS_TENSOR_TCC
 #define SMARTREDIS_TENSOR_TCC
 
-#include "SRException.h"
+#include "srexception.h"
 
 // Tensor constructor
 template <class T>

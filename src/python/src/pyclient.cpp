@@ -29,7 +29,7 @@
 #include "pyclient.h"
 #include "tensorbase.h"
 #include "tensor.h"
-#include "SRException.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 

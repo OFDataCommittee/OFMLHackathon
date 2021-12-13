@@ -28,7 +28,7 @@
 
 #include <string_view>
 #include "dataset.h"
-#include "SRException.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 

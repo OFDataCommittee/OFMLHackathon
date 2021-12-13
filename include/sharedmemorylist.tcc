@@ -29,7 +29,7 @@
 #ifndef SMARTREDIS_SHAREDMEMORYLIST_TCC
 #define SMARTREDIS_SHAREDMEMORYLIST_TCC
 
-#include "SRException.h"
+#include "srexception.h"
 
 // Record a memory allocation
 template <class T>

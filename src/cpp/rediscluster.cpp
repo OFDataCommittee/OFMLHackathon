@@ -29,7 +29,7 @@
 #include "rediscluster.h"
 #include "nonkeyedcommand.h"
 #include "keyedcommand.h"
-#include "SRException.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 

@@ -29,7 +29,7 @@
 #if !defined(SMARTREDIS_ASSERT_H)
 #define SMARTREDIS_ASSERT_H
 
-#include "SRException.h"
+#include "srexception.h"
 
 inline bool throw_runtime_error(const std::string &txt, const char *file, int line)
 {

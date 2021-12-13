@@ -30,7 +30,7 @@
 #include "client.h"
 #include "dataset.h"
 #include "../client_test_utils.h"
-#include "SRException.h"
+#include "srexception.h"
 #include <sstream>
 
 using namespace SmartRedis;

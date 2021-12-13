@@ -28,7 +28,7 @@
 
 #include "../../../third-party/catch/catch.hpp"
 #include "dataset.h"
-#include "SRException.h"
+#include "srexception.h"
 #include <cxxabi.h>
 
 using namespace SmartRedis;

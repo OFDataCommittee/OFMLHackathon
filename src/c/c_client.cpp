@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "c_client.h"
-#include "SRException.h"
+#include "srexception.h"
 #include "srassert.h"
 
 using namespace SmartRedis;

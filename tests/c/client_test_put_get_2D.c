@@ -32,7 +32,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "stdint.h"
-#include "SRException.h"
+#include "srexception.h"
 
 bool cluster = true;
 

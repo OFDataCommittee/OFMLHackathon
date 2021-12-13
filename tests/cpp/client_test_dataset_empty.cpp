@@ -30,7 +30,7 @@
 #include "dataset.h"
 #include "client_test_utils.h"
 #include "dataset_test_utils.h"
-#include "SRException.h"
+#include "srexception.h"
 
 void put_get_empty_dataset(std::string dataset_name)
 {
