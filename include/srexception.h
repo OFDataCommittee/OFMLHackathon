@@ -106,12 +106,7 @@ class Exception: public std::exception
 	}
 
 	virtual const char* what() const noexcept{
-		std::string output = _msg + "\n" + _loc;
-		return output.c_str();
-	}
-
-	virtual const char* what(bool hideLocation) const noexcept {
-		return hideLocation ? _msg.c_str() : what();
+		return _msg.c_str();
 	}
 
 	virtual const char* where() const noexcept {
