@@ -1,0 +1,19 @@
+name: 'build_docker'
+
+on: [push, pull_request]
+
+jobs:
+    run_docker_build:
+        name: Build docker image on ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+              os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
+        steps:
+            - name: 'Checkout'
+              uses: actions/checkout@v2
+            - name: 'Build'
+              run: |
+                cd ./images
+                docker build -t smartredis .
