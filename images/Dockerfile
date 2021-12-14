@@ -51,5 +51,4 @@ RUN make lib && pip install .
 # usr/local/include and delete unnecessary build files
 RUN cp -r /usr/local/src/SmartRedis/install/lib/* /usr/local/lib/ && \
     mkdir /usr/local/include/smartredis && \
-    cp -r /usr/local/src/SmartRedis/install/include/* /usr/local/include/smartredis/ && \
-    rm -r /usr/local/src/SmartRedis
+    cp -r /usr/local/src/SmartRedis/install/include/* /usr/local/include/smartredis/
