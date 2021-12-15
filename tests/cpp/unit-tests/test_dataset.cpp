@@ -135,29 +135,12 @@ SCENARIO("Testing DataSet object", "[DataSet]")
                 std::vector<size_t> retrieved_dims;
                 SRTensorType retrieved_type;
 
-#if 1
-                CHECK_THROWS(
+                CHECK_THROWS_AS(
                     dataset.get_tensor("does_not_exist", retrieved_data,
                                        retrieved_dims, retrieved_type,
-                                       mem_layout)
+                                       mem_layout),
+                    SmartRedis::RuntimeException
                 );
-#else
-                try {
-                    dataset.get_tensor("does_not_exist", retrieved_data,
-                                       retrieved_dims, retrieved_type,
-                                       mem_layout);
-                } catch (RuntimeException const&) {
-                    throw std::runtime_error("We can catch an RuntimeException, but Catch cannot detect it");
-                } catch (std::exception &e) {
-                    std::string foo("thrown: \"");
-                    foo += currentExceptionTypeName();
-                    foo += "\"; RuntimeException: \"";
-                    RuntimeException e2("test");
-                    foo += typeid(e2).name();
-                    foo += "\"";
-                    throw std::runtime_error(foo);
-                }
-#endif
             }
         }
 
@@ -190,10 +173,11 @@ SCENARIO("Testing DataSet object", "[DataSet]")
                 dataset.clear_field(meta_scalar_name);
 
                 // The meta scalar no longer exists
-                CHECK_THROWS(
+                CHECK_THROWS_AS(
                     dataset.get_meta_scalars(meta_scalar_name,
                                             (void*&)retrieved_data,
-                                             retrieved_length, type)
+                                             retrieved_length, type),
+                    SmartRedis::RuntimeException
                 );
             }
         }

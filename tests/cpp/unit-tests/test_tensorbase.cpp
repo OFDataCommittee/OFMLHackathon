@@ -136,10 +136,11 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
 
             THEN("A runtime error is thrown during TensorType initialization")
             {
-                CHECK_THROWS(
+                CHECK_THROWS_AS(
                     tp.add_tensor(name, data, dims,
                                   tensor_type,
-                                  SRMemLayoutContiguous)
+                                  SRMemLayoutContiguous),
+                    SmartRedis::RuntimeException
                 );
             }
         }
@@ -157,10 +158,11 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
 
             THEN("A runtime error is thrown")
             {
-                CHECK_THROWS(
+                CHECK_THROWS_AS(
                     tp.add_tensor(name, data, dims,
                                   tensor_type,
-                                  SRMemLayoutContiguous)
+                                  SRMemLayoutContiguous),
+                    SmartRedis::RuntimeException
                 );
             }
         }
@@ -178,10 +180,11 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
 
             THEN("A runtime error is thrown")
             {
-                CHECK_THROWS(
+                CHECK_THROWS_AS(
                     tp.add_tensor(name, data, dims,
                                  tensor_type,
-                                 SRMemLayoutContiguous)
+                                 SRMemLayoutContiguous),
+                    SmartRedis::RuntimeException
                 );
             }
         }
@@ -197,10 +200,11 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
 
             THEN("A runtime error is thrown")
             {
-                CHECK_THROWS(
+                CHECK_THROWS_AS(
                     tp.add_tensor(name, data, dims,
                                   tensor_type,
-                                  SRMemLayoutContiguous)
+                                  SRMemLayoutContiguous),
+                    SmartRedis::RuntimeException
                 );
             }
         }
@@ -217,10 +221,11 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
 
             THEN("A runtime error is thrown")
             {
-                CHECK_THROWS(
+                CHECK_THROWS_AS(
                     tp.add_tensor(name, data, dims,
                                   tensor_type,
-                                  SRMemLayoutContiguous)
+                                  SRMemLayoutContiguous),
+                    SmartRedis::RuntimeException
                 );
             }
         }

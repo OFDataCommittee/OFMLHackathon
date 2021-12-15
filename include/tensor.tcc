@@ -29,8 +29,6 @@
 #ifndef SMARTREDIS_TENSOR_TCC
 #define SMARTREDIS_TENSOR_TCC
 
-#include "srexception.h"
-
 // Tensor constructor
 template <class T>
 Tensor<T>::Tensor(const std::string& name,
