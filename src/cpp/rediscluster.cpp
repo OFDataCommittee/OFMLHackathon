@@ -598,7 +598,7 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
     }
 
     // Since we didn't execute, we must have run out of retry attempts
-    throw SRTimeoutException("Unable to execute command" + cmd.first_field());
+    throw SRTimeoutException("Unable to execute command " + cmd.first_field());
 }
 
 // Connect to the cluster at the address and port
