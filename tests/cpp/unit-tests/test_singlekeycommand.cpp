@@ -45,7 +45,7 @@ SCENARIO("Retrieve field to empty SingleKeyCommand", "[SingleKeyCommand]")
 
             THEN("A runtime error is thrown")
             {
-                CHECK_THROWS_AS(cmd.first_field(), SR::RuntimeException);
+                CHECK_THROWS_AS(cmd.first_field(), RuntimeException);
             }
         }
     }

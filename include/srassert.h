@@ -33,12 +33,12 @@
 
 inline bool throw_runtime_error(const std::string &txt, const char *file, int line)
 {
-    throw SR::RuntimeException(txt, file, line);
+    throw RuntimeException(txt, file, line);
 }
 
 inline bool throw_param_error(const std::string &txt, const char *file, int line)
 {
-    throw SR::ParameterException(txt, file, line);
+    throw ParameterException(txt, file, line);
 }
 
 #define SR_ASSERT(condition) \

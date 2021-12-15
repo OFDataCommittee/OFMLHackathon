@@ -146,13 +146,13 @@ SCENARIO("Testing DataSet object", "[DataSet]")
                     dataset.get_tensor("does_not_exist", retrieved_data,
                                        retrieved_dims, retrieved_type,
                                        mem_layout);
-                } catch (SR::RuntimeException const&) {
-                    throw std::runtime_error("We can catch an SR::RuntimeException, but Catch cannot detect it");
+                } catch (RuntimeException const&) {
+                    throw std::runtime_error("We can catch an RuntimeException, but Catch cannot detect it");
                 } catch (std::exception &e) {
                     std::string foo("thrown: \"");
                     foo += currentExceptionTypeName();
-                    foo += "\"; SR::RuntimeException: \"";
-                    SR::RuntimeException e2("test");
+                    foo += "\"; RuntimeException: \"";
+                    RuntimeException e2("test");
                     foo += typeid(e2).name();
                     foo += "\"";
                     throw std::runtime_error(foo);

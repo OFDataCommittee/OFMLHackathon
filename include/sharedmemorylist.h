@@ -32,6 +32,7 @@
 #include <forward_list>
 #include <cstring>
 #include <memory>
+#include "srexception.h"
 
 namespace SmartRedis {
 

@@ -42,7 +42,7 @@ void put_get_empty_dataset(std::string dataset_name)
     try {
         client.put_dataset(sent_dataset);
     }
-    catch(SR::RuntimeException) {
+    catch(RuntimeException) {
         return;
     }
 

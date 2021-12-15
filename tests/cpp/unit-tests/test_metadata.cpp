@@ -212,13 +212,13 @@ SCENARIO("Test MetaData", "[MetaData]")
                 CHECK_THROWS_AS(
                     metadata.get_scalar_values("DNE", (void*&)data,
                                                 length, type),
-                    SR::RuntimeException);
+                    RuntimeException);
 
                 INFO("Cannot retrieve a scalar through "
                      "get_string_values method");
                 CHECK_THROWS_AS(
                     metadata.get_string_values("uint32_scalar"),
-                    SR::RuntimeException);
+                    RuntimeException);
             }
 
             AND_THEN("The MetaData object can be copied "
@@ -292,13 +292,13 @@ SCENARIO("Test MetaData", "[MetaData]")
                 CHECK_THROWS_AS(
                     metadata.add_scalar("str_scalar", &str_val,
                                          SRMetadataTypeString),
-                    SR::RuntimeException);
+                    RuntimeException);
                 INFO("The existing metadata field has a different "
                      "type from SRMetadataTypeDouble");
                 CHECK_THROWS_AS(
                     metadata.add_scalar("str_scalar", &str_val,
                                          SRMetadataTypeDouble),
-                    SR::RuntimeException);
+                    RuntimeException);
             }
         }
 
@@ -334,11 +334,11 @@ SCENARIO("Test MetaData", "[MetaData]")
                 CHECK_THROWS_AS(
                     metadata.get_scalar_values("str_field", (void*&)str_data,
                                                 length, type),
-                    SR::RuntimeException);
+                    RuntimeException);
                 INFO("Cannot retrieve a string value that does not exist");
                 CHECK_THROWS_AS(
                     metadata.get_string_values("DNE"),
-                    SR::RuntimeException
+                    RuntimeException
                 );
 
             }
@@ -351,7 +351,7 @@ SCENARIO("Test MetaData", "[MetaData]")
                      "is called on the MetaData object");
                 CHECK_THROWS_AS(
                     metadata.get_string_values("str_field"),
-                    SR::RuntimeException);
+                    RuntimeException);
             }
         }
     }

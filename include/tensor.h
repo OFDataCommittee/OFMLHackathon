@@ -34,6 +34,7 @@
 #include <stdexcept>
 #include "tensorbase.h"
 #include "sharedmemorylist.h"
+#include "srexception.h"
 
 ///@file
 

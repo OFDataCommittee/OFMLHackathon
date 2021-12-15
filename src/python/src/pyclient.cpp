@@ -41,7 +41,7 @@ PyClient::PyClient(bool cluster)
     try {
         _client = new Client(cluster);
     }
-    catch (SR::Exception& e) {
+    catch (Exception& e) {
         // exception is already prepared for caller
         throw e;
     }

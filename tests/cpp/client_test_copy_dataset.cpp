@@ -75,7 +75,7 @@ void put_and_copy_dataset(
     client.copy_dataset(dataset_name, dest_dataset_name);
 
     if(!client.tensor_exists(dest_dataset_name))
-        throw SR::RuntimeException("The DataSet confirmation key is not set.");
+        throw RuntimeException("The DataSet confirmation key is not set.");
 
     //Retrieving a dataset
     SmartRedis::DataSet DestDataSet = client.get_dataset(dest_dataset_name);

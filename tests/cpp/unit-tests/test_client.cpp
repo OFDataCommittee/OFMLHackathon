@@ -102,13 +102,13 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
         {
             CHECK_THROWS_AS(
                 client.get_dataset("DNE"),
-                SR::RuntimeException);
+                RuntimeException);
             CHECK_THROWS_AS(
                 client.rename_dataset("DNE", "rename_DNE"),
-               SR::RuntimeException);
+               RuntimeException);
             CHECK_THROWS_AS(
                 client.copy_dataset("src_DNE", "dest_DNE"),
-                SR::RuntimeException);
+                RuntimeException);
         }
 
         WHEN("A dataset is created and put into the Client")
@@ -165,7 +165,7 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
                 // original name no longer exists after renaming
                 CHECK_THROWS_AS(
                     client.get_dataset(dataset_name),
-                    SR::RuntimeException);
+                    RuntimeException);
 
                 // the dataset with new name can be retrieved
                 double* retrieved_meta_data;
@@ -325,7 +325,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
                     client.unpack_tensor(keys[0], contig_retrieved_data,
                                          dims[0], SRTensorTypeDouble,
                                          SRMemLayoutContiguous),
-                    SR::RuntimeException);
+                    RuntimeException);
 
                 free(contig_retrieved_data);
 
@@ -458,7 +458,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
                     client.unpack_tensor(keys[0], retrieved_data,
                                          incorrect_dims, types[0],
                                          mem_layout),
-                    SR::RuntimeException);
+                    RuntimeException);
 
                 free(retrieved_data);
             }
@@ -481,9 +481,9 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
                 std::string db_address = ":00";
 
                 CHECK_THROWS_AS(client.get_db_node_info(db_address),
-                                SR::RuntimeException);
+                                RuntimeException);
                 CHECK_THROWS_AS(client.get_db_cluster_info(db_address),
-                                SR::RuntimeException);
+                                RuntimeException);
             }
         }
 
@@ -509,7 +509,7 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
                     CHECK_NOTHROW(client.get_db_cluster_info(db_address));
                 else
                     CHECK_THROWS_AS(client.get_db_cluster_info(db_address),
-                                    SR::RuntimeException);
+                                    RuntimeException);
             }
         }
     }
@@ -530,10 +530,10 @@ SCENARIO("Testing FLUSHDB on empty Client Object", "[Client][FLUSHDB]")
                 std::string db_address = ":00";
 
                 CHECK_THROWS_AS(client.flush_db(db_address),
-                                SR::RuntimeException);
+                                RuntimeException);
 
                 CHECK_THROWS_AS(client.flush_db("123456678.345633.21:2345561"),
-                                SR::RuntimeException);
+                                RuntimeException);
             }
         }
 
@@ -608,9 +608,9 @@ SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
 
                 for (size_t address_index = 0; address_index < db_addresses.size(); address_index++) {
                     CHECK_THROWS_AS(client.config_get("*max-*-entries*", db_addresses[address_index]),
-                                    SR::RuntimeException);
+                                    RuntimeException);
                     CHECK_THROWS_AS(client.config_set("dbfilename", "new_file.rdb", db_addresses[address_index]),
-                                    SR::RuntimeException);
+                                    RuntimeException);
                 }
             }
         }
@@ -670,7 +670,7 @@ SCENARIO("Test CONFIG SET on an unsupported command", "[Client]")
             {
                 CHECK_THROWS_AS(
                     client.config_set("unsupported_cmd", "100", address),
-                    SR::RuntimeException);
+                    RuntimeException);
             }
         }
     }
@@ -748,7 +748,7 @@ SCENARIO("Test that prefixing covers all hash slots of a cluster", "[Client]")
             THEN("A std::runtime_error is thrown")
             {
                 CHECK_THROWS_AS(redis_cluster.get_crc16_prefix(16385),
-                                SR::RuntimeException);
+                                RuntimeException);
             }
         }
 

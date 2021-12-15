@@ -56,7 +56,7 @@ const char* SRGetLastError();
 
 #ifdef __cplusplus
 #include <string>
-namespace SR {
+namespace SmartRedis {
 
 // Smart error: custom error class for the SmartRedis library
 class Exception: public std::exception
@@ -96,8 +96,8 @@ class Exception: public std::exception
         // NOP
     }
 
-    Exception& operator=(const SR::Exception &) = default;
-    Exception(SR::Exception &&) = default;
+    Exception& operator=(const Exception &) = default;
+    Exception(Exception &&) = default;
     Exception& operator=(Exception &&) = default;
     virtual ~Exception() override = default;
 
@@ -129,7 +129,7 @@ class BadAllocException: public Exception
     }
 };
 
-#define SRBadAllocException(txt) SR::BadAllocException(txt, __FILE__, __LINE__)
+#define SRBadAllocException(txt) BadAllocException(txt, __FILE__, __LINE__)
 
 //////////////////////////////////////////////////
 //  Back-end database exception
@@ -142,7 +142,7 @@ class DatabaseException: public Exception
     }
 };
 
-#define SRDatabaseException(txt) SR::DatabaseException(txt, __FILE__, __LINE__)
+#define SRDatabaseException(txt) DatabaseException(txt, __FILE__, __LINE__)
 
 //////////////////////////////////////////////////
 // Runtime exception
@@ -155,7 +155,7 @@ class RuntimeException: public Exception
     }
 };
 
-#define SRRuntimeException(txt) SR::RuntimeException(txt, __FILE__, __LINE__)
+#define SRRuntimeException(txt) RuntimeException(txt, __FILE__, __LINE__)
 
 //////////////////////////////////////////////////
 // Parameter exception
@@ -168,7 +168,7 @@ class ParameterException: public Exception
     }
 };
 
-#define SRParameterException(txt) SR::ParameterException(txt, __FILE__, __LINE__)
+#define SRParameterException(txt) ParameterException(txt, __FILE__, __LINE__)
 
 //////////////////////////////////////////////////
 // Timeout exception
@@ -181,7 +181,7 @@ class TimeoutException: public Exception
     }
 };
 
-#define SRTimeoutException(txt) SR::TimeoutException(txt, __FILE__, __LINE__)
+#define SRTimeoutException(txt) TimeoutException(txt, __FILE__, __LINE__)
 
 //////////////////////////////////////////////////
 // Internal exception
@@ -194,7 +194,7 @@ class InternalException: public Exception
     }
 };
 
-#define SRInternalException(txt) SR::InternalException(txt, __FILE__, __LINE__)
+#define SRInternalException(txt) InternalException(txt, __FILE__, __LINE__)
 
 //////////////////////////////////////////////////
 // Key exception
@@ -207,7 +207,7 @@ class KeyException: public Exception
     }
 };
 
-#define SRKeyException(txt) SR::KeyException(txt, __FILE__, __LINE__)
+#define SRKeyException(txt) KeyException(txt, __FILE__, __LINE__)
 
 //////////////////////////////////////////////////
 // Store the last error encountered

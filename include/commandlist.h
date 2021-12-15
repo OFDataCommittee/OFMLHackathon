@@ -29,9 +29,10 @@
 #ifndef SMARTREDIS_COMMANDLIST_H
 #define SMARTREDIS_COMMANDLIST_H
 
-#include "stdlib.h"
+#include <stdlib.h>
 #include <vector>
 #include "command.h"
+#include "srexception.h"
 
 namespace SmartRedis {
 
