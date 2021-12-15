@@ -30,7 +30,11 @@
 #ifndef SMARTREDIS_ENUMS_H
 #define SMARTREDIS_ENUMS_H
 
-// Memory layout of tensor data
+///@file
+
+/*!
+*   \brief  Enumeration for memory layout of tensor data
+*/
 typedef enum {
     SRMemLayoutInvalid           = 0, // Invalid or uninitialized memory layout
     SRMemLayoutNested            = 1, // Multidimensional row-major array layout with nested arrays of pointers (contiguous at innermost layer)
@@ -39,7 +43,9 @@ typedef enum {
     SRMemLayoutFortranContiguous = 4  // Multidimensional column-major array layout in contiguous memory
 } SRMemoryLayout;
 
-// Metadata types
+/*!
+*   \brief  Enumeration for metadata types
+*/
 typedef enum {
     SRMetadataTypeInvalid = 0, // Invalid or uninitialized metadata
     SRMetadataTypeDouble  = 1, // Double-precision floating point metadata
@@ -51,7 +57,9 @@ typedef enum {
     SRMetadataTypeString  = 7  // ASCII text string metadata
 } SRMetaDataType;
 
-// Tensor types
+/*!
+*   \brief  Enumeration for tensor data types
+*/
 typedef enum {
     SRTensorTypeInvalid = 0, // Invalid or uninitialized tensor type
     SRTensorTypeDouble  = 1, // Double-precision floating point tensor type

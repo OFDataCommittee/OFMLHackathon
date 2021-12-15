@@ -35,8 +35,6 @@ namespace SmartRedis {
 
 ///@file
 
-class Redis;
-
 /*!
 *   \brief  The Redis class executes RedisServer
 *           commands on a non-cluster redis server.

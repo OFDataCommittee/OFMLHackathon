@@ -32,6 +32,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+///@file
+
+/*!
+*   \brief  SRError lists possible errors encountered in SmartRedis.
+*/
 typedef enum {
     SRNoError        = 0, // No error
     SRBadAllocError  = 1, // Memory allocation error
@@ -58,13 +63,11 @@ const char* SRGetLastError();
 #include <string>
 namespace SmartRedis {
 
-// Smart error: custom error class for the SmartRedis library
+/*!
+*   \brief  Smart error: custom exception class for the SmartRedis library
+*/
 class Exception: public std::exception
 {
-    // Inherit all the standard constructors
-    // using std::exception::exception;
-
-
     public:
     Exception(const char* what_arg)
       : _msg(what_arg)
@@ -118,8 +121,10 @@ class Exception: public std::exception
     std::string _loc;
 };
 
-//////////////////////////////////////////////////
-// Memory allocation exception
+
+/*!
+*   \brief  Memory allocation exception for SmartRedis
+*/
 class BadAllocException: public Exception
 {
     using Exception::Exception;
@@ -131,8 +136,10 @@ class BadAllocException: public Exception
 
 #define SRBadAllocException(txt) BadAllocException(txt, __FILE__, __LINE__)
 
-//////////////////////////////////////////////////
-//  Back-end database exception
+
+/*!
+*   \brief  Back-end database exception for SmartRedis
+*/
 class DatabaseException: public Exception
 {
     using Exception::Exception;
@@ -144,8 +151,10 @@ class DatabaseException: public Exception
 
 #define SRDatabaseException(txt) DatabaseException(txt, __FILE__, __LINE__)
 
-//////////////////////////////////////////////////
-// Runtime exception
+
+/*!
+*   \brief  Runtime exception for SmartRedis
+*/
 class RuntimeException: public Exception
 {
     using Exception::Exception;
@@ -157,8 +166,10 @@ class RuntimeException: public Exception
 
 #define SRRuntimeException(txt) RuntimeException(txt, __FILE__, __LINE__)
 
-//////////////////////////////////////////////////
-// Parameter exception
+
+/*!
+*   \brief  Parameter exception for SmartRedis
+*/
 class ParameterException: public Exception
 {
     using Exception::Exception;
@@ -170,8 +181,10 @@ class ParameterException: public Exception
 
 #define SRParameterException(txt) ParameterException(txt, __FILE__, __LINE__)
 
-//////////////////////////////////////////////////
-// Timeout exception
+
+/*!
+*   \brief  Timeout exception for SmartRedis
+*/
 class TimeoutException: public Exception
 {
     using Exception::Exception;
@@ -183,8 +196,10 @@ class TimeoutException: public Exception
 
 #define SRTimeoutException(txt) TimeoutException(txt, __FILE__, __LINE__)
 
-//////////////////////////////////////////////////
-// Internal exception
+
+/*!
+*   \brief  Internal exception for SmartRedis
+*/
 class InternalException: public Exception
 {
     using Exception::Exception;
@@ -196,8 +211,10 @@ class InternalException: public Exception
 
 #define SRInternalException(txt) InternalException(txt, __FILE__, __LINE__)
 
-//////////////////////////////////////////////////
-// Key exception
+
+/*!
+*   \brief  Key exception for SmartRedis
+*/
 class KeyException: public Exception
 {
     using Exception::Exception;
@@ -209,12 +226,13 @@ class KeyException: public Exception
 
 #define SRKeyException(txt) KeyException(txt, __FILE__, __LINE__)
 
-//////////////////////////////////////////////////
-// Store the last error encountered
+/*!
+*   \brief  Store the last error encountered
+*/
 extern "C"
 void SRSetLastError(const Exception& last_error);
 
-} // namespace SR
+} // namespace SmartRedis
 
 #endif // __cplusplus
 #endif // SMARTREDIS_SRException_H
