@@ -33,8 +33,8 @@
 
 template <typename T_send, typename T_recv>
 void put_get_3D_array(
-		    void (*fill_array)(T_send***, int, int, int),
-		    std::vector<size_t> dims,
+        void (*fill_array)(T_send***, int, int, int),
+        std::vector<size_t> dims,
         SRTensorType type,
         std::string key_suffix="")
 {
@@ -76,8 +76,8 @@ void put_get_3D_array(
 
   if (!is_equal_3D_array<T_send, T_recv>(array, u_result,
                                          dims[0], dims[1], dims[2]))
-	  throw std::runtime_error("The results do not match for "\
-				                     "the 3d put and get test!");
+    throw std::runtime_error("The results do not match for "\
+                             "the 3d put and get test!");
 
   SRTensorType g_type;
   std::vector<size_t> g_dims;
@@ -108,8 +108,8 @@ void put_get_3D_array(
 
   if (!is_equal_3D_array<T_send, T_recv>(array, g_type_result,
                                          dims[0], dims[1], dims[2]))
-	  throw std::runtime_error("The results do not match for "\
-				                     "the 3D put and get test!");
+    throw std::runtime_error("The results do not match for "\
+                             "the 3D put and get test!");
 
   free_3D_array(array, dims[0], dims[1]);
   free_3D_array(u_result, dims[0], dims[1]);
@@ -124,36 +124,36 @@ int main(int argc, char* argv[])
   std::vector<size_t> dims = {dim1, dim2, dim3};
 
   put_get_3D_array<double,double>(
-				  &set_3D_array_floating_point_values<double>,
-				  dims, SRTensorTypeDouble, "_dbl");
+          &set_3D_array_floating_point_values<double>,
+          dims, SRTensorTypeDouble, "_dbl");
 
   put_get_3D_array<float,float>(
-				&set_3D_array_floating_point_values<float>,
-				dims, SRTensorTypeFloat, "_flt");
+        &set_3D_array_floating_point_values<float>,
+        dims, SRTensorTypeFloat, "_flt");
 
   put_get_3D_array<int64_t,int64_t>(
-				    &set_3D_array_integral_values<int64_t>,
-				    dims, SRTensorTypeInt64, "_i64");
+            &set_3D_array_integral_values<int64_t>,
+            dims, SRTensorTypeInt64, "_i64");
 
   put_get_3D_array<int32_t,int32_t>(
-				    &set_3D_array_integral_values<int32_t>,
-				    dims, SRTensorTypeInt32, "_i32");
+            &set_3D_array_integral_values<int32_t>,
+            dims, SRTensorTypeInt32, "_i32");
 
   put_get_3D_array<int16_t,int16_t>(
-				      &set_3D_array_integral_values<int16_t>,
-				      dims, SRTensorTypeInt16, "_i16");
+              &set_3D_array_integral_values<int16_t>,
+              dims, SRTensorTypeInt16, "_i16");
 
   put_get_3D_array<int8_t,int8_t>(
-				      &set_3D_array_integral_values<int8_t>,
-				      dims, SRTensorTypeInt8, "_i8");
+              &set_3D_array_integral_values<int8_t>,
+              dims, SRTensorTypeInt8, "_i8");
 
   put_get_3D_array<uint16_t,uint16_t>(
-				      &set_3D_array_integral_values<uint16_t>,
-				      dims, SRTensorTypeUint16, "_ui16");
+              &set_3D_array_integral_values<uint16_t>,
+              dims, SRTensorTypeUint16, "_ui16");
 
   put_get_3D_array<uint8_t,uint8_t>(
-				      &set_3D_array_integral_values<uint8_t>,
-				      dims, SRTensorTypeUint8, "_ui8");
+              &set_3D_array_integral_values<uint8_t>,
+              dims, SRTensorTypeUint8, "_ui8");
 
   std::cout<<"3D put and get test complete."<<std::endl;
 

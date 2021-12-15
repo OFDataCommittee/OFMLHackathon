@@ -33,8 +33,8 @@
 
 template <typename T_send, typename T_recv>
 void dataset_delete(
-		    void (*fill_array)(T_send***, int, int, int),
-		    std::vector<size_t> dims,
+            void (*fill_array)(T_send***, int, int, int),
+            std::vector<size_t> dims,
             SRTensorType type,
             std::string key_suffix,
             std::string dataset_name)
@@ -129,8 +129,8 @@ int main(int argc, char* argv[]) {
 
   dataset_name = "3D_dbl_dataset_delete";
   dataset_delete<double,double>(
-				  &set_3D_array_floating_point_values<double>,
-				  dims, SRTensorTypeDouble, "_dbl", dataset_name);
+                  &set_3D_array_floating_point_values<double>,
+                  dims, SRTensorTypeDouble, "_dbl", dataset_name);
 
   return 0;
 }

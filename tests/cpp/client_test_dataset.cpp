@@ -33,11 +33,11 @@
 
 template <typename T_send, typename T_recv>
 void put_get_dataset(
-		    void (*fill_array)(T_send***, int, int, int),
-		    std::vector<size_t> dims,
-		    SRTensorType type,
-		    std::string key_suffix,
-		    std::string dataset_name)
+            void (*fill_array)(T_send***, int, int, int),
+            std::vector<size_t> dims,
+            SRTensorType type,
+            std::string key_suffix,
+            std::string dataset_name)
 {
     T_send*** t_send_1 =
         allocate_3D_array<T_send>(dims[0], dims[1], dims[2]);

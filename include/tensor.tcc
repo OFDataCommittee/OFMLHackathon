@@ -257,7 +257,7 @@ void Tensor<T>::_fill_nested_mem_with_data(void* data,
     }
     else {
         T* data_to_copy = &(((T*)tensor_data)[data_position]);
-	    std::memcpy(data, data_to_copy, dims[0] * sizeof(T));
+        std::memcpy(data, data_to_copy, dims[0] * sizeof(T));
         data_position += dims[0];
     }
 }

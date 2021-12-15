@@ -442,7 +442,7 @@ class PyClient
         *                    formatted as address:port e.g. 127.0.0.1:6379
         *   \returns A list of parsed_map objects containing all the
         *            information about the given database nodes
-	    *   \throws SRRuntimeException if the address is not addressable by this
+        *   \throws SRRuntimeException if the address is not addressable by this
         *           client.  In the case of using a cluster of database nodes,
         *           it is best practice to bind each node in the cluster
         *           to a specific adddress to avoid inconsistencies in
@@ -460,7 +460,7 @@ class PyClient
         *                    formatted as address:port e.g. 127.0.0.1:6379
         *   \returns A list of parsed_map objects containing all the cluster
         *            information about the given database nodes
-	    *   \throws SRRuntimeException if the address is not addressable by this
+        *   \throws SRRuntimeException if the address is not addressable by this
         *           client.  In the case of using a cluster of database nodes,
         *           it is best practice to bind each node in the cluster
         *           to a specific adddress to avoid inconsistencies in

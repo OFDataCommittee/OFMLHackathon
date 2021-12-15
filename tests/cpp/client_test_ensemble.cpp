@@ -54,7 +54,7 @@ void load_mnist_image_to_array(float**** img)
 }
 
 void produce(
-		    std::vector<size_t> dims,
+            std::vector<size_t> dims,
         std::string keyout="",
         std::string keyin="")
 {
@@ -216,7 +216,7 @@ int main(int argc, char* argv[]) {
   std::vector<size_t> dims = {dim1};
 
   produce(dims,
-		  std::string("producer_0"),
+          std::string("producer_0"),
           std::string("producer_0"));
 
   char keyin_env_get[] = "SSKEYIN=producer_1,producer_0";

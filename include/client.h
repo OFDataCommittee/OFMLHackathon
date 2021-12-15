@@ -576,7 +576,7 @@ class Client
         *          cluster node.
         *   \param address The address of the database node (host:port)
         *   \returns parsed_reply_map containing the database cluster information.
-	    *   \throws SRRuntimeException if on a non-cluster environment or
+        *   \throws SRRuntimeException if on a non-cluster environment or
         *           if the address is not addressable by this
         *           client. In the case of using a cluster of database nodes,
         *           it is best practice to bind each node in the cluster

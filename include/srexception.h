@@ -26,7 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined(SMARTREDIS_SRException_H)
+#ifndef SMARTREDIS_SRException_H
 #define SMARTREDIS_SRException_H
 
 #include <stdio.h>
@@ -40,7 +40,7 @@ typedef enum {
     SRRuntimeError   = 4, // Runtime error executing an operation
     SRParameterError = 5, // Bad parameter error
     SRTimeoutError   = 6, // Timeout error
-	SRKeyError       = 7, // Key error
+    SRKeyError       = 7, // Key error
     SRInvalidError   = 8  // Uninitialized error variable
 } SRError;
 
@@ -61,72 +61,72 @@ namespace SR {
 // Smart error: custom error class for the SmartRedis library
 class Exception: public std::exception
 {
-	// Inherit all the standard constructors
-	// using std::exception::exception;
+    // Inherit all the standard constructors
+    // using std::exception::exception;
 
 
-	public:
-	Exception(const char* what_arg)
-	  : _msg(what_arg)
-	{
-	    // NOP
-	}
+    public:
+    Exception(const char* what_arg)
+      : _msg(what_arg)
+    {
+        // NOP
+    }
 
-	Exception(const char* what_arg, const char* file, int line)
-	  : _msg(what_arg), _loc(file + std::string(":") + std::to_string(line))
-	{
-	    // NOP
-	}
+    Exception(const char* what_arg, const char* file, int line)
+      : _msg(what_arg), _loc(file + std::string(":") + std::to_string(line))
+    {
+        // NOP
+    }
 
-	Exception(const std::string& what_arg, const char* file, int line)
-	  : _msg(what_arg), _loc(file + std::string(":") + std::to_string(line))
-	{
-	    // NOP
-	}
+    Exception(const std::string& what_arg, const char* file, int line)
+      : _msg(what_arg), _loc(file + std::string(":") + std::to_string(line))
+    {
+        // NOP
+    }
 
-	Exception(const Exception& other) noexcept
-	  : _msg(other._msg), _loc(other._loc)
-	{
-		// NOP
-	}
+    Exception(const Exception& other) noexcept
+      : _msg(other._msg), _loc(other._loc)
+    {
+        // NOP
+    }
 
-	Exception(const std::exception& other) noexcept
-	  : _msg(other.what())
-	{
-		// NOP
-	}
+    Exception(const std::exception& other) noexcept
+      : _msg(other.what())
+    {
+        // NOP
+    }
 
     Exception& operator=(const SR::Exception &) = default;
     Exception(SR::Exception &&) = default;
     Exception& operator=(Exception &&) = default;
     virtual ~Exception() override = default;
 
-	virtual SRError to_error_code() const noexcept {
-		return SRInvalidError;
-	}
+    virtual SRError to_error_code() const noexcept {
+        return SRInvalidError;
+    }
 
-	virtual const char* what() const noexcept{
-		return _msg.c_str();
-	}
+    virtual const char* what() const noexcept{
+        return _msg.c_str();
+    }
 
-	virtual const char* where() const noexcept {
-		return _loc.c_str();
-	}
+    virtual const char* where() const noexcept {
+        return _loc.c_str();
+    }
 
-	protected:
-	std::string _msg;
-	std::string _loc;
+    protected:
+    std::string _msg;
+    std::string _loc;
 };
 
 //////////////////////////////////////////////////
 // Memory allocation exception
 class BadAllocException: public Exception
 {
-	using SR::Exception::Exception;
+    using Exception::Exception;
 
-	virtual SRError to_error_code() const noexcept {
-		return SRBadAllocError;
-	}
+    virtual SRError to_error_code() const noexcept {
+        return SRBadAllocError;
+    }
 };
 
 #define SRBadAllocException(txt) SR::BadAllocException(txt, __FILE__, __LINE__)
@@ -135,11 +135,11 @@ class BadAllocException: public Exception
 //  Back-end database exception
 class DatabaseException: public Exception
 {
-	using Exception::Exception;
+    using Exception::Exception;
 
-	virtual SRError to_error_code() const noexcept {
-		return SRDatabaseError;
-	}
+    virtual SRError to_error_code() const noexcept {
+        return SRDatabaseError;
+    }
 };
 
 #define SRDatabaseException(txt) SR::DatabaseException(txt, __FILE__, __LINE__)
@@ -148,11 +148,11 @@ class DatabaseException: public Exception
 // Runtime exception
 class RuntimeException: public Exception
 {
-	using Exception::Exception;
+    using Exception::Exception;
 
-	virtual SRError to_error_code() const noexcept {
-		return SRRuntimeError;
-	}
+    virtual SRError to_error_code() const noexcept {
+        return SRRuntimeError;
+    }
 };
 
 #define SRRuntimeException(txt) SR::RuntimeException(txt, __FILE__, __LINE__)
@@ -161,11 +161,11 @@ class RuntimeException: public Exception
 // Parameter exception
 class ParameterException: public Exception
 {
-	using Exception::Exception;
+    using Exception::Exception;
 
-	virtual SRError to_error_code() const noexcept {
-		return SRParameterError;
-	}
+    virtual SRError to_error_code() const noexcept {
+        return SRParameterError;
+    }
 };
 
 #define SRParameterException(txt) SR::ParameterException(txt, __FILE__, __LINE__)
@@ -174,11 +174,11 @@ class ParameterException: public Exception
 // Timeout exception
 class TimeoutException: public Exception
 {
-	using Exception::Exception;
+    using Exception::Exception;
 
-	virtual SRError to_error_code() const noexcept {
-		return SRTimeoutError;
-	}
+    virtual SRError to_error_code() const noexcept {
+        return SRTimeoutError;
+    }
 };
 
 #define SRTimeoutException(txt) SR::TimeoutException(txt, __FILE__, __LINE__)
@@ -187,11 +187,11 @@ class TimeoutException: public Exception
 // Internal exception
 class InternalException: public Exception
 {
-	using Exception::Exception;
+    using Exception::Exception;
 
-	virtual SRError to_error_code() const noexcept {
-		return SRInternalError;
-	}
+    virtual SRError to_error_code() const noexcept {
+        return SRInternalError;
+    }
 };
 
 #define SRInternalException(txt) SR::InternalException(txt, __FILE__, __LINE__)
@@ -200,11 +200,11 @@ class InternalException: public Exception
 // Key exception
 class KeyException: public Exception
 {
-	using Exception::Exception;
+    using Exception::Exception;
 
-	virtual SRError to_error_code() const noexcept {
-		return SRKeyError;
-	}
+    virtual SRError to_error_code() const noexcept {
+        return SRKeyError;
+    }
 };
 
 #define SRKeyException(txt) SR::KeyException(txt, __FILE__, __LINE__)

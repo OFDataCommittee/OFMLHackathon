@@ -53,8 +53,8 @@ inline size_t _c_index(const std::vector<size_t>& dims,
 
 template <typename T_send, typename T_recv>
 void put_get_3D_array(
-		    void (*fill_array)(T_send*, int),
-		    std::vector<size_t> dims,
+        void (*fill_array)(T_send*, int),
+        std::vector<size_t> dims,
         SRTensorType type,
         std::string key_suffix = "",
         SRMemoryLayout send_direction = SRMemLayoutContiguous,
@@ -198,100 +198,100 @@ int main(int argc, char* argv[])
   /* Test conversion on the put side
   */
   put_get_3D_array<double,double>(
-				  &set_1D_array_floating_point_values<double>,
-				  dims, SRTensorTypeDouble, "_dbl",
+          &set_1D_array_floating_point_values<double>,
+          dims, SRTensorTypeDouble, "_dbl",
           SRMemLayoutFortranContiguous,
           SRMemLayoutContiguous);
 
   put_get_3D_array<float,float>(
-				&set_1D_array_floating_point_values<float>,
-				dims, SRTensorTypeFloat, "_flt",
+        &set_1D_array_floating_point_values<float>,
+        dims, SRTensorTypeFloat, "_flt",
         SRMemLayoutFortranContiguous,
         SRMemLayoutContiguous);
 
   put_get_3D_array<int64_t,int64_t>(
-				    &set_1D_array_integral_values<int64_t>,
-				    dims, SRTensorTypeInt64, "_i64",
+            &set_1D_array_integral_values<int64_t>,
+            dims, SRTensorTypeInt64, "_i64",
             SRMemLayoutFortranContiguous,
             SRMemLayoutContiguous);
 
   put_get_3D_array<int32_t,int32_t>(
-				    &set_1D_array_integral_values<int32_t>,
-				    dims, SRTensorTypeInt32, "_i32",
+            &set_1D_array_integral_values<int32_t>,
+            dims, SRTensorTypeInt32, "_i32",
             SRMemLayoutFortranContiguous,
             SRMemLayoutContiguous);
 
   put_get_3D_array<int16_t,int16_t>(
-				      &set_1D_array_integral_values<int16_t>,
-				      dims, SRTensorTypeInt16, "_i16",
+              &set_1D_array_integral_values<int16_t>,
+              dims, SRTensorTypeInt16, "_i16",
               SRMemLayoutFortranContiguous,
               SRMemLayoutContiguous);
 
   put_get_3D_array<int8_t,int8_t>(
-				      &set_1D_array_integral_values<int8_t>,
-				      dims, SRTensorTypeInt8, "_i8",
+              &set_1D_array_integral_values<int8_t>,
+              dims, SRTensorTypeInt8, "_i8",
               SRMemLayoutFortranContiguous,
               SRMemLayoutContiguous);
 
   put_get_3D_array<uint16_t,uint16_t>(
-				      &set_1D_array_integral_values<uint16_t>,
-				      dims, SRTensorTypeUint16, "_ui16",
+              &set_1D_array_integral_values<uint16_t>,
+              dims, SRTensorTypeUint16, "_ui16",
               SRMemLayoutFortranContiguous,
               SRMemLayoutContiguous);
 
   put_get_3D_array<uint8_t,uint8_t>(
-				      &set_1D_array_integral_values<uint8_t>,
-				      dims, SRTensorTypeUint8, "_ui8",
+              &set_1D_array_integral_values<uint8_t>,
+              dims, SRTensorTypeUint8, "_ui8",
               SRMemLayoutFortranContiguous,
               SRMemLayoutContiguous);
 
   /* Test conversion on the get side
   */
   put_get_3D_array<double,double>(
-				  &set_1D_array_floating_point_values<double>,
-				  dims, SRTensorTypeDouble, "_dbl",
+          &set_1D_array_floating_point_values<double>,
+          dims, SRTensorTypeDouble, "_dbl",
           SRMemLayoutContiguous,
           SRMemLayoutFortranContiguous);
 
   put_get_3D_array<float,float>(
-				&set_1D_array_floating_point_values<float>,
-				dims, SRTensorTypeFloat, "_flt",
+        &set_1D_array_floating_point_values<float>,
+        dims, SRTensorTypeFloat, "_flt",
         SRMemLayoutContiguous,
         SRMemLayoutFortranContiguous);
 
   put_get_3D_array<int64_t,int64_t>(
-				    &set_1D_array_integral_values<int64_t>,
-				    dims, SRTensorTypeInt64, "_i64",
+            &set_1D_array_integral_values<int64_t>,
+            dims, SRTensorTypeInt64, "_i64",
             SRMemLayoutContiguous,
             SRMemLayoutFortranContiguous);
 
   put_get_3D_array<int32_t,int32_t>(
-				    &set_1D_array_integral_values<int32_t>,
-				    dims, SRTensorTypeInt32, "_i32",
+            &set_1D_array_integral_values<int32_t>,
+            dims, SRTensorTypeInt32, "_i32",
             SRMemLayoutContiguous,
             SRMemLayoutFortranContiguous);
 
   put_get_3D_array<int16_t,int16_t>(
-				      &set_1D_array_integral_values<int16_t>,
-				      dims, SRTensorTypeInt16, "_i16",
+              &set_1D_array_integral_values<int16_t>,
+              dims, SRTensorTypeInt16, "_i16",
               SRMemLayoutContiguous,
               SRMemLayoutFortranContiguous);
 
   put_get_3D_array<int8_t,int8_t>(
-				      &set_1D_array_integral_values<int8_t>,
-				      dims, SRTensorTypeInt8, "_i8",
+              &set_1D_array_integral_values<int8_t>,
+              dims, SRTensorTypeInt8, "_i8",
               SRMemLayoutContiguous,
               SRMemLayoutFortranContiguous);
 
   put_get_3D_array<uint16_t,uint16_t>(
-				      &set_1D_array_integral_values<uint16_t>,
-				      dims, SRTensorTypeUint16, "_ui16",
+              &set_1D_array_integral_values<uint16_t>,
+              dims, SRTensorTypeUint16, "_ui16",
               SRMemLayoutContiguous,
               SRMemLayoutFortranContiguous);
 
   put_get_3D_array<uint8_t,uint8_t>(
-				      &set_1D_array_integral_values<uint8_t>,
-				      dims, SRTensorTypeUint8, "_ui8",
+              &set_1D_array_integral_values<uint8_t>,
+              dims, SRTensorTypeUint8, "_ui8",
               SRMemLayoutContiguous,
               SRMemLayoutFortranContiguous);
 

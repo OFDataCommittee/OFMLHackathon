@@ -49,7 +49,7 @@ class SingleKeyCommand : public KeyedCommand
         *   \brief Run this Command on the RedisServer.
         *   \param server A pointer to the RedisServer
         */
-	    virtual CommandReply run_me(RedisServer* server);
+        virtual CommandReply run_me(RedisServer* server);
 
         /*!
         *   \brief Deep copy operator

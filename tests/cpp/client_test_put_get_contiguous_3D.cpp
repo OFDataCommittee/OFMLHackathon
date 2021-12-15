@@ -33,8 +33,8 @@
 
 template <typename T_send, typename T_recv>
 void put_get_3D_array(
-		    void (*fill_array)(T_send*, int),
-		    std::vector<size_t> dims,
+        void (*fill_array)(T_send*, int),
+        std::vector<size_t> dims,
         SRTensorType type,
         std::string key_suffix="")
 {
@@ -94,8 +94,8 @@ void put_get_3D_array(
 
   if (!is_equal_1D_array<T_send, T_recv>(array, u_contig_result,
                                          dims[0]*dims[1]*dims[2]))
-	  throw std::runtime_error("The results do not match for "\
-				                     "when unpacking the result into "\
+    throw std::runtime_error("The results do not match for "\
+                             "when unpacking the result into "\
                              "a contiguous array!");
 
   int e = 0;
@@ -104,7 +104,7 @@ void put_get_3D_array(
       for(int k = 0; k < dims[2]; k++) {
         if(u_nested_result[i][j][k]!=array[e]) {
           throw std::runtime_error("The results do not match for "\
-				                           "when unpacking the result into "\
+                                   "when unpacking the result into "\
                                    "a nested array!");
         }
         e++;
@@ -147,7 +147,7 @@ void put_get_3D_array(
       for(int k = 0; k < dims[2]; k++) {
         if(g_type_nested_result[i][j][k]!=array[g]) {
           throw std::runtime_error("The results do not match "\
-				                           "when using get_tensor() with"\
+                                   "when using get_tensor() with"\
                                    "a nested destination array!");
         }
         g++;
@@ -176,7 +176,7 @@ void put_get_3D_array(
   if (!is_equal_1D_array<T_send, T_recv>(array,
                                          (T_recv*)g_contig_result,
                                          dims[0]*dims[1]*dims[2])) {
-	  throw std::runtime_error("The tensor data retrieved with "\
+    throw std::runtime_error("The tensor data retrieved with "\
                              "get_tensor() does not match "\
                              "when unpacked into nested array!");
   }
@@ -197,36 +197,36 @@ int main(int argc, char* argv[]) {
   std::vector<size_t> dims = {dim1, dim2, dim3};
 
   put_get_3D_array<double,double>(
-				  &set_1D_array_floating_point_values<double>,
-				  dims, SRTensorTypeDouble, "_dbl");
+          &set_1D_array_floating_point_values<double>,
+          dims, SRTensorTypeDouble, "_dbl");
 
   put_get_3D_array<float,float>(
-				&set_1D_array_floating_point_values<float>,
-				dims, SRTensorTypeFloat, "_flt");
+        &set_1D_array_floating_point_values<float>,
+        dims, SRTensorTypeFloat, "_flt");
 
   put_get_3D_array<int64_t,int64_t>(
-				    &set_1D_array_integral_values<int64_t>,
-				    dims, SRTensorTypeInt64, "_i64");
+            &set_1D_array_integral_values<int64_t>,
+            dims, SRTensorTypeInt64, "_i64");
 
   put_get_3D_array<int32_t,int32_t>(
-				    &set_1D_array_integral_values<int32_t>,
-				    dims, SRTensorTypeInt32, "_i32");
+            &set_1D_array_integral_values<int32_t>,
+            dims, SRTensorTypeInt32, "_i32");
 
   put_get_3D_array<int16_t,int16_t>(
-				      &set_1D_array_integral_values<int16_t>,
-				      dims, SRTensorTypeInt16, "_i16");
+              &set_1D_array_integral_values<int16_t>,
+              dims, SRTensorTypeInt16, "_i16");
 
   put_get_3D_array<int8_t,int8_t>(
-				      &set_1D_array_integral_values<int8_t>,
-				      dims, SRTensorTypeInt8, "_i8");
+              &set_1D_array_integral_values<int8_t>,
+              dims, SRTensorTypeInt8, "_i8");
 
   put_get_3D_array<uint16_t,uint16_t>(
-				      &set_1D_array_integral_values<uint16_t>,
-				      dims, SRTensorTypeUint16, "_ui16");
+              &set_1D_array_integral_values<uint16_t>,
+              dims, SRTensorTypeUint16, "_ui16");
 
   put_get_3D_array<uint8_t,uint8_t>(
-				      &set_1D_array_integral_values<uint8_t>,
-				      dims, SRTensorTypeUint8, "_ui8");
+              &set_1D_array_integral_values<uint8_t>,
+              dims, SRTensorTypeUint8, "_ui8");
 
   std::cout<<"3D put and get with contiguous "\
              "data test complete."<<std::endl;

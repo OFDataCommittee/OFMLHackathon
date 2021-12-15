@@ -172,7 +172,7 @@ bool is_equal_1D_array(T* a, U* b, int dim_1)
   */
   for(int i=0; i<dim_1; i++)
       if(!(a[i] == b[i]))
-	return false;
+        return false;
   return true;
 }
 
@@ -185,7 +185,7 @@ bool is_equal_2D_array(T** a, U** b, int dim_1, int dim_2)
   for(int i=0; i<dim_1; i++)
     for(int j=0; j<dim_2; j++)
       if(!(a[i][j] == b[i][j]))
-	return false;
+        return false;
   return true;
 }
 
@@ -198,8 +198,8 @@ bool is_equal_3D_array(T*** a, U*** b, int dim_1, int dim_2, int dim_3)
   for(int i=0; i<dim_1; i++)
     for(int j=0; j<dim_2; j++)
       for(int k=0; k<dim_3; k++)
-    	if(!(a[i][j][k] == b[i][j][k]))
-    	  return false;
+      if(!(a[i][j][k] == b[i][j][k]))
+        return false;
   return true;
 }
 

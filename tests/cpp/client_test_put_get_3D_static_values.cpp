@@ -33,7 +33,7 @@
 
 template <typename T_send, typename T_recv>
 void put_get_3D_array(
-		    std::vector<size_t> dims,
+            std::vector<size_t> dims,
         SRTensorType type,
         std::string key_suffix="")
 {
@@ -91,7 +91,7 @@ void put_get_3D_array(
         if( (array[i][j][k]!=(T_send)(b+2)) ||
             (u_result[i][j][k]!=(T_recv)(b+2)) ) {
               throw std::runtime_error("The results do not match for "\
-				                               "the 3d put and get test!");
+                                       "the 3d put and get test!");
             }
         b++;
       }
@@ -133,7 +133,7 @@ void put_get_3D_array(
         if( (array[i][j][k]!=(T_send)(c+2)) ||
             (g_type_result[i][j][k]!=(T_recv)(c+2)) ) {
               throw std::runtime_error("The results do not match for "\
-				                               "the 3d put and get test!");
+                                       "the 3d put and get test!");
             }
         c++;
       }
