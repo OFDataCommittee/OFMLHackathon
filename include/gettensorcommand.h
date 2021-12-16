@@ -39,6 +39,9 @@ namespace SmartRedis {
 
 class RedisServer;
 
+/*!
+*   \brief The GetTensorCommand class constructs the Redis GET TENSOR command.
+*/
 class GetTensorCommand : public SingleKeyCommand
 {
     public:

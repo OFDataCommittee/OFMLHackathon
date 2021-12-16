@@ -39,6 +39,9 @@ namespace SmartRedis {
 
 class RedisServer;
 
+/*!
+*   \brief The DBInfoCommand class constructs the Redis DB INFO command.
+*/
 class DBInfoCommand : public AddressAtCommand
 {
     public:
