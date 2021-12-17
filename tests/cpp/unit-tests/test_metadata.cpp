@@ -1,5 +1,34 @@
+/*
+ * BSD 2-Clause License
+ *
+ * Copyright (c) 2021, Hewlett Packard Enterprise
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "../../../third-party/catch/catch.hpp"
 #include "metadata.h"
+#include "srexception.h"
 
 // helper function for checking if the MetaData object was copied correctly
 void check_metadata_copied_correctly(MetaData metadata, MetaData metadata_cpy)
@@ -11,7 +40,7 @@ void check_metadata_copied_correctly(MetaData metadata, MetaData metadata_cpy)
     int32_t* int32_data;
     uint32_t* uint32_data;
     size_t length;
-    MetaDataType type;
+    SRMetaDataType type;
 
     double* dbl_data_cpy;
     float* flt_data_cpy;
@@ -20,7 +49,7 @@ void check_metadata_copied_correctly(MetaData metadata, MetaData metadata_cpy)
     int32_t* int32_data_cpy;
     uint32_t* uint32_data_cpy;
     size_t length_cpy;
-    MetaDataType type_cpy;
+    SRMetaDataType type_cpy;
     char** str_data;
     size_t n_strings;
     size_t* lengths;
@@ -118,17 +147,17 @@ SCENARIO("Test MetaData", "[MetaData]")
             uint32_t uint32_val = std::numeric_limits<uint32_t>::max();
 
             metadata.add_scalar(keys[0], &dbl_val,
-                                 MetaDataType::dbl);
+                                 SRMetadataTypeDouble);
             metadata.add_scalar(keys[1], &flt_val,
-                                 MetaDataType::flt);
+                                 SRMetadataTypeFloat);
             metadata.add_scalar(keys[2], &int64_val,
-                                 MetaDataType::int64);
+                                 SRMetadataTypeInt64);
             metadata.add_scalar(keys[3], &uint64_val,
-                                 MetaDataType::uint64);
+                                 SRMetadataTypeUint64);
             metadata.add_scalar(keys[4], &int32_val,
-                                 MetaDataType::int32);
+                                 SRMetadataTypeInt32);
             metadata.add_scalar(keys[5], &uint32_val,
-                                 MetaDataType::uint32);
+                                 SRMetadataTypeUint32);
 
             double* dbl_data;
             float* flt_data;
@@ -137,7 +166,7 @@ SCENARIO("Test MetaData", "[MetaData]")
             int32_t* int32_data;
             uint32_t* uint32_data;
             size_t length;
-            MetaDataType type;
+            SRMetaDataType type;
 
             THEN("The scalers can be retrieved correctly")
             {
@@ -145,51 +174,51 @@ SCENARIO("Test MetaData", "[MetaData]")
                                             length, type);
                 CHECK(*dbl_data == dbl_val);
                 CHECK(length == 1);
-                CHECK(type == MetaDataType::dbl);
+                CHECK(type == SRMetadataTypeDouble);
                 metadata.get_scalar_values(keys[1], (void*&)flt_data,
                                             length, type);
                 CHECK(*flt_data == flt_val);
                 CHECK(length == 1);
-                CHECK(type == MetaDataType::flt);
+                CHECK(type == SRMetadataTypeFloat);
                 metadata.get_scalar_values(keys[2], (void*&)int64_data,
                                             length, type);
                 CHECK(*int64_data == int64_val);
                 CHECK(length == 1);
-                CHECK(type == MetaDataType::int64);
+                CHECK(type == SRMetadataTypeInt64);
                 metadata.get_scalar_values(keys[3], (void*&)uint64_data,
                                             length, type);
                 CHECK(*uint64_data == uint64_val);
                 CHECK(length == 1);
-                CHECK(type == MetaDataType::uint64);
+                CHECK(type == SRMetadataTypeUint64);
                 metadata.get_scalar_values(keys[4], (void*&)int32_data,
                                             length, type);
                 CHECK(*int32_data == int32_val);
                 CHECK(length == 1);
-                CHECK(type == MetaDataType::int32);
+                CHECK(type == SRMetadataTypeInt32);
                 metadata.get_scalar_values(keys[5], (void*&)uint32_data,
                                             length, type);
                 CHECK(*uint32_data == uint32_val);
                 CHECK(length == 1);
-                CHECK(type == MetaDataType::uint32);
+                CHECK(type == SRMetadataTypeUint32);
             }
 
             AND_THEN("The scalers can be retrieved incorrectly")
             {
                 uint32_t* data;
                 size_t length;
-                MetaDataType type;
+                SRMetaDataType type;
 
                 INFO("Cannot retrieve a scalar value that does not exist");
                 CHECK_THROWS_AS(
                     metadata.get_scalar_values("DNE", (void*&)data,
                                                 length, type),
-                    std::runtime_error);
+                    RuntimeException);
 
                 INFO("Cannot retrieve a scalar through "
                      "get_string_values method");
                 CHECK_THROWS_AS(
                     metadata.get_string_values("uint32_scalar"),
-                    std::runtime_error);
+                    RuntimeException);
             }
 
             AND_THEN("The MetaData object can be copied "
@@ -224,32 +253,32 @@ SCENARIO("Test MetaData", "[MetaData]")
                                             length, type);
                 CHECK(*dbl_data == dbl_val);
                 CHECK(length == 1);
-                CHECK(type == MetaDataType::dbl);
+                CHECK(type == SRMetadataTypeDouble);
                 metadata_2.get_scalar_values(keys[1], (void*&)flt_data,
                                             length, type);
                 CHECK(*flt_data == flt_val);
                 CHECK(length == 1);
-                CHECK(type == MetaDataType::flt);
+                CHECK(type == SRMetadataTypeFloat);
                 metadata_2.get_scalar_values(keys[2], (void*&)int64_data,
                                             length, type);
                 CHECK(*int64_data == int64_val);
                 CHECK(length == 1);
-                CHECK(type == MetaDataType::int64);
+                CHECK(type == SRMetadataTypeInt64);
                 metadata_2.get_scalar_values(keys[3], (void*&)uint64_data,
                                             length, type);
                 CHECK(*uint64_data == uint64_val);
                 CHECK(length == 1);
-                CHECK(type == MetaDataType::uint64);
+                CHECK(type == SRMetadataTypeUint64);
                 metadata_2.get_scalar_values(keys[4], (void*&)int32_data,
                                             length, type);
                 CHECK(*int32_data == int32_val);
                 CHECK(length == 1);
-                CHECK(type == MetaDataType::int32);
+                CHECK(type == SRMetadataTypeInt32);
                 metadata_2.get_scalar_values(keys[5], (void*&)uint32_data,
                                             length, type);
                 CHECK(*uint32_data == uint32_val);
                 CHECK(length == 1);
-                CHECK(type == MetaDataType::uint32);
+                CHECK(type == SRMetadataTypeUint32);
             }
         }
 
@@ -262,14 +291,14 @@ SCENARIO("Test MetaData", "[MetaData]")
                 INFO("Cannot add a string with add_scalar method");
                 CHECK_THROWS_AS(
                     metadata.add_scalar("str_scalar", &str_val,
-                                         MetaDataType::string),
-                    std::runtime_error);
+                                         SRMetadataTypeString),
+                    RuntimeException);
                 INFO("The existing metadata field has a different "
-                     "type from MetaDataType::dbl");
+                     "type from SRMetadataTypeDouble");
                 CHECK_THROWS_AS(
                     metadata.add_scalar("str_scalar", &str_val,
-                                         MetaDataType::dbl),
-                    std::runtime_error);
+                                         SRMetadataTypeDouble),
+                    RuntimeException);
             }
         }
 
@@ -299,17 +328,17 @@ SCENARIO("Test MetaData", "[MetaData]")
             {
                 std::string* str_data;
                 size_t length;
-                MetaDataType type;
+                SRMetaDataType type;
                 INFO("A string field cannot be retrieved through "
                      "the get_scalar_values method");
                 CHECK_THROWS_AS(
                     metadata.get_scalar_values("str_field", (void*&)str_data,
                                                 length, type),
-                    std::runtime_error);
+                    RuntimeException);
                 INFO("Cannot retrieve a string value that does not exist");
                 CHECK_THROWS_AS(
                     metadata.get_string_values("DNE"),
-                    std::runtime_error
+                    RuntimeException
                 );
 
             }
@@ -322,7 +351,7 @@ SCENARIO("Test MetaData", "[MetaData]")
                      "is called on the MetaData object");
                 CHECK_THROWS_AS(
                     metadata.get_string_values("str_field"),
-                    std::runtime_error);
+                    RuntimeException);
             }
         }
     }

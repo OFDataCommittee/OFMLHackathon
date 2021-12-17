@@ -16,27 +16,30 @@ include_directories(SYSTEM
 )
 
 set(SOURCES
-	../../../src/cpp/client.cpp
-	../../../src/cpp/dataset.cpp
-	../../../src/cpp/command.cpp
 	../../../src/cpp/addressanycommand.cpp
 	../../../src/cpp/addressatcommand.cpp
-	../../../src/cpp/compoundcommand.cpp
-	../../../src/cpp/singlekeycommand.cpp
-	../../../src/cpp/multikeycommand.cpp
-	../../../src/cpp/dbinfocommand.cpp
+	../../../src/cpp/client.cpp
 	../../../src/cpp/clusterinfocommand.cpp
+	../../../src/cpp/command.cpp
 	../../../src/cpp/commandlist.cpp
-	../../../src/cpp/metadata.cpp
-	../../../src/cpp/tensorbase.cpp
-	../../../src/cpp/tensorpack.cpp
-	../../../src/cpp/dbnode.cpp
 	../../../src/cpp/commandreply.cpp
+	../../../src/cpp/compoundcommand.cpp
+	../../../src/cpp/dataset.cpp
+	../../../src/cpp/dbinfocommand.cpp
+	../../../src/cpp/dbnode.cpp
+	../../../src/cpp/gettensorcommand.cpp
+	../../../src/cpp/keyedcommand.cpp
+	../../../src/cpp/metadata.cpp
+	../../../src/cpp/metadatafield.cpp
+	../../../src/cpp/multikeycommand.cpp
+	../../../src/cpp/nonkeyedcommand.cpp
 	../../../src/cpp/redis.cpp
 	../../../src/cpp/rediscluster.cpp
 	../../../src/cpp/redisserver.cpp
-	../../../src/cpp/metadatafield.cpp
+	../../../src/cpp/singlekeycommand.cpp
 	../../../src/cpp/stringfield.cpp
+	../../../src/cpp/tensorbase.cpp
+	../../../src/cpp/tensorpack.cpp
 )
 
 set(UNIT_TESTS

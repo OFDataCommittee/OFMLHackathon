@@ -25,19 +25,24 @@
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 interface
-  subroutine get_script_c( c_client, key, key_length, script, script_length) bind(c,name="get_script")
+  function get_script_c( c_client, key, key_length, script, script_length) bind(c,name="get_script")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
+    import :: enum_kind
+    integer(kind=enum_kind)                      :: get_script_c
     type(c_ptr), value,            intent(in)    :: c_client   !< Initialized SmartRedis client
     character(kind=c_char),        intent(in)    :: key(*)     !< The key to use to place the script
     integer(kind=c_size_t), value, intent(in)    :: key_length !< The length of the key c-string, excluding null
     type(c_ptr),                   intent(inout) :: script      !< The script as a continuous buffer
     integer(kind=c_size_t),        intent(  out) :: script_length !< Length of the script buffer c-string
-  end subroutine get_script_c
+  end function get_script_c
 end interface
+
 interface
-  subroutine set_script_from_file_c( c_client, key, key_length, device, device_length, &
+  function set_script_from_file_c( c_client, key, key_length, device, device_length, &
                                      script_file, script_file_length) bind(c,name="set_script_from_file")
     use iso_c_binding, only : c_ptr, c_size_t,  c_char
+    import :: enum_kind
+    integer(kind=enum_kind)                   :: set_script_from_file_c
     type(c_ptr), value,            intent(in) :: c_client          !< Initialized SmartRedis client
     character(kind=c_char),        intent(in) :: key(*)            !< The key to use to place the script
     integer(kind=c_size_t), value, intent(in) :: key_length        !< The length of the key c-string, excluding null
@@ -47,13 +52,15 @@ interface
     character(kind=c_char),        intent(in) :: script_file(*)     !< The file storing the script
     integer(kind=c_size_t), value, intent(in) :: script_file_length !< The length of the file name c-string, excluding
                                                                    !! null terminating character
-  end subroutine set_script_from_file_c
+  end function set_script_from_file_c
 end interface
 
 interface
-  subroutine set_script_c( c_client, key, key_length, device, device_length, script, script_length ) &
+  function set_script_c( c_client, key, key_length, device, device_length, script, script_length ) &
       bind(c, name="set_script")
     use iso_c_binding, only : c_ptr, c_size_t,  c_char
+    import :: enum_kind
+    integer(kind=enum_kind)                   :: set_script_c
     type(c_ptr), value,            intent(in) :: c_client          !< Initialized SmartRedis client
     character(kind=c_char),        intent(in) :: key(*)            !< The key to use to place the script
     integer(kind=c_size_t), value, intent(in) :: key_length        !< The length of the key c-string, excluding null
@@ -63,13 +70,15 @@ interface
     character(kind=c_char),        intent(in) :: script(*)     !< The file storing the script
     integer(kind=c_size_t), value, intent(in) :: script_length !< The length of the file name c-string, excluding
                                                                    !! null terminating character
-  end subroutine set_script_c
+  end function set_script_c
 end interface
 
 interface
-  subroutine run_script_c(c_client, key, key_length, func, func_length, inputs, input_lengths, n_inputs, &
+  function run_script_c(c_client, key, key_length, func, func_length, inputs, input_lengths, n_inputs, &
                          outputs, output_lengths, n_outputs) bind(c, name="run_script")
     use iso_c_binding, only : c_ptr, c_size_t, c_char
+    import :: enum_kind
+    integer(kind=enum_kind)                   :: run_script_c
     type(c_ptr), value,            intent(in) :: c_client       !< Initialized SmartRedis client
     character(kind=c_char),        intent(in) :: key(*)         !< The key to use to place the script
     integer(kind=c_size_t), value, intent(in) :: key_length     !< The length of the key c-string, excluding null
@@ -86,5 +95,5 @@ interface
                                                                 !! excluding null terminating character
     integer(kind=c_size_t), value, intent(in) :: n_outputs      !< The number of outputs
 
-  end subroutine run_script_c
+  end function run_script_c
 end interface

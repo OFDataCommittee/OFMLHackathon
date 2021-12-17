@@ -34,7 +34,7 @@
 #include <vector>
 #include <unordered_map>
 #include "sharedmemorylist.h"
-#include "enums/cpp_metadata_type.h"
+#include "sr_enums.h"
 #include "metadatafield.h"
 #include "metadatabuffer.h"
 #include "scalarfield.h"
@@ -55,15 +55,15 @@ static std::string DATATYPE_METADATA_STR_UINT32 = "UINT32";
 static std::string DATATYPE_METADATA_STR_UINT64 = "UINT64";
 static std::string DATATYPE_METADATA_STR_STRING = "STRING";
 
-static const std::unordered_map<std::string, MetaDataType>
+static const std::unordered_map<std::string, SRMetaDataType>
     METADATA_TYPE_MAP{
-        {DATATYPE_METADATA_STR_DOUBLE, MetaDataType::dbl},
-        {DATATYPE_METADATA_STR_FLOAT, MetaDataType::flt},
-        {DATATYPE_METADATA_STR_INT32, MetaDataType::int32},
-        {DATATYPE_METADATA_STR_INT64, MetaDataType::int64},
-        {DATATYPE_METADATA_STR_UINT32, MetaDataType::uint32},
-        {DATATYPE_METADATA_STR_UINT64, MetaDataType::uint64},
-        {DATATYPE_METADATA_STR_STRING, MetaDataType::string} };
+        {DATATYPE_METADATA_STR_DOUBLE, SRMetadataTypeDouble},
+        {DATATYPE_METADATA_STR_FLOAT, SRMetadataTypeFloat},
+        {DATATYPE_METADATA_STR_INT32, SRMetadataTypeInt32},
+        {DATATYPE_METADATA_STR_INT64, SRMetadataTypeInt64},
+        {DATATYPE_METADATA_STR_UINT32, SRMetadataTypeUint32},
+        {DATATYPE_METADATA_STR_UINT64, SRMetadataTypeUint64},
+        {DATATYPE_METADATA_STR_STRING, SRMetadataTypeString} };
 
 class MetaData;
 
@@ -131,7 +131,7 @@ class MetaData
         */
         void add_scalar(const std::string& field_name,
                         const void* value,
-                        const MetaDataType type);
+                        const SRMetaDataType type);
 
         /*!
         *   \brief Add string to a metadata field.
@@ -175,7 +175,7 @@ class MetaData
         void get_scalar_values(const std::string& name,
                                void*& data,
                                size_t& length,
-                               MetaDataType& type);
+                               SRMetaDataType& type);
 
         /*!
         *   \brief  Get metadata values string field
@@ -315,7 +315,7 @@ class MetaData
         *   \param type The data type of the field
         */
         void _create_field(const std::string& field_name,
-                           const MetaDataType type);
+                           const SRMetaDataType type);
 
         /*!
         *   \brief This function will perform a deep copy assignment
@@ -337,7 +337,7 @@ class MetaData
         */
         template <typename T>
         void _create_scalar_field(const std::string& field_name,
-                                  const MetaDataType type);
+                                  const SRMetaDataType type);
 
         /*!
         *   \brief This function creates a new string metadata field

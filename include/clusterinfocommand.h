@@ -39,6 +39,9 @@ namespace SmartRedis {
 
 class RedisServer;
 
+/*!
+*   \brief The ClusterInfoCommand class constructs the Redis CLUSTER INFO command.
+*/
 class ClusterInfoCommand : public AddressAtCommand
 {
     public:

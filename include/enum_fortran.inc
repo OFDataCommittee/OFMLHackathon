@@ -67,3 +67,16 @@ enum, bind(c)
   enumerator :: meta_uint64  = -1
   enumerator :: meta_string  = 7
 end enum
+
+! SRError
+enum, bind(c)
+  enumerator :: SRNoError        = 0
+  enumerator :: SRBadAllocError  = 1
+  enumerator :: SRDatabaseError  = 2
+  enumerator :: SRInternalError  = 3
+  enumerator :: SRRuntimeError   = 4
+  enumerator :: SRParameterError = 5
+  enumerator :: SRTimeoutError   = 6
+  enumerator :: SRKeyError       = 7
+  enumerator :: SRInvalidError   = -1
+end enum

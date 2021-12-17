@@ -27,6 +27,7 @@
  */
 
 #include "metadata.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -110,7 +111,7 @@ void MetaData::_clone_from(const MetaData& other)
 // to existing field.
 void MetaData::add_scalar(const std::string& field_name,
                           const void* value,
-                          MetaDataType type)
+                          SRMetaDataType type)
 
 {
     // Create a field for the scalar if needed
@@ -121,39 +122,39 @@ void MetaData::add_scalar(const std::string& field_name,
     // Get the field
     MetadataField* mdf = _field_map[field_name];
     if (mdf == NULL) {
-        throw std::runtime_error("Metadata field was not found");
+        throw SRRuntimeException("Metadata field was not found");
     }
 
     // Get its type
-    MetaDataType existing_type = mdf->type();
+    SRMetaDataType existing_type = mdf->type();
     if (existing_type != type) {
-        throw std::runtime_error("The existing metadata field "\
+        throw SRRuntimeException("The existing metadata field "\
                                  "has a different type. ");
     }
 
     // Add the value
     switch (type) {
-        case MetaDataType::dbl:
+        case SRMetadataTypeDouble:
             (dynamic_cast<ScalarField<double>*>(mdf))->append(value);
             break;
-        case MetaDataType::flt:
+        case SRMetadataTypeFloat:
             (dynamic_cast<ScalarField<float>*>(mdf))->append(value);
             break;
-        case MetaDataType::int64:
+        case SRMetadataTypeInt64:
             (dynamic_cast<ScalarField<int64_t>*>(mdf))->append(value);
             break;
-        case MetaDataType::uint64:
+        case SRMetadataTypeUint64:
             (dynamic_cast<ScalarField<uint64_t>*>(mdf))->append(value);
             break;
-        case MetaDataType::int32:
+        case SRMetadataTypeInt32:
             (dynamic_cast<ScalarField<int32_t>*>(mdf))->append(value);
             break;
-        case MetaDataType::uint32:
+        case SRMetadataTypeUint32:
             (dynamic_cast<ScalarField<uint32_t>*>(mdf))->append(value);
             break;
-        case MetaDataType::string:
+        case SRMetadataTypeString:
         default:
-            throw std::runtime_error("Invalid MetaDataType used in "\
+            throw SRRuntimeException("Invalid MetaDataType used in "\
                                      "MetaData.add_scalar().");
     }
 }
@@ -166,17 +167,17 @@ void MetaData::add_string(const std::string& field_name,
 {
     // Create the field if this will be the first string for it
     if (!has_field(field_name))
-         _create_field(field_name, MetaDataType::string);
+         _create_field(field_name, SRMetadataTypeString);
 
     // Get the field
     MetadataField* mdf = _field_map[field_name];
     if (mdf == NULL) {
-        throw std::runtime_error("Internal error: Metadata field not found");
+        throw SRRuntimeException("Internal error: Metadata field not found");
     }
 
     // Double-check its type
-    if (mdf->type() != MetaDataType::string) {
-        throw std::runtime_error("The metadata field isn't a string type.");
+    if (mdf->type() != SRMetadataTypeString) {
+        throw SRRuntimeException("The metadata field isn't a string type.");
     }
 
     // Add the value
@@ -187,47 +188,47 @@ void MetaData::add_string(const std::string& field_name,
 void MetaData::get_scalar_values(const std::string& name,
                                 void*& data,
                                 size_t& length,
-                                MetaDataType& type)
+                                SRMetaDataType& type)
 {
     // Make sure the field exists
     if (_field_map[name] == NULL) {
-        throw std::runtime_error("The metadata field " + name +
+        throw SRRuntimeException("The metadata field " + name +
                                  " does not exist.");
     }
 
     // Get values for the field
     type = _field_map[name]->type();
     switch (type) {
-        case MetaDataType::dbl:
+        case SRMetadataTypeDouble:
             _get_numeric_field_values<double>
                 (name, data, length, _double_mem_mgr);
             break;
-        case MetaDataType::flt:
+        case SRMetadataTypeFloat:
             _get_numeric_field_values<float>
                 (name, data, length, _float_mem_mgr);
             break;
-        case MetaDataType::int64:
+        case SRMetadataTypeInt64:
             _get_numeric_field_values<int64_t>
                 (name, data, length, _int64_mem_mgr);
             break;
-        case MetaDataType::uint64:
+        case SRMetadataTypeUint64:
             _get_numeric_field_values<uint64_t>
                 (name, data, length, _uint64_mem_mgr);
             break;
-        case MetaDataType::int32:
+        case SRMetadataTypeInt32:
             _get_numeric_field_values<int32_t>
                 (name, data, length, _int32_mem_mgr);
             break;
-        case MetaDataType::uint32:
+        case SRMetadataTypeUint32:
             _get_numeric_field_values<uint32_t>
                 (name, data, length, _uint32_mem_mgr);
             break;
-        case MetaDataType::string:
-            throw std::runtime_error("MetaData.get_scalar_values() "\
+        case SRMetadataTypeString:
+            throw SRRuntimeException("MetaData.get_scalar_values() "\
                                      "requested invalid MetaDataType.");
             break;
         default:
-            throw std::runtime_error("MetaData.get_scalar_values() "\
+            throw SRRuntimeException("MetaData.get_scalar_values() "\
                                      "requested unknown MetaDataType.");
             break;
     }
@@ -247,17 +248,17 @@ void MetaData::get_string_values(const std::string& name,
     n_strings = 0; // Set to zero until all data copied
     data = _char_array_mem_mgr.allocate(field_strings.size());
     if (data == NULL)
-        throw std::bad_alloc();
+        throw SRBadAllocException("field strings array");
     lengths = _str_len_mem_mgr.allocate(field_strings.size());
     if (lengths == NULL)
-        throw std::bad_alloc();
+        throw SRBadAllocException("field string lengths");
 
     // Copy each metadata string into the string buffer
     for (size_t i = 0; i < field_strings.size(); i++) {
         size_t size = field_strings[i].size();
         char* cstr = _char_mem_mgr.allocate(size + 1);
         if (cstr == NULL)
-            throw std::bad_alloc();
+            throw SRBadAllocException("field string data");
         field_strings[i].copy(cstr, size, 0);
         cstr[size] = '\0';
         data[i] = cstr;
@@ -275,13 +276,13 @@ MetaData::get_string_values(const std::string& name)
     // Get the field
     MetadataField* mdf = _field_map[name];
     if (mdf == NULL) {
-        throw std::runtime_error("The metadata field " + name +
+        throw SRRuntimeException("The metadata field " + name +
                                  " does not exist.");
     }
 
     // Double-check its type
-    if (mdf->type() != MetaDataType::string) {
-        throw std::runtime_error("The metadata field " + name +
+    if (mdf->type() != SRMetadataTypeString) {
+        throw SRRuntimeException("The metadata field " + name +
                                  " is not a string field.");
     }
 
@@ -307,32 +308,32 @@ void MetaData::clear_field(const std::string& field_name)
 
 // Create a new metadata field with the given name and type.
 void MetaData::_create_field(const std::string& field_name,
-                             const MetaDataType type)
+                             const SRMetaDataType type)
 {
     switch (type) {
-        case MetaDataType::string:
+        case SRMetadataTypeString:
             _create_string_field(field_name);
             break;
-        case MetaDataType::dbl:
+        case SRMetadataTypeDouble:
             _create_scalar_field<double>(field_name,type);
             break;
-        case MetaDataType::flt:
+        case SRMetadataTypeFloat:
             _create_scalar_field<float>(field_name,type);
             break;
-        case MetaDataType::int64:
+        case SRMetadataTypeInt64:
             _create_scalar_field<int64_t>(field_name,type);
             break;
-        case MetaDataType::uint64:
+        case SRMetadataTypeUint64:
             _create_scalar_field<uint64_t>(field_name,type);
             break;
-        case MetaDataType::int32:
+        case SRMetadataTypeInt32:
             _create_scalar_field<int32_t>(field_name,type);
             break;
-        case MetaDataType::uint32:
+        case SRMetadataTypeUint32:
             _create_scalar_field<uint32_t>(field_name,type);
             break;
         default:
-            throw std::runtime_error("Unknown field type in _create_field");
+            throw SRRuntimeException("Unknown field type in _create_field");
     }
 }
 
@@ -340,53 +341,65 @@ void MetaData::_create_field(const std::string& field_name,
 void MetaData::_deep_copy_field(MetadataField* dest_field,
                                 MetadataField* src_field)
 {
-    MetaDataType type = src_field->type();
+    SRMetaDataType type = src_field->type();
     switch (type) {
-        case MetaDataType::string:
+        case SRMetadataTypeString:
             *((StringField*)dest_field) = *((StringField*)src_field);
             break;
-        case MetaDataType::dbl:
+        case SRMetadataTypeDouble:
             *(dynamic_cast<ScalarField<double>*>(dest_field)) =
                 *(dynamic_cast<ScalarField<double>*>(src_field));
             break;
-        case MetaDataType::flt:
+        case SRMetadataTypeFloat:
             *(dynamic_cast<ScalarField<float>*>(dest_field)) =
                 *(dynamic_cast<ScalarField<float>*>(src_field));
             break;
-        case MetaDataType::int64:
+        case SRMetadataTypeInt64:
             *(dynamic_cast<ScalarField<int64_t>*>(dest_field)) =
                 *(dynamic_cast<ScalarField<int64_t>*>(src_field));
             break;
-        case MetaDataType::uint64:
+        case SRMetadataTypeUint64:
             *(dynamic_cast<ScalarField<uint64_t>*>(dest_field)) =
                 *(dynamic_cast<ScalarField<uint64_t>*>(src_field));
             break;
-        case MetaDataType::int32:
+        case SRMetadataTypeInt32:
             *(dynamic_cast<ScalarField<int32_t>*>(dest_field)) =
                 *(dynamic_cast<ScalarField<int32_t>*>(src_field));
             break;
-        case MetaDataType::uint32:
+        case SRMetadataTypeUint32:
             *(dynamic_cast<ScalarField<uint32_t>*>(dest_field)) =
                 *(dynamic_cast<ScalarField<uint32_t>*>(src_field));
             break;
         default:
-            throw std::runtime_error("Unknown field type in _deep_copy_field");
+            throw SRRuntimeException("Unknown field type in _deep_copy_field");
     }
 }
 
 // Create a new scalar metadata field and add it to the field map.
 template <typename T>
 void MetaData::_create_scalar_field(const std::string& field_name,
-                                    const MetaDataType type)
+                                    const SRMetaDataType type)
 {
-    MetadataField* mdf = new ScalarField<T>(field_name, type);
+    MetadataField* mdf = NULL;
+    try {
+        mdf = new ScalarField<T>(field_name, type);
+    }
+    catch (std::bad_alloc& e) {
+        throw SRBadAllocException("scalar field");
+    }
     _field_map[field_name] = mdf;
 }
 
 // Create a new string metadata field and add it to the field map
 void MetaData::_create_string_field(const std::string& field_name)
 {
-    MetadataField* mdf = new StringField(field_name);
+    MetadataField* mdf = NULL;
+    try {
+        mdf = new StringField(field_name);
+    }
+    catch (std::bad_alloc& e) {
+        throw SRBadAllocException("metadata field");
+    }
     _field_map[field_name] = mdf;
 }
 
@@ -401,77 +414,77 @@ void MetaData::_get_numeric_field_values(const std::string& name,
     // Make sure the field exists
     MetadataField* mdf = _field_map[name];
     if (mdf == NULL) {
-        throw std::runtime_error("Field " + name + " does not exist.");
+        throw SRRuntimeException("Field " + name + " does not exist.");
     }
 
     // Perform type-specific allocation
     switch (mdf->type()) {
-        case MetaDataType::dbl: {
+        case SRMetadataTypeDouble: {
             ScalarField<double>* sdf = dynamic_cast<ScalarField<double>*>(mdf);
             n_values = sdf->size();
             data = reinterpret_cast<void*>(mem_list.allocate(n_values));
             if (data == NULL)
-                throw std::bad_alloc();
+                throw SRBadAllocException("double tensor");
             std::memcpy(data, sdf->data(), n_values * sizeof(T));
             }
             break;
-        case MetaDataType::flt: {
+        case SRMetadataTypeFloat: {
             ScalarField<float>* sdf = dynamic_cast<ScalarField<float>*>(mdf);
             n_values = sdf->size();
             data = reinterpret_cast<void*>(mem_list.allocate(n_values));
             if (data == NULL)
-                throw std::bad_alloc();
+                throw SRBadAllocException("float tensor");
             std::memcpy(data, sdf->data(), n_values*sizeof(T));
             }
             break;
-        case MetaDataType::int64: {
+        case SRMetadataTypeInt64: {
             ScalarField<int64_t>* sdf = dynamic_cast<ScalarField<int64_t>*>(mdf);
             n_values = sdf->size();
             data = reinterpret_cast<void*>(mem_list.allocate(n_values));
             if (data == NULL)
-                throw std::bad_alloc();
+                throw SRBadAllocException("int64 tensor");
             std::memcpy(data, sdf->data(), n_values*sizeof(T));
             }
             break;
-        case MetaDataType::uint64: {
+        case SRMetadataTypeUint64: {
             ScalarField<uint64_t>* sdf = dynamic_cast<ScalarField<uint64_t>*>(mdf);
             n_values = sdf->size();
             data = reinterpret_cast<void*>(mem_list.allocate(n_values));
             if (data == NULL)
-                throw std::bad_alloc();
+                throw SRBadAllocException("uint64 tensor");
             std::memcpy(data, sdf->data(), n_values*sizeof(T));
             }
             break;
-        case MetaDataType::int32: {
+        case SRMetadataTypeInt32: {
             ScalarField<int32_t>* sdf = dynamic_cast<ScalarField<int32_t>*>(mdf);
             n_values = sdf->size();
             data = reinterpret_cast<void*>(mem_list.allocate(n_values));
             if (data == NULL)
-                throw std::bad_alloc();
+                throw SRBadAllocException("int32 tensor");
             std::memcpy(data, sdf->data(), n_values*sizeof(T));
             }
             break;
-        case MetaDataType::uint32: {
+        case SRMetadataTypeUint32: {
             ScalarField<uint32_t>* sdf = dynamic_cast<ScalarField<uint32_t>*>(mdf);
             n_values = sdf->size();
             data = reinterpret_cast<void*>(mem_list.allocate(n_values));
             if (data == NULL)
-                throw std::bad_alloc();
+                throw SRBadAllocException("uint32 tensor");
             std::memcpy(data, sdf->data(), n_values*sizeof(T));
             }
             break;
-        case MetaDataType::string:
-            throw std::runtime_error("Invalid MetaDataType used in "\
+        case SRMetadataTypeString:
+            throw SRRuntimeException("Invalid MetaDataType used in "\
                                      "MetaData.add_scalar().");
             break;
         default:
-            throw std::runtime_error("Unknown MetaDataType found in "\
+            throw SRRuntimeException("Unknown MetaDataType found in "\
                                      "MetaData.add_scalar().");
 
     }
 }
 
-// Retrieve a vector of std::pair with the field name and the field serialization 
+// Retrieve a vector of std::pair with the field name and the field serialization
 // for all fields in the MetaData set.
 std::vector<std::pair<std::string, std::string>>
     MetaData::get_metadata_serialization_map()
@@ -493,61 +506,64 @@ void MetaData::add_serialized_field(const std::string& name,
 {
     // Sanity check
     if (buf == NULL)
-        throw std::runtime_error("invalid buffer supplied");
+        throw SRRuntimeException("invalid buffer supplied");
 
     // Determine the type of the serialized data
     std::string_view buf_sv(buf, buf_size);
-    MetaDataType type = MetadataBuffer::get_type(buf_sv);
+    SRMetaDataType type = MetadataBuffer::get_type(buf_sv);
 
     // Make sure we don't already have a field with this name
     if (has_field(name))
-        throw std::runtime_error("Cannot add serialized field if "\
+        throw SRRuntimeException("Cannot add serialized field if "\
                                  "already exists.");
 
     // Allocate memory for the field
     MetadataField* mdf = NULL;
-    switch (type) {
-        case MetaDataType::dbl:
-            mdf = new ScalarField<double>(
-                name, MetaDataType::dbl,
-                MetadataBuffer::unpack_scalar_buf<double>(buf_sv));
-            break;
-        case MetaDataType::flt:
-            mdf = new ScalarField<float>(
-                name, MetaDataType::flt,
-                MetadataBuffer::unpack_scalar_buf<float>(buf_sv));
-            break;
-        case MetaDataType::int64:
-            mdf = new ScalarField<int64_t>(
-                name, MetaDataType::int64,
-                MetadataBuffer::unpack_scalar_buf<int64_t>(buf_sv));
-            break;
-        case MetaDataType::uint64:
-            mdf = new ScalarField<uint64_t>(
-                name, MetaDataType::uint64,
-                MetadataBuffer::unpack_scalar_buf<uint64_t>(buf_sv));
-            break;
-        case MetaDataType::int32:
-            mdf = new ScalarField<int32_t>(
-                name, MetaDataType::int32,
-                MetadataBuffer::unpack_scalar_buf<int32_t>(buf_sv));
-            break;
-        case MetaDataType::uint32:
-            mdf = new ScalarField<uint32_t>(
-                name, MetaDataType::uint32,
-                MetadataBuffer::unpack_scalar_buf<uint32_t>(buf_sv));
-            break;
-        case MetaDataType::string:
-            mdf = new StringField(
-                name, MetadataBuffer::unpack_string_buf(buf_sv));
-            break;
-        default:
-            throw std::runtime_error("unknown type in add_serialized_field");
+    try {
+        switch (type) {
+            case SRMetadataTypeDouble:
+                mdf = new ScalarField<double>(
+                    name, SRMetadataTypeDouble,
+                    MetadataBuffer::unpack_scalar_buf<double>(buf_sv));
+                break;
+            case SRMetadataTypeFloat:
+                mdf = new ScalarField<float>(
+                    name, SRMetadataTypeFloat,
+                    MetadataBuffer::unpack_scalar_buf<float>(buf_sv));
+                break;
+            case SRMetadataTypeInt64:
+                mdf = new ScalarField<int64_t>(
+                    name, SRMetadataTypeInt64,
+                    MetadataBuffer::unpack_scalar_buf<int64_t>(buf_sv));
+                break;
+            case SRMetadataTypeUint64:
+                mdf = new ScalarField<uint64_t>(
+                    name, SRMetadataTypeUint64,
+                    MetadataBuffer::unpack_scalar_buf<uint64_t>(buf_sv));
+                break;
+            case SRMetadataTypeInt32:
+                mdf = new ScalarField<int32_t>(
+                    name, SRMetadataTypeInt32,
+                    MetadataBuffer::unpack_scalar_buf<int32_t>(buf_sv));
+                break;
+            case SRMetadataTypeUint32:
+                mdf = new ScalarField<uint32_t>(
+                    name, SRMetadataTypeUint32,
+                    MetadataBuffer::unpack_scalar_buf<uint32_t>(buf_sv));
+                break;
+            case SRMetadataTypeString:
+                mdf = new StringField(
+                    name, MetadataBuffer::unpack_string_buf(buf_sv));
+                break;
+            default:
+                throw SRRuntimeException("unknown type in add_serialized_field");
+        }
+    }
+    catch (std::bad_alloc& e) {
+        throw SRBadAllocException("metadata field buffer");
     }
 
     // Add the field
-    if (mdf == NULL)
-        throw std::bad_alloc();
     _field_map[name] = mdf;
 }
 

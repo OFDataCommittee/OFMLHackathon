@@ -1,3 +1,31 @@
+/*
+ * BSD 2-Clause License
+ *
+ * Copyright (c) 2021, Hewlett Packard Enterprise
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "client.h"
 #include "dataset.h"
 #include "client_test_utils.h"
@@ -5,9 +33,9 @@
 
 template <typename T_send, typename T_recv>
 void copy_constructor(
-		    void (*fill_array)(T_send***, int, int, int),
-		    std::vector<size_t> dims,
-            SmartRedis::TensorType type,
+            void (*fill_array)(T_send***, int, int, int),
+            std::vector<size_t> dims,
+            SRTensorType type,
             std::string key_suffix,
             std::string dataset_name)
 {
@@ -32,69 +60,66 @@ void copy_constructor(
     std::string t_name_2 = "tensor_2";
     std::string t_name_3 = "tensor_3";
 
-    dataset->add_tensor(t_name_1, t_send_1,
-                        dims, type, SmartRedis::MemoryLayout::nested);
-    dataset->add_tensor(t_name_2, t_send_2,
-                        dims, type, SmartRedis::MemoryLayout::nested);
-    dataset->add_tensor(t_name_3, t_send_3,
-                        dims, type, SmartRedis::MemoryLayout::nested);
+    dataset->add_tensor(t_name_1, t_send_1, dims, type, SRMemLayoutNested);
+    dataset->add_tensor(t_name_2, t_send_2, dims, type, SRMemLayoutNested);
+    dataset->add_tensor(t_name_3, t_send_3, dims, type, SRMemLayoutNested);
 
     //Add only a portion of the metadata values so that we can test
     //that a user can add metadata after the object has been copied
 
     dataset->add_meta_scalar("dbl_field_1",
                             &DATASET_TEST_UTILS::dbl_meta_1,
-                            SmartRedis::MetaDataType::dbl);
+                            SRMetadataTypeDouble);
     dataset->add_meta_scalar("dbl_field_1",
                             &DATASET_TEST_UTILS::dbl_meta_2,
-                            SmartRedis::MetaDataType::dbl);
+                            SRMetadataTypeDouble);
     dataset->add_meta_scalar("dbl_field_2",
                             &DATASET_TEST_UTILS::dbl_meta_3,
-                            SmartRedis::MetaDataType::dbl);
+                            SRMetadataTypeDouble);
 
     dataset->add_meta_scalar("flt_field_1",
                             &DATASET_TEST_UTILS::flt_meta_1,
-                            SmartRedis::MetaDataType::flt);
+                            SRMetadataTypeFloat);
     dataset->add_meta_scalar("flt_field_1",
                             &DATASET_TEST_UTILS::flt_meta_2,
-                            SmartRedis::MetaDataType::flt);
+                            SRMetadataTypeFloat);
     dataset->add_meta_scalar("flt_field_2",
                             &DATASET_TEST_UTILS::flt_meta_3,
-                            SmartRedis::MetaDataType::flt);
+                            SRMetadataTypeFloat);
 
     dataset->add_meta_scalar("i64_field_1",
                             &DATASET_TEST_UTILS::i64_meta_1,
-                            SmartRedis::MetaDataType::int64);
+                            SRMetadataTypeInt64);
     dataset->add_meta_scalar("i64_field_1",
                             &DATASET_TEST_UTILS::i64_meta_2,
-                            SmartRedis::MetaDataType::int64);
+                            SRMetadataTypeInt64);
     dataset->add_meta_scalar("i64_field_2",
                             &DATASET_TEST_UTILS::i64_meta_3,
-                            SmartRedis::MetaDataType::int64);
+                            SRMetadataTypeInt64);
 
     dataset->add_meta_scalar("i32_field_1",
                             &DATASET_TEST_UTILS::i32_meta_1,
-                            SmartRedis::MetaDataType::int32);
+                            SRMetadataTypeInt32);
     dataset->add_meta_scalar("i32_field_1",
                             &DATASET_TEST_UTILS::i32_meta_2,
-                            SmartRedis::MetaDataType::int32);
+                            SRMetadataTypeInt32);
     dataset->add_meta_scalar("i32_field_2",
                             &DATASET_TEST_UTILS::i32_meta_3,
-                            SmartRedis::MetaDataType::int32);
+                            SRMetadataTypeInt32);
 
     dataset->add_meta_scalar("ui64_field_1",
                             &DATASET_TEST_UTILS::ui64_meta_1,
-                            SmartRedis::MetaDataType::uint64);
+                            SRMetadataTypeUint64);
     dataset->add_meta_scalar("ui64_field_1",
                             &DATASET_TEST_UTILS::ui64_meta_2,
-                            SmartRedis::MetaDataType::uint64);
+                            SRMetadataTypeUint64);
     dataset->add_meta_scalar("ui64_field_2",
                             &DATASET_TEST_UTILS::ui64_meta_3,
-                            SmartRedis::MetaDataType::uint64);
+                            SRMetadataTypeUint64);
 
     dataset->add_meta_scalar("ui32_field_1",
                             &DATASET_TEST_UTILS::ui32_meta_1,
-                            SmartRedis::MetaDataType::uint32);
+                            SRMetadataTypeUint32);
 
     //Copy the DataSet half way through metadata additions to
     //test that we can continue adding new fields to the old fields
@@ -102,10 +127,10 @@ void copy_constructor(
 
     copied_dataset.add_meta_scalar("ui32_field_1",
                                 &DATASET_TEST_UTILS::ui32_meta_2,
-                                SmartRedis::MetaDataType::uint32);
+                                SRMetadataTypeUint32);
     copied_dataset.add_meta_scalar("ui32_field_2",
                             &DATASET_TEST_UTILS::ui32_meta_3,
-                            SmartRedis::MetaDataType::uint32);
+                            SRMetadataTypeUint32);
 
     copied_dataset.add_meta_string("str_field_1",
                             DATASET_TEST_UTILS::str_meta_1);
@@ -132,7 +157,7 @@ void copy_constructor(
     DATASET_TEST_UTILS::check_meta_field<uint32_t>(
                                     partial_dataset,
                                     "ui32_field_1",
-                                    SmartRedis::MetaDataType::uint32,
+                                    SRMetadataTypeUint32,
                                     {DATASET_TEST_UTILS::ui32_meta_1});
 
 
@@ -176,49 +201,49 @@ int main(int argc, char* argv[]) {
     dataset_name = "3D_dbl_dataset_copy_construct";
     copy_constructor<double,double>(
                     &set_3D_array_floating_point_values<double>,
-                    dims, SmartRedis::TensorType::dbl,
+                    dims, SRTensorTypeDouble,
                     "_dbl", dataset_name);
 
     dataset_name = "3D_flt_dataset_copy_construct";
     copy_constructor<float,float>(
                     &set_3D_array_floating_point_values<float>,
-                    dims, SmartRedis::TensorType::flt,
+                    dims, SRTensorTypeFloat,
                     "_flt", dataset_name);
 
     dataset_name = "3D_i64_dataset_copy_construct";
     copy_constructor<int64_t,int64_t>(
                         &set_3D_array_integral_values<int64_t>,
-                        dims, SmartRedis::TensorType::int64,
+                        dims, SRTensorTypeInt64,
                         "_i64", dataset_name);
 
     dataset_name = "3D_i32_dataset_copy_construct";
     copy_constructor<int32_t,int32_t>(
                         &set_3D_array_integral_values<int32_t>,
-                        dims, SmartRedis::TensorType::int32,
+                        dims, SRTensorTypeInt32,
                         "_i32", dataset_name);
 
     dataset_name = "3D_i16_dataset_copy_construct";
     copy_constructor<int16_t,int16_t>(
                         &set_3D_array_integral_values<int16_t>,
-                        dims, SmartRedis::TensorType::int16,
+                        dims, SRTensorTypeInt16,
                         "_i16", dataset_name);
 
     dataset_name = "3D_i8_dataset_copy_construct";
     copy_constructor<int8_t,int8_t>(
                         &set_3D_array_integral_values<int8_t>,
-                        dims, SmartRedis::TensorType::int8,
+                        dims, SRTensorTypeInt8,
                         "_i8", dataset_name);
 
     dataset_name = "3D_ui16_dataset_copy_construct";
     copy_constructor<uint16_t,uint16_t>(
                         &set_3D_array_integral_values<uint16_t>,
-                        dims, SmartRedis::TensorType::uint16,
+                        dims, SRTensorTypeUint16,
                         "_ui16", dataset_name);
 
     dataset_name = "3D_ui8_dataset_copy_construct";
     copy_constructor<uint8_t,uint8_t>(
                         &set_3D_array_integral_values<uint8_t>,
-                        dims, SmartRedis::TensorType::uint8,
+                        dims, SRTensorTypeUint8,
                         "_ui8", dataset_name);
 
     std::cout<<"Finished DataSet copy constructor test."<<std::endl;

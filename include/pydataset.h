@@ -32,12 +32,18 @@
 #include <pybind11/numpy.h>
 #include <string>
 
+///@file
+
 namespace py = pybind11;
 
 namespace SmartRedis {
 
 class PyDataset;
 
+/*!
+*   \brief The PyDataset class is a wrapper around the
+           C++ dataset abstraction class.
+*/
 class PyDataset
 {
     public:

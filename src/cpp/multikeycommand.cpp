@@ -28,6 +28,7 @@
 
 #include "multikeycommand.h"
 #include "redisserver.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -40,6 +41,10 @@ CommandReply MultiKeyCommand::run_me(RedisServer* server)
 // Deep copy constructor
 Command* MultiKeyCommand::clone()
 {
-    MultiKeyCommand* new_cmd = new MultiKeyCommand(*this);
-    return new_cmd;
+    try {
+        return new MultiKeyCommand(*this);
+    }
+    catch (std::bad_alloc& e) {
+        throw SRBadAllocException("MultiKeyCommand clone");
+    }
 }

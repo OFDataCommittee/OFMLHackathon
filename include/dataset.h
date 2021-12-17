@@ -36,9 +36,7 @@
 #include "tensorpack.h"
 #include "metadata.h"
 #include "sharedmemorylist.h"
-#include "enums/cpp_tensor_type.h"
-#include "enums/cpp_memory_layout.h"
-#include "enums/cpp_metadata_type.h"
+#include "sr_enums.h"
 
 ///@file
 
@@ -106,8 +104,8 @@ class DataSet
         void add_tensor(const std::string& name,
                         void* data,
                         const std::vector<size_t>& dims,
-                        const TensorType type,
-                        const MemoryLayout mem_layout);
+                        const SRTensorType type,
+                        const SRMemoryLayout mem_layout);
 
         /*!
         *   \brief Add metadata scalar field (non-string)
@@ -122,7 +120,7 @@ class DataSet
         */
         void add_meta_scalar(const std::string& name,
                              const void* data,
-                             const MetaDataType type);
+                             const SRMetaDataType type);
 
         /*!
         *   \brief Add metadata string field with value
@@ -170,8 +168,8 @@ class DataSet
         void get_tensor(const std::string& name,
                         void*& data,
                         std::vector<size_t>& dims,
-                        TensorType& type,
-                        const MemoryLayout mem_layout);
+                        SRTensorType& type,
+                        const SRMemoryLayout mem_layout);
 
         /*!
         *   \brief Get the tensor data, dimensions,
@@ -209,8 +207,8 @@ class DataSet
                         void*& data,
                         size_t*& dims,
                         size_t& n_dims,
-                        TensorType& type,
-                        const MemoryLayout mem_layout);
+                        SRTensorType& type,
+                        const SRMemoryLayout mem_layout);
 
         /*!
         *   \brief Get tensor data and fill an already allocated
@@ -233,8 +231,8 @@ class DataSet
         void unpack_tensor(const std::string& name,
                            void* data,
                            const std::vector<size_t>& dims,
-                           const TensorType type,
-                           const MemoryLayout mem_layout);
+                           const SRTensorType type,
+                           const SRMemoryLayout mem_layout);
 
         /*!
         *   \brief Get the metadata scalar field values
@@ -260,7 +258,7 @@ class DataSet
         void get_meta_scalars(const std::string& name,
                               void*& data,
                               size_t& length,
-                              MetaDataType& type);
+                              SRMetaDataType& type);
 
         /*!
         *   \brief Get the strings in a metadata string field.
@@ -380,7 +378,7 @@ class DataSet
         *   \param name The name of the Tensor
         *   \returns The Tensor's TensorType
         */
-        TensorType get_tensor_type(const std::string& name);
+        SRTensorType get_tensor_type(const std::string& name);
 
         /*!
         *   \brief Returns a vector of std::pair with
@@ -404,8 +402,8 @@ class DataSet
         void _add_to_tensorpack(const std::string& name,
                                 void* data,
                                 const std::vector<size_t>& dims,
-                                const TensorType type,
-                                const MemoryLayout mem_layout);
+                                const SRTensorType type,
+                                const SRMemoryLayout mem_layout);
 
         /*!
         *   \brief Add a serialized field to the DataSet
@@ -448,7 +446,7 @@ class DataSet
         /*!
         *   \brief Check and enforce that a tensor must exist or
         *          throw an error.
-        *   \throw std::runtime_error if the tensor is not
+        *   \throw SRRuntimeException if the tensor is not
         *          in the DataSet.
         */
         inline void _enforce_tensor_exists(const std::string& name);

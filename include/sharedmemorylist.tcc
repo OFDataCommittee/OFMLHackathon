@@ -41,9 +41,14 @@ void SharedMemoryList<T>::add_allocation(size_t bytes, T* ptr)
 template <class T>
 T* SharedMemoryList<T>::allocate_bytes(size_t bytes)
 {
-    T* ptr = (T*)new unsigned char[bytes];
-    add_allocation(bytes, ptr);
-    return ptr;
+    try {
+        T* ptr = (T*)new unsigned char[bytes];
+        add_allocation(bytes, ptr);
+        return ptr;
+    }
+    catch (std::bad_alloc& e) {
+        throw SRBadAllocException("shared memory buffer");
+    }
 }
 
 // Perform type-specific memory allocation

@@ -27,6 +27,7 @@
  */
 
 #include "redis.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -72,7 +73,7 @@ CommandReply Redis::run(CompoundCommand& cmd){
 // Run an address-at Command on the server
 CommandReply Redis::run(AddressAtCommand& cmd){
     if (not is_addressable(cmd.get_address(), cmd.get_port()))
-        throw std::runtime_error("The provided host and port do not match "\
+        throw SRRuntimeException("The provided host and port do not match "\
                                  "the host and port used to initialize the "\
                                  "non-cluster client connection.");
     return this->_run(cmd);
@@ -111,7 +112,7 @@ bool Redis::key_exists(const std::string& key)
     // Run it
     CommandReply reply = run(cmd);
     if (reply.has_error() > 0)
-        throw std::runtime_error("Error encountered while checking "\
+        throw SRRuntimeException("Error encountered while checking "\
                                  "for existence of key " + key);
     return (bool)reply.integer();
 }
@@ -196,17 +197,14 @@ CommandReply Redis::copy_tensor(const std::string& src_key,
     // Run the GET command
     CommandReply cmd_get_reply = run(cmd_get);
     if (cmd_get_reply.has_error() > 0) {
-        throw std::runtime_error("Failed to retrieve tensor " +
+        throw SRRuntimeException("Failed to retrieve tensor " +
                                  src_key + "from database");
     }
 
     // Decode the tensor
-    std::vector<size_t> dims =
-        cmd_get.get_dims(cmd_get_reply);
-    std::string_view blob =
-        cmd_get.get_data_blob(cmd_get_reply);
-    TensorType type =
-        cmd_get.get_data_type(cmd_get_reply);
+    std::vector<size_t> dims = cmd_get.get_dims(cmd_get_reply);
+    std::string_view blob = cmd_get.get_data_blob(cmd_get_reply);
+    SRTensorType type = cmd_get.get_data_type(cmd_get_reply);
 
     // Build a PUT command to send the tensor back to the database
     // under the new key
@@ -228,7 +226,7 @@ CommandReply Redis::copy_tensors(const std::vector<std::string>& src,
 {
     // Make sure vectors are the same length
     if (src.size() != dest.size()) {
-        throw std::runtime_error("differing size vectors "\
+        throw SRRuntimeException("differing size vectors "\
                                  "passed to copy_tensors");
     }
 
@@ -241,7 +239,7 @@ CommandReply Redis::copy_tensors(const std::vector<std::string>& src,
     for ( ; it_src != src.cend(); it_src++, it_dest++) {
         reply = copy_tensor(*it_src, *it_dest);
         if (reply.has_error() > 0) {
-            throw std::runtime_error("tensor copy failed");
+            throw SRRuntimeException("tensor copy failed");
         }
 
     }
@@ -382,42 +380,44 @@ CommandReply Redis::get_script(const std::string& key)
 inline CommandReply Redis::_run(const Command& cmd)
 {
     CommandReply reply;
-    bool do_sleep = false;
+    bool executed = false;
     for (int n_trial = 0; n_trial < 100; n_trial++) {
-        do_sleep = false;
         try {
             reply = _redis->command(cmd.cbegin(), cmd.cend());
             if (reply.has_error() == 0)
                 return reply;
+            executed = true;
             break;
         }
         catch (sw::redis::IoError &e) {
-            do_sleep = true;
+            // Fall through for a retry
         }
         catch (sw::redis::ClosedError &e) {
-            do_sleep = true;
+            // Fall through for a retry
         }
         catch (std::exception& e) {
-            throw std::runtime_error(e.what());
+            throw SRRuntimeException(e.what());
         }
         catch (...) {
-            throw std::runtime_error("A non-standard exception "\
-                                     "encountered during command " +
-                                     cmd.first_field() +
-                                     " execution. ");
+            throw SRInternalException("Non-standard exception "\
+                                      "encountered during command " +
+                                      cmd.first_field() + " execution. ");
         }
 
-        if (do_sleep) {
-            std::this_thread::sleep_for(std::chrono::seconds(2));
-        }
+        std::this_thread::sleep_for(std::chrono::seconds(2));
     }
 
-    if (reply.has_error() > 0)
-        reply.print_reply_error();
-    throw std::runtime_error("Redis failed to execute command: " +
-                             cmd.first_field());
+    // If we get here, we've either run out of retry attempts or gotten
+    // a failure back from the database
+    if (executed) {
+        if (reply.has_error() > 0)
+            reply.print_reply_error();
+        throw SRRuntimeException("Redis failed to execute command: " +
+                                 cmd.first_field());
+    }
 
-    return reply;
+    // Since we didn't execute, we must have run out of retry attempts
+    throw SRTimeoutException("Unable to execute command" + cmd.first_field());
 }
 
 inline void Redis::_add_to_address_map(std::string address_port)
@@ -436,37 +436,48 @@ inline void Redis::_connect(std::string address_port)
     try {
         _redis = new sw::redis::Redis(address_port);
     }
+    catch (sw::redis::Error& e) {
+        _redis = NULL;
+        throw SRDatabaseException(std::string("Unable to connect to "\
+                                  "backend Redis database: ") +
+                                  e.what());
+    }
+    catch (std::bad_alloc& e) {
+        throw SRBadAllocException("Redis connection");
+    }
     catch (std::exception& e) {
         _redis = NULL;
-        throw std::runtime_error("Failed to create Redis object with error: " +
+        throw SRRuntimeException("Failed to create Redis object with error: " +
                                  std::string(e.what()));
     }
     catch (...) {
         _redis = NULL;
-        throw std::runtime_error("A non-standard exception encountered "\
-                                 "during client connection.");
+        throw SRInternalException("A non-standard exception encountered "\
+                                  "during client connection.");
     }
 
     // Attempt to have the sw::redis::Redis object
     // make a connection using the PING command
-    int n_trials = 10;
+    const int n_trials = 10;
     for (int i = 1; i <= n_trials; i++) {
         try {
             if (_redis->ping().compare("PONG") == 0) {
                 return;
             }
             else if (i == n_trials) {
-                throw std::runtime_error("Connection attempt failed");
+                throw SRTimeoutException(std::string("Connection attempt "\
+                                         "failed after ") +
+                                         std::to_string(i) + "tries");
             }
         }
         catch (std::exception& e) {
             if (i == n_trials) {
-                throw std::runtime_error(e.what());
+                throw SRRuntimeException(e.what());
             }
         }
         catch (...) {
             if (i == n_trials) {
-                throw std::runtime_error("A non-standard exception encountered"\
+                throw SRRuntimeException("A non-standard exception encountered"\
                                          " during client connection.");
             }
         }
@@ -474,5 +485,5 @@ inline void Redis::_connect(std::string address_port)
     }
 
     // Should never get here
-    throw std::runtime_error("End of _connect reached unexpectedly");
+    throw SRInternalException("End of _connect reached unexpectedly");
 }

@@ -27,101 +27,168 @@
  */
 
 #include "c_dataset.h"
+#include "srexception.h"
+#include "srassert.h"
 
 using namespace SmartRedis;
 
 // Create a new DataSet.
 // The user is responsible for deallocating the DataSet via DeallocateeDataSet()
 extern "C"
-void* CDataSet(const char* name, const size_t name_length)
+SRError CDataSet(const char* name, const size_t name_length, void** new_dataset)
 {
-  // Sanity check parameters
-  if (name == NULL)
-    return NULL;
-
-  std::string name_str(name, name_length);
-
-  DataSet* dataset = NULL;
+  SRError result = SRNoError;
   try {
-    dataset = new DataSet(name_str);
-  } catch (...) {
-    dataset = NULL;
+    // Sanity check params
+    SR_CHECK_PARAMS(name != NULL && new_dataset != NULL);
+
+    std::string name_str(name, name_length);
+    DataSet* dataset = new DataSet(name_str);
+    *new_dataset = reinterpret_cast<void* >(dataset);
+  }
+  catch (const std::bad_alloc& e) {
+    *new_dataset = NULL;
+    SRSetLastError(SRBadAllocException("client allocation"));
+    result = SRBadAllocError;
+  }
+  catch (const Exception& e) {
+    *new_dataset = NULL;
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    *new_dataset = NULL;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
-  return reinterpret_cast<void* >(dataset);
+  return result;
 }
 
 // Deallocate a DataSet
 extern "C"
-void DeallocateeDataSet(void* dataset)
+SRError DeallocateeDataSet(void** dataset)
 {
-  // Sanity check parameters
-  if (dataset == NULL)
-    return;
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(dataset != NULL);
 
-  DataSet* d = reinterpret_cast<DataSet*>(dataset);
-  delete d;
+    DataSet* d = reinterpret_cast<DataSet*>(*dataset);
+    delete d;
+    *dataset = NULL;
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
 }
 
 // Add a tensor to the dataset.
 extern "C"
-void add_tensor(void* dataset,
-                const char* tensor_name,
-                const size_t tensor_name_length,
-                void* data,
-                const size_t* dims,
-                const size_t n_dims,
-                const CTensorType type,
-                const CMemoryLayout mem_layout)
+SRError add_tensor(void* dataset,
+                   const char* tensor_name,
+                   const size_t tensor_name_length,
+                   void* data,
+                   const size_t* dims,
+                   const size_t n_dims,
+                   const SRTensorType type,
+                   const SRMemoryLayout mem_layout)
 {
-  // Sanity check parameters
-  DataSet* d = reinterpret_cast<DataSet*>(dataset);
-  std::string tensor_name_str = std::string(tensor_name, tensor_name_length);
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(dataset != NULL && dims != NULL);
 
-  std::vector<size_t> dims_vec;
-  dims_vec.assign(dims, dims + n_dims);
+    DataSet* d = reinterpret_cast<DataSet*>(dataset);
+    std::string tensor_name_str = std::string(tensor_name, tensor_name_length);
 
-  d->add_tensor(tensor_name_str, data, dims_vec,
-                convert_tensor_type(type),
-                convert_layout(mem_layout));
+    std::vector<size_t> dims_vec;
+    dims_vec.assign(dims, dims + n_dims);
+
+    d->add_tensor(tensor_name_str, data, dims_vec, type, mem_layout);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
 }
 
 // Add a meta data value to the named meta data field
 extern "C"
-void add_meta_scalar(void* dataset,
-                     const char* name,
-                     const size_t name_length,
-                     const void* data,
-                     const CMetaDataType type)
+SRError add_meta_scalar(void* dataset,
+                        const char* name,
+                        const size_t name_length,
+                        const void* data,
+                        const SRMetaDataType type)
 {
-  // Sanity check parameters
-  if (dataset == NULL || name == NULL || data == NULL)
-    return;
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(dataset != NULL && name != NULL && data != NULL);
 
-  DataSet* d = reinterpret_cast<DataSet*>(dataset);
-  std::string name_str(name, name_length);
+    DataSet* d = reinterpret_cast<DataSet*>(dataset);
+    std::string name_str(name, name_length);
 
-  d->add_meta_scalar(name_str, data,
-                     convert_metadata_type(type));
+    d->add_meta_scalar(name_str, data, type);
+  }
+   catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
 }
 
 // Add a meta data value to the named meta data field
 extern "C"
-void add_meta_string(void* dataset,
-                     const char* name,
-                     const size_t name_length,
-                     const char* data,
-                     const size_t data_length)
+SRError add_meta_string(void* dataset,
+                        const char* name,
+                        const size_t name_length,
+                        const char* data,
+                        const size_t data_length)
 {
-  // Sanity check parameters
-  if (dataset == NULL || name == NULL || data == NULL)
-    return;
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(dataset != NULL && name != NULL && data != NULL);
 
-  DataSet* d = reinterpret_cast<DataSet*>(dataset);
-  std::string name_str(name, name_length);
-  std::string data_str(data, data_length);
+    DataSet* d = reinterpret_cast<DataSet*>(dataset);
+    std::string name_str(name, name_length);
+    std::string data_str(data, data_length);
 
-  d->add_meta_string(name_str, data_str);
+    d->add_meta_string(name_str, data_str);
+  }
+   catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
 }
 
 // Get a tensor of a specified type from the database.
@@ -129,99 +196,144 @@ void add_meta_string(void* dataset,
 // This memory will be deleted when the user deletes the
 // DataSet object.
 extern "C"
-void get_dataset_tensor(void* dataset,
-                        const char* name,
-                        const size_t name_length,
-                        void** data,
-                        size_t** dims,
-                        size_t* n_dims,
-                        CTensorType* type,
-                        const CMemoryLayout mem_layout)
+SRError get_dataset_tensor(void* dataset,
+                           const char* name,
+                           const size_t name_length,
+                           void** data,
+                           size_t** dims,
+                           size_t* n_dims,
+                           SRTensorType* type,
+                           const SRMemoryLayout mem_layout)
 {
-  // Sanity check parameters
-  if (dataset == NULL || name == NULL || data == NULL ||
-      dims == NULL || n_dims == NULL || type == NULL)
-    return;
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(dataset != NULL && name != NULL && data != NULL &&
+                    dims != NULL && n_dims != NULL && type != NULL);
 
-  DataSet* d = (DataSet* )dataset;
-  std::string name_str(name, name_length);
+    DataSet* d = (DataSet* )dataset;
+    std::string name_str(name, name_length);
 
-  TensorType t_type = TensorType::undefined;
-  d->get_tensor(name_str,* data,* dims,* n_dims,
-                t_type, convert_layout(mem_layout));
-  *type = convert_tensor_type(t_type);
+    *type = SRTensorTypeInvalid;
+    d->get_tensor(name_str, *data, *dims, *n_dims, *type, mem_layout);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
 }
 
 // Copy the tensor data buffer into the provided memory space (data).
 extern "C"
-void unpack_dataset_tensor(void* dataset,
-                           const char* name,
-                           const size_t name_length,
-                           void* data,
-                           const size_t* dims,
-                           const size_t n_dims,
-                           const CTensorType type,
-                           const CMemoryLayout mem_layout)
+SRError unpack_dataset_tensor(void* dataset,
+                              const char* name,
+                              const size_t name_length,
+                              void* data,
+                              const size_t* dims,
+                              const size_t n_dims,
+                              const SRTensorType type,
+                              const SRMemoryLayout mem_layout)
 {
-  // Sanity check parameters
-  if (dataset == NULL || name == NULL || data == NULL || dims == NULL)
-    return;
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(dataset != NULL && name != NULL && dims != NULL);
 
-  DataSet* d = reinterpret_cast<DataSet*>(dataset);
-  std::string name_str(name, name_length);
+    DataSet* d = reinterpret_cast<DataSet*>(dataset);
+    std::string name_str(name, name_length);
 
-  std::vector<size_t> dims_vec;
-  dims_vec.assign(dims, dims + n_dims);
+    std::vector<size_t> dims_vec;
+    dims_vec.assign(dims, dims + n_dims);
 
-  d->unpack_tensor(name_str, data, dims_vec,
-                   convert_tensor_type(type),
-                   convert_layout(mem_layout));
+    d->unpack_tensor(name_str, data, dims_vec, type, mem_layout);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
 }
 
-// Get a meta data field. This method may allocate
-// memory that is cleared when the user deletes the
-// DataSet object
+// Get a meta data field. This method may allocate memory that is cleared when
+// the user deletes the DataSet object
 extern "C"
-void* get_meta_scalars(void* dataset,
+SRError get_meta_scalars(void* dataset,
                        const char* name,
                        const size_t name_length,
                        size_t* length,
-                       CMetaDataType* type)
+                       SRMetaDataType* type,
+                       void** scalar_data)
 {
-  // Sanity check parameters
-  if (dataset == NULL || name == NULL || length == NULL || type == NULL)
-    return NULL;
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(dataset != NULL && name != NULL && length != NULL &&
+                    type != NULL && scalar_data != NULL);
 
-  DataSet* d = reinterpret_cast<DataSet*>(dataset);
-  std::string key_str(name, name_length);
-  void* data = NULL;
-  MetaDataType m_type;
+    DataSet* d = reinterpret_cast<DataSet*>(dataset);
+    std::string key_str(name, name_length);
 
-  d->get_meta_scalars(key_str, data, *length, m_type);
+    void* data = NULL;
+    d->get_meta_scalars(key_str, data, *length, *type);
 
-  *type = convert_metadata_type(m_type);
-  return data;
+    *scalar_data = data;
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
 }
 
 // Get a meta data string field. This method may
 // allocate memory that is cleared when the user
 // deletes the DataSet object.
 extern "C"
-void get_meta_strings(void* dataset,
-                      const char* name,
-                      const size_t name_length,
-                      char*** data,
-                      size_t* n_strings,
-                      size_t** lengths)
+SRError get_meta_strings(void* dataset,
+                         const char* name,
+                         const size_t name_length,
+                         char*** data,
+                         size_t* n_strings,
+                         size_t** lengths)
 {
-  // Sanity check parameters
-  if (dataset == NULL || name == NULL || data == NULL ||
-      n_strings == NULL || lengths == NULL)
-    return;
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(dataset != NULL && name != NULL && data != NULL &&
+                    n_strings != NULL && lengths != NULL);
 
-  DataSet* d = reinterpret_cast<DataSet*>(dataset);
-  std::string key_str(name, name_length);
-  d->get_meta_strings(key_str, *data, *n_strings, *lengths);
+    DataSet* d = reinterpret_cast<DataSet*>(dataset);
+    std::string key_str(name, name_length);
+    d->get_meta_strings(key_str, *data, *n_strings, *lengths);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
 }
-
-// EOF

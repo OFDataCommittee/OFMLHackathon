@@ -35,8 +35,7 @@
 #include <string>
 #include <string_view>
 #include <stdexcept>
-#include "enums/cpp_tensor_type.h"
-#include "enums/cpp_memory_layout.h"
+#include "sr_enums.h"
 
 ///@file
 
@@ -56,27 +55,27 @@ static std::string DATATYPE_TENSOR_STR_INT64 = "INT64";
 static std::string DATATYPE_TENSOR_STR_UINT8 = "UINT8";
 static std::string DATATYPE_TENSOR_STR_UINT16 = "UINT16";
 
-static const std::unordered_map<std::string, TensorType>
+static const std::unordered_map<std::string, SRTensorType>
     TENSOR_TYPE_MAP{
-        {DATATYPE_TENSOR_STR_DOUBLE, TensorType::dbl},
-        {DATATYPE_TENSOR_STR_FLOAT, TensorType::flt},
-        {DATATYPE_TENSOR_STR_INT64, TensorType::int64},
-        {DATATYPE_TENSOR_STR_INT32, TensorType::int32},
-        {DATATYPE_TENSOR_STR_INT16, TensorType::int16},
-        {DATATYPE_TENSOR_STR_INT8, TensorType::int8},
-        {DATATYPE_TENSOR_STR_UINT16, TensorType::uint16},
-        {DATATYPE_TENSOR_STR_UINT8, TensorType::uint8} };
+        {DATATYPE_TENSOR_STR_DOUBLE, SRTensorTypeDouble},
+        {DATATYPE_TENSOR_STR_FLOAT, SRTensorTypeFloat},
+        {DATATYPE_TENSOR_STR_INT64, SRTensorTypeInt64},
+        {DATATYPE_TENSOR_STR_INT32, SRTensorTypeInt32},
+        {DATATYPE_TENSOR_STR_INT16, SRTensorTypeInt16},
+        {DATATYPE_TENSOR_STR_INT8, SRTensorTypeInt8},
+        {DATATYPE_TENSOR_STR_UINT16, SRTensorTypeUint16},
+        {DATATYPE_TENSOR_STR_UINT8, SRTensorTypeUint8} };
 
-static const std::unordered_map<TensorType, std::string>
+static const std::unordered_map<SRTensorType, std::string>
     TENSOR_STR_MAP{
-        {TensorType::dbl, DATATYPE_TENSOR_STR_DOUBLE},
-        {TensorType::flt, DATATYPE_TENSOR_STR_FLOAT},
-        {TensorType::int64, DATATYPE_TENSOR_STR_INT64},
-        {TensorType::int32, DATATYPE_TENSOR_STR_INT32},
-        {TensorType::int16, DATATYPE_TENSOR_STR_INT16},
-        {TensorType::int8, DATATYPE_TENSOR_STR_INT8},
-        {TensorType::uint16, DATATYPE_TENSOR_STR_UINT16},
-        {TensorType::uint8, DATATYPE_TENSOR_STR_UINT8} };
+        {SRTensorTypeDouble, DATATYPE_TENSOR_STR_DOUBLE},
+        {SRTensorTypeFloat, DATATYPE_TENSOR_STR_FLOAT},
+        {SRTensorTypeInt64, DATATYPE_TENSOR_STR_INT64},
+        {SRTensorTypeInt32, DATATYPE_TENSOR_STR_INT32},
+        {SRTensorTypeInt16, DATATYPE_TENSOR_STR_INT16},
+        {SRTensorTypeInt8, DATATYPE_TENSOR_STR_INT8},
+        {SRTensorTypeUint16, DATATYPE_TENSOR_STR_UINT16},
+        {SRTensorTypeUint8, DATATYPE_TENSOR_STR_UINT8} };
 
 class TensorBase;
 
@@ -100,8 +99,8 @@ class TensorBase{
         TensorBase(const std::string& name,
                    void* data,
                    const std::vector<size_t>& dims,
-                   const TensorType type,
-                   const MemoryLayout mem_layout);
+                   const SRTensorType type,
+                   const SRMemoryLayout mem_layout);
 
         /*!
         *   \brief TensorBase copy constructor
@@ -160,7 +159,7 @@ class TensorBase{
         *   \brief Retrieve the type of the TensorBase
         *   \returns The type of the TensorBase
         */
-        TensorType type();
+        SRTensorType type();
 
         /*!
         *   \brief Retrieve a string representation of
@@ -202,7 +201,7 @@ class TensorBase{
         *   \param mem_layout The MemoryLayout enum describing
         *          the layout of data view
         */
-        virtual void* data_view(const MemoryLayout mem_layout) = 0;
+        virtual void* data_view(const SRMemoryLayout mem_layout) = 0;
 
         /*!
         *   \brief Fill a user provided memory space with
@@ -213,7 +212,7 @@ class TensorBase{
         */
         virtual void fill_mem_space(void* data,
                                     std::vector<size_t> dims,
-                                    MemoryLayout mem_layout) = 0;
+                                    SRMemoryLayout mem_layout) = 0;
 
 
         protected:
@@ -226,7 +225,7 @@ class TensorBase{
         /*!
         *   \brief TensorBase type
         */
-        TensorType _type;
+        SRTensorType _type;
 
         /*!
         *   \brief TensorBase dims
@@ -264,7 +263,7 @@ class TensorBase{
         */
         virtual void _set_tensor_data(void* src_data,
                                       const std::vector<size_t>& dims,
-                                      const MemoryLayout mem_layout) = 0;
+                                      const SRMemoryLayout mem_layout) = 0;
 
         /*!
         *   \brief Get the total number of bytes of the data

@@ -26,16 +26,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "tensorbase.h"
 #include <iostream>
+#include "tensorbase.h"
+#include "srexception.h"
+
 using namespace SmartRedis;
 
 // TensorBase constructor
 TensorBase::TensorBase(const std::string& name,
                        void* data,
                        const std::vector<size_t>& dims,
-                       const TensorType type,
-                       const MemoryLayout mem_layout)
+                       const SRTensorType type,
+                       const SRMemoryLayout mem_layout)
 {
     /* The TensorBase constructor makes a copy of the
     name, type, and dims associated with the tensor.
@@ -59,7 +61,7 @@ TensorBase::TensorBase(const TensorBase& tb)
     // deep copy of tensor data
     _dims = std::vector<size_t>(tb._dims);
     _name = std::string(tb._name);
-    _type = TensorType(tb._type);
+    _type = SRTensorType(tb._type);
 }
 
 // TensorBase move constructor
@@ -143,7 +145,7 @@ std::string TensorBase::name()
 }
 
 // Retrieve the tensor type.
-TensorType TensorBase::type()
+SRTensorType TensorBase::type()
 {
    return _type;
 }
@@ -164,7 +166,7 @@ std::vector<size_t> TensorBase::dims()
 size_t TensorBase::num_values()
 {
     if (_dims.size() == 0)
-        throw std::runtime_error("Invalid dimensionality for tensor detected");
+        throw SRRuntimeException("Invalid dimensionality for tensor detected");
     size_t n_values = 1;
     for (size_t i = 0; i < _dims.size(); i++)
         n_values *= _dims[i];
@@ -200,27 +202,27 @@ inline void TensorBase::_check_inputs(const void* src_data,
     */
 
     if (src_data == NULL) {
-        throw std::runtime_error("Must provide non-Null pointer to data.");
+        throw SRRuntimeException("Must provide non-Null pointer to data.");
     }
 
     if (name.size() == 0) {
-        throw std::runtime_error("A name must be provided for the tensor");
+        throw SRRuntimeException("A name must be provided for the tensor");
     }
 
     if (name.compare(".meta") == 0) {
-        throw std::runtime_error(".meta is an internally reserved name "\
+        throw SRRuntimeException(".meta is an internally reserved name "\
                                  "that is not allowed.");
     }
 
     if (dims.size() == 0) {
-        throw std::runtime_error("Must provide a dimensions vector with at "
+        throw SRRuntimeException("Must provide a dimensions vector with at "
                                  "least one dimension.");
     }
 
     std::vector<size_t>::const_iterator it = dims.cbegin();
     for ( ; it != dims.cend(); it++) {
         if (*it <= 0) {
-            throw std::runtime_error("All tensor dimensions "\
+            throw SRRuntimeException("All tensor dimensions "\
                                      "must be positive.");
         }
     }

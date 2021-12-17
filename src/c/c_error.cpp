@@ -26,22 +26,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* Defines the tensor types for c-clients to use as a type specifier
-*/
+#include "c_client.h"
+#include "srexception.h"
+#include "srassert.h"
 
-#ifndef SMARTREDIS_CTENSORTYPE_H
-#define SMARTREDIS_CTENSORTYPE_H
+using namespace SmartRedis;
 
-typedef enum {
-    c_invalid_tensor = 0,
-    c_dbl     = 1,
-    c_flt     = 2,
-    c_int8    = 3,
-    c_int16   = 4,
-    c_int32   = 5,
-    c_int64   = 6,
-    c_uint8   = 7,
-    c_uint16  = 8
-} CTensorType;
+// The last error encountered
+static Exception __lastError = Exception("no error");
 
-#endif //SMARTREDIS_CTENSORTYPE_H
+// Store the last error encountered
+extern "C"
+void SRSetLastError(const Exception& last_error)
+{
+  // Check environment for debug level if we haven't done so yet
+  static bool __debug_level_verbose = false;
+  static bool __debug_level_checked = false;
+  if (!__debug_level_checked)
+  {
+    __debug_level_checked = true;
+     std::string dbgLevel(getenv("SMARTREDIS_DEBUG_LEVEL"));
+     __debug_level_verbose = dbgLevel.compare("VERBOSE") == 0;
+  }
+
+  // Print out the error message if verbose
+  if (__debug_level_verbose && SRNoError != last_error.to_error_code()) {
+    printf("%s\n", last_error.what());
+  }
+
+  // Store the last error
+  __lastError = last_error;
+}
+
+// Return the last error encountered
+extern "C"
+const char* SRGetLastError()  {
+  return __lastError.what();
+}

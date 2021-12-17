@@ -1,5 +1,34 @@
+/*
+ * BSD 2-Clause License
+ *
+ * Copyright (c) 2021, Hewlett Packard Enterprise
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "../../../third-party/catch/catch.hpp"
 #include "commandreply.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -90,11 +119,11 @@ SCENARIO("Testing CommandReply object", "[CommandReply]")
         AND_THEN("Various methods will throw errors since the CommandReply "
                  "object doesn't have the correct type for those methods")
         {
-            CHECK_THROWS_AS(cmd_reply.str(), std::runtime_error);
-            CHECK_THROWS_AS(cmd_reply.dbl(), std::runtime_error);
-            CHECK_THROWS_AS(cmd_reply[1], std::runtime_error);
-            CHECK_THROWS_AS(cmd_reply.str_len(), std::runtime_error);
-            CHECK_THROWS_AS(cmd_reply.n_elements(), std::runtime_error);
+            CHECK_THROWS_AS(cmd_reply.str(), RuntimeException);
+            CHECK_THROWS_AS(cmd_reply.dbl(), RuntimeException);
+            CHECK_THROWS_AS(cmd_reply[1], RuntimeException);
+            CHECK_THROWS_AS(cmd_reply.str_len(), RuntimeException);
+            CHECK_THROWS_AS(cmd_reply.n_elements(), RuntimeException);
         }
     }
 
@@ -112,7 +141,7 @@ SCENARIO("Testing CommandReply object", "[CommandReply]")
 
         THEN("Cannot call integer method on a REDIS_REPLY_BOOL")
         {
-            CHECK_THROWS_AS(cmd_reply.integer(), std::runtime_error);
+            CHECK_THROWS_AS(cmd_reply.integer(), RuntimeException);
         }
     }
 
@@ -125,7 +154,7 @@ SCENARIO("Testing CommandReply object", "[CommandReply]")
         THEN("An error is thrown when the redis reply"
              "type is attempted to be retrieved")
         {
-            CHECK_THROWS_AS(cmd_reply.redis_reply_type(), std::runtime_error);
+            CHECK_THROWS_AS(cmd_reply.redis_reply_type(), RuntimeException);
         }
     }
 }
@@ -355,7 +384,7 @@ SCENARIO("Test CommandReply copy constructor with an inconsistent redisReply", "
             THEN("An error is thrown during construction")
             {
                 CommandReply cmd_reply;
-                CHECK_THROWS_AS(cmd_reply = reply, std::runtime_error);
+                CHECK_THROWS_AS(cmd_reply = reply, RuntimeException);
 
                 delete reply;
             }
@@ -430,10 +459,10 @@ SCENARIO("Test CommandReply string retrieval for non REDIS_REPLY_STRING", "[Comm
                  "are called on an incompatible redisReply type")
         {
             // Calling string retrieval methods on a REDIS_REPLY_ARRAY
-            CHECK_THROWS_AS(cmd_reply[0].status_str(), std::runtime_error);
-            CHECK_THROWS_AS(cmd_reply[0].dbl_str(), std::runtime_error);
-            CHECK_THROWS_AS(cmd_reply[0].bignum_str(), std::runtime_error);
-            CHECK_THROWS_AS(cmd_reply[0].verb_str(), std::runtime_error);
+            CHECK_THROWS_AS(cmd_reply[0].status_str(), RuntimeException);
+            CHECK_THROWS_AS(cmd_reply[0].dbl_str(), RuntimeException);
+            CHECK_THROWS_AS(cmd_reply[0].bignum_str(), RuntimeException);
+            CHECK_THROWS_AS(cmd_reply[0].verb_str(), RuntimeException);
         }
         delete cmd_reply;
     }

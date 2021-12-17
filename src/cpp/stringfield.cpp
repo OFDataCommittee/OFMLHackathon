@@ -32,7 +32,7 @@ using namespace SmartRedis;
 
 // StringField constructor
 StringField::StringField(const std::string& name)
- : MetadataField(name, MetaDataType::string)
+ : MetadataField(name, SRMetadataTypeString)
 {
     // NOP
 }
@@ -40,7 +40,7 @@ StringField::StringField(const std::string& name)
 // StringField constructor with initial values to be copied
 StringField::StringField(const std::string& name,
                          const std::vector<std::string>& vals)
- : MetadataField(name, MetaDataType::string)
+ : MetadataField(name, SRMetadataTypeString)
 {
     _vals = vals;
 }
@@ -48,7 +48,7 @@ StringField::StringField(const std::string& name,
 // StringField constructor with initial values to be copied
 StringField::StringField(const std::string& name,
                          std::vector<std::string>&& vals)
- : MetadataField(name, MetaDataType::string)
+ : MetadataField(name, SRMetadataTypeString)
 {
     _vals = std::move(vals);
 }

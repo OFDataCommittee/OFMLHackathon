@@ -1,7 +1,36 @@
+/*
+ * BSD 2-Clause License
+ *
+ * Copyright (c) 2021, Hewlett Packard Enterprise
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "../../../third-party/catch/catch.hpp"
 #include "client.h"
 #include "dataset.h"
 #include "../client_test_utils.h"
+#include "srexception.h"
 #include <sstream>
 
 using namespace SmartRedis;
@@ -73,13 +102,13 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
         {
             CHECK_THROWS_AS(
                 client.get_dataset("DNE"),
-                std::runtime_error);
+                RuntimeException);
             CHECK_THROWS_AS(
                 client.rename_dataset("DNE", "rename_DNE"),
-                std::runtime_error);
+               RuntimeException);
             CHECK_THROWS_AS(
                 client.copy_dataset("src_DNE", "dest_DNE"),
-                std::runtime_error);
+                RuntimeException);
         }
 
         WHEN("A dataset is created and put into the Client")
@@ -91,7 +120,7 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
             // Add meta scalar to DataSet
             std::string meta_scalar_name = "dbl_field";
             const double dbl_meta = std::numeric_limits<double>::max();
-            MetaDataType meta_type = MetaDataType::dbl;
+            SRMetaDataType meta_type = SRMetadataTypeDouble;
             dataset.add_meta_scalar(meta_scalar_name,
                                      &dbl_meta,
                                      meta_type);
@@ -99,11 +128,11 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
             // Add tensor to DataSet
             std::string tensor_name = "test_tensor";
             std::vector<size_t> dims = {1, 2, 3};
-            TensorType type = TensorType::flt;
+            SRTensorType type = SRTensorTypeFloat;
             size_t tensor_size = dims.at(0) * dims.at(1) * dims.at(2);
             std::vector<float> tensor(tensor_size, 2.0);
             void* data = tensor.data();
-            MemoryLayout mem_layout = MemoryLayout::contiguous;
+            SRMemoryLayout mem_layout = SRMemLayoutContiguous;
             dataset.add_tensor(tensor_name, data, dims, type, mem_layout);
 
             // Put the DataSet into the Client
@@ -136,7 +165,7 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
                 // original name no longer exists after renaming
                 CHECK_THROWS_AS(
                     client.get_dataset(dataset_name),
-                    std::runtime_error);
+                    RuntimeException);
 
                 // the dataset with new name can be retrieved
                 double* retrieved_meta_data;
@@ -166,7 +195,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
 
         AND_WHEN("Tensors of each type are created and put into the Client")
         {
-            MemoryLayout mem_layout = MemoryLayout::contiguous;
+            SRMemoryLayout mem_layout = SRMemLayoutContiguous;
             const int num_of_tensors = 8;
             std::vector<std::vector<size_t> > dims(num_of_tensors, {2, 1});
             size_t tensors_size = dims[0][0] * dims[0][1];
@@ -174,11 +203,11 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
                                               "int64_key", "int32_key",
                                               "int16_key", "int8_key",
                                               "uint16_key", "uint8_key"};
-            std::vector<TensorType> types =
-                {TensorType::dbl, TensorType::flt,
-                 TensorType::int64, TensorType::int32,
-                 TensorType::int16, TensorType::int8,
-                 TensorType::uint16, TensorType::uint8};
+            std::vector<SRTensorType> types =
+                {SRTensorTypeDouble, SRTensorTypeFloat,
+                 SRTensorTypeInt64, SRTensorTypeInt32,
+                 SRTensorTypeInt16, SRTensorTypeInt8,
+                 SRTensorTypeUint16, SRTensorTypeUint8};
 
             std::vector<double> dbl_tensor =
                 {std::numeric_limits<double>::min(),
@@ -218,7 +247,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
 
             THEN("The Tensors can be retrieved")
             {
-                TensorType retrieved_type;
+                SRTensorType retrieved_type;
                 std::vector<void*> retrieved_datas(num_of_tensors);
                 std::vector<std::vector<size_t>>
                     retrieved_dims(num_of_tensors);
@@ -239,7 +268,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
                 std::vector<void*> retrieved_datas(num_of_tensors);
                 std::vector<size_t*> retrieved_dims(num_of_tensors);
                 std::vector<size_t> retrieved_n_dims(num_of_tensors);
-                TensorType retrieved_type;
+                SRTensorType retrieved_type;
 
                 // Get the tensors and ensure the correct data is retrieved
                 for(int i=0; i<num_of_tensors; i++) {
@@ -294,9 +323,9 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
                 // match the dimensions that were fetched)
                 CHECK_THROWS_AS(
                     client.unpack_tensor(keys[0], contig_retrieved_data,
-                                         dims[0], TensorType::dbl,
-                                         MemoryLayout::contiguous),
-                    std::runtime_error);
+                                         dims[0], SRTensorTypeDouble,
+                                         SRMemLayoutContiguous),
+                    RuntimeException);
 
                 free(contig_retrieved_data);
 
@@ -314,7 +343,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
                 }
 
                 // Ensure the tensors were correctly migrated to their new name
-                TensorType retrieved_type;
+                SRTensorType retrieved_type;
                 std::vector<void*> retrieved_datas(num_of_tensors);
                 std::vector<std::vector<size_t>>
                     retrieved_dims(num_of_tensors);
@@ -352,7 +381,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
 
                 // ensure the copied tensors contain
                 // the correct data, dims, type
-                TensorType copied_type;
+                SRTensorType copied_type;
                 std::vector<void*> copied_datas(num_of_tensors);
                 std::vector<std::vector<size_t>> copied_dims(num_of_tensors);
 
@@ -370,7 +399,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
                 for(int i=0; i<num_of_tensors; i++)
                     client.delete_tensor("copied_" + keys[i]);
 
-                TensorType retrieved_type;
+                SRTensorType retrieved_type;
                 std::vector<void*> retrieved_datas(num_of_tensors);
                 std::vector<std::vector<size_t>>
                     retrieved_dims(num_of_tensors);
@@ -429,7 +458,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
                     client.unpack_tensor(keys[0], retrieved_data,
                                          incorrect_dims, types[0],
                                          mem_layout),
-                    std::runtime_error);
+                    RuntimeException);
 
                 free(retrieved_data);
             }
@@ -452,9 +481,9 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
                 std::string db_address = ":00";
 
                 CHECK_THROWS_AS(client.get_db_node_info(db_address),
-                                std::runtime_error);
+                                RuntimeException);
                 CHECK_THROWS_AS(client.get_db_cluster_info(db_address),
-                                std::runtime_error);
+                                RuntimeException);
             }
         }
 
@@ -480,7 +509,7 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
                     CHECK_NOTHROW(client.get_db_cluster_info(db_address));
                 else
                     CHECK_THROWS_AS(client.get_db_cluster_info(db_address),
-                                    std::runtime_error);
+                                    RuntimeException);
             }
         }
     }
@@ -501,10 +530,10 @@ SCENARIO("Testing FLUSHDB on empty Client Object", "[Client][FLUSHDB]")
                 std::string db_address = ":00";
 
                 CHECK_THROWS_AS(client.flush_db(db_address),
-                                std::runtime_error);
+                                RuntimeException);
 
                 CHECK_THROWS_AS(client.flush_db("123456678.345633.21:2345561"),
-                                std::runtime_error);
+                                RuntimeException);
             }
         }
 
@@ -541,7 +570,7 @@ SCENARIO("Testing FLUSHDB on Client Object", "[Client][FLUSHDB]")
                  std::numeric_limits<double>::max()};
         client.put_dataset(dataset);
         client.put_tensor(tensor_key, (void*)tensor_dbl.data(), {2,1},
-                          TensorType::dbl, MemoryLayout::contiguous);
+                          SRTensorTypeDouble, SRMemLayoutContiguous);
         WHEN("FLUSHDB is called on databsase")
         {
 
@@ -579,11 +608,9 @@ SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
 
                 for (size_t address_index = 0; address_index < db_addresses.size(); address_index++) {
                     CHECK_THROWS_AS(client.config_get("*max-*-entries*", db_addresses[address_index]),
-                                    std::runtime_error);
-                    CHECK_THROWS_AS(client.config_set("dbfilename",
-                                                      "new_file.rdb",
-                                                      db_addresses[address_index]),
-                                    std::runtime_error);
+                                    RuntimeException);
+                    CHECK_THROWS_AS(client.config_set("dbfilename", "new_file.rdb", db_addresses[address_index]),
+                                    RuntimeException);
                 }
             }
         }
@@ -643,7 +670,7 @@ SCENARIO("Test CONFIG SET on an unsupported command", "[Client]")
             {
                 CHECK_THROWS_AS(
                     client.config_set("unsupported_cmd", "100", address),
-                    std::runtime_error);
+                    RuntimeException);
             }
         }
     }
@@ -664,7 +691,7 @@ SCENARIO("Testing SAVE command on Client Object", "[!mayfail][Client][SAVE]")
                  std::numeric_limits<double>::max()};
         client.put_dataset(dataset);
         client.put_tensor(tensor_key, (void*)tensor_dbl.data(), {2,1},
-                          TensorType::dbl, MemoryLayout::contiguous);
+                          SRTensorTypeDouble, SRMemLayoutContiguous);
 
         std::string address = parse_SSDB(std::getenv("SSDB"));
 
@@ -721,7 +748,7 @@ SCENARIO("Test that prefixing covers all hash slots of a cluster", "[Client]")
             THEN("A std::runtime_error is thrown")
             {
                 CHECK_THROWS_AS(redis_cluster.get_crc16_prefix(16385),
-                                std::runtime_error);
+                                RuntimeException);
             }
         }
 

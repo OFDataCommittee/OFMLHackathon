@@ -32,7 +32,7 @@ use iso_c_binding,   only : c_loc, c_f_pointer
 
 implicit none; private
 
-include 'enums/enum_fortran.inc'
+include 'enum_fortran.inc'
 include 'dataset/dataset_interfaces.inc'
 include 'dataset/add_tensor_interfaces.inc'
 include 'dataset/unpack_dataset_tensor_interfaces.inc'
@@ -87,247 +87,259 @@ end type dataset_type
 
 contains
 
-subroutine initialize_dataset( self, name )
+
+!> Initialize the dataset
+function initialize_dataset(self, name) result(code)
   class(dataset_type), intent(inout) :: self !< Receives the dataset
   character(len=*),    intent(in)    :: name !< Name of the dataset
+  integer(kind=enum_kind)            :: code !< Result of the operation
 
-  ! local variables
+  ! Local variables
   integer(kind=c_size_t) :: name_length
   character(kind=c_char, len=len_trim(name)) :: c_name
 
   name_length = len_trim(name)
   c_name = trim(name)
-  
-  self%dataset_ptr = dataset_constructor(c_name, name_length)
-end subroutine initialize_dataset
+
+  code = dataset_constructor(c_name, name_length, self%dataset_ptr)
+end function initialize_dataset
 
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'int8' C-type
-subroutine add_tensor_i8(self, name, data, dims)
+function add_tensor_i8(self, name, data, dims) result(code)
   integer(kind=c_int8_t), dimension(..), target, intent(in) :: data !< Data to be sent
   include 'dataset/add_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_int8
-  call add_tensor_c(self%dataset_ptr, c_name, name_length, data_ptr, c_dims_ptr, c_n_dims, data_type, &
-       c_fortran_contiguous)
-end subroutine add_tensor_i8
+  code = add_tensor_c(self%dataset_ptr, c_name, name_length, data_ptr, &
+       c_dims_ptr, c_n_dims, data_type, c_fortran_contiguous)
+end function add_tensor_i8
 
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'int16' C-type
-subroutine add_tensor_i16(self, name, data, dims)
+function add_tensor_i16(self, name, data, dims) result(code)
   integer(kind=c_int16_t), dimension(..), target, intent(in) :: data !< Data to be sent
   include 'dataset/add_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_int16
-  call add_tensor_c(self%dataset_ptr, c_name, name_length, data_ptr, c_dims_ptr, c_n_dims, data_type, &
-       c_fortran_contiguous)
-end subroutine add_tensor_i16
+  code = add_tensor_c(self%dataset_ptr, c_name, name_length, data_ptr, &
+       c_dims_ptr, c_n_dims, data_type, c_fortran_contiguous)
+end function add_tensor_i16
 
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'int32' C-type
-subroutine add_tensor_i32(self, name, data, dims)
+function add_tensor_i32(self, name, data, dims) result(code)
   integer(kind=c_int32_t), dimension(..), target, intent(in) :: data !< Data to be sent
   include 'dataset/add_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_int32
-  call add_tensor_c(self%dataset_ptr, c_name, name_length, data_ptr, c_dims_ptr, c_n_dims, data_type, &
-       c_fortran_contiguous)
-end subroutine add_tensor_i32
+  code = add_tensor_c(self%dataset_ptr, c_name, name_length, data_ptr, &
+       c_dims_ptr, c_n_dims, data_type, c_fortran_contiguous)
+end function add_tensor_i32
 
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'int64' C-type
-subroutine add_tensor_i64(self, name, data, dims)
+function add_tensor_i64(self, name, data, dims) result(code)
   integer(kind=c_int64_t), dimension(..), target, intent(in) :: data !< Data to be sent
   include 'dataset/add_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_int64
-  call add_tensor_c(self%dataset_ptr, c_name, name_length, data_ptr, c_dims_ptr, c_n_dims, data_type, &
-       c_fortran_contiguous)
-end subroutine add_tensor_i64
+  code = add_tensor_c(self%dataset_ptr, c_name, name_length, data_ptr, &
+       c_dims_ptr, c_n_dims, data_type, c_fortran_contiguous)
+end function add_tensor_i64
 
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'float' C-type
-subroutine add_tensor_float(self, name, data, dims)
+function add_tensor_float(self, name, data, dims) result(code)
   real(kind=c_float), dimension(..), target, intent(in) :: data !< Data to be sent
   include 'dataset/add_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_flt
-  call add_tensor_c(self%dataset_ptr, c_name, name_length, data_ptr, c_dims_ptr, c_n_dims, data_type, &
-       c_fortran_contiguous)
-end subroutine add_tensor_float
+  code = add_tensor_c(self%dataset_ptr, c_name, name_length, data_ptr, &
+       c_dims_ptr, c_n_dims, data_type, c_fortran_contiguous)
+end function add_tensor_float
 
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'double' C-type
-subroutine add_tensor_double(self, name, data, dims)
+function add_tensor_double(self, name, data, dims) result(code)
   real(kind=c_double), dimension(..), target, intent(in) :: data !< Data to be sent
   include 'dataset/add_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_dbl
-  call add_tensor_c(self%dataset_ptr, c_name, name_length, data_ptr, c_dims_ptr, c_n_dims, data_type, &
-       c_fortran_contiguous)
-end subroutine add_tensor_double
+  code = add_tensor_c(self%dataset_ptr, c_name, name_length, data_ptr, &
+       c_dims_ptr, c_n_dims, data_type, c_fortran_contiguous)
+end function add_tensor_double
 
 
 !> Unpack a tensor into already allocated memory whose Fortran type is the equivalent 'int8' C-type
-subroutine unpack_dataset_tensor_i8(self, name, result, dims)
+function unpack_dataset_tensor_i8(self, name, result, dims) result(code)
   integer(kind=c_int8_t), dimension(..), target, intent(out) :: result !< Array to be populated with data
   include 'dataset/unpack_dataset_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_int8
-  call unpack_dataset_tensor_c( self%dataset_ptr, c_name, name_length, data_ptr, c_dims_ptr, c_n_dims, data_type, &
-                                mem_layout )
-end subroutine unpack_dataset_tensor_i8
+  code = unpack_dataset_tensor_c(self%dataset_ptr, c_name, name_length, &
+       data_ptr, c_dims_ptr, c_n_dims, data_type, mem_layout)
+end function unpack_dataset_tensor_i8
 
 !> Unpack a tensor into already allocated memory whose Fortran type is the equivalent 'int16' C-type
-subroutine unpack_dataset_tensor_i16(self, name, result, dims)
+function unpack_dataset_tensor_i16(self, name, result, dims) result(code)
   integer(kind=c_int16_t), dimension(..), target, intent(out) :: result !< Array to be populated with data
   include 'dataset/unpack_dataset_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_int16
-  call unpack_dataset_tensor_c( self%dataset_ptr, c_name, name_length, data_ptr, c_dims_ptr, c_n_dims, data_type, &
-                                mem_layout )
-end subroutine unpack_dataset_tensor_i16
+  code = unpack_dataset_tensor_c(self%dataset_ptr, c_name, name_length, &
+       data_ptr, c_dims_ptr, c_n_dims, data_type, mem_layout)
+end function unpack_dataset_tensor_i16
 
 !> Unpack a tensor into already allocated memory whose Fortran type is the equivalent 'int32' C-type
-subroutine unpack_dataset_tensor_i32(self, name, result, dims)
+function unpack_dataset_tensor_i32(self, name, result, dims) result(code)
   integer(kind=c_int32_t), dimension(..), target, intent(out) :: result !< Array to be populated with data
   include 'dataset/unpack_dataset_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_int32
-  call unpack_dataset_tensor_c( self%dataset_ptr, c_name, name_length, data_ptr, c_dims_ptr, c_n_dims, data_type, &
-                                mem_layout )
-end subroutine unpack_dataset_tensor_i32
+  code = unpack_dataset_tensor_c(self%dataset_ptr, c_name, name_length, &
+       data_ptr, c_dims_ptr, c_n_dims, data_type, mem_layout)
+end function unpack_dataset_tensor_i32
 
 !> Unpack a tensor into already allocated memory whose Fortran type is the equivalent 'int64' C-type
-subroutine unpack_dataset_tensor_i64(self, name, result, dims)
+function unpack_dataset_tensor_i64(self, name, result, dims) result(code)
   integer(kind=c_int64_t), dimension(..), target, intent(out) :: result !< Array to be populated with data
   include 'dataset/unpack_dataset_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_int64
-  call unpack_dataset_tensor_c( self%dataset_ptr, c_name, name_length, data_ptr, c_dims_ptr, c_n_dims, data_type, &
-                                mem_layout )
-end subroutine unpack_dataset_tensor_i64
+  code = unpack_dataset_tensor_c(self%dataset_ptr, c_name, name_length, &
+       data_ptr, c_dims_ptr, c_n_dims, data_type, mem_layout)
+end function unpack_dataset_tensor_i64
 
 !> Unpack a tensor into already allocated memory whose Fortran type is the equivalent 'float' C-type
-subroutine unpack_dataset_tensor_float(self, name, result, dims)
+function unpack_dataset_tensor_float(self, name, result, dims) result(code)
   real(kind=c_float), dimension(..), target, intent(out) :: result !< Array to be populated with data
   include 'dataset/unpack_dataset_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_flt
-  call unpack_dataset_tensor_c( self%dataset_ptr, c_name, name_length, data_ptr, c_dims_ptr, c_n_dims, data_type, &
-                                mem_layout )
-end subroutine unpack_dataset_tensor_float
+  code = unpack_dataset_tensor_c(self%dataset_ptr, c_name, name_length, &
+       data_ptr, c_dims_ptr, c_n_dims, data_type, mem_layout)
+end function unpack_dataset_tensor_float
 
 !> Unpack a tensor into already allocated memory whose Fortran type is the equivalent 'double' C-type
-subroutine unpack_dataset_tensor_double(self, name, result, dims)
+function unpack_dataset_tensor_double(self, name, result, dims) result(code)
   real(kind=c_double), dimension(..), target, intent(out) :: result !< Array to be populated with data
   include 'dataset/unpack_dataset_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_dbl
-  call unpack_dataset_tensor_c( self%dataset_ptr, c_name, name_length, data_ptr, c_dims_ptr, c_n_dims, data_type, &
-                                mem_layout )
-end subroutine unpack_dataset_tensor_double
+  code = unpack_dataset_tensor_c(self%dataset_ptr, c_name, name_length, &
+       data_ptr, c_dims_ptr, c_n_dims, data_type, mem_layout)
+end function unpack_dataset_tensor_double
 
 
 !> Get scalar metadata whose Fortran type is the equivalent 'int32' C-type
-subroutine get_meta_scalars_i32(self, name, meta)
-  class(dataset_type), intent(in) :: self !< The dataset
-  character(len=*),    intent(in) :: name !< The name of the metadata field
+function get_meta_scalars_i32(self, name, meta) result(code)
+  class(dataset_type),                intent(in) :: self !< The dataset
+  character(len=*),                   intent(in) :: name !< The name of the metadata field
   integer(kind=c_int32_t), dimension(:), pointer :: meta !< The actual metadata
+  integer(kind=enum_kind)                        :: code !< Result of the operation
 
   ! local variables
   integer(kind=enum_kind) :: expected_data_type = meta_int32
   include 'dataset/get_meta_scalars_common.inc'
-end subroutine get_meta_scalars_i32
+end function get_meta_scalars_i32
 
 !> Get scalar metadata whose Fortran type is the equivalent 'int64' C-type
-subroutine get_meta_scalars_i64(self, name, meta)
-  class(dataset_type), intent(in) :: self !< The dataset
-  character(len=*),    intent(in) :: name !< The name of the metadata field
+function get_meta_scalars_i64(self, name, meta) result(code)
+  class(dataset_type),                intent(in) :: self !< The dataset
+  character(len=*),                   intent(in) :: name !< The name of the metadata field
   integer(kind=c_int64_t), dimension(:), pointer :: meta !< The actual metadata
+  integer(kind=enum_kind)                        :: code !< Result of the operation
 
   ! local variables
   integer(kind=enum_kind) :: expected_data_type = meta_int64
   include 'dataset/get_meta_scalars_common.inc'
-end subroutine get_meta_scalars_i64
+end function get_meta_scalars_i64
 
 !> Get scalar metadata whose Fortran type is the equivalent 'float' C-type
-subroutine get_meta_scalars_float(self, name, meta)
-  class(dataset_type), intent(in) :: self !< The dataset
-  character(len=*),    intent(in) :: name !< The name of the metadata field
+function get_meta_scalars_float(self, name, meta) result(code)
+  class(dataset_type),           intent(in) :: self !< The dataset
+  character(len=*),              intent(in) :: name !< The name of the metadata field
   real(kind=c_float), dimension(:), pointer :: meta !< The actual metadata
+  integer(kind=enum_kind)                   :: code !< Result of the operation
 
   ! local variables
   integer(kind=enum_kind) :: expected_data_type = meta_flt
   include 'dataset/get_meta_scalars_common.inc'
-end subroutine get_meta_scalars_float
+end function get_meta_scalars_float
 
 !> Get scalar metadata whose Fortran type is the equivalent 'double' C-type
-subroutine get_meta_scalars_double(self, name, meta)
-  class(dataset_type), intent(in) :: self !< The dataset
-  character(len=*),    intent(in) :: name !< The name of the metadata field
+function get_meta_scalars_double(self, name, meta) result(code)
+  class(dataset_type),            intent(in) :: self !< The dataset
+  character(len=*),               intent(in) :: name !< The name of the metadata field
   real(kind=c_double), dimension(:), pointer :: meta !< The actual metadata
+  integer(kind=enum_kind)                    :: code !< Result of the operation
 
   ! local variables
   integer(kind=enum_kind) :: expected_data_type = meta_dbl
   include 'dataset/get_meta_scalars_common.inc'
-end subroutine get_meta_scalars_double
+end function get_meta_scalars_double
 
 !> Add scalar metadata whose Fortran type is the equivalent 'int32' C-type
-subroutine add_meta_scalar_i32(self, name, meta)
-  class(dataset_type), intent(in) :: self !< The dataset
-  character(len=*),    intent(in) :: name !< The name of the metadata field
+function add_meta_scalar_i32(self, name, meta) result(code)
+  class(dataset_type),             intent(in) :: self !< The dataset
+  character(len=*),                intent(in) :: name !< The name of the metadata field
   integer(kind=c_int32_t), target, intent(in) :: meta !< The actual metadata
+  integer(kind=enum_kind)                     :: code !< Result of the operation
 
   ! local variables
   integer(kind=enum_kind), parameter :: meta_type = meta_int32
   include 'dataset/add_meta_scalar_common.inc'
-end subroutine add_meta_scalar_i32
+end function add_meta_scalar_i32
 
 !> Add scalar metadata whose Fortran type is the equivalent 'int64' C-type
-subroutine add_meta_scalar_i64(self, name, meta)
-  class(dataset_type), intent(in) :: self !< The dataset
-  character(len=*),    intent(in) :: name !< The name of the metadata field
+function add_meta_scalar_i64(self, name, meta) result(code)
+  class(dataset_type),             intent(in) :: self !< The dataset
+  character(len=*),                intent(in) :: name !< The name of the metadata field
   integer(kind=c_int64_t), target, intent(in) :: meta !< The actual metadata
+  integer(kind=enum_kind)                     :: code !< Result of the operation
 
   ! local variables
   integer(kind=enum_kind), parameter :: meta_type = meta_int64
   include 'dataset/add_meta_scalar_common.inc'
-end subroutine add_meta_scalar_i64
+end function add_meta_scalar_i64
 
 !> Add scalar metadata whose Fortran type is the equivalent 'float' C-type
-subroutine add_meta_scalar_float(self, name, meta)
+function add_meta_scalar_float(self, name, meta) result(code)
   class(dataset_type),        intent(in) :: self !< The dataset
   character(len=*),           intent(in) :: name !< The name of the metadata field
   real(kind=c_float), target, intent(in) :: meta !< The actual metadata
+  integer(kind=enum_kind)                :: code !< Result of the operation
 
   ! local variables
   integer(kind=enum_kind), parameter :: meta_type = meta_flt
   include 'dataset/add_meta_scalar_common.inc'
-end subroutine add_meta_scalar_float
+end function add_meta_scalar_float
 
 !> Add scalar metadata whose Fortran type is the equivalent 'double' C-type
-subroutine add_meta_scalar_double(self, name, meta)
+function add_meta_scalar_double(self, name, meta) result(code)
   class(dataset_type),         intent(in) :: self !< The dataset
   character(len=*),            intent(in) :: name !< The name of the metadata field
   real(kind=c_double), target, intent(in) :: meta !< The actual metadata
+  integer(kind=enum_kind)                 :: code !< Result of the operation
 
   ! local variables
   integer(kind=enum_kind), parameter :: meta_type = meta_dbl
   include 'dataset/add_meta_scalar_common.inc'
-end subroutine add_meta_scalar_double
+end function add_meta_scalar_double
 
 !> Add string-like metadata to the dataset
-subroutine add_meta_string( self, name, meta )
-  class(dataset_type), intent(in) :: self !< The dataset
-  character(len=*),    intent(in) :: name !< The name of the metadata field
-  character(len=*),    intent(in) :: meta !< The actual metadata
+function add_meta_string( self, name, meta) result(code)
+  class(dataset_type),     intent(in) :: self !< The dataset
+  character(len=*),        intent(in) :: name !< The name of the metadata field
+  character(len=*),        intent(in) :: meta !< The actual metadata
+  integer(kind=enum_kind)             :: code !< Result of the operation
 
   ! local variables
   character(kind=c_char, len=len_trim(meta)) :: c_meta
@@ -341,7 +353,7 @@ subroutine add_meta_string( self, name, meta )
   meta_length = len_trim(c_meta)
   name_length = len_trim(c_name)
 
-  call add_meta_string_c( self%dataset_ptr, c_name, name_length, c_meta, meta_length )
-end subroutine add_meta_string
+  code = add_meta_string_c(self%dataset_ptr, c_name, name_length, c_meta, meta_length)
+end function add_meta_string
 
 end module smartredis_dataset

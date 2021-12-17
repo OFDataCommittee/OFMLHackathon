@@ -42,7 +42,7 @@
 
 namespace SmartRedis {
 
-class Command;
+class RedisServer;
 
 /*!
 *   \brief The Command class constructs Client commands.
@@ -54,9 +54,6 @@ class Command;
 *          The Command.add_field_ptr() methods are ideal
 *          for large field values.
 */
-
-class RedisServer;
-
 class Command
 {
     public:

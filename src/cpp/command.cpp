@@ -27,6 +27,7 @@
  */
 
 #include "command.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -60,7 +61,13 @@ Command& Command::operator=(const Command& cmd)
     for (; local_it != cmd._local_fields.end(); local_it++) {
         // allocate memory and copy a local field
         size_t field_size = cmd._fields[local_it->second].size();
-        char* f = new char[field_size];
+        char* f = NULL;
+        try {
+            f = new char[field_size];
+        }
+        catch (std::bad_alloc& e) {
+            throw SRBadAllocException("field data");
+        }
         std::memcpy(f, local_it->first, field_size);
         _local_fields.push_back(
             std::pair<char*, size_t>(f, local_it->second));
@@ -94,7 +101,14 @@ void Command::add_field(std::string field, bool is_key)
     */
 
     size_t field_size = field.size();
-    char* f = (char*)new unsigned char[field_size + 1];
+    char* f = NULL;
+    try {
+        f = (char*)new unsigned char[field_size + 1];
+    }
+    catch (std::bad_alloc& e) {
+        throw SRBadAllocException("field");
+    }
+
     field.copy(f, field_size, 0);
     f[field_size] = '\0';
     _local_fields.push_back({f, _fields.size()});
@@ -117,7 +131,13 @@ void Command::add_field(const char* field, bool is_key)
     */
 
     size_t field_size = std::strlen(field);
-    char* f = new char[field_size];
+    char* f = NULL;
+    try {
+        f = new char[field_size];
+    }
+    catch (std::bad_alloc& e) {
+        throw SRBadAllocException("field");
+    }
     std::memcpy(f, field, field_size);
     _local_fields.push_back({f, _fields.size()});
     _fields.push_back(std::string_view(f, field_size));
@@ -171,7 +191,7 @@ void Command::add_fields(const std::vector<std::string>& fields, bool is_key)
 std::string Command::first_field() const
 {
     if (cbegin() == cend())
-        throw std::runtime_error("No fields exist in the Command.");
+        throw SRRuntimeException("No fields exist in the Command.");
     return std::string(cbegin()->data(), cbegin()->size());
 }
 

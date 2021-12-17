@@ -28,6 +28,7 @@
 
 #include "singlekeycommand.h"
 #include "redisserver.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -40,6 +41,10 @@ CommandReply SingleKeyCommand::run_me(RedisServer* server)
 // Deep copy constructor
 Command* SingleKeyCommand::clone()
 {
-    SingleKeyCommand* new_cmd = new SingleKeyCommand(*this);
-    return new_cmd;
+    try {
+        return new SingleKeyCommand(*this);
+    }
+    catch (std::bad_alloc& e) {
+        throw SRBadAllocException("SingleKeyCommand clone");
+    }
 }

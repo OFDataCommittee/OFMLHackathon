@@ -28,6 +28,7 @@
 
 #include "addressatcommand.h"
 #include "redisserver.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -40,6 +41,11 @@ CommandReply AddressAtCommand::run_me(RedisServer* server)
 // Deep copy operator
 Command* AddressAtCommand::clone()
 {
-    AddressAtCommand* new_cmd = new AddressAtCommand(*this);
-    return new_cmd;
+    try {
+        AddressAtCommand* new_cmd = new AddressAtCommand(*this);
+        return new_cmd;
+    }
+    catch (std::bad_alloc& e) {
+        throw SRBadAllocException("AddressAtCommand clone");
+    }
 }

@@ -34,8 +34,8 @@ template <class T>
 Tensor<T>::Tensor(const std::string& name,
                   void* data,
                   const std::vector<size_t>& dims,
-                  const TensorType type,
-                  const MemoryLayout mem_layout) :
+                  const SRTensorType type,
+                  const SRMemoryLayout mem_layout) :
                   TensorBase(name, data, dims, type, mem_layout)
 {
     _set_tensor_data(data, dims, mem_layout);
@@ -49,8 +49,7 @@ Tensor<T>::Tensor(const Tensor<T>& tensor) : TensorBase(tensor)
     if (&tensor == this)
         return;
 
-    _set_tensor_data(tensor._data, tensor._dims,
-                           MemoryLayout::contiguous);
+    _set_tensor_data(tensor._data, tensor._dims, SRMemLayoutContiguous);
     _c_mem_views = tensor._c_mem_views;
     _f_mem_views = tensor._f_mem_views;
 }
@@ -73,8 +72,7 @@ Tensor<T>& Tensor<T>::operator=(const Tensor<T>& tensor)
 
     // Deep copy tensor data
     TensorBase::operator=(tensor);
-    _set_tensor_data(tensor._data, tensor._dims,
-                     MemoryLayout::contiguous);
+    _set_tensor_data(tensor._data, tensor._dims, SRMemLayoutContiguous);
     _c_mem_views = tensor._c_mem_views;
     _f_mem_views = tensor._f_mem_views;
 
@@ -103,14 +101,19 @@ Tensor<T>& Tensor<T>::operator=(Tensor<T>&& tensor)
 template <class T>
 TensorBase* Tensor<T>::clone()
 {
-    Tensor<T>* new_tensor = new Tensor<T>(*this);
-    (*new_tensor) = *this;
-    return new_tensor;
+    try {
+        Tensor<T>* new_tensor = new Tensor<T>(*this);
+        (*new_tensor) = *this;
+        return new_tensor;
+    }
+    catch (std::bad_alloc& e) {
+        throw SRBadAllocException("tensor");
+    }
 }
 
 // Get a pointer to a specificed memory view of the Tensor data
 template <class T>
-void* Tensor<T>::data_view(const MemoryLayout mem_layout)
+void* Tensor<T>::data_view(const SRMemoryLayout mem_layout)
 {
     /* This function returns a pointer to a memory
     view of the underlying tensor data.  The
@@ -137,23 +140,22 @@ void* Tensor<T>::data_view(const MemoryLayout mem_layout)
     void* ptr = NULL;
 
     switch (mem_layout) {
-        case MemoryLayout::contiguous:
+        case SRMemLayoutContiguous:
             ptr = _data;
             break;
-        case MemoryLayout::fortran_contiguous:
+        case SRMemLayoutFortranContiguous:
             ptr = _f_mem_views.allocate_bytes(_n_data_bytes());
             _c_to_f_memcpy((T*)ptr, (T*)_data, _dims);
             break;
-        case MemoryLayout::nested:
+        case SRMemLayoutNested:
             _build_nested_memory(&ptr,
                                  _dims.data(),
                                  _dims.size(),
                                  (T*)_data);
             break;
         default:
-            throw std::runtime_error(
-                "Unsupported MemoryLayout value in "\
-                "Tensor<T>.data_view().");
+            throw SRRuntimeException("Unsupported MemoryLayout value in "\
+                                     "Tensor<T>.data_view().");
     }
     return ptr;
 }
@@ -162,15 +164,15 @@ void* Tensor<T>::data_view(const MemoryLayout mem_layout)
 template <class T>
 void Tensor<T>::fill_mem_space(void* data,
                                std::vector<size_t> dims,
-                               MemoryLayout mem_layout)
+                               SRMemoryLayout mem_layout)
 {
     if (_data == NULL) {
-        throw std::runtime_error("The tensor does not have "\
+        throw SRRuntimeException("The tensor does not have "\
                                  "a data array to fill with.");
     }
 
     if (dims.size() == 0) {
-        throw std::runtime_error("The dimensions must have nonzero size");
+        throw SRRuntimeException("The dimensions must have nonzero size");
     }
 
     // Calculate size of memory buffer
@@ -178,27 +180,27 @@ void Tensor<T>::fill_mem_space(void* data,
     std::vector<size_t>::const_iterator it = dims.cbegin();
     for ( ; it != dims.cend(); it++) {
         if (*it <= 0) {
-            throw std::runtime_error("All dimensions must be greater than 0.");
+            throw SRRuntimeException("All dimensions must be greater than 0.");
         }
         n_values *= (*it);
     }
 
     // Make sure there is space for all the data
     if (n_values != num_values()) {
-        throw std::runtime_error("The provided dimensions do "\
-                                  "not match the size of the "\
-                                  "tensor data array");
+        throw SRRuntimeException("The provided dimensions do "\
+                                 "not match the size of the "\
+                                 "tensor data array");
     }
 
     // Copy over the data
     switch (mem_layout) {
-        case MemoryLayout::fortran_contiguous:
+        case SRMemLayoutFortranContiguous:
             _c_to_f_memcpy((T*)data, (T*)_data, _dims);
             break;
-        case MemoryLayout::contiguous:
+        case SRMemLayoutContiguous:
             std::memcpy(data, _data, _n_data_bytes());
             break;
-        case MemoryLayout::nested: {
+        case SRMemLayoutNested: {
             size_t starting_position = 0;
             _fill_nested_mem_with_data(data, dims.data(),
                                              dims.size(),
@@ -207,9 +209,8 @@ void Tensor<T>::fill_mem_space(void* data,
             }
             break;
         default:
-            throw std::runtime_error(
-                "Unsupported MemoryLayout value in "\
-                "Tensor<T>.fill_mem_space().");
+            throw SRRuntimeException("Unsupported MemoryLayout value in "\
+                                     "Tensor<T>.fill_mem_space().");
     }
 }
 
@@ -225,7 +226,7 @@ void* Tensor<T>::_copy_nested_to_contiguous(void* src_data,
         for (size_t i = 0; i < dims[0]; i++) {
           dest_data =
             _copy_nested_to_contiguous(*current, &dims[1],
-                                       n_dims-1, dest_data);
+                                       n_dims - 1, dest_data);
           current++;
         }
     }
@@ -254,7 +255,7 @@ void Tensor<T>::_fill_nested_mem_with_data(void* data,
     }
     else {
         T* data_to_copy = &(((T*)tensor_data)[data_position]);
-	    std::memcpy(data, data_to_copy, dims[0] * sizeof(T));
+        std::memcpy(data, data_to_copy, dims[0] * sizeof(T));
         data_position += dims[0];
     }
 }
@@ -268,13 +269,13 @@ T* Tensor<T>::_build_nested_memory(void** data,
                                    T* contiguous_mem)
 {
     if (dims == NULL) {
-        throw std::runtime_error("Missing dims in call to "\
+        throw SRRuntimeException("Missing dims in call to "\
                                  "_build_nested_memory");
     }
     if (n_dims > 1) {
         T** new_data = _c_mem_views.allocate(dims[0]);
         if (new_data == NULL)
-            throw std::bad_alloc();
+            throw SRBadAllocException("nested memory for tensor");
         (*data) = reinterpret_cast<void*>(new_data);
         for (size_t i = 0; i < dims[0]; i++)
             contiguous_mem = _build_nested_memory(
@@ -292,25 +293,30 @@ T* Tensor<T>::_build_nested_memory(void** data,
 template <class T>
 void Tensor<T>::_set_tensor_data(void* src_data,
                                  const std::vector<size_t>& dims,
-                                 const MemoryLayout mem_layout)
+                                 const SRMemoryLayout mem_layout)
 {
     size_t n_values = num_values();
     size_t n_bytes = n_values * sizeof(T);
-    _data = new unsigned char[n_bytes];
+    try {
+        _data = new unsigned char[n_bytes];
+    }
+    catch (std::bad_alloc& e) {
+        throw SRBadAllocException("tensor data");
+    }
 
     switch (mem_layout) {
-        case MemoryLayout::contiguous:
+        case SRMemLayoutContiguous:
             std::memcpy(_data, src_data, n_bytes);
             break;
-        case MemoryLayout::fortran_contiguous:
+        case SRMemLayoutFortranContiguous:
             _f_to_c_memcpy((T*)_data, (T*) src_data, dims);
             break;
-        case MemoryLayout::nested:
+        case SRMemLayoutNested:
             _copy_nested_to_contiguous(
                 src_data, dims.data(), dims.size(), _data);
             break;
         default:
-            throw std::runtime_error("Invalid memory layout in call "\
+            throw SRRuntimeException("Invalid memory layout in call "\
                                      "to _set_tensor_data");
     }
 }
@@ -329,7 +335,7 @@ void Tensor<T>::_f_to_c_memcpy(T* c_data,
                                const std::vector<size_t>& dims)
 {
     if (c_data == NULL || f_data == NULL) {
-        throw std::runtime_error("Invalid buffer suppplied to _f_to_c_memcpy");
+        throw SRRuntimeException("Invalid buffer suppplied to _f_to_c_memcpy");
     }
     std::vector<size_t> dim_positions(dims.size(), 0);
     _f_to_c(c_data, f_data, dims, dim_positions, 0);
@@ -343,7 +349,7 @@ void Tensor<T>::_c_to_f_memcpy(T* f_data,
                                const std::vector<size_t>& dims)
 {
     if (c_data == NULL || f_data == NULL) {
-        throw std::runtime_error("Invalid buffer suppplied to _c_to_f_memcpy");
+        throw SRRuntimeException("Invalid buffer suppplied to _c_to_f_memcpy");
     }
     std::vector<size_t> dim_positions(dims.size(), 0);
     _c_to_f(f_data, c_data, dims, dim_positions, 0);
@@ -358,7 +364,7 @@ void Tensor<T>::_f_to_c(T* c_data,
                         size_t current_dim)
 {
     if (c_data == NULL || f_data == NULL) {
-        throw std::runtime_error("Invalid buffer suppplied to _f_to_c");
+        throw SRRuntimeException("Invalid buffer suppplied to _f_to_c");
     }
     size_t start = dim_positions[current_dim];
     size_t end = dims[current_dim];
@@ -386,7 +392,7 @@ void Tensor<T>::_c_to_f(T* f_data,
                         size_t current_dim)
 {
     if (c_data == NULL || f_data == NULL) {
-        throw std::runtime_error("Invalid buffer suppplied to _f_to_c");
+        throw SRRuntimeException("Invalid buffer suppplied to _f_to_c");
     }
     size_t start = dim_positions[current_dim];
     size_t end = dims[current_dim];

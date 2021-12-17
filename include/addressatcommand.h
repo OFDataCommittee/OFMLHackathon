@@ -30,6 +30,7 @@
 #define SMARTREDIS_ADDRESSATCOMMAND_H
 
 #include "nonkeyedcommand.h"
+#include "srexception.h"
 
 ///@file
 
@@ -71,7 +72,7 @@ class AddressAtCommand : public NonKeyedCommand
         *   \brief Returns host of database node
         *   \param address The address of the database node
         *   \returns The host of the database node
-        *   \throws std::runtime_error if ':' is at the start of address,
+        *   \throws SRRuntimeException if ':' is at the start of address,
         *           or if ':' is not found in address, or if allocating
         *           storage for the host string fails.
         */
@@ -81,7 +82,7 @@ class AddressAtCommand : public NonKeyedCommand
             size_t end_position = address.find(":");
 
             if (end_position == 0 || end_position == std::string::npos) {
-                throw std::runtime_error(std::string(address) +
+                throw SRRuntimeException(std::string(address) +
                                          " is not a valid database node address.");
             }
 
@@ -89,7 +90,7 @@ class AddressAtCommand : public NonKeyedCommand
                 host = address.substr(0, end_position);
             }
             catch (std::bad_alloc& ba) {
-                throw std::runtime_error(ba.what());
+                throw SRBadAllocException(ba.what());
             }
             return host;
         }
@@ -98,7 +99,7 @@ class AddressAtCommand : public NonKeyedCommand
         *   \brief Returns port of database node
         *   \param address The address of the database node
         *   \returns The port of the database node
-        *   \throws std::runtime_error if ':' is at the end of the address,
+        *   \throws SRRuntimeException if ':' is at the end of the address,
         *           or if ':' is not found in address, or if the port conversion
         *           to unint64_t cannot be performed, or if the string representation
         *           of the port is out of the range of representable values by an uint_64
@@ -107,7 +108,7 @@ class AddressAtCommand : public NonKeyedCommand
         {
             size_t start_position = address.find(":");
             if ((start_position >= address.size() - 1) || (start_position == std::string::npos)) {
-                throw std::runtime_error(std::string(address) +
+                throw SRRuntimeException(std::string(address) +
                                          " is not a valid database node address.");
             }
 
@@ -118,13 +119,13 @@ class AddressAtCommand : public NonKeyedCommand
                 port = std::stoul(port_string, nullptr, 0);
             }
             catch (std::bad_alloc& ba) {
-                throw std::runtime_error(ba.what());
+                throw SRBadAllocException(ba.what());
             }
             catch (std::invalid_argument& ia) {
-                throw std::runtime_error(ia.what());
+                throw SRRuntimeException(ia.what());
             }
             catch (std::out_of_range& oor) {
-                throw std::runtime_error(oor.what());
+                throw SRRuntimeException(oor.what());
             }
             return port;
         }

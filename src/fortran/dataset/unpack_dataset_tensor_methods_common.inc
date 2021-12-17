@@ -27,6 +27,7 @@
   class(dataset_type),                  intent(in) :: self !< Pointer to the initialized dataset
   character(len=*),                     intent(in) :: name !< The name to use to place the tensor
   integer, dimension(:),                intent(in) :: dims !< Length along each dimension of the tensor
+  integer(kind=enum_kind)                          :: code
 
   ! Local variables
   integer(kind=c_size_t) :: ndim ! Number of dimensions

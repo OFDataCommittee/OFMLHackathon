@@ -32,9 +32,14 @@
 template <class T>
 T* CommandList::add_command()
 {
-    T* new_cmd = new T();
-    _commands.push_back(new_cmd);
-    return new_cmd;
+    try {
+        T* new_cmd = new T();
+        _commands.push_back(new_cmd);
+        return new_cmd;
+    }
+    catch (std::bad_alloc &e) {
+        throw SRBadAllocException("command");
+    }
 };
 
 #endif //SMARTREDIS_COMMANDLIST_TCC
