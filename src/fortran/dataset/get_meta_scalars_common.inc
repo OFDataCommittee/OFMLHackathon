@@ -25,11 +25,11 @@
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
   character(kind=c_char, len=len_trim(name))  :: c_name
-  integer(kind=enum_kind) :: c_data_type, result_code
+  integer(kind=enum_kind) :: c_data_type
   integer(kind=c_size_t) :: name_length, meta_length
   type(c_ptr) :: result_ptr
 
   c_name = trim(name)
   name_length = len_trim(name)
-  result_code = get_meta_scalars_c(self%dataset_ptr, c_name, name_length, meta_length, c_data_type, result_ptr)
+  code = get_meta_scalars_c(self%dataset_ptr, c_name, name_length, meta_length, c_data_type, result_ptr)
   call c_f_pointer(result_ptr, meta, [meta_length])

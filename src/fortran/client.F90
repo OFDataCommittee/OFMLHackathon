@@ -30,6 +30,8 @@ use iso_c_binding, only : c_ptr, c_bool, c_null_ptr, c_char, c_int
 use iso_c_binding, only : c_int8_t, c_int16_t, c_int32_t, c_int64_t, c_float, c_double, c_size_t
 use iso_c_binding, only : c_loc, c_f_pointer
 
+use, intrinsic :: iso_fortran_env, only: stderr => error_unit
+
 use smartredis_dataset, only : dataset_type
 use fortran_c_interop, only : convert_char_array_to_c
 
@@ -62,6 +64,8 @@ type, public :: client_type
   generic :: unpack_tensor => unpack_tensor_i8, unpack_tensor_i16, unpack_tensor_i32, unpack_tensor_i64, &
                               unpack_tensor_float, unpack_tensor_double
 
+  !> Decode a response code from an API function
+  procedure :: SR_error_parser
   !> Initializes a new instance of the SmartRedis client
   procedure :: initialize => initialize_client
   !> Check if a SmartRedis client has been initialized
@@ -138,19 +142,44 @@ end type client_type
 
 contains
 
+!> Decode a response code from an API function
+function SR_error_parser(self, response_code) result(is_error)
+  class(client_type),       intent(in) :: self    !< Receives the initialized client
+  integer (kind=enum_kind), intent(in) :: response_code !< The response code to decode
+  logical                              :: is_error      !< Indicates whether this is an error response
+
+  is_error = .true.
+  select case (response_code)
+    case(SRNoError)
+      is_error = .false.
+    case(SRBadAllocError)
+      write(stderr,*) "Memory allocation error"
+    case(SRDatabaseError)
+      write(stderr,*) "Backend database error"
+    case(SRInternalError)
+      write(stderr,*) "Internal SmartRedis error"
+    case(SRRuntimeError)
+      write(stderr,*) "Runtime error executing an operation"
+    case(SRParameterError)
+      write(stderr,*) "Bad parameter error"
+    case(SRTimeoutError)
+      write(stderr,*) "Timeout error"
+    case(SRKeyError)
+      write(stderr,*) "Key error"
+    case default
+       write(stderr,*) "Invalid or uninitialized response code"
+  end select
+end function SR_error_parser
+
 !> Initializes a new instance of a SmartRedis client
 function initialize_client(self, cluster)
   integer(kind=enum_kind)           :: initialize_client
   class(client_type), intent(inout) :: self    !< Receives the initialized client
   logical, optional,  intent(in   ) :: cluster !< If true, client uses a database cluster (Default: .false.)
 
-  ! Local variables
-  integer(kind=enum_kind) :: result
-
   if (present(cluster)) self%cluster = cluster
-  result = c_constructor(self%cluster, self%client_ptr)
-  self%is_initialized = result .eq. SRNoError
-  initialize_client = result
+  initialize_client = c_constructor(self%cluster, self%client_ptr)
+  self%is_initialized = initialize_client .eq. SRNoError
 end function initialize_client
 
 !> Check whether the client has been initialized
@@ -164,20 +193,16 @@ function destructor(self)
   integer(kind=enum_kind)           :: destructor
   class(client_type), intent(inout) :: self
 
-  ! Local variables
-  integer(kind=enum_kind) :: result
-
-  result = c_destructor(self%client_ptr)
+  destructor = c_destructor(self%client_ptr)
   self%client_ptr = C_NULL_PTR
-  destructor = result
 end function destructor
 
 !> Check if the specified key exists in the database
 function key_exists(self, key, exists)
-  integer(kind=enum_kind)           :: key_exists
   class(client_type),   intent(in)  :: self   !< The client
   character(len=*),     intent(in)  :: key    !< The key to check
   logical(kind=c_bool), intent(out) :: exists !< Receives whether the key exists
+  integer(kind=enum_kind)           :: key_exists
 
   ! Local variables
   character(kind=c_char, len=len_trim(key)) :: c_key
@@ -190,11 +215,11 @@ function key_exists(self, key, exists)
 end function key_exists
 
 !> Check if the specified model exists in the database
-function model_exists(self, model_name, exists)
-  integer(kind=enum_kind)           :: model_exists
+function model_exists(self, model_name, exists) result(code)
   class(client_type),   intent(in)  :: self       !< The client
   character(len=*),     intent(in)  :: model_name !< The model to check
   logical(kind=c_bool), intent(out) :: exists     !< Receives whether the model exists
+  integer(kind=enum_kind)           :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(model_name)) :: c_model_name
@@ -203,15 +228,15 @@ function model_exists(self, model_name, exists)
   c_model_name = trim(model_name)
   c_model_name_length = len_trim(model_name)
 
-  model_exists = model_exists_c(self%client_ptr, c_model_name, c_model_name_length, exists)
+  code = model_exists_c(self%client_ptr, c_model_name, c_model_name_length, exists)
 end function model_exists
 
 !> Check if the specified tensor exists in the database
-function tensor_exists(self, tensor_name, exists)
-  integer(kind=enum_kind)           :: tensor_exists
+function tensor_exists(self, tensor_name, exists) result(code)
   class(client_type),   intent(in)  :: self        !< The client
   character(len=*),     intent(in)  :: tensor_name !< The tensor to check
   logical(kind=c_bool), intent(out) :: exists      !< Receives whether the model exists
+  integer(kind=enum_kind)           :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(tensor_name)) :: c_tensor_name
@@ -220,15 +245,15 @@ function tensor_exists(self, tensor_name, exists)
   c_tensor_name = trim(tensor_name)
   c_tensor_name_length = len_trim(tensor_name)
 
-  tensor_exists = tensor_exists_c(self%client_ptr, c_tensor_name, c_tensor_name_length, exists)
+  code = tensor_exists_c(self%client_ptr, c_tensor_name, c_tensor_name_length, exists)
 end function tensor_exists
 
 !> Check if the specified dataset exists in the database
-function dataset_exists(this, dataset_name, exists)
-  integer(kind=enum_kind)           :: dataset_exists
+function dataset_exists(this, dataset_name, exists) result(code)
   class(client_type),   intent(in)  :: this
   character(len=*),     intent(in)  :: dataset_name
   logical(kind=c_bool), intent(out) :: exists      !< Receives whether the model exists
+  integer(kind=enum_kind)           :: code
 
   character(kind=c_char, len=len_trim(dataset_name)) :: c_dataset_name
   integer(kind=c_size_t) :: c_dataset_name_length
@@ -236,17 +261,17 @@ function dataset_exists(this, dataset_name, exists)
   c_dataset_name = trim(dataset_name)
   c_dataset_name_length = len_trim(dataset_name)
 
-  dataset_exists = dataset_exists_c(this%client_ptr, c_dataset_name, c_dataset_name_length, exists)
+  code = dataset_exists_c(this%client_ptr, c_dataset_name, c_dataset_name_length, exists)
 end function dataset_exists
 
 !> Repeatedly poll the database until the tensor exists or the number of tries is exceeded
-function poll_tensor(self, tensor_name, poll_frequency_ms, num_tries, exists)
-  integer(kind=enum_kind)           :: poll_tensor
+function poll_tensor(self, tensor_name, poll_frequency_ms, num_tries, exists) result(code)
   class(client_type),   intent(in)  :: self              !< The client
   character(len=*),     intent(in)  :: tensor_name       !< Key in the database to poll
   integer,              intent(in)  :: poll_frequency_ms !< Frequency at which to poll the database (ms)
   integer,              intent(in)  :: num_tries         !< Number of times to poll the database before failing
   logical(kind=c_bool), intent(out) :: exists            !< Receives whether the tensor exists
+  integer(kind=enum_kind)           :: code
 
   ! Local variables
   character(kind=c_char,len=len_trim(tensor_name)) :: c_tensor_name
@@ -258,17 +283,17 @@ function poll_tensor(self, tensor_name, poll_frequency_ms, num_tries, exists)
   c_num_tries = num_tries
   c_poll_frequency = poll_frequency_ms
 
-  poll_tensor = poll_tensor_c(self%client_ptr, c_tensor_name, c_tensor_name_length, c_poll_frequency, c_num_tries, exists)
+  code = poll_tensor_c(self%client_ptr, c_tensor_name, c_tensor_name_length, c_poll_frequency, c_num_tries, exists)
 end function poll_tensor
 
 !> Repeatedly poll the database until the model exists or the number of tries is exceeded
-function poll_model(self, model_name, poll_frequency_ms, num_tries, exists)
-  integer(kind=enum_kind)           :: poll_model
+function poll_model(self, model_name, poll_frequency_ms, num_tries, exists) result(code)
   class(client_type),   intent(in)  :: self              !< The client
   character(len=*),     intent(in)  :: model_name        !< Key in the database to poll
   integer,              intent(in)  :: poll_frequency_ms !< Frequency at which to poll the database (ms)
   integer,              intent(in)  :: num_tries         !< Number of times to poll the database before failing
   logical(kind=c_bool), intent(out) :: exists            !< Receives whether the model exists
+  integer(kind=enum_kind)           :: code
 
   ! Local variables
   character(kind=c_char,len=len_trim(model_name)) :: c_model_name
@@ -280,17 +305,17 @@ function poll_model(self, model_name, poll_frequency_ms, num_tries, exists)
   c_num_tries = num_tries
   c_poll_frequency = poll_frequency_ms
 
-  poll_model = poll_model_c(self%client_ptr, c_model_name, c_model_name_length, c_poll_frequency, c_num_tries, exists)
+  code = poll_model_c(self%client_ptr, c_model_name, c_model_name_length, c_poll_frequency, c_num_tries, exists)
 end function poll_model
 
 !> Repeatedly poll the database until the key exists or the number of tries is exceeded
-function poll_key(self, key, poll_frequency_ms, num_tries, exists)
-  integer(kind=enum_kind)           :: poll_key
+function poll_key(self, key, poll_frequency_ms, num_tries, exists) result(code)
   class(client_type),   intent(in)  :: self               !< The client
   character(len=*),     intent(in)  :: key                !< Key in the database to poll
   integer,              intent(in)  :: poll_frequency_ms  !< Frequency at which to poll the database (ms)
   integer,              intent(in)  :: num_tries          !< Number of times to poll the database before failing
   logical(kind=c_bool), intent(out) :: exists             !< Receives whether the key exists
+  integer(kind=enum_kind)           :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(key)) :: c_key
@@ -302,160 +327,148 @@ function poll_key(self, key, poll_frequency_ms, num_tries, exists)
   c_num_tries = num_tries
   c_poll_frequency = poll_frequency_ms
 
-  poll_key = poll_key_c(self%client_ptr, c_key, c_key_length, c_poll_frequency, c_num_tries, exists)
+  code = poll_key_c(self%client_ptr, c_key, c_key_length, c_poll_frequency, c_num_tries, exists)
 end function poll_key
 
 !> Put a tensor whose Fortran type is the equivalent 'int8' C-type
-function put_tensor_i8(self, key, data, dims)
-  integer(kind=enum_kind)                                   :: put_tensor_i8
+function put_tensor_i8(self, key, data, dims) result(code)
   integer(kind=c_int8_t), dimension(..), target, intent(in) :: data !< Data to be sent
   include 'client/put_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_int8
-  put_tensor_i8 = put_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, &
+  code = put_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, &
     c_n_dims, data_type, c_fortran_contiguous)
 end function put_tensor_i8
 
 !> Put a tensor whose Fortran type is the equivalent 'int16' C-type
-function put_tensor_i16(self, key, data, dims)
-  integer(kind=enum_kind)                                    :: put_tensor_i16
+function put_tensor_i16(self, key, data, dims) result(code)
   integer(kind=c_int16_t), dimension(..), target, intent(in) :: data !< Data to be sent
   include 'client/put_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_int16
-  put_tensor_i16 = put_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, &
+  code = put_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, &
     data_type, c_fortran_contiguous)
 end function put_tensor_i16
 
 !> Put a tensor whose Fortran type is the equivalent 'int32' C-type
-function put_tensor_i32(self, key, data, dims)
-  integer(kind=enum_kind)                                    :: put_tensor_i32
+function put_tensor_i32(self, key, data, dims) result(code)
   integer(kind=c_int32_t), dimension(..), target, intent(in) :: data !< Data to be sent
   include 'client/put_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_int32
-  put_tensor_i32 = put_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, &
+  code = put_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, &
     data_type, c_fortran_contiguous)
 end function put_tensor_i32
 
 !> Put a tensor whose Fortran type is the equivalent 'int64' C-type
-function put_tensor_i64(self, key, data, dims)
-  integer(kind=enum_kind)                                    :: put_tensor_i64
+function put_tensor_i64(self, key, data, dims) result(code)
   integer(kind=c_int64_t), dimension(..), target, intent(in) :: data !< Data to be sent
   include 'client/put_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_int64
-  put_tensor_i64 = put_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, &
+  code = put_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, &
     data_type, c_fortran_contiguous)
 end function put_tensor_i64
 
 !> Put a tensor whose Fortran type is the equivalent 'float' C-type
-function put_tensor_float(self, key, data, dims)
-  integer(kind=enum_kind)                               :: put_tensor_float
+function put_tensor_float(self, key, data, dims) result(code)
   real(kind=c_float), dimension(..), target, intent(in) :: data !< Data to be sent
   include 'client/put_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_flt
-  put_tensor_float = put_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, &
+  code = put_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, &
     data_type, c_fortran_contiguous)
 end function put_tensor_float
 
 !> Put a tensor whose Fortran type is the equivalent 'double' C-type
-function put_tensor_double(self, key, data, dims)
-  integer(kind=enum_kind)                                :: put_tensor_double
+function put_tensor_double(self, key, data, dims) result(code)
   real(kind=c_double), dimension(..), target, intent(in) :: data !< Data to be sent
   include 'client/put_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_dbl
-  put_tensor_double = put_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, &
+  code = put_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, &
     data_type, c_fortran_contiguous)
 end function put_tensor_double
 
 !> Put a tensor whose Fortran type is the equivalent 'int8' C-type
-function unpack_tensor_i8(self, key, result, dims)
-  integer(kind=enum_kind)                                    :: unpack_tensor_i8
+function unpack_tensor_i8(self, key, result, dims) result(code)
   integer(kind=c_int8_t), dimension(..), target, intent(out) :: result !< Data to be sent
   include 'client/unpack_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_int8
-  unpack_tensor_i8 = unpack_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, &
+  code = unpack_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, &
     data_type, mem_layout)
 end function unpack_tensor_i8
 
 !> Put a tensor whose Fortran type is the equivalent 'int16' C-type
-function unpack_tensor_i16(self, key, result, dims)
-  integer(kind=enum_kind)                                     :: unpack_tensor_i16
+function unpack_tensor_i16(self, key, result, dims) result(code)
   integer(kind=c_int16_t), dimension(..), target, intent(out) :: result !< Data to be sent
   include 'client/unpack_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_int16
-  unpack_tensor_i16 = unpack_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, &
+  code = unpack_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, &
     data_type, mem_layout)
 end function unpack_tensor_i16
 
 !> Put a tensor whose Fortran type is the equivalent 'int32' C-type
-function unpack_tensor_i32(self, key, result, dims)
-  integer(kind=enum_kind)                                     :: unpack_tensor_i32
+function unpack_tensor_i32(self, key, result, dims) result(code)
   integer(kind=c_int32_t), dimension(..), target, intent(out) :: result !< Data to be sent
   include 'client/unpack_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_int32
-  unpack_tensor_i32 = unpack_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, &
+  code = unpack_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, c_n_dims, &
     data_type, mem_layout)
 end function unpack_tensor_i32
 
 !> Put a tensor whose Fortran type is the equivalent 'int64' C-type
-function unpack_tensor_i64(self, key, result, dims)
-  integer(kind=enum_kind)                                     :: unpack_tensor_i64
+function unpack_tensor_i64(self, key, result, dims) result(code)
   integer(kind=c_int64_t), dimension(..), target, intent(out) :: result !< Data to be sent
   include 'client/unpack_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_int64
-  unpack_tensor_i64 = unpack_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, &
+  code = unpack_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, &
     c_n_dims, data_type, mem_layout)
 end function unpack_tensor_i64
 
 !> Put a tensor whose Fortran type is the equivalent 'float' C-type
-function unpack_tensor_float(self, key, result, dims)
-  integer(kind=enum_kind)                                :: unpack_tensor_float
+function unpack_tensor_float(self, key, result, dims) result(code)
   real(kind=c_float), dimension(..), target, intent(out) :: result !< Data to be sent
   include 'client/unpack_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_flt
-  unpack_tensor_float = unpack_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, &
+  code = unpack_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, &
     c_n_dims, data_type, mem_layout)
 end function unpack_tensor_float
 
 !> Put a tensor whose Fortran type is the equivalent 'double' C-type
-function unpack_tensor_double(self, key, result, dims)
-  integer(kind=enum_kind)                                 :: unpack_tensor_double
+function unpack_tensor_double(self, key, result, dims) result(code)
   real(kind=c_double), dimension(..), target, intent(out) :: result !< Data to be sent
   include 'client/unpack_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
   data_type = tensor_dbl
-  unpack_tensor_double = unpack_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, &
+  code = unpack_tensor_c(self%client_ptr, c_key, key_length, data_ptr, c_dims_ptr, &
     c_n_dims, data_type, mem_layout)
 end function unpack_tensor_double
 
 !> Move a tensor to a new key
-function rename_tensor(self, key, new_key)
-  integer(kind=enum_kind)        :: rename_tensor
+function rename_tensor(self, key, new_key) result(code)
   class(client_type), intent(in) :: self    !< The initialized Fortran SmartRedis client
   character(len=*),   intent(in) :: key     !< The current key for the tensor
                                             !! excluding null terminating character
   character(len=*),   intent(in) :: new_key !< The new tensor key
+  integer(kind=enum_kind)        :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(key)) :: c_key
@@ -468,14 +481,14 @@ function rename_tensor(self, key, new_key)
   key_length = len_trim(key)
   new_key_length = len_trim(new_key)
 
-  rename_tensor = rename_tensor_c(self%client_ptr, c_key, key_length, c_new_key, new_key_length)
+  code = rename_tensor_c(self%client_ptr, c_key, key_length, c_new_key, new_key_length)
 end function rename_tensor
 
 !> Delete a tensor
-function delete_tensor(self, key)
-  integer(kind=enum_kind)        :: delete_tensor
+function delete_tensor(self, key) result(code)
   class(client_type), intent(in) :: self !< The initialized Fortran SmartRedis client
   character(len=*),   intent(in) :: key  !< The key associated with the tensor
+  integer(kind=enum_kind)        :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(key)) :: c_key
@@ -484,16 +497,16 @@ function delete_tensor(self, key)
   c_key = trim(key)
   key_length = len_trim(key)
 
-  delete_tensor = delete_tensor_c(self%client_ptr, c_key, key_length)
+  code = delete_tensor_c(self%client_ptr, c_key, key_length)
 end function delete_tensor
 
 !> Copy a tensor to the destination key
-function copy_tensor(self, src_name, dest_name)
-  integer(kind=enum_kind)        :: copy_tensor
+function copy_tensor(self, src_name, dest_name) result(code)
   class(client_type), intent(in) :: self      !< The initialized Fortran SmartRedis client
   character(len=*),   intent(in) :: src_name  !< The key associated with the tensor
                                               !! excluding null terminating character
   character(len=*),   intent(in) :: dest_name !< The new tensor key
+  integer(kind=enum_kind)        :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(src_name)) :: c_src_name
@@ -506,18 +519,17 @@ function copy_tensor(self, src_name, dest_name)
   src_name_length = len_trim(src_name, kind=c_size_t)
   dest_name_length = len_trim(dest_name, kind=c_size_t)
 
-  copy_tensor = copy_tensor_c(self%client_ptr, c_src_name, src_name_length, c_dest_name, dest_name_length)
+  code = copy_tensor_c(self%client_ptr, c_src_name, src_name_length, c_dest_name, dest_name_length)
 end function copy_tensor
 
 !> Retrieve the model from the database
-function get_model(self, key, model)
-  integer(kind=enum_kind)                        :: get_model
+function get_model(self, key, model) result(code)
   class(client_type),               intent(in  ) :: self  !< An initialized SmartRedis client
   character(len=*),                 intent(in  ) :: key   !< The key associated with the model
   character(len=*),                 intent( out) :: model !< The model as a continuous buffer
+  integer(kind=enum_kind)                        :: code
 
   ! Local variables
-  integer(kind=enum_kind) :: result
   character(kind=c_char, len=len_trim(key)) :: c_key
   integer(kind=c_size_t) :: key_length, model_length
   character(kind=c_char), dimension(:), pointer :: f_str_ptr
@@ -527,20 +539,18 @@ function get_model(self, key, model)
   c_key = trim(key)
   key_length = len_trim(key)
 
-  result = get_model_c(self%client_ptr, key, key_length, c_str_ptr, model_length, c_str_ptr)
+  code = get_model_c(self%client_ptr, key, key_length, c_str_ptr, model_length, c_str_ptr)
 
   call c_f_pointer(c_str_ptr, f_str_ptr, [ model_length ])
 
   do i=1,model_length
     model(i:i) = f_str_ptr(i)
   enddo
-  get_model = result
 end function get_model
 
 !> Load the machine learning model from a file and set the configuration
 function set_model_from_file(self, key, model_file, backend, device, batch_size, min_batch_size, tag, &
-    inputs, outputs)
-  integer(kind=enum_kind)                              :: set_model_from_file
+    inputs, outputs) result(code)
   class(client_type),                       intent(in) :: self           !< An initialized SmartRedis client
   character(len=*),                         intent(in) :: key            !< The key to use to place the model
   character(len=*),                         intent(in) :: model_file     !< The file storing the model
@@ -553,9 +563,9 @@ function set_model_from_file(self, key, model_file, backend, device, batch_size,
   character(len=*), dimension(:), optional, intent(in) :: inputs         !< One or more names of model input nodes (TF
                                                                          !! models)
   character(len=*), dimension(:), optional, intent(in) :: outputs        !< One or more names of model output nodes (TF models)
+  integer(kind=enum_kind)                              :: code
 
   ! Local variables
-  integer(kind=enum_kind) :: result
   character(kind=c_char, len=len_trim(key)) :: c_key
   character(kind=c_char, len=len_trim(model_file)) :: c_model_file
   character(kind=c_char, len=len_trim(backend)) :: c_backend
@@ -619,9 +629,9 @@ function set_model_from_file(self, key, model_file, backend, device, batch_size,
                                   output_lengths_ptr, n_outputs)
   endif
 
-  result = set_model_from_file_c(self%client_ptr, c_key, key_length, c_model_file, model_file_length,               &
-                             c_backend, backend_length, c_device, device_length, c_batch_size, c_min_batch_size,&
-                             c_tag, tag_length, inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr,           &
+  code = set_model_from_file_c(self%client_ptr, c_key, key_length, c_model_file, model_file_length, &
+                             c_backend, backend_length, c_device, device_length, c_batch_size, c_min_batch_size, &
+                             c_tag, tag_length, inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, &
                              output_lengths_ptr, n_outputs)
   deallocate(c_inputs)
   deallocate(input_lengths)
@@ -630,13 +640,11 @@ function set_model_from_file(self, key, model_file, backend, device, batch_size,
   deallocate(output_lengths)
   deallocate(ptrs_to_outputs)
   deallocate(c_tag)
-  set_model_from_file = result
 end function set_model_from_file
 
 !> Establish a model to run
 function set_model(self, key, model, backend, device, batch_size, min_batch_size, tag, &
-    inputs, outputs)
-  integer(kind=enum_kind)                    :: set_model
+    inputs, outputs) result(code)
   class(client_type),             intent(in) :: self           !< An initialized SmartRedis client
   character(len=*),               intent(in) :: key            !< The key to use to place the model
   character(len=*),               intent(in) :: model          !< The binary representation of the model
@@ -647,9 +655,9 @@ function set_model(self, key, model, backend, device, batch_size, min_batch_size
   character(len=*),               intent(in) :: tag            !< A tag to attach to the model for information purposes
   character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of model input nodes (TF models)
   character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of model output nodes (TF models)
+  integer(kind=enum_kind)                    :: code
 
   ! Local variables
-  integer(kind=enum_kind) :: result
   character(kind=c_char, len=len_trim(key)) :: c_key
   character(kind=c_char, len=len_trim(model)) :: c_model
   character(kind=c_char, len=len_trim(backend)) :: c_backend
@@ -690,8 +698,8 @@ function set_model(self, key, model, backend, device, batch_size, min_batch_size
   c_batch_size = batch_size
   c_min_batch_size = min_batch_size
 
-  result = set_model_c(self%client_ptr, c_key, key_length, c_model, model_length, c_backend, backend_length, &
-                 c_device, device_length, batch_size, min_batch_size, c_tag, tag_length,                 &
+  code = set_model_c(self%client_ptr, c_key, key_length, c_model, model_length, c_backend, backend_length, &
+                 c_device, device_length, batch_size, min_batch_size, c_tag, tag_length, &
                  inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, output_lengths_ptr, n_outputs)
 
   deallocate(c_inputs)
@@ -700,19 +708,17 @@ function set_model(self, key, model, backend, device, batch_size, min_batch_size
   deallocate(c_outputs)
   deallocate(output_lengths)
   deallocate(ptrs_to_outputs)
-  set_model = result
 end function set_model
 
 !> Execute a model
-function run_model(self, key, inputs, outputs)
-  integer(kind=enum_kind)                    :: run_model
+function run_model(self, key, inputs, outputs) result(code)
   class(client_type),             intent(in) :: self    !< An initialized SmartRedis client
   character(len=*),               intent(in) :: key     !< The key to use to place the model
   character(len=*), dimension(:), intent(in) :: inputs  !< One or more names of model input nodes (TF models)
   character(len=*), dimension(:), intent(in) :: outputs !< One or more names of model output nodes (TF models)
+  integer(kind=enum_kind)                    :: code
 
   ! Local variables
-  integer(kind=enum_kind) :: result
   character(kind=c_char, len=len_trim(key)) :: c_key
   character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
 
@@ -732,8 +738,8 @@ function run_model(self, key, inputs, outputs)
   call convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
                                 output_lengths_ptr, n_outputs)
 
-  result = run_model_c(self%client_ptr, c_key, key_length, inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, &
-                  output_lengths_ptr, n_outputs)
+  code = run_model_c(self%client_ptr, c_key, key_length, inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, &
+                          output_lengths_ptr, n_outputs)
 
   deallocate(c_inputs)
   deallocate(input_lengths)
@@ -741,18 +747,16 @@ function run_model(self, key, inputs, outputs)
   deallocate(c_outputs)
   deallocate(output_lengths)
   deallocate(ptrs_to_outputs)
-  run_model = result
 end function run_model
 
 !> Retrieve the script from the database
-function get_script(self, key, script)
-  integer(kind=enum_kind)          :: get_script
+function get_script(self, key, script) result(code)
   class(client_type), intent(in  ) :: self   !< An initialized SmartRedis client
   character(len=*),   intent(in  ) :: key    !< The key to use to place the script
   character(len=*),   intent( out) :: script !< The script as a continuous buffer
+  integer(kind=enum_kind)          :: code
 
   ! Local variables
-  integer(kind=enum_kind) :: result
   character(kind=c_char, len=len_trim(key)) :: c_key
   integer(kind=c_size_t) :: key_length, script_length
   character(kind=c_char), dimension(:), pointer :: f_str_ptr
@@ -762,22 +766,21 @@ function get_script(self, key, script)
   c_key = trim(key)
   key_length = len_trim(key)
 
-  result = get_script_c(self%client_ptr, key, key_length, c_str_ptr, script_length)
+  code = get_script_c(self%client_ptr, key, key_length, c_str_ptr, script_length)
 
   call c_f_pointer(c_str_ptr, f_str_ptr, [ script_length ])
 
   do i=1,script_length
     script(i:i) = f_str_ptr(i)
   enddo
-  get_script = result
 end function get_script
 
-function set_script_from_file(self, key, device, script_file)
-  integer(kind=enum_kind)        :: set_script_from_file
+function set_script_from_file(self, key, device, script_file) result(code)
   class(client_type), intent(in) :: self        !< An initialized SmartRedis client
   character(len=*),   intent(in) :: key         !< The key to use to place the script
   character(len=*),   intent(in) :: device      !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
   character(len=*),   intent(in) :: script_file !< The file storing the script
+  integer(kind=enum_kind)        :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(key))         :: c_key
@@ -796,16 +799,16 @@ function set_script_from_file(self, key, device, script_file)
   script_file_length = len_trim(script_file)
   device_length = len_trim(device)
 
-  set_script_from_file = set_script_from_file_c(self%client_ptr, c_key, key_length, c_device, device_length, &
+  code = set_script_from_file_c(self%client_ptr, c_key, key_length, c_device, device_length, &
                               c_script_file, script_file_length)
 end function set_script_from_file
 
-function set_script(self, key, device, script)
-  integer(kind=enum_kind)        :: set_script
+function set_script(self, key, device, script) result(code)
   class(client_type), intent(in) :: self   !< An initialized SmartRedis client
   character(len=*),   intent(in) :: key    !< The key to use to place the script
   character(len=*),   intent(in) :: device !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
   character(len=*),   intent(in) :: script !< The file storing the script
+  integer(kind=enum_kind)        :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(key)) :: c_key
@@ -824,19 +827,18 @@ function set_script(self, key, device, script)
   script_length = len_trim(script)
   device_length = len_trim(device)
 
-  set_script = set_script_c(self%client_ptr, c_key, key_length, c_device, device_length, c_script, script_length)
+  code = set_script_c(self%client_ptr, c_key, key_length, c_device, device_length, c_script, script_length)
 end function set_script
 
-function run_script(self, key, func, inputs, outputs)
-  integer(kind=enum_kind)                    :: run_script
+function run_script(self, key, func, inputs, outputs) result(code)
   class(client_type),             intent(in) :: self           !< An initialized SmartRedis client
   character(len=*),               intent(in) :: key            !< The key to use to place the script
   character(len=*),               intent(in) :: func           !< The name of the function in the script to call
   character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of script input nodes (TF scripts)
   character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of script output nodes (TF scripts)
+  integer(kind=enum_kind)                    :: code
 
   ! Local variables
-  integer(kind=enum_kind) :: result
   character(kind=c_char, len=len_trim(key)) :: c_key
   character(kind=c_char, len=len_trim(func)) :: c_func
   character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
@@ -860,8 +862,8 @@ function run_script(self, key, func, inputs, outputs)
   call convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
                                 output_lengths_ptr, n_outputs)
 
-  result = run_script_c(self%client_ptr, c_key, key_length, c_func, func_length, inputs_ptr, input_lengths_ptr, &
-       n_inputs, outputs_ptr, output_lengths_ptr, n_outputs)
+  code = run_script_c(self%client_ptr, c_key, key_length, c_func, func_length, inputs_ptr, input_lengths_ptr, &
+                            n_inputs, outputs_ptr, output_lengths_ptr, n_outputs)
 
   deallocate(c_inputs)
   deallocate(input_lengths)
@@ -869,24 +871,23 @@ function run_script(self, key, func, inputs, outputs)
   deallocate(c_outputs)
   deallocate(output_lengths)
   deallocate(ptrs_to_outputs)
-  run_script = result
 end function run_script
 
 !> Store a dataset in the database
-function put_dataset(self, dataset)
-  integer(kind=enum_kind)        :: put_dataset
+function put_dataset(self, dataset) result(code)
   class(client_type), intent(in) :: self    !< An initialized SmartRedis client
   type(dataset_type), intent(in) :: dataset !< Dataset to store in the dataset
+  integer(kind=enum_kind)        :: code
 
-  put_dataset = put_dataset_c(self%client_ptr, dataset%dataset_ptr)
+  code = put_dataset_c(self%client_ptr, dataset%dataset_ptr)
 end function put_dataset
 
 !> Retrieve a dataset from the database
-function get_dataset(self, name, dataset)
-  integer(kind=enum_kind)          :: get_dataset
+function get_dataset(self, name, dataset) result(code)
   class(client_type), intent(in )  :: self !< An initialized SmartRedis client
   character(len=*),   intent(in )  :: name !< Name of the dataset to get
-  TYPE(dataset_type), intent( out) :: dataset !< receives the dataset
+  type(dataset_type), intent( out) :: dataset !< receives the dataset
+  integer(kind=enum_kind)          :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(name)) :: c_name
@@ -894,15 +895,15 @@ function get_dataset(self, name, dataset)
 
   c_name = trim(name)
   name_length = len_trim(name)
-  get_dataset = get_dataset_c(self%client_ptr, c_name, name_length, dataset%dataset_ptr)
+  code = get_dataset_c(self%client_ptr, c_name, name_length, dataset%dataset_ptr)
 end function get_dataset
 
 !> Rename a dataset stored in the database
-function rename_dataset(self, name, new_name)
-  integer(kind=enum_kind)        :: rename_dataset
+function rename_dataset(self, name, new_name) result(code)
   class(client_type), intent(in) :: self     !< An initialized SmartRedis client
   character(len=*),   intent(in) :: name     !< Original name of the dataset
   character(len=*),   intent(in) :: new_name !< New name of the dataset
+  integer(kind=enum_kind)        :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(name)) :: c_name
@@ -914,15 +915,15 @@ function rename_dataset(self, name, new_name)
   name_length = len_trim(name)
   new_name_length = len_trim(new_name)
 
-  rename_dataset = rename_dataset_c(self%client_ptr, c_name, name_length, c_new_name, new_name_length)
+  code = rename_dataset_c(self%client_ptr, c_name, name_length, c_new_name, new_name_length)
 end function rename_dataset
 
 !> Copy a dataset within the database to a new name
-function copy_dataset(self, name, new_name)
-  integer(kind=enum_kind)        :: copy_dataset
+function copy_dataset(self, name, new_name) result(code)
   class(client_type), intent(in) :: self   !< An initialized SmartRedis client
   character(len=*),   intent(in) :: name     !< Source name of the dataset
   character(len=*),   intent(in) :: new_name !< Name of the new dataset
+  integer(kind=enum_kind)        :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(name)) :: c_name
@@ -934,14 +935,14 @@ function copy_dataset(self, name, new_name)
   name_length = len_trim(name)
   new_name_length = len_trim(new_name)
 
-  copy_dataset = copy_dataset_c(self%client_ptr, c_name, name_length, c_new_name, new_name_length)
+  code = copy_dataset_c(self%client_ptr, c_name, name_length, c_new_name, new_name_length)
 end function copy_dataset
 
 !> Delete a dataset stored within a database
-function delete_dataset(self, name)
-  integer(kind=enum_kind)        :: delete_dataset
+function delete_dataset(self, name) result(code)
   class(client_type), intent(in) :: self !< An initialized SmartRedis client
   character(len=*),   intent(in) :: name   !< Name of the dataset to delete
+  integer(kind=enum_kind)        :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(name)) :: c_name
@@ -949,14 +950,14 @@ function delete_dataset(self, name)
 
   c_name = trim(name)
   name_length = len_trim(name)
-  delete_dataset = delete_dataset_c(self%client_ptr, c_name, name_length)
+  code = delete_dataset_c(self%client_ptr, c_name, name_length)
 end function delete_dataset
 
 !> Set the data source (i.e. key prefix for get functions)
-function set_data_source(self, source_id)
-  integer(kind=enum_kind)        :: set_data_source
+function set_data_source(self, source_id) result(code)
   class(client_type), intent(in) :: self      !< An initialized SmartRedis client
   character(len=*),   intent(in) :: source_id !< The key prefix
+  integer(kind=enum_kind)        :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(source_id)) :: c_source_id
@@ -964,19 +965,19 @@ function set_data_source(self, source_id)
   c_source_id = trim(source_id)
   source_id_length = len_trim(source_id)
 
-  set_data_source = set_data_source_c(self%client_ptr, c_source_id, source_id_length)
+  code = set_data_source_c(self%client_ptr, c_source_id, source_id_length)
 end function set_data_source
 
 !> Set whether names of model and script entities should be prefixed (e.g. in an ensemble) to form database keys.
 !! Prefixes will only be used if they were previously set through the environment variables SSKEYOUT and SSKEYIN.
 !! Keys of entities created before client function is called will not be affected. By default, the client does not
 !! prefix model and script keys.
-function use_model_ensemble_prefix(self, use_prefix)
-  integer(kind=enum_kind)          :: use_model_ensemble_prefix
+function use_model_ensemble_prefix(self, use_prefix) result(code)
   class(client_type),   intent(in) :: self       !< An initialized SmartRedis client
   logical,              intent(in) :: use_prefix !< The prefix setting
+  integer(kind=enum_kind)          :: code
 
-  use_model_ensemble_prefix = use_model_ensemble_prefix_c(self%client_ptr, logical(use_prefix,kind=c_bool))
+  code = use_model_ensemble_prefix_c(self%client_ptr, logical(use_prefix,kind=c_bool))
 end function use_model_ensemble_prefix
 
 
@@ -984,12 +985,12 @@ end function use_model_ensemble_prefix
 !! Prefixes will only be used if they were previously set through the environment variables SSKEYOUT and SSKEYIN.
 !! Keys of entities created before client function is called will not be affected. By default, the client prefixes
 !! tensor and dataset keys with the first prefix specified with the SSKEYIN and SSKEYOUT environment variables.
-function use_tensor_ensemble_prefix(self, use_prefix)
-  integer(kind=enum_kind)          :: use_tensor_ensemble_prefix
+function use_tensor_ensemble_prefix(self, use_prefix) result(code)
   class(client_type),   intent(in) :: self       !< An initialized SmartRedis client
   logical,              intent(in) :: use_prefix !< The prefix setting
+  integer(kind=enum_kind)          :: code
 
-  use_tensor_ensemble_prefix = use_tensor_ensemble_prefix_c(self%client_ptr, logical(use_prefix,kind=c_bool))
+  code = use_tensor_ensemble_prefix_c(self%client_ptr, logical(use_prefix,kind=c_bool))
 end function use_tensor_ensemble_prefix
 
 end module smartredis_client
