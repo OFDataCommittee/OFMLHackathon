@@ -8,26 +8,55 @@ can be compiled as a library that is linked with an application
 at compile time. For Python, the clients can be used just like
 any other pip library.
 
-SmartRedis is ran on these compilers and OS'es regularly:
+Before installation, it is recommended to use an OS and compiler that are known to be reliable with SmartRedis.
 
+SmartRedis is tested with the following operating systems on a daily basis:
 
 .. list-table::
-    :widths: 50 50 50
+    :widths: 50
     :header-rows: 1
     :align: center
 
-    * - OS
-      - Compiler
-      - Compiler Versions
+    * - OS (tested daily)
     * - MacOS
-      - Clang
-      - 12
-    * - Ubuntu 20.04
-      - GCC/GFortran
-      - 8 - 10
-    * - Ubuntu 20.04
-      - Intel
-      - 2021.4.0
+    * - Ubuntu
+
+
+SmartRedis is tested with the following compilers on a daily basis:
+
+.. list-table::
+    :widths: 50
+    :header-rows: 1
+    :align: center
+
+    * - Compilers (tested daily)
+    * - GNU (GCC/GFortran)
+    * - Intel (icc/icpc/ifort)
+    * - Apple Clang
+
+
+SmartRedis has been tested with the following compiler in the past, but on a less regular basis as the compilers listed above:
+
+.. list-table::
+    :widths: 50
+    :header-rows: 1
+    :align: center
+
+    * - Compilers (irregularly tested in the past)
+    * - Cray Clang
+
+
+SmartRedis has been used with the following compilers in the past, but they have not been tested. We do not imply that these compilers work for certain:
+
+.. list-table::
+    :widths: 50
+    :header-rows: 1
+    :align: center
+
+    * - Compilers (used in the past, but not tested)
+    * - Cray Classic
+    * - NVHPC
+    * - PGI
 
 
 This document will show how to:
