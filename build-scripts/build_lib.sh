@@ -5,6 +5,9 @@ NPROC=$(python -c "import multiprocessing as mp; print(mp.cpu_count())")
 
 CMAKE=$(python -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
 
+# Any command line arguments are assumed to be CMake arguments
+CMAKE_ARGS=$@
+
 # Remove existing module
 if [ -f ./src/python/module/smartredis/smartredisPy.*.so ]; then
     echo "Removing existing module installation"
@@ -19,7 +22,7 @@ fi
 # make a new build directory and invoke cmake
 mkdir build
 cd build
-$CMAKE ..
+$CMAKE .. $CMAKE_ARGS
 make -j $NPROC
 make install
 
