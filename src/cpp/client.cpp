@@ -667,14 +667,30 @@ bool Client::poll_model(const std::string& name,
     return false;
 }
 
-// Check if the tensor (or dataset) exists in the database at a specified frequency for a specified number of times
+// Check if the tensor exists in the database at a specified frequency for a specified number of times
 bool Client::poll_tensor(const std::string& name,
                          int poll_frequency_ms,
                          int num_tries)
 {
-    // Check for the model/script however many times requested
+    // Check for the tensor however many times requested
     for (int i = 0; i < num_tries; i++) {
         if (tensor_exists(name))
+            return true;
+        std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
+    }
+
+    // If we get here, it was never found
+    return false;
+}
+
+// Check if the dataset exists in the database at a specified frequency for a specified number of times
+bool Client::poll_dataset(const std::string& name,
+                          int poll_frequency_ms,
+                          int num_tries)
+{
+    // Check for the dataset however many times requested
+    for (int i = 0; i < num_tries; i++) {
+        if (dataset_exists(name))
             return true;
         std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
     }

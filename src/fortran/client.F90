@@ -84,6 +84,8 @@ type, public :: client_type
   procedure :: poll_model
   !> Poll the database and return if the tensor exists
   procedure :: poll_tensor
+  !> Poll the database and return if the datasaet exists
+  procedure :: poll_dataset
   !> Poll the database and return if the key exists
   procedure :: poll_key
   !> Rename a tensor within the database
@@ -285,6 +287,28 @@ function poll_tensor(self, tensor_name, poll_frequency_ms, num_tries, exists) re
 
   code = poll_tensor_c(self%client_ptr, c_tensor_name, c_tensor_name_length, c_poll_frequency, c_num_tries, exists)
 end function poll_tensor
+
+!> Repeatedly poll the database until the dataset exists or the number of tries is exceeded
+function poll_dataset(self, dataset_name, poll_frequency_ms, num_tries, exists)
+  integer(kind=enum_kind)           :: poll_dataset
+  class(client_type),   intent(in)  :: self              !< The client
+  character(len=*),     intent(in)  :: dataset_name      !< Key in the database to poll
+  integer,              intent(in)  :: poll_frequency_ms !< Frequency at which to poll the database (ms)
+  integer,              intent(in)  :: num_tries         !< Number of times to poll the database before failing
+  logical(kind=c_bool), intent(out) :: exists            !< Receives whether the tensor exists
+
+  ! Local variables
+  character(kind=c_char,len=len_trim(dataset_name)) :: c_dataset_name
+  integer(kind=c_size_t) :: c_dataset_name_length
+  integer(kind=c_int) :: c_poll_frequency, c_num_tries
+
+  c_dataset_name = trim(dataset_name)
+  c_dataset_name_length = len_trim(dataset_name)
+  c_num_tries = num_tries
+  c_poll_frequency = poll_frequency_ms
+
+  poll_dataset = poll_dataset_c(self%client_ptr, c_dataset_name, c_dataset_name_length, c_poll_frequency, c_num_tries, exists)
+end function poll_dataset
 
 !> Repeatedly poll the database until the model exists or the number of tries is exceeded
 function poll_model(self, model_name, poll_frequency_ms, num_tries, exists) result(code)

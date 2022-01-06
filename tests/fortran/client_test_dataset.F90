@@ -169,9 +169,15 @@ program main
   result = client%dataset_exists("nonexistent", exists)
   if (result .ne. SRNoError) stop
   if (exists) stop 'non-existant dataset: FAILED'
+  result = client%poll_dataset("nonexistent", 50, 5, exists)
+  if (result .ne. SRNoError) stop
+  if (exists) stop 'non-existant dataset: FAILED'
   result = client%put_dataset(dataset)
   if (result .ne. SRNoError) stop
   result = client%dataset_exists("test_dataset", exists)
+  if (result .ne. SRNoError) stop
+  if (.not. exists) stop 'existant dataset: FAILED'
+  result = client%poll_dataset("test_dataset", 50, 5, exists)
   if (result .ne. SRNoError) stop
   if (.not. exists) stop 'existant dataset: FAILED'
 

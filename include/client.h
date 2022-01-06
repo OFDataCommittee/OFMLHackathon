@@ -465,9 +465,7 @@ class Client
         *   \param poll_frequency_ms The frequency of checks for the
         *                            key in milliseconds
         *   \param num_tries The total number of times to check for
-        *                    the specified number of keys.  If the
-        *                    value is set to -1, the key will be
-        *                    polled indefinitely.
+        *                    the specified number of keys.
         *   \returns Returns true if the key is found within the
         *            specified number of tries, otherwise false.
         */
@@ -476,9 +474,8 @@ class Client
                       int num_tries);
 
         /*!
-        *   \brief Check if the tensor (or dataset) exists in the database
-        *          at a specified frequency for a specified number
-        *          of times
+        *   \brief Check if the tensor exists in the database at a
+        *          specified frequency for a specified number of times
         *   \param name The key that will be checked in the database
         *               Depending on the current prefixing behavior,
         *               the name could be automatically prefixed
@@ -486,15 +483,31 @@ class Client
         *   \param poll_frequency_ms The frequency of checks for the
         *                            key in milliseconds
         *   \param num_tries The total number of times to check for
-        *                    the specified number of keys.  If the
-        *                    value is set to -1, the key will be
-        *                    polled indefinitely.
+        *                    the specified number of keys.
         *   \returns Returns true if the key is found within the
         *            specified number of tries, otherwise false.
         */
         bool poll_tensor(const std::string& name,
                          int poll_frequency_ms,
                          int num_tries);
+
+        /*!
+        *   \brief Check if the dataset exists in the database at a
+        *          specified frequency for a specified number of times
+        *   \param name The key that will be checked in the database
+        *               Depending on the current prefixing behavior,
+        *               the name could be automatically prefixed
+        *               to form the corresponding key.
+        *   \param poll_frequency_ms The frequency of checks for the
+        *                            key in milliseconds
+        *   \param num_tries The total number of times to check for
+        *                    the specified number of keys.
+        *   \returns Returns true if the key is found within the
+        *            specified number of tries, otherwise false.
+        */
+        bool poll_dataset(const std::string& name,
+                          int poll_frequency_ms,
+                          int num_tries);
 
         /*!
         *   \brief Check if the model (or script) exists in the database
@@ -507,9 +520,7 @@ class Client
         *   \param poll_frequency_ms The frequency of checks for the
         *                            key in milliseconds
         *   \param num_tries The total number of times to check for
-        *                    the specified number of keys.  If the
-        *                    value is set to -1, the key will be
-        *                    polled indefinitely.
+        *                    the specified number of keys.
         *   \returns Returns true if the key is found within the
         *            specified number of tries, otherwise false.
         */

@@ -591,7 +591,7 @@ SRError poll_model(void* c_client,
                    bool* exists);
 
 /*!
-*   \brief Check if a tensor or dataset exists in the database at a specified
+*   \brief Check if a tensor exists in the database at a specified
 *          frequency for a specified number of times
 *   \param c_client A pointer to c client to use for communication
 *   \param name The name of the entity that will be checked in the database.
@@ -613,6 +613,30 @@ SRError poll_tensor(void* c_client,
                     const int poll_frequency_ms,
                     const int num_tries,
                     bool* exists);
+
+/*!
+*   \brief Check if a dataset exists in the database at a specified
+*          frequency for a specified number of times
+*   \param c_client A pointer to c client to use for communication
+*   \param name The name of the entity that will be checked in the database.
+*               The full key associated to \p name will be formed according
+*               to the prefixing behavior
+*   \param name_length The length of the name c-string,
+*                     excluding null terminating character
+*   \param poll_frequency_ms The frequency of checks, in milliseconds
+*   \param num_tries The total number of times to check for the specified
+*                    number of keys.  If this value is set to -1, the key
+*                    will be polled indefinitely.
+*   \param exists Receives whether the tensor is found within the
+*                 specified number of tries
+*   \return Returns sr_ok on success
+*/
+SRError poll_dataset(void* c_client,
+                     const char* name,
+                     const size_t name_length,
+                     const int poll_frequency_ms,
+                     const int num_tries,
+                     bool* exists);
 
 /*!
 *   \brief Set the data source (i.e. key prefix for get functions)

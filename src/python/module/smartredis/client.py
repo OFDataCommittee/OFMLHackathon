@@ -521,9 +521,7 @@ class Client(PyClient):
                                   key in milliseconds
         :type poll_frequency_ms: int
         :param num_tries: The total number of times to check for
-                          the specified number of keys.  If the
-                          value is set to -1, the key will be
-                          polled indefinitely.
+                          the specified number of keys.
         :type num_tries: int
         :returns: Returns true if the key is found within the
                   specified number of tries, otherwise false.
@@ -536,7 +534,7 @@ class Client(PyClient):
             raise RedisReplyError(str(e), "poll_key")
 
     def poll_tensor(self, name, poll_frequency_ms, num_tries):
-        """Check if a tensor or dataset exists in the database
+        """Check if a tensor exists in the database
 
         The check will be performed at a
         specified frequency for a specified number
@@ -549,9 +547,7 @@ class Client(PyClient):
                                   key in milliseconds
         :type poll_frequency_ms: int
         :param num_tries: The total number of times to check for
-                          the specified number of keys.  If the
-                          value is set to -1, the key will be
-                          polled indefinitely.
+                          the specified number of keys.
         :type num_tries: int
         :returns: Returns true if the key is found within the
                   specified number of tries, otherwise false.
@@ -562,6 +558,33 @@ class Client(PyClient):
             return super().poll_tensor(name, poll_frequency_ms, num_tries)
         except RuntimeError as e:
             raise RedisReplyError(str(e), "poll_tensor")
+
+
+    def poll_dataset(self, name, poll_frequency_ms, num_tries):
+        """Check if a dataset exists in the database
+
+        The check will be performed at a
+        specified frequency for a specified number
+        of times. The key associated to the entity will be
+        computed internally based on the current prefix behavior.
+
+        :param key: The key that will be checked in the database
+        :type key: int
+        :param poll_frequency_ms: The frequency of checks for the
+                                  key in milliseconds
+        :type poll_frequency_ms: int
+        :param num_tries: The total number of times to check for
+                          the specified number of keys.
+        :type num_tries: int
+        :returns: Returns true if the key is found within the
+                  specified number of tries, otherwise false.
+        :rtype: bool
+        :raises RedisReplyError: if `poll_dataset` fails
+        """
+        try:
+            return super().poll_dataset(name, poll_frequency_ms, num_tries)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "poll_dataset")
 
     def poll_model(self, name, poll_frequency_ms, num_tries):
         """Check if a model or script exists in the database
@@ -577,9 +600,7 @@ class Client(PyClient):
                                   key in milliseconds
         :type poll_frequency_ms: int
         :param num_tries: The total number of times to check for
-                          the specified number of keys.  If the
-                          value is set to -1, the key will be
-                          polled indefinitely.
+                          the specified number of keys.
         :type num_tries: int
         :returns: Returns true if the key is found within the
                   specified number of tries, otherwise false.

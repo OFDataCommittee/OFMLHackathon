@@ -64,6 +64,7 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("dataset_exists", &PyClient::dataset_exists)
         .def("poll_model", &PyClient::poll_model)
         .def("poll_tensor", &PyClient::poll_tensor)
+        .def("poll_dataset", &PyClient::poll_dataset)
         .def("set_data_source", &PyClient::set_data_source)
         .def("use_tensor_ensemble_prefix", &PyClient::use_tensor_ensemble_prefix)
         .def("use_model_ensemble_prefix", &PyClient::use_model_ensemble_prefix)
