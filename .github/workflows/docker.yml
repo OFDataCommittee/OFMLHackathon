@@ -61,7 +61,8 @@ jobs:
             - name: 'Build base SmartRedis docker image'
               run: |
                 cd ./images
-                docker build -t smartredis .
+                docker build --build-arg REMOTE=https://github.com/${GITHUB_REPOSITORY}.git \
+                --build-arg BRANCH=$GITHUB_REF_NAME -t smartredis .
                 cd ../
             - name: 'Build C++ docker application'
               run: |

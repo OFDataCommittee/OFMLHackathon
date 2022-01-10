@@ -29,6 +29,10 @@
 ## Builder image
 FROM ubuntu:21.04 as builder
 
+# Define default arguments for building
+ARG REMOTE=https://github.com/CrayLabs/SmartRedis.git
+ARG BRANCH=develop
+
 # Install tooling
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -q -y --no-install-recommends \
@@ -41,7 +45,7 @@ RUN pip3 install cmake
 # Get source code
 WORKDIR /usr/local/src/
 RUN git config --global advice.detachedHead false && \
-    git clone https://github.com/CrayLabs/SmartRedis.git
+    git clone $REMOTE --branch $BRANCH
 
 # Compile and install
 WORKDIR /usr/local/src/SmartRedis
