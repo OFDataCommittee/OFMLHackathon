@@ -27,6 +27,7 @@
  */
 
 #include "stdio.h"
+#include "string.h"
 
 #include "c_client.h"
 #include "srexception.h"
@@ -53,10 +54,26 @@ int main(int argc, char* argv[]) {
     size_t n_dims = 1;
 
     return_code = put_tensor(client, key, key_length,
-                            (void*)(&tensor), &dims, n_dims, type, layout);
+                            (void*)(&tensor), (const size_t*)(&dims),
+                            n_dims, type, layout);
 
     if (return_code != SRNoError) {
         return -1;
+    }
+
+    double returned[3];
+
+    return_code = unpack_tensor(client, key, key_length,
+                                (void*)(&returned), (const size_t*)(&dims),
+                                n_dims, type, layout);
+
+    if (return_code != SRNoError) {
+        return -1;
+    }
+
+    for (size_t i = 0; i < 3; i++) {
+        if (returned[i] != tensor[i])
+            return -1;
     }
 
     return 0;

@@ -34,7 +34,19 @@ int main(int argc, char* argv[]) {
 
     std::vector<double> data = {1.0, 2.0, 3.0};
     std::vector<size_t> dims = {3};
-    client.put_tensor("cpp_docker_tensor", data.data(), dims,
+    std::string tensor_key = "cpp_docker_tensor";
+
+    client.put_tensor(tensor_key, data.data(), dims,
                       SRTensorTypeDouble, SRMemLayoutContiguous);
+
+    std::vector<double> returned(3, 0.0);
+    client.unpack_tensor(tensor_key, returned.data(), dims,
+                         SRTensorTypeDouble, SRMemLayoutContiguous);
+
+    if (returned != data) {
+        throw std::runtime_error("The returned tensor is not equal "\
+                                 "to the sent tensor.");
+    }
+
     return 0;
 }

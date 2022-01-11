@@ -36,6 +36,7 @@ program main
     type(client_type) :: client
     integer, parameter :: dim1 = 10
     real(kind=8), dimension(dim1) :: tensor
+    real(kind=8), dimension(dim1) :: returned
 
     result = client%initialize(.FALSE.)
     if (result .ne. SRNoError) stop
@@ -44,5 +45,10 @@ program main
 
     result = client%put_tensor("fortran_docker_tensor", tensor, shape(tensor))
     if (result .ne. SRNoError) stop
+
+    result = client%unpack_tensor("fortran_docker_tensor", returned, shape(returned))
+    if (result .ne. SRNoError) stop
+
+    if (.not. all(tensor == returned)) stop
 
 end program main
