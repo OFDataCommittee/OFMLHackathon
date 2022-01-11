@@ -28,9 +28,15 @@
 
 FROM smartredis
 
+# Copy source and build files into the container
 COPY ./CMakeLists.txt /usr/local/src/DockerTest/
 COPY ./docker_test.cpp /usr/local/src/DockerTest/
+
+# Change working directory to the application folder
 WORKDIR /usr/local/src/DockerTest
+
+# Run CMake and make
 RUN mkdir build && cd build && cmake .. && make && cd ../
 
+# Default command for container execution
 CMD ["/usr/local/src/DockerTest/build/docker_test"]

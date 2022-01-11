@@ -28,6 +28,8 @@
 
 FROM smartredis as builder
 
+# Copy appliction script
 COPY ./test_docker.py /usr/local/src/SmartRedis
 
+# Default command for container execution
 CMD ["python", "/usr/local/src/SmartRedis/test_docker.py"]

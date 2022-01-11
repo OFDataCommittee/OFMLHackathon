@@ -28,14 +28,21 @@
 
 FROM smartredis
 
+# Install Fortran compiler
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -q -y --no-install-recommends \
     gfortran && \
     rm -rf /var/lib/apt/lists/*
 
+# Copy source and build files into the container
 COPY ./CMakeLists.txt /usr/local/src/DockerTest/
 COPY ./test_docker.F90 /usr/local/src/DockerTest/
+
+# Change working directory to the application folder
 WORKDIR /usr/local/src/DockerTest
+
+# Run CMake and make
 RUN mkdir build && cd build && cmake .. && make && cd ../
 
+# Default command for container execution
 CMD ["/usr/local/src/DockerTest/build/docker_test"]
