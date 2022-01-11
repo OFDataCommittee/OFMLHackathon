@@ -32,3 +32,5 @@ COPY ./CMakeLists.txt /usr/local/src/DockerTest/
 COPY ./test_docker.c /usr/local/src/DockerTest/
 WORKDIR /usr/local/src/DockerTest
 RUN mkdir build && cd build && cmake .. && make && cd ../
+
+CMD ["/usr/local/src/DockerTest/build/docker_test"]
