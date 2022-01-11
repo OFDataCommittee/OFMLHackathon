@@ -42,10 +42,15 @@ RUN apt-get update && \
 RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN pip3 install cmake
 
-# Get source code
-WORKDIR /usr/local/src/
-RUN git config --global advice.detachedHead false && \
-    git clone $REMOTE --branch $BRANCH
+# Get source code from current clone
+COPY .  /usr/local/src/SmartRedis
+
+# To build a docker image from another repository,
+# users should uncomment the following WORKDIR and
+# RUN commands and remove the COPY command above.
+#WORKDIR /usr/local/src/
+#RUN git config --global advice.detachedHead false && \
+#    git clone https://github.com/CrayLabs/SmartRedis.git --branch develop
 
 # Compile and install
 WORKDIR /usr/local/src/SmartRedis
