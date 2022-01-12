@@ -382,6 +382,9 @@ class PyClient
         *          of times. The name will be automatically prefixed
         *          base on prefixing behavior.
         *   \param name The key that will be checked in the database
+        *               Depending on the current prefixing behavior,
+        *               the name could be automatically prefixed
+        *               to form the corresponding key.
         *   \param poll_frequency_ms The frequency of checks for the
         *                            key in milliseconds
         *   \param num_tries The total number of times to check for

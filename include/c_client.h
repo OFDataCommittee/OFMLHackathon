@@ -553,8 +553,7 @@ SRError dataset_exists(void* c_client,
 *                     excluding null terminating character
 *   \param poll_frequency_ms The frequency of checks, in milliseconds
 *   \param num_tries The total number of times to check for the specified
-*                    number of keys.  If this value is set to -1, the key
-*                    will be polled indefinitely.
+*                    number of keys.
 *   \param exists Receives whether the key is found within the
 *                 specified number of tries
 *   \return Returns SRNoError on success or an error code on failure
@@ -577,8 +576,7 @@ SRError poll_key(void* c_client,
 *                     excluding null terminating character
 *   \param poll_frequency_ms The frequency of checks, in milliseconds
 *   \param num_tries The total number of times to check for the specified
-*                    number of keys.  If this value is set to -1, the key
-*                    will be polled indefinitely.
+*                    number of keys.
 *   \param exists Receives whether the model is found within the
 *                 specified number of tries
 *   \return Returns SRNoError on success or an error code on failure
@@ -601,8 +599,7 @@ SRError poll_model(void* c_client,
 *                     excluding null terminating character
 *   \param poll_frequency_ms The frequency of checks, in milliseconds
 *   \param num_tries The total number of times to check for the specified
-*                    number of keys.  If this value is set to -1, the key
-*                    will be polled indefinitely.
+*                    number of keys.
 *   \param exists Receives whether the tensor is found within the
 *                 specified number of tries
 *   \return Returns SRNoError on success or an error code on failure
@@ -625,8 +622,7 @@ SRError poll_tensor(void* c_client,
 *                     excluding null terminating character
 *   \param poll_frequency_ms The frequency of checks, in milliseconds
 *   \param num_tries The total number of times to check for the specified
-*                    number of keys.  If this value is set to -1, the key
-*                    will be polled indefinitely.
+*                    number of keys.
 *   \param exists Receives whether the tensor is found within the
 *                 specified number of tries
 *   \return Returns sr_ok on success
