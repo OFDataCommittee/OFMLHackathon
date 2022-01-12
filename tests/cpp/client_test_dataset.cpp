@@ -72,16 +72,22 @@ void put_get_dataset(
     if (client.dataset_exists(nonexistant))
       throw std::runtime_error("DataSet existence of a non-existant"\
                                "dataset failed.");
+    if (client.poll_dataset(nonexistant, 50, 5))
+      throw std::runtime_error("DataSet existence of a non-existant "\
+                                 "dataset failed.");
 
-    //Put the DataSet into the database
+    // Put the DataSet into the database
     client.put_dataset(sent_dataset);
 
     // Make sure it exists
     if (!client.dataset_exists(dataset_name))
-      throw std::runtime_error("DataSet existence of a non-existant"\
+      throw std::runtime_error("DataSet existence of an existant"\
                                "dataset failed.");
+    if (!client.poll_dataset(dataset_name, 50, 5))
+      throw std::runtime_error("DataSet existence of an existant"\
+                                 "dataset failed.");
 
-    if(!client.tensor_exists(dataset_name))
+    if (!client.tensor_exists(dataset_name))
         throw std::runtime_error("The DataSet "\
                                  "confirmation key is not set.");
 

@@ -1127,6 +1127,38 @@ SRError poll_tensor(void* c_client,
   return result;
 }
 
+// Delay until a dataset exists in the database
+extern "C"
+SRError poll_dataset(void* c_client,
+                     const char* name,
+                     const size_t name_length,
+                     const int poll_frequency_ms,
+                     const int num_tries,
+                     bool* exists)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+
+    *exists = s->poll_dataset(name_str, poll_frequency_ms, num_tries);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
 // Establish a data source
 extern "C"
 SRError set_data_source(void* c_client,

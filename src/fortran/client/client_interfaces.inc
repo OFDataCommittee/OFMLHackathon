@@ -92,7 +92,8 @@ interface
 end interface
 
 interface
-  function poll_model_c(client, model_name, model_name_length, poll_frequency_ms, num_tries, exists) bind(c, name="poll_model")
+  function poll_model_c(client, model_name, model_name_length, poll_frequency_ms, num_tries, exists)&
+  bind(c, name="poll_model")
     use iso_c_binding, only : c_ptr, c_char, c_bool, c_size_t, c_int
     import :: enum_kind
     integer(kind=enum_kind)       :: poll_model_c
@@ -106,7 +107,8 @@ interface
 end interface
 
 interface
-  function poll_tensor_c(client, tensor_name, tensor_name_length, poll_frequency_ms, num_tries, exists) bind(c, name="poll_tensor")
+  function poll_tensor_c(client, tensor_name, tensor_name_length, poll_frequency_ms, num_tries, exists)&
+  bind(c, name="poll_tensor")
     use iso_c_binding, only : c_ptr, c_char, c_bool, c_size_t, c_int
     import :: enum_kind
     integer(kind=enum_kind)       :: poll_tensor_c
@@ -117,6 +119,21 @@ interface
     integer(kind=c_int),    value :: num_tries
     logical(kind=c_bool)          :: exists
   end function poll_tensor_c
+end interface
+
+interface
+  function poll_dataset_c(client, tensor_name, tensor_name_length, poll_frequency_ms, num_tries, exists)&
+  bind(c, name="poll_dataset")
+    use iso_c_binding, only : c_ptr, c_char, c_bool, c_size_t, c_int
+    import :: enum_kind
+    integer(kind=enum_kind)       :: poll_dataset_c
+    type(c_ptr), value            :: client
+    character(kind=c_char)        :: tensor_name(*)
+    integer(kind=c_size_t), value :: tensor_name_length
+    integer(kind=c_int),    value :: poll_frequency_ms
+    integer(kind=c_int),    value :: num_tries
+    logical(kind=c_bool)          :: exists
+  end function poll_dataset_c
 end interface
 
 interface

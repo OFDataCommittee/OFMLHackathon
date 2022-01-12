@@ -47,7 +47,12 @@ int missing_dataset(char *dataset_name, size_t dataset_name_len)
   bool exists = false;
   if (SRNoError != dataset_exists(client, dataset_name, dataset_name_len, &exists))
     return -1;
-  return exists ? 1 : 0;
+  if (exists)
+    return -1;
+  exists = false;
+  if (SRNoError != poll_dataset(client, dataset_name, dataset_name_len, 50, 5, &exists))
+    return -1;
+  return exists ? -1 : 0;
 }
 
 int present_dataset(char *dataset_name, size_t dataset_name_len)
@@ -120,6 +125,15 @@ int present_dataset(char *dataset_name, size_t dataset_name_len)
   // Make sure it exists
   if (SRNoError != dataset_exists(client, dataset_name, dataset_name_len, &exists))
     return -1;
+  if (!exists) {
+    printf("Dataset not found to exist!\n");
+    return -1;
+  }
+  if (SRNoError != poll_dataset(client, dataset_name, dataset_name_len, 50, 5, &exists))
+    return -1;
+  if (!exists) {
+    printf("Dataset not found to exist on poll!\n");
+  }
   return exists ? 0 : -1;
 }
 
