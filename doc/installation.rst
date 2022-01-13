@@ -82,3 +82,8 @@ Build SmartRedis from Source
 ============================
 
 .. include:: ./install/from_source.rst
+
+Build SmartRedis Docker Image
+=============================
+
+.. include:: ./install/docker.rst

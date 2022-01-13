@@ -1,0 +1,89 @@
+#
+# BSD 2-Clause License
+#
+# Copyright (c) 2021, Hewlett Packard Enterprise
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this
+#    list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+name: 'build_docker'
+
+on: [push, pull_request]
+
+jobs:
+    run_docker_build:
+        name: Build docker image on ${{ matrix.os }}, RedisAI ${{ matrix.rai_v }}
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: true
+            matrix:
+              os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
+              rai_v: [1.2.4, 1.2.5] # verisons of RedisAI
+
+        # Service containers to run with docker tests
+        services:
+          # Label used to access the service container
+          redis:
+            # Docker Hub image
+            image: redislabs/redisai:${{ matrix.rai_v }}-cpu-xenial
+            # Set health checks to wait until redis has started
+            options: >-
+              --health-cmd "redis-cli ping"
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+            ports:
+              # map port 6379 on service container to the host
+              - 6379:6379
+        steps:
+            - name: 'Checkout SmartRedis'
+              uses: actions/checkout@v2
+            - name: 'Build base SmartRedis docker image'
+              run: |
+                cd ./images
+                ./build.sh
+                cd ../
+            - name: 'Build C++ docker application'
+              run: |
+                cd ./tests/docker/cpp
+                docker build -t cpp_docker_test .
+                cd ../../../
+                docker run -d --env SSDB="redis:6379" cpp_docker_test
+            - name: 'Build C docker application'
+              run: |
+                cd ./tests/docker/c
+                docker build -t c_docker_test .
+                docker run -d --env SSDB="redis:6379" c_docker_test
+                cd ../../../
+            - name: 'Build Fortran docker application'
+              run: |
+                cd ./tests/docker/fortran
+                docker build -t fortran_docker_test .
+                docker run -d --env SSDB="redis:6379" fortran_docker_test
+                cd ../../../
+            - name: 'Build Python docker application'
+              run: |
+                cd ./tests/docker/python
+                docker build -t python_docker_test .
+                docker run -d --env SSDB="redis:6379" python_docker_test
+                cd ../../../
