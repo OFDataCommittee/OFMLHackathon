@@ -181,14 +181,14 @@ cov:
 .PHONY: test
 test: build-tests
 test:
-	@PYTHONFAULTHANDLER=1 python -m pytest -vv ./tests
+	@PYTHONFAULTHANDLER=1 python -m pytest --ignore ./tests/docker -vv ./tests
 
 
 # help: test-verbose                   - Build and run all tests [verbosely]
 .PHONY: test-verbose
 test-verbose: build-tests
 test-verbose:
-	@PYTHONFAULTHANDLER=1 python -m pytest -vv -s ./tests
+	@PYTHONFAULTHANDLER=1 python -m pytest --ignore ./tests/docker -vv -s ./tests
 
 # help: test-c                         - Build and run all C tests
 .PHONY: test-c
