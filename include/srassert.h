@@ -31,6 +31,8 @@
 
 #include "srexception.h"
 
+using namespace SmartRedis;
+
 ///@file
 
 /*!
