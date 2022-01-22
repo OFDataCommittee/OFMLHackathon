@@ -31,7 +31,10 @@
 
 #include <thread>
 #include <iostream>
+#include "limits.h"
+
 #include <sw/redis++/redis++.h>
+
 #include "command.h"
 #include "commandreply.h"
 #include "commandlist.h"
@@ -66,7 +69,7 @@ class RedisServer {
         /*!
         *   \brief Default constructor
         */
-        RedisServer() = default;
+        RedisServer();
 
         /*!
         *   \brief Default destructor
@@ -318,6 +321,81 @@ class RedisServer {
     protected:
 
         /*!
+        *   \brief Timeout (in seconds) of connection attempt(s).
+        */
+        int _connection_timeout;
+
+        /*!
+        *   \brief Timeout (in seconds) of command attempt(s).
+        */
+        int _command_timeout;
+
+        /*!
+        *   \brief Interval (in milliseconds) between connection attempts.
+        */
+        int _connection_interval;
+
+        /*!
+        *   \brief Interval (in milliseconds) between command execution attempts.
+        */
+        int _command_interval;
+
+        /*!
+        *   \brief The number of client connection attempts
+        */
+        int _connection_attempts;
+
+        /*!
+        *   \brief The number of client command execution attempts
+        */
+        int _command_attempts;
+
+        /*!
+        *   \brief Default value of connection timeout (seconds)
+        */
+        static constexpr int _DEFAULT_CONN_TIMEOUT = 100;
+
+        /*!
+        *   \brief Default value of connection attempt intervals (milliseconds)
+        */
+        static constexpr int _DEFAULT_CONN_INTERVAL = 1000;
+
+        /*!
+        *   \brief Default value of command execution timeout (seconds)
+        */
+        static constexpr int _DEFAULT_CMD_TIMEOUT = 100;
+
+        /*!
+        *   \brief Default value of command execution attempt
+        *          intervals (milliseconds)
+        */
+        static constexpr int _DEFAULT_CMD_INTERVAL = 1000;
+
+        /*!
+        *   \brief Environment variable for connection timeout
+        */
+        inline static const std::string _CONN_TIMEOUT_ENV_VAR =
+            "SR_CONN_TIMEOUT";
+
+        /*!
+        *   \brief Environment variable for connection interval
+        */
+        inline static const std::string _CONN_INTERVAL_ENV_VAR =
+            "SR_CONN_INTERVAL";
+
+        /*!
+        *   \brief Environment variable for command execution timeout
+        */
+        inline static const std::string _CMD_TIMEOUT_ENV_VAR =
+            "SR_CMD_TIMEOUT";
+
+        /*!
+        *   \brief Environment variable for command execution interval
+        */
+        inline static const std::string _CMD_INTERVAL_ENV_VAR =
+            "SR_CMD_INTERVAL";
+
+        /*!
         *   \brief Retrieve a single address, randomly
         *          chosen from a list of addresses if
         *          applicable, from the SSDB environment
@@ -339,6 +417,35 @@ class RedisServer {
         *          in SSDB environment variable format
         */
         void _check_ssdb_string(const std::string& env_str);
+
+        /*!
+        *   \brief Initialize a variable of type integer from an environment
+        *          variable.  If the environment variable is not set,
+        *          the default value is assigned.
+        *   \param value Reference to a integer value which will be assigned
+        *                a default value or environment variable value
+        *   \param env_var std::string of the environment variable name
+        *   \param default_value The default value to assign if the environment
+        *                        variable is not set.
+        *   \throw SmartRedis::RuntimeException if environment variable
+        *          retrieval fails, conversion to integer fails, or
+        *          if the value of the environment value contains
+        *          characters other than [0,9] or a negative sign ('-').
+        */
+        void _init_integer_from_env(int& value,
+                                    const std::string& env_var,
+                                    const int& default_value);
+
+        /*!
+        *   \brief This function checks that _connection_timeout,
+        *          _connection_interval, _command_timeout, and
+        *          _command_interval, which have been set from environment
+        *          variables, are within valid ranges.
+        *   \throw SmartRedis::RuntimeException if any of the runtime
+        *          settings is outside of the allowable range
+        */
+        void _check_runtime_variables();
+
 
 };
 

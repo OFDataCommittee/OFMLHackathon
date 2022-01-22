@@ -381,7 +381,7 @@ inline CommandReply Redis::_run(const Command& cmd)
 {
     CommandReply reply;
     bool executed = false;
-    for (int n_trial = 0; n_trial < 100; n_trial++) {
+    for (int i = 1; i <= _command_attempts; i++) {
         try {
             reply = _redis->command(cmd.cbegin(), cmd.cend());
             if (reply.has_error() == 0)
@@ -404,7 +404,7 @@ inline CommandReply Redis::_run(const Command& cmd)
                                       cmd.first_field() + " execution. ");
         }
 
-        std::this_thread::sleep_for(std::chrono::seconds(2));
+        std::this_thread::sleep_for(std::chrono::milliseconds(_command_interval));
     }
 
     // If we get here, we've either run out of retry attempts or gotten
@@ -458,30 +458,29 @@ inline void Redis::_connect(std::string address_port)
 
     // Attempt to have the sw::redis::Redis object
     // make a connection using the PING command
-    const int n_trials = 10;
-    for (int i = 1; i <= n_trials; i++) {
+    for (int i = 1; i <= _connection_attempts; i++) {
         try {
             if (_redis->ping().compare("PONG") == 0) {
                 return;
             }
-            else if (i == n_trials) {
+            else if (i == _connection_attempts) {
                 throw SRTimeoutException(std::string("Connection attempt "\
                                          "failed after ") +
                                          std::to_string(i) + "tries");
             }
         }
         catch (std::exception& e) {
-            if (i == n_trials) {
+            if (i == _connection_attempts) {
                 throw SRRuntimeException(e.what());
             }
         }
         catch (...) {
-            if (i == n_trials) {
+            if (i == _connection_attempts) {
                 throw SRRuntimeException("A non-standard exception encountered"\
                                          " during client connection.");
             }
         }
-        std::this_thread::sleep_for(std::chrono::seconds(2));
+        std::this_thread::sleep_for(std::chrono::milliseconds(_connection_interval));
     }
 
     // Should never get here

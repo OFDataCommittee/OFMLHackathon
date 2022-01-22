@@ -62,6 +62,7 @@ set(UNIT_TESTS
 	test_addressanycommand.cpp
 	test_dbinfocommand.cpp
 	test_clusterinfocommand.cpp
+    test_redisserver.cpp
 )
 
 add_executable(cpp_unit_tests ${SOURCES} ${UNIT_TESTS})

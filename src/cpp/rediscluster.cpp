@@ -552,13 +552,12 @@ CommandReply RedisCluster::get_script(const std::string& key)
 
 inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix)
 {
-    const int n_trials = 100;
     std::string_view sv_prefix(db_prefix.data(), db_prefix.size());
 
     // Execute the commmand
     CommandReply reply;
     bool executed = false;
-    for (int trial = 0; trial < n_trials; trial++) {
+    for (int i = 1; i <= _command_attempts; i++) {
         try {
             sw::redis::Redis db = _redis_cluster->redis(sv_prefix, false);
             reply = db.command(cmd.cbegin(), cmd.cend());
@@ -585,7 +584,7 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
         }
 
         // Sleep before the next attempt
-        std::this_thread::sleep_for(std::chrono::seconds(2));
+        std::this_thread::sleep_for(std::chrono::milliseconds(_command_interval));
     }
 
     // If we get here, we've either run out of retry attempts or gotten
@@ -605,7 +604,7 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
 inline void RedisCluster::_connect(std::string address_port)
 {
     const int n_trials = 10;
-    for (int i = 1; i <= n_trials; i++) {
+    for (int i = 1; i <= _connection_attempts; i++) {
         try {
             _redis_cluster = new sw::redis::RedisCluster(address_port);
             return;
@@ -645,12 +644,12 @@ inline void RedisCluster::_connect(std::string address_port)
             delete _redis_cluster;
             _redis_cluster = NULL;
         }
-        std::this_thread::sleep_for(std::chrono::seconds(2));
+        std::this_thread::sleep_for(std::chrono::milliseconds(_connection_interval));
     }
 
     // If we get here, we failed to establish a connection
     throw SRTimeoutException(std::string("Connection attempt failed after ") +
-                                         std::to_string(n_trials) + "tries");
+                                         std::to_string(_connection_attempts) + "tries");
 }
 
 // Map the RedisCluster via the CLUSTER SLOTS command

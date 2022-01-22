@@ -32,6 +32,10 @@
 #include <typeinfo>
 #include <random>
 
+#include "rediscluster.h"
+
+using namespace SmartRedis;
+
 class RedisClusterTestObject : public RedisCluster
 {
     public:
