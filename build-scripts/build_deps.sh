@@ -13,7 +13,7 @@ cd ./third-party
 # get the number of processors
 NPROC=$(python -c "import multiprocessing as mp; print(mp.cpu_count())")
 # get python installed cmake
-CMAKE=$(python -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
+CMAKE=$(which cmake)
 
 # Install Hiredis
 if ls ../install/lib/libhiredis.a 1>/dev/null 2>&1; then

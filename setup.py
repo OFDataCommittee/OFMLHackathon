@@ -31,7 +31,6 @@ import shutil
 from pathlib import Path
 import multiprocessing as mp
 
-import cmake
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
@@ -47,8 +46,8 @@ class CMakeBuild(build_ext):
 
     @property
     def cmake(self):
-        """Find and use pip installed cmake"""
-        cmake_cmd = os.path.join(cmake.CMAKE_BIN_DIR, "cmake")
+        """Find and use installed cmake"""
+        cmake_cmd = shutil.which("cmake")
         return cmake_cmd
 
     def run(self):

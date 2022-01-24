@@ -9,4 +9,3 @@ pylint==2.6.0
 breathe==4.26.0
 torch==1.7.1
 sphinx-fortran==1.1.1
-cmake>=3.10

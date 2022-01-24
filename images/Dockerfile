@@ -36,7 +36,6 @@ RUN apt-get update && \
     make cmake gcc g++ libc6-dev python3 libpython3-dev pip && \
     rm -rf /var/lib/apt/lists/*
 RUN ln -s /usr/bin/python3 /usr/bin/python
-RUN pip3 install cmake && rm -rf ~/.cache/pip
 
 # Get source code from current clone
 COPY . /usr/local/src/SmartRedis
