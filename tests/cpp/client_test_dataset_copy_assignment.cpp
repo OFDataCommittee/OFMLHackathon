@@ -52,7 +52,7 @@ void copy_assignment(
     fill_array(t_send_3, dims[0], dims[1], dims[2]);
 
     //Create Client and DataSets
-    SmartRedis::Client client(use_cluster());
+    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster());
     SmartRedis::DataSet* dataset = new SmartRedis::DataSet(dataset_name);
 
     //Add tensors to the DataSet
@@ -139,7 +139,9 @@ void copy_assignment(
 
     client.put_dataset(*dataset);
 
-    if(!client.tensor_exists(dataset_name))
+    std::string ack_key = "{" + dataset_name + "}" + ".meta";
+    std::string ack_field = client.ack_field();
+    if(!client.hash_field_exists(ack_key, ack_field))
         throw std::runtime_error("The first DataSet confirmation "\
                                  "key is not set.");
 
@@ -163,7 +165,7 @@ void copy_assignment(
     client.put_dataset(copied_dataset);
     SmartRedis::DataSet full_dataset = client.get_dataset(dataset_name);
 
-    if(!client.tensor_exists(dataset_name))
+    if(!client.hash_field_exists(ack_key, ack_field))
         throw std::runtime_error("The copy assigned DataSet "\
                                  "confirmation key is not set.");
 

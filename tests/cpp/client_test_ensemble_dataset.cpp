@@ -35,7 +35,7 @@ void rename_dataset(std::string keyout)
 {
     std::vector<size_t> dims({10,10,2});
 
-    SmartRedis::Client client(use_cluster());
+    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster());
     client.use_tensor_ensemble_prefix(true);
 
     double*** t_send_1 =
@@ -55,39 +55,61 @@ void rename_dataset(std::string keyout)
     std::string t_name_1 = "tensor_1";
     std::string t_name_2 = "tensor_2";
 
-    dataset.add_tensor(t_name_1, t_send_1, dims, SRTensorTypeDouble, SRMemLayoutNested);
-    dataset.add_tensor(t_name_2, t_send_2, dims, SRTensorTypeDouble, SRMemLayoutNested);
+    dataset.add_tensor(t_name_1, t_send_1, dims,
+                       SRTensorTypeDouble, SRMemLayoutNested);
+    dataset.add_tensor(t_name_2, t_send_2, dims,
+                       SRTensorTypeDouble, SRMemLayoutNested);
 
+    // Put the DataSet into the database
     client.put_dataset(dataset);
 
+    // Rename the DataSet
     std::string new_name = "ensemble_dataset_renamed";
-
     client.rename_dataset(name, new_name);
 
-    if(!client.key_exists(keyout + "." + new_name))
+    // Build strings for testing that the DataSet has been renamed.
+    // It is assumed the keys are of the form:
+    // ensemble_member.{dataset_name}
+    std::string new_dataset_key = keyout + "." + "{"  + new_name + "}";
+    std::string old_dataset_key = keyout + "." + "{" + name + "}";
+    std::string ack_field = client.ack_field();
+
+    // Test that the acknowledgement hash field in the
+    // ensemble_member.{dataset_name.meta} key is present
+    // for the new DataSet
+    if(!client.hash_field_exists(new_dataset_key + ".meta", ack_field))
         throw std::runtime_error("The dataset ack key for the new "\
                                  "DataSet does not exist in the "
                                  "database.");
 
-    if(client.key_exists(keyout + "." + name))
+    // Test that the acknowledgement hash field in the
+    // ensemble_member.{dataset_name.meta} key has been deleted
+    // for the old DataSet
+    if(client.hash_field_exists(old_dataset_key + ".meta", ack_field))
         throw std::runtime_error("The dataset ack key for the old "\
                                  "DataSet was not deleted.");
 
-    if(client.key_exists(keyout + "." + name + ".meta"))
+    // Test that the metadata key ensemble_member.{dataset_name.meta}.meta
+    // for the old DataSet has been deleted
+    if(client.key_exists(old_dataset_key + ".meta"))
         throw std::runtime_error("The dataset meta key for the old "\
                                  "DataSet was not deleted.");
 
-    if(client.key_exists(keyout + "." + name + "." + t_name_1))
+    // Test that tensor key ensemble_member.{dataset_name.meta}.tensor_name
+    // for the old DataSet has been deleted
+    if(client.key_exists(old_dataset_key + "." + t_name_1))
         throw std::runtime_error("The dataset tensor key for " +
                                  t_name_1 +
                                  " was not deleted.");
 
-    if(client.key_exists(keyout + "." + name + "." + t_name_2))
+    // Test that tensor key ensemble_member.{dataset_name.meta}.tensor_name
+    // for the old DataSet has been deleted
+    if(client.key_exists(old_dataset_key + "." + t_name_2))
         throw std::runtime_error("The dataset tensor key for " +
                                  t_name_2 +
                                  " was not deleted.");
 
-    //Retrieving a dataset
+    //Retrieve the new dataset
     SmartRedis::DataSet retrieved_dataset =
         client.get_dataset(new_name);
 
@@ -112,6 +134,7 @@ void rename_dataset(std::string keyout)
 }
 
 int main(int argc, char* argv[]) {
+
 
     const char* old_keyin = std::getenv("SSKEYIN");
     const char* old_keyout = std::getenv("SSKEYOUT");

@@ -148,6 +148,15 @@ class Redis : public RedisServer
         virtual bool key_exists(const std::string& key);
 
         /*!
+        *   \brief Check if a hash field exists
+        *   \param key The key containing the field
+        *   \param field The field in the key to check
+        *   \returns True if the hash field exists, otherwise False
+        */
+        virtual bool hash_field_exists(const std::string& key,
+                                       const std::string& field);
+
+        /*!
         *   \brief Check if a model or script key exists in the database
         *   \param key The key to check
         *   \returns True if the key exists, otherwise False

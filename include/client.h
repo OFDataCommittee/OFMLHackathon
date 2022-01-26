@@ -798,6 +798,12 @@ class Client
         */
         TensorBase* _get_tensorbase_obj(const std::string& name);
 
+        /*!
+        *   \brief The name of the hash field used to confirm that the
+        *          DataSet placement operation was successfully completed.
+        */
+        inline static const std::string _DATASET_ACK_FIELD = ".COMPLETE";
+
         friend class PyClient;
 
     private:
@@ -848,57 +854,84 @@ class Client
         bool _use_model_prefix;
 
         /*!
-        * \brief Build full formatted key of a tensor, based on current prefix settings.
+        * \brief Build full formatted key of a tensor, based on
+        *        current prefix settings.
         * \param key Tensor key
-        * \param on_db Indicates whether the key refers to an entity which is already in the database.
+        * \param on_db Indicates whether the key refers to an entity
+        *              which is already in the database.
         */
-        inline std::string _build_tensor_key(const std::string& key, bool on_db);
+        inline std::string _build_tensor_key(const std::string& key,
+                                             const bool on_db);
 
         /*!
-        * \brief Build full formatted key of a model or a script, based on current prefix settings.
+        * \brief Build full formatted key of a model or a script,
+        *        based on current prefix settings.
         * \param key Model or script key
-        * \param on_db Indicates whether the key refers to an entity which is already in the database.
+        * \param on_db Indicates whether the key refers to an entity
+        *              which is already in the database.
         */
-        inline std::string _build_model_key(const std::string& key, bool on_db);
+        inline std::string _build_model_key(const std::string& key,
+                                            const bool on_db);
 
         /*!
         *  \brief Build full formatted key of a dataset, based
         *         on current prefix settings.
         *  \param dataset_name Name of dataset
-        *  \param on_db Indicates whether the key refers to an entity which is already in the database.
+        *  \param on_db Indicates whether the key refers to an entity
+        *               which is already in the database.
         *  \returns Formatted key.
         */
-        inline std::string _build_dataset_key(const std::string& dataset_name, bool on_db);
+        inline std::string _build_dataset_key(const std::string& dataset_name,
+                                              const bool on_db);
 
         /*!
-        *  \brief Create the key for putting or getting a DataSet tensor in the database
+        *  \brief Create the key for putting or getting a DataSet tensor
+        *         in the database
         *  \param dataset_name The name of the dataset
         *  \param tensor_name The name of the tensor
-        *  \param on_db Indicates whether the key refers to an entity which is already in the database.
+        *  \param on_db Indicates whether the key refers to an entity
+        *               which is already in the database.
         *  \returns A string of the key for the tensor
         */
         inline std::string _build_dataset_tensor_key(const std::string& dataset_name,
                                                      const std::string& tensor_name,
-                                                     bool on_db);
+                                                     const bool on_db);
 
         /*!
-        *  \brief Create the key for putting or getting DataSet metadata in the database
+        *  \brief Create keys for putting or getting a DataSet tensors
+        *         in the database
         *  \param dataset_name The name of the dataset
-        *  \param on_db Indicates whether the key refers to an entity which is already in the database.
+        *  \param tensor_name A std::vector of tensor names
+        *  \param on_db Indicates whether the keys refer to an entity which
+        *               is already in the database.
+        *  \returns A std::vector<std::string> of the keys for the tensors
+        */
+        inline std::vector<std::string>
+        _build_dataset_tensor_keys(const std::string& dataset_name,
+                                   const std::vector<std::string>& tensor_names,
+                                   const bool on_db);
+
+        /*!
+        *  \brief Create the key for putting or getting DataSet metadata
+        *         in the database
+        *  \param dataset_name The name of the dataset
+        *  \param on_db Indicates whether the key refers to an entity which
+        *               is already in the database.
         *  \returns A string of the key for the metadata
         */
         inline std::string _build_dataset_meta_key(const std::string& dataset_name,
-                                                   bool on_db);
+                                                   const bool on_db);
 
         /*!
-        *  \brief Create the key to place an indicator in the database that the dataset has been
-        *         successfully stored.
+        *  \brief Create the key to place an indicator in the database
+        *         that the dataset has been successfully stored.
         *  \param dataset_name The name of the dataset
-        *  \param on_db Indicates whether the key refers to an entity which is already in the database.
+        *  \param on_db Indicates whether the key refers to an entity which
+        *               is already in the database.
         *  \returns A string of the key for the ack key
         */
         inline std::string _build_dataset_ack_key(const std::string& dataset_name,
-                                                  bool on_db);
+                                                  const bool on_db);
 
         /*!
         *   \brief Append the Command associated with

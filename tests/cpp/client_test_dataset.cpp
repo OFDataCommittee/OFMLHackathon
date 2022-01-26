@@ -52,7 +52,7 @@ void put_get_dataset(
     fill_array(t_send_3, dims[0], dims[1], dims[2]);
 
     //Create Client and DataSet
-    SmartRedis::Client client(use_cluster());
+    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster());
     SmartRedis::DataSet sent_dataset(dataset_name);
 
     //Add metadata to the DataSet
@@ -70,26 +70,34 @@ void put_get_dataset(
     // Make sure a nonexistant dataset doesn't exist
     std::string nonexistant("nonexistant");
     if (client.dataset_exists(nonexistant))
-      throw std::runtime_error("DataSet existence of a non-existant"\
-                               "dataset failed.");
+      throw std::runtime_error("client.dataset_exists() returns true for "\
+                               "for a nonexistant dataset.");
     if (client.poll_dataset(nonexistant, 50, 5))
-      throw std::runtime_error("DataSet existence of a non-existant "\
-                                 "dataset failed.");
+      throw std::runtime_error("client.poll_dataset() returns true for "\
+                               "for a nonexistant dataset.");
 
     // Put the DataSet into the database
     client.put_dataset(sent_dataset);
 
+    // Check that the ack key was placed for the copied dataset
+    std::string ack_key = "{" + dataset_name + "}" + ".meta";
+    std::string ack_field = client.ack_field();
+    if(!client.hash_field_exists(ack_key, ack_field))
+        throw RuntimeException("The DataSet confirmation key is not set.");
+
     // Make sure it exists
     if (!client.dataset_exists(dataset_name))
-      throw std::runtime_error("DataSet existence of an existant"\
-                               "dataset failed.");
+      throw std::runtime_error("Client.dataset_exists() returns false "\
+                               "after dataset placed into database.");
     if (!client.poll_dataset(dataset_name, 50, 5))
-      throw std::runtime_error("DataSet existence of an existant"\
-                                 "dataset failed.");
+      throw std::runtime_error("Client.poll_dataset() returns false "\
+                               "after dataset placed into database.");
 
-    if (!client.tensor_exists(dataset_name))
-        throw std::runtime_error("The DataSet "\
-                                 "confirmation key is not set.");
+    // Test that the acknowledgement field exists after placement
+    ack_key = "{" + dataset_name + "}" + ".meta";
+    ack_field = client.ack_field();
+    if(!client.hash_field_exists(ack_key, ack_field))
+        throw std::runtime_error("The dataset ack field was not set.");
 
     SmartRedis::DataSet retrieved_dataset = client.get_dataset(dataset_name);
 

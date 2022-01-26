@@ -52,7 +52,7 @@ void rename_dataset(
     fill_array(t_send_3, dims[0], dims[1], dims[2]);
 
     //Create Client and DataSet
-    SmartRedis::Client client(use_cluster());
+    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster());
     SmartRedis::DataSet sent_dataset(dataset_name);
 
     //Add metadata to the DataSet
@@ -96,11 +96,15 @@ void rename_dataset(
         throw std::runtime_error("The DataSet metadata "\
                                  "was not deleted.");
 
-    if(client.tensor_exists(dataset_name))
+    std::string ack_key = "{" + dataset_name + "}" + ".meta";
+    std::string ack_field = client.ack_field();
+    if(client.hash_field_exists(ack_key, ack_field))
         throw std::runtime_error("The DataSet confirmation "\
                                  "key was not deleted.");
 
-    if(!client.tensor_exists(new_dataset_name))
+    ack_key = "{" + new_dataset_name + "}" + ".meta";
+    ack_field = client.ack_field();
+    if(!client.hash_field_exists(ack_key, ack_field))
         throw std::runtime_error("The renamed DataSet "\
                                  "confirmation key is not set.");
 

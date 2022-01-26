@@ -52,7 +52,7 @@ void move_constructor(
     fill_array(t_send_3, dims[0], dims[1], dims[2]);
 
     //Create Client and DataSets
-    SmartRedis::Client client(use_cluster());
+    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster());
     SmartRedis::DataSet* dataset = new SmartRedis::DataSet(dataset_name);
 
     //Add tensors to the DataSet
@@ -61,11 +61,11 @@ void move_constructor(
     std::string t_name_3 = "tensor_3";
 
     dataset->add_tensor(t_name_1, t_send_1,
-                        dims, type, SmartRedis::MemoryLayout::nested);
+                        dims, type, SRMemLayoutNested);
     dataset->add_tensor(t_name_2, t_send_2,
-                        dims, type, SmartRedis::MemoryLayout::nested);
+                        dims, type, SRMemLayoutNested);
     dataset->add_tensor(t_name_3, t_send_3,
-                        dims, type, SmartRedis::MemoryLayout::nested);
+                        dims, type, SRMemLayoutNested);
 
     //Add metadata fields to the DataSet.  _meta_1 and _meta_2
     //Add only a portion of the metadata values so that we can test
@@ -146,9 +146,11 @@ void move_constructor(
     delete dataset;
     client.put_dataset(moved_dataset);
 
-    if(!client.tensor_exists(dataset_name))
+    std::string ack_key = "{" + dataset_name + "}" + ".meta";
+    std::string ack_field = client.ack_field();
+    if(!client.hash_field_exists(ack_key, ack_field))
         throw std::runtime_error("The moved constructed DataSet "\
-                                 "confirmation key is not set.");
+                                 "ack field is not set.");
 
     SmartRedis::DataSet full_dataset = client.get_dataset(dataset_name);
 

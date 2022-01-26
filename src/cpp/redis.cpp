@@ -117,6 +117,25 @@ bool Redis::key_exists(const std::string& key)
     return (bool)reply.integer();
 }
 
+// Check if a hash field exists in the database
+bool Redis::hash_field_exists(const std::string& key,
+                              const std::string& field)
+{
+    // Build the command
+    SingleKeyCommand cmd;
+    cmd.add_field("HEXISTS");
+    cmd.add_field(key, true);
+    cmd.add_field(field);
+
+    // Run it
+    CommandReply reply = run(cmd);
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("Error encountered while checking "\
+                                 "for existence of hash field " +
+                                 field + " at key " + key);
+    return (bool)reply.integer();
+}
+
 // Check if address is valid
 bool Redis::is_addressable(const std::string& address,
                            const uint64_t& port)

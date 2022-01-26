@@ -95,7 +95,7 @@ CommandReply RedisCluster::run(CompoundCommand& cmd)
     return _run(cmd, db_prefix);
 }
 
-// Run a compound Command on the server
+// Run a MultiKeyCommand on the server
 CommandReply RedisCluster::run(MultiKeyCommand& cmd)
 {
     std::string db_prefix;
@@ -167,6 +167,25 @@ bool RedisCluster::key_exists(const std::string& key)
     return (bool)reply.integer();
 }
 
+// Check if a hash field exists in the database
+bool RedisCluster::hash_field_exists(const std::string& key,
+                                     const std::string& field)
+{
+    // Build the command
+    SingleKeyCommand cmd;
+    cmd.add_field("HEXISTS");
+    cmd.add_field(key, true);
+    cmd.add_field(field);
+
+    // Run it
+    CommandReply reply = run(cmd);
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("Error encountered while checking "\
+                                 "for existence of hash field " +
+                                 field + " at key " + key);
+    return (bool)reply.integer();
+}
+
 // Check if a key exists in the database
 bool RedisCluster::is_addressable(const std::string& address,
                                   const uint64_t& port)
@@ -209,7 +228,7 @@ CommandReply RedisCluster::get_tensor(const std::string& key)
 CommandReply RedisCluster::rename_tensor(const std::string& key,
                                          const std::string& new_key)
 {
-    // Check wehether we have to switch hash slots
+    // Check whether we have to switch hash slots
     uint16_t key_hash_slot = _get_hash_slot(key);
     uint16_t new_key_hash_slot = _get_hash_slot(new_key);
 

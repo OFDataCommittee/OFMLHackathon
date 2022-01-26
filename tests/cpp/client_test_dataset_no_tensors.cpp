@@ -34,7 +34,7 @@
 void put_dataset_no_tensors(std::string dataset_name)
 {
     //Create Client and DataSet
-    SmartRedis::Client client(use_cluster());
+    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster());
     SmartRedis::DataSet sent_dataset(dataset_name);
 
     //Add metadata to the DataSet
@@ -43,9 +43,11 @@ void put_dataset_no_tensors(std::string dataset_name)
     //Put the DataSet into the database
     client.put_dataset(sent_dataset);
 
-    if(!client.tensor_exists(dataset_name))
-        throw std::runtime_error("The DataSet "\
-                                 "confirmation key is not set.");
+    // Test that the acknowledgement field exists after placement
+    std::string ack_key = "{" + dataset_name + "}" + ".meta";
+    std::string ack_field = client.ack_field();
+    if(!client.hash_field_exists(ack_key, ack_field))
+        throw std::runtime_error("The dataset ack field was not set.");
 
     SmartRedis::DataSet retrieved_dataset = client.get_dataset(dataset_name);
 

@@ -52,7 +52,7 @@ void dataset_delete(
     fill_array(t_send_3, dims[0], dims[1], dims[2]);
 
     //Create Client and DataSets
-    SmartRedis::Client client(use_cluster());
+    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster());
     SmartRedis::DataSet* dataset = new SmartRedis::DataSet(dataset_name);
 
     //Add tensors to the DataSet
@@ -115,9 +115,11 @@ void dataset_delete(
         throw std::runtime_error("The DataSet tensor " + key +
                                  " was not deleted.");
 
-    if(client.tensor_exists(dataset_name))
-        throw std::runtime_error("The DataSet confirmation "\
-                                 "key was not deleted.");
+    std::string ack_key = "{" + dataset_name + "}" + ".meta";
+    std::string ack_field = client.ack_field();
+    if(client.hash_field_exists(ack_key, ack_field))
+        throw std::runtime_error("The dataset ack field still exists "\
+                                 "after deletion");
 }
 
 int main(int argc, char* argv[]) {

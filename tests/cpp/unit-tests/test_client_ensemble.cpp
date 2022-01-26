@@ -174,7 +174,7 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
             dataset.add_tensor(in_key_ds, mnist_array, {1,1,28,28},
                                SRTensorTypeFloat, SRMemLayoutNested);
             producer_client.put_dataset(dataset);
-            CHECK(producer_client.tensor_exists(dataset_name) == true);
+            CHECK(producer_client.dataset_exists(dataset_name) == true);
             producer_client.run_script(script_name, "pre_process",
                              {dataset_in_key}, {script_out_key_ds});
             producer_client.run_model(model_name, {script_out_key_ds},

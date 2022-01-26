@@ -79,7 +79,7 @@ target_link_libraries(client_test_dataset_copy_constructor
 )
 
 add_executable(client_test_dataset_move_constructor
-  client_test_dataset_copy_constructor.cpp
+  client_test_dataset_move_constructor.cpp
 )
 target_link_libraries(client_test_dataset_move_constructor
   ${SR_LIB}
@@ -93,7 +93,7 @@ target_link_libraries(client_test_dataset_copy_assignment
 )
 
 add_executable(client_test_dataset_move_assignment
-  client_test_dataset_copy_assignment.cpp
+  client_test_dataset_move_assignment.cpp
 )
 target_link_libraries(client_test_dataset_move_assignment
   ${SR_LIB}

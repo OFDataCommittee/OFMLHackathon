@@ -34,6 +34,26 @@
 
 namespace DATASET_TEST_UTILS {
 
+/*
+   The following Client derivative enables checking for
+   a hash field to verify DataSet behavior.  If hash
+   field functionality is introduced to Client, this
+   class can be removed.
+*/
+class DatasetTestClient : public SmartRedis::Client
+{
+    public:
+        DatasetTestClient(bool cluster) : Client(cluster) {};
+
+        bool hash_field_exists(const std::string& key,
+                               const std::string& field) {
+            return _redis_server->hash_field_exists(key, field);
+        }
+        std::string ack_field() {
+            return _DATASET_ACK_FIELD;
+        }
+};
+
 const static double dbl_meta_1 = std::numeric_limits<double>::max();
 const static double dbl_meta_2 = std::numeric_limits<double>::min();
 const static double dbl_meta_3 = M_PI;
