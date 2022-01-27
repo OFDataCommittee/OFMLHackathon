@@ -70,6 +70,7 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("use_model_ensemble_prefix", &PyClient::use_model_ensemble_prefix)
         .def("get_db_node_info", &PyClient::get_db_node_info)
         .def("get_db_cluster_info", &PyClient::get_db_cluster_info)
+        .def("get_ai_info", &PyClient::get_ai_info)
         .def("flush_db", &PyClient::flush_db)
         .def("config_set", &PyClient::config_set)
         .def("config_get", &PyClient::config_get)

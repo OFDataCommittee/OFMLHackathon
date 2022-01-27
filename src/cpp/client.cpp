@@ -784,6 +784,43 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
                                                      reply.str_len()));
 }
 
+// Returns the AI.INFO command reply
+parsed_reply_map Client::get_ai_info(const std::string& address,
+                                     const std::string& key,
+                                     const bool reset_stat)
+{
+    // Run the command
+    CommandReply reply =
+        _redis_server->get_model_script_ai_info(address, key, reset_stat);
+
+    if (reply.has_error())
+        throw SRRuntimeException("AI.INFO command failed on server");
+
+    if (reply.n_elements() % 2 != 0)
+        throw SRInternalException("The AI.INFO reply structure has an "\
+                                  "unexpected format");
+
+    reply.print_reply_structure();
+
+    // Parse reply
+    parsed_reply_map reply_map;
+    for (size_t i = 0; i < reply.n_elements(); i += 2) {
+        std::string map_key = reply[i].str();
+        std::string value;
+        if(reply[i+1].redis_reply_type() == "REDIS_REPLY_STRING")
+            value = reply[i + 1].str();
+        else if (reply[i + 1].redis_reply_type() == "REDIS_REPLY_INTEGER")
+            value = std::to_string(reply[i+1].integer());
+        else if (reply[i + 1].redis_reply_type() == "REDIS_REPLY_DOUBLE")
+            value = std::to_string(reply[i+1].dbl());
+        else
+            throw SRInternalException("The AI.INFO field " + map_key +
+                                      " has an unexpected type.");
+        reply_map[map_key] = value;
+    }
+    return reply_map;
+}
+
 // Delete all the keys of the given database
 void Client::flush_db(std::string address)
 {

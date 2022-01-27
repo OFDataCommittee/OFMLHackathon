@@ -45,7 +45,7 @@ def test_dbnode_info_command(use_cluster):
     assert len(info) > 0
 
 
-def test_dbcluster_info_command(use_cluster):
+def test_dbcluster_info_command(mock_model, use_cluster):
     # get env var to set through client init
     ssdb = os.environ["SSDB"]
     address = [ssdb]
@@ -61,6 +61,31 @@ def test_dbcluster_info_command(use_cluster):
         with pytest.raises(RedisReplyError):
             client.get_db_cluster_info(address)
 
+    # get env var to set through client init
+    ssdb = os.environ["SSDB"]
+    address = [ssdb]
+    del os.environ["SSDB"]
+
+    # Init client
+    client = Client(address=ssdb, cluster=use_cluster)
+
+    # Get a mock model
+    model = mock_model.create_torch_cnn()
+
+    # set the mock model
+    client.set_model("ai_info_cnn", model, "TORCH", "CPU")
+
+    # Check with valid address and model key
+    ai_info = client.get_ai_info(address, "ai_info_cnn")
+    assert len(ai_info) != 0
+
+    # Check that invalid address throws error
+    with pytest.raises(RedisReplyError):
+        client.get_ai_info(["no_host:6379"], "ai_info_cnn")
+
+    # Check that invalid model name throws error
+    with pytest.raises(RedisReplyError):
+        client.get_ai_info(address, "bad_key")
 
 def test_flushdb_command(use_cluster):
     # from within the testing framework, there is no way

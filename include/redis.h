@@ -322,6 +322,20 @@ class Redis : public RedisServer
         */
         virtual CommandReply get_script(const std::string& key);
 
+        /*!
+        *   \brief Retrieve model/script runtime statistics
+        *   \param address The address of the database node (host:port)
+        *   \param key The key associated with the model or script
+        *   \param reset_stat Boolean indicating if the counters associated
+        *                     with the model or script should be reset.
+        *   \returns The CommandReply that contains the result
+        *            of the AI.INFO execution on the server
+        */
+        virtual CommandReply
+        get_model_script_ai_info(const std::string& address,
+                                 const std::string& key,
+                                 const bool reset_stat);
+
     private:
 
         /*!

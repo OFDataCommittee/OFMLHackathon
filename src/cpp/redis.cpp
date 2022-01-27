@@ -396,6 +396,37 @@ CommandReply Redis::get_script(const std::string& key)
     return run(cmd);
 }
 
+// Retrieve the model and script AI.INFO
+CommandReply Redis::get_model_script_ai_info(const std::string& address,
+                                             const std::string& key,
+                                             const bool reset_stat)
+{
+    AddressAtCommand cmd;
+
+    // Parse the host and port
+    std::string host = cmd.parse_host(address);
+    uint64_t port = cmd.parse_port(address);
+
+    // Determine the prefix we need for the model or script
+    if (!is_addressable(host, port)) {
+        throw SRRuntimeException("The provided host and port do not match "\
+                                 "the host and port used to initialize the "\
+                                 "non-cluster client connection.");
+    }
+
+    //Build the Command
+    cmd.set_exec_address_port(host, port);
+    cmd.add_field("AI.INFO");
+    cmd.add_field(key);
+
+    // Optionally add RESETSTAT to the command
+    if (reset_stat) {
+        cmd.add_field("RESETSTAT");
+    }
+
+    return run(cmd);
+}
+
 inline CommandReply Redis::_run(const Command& cmd)
 {
     CommandReply reply;

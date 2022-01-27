@@ -569,6 +569,41 @@ CommandReply RedisCluster::get_script(const std::string& key)
     return run(cmd);
 }
 
+// Retrieve the model and script AI.INFO
+CommandReply RedisCluster::get_model_script_ai_info(const std::string& address,
+                                                    const std::string& key,
+                                                    const bool reset_stat)
+{
+    AddressAtCommand cmd;
+
+    // Parse the host and port
+    std::string host = cmd.parse_host(address);
+    uint64_t port = cmd.parse_port(address);
+
+    // Determine the prefix we need for the model or script
+    if (!is_addressable(host, port)) {
+        throw SRInternalException("The provided host and port does "\
+                                  "not match a cluster shard address.");
+    }
+
+    std::string host_port = host + ":" + std::to_string(port);
+    std::string db_prefix = _address_node_map.at(host_port)->prefix;
+
+    std::string prefixed_key = "{" + db_prefix + "}." + key;
+
+    //Build the Command
+    cmd.set_exec_address_port(host, port);
+    cmd.add_field("AI.INFO");
+    cmd.add_field(prefixed_key);
+
+    // Optionally add RESETSTAT to the command
+    if (reset_stat) {
+        cmd.add_field("RESETSTAT");
+    }
+
+    return run(cmd);
+}
+
 inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix)
 {
     std::string_view sv_prefix(db_prefix.data(), db_prefix.size());

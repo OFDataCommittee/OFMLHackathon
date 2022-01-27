@@ -515,6 +515,54 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
     }
 }
 
+SCENARIO("Testing AI.INFO Functions on Client Object", "[Client]")
+{
+    GIVEN("A Client object")
+    {
+        Client client(use_cluster());
+
+        WHEN("AI.INFO called on database with an invalid address")
+        {
+            THEN("An error is thrown")
+            {
+                std::string db_address = ":00";
+
+                CHECK_THROWS_AS(client.get_ai_info(db_address, "bad_key", false),
+                                RuntimeException);
+            }
+        }
+        AND_WHEN("AI.INFO is called on database with a valid address "\
+                 "but invalid key")
+        {
+            THEN("An error is thrown")
+            {
+                std::string db_address = parse_SSDB(std::getenv("SSDB"));
+
+                CHECK_THROWS_AS(client.get_ai_info(db_address, "bad_key", false),
+                                RuntimeException);
+            }
+        }
+        AND_WHEN("AI.INFO is called on database with a valid address "\
+                 "and valid key")
+        {
+            THEN("No errors are thrown and the returned list has non-zero size")
+            {
+                std::string db_address = parse_SSDB(std::getenv("SSDB"));
+                std::string model_key = "ai_info_model";
+                std::string model_file = "./../../mnist_data/mnist_cnn.pt";
+                std::string backend = "TORCH";
+                std::string device = "CPU";
+                parsed_reply_map reply;
+                CHECK_NOTHROW(client.set_model_from_file(model_key, model_file,
+                                                         backend, device));
+                CHECK_NOTHROW(reply = client.get_ai_info(db_address, model_key,
+                                                         false));
+                CHECK(reply.size() > 0);
+            }
+        }
+    }
+}
+
 SCENARIO("Testing FLUSHDB on empty Client Object", "[Client][FLUSHDB]")
 {
 

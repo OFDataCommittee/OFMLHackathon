@@ -713,6 +713,28 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "get_db_cluster_info")
 
+    def get_ai_info(self, address, key, reset_stat=False):
+        """Returns AI.INFO command reply information for the
+        script or model key at the provided addresses.
+        :param addresses: The addresses of the database nodes
+        :type address: list[str]
+        :param key: The key associated with the model or script
+        :type key: str
+        :param reset_stat: Boolean indicating if the statistics
+                           for the model or script should be
+                           reset.
+        :type reset_stat: bool
+        :returns: A list of dictionaries with each entry in the
+                  list corresponding to an address reply
+        :rtype: list[dict]
+        :raises RedisReplyError: if there is an error
+                in command execution or parsing the command reply.
+        """
+        try:
+            return super().get_ai_info(address, key, reset_stat)
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "get_ai_info()")
+
     def flush_db(self, addresses):
         """Removes all keys from a specified db node.
 

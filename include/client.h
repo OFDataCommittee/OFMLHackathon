@@ -633,6 +633,21 @@ class Client
         parsed_reply_map get_db_cluster_info(std::string address);
 
         /*!
+        *   \brief Returns the AI.INFO command reply from the database
+        *          shard at the provided address
+        *   \param address The address of the database node (host:port)
+        *   \param key The model or script name
+        *   \param reset_stat Boolean indicating if the counters associated
+        *                     with the model or script should be reset.
+        *   \returns parsed_reply_map containing the AI.INFO information.
+        *   \throws SmartRedis::Exception or derivative error object if
+        *           command execution or reply parsing fails.
+        */
+        parsed_reply_map get_ai_info(const std::string& address,
+                                     const std::string& key,
+                                     const bool reset_stat);
+
+        /*!
         *   \brief Returns the CLUSTER INFO command reply addressed to a single
         *          cluster node.
         *   \param address The address of the database node (host:port)
