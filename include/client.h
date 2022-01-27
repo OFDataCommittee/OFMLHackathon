@@ -71,6 +71,8 @@ class Client
         *   \brief Client constructor
         *   \param cluster Flag to indicate if a database cluster
         *                  is being used
+        *   \throw SmartRedis::Exception if client connection or
+        *          object initialization fails
         */
         Client(bool cluster);
 
@@ -103,6 +105,7 @@ class Client
         /*!
         *   \brief Send a DataSet object to the database
         *   \param dataset The DataSet object to send to the database
+        *   \throw SmartRedis::Exception if put dataset command fails
         */
         void put_dataset(DataSet& dataset);
 
@@ -110,6 +113,7 @@ class Client
         *   \brief Get a DataSet object from the database
         *   \param name The name of the dataset to retrieve
         *   \returns DataSet object retrieved from the database
+        *   \throw SmartRedis::Exception if get dataset command fails
         */
         DataSet get_dataset(const std::string& name);
 
@@ -120,6 +124,7 @@ class Client
         *               DataSet in the database
         *   \param new_name The new key to assign to the
         *                   DataSet object
+        *   \throw SmartRedis::Exception if dataset rename command fails
         */
         void rename_dataset(const std::string& name,
                             const std::string& new_name);
@@ -132,6 +137,7 @@ class Client
         *                   that is to be copied
         *   \param dest_name The key in the database that will
         *                    store the copied database.
+        *   \throw SmartRedis::Exception if copy dataset command fails
         */
         void copy_dataset(const std::string& src_name,
                           const std::string& dest_name);
@@ -143,6 +149,7 @@ class Client
         *          deleted.
         *   \param name The name of the DataSet that should be
         *               deleted.
+        *   \throw SmartRedis::Exception if delete dataset command fails
         */
         void delete_dataset(const std::string& name);
 
@@ -155,6 +162,7 @@ class Client
         *   \param type The data type of the tensor
         *   \param mem_layout The memory layout of the provided
         *                     tensor data
+        *   \throw SmartRedis::Exception if put tensor command fails
         */
         void put_tensor(const std::string& key,
                         void* data,
@@ -190,6 +198,7 @@ class Client
         *               tensor type
         *   \param mem_layout The MemoryLayout that the newly
         *                     allocated memory should conform to
+        *   \throw SmartRedis::Exception if get tensor command fails
         */
         void get_tensor(const std::string& key,
                         void*& data,
@@ -231,6 +240,7 @@ class Client
         *               tensor type
         *   \param mem_layout The MemoryLayout that the newly
         *                     allocated memory should conform to
+        *   \throw SmartRedis::Exception if get tensor command fails
         */
         void get_tensor(const std::string& key,
                         void*& data,
@@ -255,6 +265,7 @@ class Client
         *               type of the memory space
         *   \param mem_layout The MemoryLayout of the provided
         *               memory space.
+        *   \throw SmartRedis::Exception if unpack tensor command fails
         */
         void unpack_tensor(const std::string& key,
                            void* data,
@@ -266,6 +277,7 @@ class Client
         *   \brief Move a tensor from one key to another key
         *   \param key The original tensor key
         *   \param new_key The new tensor key
+        *   \throw SmartRedis::Exception if rename tensor command fails
         */
         void rename_tensor(const std::string& key,
                            const std::string& new_key);
@@ -273,6 +285,7 @@ class Client
         /*!
         *   \brief Delete a tensor from the database
         *   \param key The key of tensor to delete
+        *   \throw SmartRedis::Exception if delete tensor command fails
         */
         void delete_tensor(const std::string& key);
 
@@ -281,6 +294,7 @@ class Client
         *          key to the destination key
         *   \param src_key The key of the tensor to copy
         *   \param dest_key The destination key of the tensor
+        *   \throw SmartRedis::Exception if copy tensor command fails
         */
         void copy_tensor(const std::string& src_key,
                          const std::string& dest_key);
@@ -303,6 +317,7 @@ class Client
         *                 (TF models only)
         *   \param outputs One or more names of model output nodes
         *                 (TF models only)
+        *   \throw SmartRedis::Exception if set model from file fails
         */
         void set_model_from_file(const std::string& key,
                                  const std::string& model_file,
@@ -334,6 +349,7 @@ class Client
         *                 (TF models only)
         *   \param outputs One or more names of model output nodes
         *                 (TF models only)
+        *   \throw SmartRedis::Exception if set model command fails
         */
         void set_model(const std::string& key,
                        const std::string_view& model,
@@ -354,6 +370,7 @@ class Client
         *            The memory associated with the model
         *            is managed by the Client and is valid
         *            until the destruction of the Client.
+        *   \throw SmartRedis::Exception if get model command fails
         */
         std::string_view get_model(const std::string& key);
 
@@ -364,6 +381,7 @@ class Client
         *   \param device The name of the device for execution
         *                 (e.g. CPU or GPU)
         *   \param script_file The source file for the script
+        *   \throw SmartRedis::Exception if set script command fails
         */
         void set_script_from_file(const std::string& key,
                                   const std::string& device,
@@ -376,6 +394,7 @@ class Client
         *   \param device The name of the device for execution
         *                 (e.g. CPU or GPU)
         *   \param script The script source in a std::string_view
+        *   \throw SmartRedis::Exception if set script command fails
         */
         void set_script(const std::string& key,
                         const std::string& device,
@@ -388,6 +407,7 @@ class Client
         *            The memory associated with the script
         *            is managed by the Client and is valid
         *            until the destruction of the Client.
+        *   \throw SmartRedis::Exception if get script command fails
         */
         std::string_view get_script(const std::string& key);
 
@@ -399,6 +419,7 @@ class Client
         *                 in the model
         *   \param outputs The keys of output tensors that
         *                 will be used to save model results
+        *   \throw SmartRedis::Exception if run model command fails
         */
         void run_model(const std::string& key,
                        std::vector<std::string> inputs,
@@ -413,6 +434,7 @@ class Client
         *                 in the script
         *   \param outputs The keys of output tensors that
         *                 will be used to save script results
+        *   \throw SmartRedis::Exception if run script command fails
         */
         void run_script(const std::string& key,
                         const std::string& function,
@@ -424,6 +446,7 @@ class Client
         *   \param key The key that will be checked in the database.
         *              No prefix will be added to \p key.
         *   \returns Returns true if the key exists in the database
+        *   \throw SmartRedis::Exception if key exists command fails
         */
         bool key_exists(const std::string& key);
 
@@ -434,6 +457,7 @@ class Client
         *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the key exists in the database
+        *   \throw SmartRedis::Exception if model exists command fails
         */
         bool model_exists(const std::string& name);
 
@@ -444,6 +468,7 @@ class Client
         *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the tensor key exists in the database
+        *   \throw SmartRedis::Exception if tensor exists command fails
         */
         bool tensor_exists(const std::string& name);
 
@@ -454,6 +479,7 @@ class Client
         *               the name could be automatically prefixed
         *               to form the corresponding key.
         *   \returns Returns true if the dataset key exists in the database
+        *   \throw SmartRedis::Exception if dataset exists command fails
         */
         bool dataset_exists(const std::string& name);
 
@@ -468,6 +494,7 @@ class Client
         *                    the specified number of keys.
         *   \returns Returns true if the key is found within the
         *            specified number of tries, otherwise false.
+        *   \throw SmartRedis::Exception if poll key command fails
         */
         bool poll_key(const std::string& key,
                       int poll_frequency_ms,
@@ -486,6 +513,7 @@ class Client
         *                    the specified number of keys.
         *   \returns Returns true if the key is found within the
         *            specified number of tries, otherwise false.
+        *   \throw SmartRedis::Exception if poll tensor command fails
         */
         bool poll_tensor(const std::string& name,
                          int poll_frequency_ms,
@@ -504,6 +532,7 @@ class Client
         *                    the specified number of keys.
         *   \returns Returns true if the key is found within the
         *            specified number of tries, otherwise false.
+        *   \throw SmartRedis::Exception if poll dataset command fails
         */
         bool poll_dataset(const std::string& name,
                           int poll_frequency_ms,
@@ -523,6 +552,7 @@ class Client
         *                    the specified number of keys.
         *   \returns Returns true if the key is found within the
         *            specified number of tries, otherwise false.
+        *   \throw SmartRedis::Exception if poll model command fails
         */
         bool poll_model(const std::string& name,
                         int poll_frequency_ms,
@@ -532,6 +562,7 @@ class Client
         *   \brief Set the data source (i.e. key prefix for
         *          get functions)
         *   \param source_id The prefix for retrieval commands
+        *   \throw SmartRedis::Exception for failed setting of data source
         */
         void set_data_source(std::string source_id);
 
@@ -549,6 +580,7 @@ class Client
         * \param use_prefix If set to true, all future operations
         *                   on tensors and datasets will use
         *                   a prefix, if available.
+        * \throw SmartRedis::Exception for failed activation of tensor prefixing
         */
         void use_tensor_ensemble_prefix(bool use_prefix);
 
@@ -560,10 +592,10 @@ class Client
         *        Keys of entities created before this function is called
         *        will not be affected.
         *        By default, the client does not prefix model and script keys.
-        *
         * \param use_prefix If set to true, all future operations
         *                   on models and scripts will use
         *                   a prefix, if available.
+        * \throw SmartRedis::Exception for failed activation of model prefixing
         */
         void use_model_ensemble_prefix(bool use_prefix);
 
@@ -571,14 +603,15 @@ class Client
         *   \brief Returns information about the given database node
         *   \param address The address of the database node (host:port)
         *   \returns parsed_reply_nested_map containing the database node information
-        *   \throws SRRuntimeException if the address is not addressable by this
-        *           client.  In the case of using a cluster of database nodes,
-        *           it is best practice to bind each node in the cluster
-        *           to a specific address to avoid inconsistencies in
-        *           addresses retrieved with the CLUSTER SLOTS command.
-        *           Inconsistencies in node addresses across
-        *           CLUSTER SLOTS commands will lead to SRRuntimeException
-        *           being thrown.
+        *   \throw SmartRedis::Exception if the command fails or if the
+        *          address is not addressable by this client.
+        *          In the case of using a cluster of database nodes,
+        *          it is best practice to bind each node in the cluster
+        *          to a specific address to avoid inconsistencies in
+        *          addresses retrieved with the CLUSTER SLOTS command.
+        *          Inconsistencies in node addresses across
+        *          CLUSTER SLOTS commands will lead to SmartRedis::Exception
+        *          being thrown.
         */
         parsed_reply_nested_map get_db_node_info(std::string address);
 
@@ -587,15 +620,15 @@ class Client
         *          cluster node.
         *   \param address The address of the database node (host:port)
         *   \returns parsed_reply_map containing the database cluster information.
-        *   \throws SRRuntimeException if on a non-cluster environment or
-        *           if the address is not addressable by this
-        *           client. In the case of using a cluster of database nodes,
-        *           it is best practice to bind each node in the cluster
-        *           to a specific address to avoid inconsistencies in
-        *           addresses retrieved with the CLUSTER SLOTS command.
-        *           Inconsistencies in node addresses across
-        *           CLUSTER SLOTS commands will lead to SRRuntimeException
-        *           being thrown.
+        *   \throw SmartRedis::Exception if the command fails or if the
+        *          address is not addressable by this client.
+        *          In the case of using a cluster of database nodes,
+        *          it is best practice to bind each node in the cluster
+        *          to a specific address to avoid inconsistencies in
+        *          addresses retrieved with the CLUSTER SLOTS command.
+        *          Inconsistencies in node addresses across
+        *          CLUSTER SLOTS commands will lead to SmartRedis::Exception
+        *          being thrown.
         */
         parsed_reply_map get_db_cluster_info(std::string address);
 
@@ -606,16 +639,15 @@ class Client
         *   \returns parsed_reply_map containing the database cluster information.
         *            If this command is executed on a non-cluster database, an
         *            empty parsed_reply_map is returned.
-        *   \throws SRRuntimeException if the address is not addressable by this
-        *           client.  In the case of using a cluster of database nodes,
-        *           it is best practice to bind each node in the cluster
-        *           to a specific address to avoid inconsistencies in
-        *           addresses retrieved with the CLUSTER SLOTS command.
-        *           Inconsistencies in node addresses across
-        *           CLUSTER SLOTS comands will lead to SRRuntimeException
-        *           being thrown.
-        parsed_reply_map get_db_cluster_info(std::string address);
-        *   \param address The address of the database node
+        *   \throw SmartRedis::Exception if the command fails or if the
+        *          address is not addressable by this client.
+        *          In the case of using a cluster of database nodes,
+        *          it is best practice to bind each node in the cluster
+        *          to a specific address to avoid inconsistencies in
+        *          addresses retrieved with the CLUSTER SLOTS command.
+        *          Inconsistencies in node addresses across
+        *          CLUSTER SLOTS commands will lead to SmartRedis::Exception
+        *          being thrown.
         */
         void flush_db(std::string address);
 
@@ -628,8 +660,15 @@ class Client
         *   \returns An unordered map that maps configuration parameters to their values.
         *            If the provided expression does not exist, then an empty dictionary
         *            is returned.
-        *   \throws SRRuntimeException if the address is not addressable by this
-        *           client
+        *   \throw SmartRedis::Exception if the command fails or if the
+        *          address is not addressable by this client.
+        *          In the case of using a cluster of database nodes,
+        *          it is best practice to bind each node in the cluster
+        *          to a specific address to avoid inconsistencies in
+        *          addresses retrieved with the CLUSTER SLOTS command.
+        *          Inconsistencies in node addresses across
+        *          CLUSTER SLOTS commands will lead to SmartRedis::Exception
+        *          being thrown.
         */
         std::unordered_map<std::string,std::string> config_get(std::string expression,
                                                                std::string address);
@@ -643,9 +682,15 @@ class Client
         *   \param config_param A configuration parameter to set
         *   \param value The value to assign to the configuration parameter
         *   \param address The address of the database node to execute on
-        *   \throws SRRuntimeException if the address is not addressable by this
-        *           client or if command fails to execute or if the config_param
-        *           is not supported.
+        *   \throw SmartRedis::Exception if the command fails or if the
+        *          address is not addressable by this client.
+        *          In the case of using a cluster of database nodes,
+        *          it is best practice to bind each node in the cluster
+        *          to a specific address to avoid inconsistencies in
+        *          addresses retrieved with the CLUSTER SLOTS command.
+        *          Inconsistencies in node addresses across
+        *          CLUSTER SLOTS commands will lead to SmartRedis::Exception
+        *          being thrown.
         */
         void config_set(std::string config_param, std::string value, std::string address);
 
@@ -654,8 +699,15 @@ class Client
         *          time snapshot of all the data inside the Redis instance  in the form of
         *          an RDB file.
         *   \param address The address of the database node (host:port)
-        *   \throws SRRuntimeException if the address is not addressable by this
-        *           client or if command fails to execute
+        *   \throw SmartRedis::Exception if the command fails or if the
+        *          address is not addressable by this client.
+        *          In the case of using a cluster of database nodes,
+        *          it is best practice to bind each node in the cluster
+        *          to a specific address to avoid inconsistencies in
+        *          addresses retrieved with the CLUSTER SLOTS command.
+        *          Inconsistencies in node addresses across
+        *          CLUSTER SLOTS commands will lead to SmartRedis::Exception
+        *          being thrown.
         */
         void save(std::string address);
 

@@ -100,6 +100,7 @@ class DataSet
         *   \param mem_layout The MemoryLayout enum describing the
         *                     layout of the provided tensor
         *                     data
+        *   \throw SmartRedis::Exception if add_tensor operation fails
         */
         void add_tensor(const std::string& name,
                         void* data,
@@ -117,6 +118,7 @@ class DataSet
         *               field
         *   \param data A c-ptr to the metadata field data
         *   \param type The data type of the metadata
+        *   \throw SmartRedis::Exception if add_meta_scalar operation fails
         */
         void add_meta_scalar(const std::string& name,
                              const void* data,
@@ -131,6 +133,7 @@ class DataSet
         *   \param name The name used to reference the metadata
         *               field
         *   \param data The string to add to the field
+        *   \throw SmartRedis::Exception if add_meta_string operation fails
         */
         void add_meta_string(const std::string& name,
                              const std::string& data);
@@ -164,6 +167,7 @@ class DataSet
         *               tensor type
         *   \param mem_layout The MemoryLayout that the newly
         *                     allocated memory should conform to
+        *   \throw SmartRedis::Exception if tensor retrieval fails
         */
         void get_tensor(const std::string& name,
                         void*& data,
@@ -202,6 +206,7 @@ class DataSet
         *               tensor type
         *   \param mem_layout The MemoryLayout that the newly
         *                     allocated memory should conform to
+        *   \throw SmartRedis::Exception if tensor retrieval fails
         */
         void get_tensor(const std::string& name,
                         void*& data,
@@ -227,6 +232,7 @@ class DataSet
         *               type of the memory space
         *   \param mem_layout The MemoryLayout of the provided
         *               memory space.
+        *   \throw SmartRedis::Exception if tensor retrieval fails
         */
         void unpack_tensor(const std::string& name,
                            void* data,
@@ -254,6 +260,7 @@ class DataSet
         *                 field
         *   \param type The MetadataType enum describing
         *               the data type of the metadata field
+        *   \throw SmartRedis::Exception if metadata retrieval fails
         */
         void get_meta_scalars(const std::string& name,
                               void*& data,
@@ -295,6 +302,7 @@ class DataSet
         *   \param lengths A c-ptr that will be pointed to a
         *                  memory space that contains the length
         *                  of each field string
+        *   \throw SmartRedis::Exception if metadata retrieval fails
         */
         void get_meta_strings(const std::string& name,
                               char**& data,
@@ -322,6 +330,7 @@ class DataSet
         *   \brief Retrieve the names of the tensors in the
         *          DataSet
         *   \returns The name of the tensors in the DataSet
+        *   \throw SmartRedis::Exception if metadata retrieval fails
         */
         std::vector<std::string> get_tensor_names();
 
