@@ -27,5 +27,5 @@
  */
 
 #define CATCH_CONFIG_MAIN
-#include "../../../third-party/catch/catch.hpp"
+#include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "srexception.h"

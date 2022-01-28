@@ -28,7 +28,7 @@
 
 #include "limits.h"
 
-#include "../../../third-party/catch/catch.hpp"
+#include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "../client_test_utils.h"
 
 #include "redisserver.h"

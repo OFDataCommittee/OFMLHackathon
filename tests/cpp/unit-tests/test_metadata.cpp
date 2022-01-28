@@ -26,7 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../../../third-party/catch/catch.hpp"
+#include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "metadata.h"
 #include "srexception.h"
 
