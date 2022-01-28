@@ -36,56 +36,96 @@ namespace py = pybind11;
 
 PyDataset::PyDataset(const std::string& name)
 {
-  DataSet* dataset = new DataSet(name);
-  _dataset = dataset;
+    _dataset = NULL;
+    try {
+        _dataset = new DataSet(name);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "during dataset construction.");
+    }
 }
 
 PyDataset::PyDataset(DataSet* dataset)
 {
-  _dataset = dataset;
+    _dataset = dataset;
 }
 
 PyDataset::~PyDataset()
 {
     if (_dataset != NULL) {
-      delete _dataset;
-      _dataset = NULL;
+        delete _dataset;
+        _dataset = NULL;
     }
 }
 
 DataSet* PyDataset::get() {
-  return _dataset;
+    return _dataset;
 }
 
 void PyDataset::add_tensor(const std::string& name, py::array data, std::string& type)
 {
-  auto buffer = data.request();
-  void* ptr = buffer.ptr;
+    try {
+        auto buffer = data.request();
+        void* ptr = buffer.ptr;
 
-  // get dims
-  std::vector<size_t> dims(buffer.ndim);
-  for (size_t i=0; i < buffer.shape.size(); i++) {
-      dims[i] = (size_t) buffer.shape[i];
-  }
+        // get dims
+        std::vector<size_t> dims(buffer.ndim);
+        for (size_t i = 0; i < buffer.shape.size(); i++) {
+            dims[i] = (size_t) buffer.shape[i];
+        }
 
-  SRTensorType ttype = TENSOR_TYPE_MAP.at(type);
-  _dataset->add_tensor(name, ptr, dims, ttype, SRMemLayoutContiguous);
+        SRTensorType ttype = TENSOR_TYPE_MAP.at(type);
+        _dataset->add_tensor(name, ptr, dims, ttype, SRMemLayoutContiguous);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing add_tensor.");
+    }
 }
 
 py::array PyDataset::get_tensor(const std::string& name)
 {
-    TensorBase* tensor;
+    TensorBase* tensor = NULL;
     try {
         tensor = _dataset->_get_tensorbase_obj(name);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_tensor.");
     }
 
     // Define py::capsule lambda function for destructor
     py::capsule free_when_done((void*)tensor, [](void *tensor) {
-            delete reinterpret_cast<TensorBase*>(tensor);
-            });
+        delete reinterpret_cast<TensorBase*>(tensor);
+    });
 
     // detect data type
     switch (tensor->type()) {
@@ -137,69 +177,144 @@ py::array PyDataset::get_tensor(const std::string& name)
 
 void PyDataset::add_meta_scalar(const std::string& name, py::array data, std::string& type)
 {
-  auto buffer = data.request();
-  void* ptr = buffer.ptr;
+    try {
+        auto buffer = data.request();
+        void* ptr = buffer.ptr;
 
-  SRMetaDataType ttype = METADATA_TYPE_MAP.at(type);
-  _dataset->add_meta_scalar(name, ptr, ttype);
+        SRMetaDataType ttype = METADATA_TYPE_MAP.at(type);
+        _dataset->add_meta_scalar(name, ptr, ttype);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing add_meta_scalar.");
+    }
 }
 
 void PyDataset::add_meta_string(const std::string& name, const std::string& data)
 {
-  _dataset->add_meta_string(name, data);
+    try {
+        _dataset->add_meta_string(name, data);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing add_meta_string.");
+    }
 }
 
 py::array PyDataset::get_meta_scalars(const std::string& name)
 {
-  SRMetaDataType type = SRMetadataTypeInvalid;
-  size_t length = 0;
-  void *ptr = NULL;
-  _dataset->get_meta_scalars(name, ptr, length, type);
+    SRMetaDataType type = SRMetadataTypeInvalid;
+    size_t length = 0;
+    void *ptr = NULL;
+    try {
+        _dataset->get_meta_scalars(name, ptr, length, type);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_meta_scalars.");
+    }
 
-  // detect data type
-  switch (type) {
-    case SRMetadataTypeDouble: {
-      double* data = reinterpret_cast<double*>(ptr);
-      return py::array(length, data, py::none());
+    // detect data type
+    switch (type) {
+        case SRMetadataTypeDouble: {
+            double* data = reinterpret_cast<double*>(ptr);
+            return py::array(length, data, py::none());
+        }
+        case SRMetadataTypeFloat: {
+            float* data = reinterpret_cast<float*>(ptr);
+            return py::array(length, data, py::none());
+        }
+        case SRMetadataTypeInt32: {
+            int32_t* data = reinterpret_cast<int32_t*>(ptr);
+            return py::array(length, data, py::none());
+        }
+        case SRMetadataTypeInt64: {
+            int64_t* data = reinterpret_cast<int64_t*>(ptr);
+            return py::array(length, data, py::none());
+        }
+        case SRMetadataTypeUint32: {
+            uint32_t* data = reinterpret_cast<uint32_t*>(ptr);
+            return py::array(length, data, py::none());
+        }
+        case SRMetadataTypeUint64: {
+            uint64_t* data = reinterpret_cast<uint64_t*>(ptr);
+            return py::array(length, data, py::none());
+        }
+        case SRMetadataTypeString: {
+            throw SRRuntimeException("MetaData is of type string. "\
+                                     "Use get_meta_strings method.");
+        }
+        default :
+            throw SRRuntimeException("Could not infer type");
     }
-    case SRMetadataTypeFloat: {
-      float* data = reinterpret_cast<float*>(ptr);
-      return py::array(length, data, py::none());
-    }
-    case SRMetadataTypeInt32: {
-      int32_t* data = reinterpret_cast<int32_t*>(ptr);
-      return py::array(length, data, py::none());
-    }
-    case SRMetadataTypeInt64: {
-      int64_t* data = reinterpret_cast<int64_t*>(ptr);
-      return py::array(length, data, py::none());
-    }
-    case SRMetadataTypeUint32: {
-      uint32_t* data = reinterpret_cast<uint32_t*>(ptr);
-      return py::array(length, data, py::none());
-    }
-    case SRMetadataTypeUint64: {
-      uint64_t* data = reinterpret_cast<uint64_t*>(ptr);
-      return py::array(length, data, py::none());
-    }
-    case SRMetadataTypeString: {
-      throw SRRuntimeException("MetaData is of type string. Use get_meta_strings method.");
-    }
-    default :
-      // TODO throw python exception here
-      throw SRRuntimeException("Could not infer type");
-  }
 }
 
 std::string PyDataset::get_name()
 {
-    return _dataset->name;
+    try {
+        return _dataset->name;
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_name.");
+    }
 }
 
 py::list PyDataset::get_meta_strings(const std::string& name)
 {
-  // We return a copy
-  return py::cast(_dataset->get_meta_strings(name));
+    try {
+        // We return a copy
+        return py::cast(_dataset->get_meta_strings(name));
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_meta_strings.");
+    }
 }
 
 // EOF

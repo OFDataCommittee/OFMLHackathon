@@ -139,7 +139,7 @@ SCENARIO("Testing DataSet object", "[DataSet]")
                     dataset.get_tensor("does_not_exist", retrieved_data,
                                        retrieved_dims, retrieved_type,
                                        mem_layout),
-                    SmartRedis::RuntimeException
+                    SmartRedis::KeyException
                 );
             }
         }

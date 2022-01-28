@@ -26,6 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <ctype.h>
 #include "client.h"
 #include "srexception.h"
 
@@ -79,8 +80,8 @@ DataSet Client::get_dataset(const std::string& name)
     // Get the metadata message and construct DataSet
     CommandReply reply = _get_dataset_metadata(name);
     if (reply.n_elements() == 0) {
-        throw SRRuntimeException("The requested DataSet " +
-                                 name + " does not exist.");
+        throw SRKeyException("The requested DataSet, \"" +
+                             name + "\", does not exist.");
     }
 
     DataSet dataset(name);
@@ -119,8 +120,8 @@ void Client::copy_dataset(const std::string& src_name,
     // Get the metadata message and construct DataSet
     CommandReply reply = _get_dataset_metadata(src_name);
     if (reply.n_elements() == 0) {
-        throw SRRuntimeException("The requested DataSet " +
-                                 src_name + " does not exist.");
+        throw SRKeyException("The requested DataSet " +
+                             src_name + " does not exist.");
     }
     DataSet dataset(src_name);
     _unpack_dataset_metadata(dataset, reply);
@@ -217,7 +218,7 @@ void Client::put_tensor(const std::string& key,
                 tensor = new Tensor<uint8_t>(p_key, data, dims, type, mem_layout);
                 break;
             default:
-                throw SRRuntimeException("Invalid type for put_tensor");
+                throw SRTypeException("Invalid type for put_tensor");
         }
     }
     catch (std::bad_alloc& e) {
@@ -391,7 +392,7 @@ void Client::unpack_tensor(const std::string& key,
                                             SRMemLayoutContiguous);
                 break;
             default:
-                throw SRRuntimeException("Invalid type for unpack_tensor");
+                throw SRTypeException("Invalid type for unpack_tensor");
         }
     }
     catch (std::bad_alloc& e) {
@@ -447,8 +448,8 @@ void Client::set_model_from_file(const std::string& key,
                                  const std::vector<std::string>& outputs)
 {
     if (model_file.size() == 0) {
-        throw SRRuntimeException("model_file is a required "
-                                 "parameter of set_model.");
+        throw SRParameterException("model_file is a required "
+                                   "parameter of set_model.");
     }
 
     std::ifstream fin(model_file, std::ios::binary);
@@ -474,22 +475,22 @@ void Client::set_model(const std::string& key,
                        const std::vector<std::string>& outputs)
 {
     if (key.size() == 0) {
-        throw SRRuntimeException("key is a required parameter of set_model.");
+        throw SRParameterException("key is a required parameter of set_model.");
     }
 
     if (backend.size() == 0) {
-        throw SRParameterException("backend is a required  "\
+        throw SRParameterException("backend is a required "\
                                    "parameter of set_model.");
     }
 
     if (backend.compare("TF") != 0) {
         if (inputs.size() > 0) {
-            throw SRRuntimeException("INPUTS in the model set command "\
-                                     "is only valid for TF models");
+            throw SRParameterException("INPUTS in the model set command "\
+                                       "is only valid for TF models");
         }
         if (outputs.size() > 0) {
-            throw SRRuntimeException("OUTPUTS in the model set command "\
-                                     "is only valid for TF models");
+            throw SRParameterException("OUTPUTS in the model set command "\
+                                       "is only valid for TF models");
         }
     }
 
@@ -800,24 +801,31 @@ parsed_reply_map Client::get_ai_info(const std::string& address,
         throw SRInternalException("The AI.INFO reply structure has an "\
                                   "unexpected format");
 
-    reply.print_reply_structure();
-
     // Parse reply
     parsed_reply_map reply_map;
     for (size_t i = 0; i < reply.n_elements(); i += 2) {
         std::string map_key = reply[i].str();
         std::string value;
-        if(reply[i+1].redis_reply_type() == "REDIS_REPLY_STRING")
-            value = reply[i + 1].str();
+        if (reply[i + 1].redis_reply_type() == "REDIS_REPLY_STRING") {
+            // Strip off a prefix if present. Form is {xx}.restofstring
+            value = std::string(reply[i + 1].str(), reply[i + 1].str_len());
+            if (_redis_cluster != NULL && value.size() > 0 && value[0] == '{') {
+                size_t pos = value.find_first_of('}');
+                if (pos != std::string::npos && pos + 2 < value.size() && value[pos + 1] == '.') {
+                    value = value.substr(pos + 2, value.size() - (pos + 1));
+                }
+            }
+        }
         else if (reply[i + 1].redis_reply_type() == "REDIS_REPLY_INTEGER")
-            value = std::to_string(reply[i+1].integer());
+            value = std::to_string(reply[i + 1].integer());
         else if (reply[i + 1].redis_reply_type() == "REDIS_REPLY_DOUBLE")
-            value = std::to_string(reply[i+1].dbl());
+            value = std::to_string(reply[i + 1].dbl());
         else
             throw SRInternalException("The AI.INFO field " + map_key +
                                       " has an unexpected type.");
         reply_map[map_key] = value;
     }
+    printf("Leaving Client::get_ai_info()\n");
     return reply_map;
 }
 
@@ -829,7 +837,7 @@ void Client::flush_db(std::string address)
     uint64_t port = cmd.parse_port(address);
     if (host.empty() or port == 0){
         throw SRRuntimeException(std::string(address) +
-                                  "is not a valid database node address.");
+                                 "is not a valid database node address.");
     }
     cmd.set_exec_address_port(host, port);
 
@@ -1165,8 +1173,7 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
         if (dims[i] <= 0) {
             throw SRRuntimeException("Dimension " +
                                      std::to_string(i) +
-                                     "of the fetched tensor is "\
-                                     "not valid: " +
+                                     "of the fetched tensor is not valid: " +
                                      std::to_string(dims[i]));
         }
     }
@@ -1207,11 +1214,9 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
                                         dims, type, SRMemLayoutContiguous);
                 break;
             default :
-                throw SRRuntimeException("An invalid TensorType was "\
-                                         "provided to "
-                                         "Client::_get_tensorbase_obj(). "
-                                         "The tensor could not be "\
-                                         "retrieved.");
+                throw SRInternalException("The database provided an invalid "\
+                                          "TensorType to Client::_get_tensorbase_obj(). "\
+                                          "The tensor could not be retrieved.");
                 break;
         }
     }

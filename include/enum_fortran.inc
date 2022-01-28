@@ -79,4 +79,5 @@ enum, bind(c)
   enumerator :: SRTimeoutError   = 6
   enumerator :: SRKeyError       = 7
   enumerator :: SRInvalidError   = -1
+  enumerator :: SRTypeError      = 9
 end enum

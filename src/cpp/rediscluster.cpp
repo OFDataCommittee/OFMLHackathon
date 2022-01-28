@@ -433,8 +433,7 @@ CommandReply RedisCluster::run_model(const std::string& key,
     */
 
     uint16_t hash_slot = _get_hash_slot(inputs[0]);
-    uint16_t db_index = _get_dbnode_index(hash_slot, 0,
-                                                _db_nodes.size()-1);
+    uint16_t db_index = _get_dbnode_index(hash_slot, 0, _db_nodes.size()-1);
     DBNode* db = &(_db_nodes[db_index]);
     if (db == NULL) {
         throw SRRuntimeException("Missing DB node found in run_model");
@@ -582,8 +581,8 @@ CommandReply RedisCluster::get_model_script_ai_info(const std::string& address,
 
     // Determine the prefix we need for the model or script
     if (!is_addressable(host, port)) {
-        throw SRInternalException("The provided host and port does "\
-                                  "not match a cluster shard address.");
+        throw SRRuntimeException("The provided host and port does "\
+                                 "not match a cluster shard address.");
     }
 
     std::string host_port = host + ":" + std::to_string(port);
@@ -591,7 +590,7 @@ CommandReply RedisCluster::get_model_script_ai_info(const std::string& address,
 
     std::string prefixed_key = "{" + db_prefix + "}." + key;
 
-    //Build the Command
+    // Build the Command
     cmd.set_exec_address_port(host, port);
     cmd.add_field("AI.INFO");
     cmd.add_field(prefixed_key);

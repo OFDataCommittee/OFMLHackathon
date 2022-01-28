@@ -28,7 +28,7 @@ import os
 import numpy as np
 import pytest
 from smartredis import Client, Dataset
-from smartredis.error import RedisReplyError
+from smartredis.error import *
 
 
 def test_copy_dataset(use_cluster):

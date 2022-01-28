@@ -168,6 +168,8 @@ function SR_error_parser(self, response_code) result(is_error)
       write(stderr,*) "Timeout error"
     case(SRKeyError)
       write(stderr,*) "Key error"
+    case(SRTypeError)
+      write(stderr,*) "Type mismatch error"
     case default
        write(stderr,*) "Invalid or uninitialized response code"
   end select

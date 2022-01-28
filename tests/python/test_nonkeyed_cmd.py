@@ -29,7 +29,7 @@ import os
 import numpy as np
 import pytest
 from smartredis import Client
-from smartredis.error import RedisReplyError
+from smartredis.error import *
 
 
 def test_dbnode_info_command(use_cluster):
@@ -80,11 +80,11 @@ def test_dbcluster_info_command(mock_model, use_cluster):
     assert len(ai_info) != 0
 
     # Check that invalid address throws error
-    with pytest.raises(RedisReplyError):
+    with pytest.raises(RedisRuntimeError):
         client.get_ai_info(["no_host:6379"], "ai_info_cnn")
 
     # Check that invalid model name throws error
-    with pytest.raises(RedisReplyError):
+    with pytest.raises(RedisRuntimeError):
         client.get_ai_info(address, "bad_key")
 
 def test_flushdb_command(use_cluster):

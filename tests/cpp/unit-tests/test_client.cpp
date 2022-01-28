@@ -102,13 +102,13 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
         {
             CHECK_THROWS_AS(
                 client.get_dataset("DNE"),
-                RuntimeException);
+                KeyException);
             CHECK_THROWS_AS(
                 client.rename_dataset("DNE", "rename_DNE"),
-               RuntimeException);
+               KeyException);
             CHECK_THROWS_AS(
                 client.copy_dataset("src_DNE", "dest_DNE"),
-                RuntimeException);
+                KeyException);
         }
 
         WHEN("A dataset is created and put into the Client")
@@ -165,7 +165,7 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
                 // original name no longer exists after renaming
                 CHECK_THROWS_AS(
                     client.get_dataset(dataset_name),
-                    RuntimeException);
+                    KeyException);
 
                 // the dataset with new name can be retrieved
                 double* retrieved_meta_data;

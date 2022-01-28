@@ -27,14 +27,16 @@
 import inspect
 import os
 import os.path as osp
+import functools
 
 import numpy as np
 
 from .dataset import Dataset
-from .error import RedisConnectionError, RedisReplyError
 from .smartredisPy import PyClient
-from .util import Dtypes, init_default
+from .util import Dtypes, init_default, exception_handler, typecheck
 
+from .error import *
+from .smartredisPy import RedisReplyError as PybindRedisReplyError
 
 class Client(PyClient):
     def __init__(self, address=None, cluster=False):
@@ -55,12 +57,15 @@ class Client(PyClient):
         if address:
             self.__set_address(address)
         if "SSDB" not in os.environ:
-            raise RedisConnectionError()
+            raise RedisConnectionError("Could not connect to database. $SSDB not set")
         try:
             super().__init__(cluster)
+        except PybindRedisReplyError as e:
+            raise RedisConnectionError(str(e)) from None
         except RuntimeError as e:
             raise RedisConnectionError(str(e)) from None
 
+    @exception_handler
     def put_tensor(self, key, data):
         """Put a tensor to a Redis database
 
@@ -70,14 +75,12 @@ class Client(PyClient):
         :type data: np.array
         :raises RedisReplyError: if put fails
         """
-        if not isinstance(data, np.ndarray):
-            raise TypeError("Argument provided was not a numpy array")
+        typecheck(key, "key", str)
+        typecheck(data, "data", np.ndarray)
         dtype = Dtypes.tensor_from_numpy(data)
-        try:
-            super().put_tensor(key, dtype, data)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "put_tensor") from None
+        super().put_tensor(key, dtype, data)
 
+    @exception_handler
     def get_tensor(self, key):
         """Get a tensor from the database
 
@@ -87,11 +90,10 @@ class Client(PyClient):
         :return: numpy array
         :rtype: np.array
         """
-        try:
-            return super().get_tensor(key)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "get_tensor") from None
+        typecheck(key, "key", str)
+        return super().get_tensor(key)
 
+    @exception_handler
     def delete_tensor(self, key):
         """Delete a tensor within the database
 
@@ -99,11 +101,10 @@ class Client(PyClient):
         :type key: str
         :raises RedisReplyError: if deletion fails
         """
-        try:
-            super().delete_tensor(key)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "delete_tensor") from None
+        typecheck(key, "key", str)
+        super().delete_tensor(key)
 
+    @exception_handler
     def copy_tensor(self, key, dest_key):
         """Copy a tensor at one key to another key
 
@@ -113,11 +114,12 @@ class Client(PyClient):
         :type dest_key: str
         :raises RedisReplyError: if copy operation fails
         """
-        try:
-            super().copy_tensor(key, dest_key)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "copy_tensor") from None
+        typecheck(key, "key", str)
+        if not isinstance(dest_key, str):
+            raise TypeError(f"Argument provided for dest_key, {type(dest_key)}, is not of type str")
+        super().copy_tensor(key, dest_key)
 
+    @exception_handler
     def rename_tensor(self, key, new_key):
         """Rename a tensor in the database
 
@@ -127,11 +129,12 @@ class Client(PyClient):
         :type new_key: str
         :raises RedisReplyError: if rename operation fails
         """
-        try:
-            super().rename_tensor(key, new_key)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "rename_tensor") from None
+        typecheck(key, "key", str)
+        if not isinstance(new_key, str):
+            raise TypeError(f"Argument provided for new_key, {type(new_key)}, is not of type str")
+        super().rename_tensor(key, new_key)
 
+    @exception_handler
     def put_dataset(self, dataset):
         """Put a Dataset instance into the database
 
@@ -144,13 +147,11 @@ class Client(PyClient):
         :raises RedisReplyError: if connection fails
         """
         if not isinstance(dataset, Dataset):
-            raise TypeError("Argument to put_dataset was not of type Dataset")
-        try:
-            pybind_dataset = dataset.get_data()
-            super().put_dataset(pybind_dataset)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "put_dataset") from None
+            raise TypeError(f"Argument provided for dataset, {type(dataset)}, is not of type Dataset")
+        pybind_dataset = dataset.get_data()
+        super().put_dataset(pybind_dataset)
 
+    @exception_handler
     def get_dataset(self, key):
         """Get a dataset from the database
 
@@ -160,13 +161,12 @@ class Client(PyClient):
         :return: Dataset instance
         :rtype: Dataset
         """
-        try:
-            dataset = super().get_dataset(key)
-            python_dataset = Dataset.from_pybind(dataset)
-            return python_dataset
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "get_dataset", key=key) from None
+        typecheck(key, "key", str)
+        dataset = super().get_dataset(key)
+        python_dataset = Dataset.from_pybind(dataset)
+        return python_dataset
 
+    @exception_handler
     def delete_dataset(self, key):
         """Delete a dataset within the database
 
@@ -174,11 +174,10 @@ class Client(PyClient):
         :type key: str
         :raises RedisReplyError: if deletion fails
         """
-        try:
-            super().delete_dataset(key)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "delete_dataset") from None
+        typecheck(key, "key", str)
+        super().delete_dataset(key)
 
+    @exception_handler
     def copy_dataset(self, key, dest_key):
         """Copy a dataset from one key to another
 
@@ -188,11 +187,11 @@ class Client(PyClient):
         :type dest_key: str
         :raises RedisReplyError: if copy operation fails
         """
-        try:
-            super().copy_dataset(key, dest_key)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "copy_dataset") from None
+        typecheck(key, "key", str)
+        typecheck(dest_key, "dest_key", str)
+        super().copy_dataset(key, dest_key)
 
+    @exception_handler
     def rename_dataset(self, key, new_key):
         """Rename a dataset in the database
 
@@ -202,11 +201,11 @@ class Client(PyClient):
         :type new_key: str
         :raises RedisReplyError: if rename operation fails
         """
-        try:
-            super().rename_dataset(key, new_key)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "rename_dataset") from None
+        typecheck(key, "key", str)
+        typecheck(new_key, "new_key", str)
+        super().rename_dataset(key, new_key)
 
+    @exception_handler
     def set_function(self, key, function, device="CPU"):
         """Set a callable function into the database
 
@@ -225,15 +224,15 @@ class Client(PyClient):
         :raises TypeError: if argument was not a callable function
         :raises RedisReplyError: if function failed to set
         """
-        device = self.__check_device(device)
+        typecheck(key, "key", str)
+        typecheck(device, "device", str)
         if not callable(function):
-            raise TypeError("Argument provided was not a callable function")
+            raise TypeError(f"Argument provided for function, {type(function)}, is not callable")
+        device = self.__check_device(device)
         fn_src = inspect.getsource(function)
-        try:
-            super().set_script(key, device, fn_src)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "set_function") from None
+        super().set_script(key, device, fn_src)
 
+    @exception_handler
     def set_script(self, key, script, device="CPU"):
         """Store a TorchScript at key in the database
 
@@ -248,12 +247,13 @@ class Client(PyClient):
         :type device: str, optional
         :raises RedisReplyError: if script fails to set
         """
+        typecheck(key, "key", str)
+        typecheck(script, "script", str)
+        typecheck(device, "device", str)
         device = self.__check_device(device)
-        try:
-            super().set_script(key, device, script)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "set_script") from None
+        super().set_script(key, device, script)
 
+    @exception_handler
     def set_script_from_file(self, key, file, device="CPU"):
         """Same as Client.set_script but from file
 
@@ -265,13 +265,14 @@ class Client(PyClient):
         :type device: str, optional
         :raises RedisReplyError: if script fails to set
         """
+        typecheck(key, "key", str)
+        typecheck(file, "file", str)
+        typecheck(device, "device", str)
         device = self.__check_device(device)
         file_path = self.__check_file(file)
-        try:
-            super().set_script_from_file(key, device, file_path)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "set_script_from_file") from None
+        super().set_script_from_file(key, device, file_path)
 
+    @exception_handler
     def get_script(self, key):
         """Get a Torchscript stored in the database
 
@@ -281,12 +282,11 @@ class Client(PyClient):
         :return: TorchScript stored at key
         :rtype: str
         """
-        try:
-            script = super().get_script(key)
-            return script
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "get_script") from None
+        typecheck(key, "key", str)
+        script = super().get_script(key)
+        return script
 
+    @exception_handler
     def run_script(self, key, fn_name, inputs, outputs):
         """Execute TorchScript stored inside the database remotely
 
@@ -300,12 +300,14 @@ class Client(PyClient):
         :type outputs: list[str]
         :raises RedisReplyError: if script execution fails
         """
+        typecheck(key, "key", str)
+        typecheck(fn_name, "fn_name", str)
+        typecheck(inputs, "inputs", list)
+        typecheck(outputs, "outputs", list)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        try:
-            super().run_script(key, fn_name, inputs, outputs)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "run_script") from None
+        super().run_script(key, fn_name, inputs, outputs)
 
+    @exception_handler
     def get_model(self, key):
         """Get a stored model
 
@@ -315,12 +317,11 @@ class Client(PyClient):
         :return: model
         :rtype: bytes
         """
-        try:
-            model = super().get_model(key)
-            return model
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "get_model")
+        typecheck(key, "key", str)
+        model = super().get_model(key)
+        return model
 
+    @exception_handler
     def set_model(
         self,
         key,
@@ -355,24 +356,28 @@ class Client(PyClient):
         :type outputs: list[str], optional
         :raises RedisReplyError: if model fails to set
         """
+        typecheck(key, "key", str)
+        typecheck(backend, "backend", str)
+        typecheck(device, "device", str)
+        typecheck(batch_size, "batch_size", int)
+        typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(tag, "tag", str)
         device = self.__check_device(device)
         backend = self.__check_backend(backend)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        try:
-            super().set_model(
-                key,
-                model,
-                backend,
-                device,
-                batch_size,
-                min_batch_size,
-                tag,
-                inputs,
-                outputs,
-            )
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "set_model") from None
+        super().set_model(
+            key,
+            model,
+            backend,
+            device,
+            batch_size,
+            min_batch_size,
+            tag,
+            inputs,
+            outputs,
+        )
 
+    @exception_handler
     def set_model_from_file(
         self,
         key,
@@ -407,25 +412,30 @@ class Client(PyClient):
         :type outputs: list[str], optional
         :raises RedisReplyError: if model fails to set
         """
+        typecheck(key, "key", str)
+        typecheck(model_file, "model_file", str)
+        typecheck(backend, "backend", str)
+        typecheck(device, "device", str)
+        typecheck(batch_size, "batch_size", int)
+        typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(tag, "tag", str)
         device = self.__check_device(device)
         backend = self.__check_backend(backend)
         m_file = self.__check_file(model_file)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        try:
-            super().set_model_from_file(
-                key,
-                m_file,
-                backend,
-                device,
-                batch_size,
-                min_batch_size,
-                tag,
-                inputs,
-                outputs,
-            )
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "set_model_from_file") from None
+        super().set_model_from_file(
+            key,
+            m_file,
+            backend,
+            device,
+            batch_size,
+            min_batch_size,
+            tag,
+            inputs,
+            outputs,
+        )
 
+    @exception_handler
     def run_model(self, key, inputs=None, outputs=None):
         """Execute a stored model
 
@@ -437,12 +447,11 @@ class Client(PyClient):
         :type outputs: list[str], optional
         :raises RedisReplyError: if model execution fails
         """
+        typecheck(key, "key", str)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        try:
-            super().run_model(key, inputs, outputs)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "run_model")
+        super().run_model(key, inputs, outputs)
 
+    @exception_handler
     def tensor_exists(self, name):
         """Check if a tensor exists in the database
 
@@ -455,11 +464,10 @@ class Client(PyClient):
         :rtype: bool
         :raises RedisReplyError: if `tensor_exists` fails (i.e. causes an error)
         """
-        try:
-            return super().tensor_exists(name)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "tensor_exists")
+        typecheck(name, "name", str)
+        return super().tensor_exists(name)
 
+    @exception_handler
     def dataset_exists(self, name):
         """Check if a dataset exists in the database
 
@@ -472,11 +480,10 @@ class Client(PyClient):
         :rtype: bool
         :raises RedisReplyError: if `dataset_exists` fails (i.e. causes an error)
         """
-        try:
-            return super().dataset_exists(name)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "dataset_exists")
+        typecheck(name, "name", str)
+        return super().dataset_exists(name)
 
+    @exception_handler
     def model_exists(self, name):
         """Check if a model or script exists in the database
 
@@ -489,11 +496,10 @@ class Client(PyClient):
         :rtype: bool
         :raises RedisReplyError: if `model_exists` fails (i.e. causes an error)
         """
-        try:
-            return super().model_exists(name)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "model_exists")
+        typecheck(name, "name", str)
+        return super().model_exists(name)
 
+    @exception_handler
     def key_exists(self, key):
         """Check if the key exists in the database
 
@@ -503,11 +509,10 @@ class Client(PyClient):
         :rtype: bool
         :raises RedisReplyError: if `key_exists` fails
         """
-        try:
-            return super().key_exists(key)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "key_exists")
+        typecheck(key, "key", str)
+        return super().key_exists(key)
 
+    @exception_handler
     def poll_key(self, key, poll_frequency_ms, num_tries):
         """Check if the key exists in the database
 
@@ -528,11 +533,12 @@ class Client(PyClient):
         :rtype: bool
         :raises RedisReplyError: if key poll fails
         """
-        try:
-            return super().poll_key(key, poll_frequency_ms, num_tries)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "poll_key")
+        typecheck(key, "key", str)
+        typecheck(poll_frequency_ms, "poll_frequency_ms", int)
+        typecheck(num_tries, "num_tries", int)
+        return super().poll_key(key, poll_frequency_ms, num_tries)
 
+    @exception_handler
     def poll_tensor(self, name, poll_frequency_ms, num_tries):
         """Check if a tensor exists in the database
 
@@ -554,12 +560,12 @@ class Client(PyClient):
         :rtype: bool
         :raises RedisReplyError: if `poll_tensor` fails
         """
-        try:
-            return super().poll_tensor(name, poll_frequency_ms, num_tries)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "poll_tensor")
+        typecheck(name, "name", str)
+        typecheck(poll_frequency_ms, "poll_frequency_ms", int)
+        typecheck(num_tries, "num_tries", int)
+        return super().poll_tensor(name, poll_frequency_ms, num_tries)
 
-
+    @exception_handler
     def poll_dataset(self, name, poll_frequency_ms, num_tries):
         """Check if a dataset exists in the database
 
@@ -581,11 +587,12 @@ class Client(PyClient):
         :rtype: bool
         :raises RedisReplyError: if `poll_dataset` fails
         """
-        try:
-            return super().poll_dataset(name, poll_frequency_ms, num_tries)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "poll_dataset")
+        typecheck(name, "name", str)
+        typecheck(poll_frequency_ms, "poll_frequency_ms", int)
+        typecheck(num_tries, "num_tries", int)
+        return super().poll_dataset(name, poll_frequency_ms, num_tries)
 
+    @exception_handler
     def poll_model(self, name, poll_frequency_ms, num_tries):
         """Check if a model or script exists in the database
 
@@ -607,11 +614,12 @@ class Client(PyClient):
         :rtype: bool
         :raises RedisReplyError: if `poll_model` fails
         """
-        try:
-            return super().poll_model(name, poll_frequency_ms, num_tries)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "poll_model")
+        typecheck(name, "name", str)
+        typecheck(poll_frequency_ms, "poll_frequency_ms", int)
+        typecheck(num_tries, "num_tries", int)
+        return super().poll_model(name, poll_frequency_ms, num_tries)
 
+    @exception_handler
     def set_data_source(self, source_id):
         """Set the data source (i.e. key prefix for get functions)
 
@@ -619,11 +627,10 @@ class Client(PyClient):
         :type source_id: str
         :raises RedisReplyError: if set data
         """
-        try:
-            return super().set_data_source(source_id)
-        except RuntimeError as e:
-            raise RuntimeError(str(e), "set_data_source")
+        typecheck(source_id, "source_id", str)
+        return super().set_data_source(source_id)
 
+    @exception_handler
     def use_model_ensemble_prefix(self, use_prefix):
         """Set whether model and script keys should be prefixed
 
@@ -638,11 +645,10 @@ class Client(PyClient):
                            available.
         :type use_prefix: bool
         """
-        try:
-            return super().use_model_ensemble_prefix(use_prefix)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "use_model_ensemble_prefix")
+        typecheck(use_prefix, "use_prefix", bool)
+        return super().use_model_ensemble_prefix(use_prefix)
 
+    @exception_handler
     def use_tensor_ensemble_prefix(self, use_prefix):
         """Set whether tensor and dataset keys should be prefixed
 
@@ -657,11 +663,10 @@ class Client(PyClient):
                            available.
         :type use_prefix: bool
         """
-        try:
-            return super().use_tensor_ensemble_prefix(use_prefix)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "use_tensor_ensemble_prefix")
+        typecheck(use_prefix, "use_prefix", bool)
+        return super().use_tensor_ensemble_prefix(use_prefix)
 
+    @exception_handler
     def get_db_node_info(self, addresses):
         """Returns information about given database nodes
 
@@ -681,11 +686,10 @@ class Client(PyClient):
                 CLUSTER SLOTS commands will lead to RedisReplyError
                 being thrown.
         """
-        try:
-            return super().get_db_node_info(addresses)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "get_db_node_info")
+        typecheck(addresses, "addresses", list)
+        return super().get_db_node_info(addresses)
 
+    @exception_handler
     def get_db_cluster_info(self, addresses):
         """Returns cluster information from a specified db node.
         If the address does not correspond to a cluster node,
@@ -708,11 +712,10 @@ class Client(PyClient):
                 CLUSTER SLOTS commands will lead to RedisReplyError
                 being thrown.
         """
-        try:
-            return super().get_db_cluster_info(addresses)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "get_db_cluster_info")
+        typecheck(addresses, "addresses", list)
+        return super().get_db_cluster_info(addresses)
 
+    @exception_handler
     def get_ai_info(self, address, key, reset_stat=False):
         """Returns AI.INFO command reply information for the
         script or model key at the provided addresses.
@@ -730,11 +733,12 @@ class Client(PyClient):
         :raises RedisReplyError: if there is an error
                 in command execution or parsing the command reply.
         """
-        try:
-            return super().get_ai_info(address, key, reset_stat)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "get_ai_info()")
+        typecheck(address, "address", list)
+        typecheck(key, "key", str)
+        typecheck(reset_stat, "reset_stat", bool)
+        return super().get_ai_info(address, key, reset_stat)
 
+    @exception_handler
     def flush_db(self, addresses):
         """Removes all keys from a specified db node.
 
@@ -751,11 +755,10 @@ class Client(PyClient):
                 CLUSTER SLOTS commands will lead to RedisReplyError
                 being thrown.
         """
-        try:
-            super().flush_db(addresses)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "flush_db")
+        typecheck(addresses, "addresses", list)
+        super().flush_db(addresses)
 
+    @exception_handler
     def config_get(self, expression, address):
         """Read the configuration parameters of a running server.
         If the address does not correspond to a cluster node,
@@ -782,11 +785,11 @@ class Client(PyClient):
                 CLUSTER SLOTS commands will lead to RedisReplyError
                 being thrown.
         """
-        try:
-            return super().config_get(expression, address)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "config_get")
+        typecheck(expression, "expression", str)
+        typecheck(address, "address", str)
+        return super().config_get(expression, address)
 
+    @exception_handler
     def config_set(self, config_param, value, address):
         """Reconfigure the server. It can change both trivial
         parameters or switch from one to another persistence option.
@@ -813,11 +816,12 @@ class Client(PyClient):
                 CLUSTER SLOTS commands will lead to RedisReplyError
                 being thrown.
         """
-        try:
-            super().config_set(config_param, value, address)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "config_set")
+        typecheck(config_param, "config_param", str)
+        typecheck(value, "value", str)
+        typecheck(address, "address", str)
+        super().config_set(config_param, value, address)
 
+    @exception_handler
     def save(self, addresses):
         """Performs a synchronous save of the database shard
         producinga point in time snapshot of all the data
@@ -836,10 +840,8 @@ class Client(PyClient):
                 CLUSTER SLOTS commands will lead to RedisReplyError
                 being thrown.
         """
-        try:
-            super().save(addresses)
-        except RuntimeError as e:
-            raise RedisReplyError(str(e), "save")
+        typecheck(addresses, "addresses", list)
+        super().save(addresses)
 
     # ---- helpers --------------------------------------------------------
 

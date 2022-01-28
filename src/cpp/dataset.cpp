@@ -78,7 +78,6 @@ void DataSet::get_tensor(const std::string& name,
                          SRTensorType& type,
                          SRMemoryLayout mem_layout)
 {
-    _enforce_tensor_exists(name);
     // Clone the tensor in the DataSet
     TensorBase* tensor = _get_tensorbase_obj(name);
     if (tensor == NULL) {
@@ -235,19 +234,18 @@ std::vector<std::pair<std::string, std::string>>
 
 // Add a serialized field to the DataSet
 void DataSet::_add_serialized_field(const std::string& name,
-                                   char* buf,
-                                   size_t buf_size)
+                                    char* buf,
+                                    size_t buf_size)
 {
     _metadata.add_serialized_field(name, buf, buf_size);
 }
 
 // Check and enforce that a tensor must exist or throw an error.
-inline void DataSet::_enforce_tensor_exists(const std::string& name)
+inline void DataSet::_enforce_tensor_exists(const std::string& tensorname)
 {
-    if (!_tensorpack.tensor_exists(name)) {
-        throw SRRuntimeException("The tensor " + std::string(name) +
-                                 " does not exist in " + name +
-                                 " dataset.");
+    if (!_tensorpack.tensor_exists(tensorname)) {
+        throw SRKeyException("The tensor \"" + std::string(tensorname) +
+                             "\" does not exist in dataset \"" + name + "\".");
     }
 }
 
@@ -257,5 +255,6 @@ inline void DataSet::_enforce_tensor_exists(const std::string& name)
 // management in any object.
 TensorBase* DataSet::_get_tensorbase_obj(const std::string& name)
 {
+    _enforce_tensor_exists(name);
     return _tensorpack.get_tensor(name)->clone();
 }

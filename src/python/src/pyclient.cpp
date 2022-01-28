@@ -37,22 +37,23 @@ namespace py = pybind11;
 
 PyClient::PyClient(bool cluster)
 {
+//    throw SRRuntimeException("Test");
     _client = NULL;
     try {
         _client = new Client(cluster);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
-        throw e;
+        throw SRInternalException(e.what());
     }
     catch (...) {
         // should never happen
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client construction.");
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "during client construction.");
     }
 }
 
@@ -82,12 +83,18 @@ void PyClient::put_tensor(std::string& key,
     try {
         _client->put_tensor(key, ptr, dims, ttype, SRMemLayoutContiguous);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client put_tensor execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing put_tensor.");
     }
 }
 
@@ -97,15 +104,21 @@ py::array PyClient::get_tensor(const std::string& key)
     try {
         tensor = _client->_get_tensorbase_obj(key);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client get_tensor execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_tensor.");
     }
 
-    //Define py::capsule lambda function for destructor
+    // Define py::capsule lambda function for destructor
     py::capsule free_when_done((void*)tensor, [](void *tensor) {
             delete reinterpret_cast<TensorBase*>(tensor);
             });
@@ -162,12 +175,18 @@ void PyClient::delete_tensor(const std::string& key) {
     try {
         _client->delete_tensor(key);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client delete_tensor execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing delete_tensor.");
     }
 }
 
@@ -176,12 +195,18 @@ void PyClient::copy_tensor(const std::string& key,
     try {
         _client->copy_tensor(key, dest_key);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client copy_tensor execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing copy_tensor.");
     }
 }
 
@@ -190,12 +215,18 @@ void PyClient::rename_tensor(const std::string& key,
     try {
         _client->rename_tensor(key, new_key);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client rename_tensor execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing rename_tensor.");
     }
 }
 
@@ -204,12 +235,18 @@ void PyClient::put_dataset(PyDataset& dataset)
     try {
         _client->put_dataset(*dataset.get());
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client put_dataset execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing put_dataset.");
     }
 }
 
@@ -219,12 +256,22 @@ PyDataset* PyClient::get_dataset(const std::string& name)
     try {
         data = new DataSet(_client->get_dataset(name));
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (const std::bad_alloc& e) {
+        data = NULL;
+        throw SRBadAllocException("DataSet");
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client get_dataset execution.");
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_dataset.");
     }
     PyDataset* dataset = new PyDataset(data);
     return dataset;
@@ -234,12 +281,18 @@ void PyClient::delete_dataset(const std::string& key) {
     try {
         _client->delete_dataset(key);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client delete_dataset execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing delete_dataset.");
     }
 }
 
@@ -248,12 +301,18 @@ void PyClient::copy_dataset(const std::string& key,
     try {
         _client->copy_dataset(key, dest_key);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client copy_dataset execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing copy_dataset.");
     }
 }
 
@@ -262,12 +321,18 @@ void PyClient::rename_dataset(const std::string& key,
     try {
         _client->rename_dataset(key, new_key);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client rename_dataset execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing rename_dataset.");
     }
 }
 
@@ -278,12 +343,18 @@ void PyClient::set_script_from_file(const std::string& key,
     try {
         _client->set_script_from_file(key, device, script_file);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client set_script_from_file execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing set_script_from_file.");
     }
 }
 
@@ -294,12 +365,18 @@ void PyClient::set_script(const std::string& key,
     try {
         _client->set_script(key, device, script);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client set_script execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing set_script.");
     }
 }
 
@@ -309,12 +386,18 @@ std::string_view PyClient::get_script(const std::string& key)
     try {
         script = _client->get_script(key);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client get_script execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_script.");
     }
     return script;
 }
@@ -327,29 +410,40 @@ void PyClient::run_script(const std::string& key,
     try {
       _client->run_script(key, function, inputs, outputs);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client run_script execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing run_script.");
     }
 }
 
 py::bytes PyClient::get_model(const std::string& key)
 {
-    std::string model;
     try {
-        model = std::string(_client->get_model(key));
+        std::string model(_client->get_model(key));
+        return py::bytes(model);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client get_model execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
     }
-    return py::bytes(model);
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_model.");
+    }
 }
 
 void PyClient::set_model(const std::string& key,
@@ -364,11 +458,21 @@ void PyClient::set_model(const std::string& key,
 {
     try {
         _client->set_model(key, model, backend, device,
-                                batch_size, min_batch_size, tag,
-                                inputs, outputs);
+                           batch_size, min_batch_size, tag,
+                           inputs, outputs);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing set_model.");
     }
 }
 
@@ -387,12 +491,18 @@ void PyClient::set_model_from_file(const std::string& key,
                                            batch_size, min_batch_size, tag,
                                            inputs, outputs);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client set_model_from_file execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing set_model_from_file.");
     }
 }
 
@@ -403,12 +513,18 @@ void PyClient::run_model(const std::string& key,
     try {
         _client->run_model(key, inputs, outputs);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client run_model execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing run_model.");
     }
 }
 
@@ -419,69 +535,84 @@ void PyClient::set_data_source(const std::string& source_id)
 
 bool PyClient::key_exists(const std::string& key)
 {
-    bool result = false;
     try {
-        result = _client->key_exists(key);
+        return _client->key_exists(key);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client key_exists execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
     }
-    return result;
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing key_exists.");
+    }
 }
 
 bool PyClient::poll_key(const std::string& key,
                         int poll_frequency_ms,
                         int num_tries)
 {
-    bool result = false;
     try {
-        result = _client->poll_key(key, poll_frequency_ms,
-                                         num_tries);
+        return _client->poll_key(key, poll_frequency_ms, num_tries);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client poll_key execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
     }
-    return result;
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing poll_key.");
+    }
 }
 
 bool PyClient::model_exists(const std::string& name)
 {
-    bool result = false;
     try {
-        result = _client->model_exists(name);
+        return _client->model_exists(name);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client model_exists execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
     }
-    return result;
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing model_exists.");
+    }
 }
 
 bool PyClient::tensor_exists(const std::string& name)
 {
-    bool result = false;
     try {
-        result = _client->tensor_exists(name);
+        return _client->tensor_exists(name);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client tensor_exists execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
     }
-    return result;
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing tensor_exists.");
+    }
 }
 
 bool PyClient::dataset_exists(const std::string& name)
@@ -493,61 +624,66 @@ bool PyClient::poll_tensor(const std::string& name,
                            int poll_frequency_ms,
                            int num_tries)
 {
-    bool result = false;
     try {
-        result = _client->poll_tensor(name, poll_frequency_ms,
-                                            num_tries);
+        return _client->poll_tensor(name, poll_frequency_ms, num_tries);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client poll_tensor execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
     }
-    return result;
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing poll_tensor.");
+    }
 }
 
 bool PyClient::poll_dataset(const std::string& name,
                             int poll_frequency_ms,
                             int num_tries)
 {
-    bool result = false;
     try {
-        result = _client->poll_dataset(name, poll_frequency_ms, num_tries);
+        return _client->poll_dataset(name, poll_frequency_ms, num_tries);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
-    catch (const std::exception& e) {
+    catch (std::exception& e) {
         // should never happen
-        throw SRRuntimeException(e.what());
+        throw SRInternalException(e.what());
     }
     catch (...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client poll_dataset execution.");
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing poll_dataset.");
     }
-    return result;
 }
 
 bool PyClient::poll_model(const std::string& name,
                           int poll_frequency_ms,
                           int num_tries)
 {
-    bool result = false;
     try {
-        result = _client->poll_model(name, poll_frequency_ms,
-                                           num_tries);
+        return _client->poll_model(name, poll_frequency_ms, num_tries);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                 "during client poll_model execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
     }
-    return result;
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing poll_model.");
+    }
 }
 
 void PyClient::use_tensor_ensemble_prefix(bool use_prefix)
@@ -562,43 +698,54 @@ void PyClient::use_model_ensemble_prefix(bool use_prefix)
 
 std::vector<py::dict> PyClient::get_db_node_info(std::vector<std::string> addresses)
 {
-    std::vector<py::dict> addresses_info;
-    for(size_t i = 0; i < addresses.size(); i++) {
-        try {
+    try {
+        std::vector<py::dict> addresses_info;
+        for (size_t i = 0; i < addresses.size(); i++) {
             parsed_reply_nested_map info_map = _client->get_db_node_info(addresses[i]);
             py::dict info_dict = py::cast(info_map);
             addresses_info.push_back(info_dict);
         }
-        catch(const std::exception& e) {
-            throw SRRuntimeException(e.what());
-        }
-        catch(...) {
-            throw SRRuntimeException("A non-standard exception was encountered "\
-                                    "during client get_db_node_info execution.");
-        }
-
+        return addresses_info;
     }
-    return addresses_info;
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                    "while executing get_db_node_info.");
+    }
 }
 
 std::vector<py::dict> PyClient::get_db_cluster_info(std::vector<std::string> addresses)
 {
-    std::vector<py::dict> addresses_info;
-    for(size_t i = 0; i < addresses.size(); i++) {
-        try {
+    try {
+        std::vector<py::dict> addresses_info;
+        for (size_t i = 0; i < addresses.size(); i++) {
             parsed_reply_map info_map = _client->get_db_cluster_info(addresses[i]);
             py::dict info_dict = py::cast(info_map);
             addresses_info.push_back(info_dict);
         }
-        catch(const std::exception& e) {
-            throw SRRuntimeException(e.what());
-        }
-        catch(...) {
-            throw SRRuntimeException("A non-standard exception was encountered "\
-                                    "during client get_db_cluster_info execution.");
-        }
+        return addresses_info;
     }
-    return addresses_info;
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_db_cluster_info.");
+    }
 }
 
 // Execute AI.INFO command
@@ -610,7 +757,7 @@ PyClient::get_ai_info(const std::vector<std::string>& addresses,
 {
     try {
         std::vector<py::dict> ai_info;
-        for(size_t i = 0; i < addresses.size(); i++) {
+        for (size_t i = 0; i < addresses.size(); i++) {
                 parsed_reply_map result =
                     _client->get_ai_info(addresses[i], key, reset_stat);
                 py::dict result_dict = py::cast(result);
@@ -619,28 +766,40 @@ PyClient::get_ai_info(const std::vector<std::string>& addresses,
         }
         return ai_info;
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                    "during client get_ai_info() execution.");
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "during client get_ai_info() execution.");
     }
 }
 
 // Delete all keys of all existing databases
 void PyClient::flush_db(std::vector<std::string> addresses)
 {
-    for(size_t i=0; i<addresses.size(); i++) {
+    for (size_t i = 0; i < addresses.size(); i++) {
         try {
             _client->flush_db(addresses[i]);
         }
-        catch(const std::exception& e) {
-            throw SRRuntimeException(e.what());
+        catch (Exception& e) {
+            // exception is already prepared for caller
+            throw;
         }
-        catch(...) {
-            throw SRRuntimeException("A non-standard exception was encountered "\
-                                    "during client flush_db execution.");
+        catch (std::exception& e) {
+            // should never happen
+            throw SRInternalException(e.what());
+        }
+        catch (...) {
+            // should never happen
+            throw SRInternalException("A non-standard exception was encountered "\
+                                      "while executing flush_db.");
         }
     }
 }
@@ -648,19 +807,23 @@ void PyClient::flush_db(std::vector<std::string> addresses)
 // Read the configuration parameters of a running server
 py::dict PyClient::config_get(std::string expression, std::string address)
 {
-    py::dict result;
     try {
         std::unordered_map<std::string,std::string> result_map = _client->config_get(expression, address);
-        result = py::cast(result_map);
+        return py::cast(result_map);
     }
-        catch(const std::exception& e) {
-            throw SRRuntimeException(e.what());
-        }
-        catch(...) {
-            throw SRRuntimeException("A non-standard exception was encountered "\
-                                    "during client config_get execution.");
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
     }
-    return result;
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing config_get.");
+    }
 }
 
 // Reconfigure the server
@@ -669,12 +832,18 @@ void PyClient::config_set(std::string config_param, std::string value, std::stri
     try {
         _client->config_set(config_param, value, address);
     }
-        catch(const std::exception& e) {
-            throw SRRuntimeException(e.what());
-        }
-        catch(...) {
-            throw SRRuntimeException("A non-standard exception was encountered "\
-                                    "during client config_set execution.");
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing config_set.");
     }
 }
 
@@ -684,12 +853,18 @@ void PyClient::save(std::vector<std::string> addresses)
         try {
             _client->save(addresses[address_index]);
         }
-            catch(const std::exception& e) {
-                throw SRRuntimeException(e.what());
-            }
-            catch(...) {
-                throw SRRuntimeException("A non-standard exception was encountered "\
-                                        "during client save execution.");
+        catch (Exception& e) {
+            // exception is already prepared for caller
+            throw;
+        }
+        catch (std::exception& e) {
+            // should never happen
+            throw SRInternalException(e.what());
+        }
+        catch (...) {
+            // should never happen
+            throw SRInternalException("A non-standard exception was encountered "\
+                                      "while executing save.");
         }
     }
 }

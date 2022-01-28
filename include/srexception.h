@@ -46,7 +46,8 @@ typedef enum {
     SRParameterError = 5, // Bad parameter error
     SRTimeoutError   = 6, // Timeout error
     SRKeyError       = 7, // Key error
-    SRInvalidError   = 8  // Uninitialized error variable
+    SRInvalidError   = 8, // Uninitialized error variable
+    SRTypeError      = 9  // Type mismatch
 } SRError;
 
 
@@ -127,6 +128,7 @@ class Exception: public std::exception
 */
 class BadAllocException: public Exception
 {
+    public:
     using Exception::Exception;
 
     virtual SRError to_error_code() const noexcept {
@@ -142,6 +144,7 @@ class BadAllocException: public Exception
 */
 class DatabaseException: public Exception
 {
+    public:
     using Exception::Exception;
 
     virtual SRError to_error_code() const noexcept {
@@ -157,6 +160,7 @@ class DatabaseException: public Exception
 */
 class RuntimeException: public Exception
 {
+    public:
     using Exception::Exception;
 
     virtual SRError to_error_code() const noexcept {
@@ -172,6 +176,7 @@ class RuntimeException: public Exception
 */
 class ParameterException: public Exception
 {
+    public:
     using Exception::Exception;
 
     virtual SRError to_error_code() const noexcept {
@@ -187,6 +192,7 @@ class ParameterException: public Exception
 */
 class TimeoutException: public Exception
 {
+    public:
     using Exception::Exception;
 
     virtual SRError to_error_code() const noexcept {
@@ -202,6 +208,7 @@ class TimeoutException: public Exception
 */
 class InternalException: public Exception
 {
+    public:
     using Exception::Exception;
 
     virtual SRError to_error_code() const noexcept {
@@ -217,6 +224,7 @@ class InternalException: public Exception
 */
 class KeyException: public Exception
 {
+    public:
     using Exception::Exception;
 
     virtual SRError to_error_code() const noexcept {
@@ -225,6 +233,21 @@ class KeyException: public Exception
 };
 
 #define SRKeyException(txt) KeyException(txt, __FILE__, __LINE__)
+
+/*!
+*   \brief  Type mismatch exception for SmartRedis
+*/
+class TypeException: public Exception
+{
+    public:
+    using Exception::Exception;
+
+    virtual SRError to_error_code() const noexcept {
+        return SRTypeError;
+    }
+};
+
+#define SRTypeException(txt) TypeException(txt, __FILE__, __LINE__)
 
 /*!
 *   \brief  Store the last error encountered
