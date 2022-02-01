@@ -2,7 +2,8 @@
 #include <mpi.h>
 
 void run_mnist(const std::string& model_name,
-               const std::string& script_name)
+               const std::string& script_name,
+               SmartRedis::Client& client)
 {
     // Get the MPI rank
     int rank;
@@ -39,13 +40,9 @@ void run_mnist(const std::string& model_name,
                                  std::to_string(rank);
     std::string out_key = "mnist_output_rank_" + std::to_string(rank);
 
-    // Initialize a Client object
-    SmartRedis::Client client(false);
-
     // Put the image tensor on the database
     client.put_tensor(in_key, img.data(), {1,1,28,28},
-                      SmartRedis::TensorType::flt,
-                      SmartRedis::MemoryLayout::contiguous);
+                      SRTensorTypeFloat, SRMemLayoutContiguous);
 
     // Run the preprocessing script
     client.run_script(script_name, "pre_process",
@@ -57,8 +54,7 @@ void run_mnist(const std::string& model_name,
     // Get the result of the model
     std::vector<float> result(1*10);
     client.unpack_tensor(out_key, result.data(), {10},
-                         SmartRedis::TensorType::flt,
-                         SmartRedis::MemoryLayout::contiguous);
+                         SRTensorTypeFloat, SRMemLayoutContiguous);
 
     // Print out the results of the model for Rank 0
     if(rank==0)
@@ -77,11 +73,13 @@ int main(int argc, char* argv[]) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+    // Initialize a Client object
+    bool cluster_mode = true; // Set to false if not using a clustered database
+    SmartRedis::Client client(cluster_mode);
+
     // Set the model and script that will be used by all ranks
     // from MPI rank 0.
     if(rank==0) {
-        SmartRedis::Client client(false);
-
         // Build model key, file name, and then set model
         // from file using client API
         std::string model_key = "mnist_model";
@@ -105,7 +103,7 @@ int main(int argc, char* argv[]) {
 
     // Run the MNIST model
     MPI_Barrier(MPI_COMM_WORLD);
-    run_mnist("mnist_model", "mnist_script");
+    run_mnist("mnist_model", "mnist_script", client);
 
     if(rank==0)
         std::cout<<"Finished SmartRedis MNIST example."<<std::endl;

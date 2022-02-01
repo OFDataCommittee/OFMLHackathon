@@ -16,22 +16,33 @@ int main(int argc, char* argv[]) {
   for(size_t i=0; i<dims[0]; i++)
     tensor[i] = ((float)rand())/RAND_MAX;
 
-  void* client = SmartRedisCClient(false);
+  void* client = NULL;
+  bool cluster_mode = true; // Set to false if not using a clustered database
+  if (SRNoError != SmartRedisCClient(cluster_mode, &client)) {
+    printf("Client initialization failed!\n");
+    exit(-1);
+  }
 
   char key[] = "1D_tensor_test";
 
   size_t key_length = strlen(key);
 
-  put_tensor(client, key, key_length,
-             (void*)tensor, dims, n_dims, c_flt, c_nested);
+  if (SRNoError != put_tensor(client, key, key_length,
+                              (void*)tensor, dims, n_dims,
+                              SRTensorTypeFloat, SRMemLayoutNested)) {
+    printf("Call to put_tensor failed!\n");
+    exit(-1);
+  }
 
-  
   float* result = (float*)malloc(dims[0]*sizeof(float));
-  unpack_tensor(client, key, key_length,
-                result, dims, n_dims,
-                c_flt, c_nested);
+  if (SRNoError != unpack_tensor(client, key, key_length,
+                                 result, dims, n_dims,
+                                 SRTensorTypeFloat, SRMemLayoutNested)) {
+    printf("Call to unpack_tensor failed!\n");
+    exit(-1);
+  }
 
-  DeleteCClient(client);
+  DeleteCClient(&client);
   free(tensor);
   free(result);
   free(dims);

@@ -23,21 +23,20 @@ int main(int argc, char* argv[]) {
         input_tensor[i] = 2.0*rand()/RAND_MAX - 1.0;
 
     // Initialize a SmartRedis client
-    SmartRedis::Client client(false);
+    bool cluster_mode = true; // Set to false if not using a clustered database
+    SmartRedis::Client client(cluster_mode);
 
     // Put the tensor in the database
     int rank = 0;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     std::string key = "3d_tensor_" + std::to_string(rank);
     client.put_tensor(key, input_tensor.data(), dims,
-                      SmartRedis::TensorType::dbl,
-                      SmartRedis::MemoryLayout::contiguous);
+                      SRTensorTypeDouble, SRMemLayoutContiguous);
 
     // Retrieve the tensor from the database using the unpack feature.
     std::vector<double> unpack_tensor(n_values, 0);
     client.unpack_tensor(key, unpack_tensor.data(), {n_values},
-                        SmartRedis::TensorType::dbl,
-                        SmartRedis::MemoryLayout::contiguous);
+                        SRTensorTypeDouble, SRMemLayoutContiguous);
 
     // Print the values retrieved with the unpack feature
     std::cout<<"Comparison of the sent and "\
@@ -48,11 +47,10 @@ int main(int argc, char* argv[]) {
 
 
     // Retrieve the tensor from the database using the get feature.
-    SmartRedis::TensorType get_type;
+    SRTensorType get_type;
     std::vector<size_t> get_dims;
     void* get_tensor;
-    client.get_tensor(key, get_tensor, get_dims, get_type,
-                      SmartRedis::MemoryLayout::nested);
+    client.get_tensor(key, get_tensor, get_dims, get_type, SRMemLayoutNested);
 
     // Print the values retrieved with the unpack feature
     std::cout<<"Comparison of the sent and "\
