@@ -429,44 +429,65 @@ CommandReply Redis::get_model_script_ai_info(const std::string& address,
 
 inline CommandReply Redis::_run(const Command& cmd)
 {
-    CommandReply reply;
-    bool executed = false;
     for (int i = 1; i <= _command_attempts; i++) {
         try {
-            reply = _redis->command(cmd.cbegin(), cmd.cend());
+            // Run the command
+            CommandReply reply = _redis->command(cmd.cbegin(), cmd.cend());
             if (reply.has_error() == 0)
                 return reply;
-            executed = true;
-            break;
+
+            // On an error response, print the response and bail
+            reply.print_reply_error();
+            throw SRRuntimeException(
+                "Redis failed to execute command: " + cmd.first_field());
+        }
+        catch (SmartRedis::Exception& e) {
+            // Exception is already prepared, just propagate it
+            throw;
         }
         catch (sw::redis::IoError &e) {
-            // Fall through for a retry
+            // For an error from Redis, retry unless we're out of chances
+            if (i == _command_attempts) {
+                throw SRDatabaseException(
+                    std::string("Redis IO error when executing commend: ") +
+                    e.what());
+            }
+            // else, Fall through for a retry
         }
         catch (sw::redis::ClosedError &e) {
-            // Fall through for a retry
+            // For an error from Redis, retry unless we're out of chances
+            if (i == _command_attempts) {
+                throw SRDatabaseException(
+                    std::string("Redis Closed error when executing commend: ") +
+                    e.what());
+            }
+            // else, Fall through for a retry
+        }
+        catch (sw::redis::Error &e) {
+            // For other errors from Redis, report them immediately
+            throw SRRuntimeException(
+                std::string("Redis error when executing commend: ") +
+                e.what());
         }
         catch (std::exception& e) {
-            throw SRRuntimeException(e.what());
+            // Should never hit this, so bail immediately if we do
+            throw SRInternalException(
+                std::string("Unexpected exception executing command: ") +
+                e.what());
         }
         catch (...) {
-            throw SRInternalException("Non-standard exception "\
-                                      "encountered during command " +
-                                      cmd.first_field() + " execution. ");
+            // Should never hit this, so bail immediately if we do
+            throw SRInternalException(
+                "Non-standard exception encountered executing command " +
+                cmd.first_field());
         }
 
+        // If we get here, the execution attempt failed.
+        // Sleep before the next attempt
         std::this_thread::sleep_for(std::chrono::milliseconds(_command_interval));
     }
 
-    // If we get here, we've either run out of retry attempts or gotten
-    // a failure back from the database
-    if (executed) {
-        if (reply.has_error() > 0)
-            reply.print_reply_error();
-        throw SRRuntimeException("Redis failed to execute command: " +
-                                 cmd.first_field());
-    }
-
-    // Since we didn't execute, we must have run out of retry attempts
+    // If we get here, we've run out of retry attempts
     throw SRTimeoutException("Unable to execute command" + cmd.first_field());
 }
 
@@ -482,57 +503,70 @@ inline void Redis::_add_to_address_map(std::string address_port)
 
 inline void Redis::_connect(std::string address_port)
 {
-    // Try to create the sw::redis::Redis object
-    try {
-        _redis = new sw::redis::Redis(address_port);
-    }
-    catch (sw::redis::Error& e) {
-        _redis = NULL;
-        throw SRDatabaseException(std::string("Unable to connect to "\
-                                  "backend Redis database: ") +
-                                  e.what());
-    }
-    catch (std::bad_alloc& e) {
-        throw SRBadAllocException("Redis connection");
-    }
-    catch (std::exception& e) {
-        _redis = NULL;
-        throw SRRuntimeException("Failed to create Redis object with error: " +
-                                 std::string(e.what()));
-    }
-    catch (...) {
-        _redis = NULL;
-        throw SRInternalException("A non-standard exception encountered "\
-                                  "during client connection.");
-    }
-
-    // Attempt to have the sw::redis::Redis object
-    // make a connection using the PING command
     for (int i = 1; i <= _connection_attempts; i++) {
         try {
+            // Try to create the sw::redis::Redis object
+            _redis = new sw::redis::Redis(address_port);
+
+            // Attempt to have the sw::redis::Redis object
+            // make a connection using the PING command
             if (_redis->ping().compare("PONG") == 0) {
                 return;
             }
-            else if (i == _connection_attempts) {
-                throw SRTimeoutException(std::string("Connection attempt "\
-                                         "failed after ") +
-                                         std::to_string(i) + "tries");
+        }
+        catch (std::bad_alloc& e) {
+            // On a memory error, bail immediately
+            if (_redis != NULL) {
+                delete _redis;
+                _redis = NULL;
+            }
+            throw SRBadAllocException("Redis connection");
+        }
+        catch (sw::redis::Error& e) {
+            // For an error from Redis, retry unless we're out of chances
+            if (_redis != NULL) {
+                delete _redis;
+                _redis = NULL;
+            }
+            if (i == _connection_attempts) {
+                throw SRDatabaseException(
+                    std::string("Unable to connect to backend database: ") +
+                                e.what());
             }
         }
         catch (std::exception& e) {
-            if (i == _connection_attempts) {
-                throw SRRuntimeException(e.what());
+            // Should never hit this, so bail immediately if we do
+            if (_redis != NULL) {
+                delete _redis;
+                _redis = NULL;
             }
+            throw SRInternalException(
+                std::string("Unexpected exception while connecting: ") +
+                e.what());
         }
         catch (...) {
-            if (i == _connection_attempts) {
-                throw SRRuntimeException("A non-standard exception encountered"\
-                                         " during client connection.");
+            // Should never hit this, so bail immediately if we do
+            if (_redis != NULL) {
+                delete _redis;
+                _redis = NULL;
             }
+            throw SRInternalException(
+                "A non-standard exception encountered "\
+                "during client connection.");
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(_connection_interval));
+
+        // Delay before the retry
+        if (_redis != NULL) {
+            delete _redis;
+            _redis = NULL;
+        }
+        if (i < _connection_attempts) {
+            std::this_thread::sleep_for(
+                std::chrono::milliseconds(_connection_interval));
+        }
     }
 
-    // Should never get here
-    throw SRInternalException("End of _connect reached unexpectedly");
+    // If we get here, we've run out of retry attempts
+    throw SRTimeoutException(std::string("Connection attempt failed after ") +
+                             std::to_string(_connection_attempts) + "tries");
 }

@@ -608,101 +608,117 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
     std::string_view sv_prefix(db_prefix.data(), db_prefix.size());
 
     // Execute the commmand
-    CommandReply reply;
-    bool executed = false;
     for (int i = 1; i <= _command_attempts; i++) {
         try {
             sw::redis::Redis db = _redis_cluster->redis(sv_prefix, false);
-            reply = db.command(cmd.cbegin(), cmd.cend());
+            CommandReply reply = db.command(cmd.cbegin(), cmd.cend());
             if (reply.has_error() == 0) {
                 _last_prefix = db_prefix;
                 return reply;
             }
-            executed = true;
-            break;
+
+            // On an error response, print the response and bail
+            reply.print_reply_error();
+            throw SRRuntimeException(
+                "Redis failed to execute command: " + cmd.first_field());
+        }
+        catch (SmartRedis::Exception& e) {
+            // Exception is already prepared, just propagate it
+            throw;
         }
         catch (sw::redis::IoError &e) {
-            // Fall through for a retry
+            // For an error from Redis, retry unless we're out of chances
+            if (i == _command_attempts) {
+                throw SRDatabaseException(
+                    std::string("Redis IO error when executing commend: ") +
+                    e.what());
+            }
+            // else, Fall through for a retry
         }
         catch (sw::redis::ClosedError &e) {
-            // Fall through for a retry
+            // For an error from Redis, retry unless we're out of chances
+            if (i == _command_attempts) {
+                throw SRDatabaseException(
+                    std::string("Redis Closed error when executing commend: ") +
+                    e.what());
+            }
+            // else, Fall through for a retry
+        }
+        catch (sw::redis::Error &e) {
+            // For other errors from Redis, report them immediately
+            throw SRRuntimeException(
+                std::string("Redis error when executing commend: ") +
+                e.what());
         }
         catch (std::exception& e) {
-            throw SRRuntimeException(e.what());
+            // Should never hit this, so bail immediately if we do
+            throw SRInternalException(
+                std::string("Unexpected exception executing command: ") +
+                e.what());
         }
         catch (...) {
-            throw SRInternalException("A non-standard exception encountered "\
-                                      "during command " + cmd.first_field() +
-                                      " execution.");
+            // Should never hit this, so bail immediately if we do
+            throw SRInternalException(
+                "Non-standard exception encountered executing command " +
+                cmd.first_field());
         }
 
         // Sleep before the next attempt
         std::this_thread::sleep_for(std::chrono::milliseconds(_command_interval));
     }
 
-    // If we get here, we've either run out of retry attempts or gotten
-    // a failure back from the database
-    if (executed) {
-        if (reply.has_error() > 0)
-            reply.print_reply_error();
-        throw SRRuntimeException("Redis failed to execute command: " +
-                                 cmd.first_field());
-    }
-
-    // Since we didn't execute, we must have run out of retry attempts
+    // If we get here, we've run out of retry attempts
     throw SRTimeoutException("Unable to execute command " + cmd.first_field());
 }
 
 // Connect to the cluster at the address and port
 inline void RedisCluster::_connect(std::string address_port)
 {
-    const int n_trials = 10;
     for (int i = 1; i <= _connection_attempts; i++) {
         try {
+            // Attempt the connection
             _redis_cluster = new sw::redis::RedisCluster(address_port);
             return;
         }
-        catch (sw::redis::Error& e) {
-            _redis_cluster = NULL;
-            throw SRDatabaseException(std::string("Unable to connect to "\
-                                      "backend Redis database: ") +
-                                      e.what());
-        }
         catch (std::bad_alloc& e) {
+            // On a memory error, bail immediately
+            _redis_cluster = NULL;
             throw SRBadAllocException("RedisCluster connection");
         }
+        catch (sw::redis::Error& e) {
+            // For an error from Redis, retry unless we're out of chances
+            _redis_cluster = NULL;
+            if (i == _connection_attempts) {
+                throw SRDatabaseException(
+                    std::string("Unable to connect to backend database: ") +
+                    e.what());
+            }
+            // Else, fall through to retry
+        }
         catch (std::exception& e) {
-            if (_redis_cluster != NULL) {
-                delete _redis_cluster;
-                _redis_cluster = NULL;
-            }
-            if (i == n_trials) {
-                throw SRRuntimeException(e.what());
-            }
+            // Should never hit this, so bail immediately if we do
+            _redis_cluster = NULL;
+            throw SRInternalException(
+                std::string("Unexpected exception while connecting: ") +
+                e.what());
         }
         catch (...) {
-            if (_redis_cluster != NULL) {
-                delete _redis_cluster;
-                _redis_cluster = NULL;
-            }
-            if (i == n_trials) {
-                throw SRInternalException("A non-standard exception was "\
-                                          "encountered during client "\
-                                          "connection.");
-            }
+            // Should never hit this, so bail immediately if we do
+            _redis_cluster = NULL;
+            throw SRInternalException(
+                "A non-standard exception was encountered during client "\
+                "connection.");
         }
 
+        // If we get here, the connection attempt failed.
         // Sleep before the next attempt
-        if (_redis_cluster != NULL) {
-            delete _redis_cluster;
-            _redis_cluster = NULL;
-        }
+        _redis_cluster = NULL;
         std::this_thread::sleep_for(std::chrono::milliseconds(_connection_interval));
     }
 
     // If we get here, we failed to establish a connection
     throw SRTimeoutException(std::string("Connection attempt failed after ") +
-                                         std::to_string(_connection_attempts) + "tries");
+                             std::to_string(_connection_attempts) + "tries");
 }
 
 // Map the RedisCluster via the CLUSTER SLOTS command
