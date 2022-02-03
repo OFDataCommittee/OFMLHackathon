@@ -506,10 +506,9 @@ void Client::set_model(const std::string& key,
         throw SRParameterException("device is a required "
                                    "parameter of set_model.");
     }
-
     if (device.compare("CPU") != 0 &&
         std::string(device).find("GPU") == std::string::npos) {
-        throw SRRuntimeException(backend + " is not a valid backend.");
+        throw SRRuntimeException(device + " is not a valid device.");
     }
 
     std::string p_key = _build_model_key(key, false);
@@ -555,6 +554,15 @@ void Client::set_script(const std::string& key,
                         const std::string& device,
                         const std::string_view& script)
 {
+    if (device.size() == 0) {
+        throw SRParameterException("device is a required "
+                                   "parameter of set_script.");
+    }
+    if (device.compare("CPU") != 0 &&
+        std::string(device).find("GPU") == std::string::npos) {
+        throw SRRuntimeException(device + " is not a valid device.");
+    }
+
     std::string s_key = _build_model_key(key, false);
     _redis_server->set_script(s_key, device, script);
 }
