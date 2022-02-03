@@ -45,8 +45,11 @@ void SRSetLastError(const Exception& last_error)
   if (!__debug_level_checked)
   {
     __debug_level_checked = true;
-     std::string dbgLevel(getenv("SMARTREDIS_DEBUG_LEVEL"));
-     __debug_level_verbose = dbgLevel.compare("VERBOSE") == 0;
+    char *dbg_setting = getenv("SMARTREDIS_DEBUG_LEVEL");
+    if (dbg_setting != NULL) {
+      std::string dbgLevel(dbg_setting);
+      __debug_level_verbose = dbgLevel.compare("VERBOSE") == 0;
+    }
   }
 
   // Print out the error message if verbose
