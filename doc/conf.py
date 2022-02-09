@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'SmartRedis'
-copyright = '2021, Hewlett Packard Enterprise'
+copyright = '2022, Hewlett Packard Enterprise'
 author = 'HPE AI & Advanced Productivity'
 
 # The full version, including alpha/beta/rc tags
