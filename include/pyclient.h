@@ -540,11 +540,11 @@ class PyClient
         */
         void config_set(std::string config_param, std::string value, std::string address);
 
-        /*
+        /*!
         *   \brief Performs a synchronous save of the database shard producing a point in
         *          time snapshot of all the data inside the Redis instance  in the form of
         *          an RDB file.
-        *   \param address The address of the database node (host:port)
+        *   \param addresses The addressees of database nodes (host:port)
         *   \throw RuntimeException if the address is not addressable by this
         *          client or if command fails to execute
         */

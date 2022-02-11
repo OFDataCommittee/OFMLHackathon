@@ -228,12 +228,12 @@ class Command
         std::string to_string();
 
         /*!
-        *   \typedef An iterator type for iterating over all Command fields
+        *   \brief An iterator type for iterating over all Command fields
         */
         typedef std::vector<std::string_view>::iterator iterator;
 
         /*!
-        *   \typedef An iterator type for iterating over all Command fields
+        *   \brief An iterator type for iterating over all Command fields
         */
         typedef std::vector<std::string_view>::const_iterator const_iterator;
 

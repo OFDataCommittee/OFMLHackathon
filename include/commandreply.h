@@ -40,7 +40,7 @@ namespace SmartRedis {
 class CommandReply;
 
 /*!
-*   \typedef Redis++ command reply type
+*   \brief Redis++ command reply type
 */
 typedef std::unique_ptr<redisReply, sw::redis::ReplyDeleter>
         RedisReplyUPtr;

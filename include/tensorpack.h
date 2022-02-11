@@ -117,14 +117,14 @@ class TensorPack
         void add_tensor(TensorBase* tensor);
 
         /*!
-        *   \typedef An iterator type for iterating
+        *   \brief An iterator type for iterating
         *            over all TensorBase items
         */
         typedef std::forward_list<TensorBase*>::iterator
                 tensorbase_iterator;
 
         /*!
-        *   \typedef A const iterator type for iterating
+        *   \brief A const iterator type for iterating
         *            over all TensorBase items
         */
         typedef std::forward_list<TensorBase*>::const_iterator

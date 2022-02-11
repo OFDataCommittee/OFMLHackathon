@@ -90,13 +90,13 @@ class CommandList
         T* add_command();
 
         /*!
-        *   \typedef An iterator type for iterating
+        *   \brief An iterator type for iterating
         *            over all Commands
         */
         typedef std::vector<Command*>::iterator iterator;
 
         /*!
-        *   \typedef A const iterator type for iterating
+        *   \brief A const iterator type for iterating
         *            over all Commands
         */
         typedef std::vector<Command*>::const_iterator const_iterator;

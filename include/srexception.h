@@ -203,8 +203,7 @@ class BadAllocException: public Exception
 };
 
 /*!
-*   \def SRBadAllocException Instantiate a BadAllocException with message
-*                            \a txt for file \a __FILE__, line \a __LINE__
+*   \brief Instantiate a BadAllocException with message
 */
 #define SRBadAllocException(txt) BadAllocException(txt, __FILE__, __LINE__)
 
@@ -227,8 +226,7 @@ class DatabaseException: public Exception
 };
 
 /*!
-*   \def SRDatabaseException Instantiate a DatabaseException with message
-*                            \a txt for file \a __FILE__, line \a __LINE__
+*   \brief Instantiate a DatabaseException with message
 */
 #define SRDatabaseException(txt) DatabaseException(txt, __FILE__, __LINE__)
 
@@ -251,9 +249,8 @@ class RuntimeException: public Exception
 };
 
 /*!
-*   \def SRRuntimeException Instantiate a RuntimeException with message
-*                           \a txt for file \a __FILE__, line \a __LINE__
-*/
+*   \brief Instantiate a RuntimeException with message
+\*/
 #define SRRuntimeException(txt) RuntimeException(txt, __FILE__, __LINE__)
 
 
@@ -275,8 +272,7 @@ class ParameterException: public Exception
 };
 
 /*!
-*   \def SRParameterException Instantiate a ParameterException with message
-*                             \a txt for file \a __FILE__, line \a __LINE__
+*   \brief Instantiate a ParameterException with message
 */
 #define SRParameterException(txt) ParameterException(txt, __FILE__, __LINE__)
 
@@ -299,8 +295,7 @@ class TimeoutException: public Exception
 };
 
 /*!
-*   \def SRTimeoutException Instantiate a TimeoutException with message
-*                           \a txt for file \a __FILE__, line \a __LINE__
+*   \brief Instantiate a TimeoutException with message
 */
 #define SRTimeoutException(txt) TimeoutException(txt, __FILE__, __LINE__)
 
@@ -323,8 +318,7 @@ class InternalException: public Exception
 };
 
 /*!
-*   \def SRInternalException Instantiate a InternalException with message
-*                            \a txt for file \a __FILE__, line \a __LINE__
+*   \brief Instantiate a InternalException with message
 */
 #define SRInternalException(txt) InternalException(txt, __FILE__, __LINE__)
 
@@ -347,8 +341,7 @@ class KeyException: public Exception
 };
 
 /*!
-*   \def SRKeyException Instantiate a KeyException with message
-*                       \a txt for file \a __FILE__, line \a __LINE__
+*   \brief Instantiate a KeyException with message
 */
 #define SRKeyException(txt) KeyException(txt, __FILE__, __LINE__)
 
@@ -370,8 +363,7 @@ class TypeException: public Exception
 };
 
 /*!
-*   \def SRTypeException Instantiate a TypeException with message
-*                        \a txt for file \a __FILE__, line \a __LINE__
+*   \brief Instantiate a TypeException with message
 */
 #define SRTypeException(txt) TypeException(txt, __FILE__, __LINE__)
 

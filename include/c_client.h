@@ -629,7 +629,7 @@ SRError tensor_exists(void* c_client,
                       bool* exists);
 
 /*!
-*   \brief Check if a model or script \exists in the database
+*   \brief Check if a model or script exists in the database
 *   \details The model or script key used to check for existence
 *            may be formed by applying a prefix to the supplied
 *            name. See set_data_source()

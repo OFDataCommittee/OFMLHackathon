@@ -50,7 +50,7 @@ inline bool throw_runtime_exception(const std::string &txt, const char *file, in
 }
 
 /*!
-*   \def SR_ASSERT Assert that a \a condition is true or throw a RuntimeException
+*   \brief Assert that a condition is true or throw a RuntimeException
 */
 #define SR_ASSERT(condition) \
     ((condition) || throw_runtime_exception(std::string("Assertion failed!") + #condition, __FILE__, __LINE__))
@@ -71,7 +71,7 @@ inline bool throw_param_exception(const std::string &txt, const char *file, int 
 }
 
 /*!
-*   \def SR_CHECK_PARAMS Validate a parameter list (via a boolean \a condition) or throw a RuntimeException
+*   \brief Validate a parameter list (via a boolean condition) or throw a RuntimeException
 */
 #define SR_CHECK_PARAMS(condition) \
     ((condition) || throw_param_exception(std::string("Assertion failed!") + #condition, __FILE__, __LINE__))

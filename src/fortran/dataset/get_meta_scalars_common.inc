@@ -24,6 +24,8 @@
 ! OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+  !** Beginning of code common to all get_meta_scalar subroutines
+
   character(kind=c_char, len=len_trim(name))  :: c_name
   integer(kind=enum_kind) :: c_data_type
   integer(kind=c_size_t) :: name_length, meta_length
@@ -33,3 +35,5 @@
   name_length = len_trim(name)
   code = get_meta_scalars_c(self%dataset_ptr, c_name, name_length, meta_length, c_data_type, result_ptr)
   call c_f_pointer(result_ptr, meta, [meta_length])
+
+  !** End of code common to all get_meta_scalar subroutines

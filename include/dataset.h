@@ -288,12 +288,12 @@ class DataSet
     protected:
 
         /*!
-        *   \typedef Iterator for Tensor in the dataset
+        *   \brief Iterator for Tensor in the dataset
         */
         typedef TensorPack::tensorbase_iterator tensor_iterator;
 
         /*!
-        *   \typedef Const iterator for Tensor in the dataset
+        *   \brief Const iterator for Tensor in the dataset
         */
         typedef TensorPack::const_tensorbase_iterator const_tensor_iterator;
 

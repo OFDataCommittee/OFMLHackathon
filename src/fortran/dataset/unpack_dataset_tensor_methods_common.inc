@@ -24,6 +24,8 @@
 ! OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+  !** Beginning of code common to all unpack_dataset_tensor subroutines
+
   class(dataset_type),                  intent(in) :: self !< Pointer to the initialized dataset
   character(len=*),                     intent(in) :: name !< The name to use to place the tensor
   integer, dimension(:),                intent(in) :: dims !< Length along each dimension of the tensor
@@ -44,3 +46,5 @@
   c_n_dims = size(dims)
   c_dims_ptr = c_loc(c_dims)
   mem_layout = c_fortran_contiguous
+
+  !** End of code common to all unpack_dataset_tensor subroutines

@@ -55,6 +55,9 @@ namespace SmartRedis {
 
 class Client;
 
+/*!
+*  \brief The database response to a command
+*/
 typedef redisReply ReplyElem;
 
 ///@file

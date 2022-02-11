@@ -30,6 +30,10 @@
 #define SMARTREDIS_DBINFOCOMMAND_H
 
 #include "addressatcommand.h"
+
+/*!
+*  \brief A nested map of reply data from a database response
+*/
 using parsed_reply_nested_map = std::unordered_map<std::string,
                                 std::unordered_map<std::string, std::string>>;
 

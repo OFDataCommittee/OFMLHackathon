@@ -31,6 +31,9 @@
 
 #include "addressatcommand.h"
 
+/*!
+*  \brief A map of reply data from a database response
+*/
 using parsed_reply_map = std::unordered_map<std::string, std::string>;
 
 ///@file
