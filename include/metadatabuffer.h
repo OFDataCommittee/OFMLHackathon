@@ -106,10 +106,9 @@ extern inline bool safe_to_read(const size_t& byte_position,
 *   \param buf The data buffer
 *   \param byte_position The current position in the buffer
 *   \param total_bytes The total bytes in the buffer
-*   \param n_values The number of values to read
 *   \tparam T The data type that is to be read from buffer
 *   \return The value read from the buffer
-*   \throw SRRuntimeException if an attempt is made to read
+*   \throw RuntimeException if an attempt is made to read
 *          beyond the buffer length.
 */
 template <typename T>
@@ -165,7 +164,7 @@ extern inline bool advance(void*& buf,
 *   \param n_chars The number of characters in the string
 *                  to be read
 *   \return The string read from the buffer
-*   \throw SRRuntimeException if an attempt is made to read
+*   \throw RuntimeException if an attempt is made to read
 *          beyond the buffer length.
 */
 extern inline std::string read_string(void* buf,

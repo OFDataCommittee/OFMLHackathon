@@ -254,9 +254,9 @@ end function tensor_exists
 
 !> Check if the specified dataset exists in the database
 function dataset_exists(this, dataset_name, exists) result(code)
-  class(client_type),   intent(in)  :: this
-  character(len=*),     intent(in)  :: dataset_name
-  logical(kind=c_bool), intent(out) :: exists      !< Receives whether the model exists
+  class(client_type),   intent(in)  :: this          !< The client
+  character(len=*),     intent(in)  :: dataset_name  !< The dataset to check
+  logical(kind=c_bool), intent(out) :: exists        !< Receives whether the model exists
   integer(kind=enum_kind)           :: code
 
   character(kind=c_char, len=len_trim(dataset_name)) :: c_dataset_name

@@ -70,55 +70,117 @@ namespace SmartRedis {
 class Exception: public std::exception
 {
     public:
+    /*!
+    *   \brief Exception default constructor
+    *   \param what_arg The message for the exception
+    */
     Exception(const char* what_arg)
       : _msg(what_arg)
     {
         // NOP
     }
 
+    /*!
+    *   \brief Exception constructor with location information
+    *   \param what_arg The message for the exception
+    *   \param file The source file from which the exception was thrown
+    *   \param line The line number from which the exception was thrown
+    */
     Exception(const char* what_arg, const char* file, int line)
       : _msg(what_arg), _loc(file + std::string(":") + std::to_string(line))
     {
         // NOP
     }
 
+    /*!
+    *   \brief Exception constructor with location information
+    *   \param what_arg The message for the exception
+    *   \param file The source file from which the exception was thrown
+    *   \param line The line number from which the exception was thrown
+    */
     Exception(const std::string& what_arg, const char* file, int line)
       : _msg(what_arg), _loc(file + std::string(":") + std::to_string(line))
     {
         // NOP
     }
 
+    /*!
+    *   \brief Exception copy constructor
+    *   \param other Exception to copy
+    */
     Exception(const Exception& other) noexcept
       : _msg(other._msg), _loc(other._loc)
     {
         // NOP
     }
 
+    /*!
+    *   \brief Exception copy constructor for std::exception
+    *   \param other Standard exception to copy
+    */
     Exception(const std::exception& other) noexcept
       : _msg(other.what())
     {
         // NOP
     }
 
-    Exception& operator=(const Exception &) = default;
-    Exception(Exception &&) = default;
-    Exception& operator=(Exception &&) = default;
+    /*!
+    *   \brief Exception assignment operator
+    *   \param other Exception to assign
+    */
+    Exception& operator=(const Exception& other) = default;
+
+    /*!
+    *   \brief Exception move constructor
+    *   \param other Exception to move
+    */
+    Exception(Exception&& other) = default;
+
+    /*!
+    *   \brief Exception move assignment operator
+    *   \param other Exception to move
+    */
+    Exception& operator=(Exception&& other) = default;
+
+    /*!
+    *   \brief Exception destructor
+    */
     virtual ~Exception() override = default;
 
+    /*!
+    *   \brief Retrieve an error code matching the exception type
+    *   \returns Error code corresponding to the exception type
+    */
     virtual SRError to_error_code() const noexcept {
         return SRInvalidError;
     }
 
+    /*!
+    *   \brief Retrieve the message for an exception
+    *   \returns String of message data
+    */
     virtual const char* what() const noexcept{
         return _msg.c_str();
     }
 
+    /*!
+    *   \brief Retrieve the location data for an exception
+    *   \returns String with location data
+    */
     virtual const char* where() const noexcept {
         return _loc.c_str();
     }
 
     protected:
+
+    /*!
+    *   \brief  The exception message text
+    */
     std::string _msg;
+
+    /*!
+    *   \brief  The exception location text
+    */
     std::string _loc;
 };
 
@@ -131,11 +193,19 @@ class BadAllocException: public Exception
     public:
     using Exception::Exception;
 
+    /*!
+    *   \brief Retrieve an error code matching the exception type
+    *   \returns Error code corresponding to the exception type
+    */
     virtual SRError to_error_code() const noexcept {
         return SRBadAllocError;
     }
 };
 
+/*!
+*   \def SRBadAllocException Instantiate a BadAllocException with message
+*                            \a txt for file \a __FILE__, line \a __LINE__
+*/
 #define SRBadAllocException(txt) BadAllocException(txt, __FILE__, __LINE__)
 
 
@@ -147,11 +217,19 @@ class DatabaseException: public Exception
     public:
     using Exception::Exception;
 
+    /*!
+    *   \brief Retrieve an error code matching the exception type
+    *   \returns Error code corresponding to the exception type
+    */
     virtual SRError to_error_code() const noexcept {
         return SRDatabaseError;
     }
 };
 
+/*!
+*   \def SRDatabaseException Instantiate a DatabaseException with message
+*                            \a txt for file \a __FILE__, line \a __LINE__
+*/
 #define SRDatabaseException(txt) DatabaseException(txt, __FILE__, __LINE__)
 
 
@@ -163,11 +241,19 @@ class RuntimeException: public Exception
     public:
     using Exception::Exception;
 
+    /*!
+    *   \brief Retrieve an error code matching the exception type
+    *   \returns Error code corresponding to the exception type
+    */
     virtual SRError to_error_code() const noexcept {
         return SRRuntimeError;
     }
 };
 
+/*!
+*   \def SRRuntimeException Instantiate a RuntimeException with message
+*                           \a txt for file \a __FILE__, line \a __LINE__
+*/
 #define SRRuntimeException(txt) RuntimeException(txt, __FILE__, __LINE__)
 
 
@@ -179,11 +265,19 @@ class ParameterException: public Exception
     public:
     using Exception::Exception;
 
+    /*!
+    *   \brief Retrieve an error code matching the exception type
+    *   \returns Error code corresponding to the exception type
+    */
     virtual SRError to_error_code() const noexcept {
         return SRParameterError;
     }
 };
 
+/*!
+*   \def SRParameterException Instantiate a ParameterException with message
+*                             \a txt for file \a __FILE__, line \a __LINE__
+*/
 #define SRParameterException(txt) ParameterException(txt, __FILE__, __LINE__)
 
 
@@ -195,11 +289,19 @@ class TimeoutException: public Exception
     public:
     using Exception::Exception;
 
+    /*!
+    *   \brief Retrieve an error code matching the exception type
+    *   \returns Error code corresponding to the exception type
+    */
     virtual SRError to_error_code() const noexcept {
         return SRTimeoutError;
     }
 };
 
+/*!
+*   \def SRTimeoutException Instantiate a TimeoutException with message
+*                           \a txt for file \a __FILE__, line \a __LINE__
+*/
 #define SRTimeoutException(txt) TimeoutException(txt, __FILE__, __LINE__)
 
 
@@ -211,11 +313,19 @@ class InternalException: public Exception
     public:
     using Exception::Exception;
 
+    /*!
+    *   \brief Retrieve an error code matching the exception type
+    *   \returns Error code corresponding to the exception type
+    */
     virtual SRError to_error_code() const noexcept {
         return SRInternalError;
     }
 };
 
+/*!
+*   \def SRInternalException Instantiate a InternalException with message
+*                            \a txt for file \a __FILE__, line \a __LINE__
+*/
 #define SRInternalException(txt) InternalException(txt, __FILE__, __LINE__)
 
 
@@ -227,11 +337,19 @@ class KeyException: public Exception
     public:
     using Exception::Exception;
 
+    /*!
+    *   \brief Retrieve an error code matching the exception type
+    *   \returns Error code corresponding to the exception type
+    */
     virtual SRError to_error_code() const noexcept {
         return SRKeyError;
     }
 };
 
+/*!
+*   \def SRKeyException Instantiate a KeyException with message
+*                       \a txt for file \a __FILE__, line \a __LINE__
+*/
 #define SRKeyException(txt) KeyException(txt, __FILE__, __LINE__)
 
 /*!
@@ -242,15 +360,25 @@ class TypeException: public Exception
     public:
     using Exception::Exception;
 
+    /*!
+    *   \brief Retrieve an error code matching the exception type
+    *   \returns Error code corresponding to the exception type
+    */
     virtual SRError to_error_code() const noexcept {
         return SRTypeError;
     }
 };
 
+/*!
+*   \def SRTypeException Instantiate a TypeException with message
+*                        \a txt for file \a __FILE__, line \a __LINE__
+*/
 #define SRTypeException(txt) TypeException(txt, __FILE__, __LINE__)
 
 /*!
-*   \brief  Store the last error encountered
+*   \brief Store the last error encountered in a global variable. Not
+*          currently thread-safe
+*   \param last_error Exception to be stored as the last error encountered
 */
 extern "C"
 void SRSetLastError(const Exception& last_error);

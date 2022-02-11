@@ -48,7 +48,7 @@ class MetadataField {
     /*!
     *   \brief MetadataField constructor
     *   \param name The name used to reference the metadata field
-    *   \param MetaDataType The metadata type for this field
+    *   \param type The metadata type for this field
     */
     MetadataField(const std::string& name, SRMetaDataType type);
 

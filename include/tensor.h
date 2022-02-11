@@ -148,10 +148,11 @@ class Tensor : public TensorBase
         *            source data value. As a result, the initial
         *            all of this function SHOULD NOT
         *            use the returned value.
-        *   \param data The nested data to copy to the
-        *               contiguous memory location
+        *   \param src_data The nested data to copy to the
+        *                   contiguous memory location
         *   \param dims The dimensions of src_data
-        *   \param mem_layout The destination memory space (contiguous)
+        *   \param n_dims The number of dimensions in dims
+        *   \param dest_data The contiguous buffer to receive copied data
         *   \returns A pointer that is for recursive functionality
         *            only.  The initial caller SHOULD NOT use
         *            this pointer.

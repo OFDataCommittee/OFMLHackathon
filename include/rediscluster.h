@@ -176,7 +176,7 @@ class RedisCluster : public RedisServer
 
         /*!
          *  \brief Check if address is valid
-         *  \param addresss address of database
+         *  \param address address of database
          *  \param port port of database
          *  \return True if address is valid
          */
@@ -234,8 +234,8 @@ class RedisCluster : public RedisServer
         /*!
         *   \brief Copy a vector of tensors from source keys
         *          to destination keys
-        *   \param src_key Vector of source keys
-        *   \param dest_key Vector of destination keys
+        *   \param src Vector of source keys
+        *   \param dest Vector of destination keys
         *   \returns The CommandReply from the last Command
         *            execution in the copying of the tensor.
         *            Different implementations may have different
@@ -356,7 +356,7 @@ class RedisCluster : public RedisServer
         /*!
         *   \brief Get a DBNode prefix for the provided hash slot
         *   \param hash_slot The hash slot to get a prefix for
-        *   \throw SRRuntimeException if there is an error
+        *   \throw RuntimeException if there is an error
         *          creating a prefix for a particular hash slot
         *          or if hash_slot is greater than 16384.
         */
@@ -408,7 +408,7 @@ class RedisCluster : public RedisServer
         *          the correct database for a given command
         *   \param cmd The Command to analyze for DBNode prefix
         *   \returns The DBNode prefix as a string
-        *   \throw SRRuntimeException if the Command does not have
+        *   \throw RuntimeException if the Command does not have
         *          keys or if multiple keys have different prefixes
         */
         std::string _get_db_node_prefix(Command& cmd);
@@ -417,7 +417,7 @@ class RedisCluster : public RedisServer
         *   \brief Processes the CommandReply for CLUSTER SLOTS
         *          to build DBNode information
         *   \param reply The CommandReply for CLUSTER SLOTS
-        *   \throw SRRuntimeException if there is an error
+        *   \throw RuntimeException if there is an error
         *          creating a prefix for a particular DBNode
         */
         inline void _parse_reply_for_slots(CommandReply& reply);
@@ -501,7 +501,7 @@ class RedisCluster : public RedisServer
         *           enforce identical hash slot constraint
         *   \param names The keys that need to be updated for identical
         *                hash slot constraint
-        *   \param prefix The prefix to attach
+        *   \param db_prefix The prefix to attach
         *   \returns A vector of updated names
         */
         std::vector<std::string>  _get_tmp_names(std::vector<std::string> names,
@@ -510,13 +510,10 @@ class RedisCluster : public RedisServer
         /*!
         *   \brief  Delete multiple keys with the assumption that all
         *           keys use the same hash slot
-        *   \param names The keys that need to be updated for identical
-        *                hash slot constraint
-        *   \param prefix The prefix to attach
+        *   \param keys The keys to be deleted
         *   \returns A vector of updated names
         */
-        void _delete_keys(std::vector<std::string> key
-                          );
+        void _delete_keys(std::vector<std::string> keys);
 
         /*!
         *   \brief  Run a model in the database that uses dagrun

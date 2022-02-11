@@ -107,15 +107,14 @@ class SharedMemoryList {
     /*!
     *   \brief  Perform an allocation based on number of
     *           values and store in the inventory
-    *   \param bytes The number of values to allocate
+    *   \param n_values The number of values to allocate
     *   \returns A pointer to the memory allocation
     */
     T* allocate(size_t n_values);
 
     private:
     /*!
-    *   \brief  Forward list to track allocation
-    *           sizes and locations in memory
+    *   \brief  Forward list to track allocation sizes and locations in memory
     */
     typename std::forward_list<std::shared_ptr<T>> _inventory;
 

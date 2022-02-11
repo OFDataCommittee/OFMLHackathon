@@ -47,14 +47,14 @@ class ScalarField : public MetadataField {
         /*!
         *   \brief ScalarField constructor
         *   \param name The name used to reference the scalar field
-        *   \param MetaDataType The metadata type for this field
+        *   \param type The metadata type for this field
         */
         ScalarField(const std::string& name, SRMetaDataType type);
 
         /*!
         *   \brief ScalarField constructor with initial values
         *   \param name The name used to reference the scalar field
-        *   \param MetaDataType The metadata type for this field
+        *   \param type The metadata type for this field
         *   \param vals Initial values to be copied into the ScalarField
         */
         ScalarField(const std::string& name,
@@ -64,7 +64,7 @@ class ScalarField : public MetadataField {
         /*!
         *   \brief ScalarField constructor with initial values
         *   \param name The name used to reference the scalar field
-        *   \param MetaDataType The metadata type for this field
+        *   \param type The metadata type for this field
         *   \param vals Initial values to be placed in the Scalarfield
         *               via move semantics
         */

@@ -110,7 +110,7 @@ class DBNode{
         *          if the lower hash slot of this
         *          node is less than the other lower
         *          hash slot.
-        *   \param db_nodes DBNode to compare to
+        *   \param db_node DBNode to compare to
         */
         bool operator<(const DBNode& db_node) const;
 

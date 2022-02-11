@@ -25,7 +25,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from .error import *
-import functools
+from functools import wraps
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
 class Dtypes:
     @staticmethod
@@ -81,7 +81,7 @@ def exception_handler(func):
     :type func: function
     :raises RedisReplyError: if the wrapped function raised an exception
     """
-    @functools.wraps(exception_handler)
+    @wraps(func)
     def smartredis_api_wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)

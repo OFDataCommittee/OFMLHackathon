@@ -36,48 +36,50 @@ integer, parameter :: enum_kind = kind(dummy)
 
 ! TensorType
 enum, bind(c)
-  enumerator :: tensor_invalid = -1
-  enumerator :: tensor_dbl     = 1
-  enumerator :: tensor_flt     = 2
-  enumerator :: tensor_int8    = 3
-  enumerator :: tensor_int16   = 4
-  enumerator :: tensor_int32   = 5
-  enumerator :: tensor_int64   = 6
-  enumerator :: tensor_uint8   = -1
-  enumerator :: tensor_uint16  = -1
+  enumerator :: tensor_invalid = -1 ! Invalid or uninitialized tensor type
+  enumerator :: tensor_dbl     = 1  ! Double-precision floating point tensor type
+  enumerator :: tensor_flt     = 2  ! Floating point tensor type
+  enumerator :: tensor_int8    = 3  ! 8-bit signed integer tensor type
+  enumerator :: tensor_int16   = 4  ! 16-bit signed integer tensor type
+  enumerator :: tensor_int32   = 5  ! 32-bit signed integer tensor type
+  enumerator :: tensor_int64   = 6  ! 64-bit signed integer tensor type
+  enumerator :: tensor_uint8   = -1 ! 8-bit unsigned integer tensor type
+  enumerator :: tensor_uint16  = -1 ! 16-bit unsigned integer tensor type
 end enum
 
 ! MemoryLayout​
 enum, bind(c)
-  enumerator :: c_invalid            = -1
-  enumerator :: c_nested             = 1
-  enumerator :: c_contiguous         = 2
-  enumerator :: c_fortran_nested     = 3
-  enumerator :: c_fortran_contiguous = 4
+  enumerator :: c_invalid            = -1 ! Invalid or uninitialized memory layout
+  enumerator :: c_nested             = 1  ! Multidimensional row-major array layout with nested arrays of
+                                          ! pointers (contiguous at innermost layer)
+  enumerator :: c_contiguous         = 2  ! Multidimensional row-major array layout in contiguous memory
+  enumerator :: c_fortran_nested     = 3  ! Multidimensional column-major array layout with nested arrays of
+                                          ! pointers (contiguous at innermost layer)
+  enumerator :: c_fortran_contiguous = 4  ! Multidimensional column-major array layout in contiguous memory
 end enum
 
 ! MetadataType​
 enum, bind(c)
-  enumerator :: meta_invalid = -1
-  enumerator :: meta_dbl     = 1
-  enumerator :: meta_flt     = 2
-  enumerator :: meta_int32   = 3
-  enumerator :: meta_int64   = 4
-  enumerator :: meta_uint32  = -1
-  enumerator :: meta_uint64  = -1
-  enumerator :: meta_string  = 7
+  enumerator :: meta_invalid = -1 ! Invalid or uninitialized metadata
+  enumerator :: meta_dbl     = 1  ! Double-precision floating point metadata
+  enumerator :: meta_flt     = 2  ! Floating point metadata
+  enumerator :: meta_int32   = 3  ! 32-bit signed integer metadata
+  enumerator :: meta_int64   = 4  ! 64-bit signed integer metadata
+  enumerator :: meta_uint32  = -1 ! 32-bit unsigned integer metadata
+  enumerator :: meta_uint64  = -1 ! 64-bit unsigned integer metadata
+  enumerator :: meta_string  = 7  ! ASCII text string metadata
 end enum
 
 ! SRError
 enum, bind(c)
-  enumerator :: SRNoError        = 0
-  enumerator :: SRBadAllocError  = 1
-  enumerator :: SRDatabaseError  = 2
-  enumerator :: SRInternalError  = 3
-  enumerator :: SRRuntimeError   = 4
-  enumerator :: SRParameterError = 5
-  enumerator :: SRTimeoutError   = 6
-  enumerator :: SRKeyError       = 7
-  enumerator :: SRInvalidError   = -1
-  enumerator :: SRTypeError      = 9
+  enumerator :: SRNoError        = 0  ! No error
+  enumerator :: SRBadAllocError  = 1  ! Memory allocation error
+  enumerator :: SRDatabaseError  = 2  ! Backend database error
+  enumerator :: SRInternalError  = 3  ! Internal SmartRedis error
+  enumerator :: SRRuntimeError   = 4  ! Runtime error executing an operation
+  enumerator :: SRParameterError = 5  ! Bad parameter error
+  enumerator :: SRTimeoutError   = 6  ! Timeout error
+  enumerator :: SRKeyError       = 7  ! Key error
+  enumerator :: SRInvalidError   = -1 ! Uninitialized error variable
+  enumerator :: SRTypeError      = 9  ! Type mismatch
 end enum

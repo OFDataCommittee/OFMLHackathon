@@ -98,17 +98,15 @@ class MetaData
 
         /*!
         *   \brief MetaData copy assignment operator
-        *   \param metadata The MetaData object
-        *                   to copy for assignment
+        *   \param metadata The MetaData object to copy for assignment
         *   \returns MetaData object reference that has
         *            been assigned the values
         */
-        MetaData& operator=(const MetaData&);
+        MetaData& operator=(const MetaData& metadata);
 
         /*!
         *   \brief MetaData move assignment operator
-        *   \param metadata The MetaData object
-        *                   to move for assignment
+        *   \param metadata The MetaData object to move for assignment
         *   \returns MetaData object reference that has
         *            been assigned the values
         */
@@ -352,6 +350,7 @@ class MetaData
         *          via the c-ptr reference being pointed to the
         *          newly allocated memory.
         *   \tparam The type associated with the SharedMemoryList
+        *   \param name The name of the field to retrieve
         *   \param data A c-ptr reference where metadata values
         *               will be placed after allocation of memory
         *   \param n_values A reference to a variable holding the
