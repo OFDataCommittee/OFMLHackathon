@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,13 +31,25 @@
 
 #include <thread>
 #include <iostream>
+#include "limits.h"
+
 #include <sw/redis++/redis++.h>
+
 #include "command.h"
 #include "commandreply.h"
-#include "commandreplyparser.h"
 #include "commandlist.h"
 #include "tensorbase.h"
 #include "dbnode.h"
+#include "nonkeyedcommand.h"
+#include "keyedcommand.h"
+#include "multikeycommand.h"
+#include "singlekeycommand.h"
+#include "compoundcommand.h"
+#include "addressatcommand.h"
+#include "addressanycommand.h"
+#include "clusterinfocommand.h"
+#include "dbinfocommand.h"
+#include "gettensorcommand.h"
 
 ///@file
 
@@ -57,7 +69,7 @@ class RedisServer {
         /*!
         *   \brief Default constructor
         */
-        RedisServer() = default;
+        RedisServer();
 
         /*!
         *   \brief Default destructor
@@ -65,14 +77,48 @@ class RedisServer {
         virtual ~RedisServer() = default;
 
         /*!
-        *   \brief Run a single-key or single-hash slot
-        *          Command on the server
-        *   \param cmd The single-key or single-hash
-        *              slot Comand to run
+        *   \brief Run a single-key Command on the server
+        *   \param cmd The single-key Comand to run
         *   \returns The CommandReply from the
         *            command execution
         */
-        virtual CommandReply run(Command& cmd) = 0;
+        virtual CommandReply run(SingleKeyCommand& cmd) = 0;
+
+        /*!
+        *   \brief Run a multi-key Command on the server
+        *   \param cmd The multi-key Comand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(MultiKeyCommand& cmd) = 0;
+
+        /*!
+        *   \brief Run a compound Command on the server
+        *   \param cmd The compound Comand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(CompoundCommand& cmd) = 0;
+
+        /*!
+        *   \brief Run a non-keyed Command that
+        *          addresses the given db node on the server
+        *   \param cmd The non-keyed Command that
+        *              addresses the given db node
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAtCommand& cmd) = 0;
+
+        /*!
+        *   \brief Run a non-keyed Command that
+        *          addresses any db node on the server
+        *   \param cmd The non-keyed Command that
+        *              addresses any db node
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAnyCommand& cmd) = 0;
 
         /*!
         *   \brief Run multiple single-key or single-hash slot
@@ -81,10 +127,10 @@ class RedisServer {
         *   \param cmd The CommandList containing multiple
         *              single-key or single-hash
         *              slot Comand to run
-        *   \returns The CommandReply from the last
-        *            command execution
+        *   \returns A list of CommandReply for each Command
+        *            in the CommandList
         */
-        virtual CommandReply run(CommandList& cmd) = 0;
+        virtual std::vector<CommandReply> run(CommandList& cmd) = 0;
 
         /*!
         *   \brief Check if a key exists in the database
@@ -92,6 +138,15 @@ class RedisServer {
         *   \returns True if the key exists, otherwise False
         */
         virtual bool key_exists(const std::string& key) = 0;
+
+        /*!
+        *   \brief Check if a hash field exists
+        *   \param key The key containing the field
+        *   \param field The field in the key to check
+        *   \returns True if the hash field exists, otherwise False
+        */
+        virtual bool hash_field_exists(const std::string& key,
+                                       const std::string& field) = 0;
 
         /*!
          *  \brief Check if a model or script exists in the database
@@ -102,7 +157,7 @@ class RedisServer {
 
         /*!
          *  \brief Check if address and port maps to database node
-         *  \param addresss address of database
+         *  \param address address of database
          *  \param port port of database
          *  \return True if address is valid
          */
@@ -162,8 +217,8 @@ class RedisServer {
         /*!
         *   \brief Copy a vector of tensors from source keys
         *          to destination keys
-        *   \param src_key Vector of source keys
-        *   \param dest_key Vector of destination keys
+        *   \param src Vector of source keys
+        *   \param dest Vector of destination keys
         *   \returns The CommandReply from the last Command
         *            execution in the copying of the tensor.
         *            Different implementations may have different
@@ -272,7 +327,96 @@ class RedisServer {
         */
         virtual CommandReply get_script(const std::string& key) = 0;
 
+        /*!
+        *   \brief Retrieve model/script runtime statistics
+        *   \param address The address of the database node (host:port)
+        *   \param key The key associated with the model or script
+        *   \param reset_stat Boolean indicating if the counters associated
+        *                     with the model or script should be reset.
+        *   \returns The CommandReply that contains the result
+        *            of the AI.INFO execution on the server
+        */
+        virtual CommandReply
+        get_model_script_ai_info(const std::string& address,
+                                 const std::string& key,
+                                 const bool reset_stat) = 0;
+
     protected:
+
+        /*!
+        *   \brief Timeout (in seconds) of connection attempt(s).
+        */
+        int _connection_timeout;
+
+        /*!
+        *   \brief Timeout (in seconds) of command attempt(s).
+        */
+        int _command_timeout;
+
+        /*!
+        *   \brief Interval (in milliseconds) between connection attempts.
+        */
+        int _connection_interval;
+
+        /*!
+        *   \brief Interval (in milliseconds) between command execution attempts.
+        */
+        int _command_interval;
+
+        /*!
+        *   \brief The number of client connection attempts
+        */
+        int _connection_attempts;
+
+        /*!
+        *   \brief The number of client command execution attempts
+        */
+        int _command_attempts;
+
+        /*!
+        *   \brief Default value of connection timeout (seconds)
+        */
+        static constexpr int _DEFAULT_CONN_TIMEOUT = 100;
+
+        /*!
+        *   \brief Default value of connection attempt intervals (milliseconds)
+        */
+        static constexpr int _DEFAULT_CONN_INTERVAL = 1000;
+
+        /*!
+        *   \brief Default value of command execution timeout (seconds)
+        */
+        static constexpr int _DEFAULT_CMD_TIMEOUT = 100;
+
+        /*!
+        *   \brief Default value of command execution attempt
+        *          intervals (milliseconds)
+        */
+        static constexpr int _DEFAULT_CMD_INTERVAL = 1000;
+
+        /*!
+        *   \brief Environment variable for connection timeout
+        */
+        inline static const std::string _CONN_TIMEOUT_ENV_VAR =
+            "SR_CONN_TIMEOUT";
+
+        /*!
+        *   \brief Environment variable for connection interval
+        */
+        inline static const std::string _CONN_INTERVAL_ENV_VAR =
+            "SR_CONN_INTERVAL";
+
+        /*!
+        *   \brief Environment variable for command execution timeout
+        */
+        inline static const std::string _CMD_TIMEOUT_ENV_VAR =
+            "SR_CMD_TIMEOUT";
+
+        /*!
+        *   \brief Environment variable for command execution interval
+        */
+        inline static const std::string _CMD_INTERVAL_ENV_VAR =
+            "SR_CMD_INTERVAL";
 
         /*!
         *   \brief Retrieve a single address, randomly
@@ -292,10 +436,39 @@ class RedisServer {
         /*!
         *   \brief Check that the SSDB environment variable
         *          value does not have any errors
-        *   \throw std::runtime_error fi there is an error
+        *   \throw RuntimeException if there is an error
         *          in SSDB environment variable format
         */
         void _check_ssdb_string(const std::string& env_str);
+
+        /*!
+        *   \brief Initialize a variable of type integer from an environment
+        *          variable.  If the environment variable is not set,
+        *          the default value is assigned.
+        *   \param value Reference to a integer value which will be assigned
+        *                a default value or environment variable value
+        *   \param env_var std::string of the environment variable name
+        *   \param default_value The default value to assign if the environment
+        *                        variable is not set.
+        *   \throw SmartRedis::RuntimeException if environment variable
+        *          retrieval fails, conversion to integer fails, or
+        *          if the value of the environment value contains
+        *          characters other than [0,9] or a negative sign ('-').
+        */
+        void _init_integer_from_env(int& value,
+                                    const std::string& env_var,
+                                    const int& default_value);
+
+        /*!
+        *   \brief This function checks that _connection_timeout,
+        *          _connection_interval, _command_timeout, and
+        *          _command_interval, which have been set from environment
+        *          variables, are within valid ranges.
+        *   \throw SmartRedis::RuntimeException if any of the runtime
+        *          settings is outside of the allowable range
+        */
+        void _check_runtime_variables();
+
 
 };
 

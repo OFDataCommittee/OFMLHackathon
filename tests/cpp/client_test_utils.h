@@ -1,8 +1,50 @@
+/*
+ * BSD 2-Clause License
+ *
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #ifndef SMARTREDIS_TEST_UTILS_H
 #define SMARTREDIS_TEST_UTILS_H
 
 #include <typeinfo>
 #include <random>
+
+#include "rediscluster.h"
+
+using namespace SmartRedis;
+
+class RedisClusterTestObject : public RedisCluster
+{
+    public:
+        RedisClusterTestObject() : RedisCluster() {};
+
+        std::string get_crc16_prefix(uint64_t hash_slot) {
+            return _get_crc16_prefix(hash_slot);
+        }
+};
 
 inline void to_lower(char* s) {
     /* This will turn each character in the
@@ -134,7 +176,7 @@ bool is_equal_1D_array(T* a, U* b, int dim_1)
   */
   for(int i=0; i<dim_1; i++)
       if(!(a[i] == b[i]))
-	return false;
+        return false;
   return true;
 }
 
@@ -147,7 +189,7 @@ bool is_equal_2D_array(T** a, U** b, int dim_1, int dim_2)
   for(int i=0; i<dim_1; i++)
     for(int j=0; j<dim_2; j++)
       if(!(a[i][j] == b[i][j]))
-	return false;
+        return false;
   return true;
 }
 
@@ -160,8 +202,8 @@ bool is_equal_3D_array(T*** a, U*** b, int dim_1, int dim_2, int dim_3)
   for(int i=0; i<dim_1; i++)
     for(int j=0; j<dim_2; j++)
       for(int k=0; k<dim_3; k++)
-    	if(!(a[i][j][k] == b[i][j][k]))
-    	  return false;
+      if(!(a[i][j][k] == b[i][j][k]))
+        return false;
   return true;
 }
 
@@ -255,6 +297,37 @@ T get_floating_point_scalar()
   std::default_random_engine generator;
   std::uniform_real_distribution<T> distribution;
   return distribution(generator);
+}
+
+inline std::string get_prefix()
+{
+        // get prefix, if it exists. Assumes Client._use_tensor_prefix
+    // defaults to true, which it does at time of implementation
+    std::string prefix = "";
+    char* sskeyin = std::getenv("SSKEYIN");
+    std::string sskeyin_str = "";
+
+    if (sskeyin != NULL) {
+        // get the first value
+        char* a = &sskeyin[0];
+        char* b = a;
+        char parse_char = ',';
+        while (*b) {
+            if(*b == parse_char) {
+                if (a != b) {
+                    sskeyin_str = std::string(a, b - a);
+                    break;
+                }
+                a = ++b;
+            }
+            else
+                b++;
+        }
+        if (sskeyin_str.length() == 0)
+            sskeyin_str = std::string(sskeyin);
+        prefix = sskeyin_str + ".";
+    }
+    return prefix;
 }
 
 #endif //SMARTREDIS_TEST_UTILS_H

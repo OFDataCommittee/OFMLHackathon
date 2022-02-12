@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,55 +30,61 @@
 
 using namespace SmartRedis;
 
-StringField::StringField(const std::string& name) :
-    MetadataField(name, MetaDataType::string)
+// StringField constructor
+StringField::StringField(const std::string& name)
+ : MetadataField(name, SRMetadataTypeString)
 {
-    return;
+    // NOP
 }
 
-StringField::StringField(const std::string& name, const std::vector<std::string>& vals) :
-    MetadataField(name, MetaDataType::string)
-{
-    this->_vals = vals;
-    return;
-}
-
+// StringField constructor with initial values to be copied
 StringField::StringField(const std::string& name,
-                         std::vector<std::string>&& vals) :
-    MetadataField(name, MetaDataType::string)
+                         const std::vector<std::string>& vals)
+ : MetadataField(name, SRMetadataTypeString)
 {
-    this->_vals = std::move(vals);
-    return;
+    _vals = vals;
 }
 
+// StringField constructor with initial values to be copied
+StringField::StringField(const std::string& name,
+                         std::vector<std::string>&& vals)
+ : MetadataField(name, SRMetadataTypeString)
+{
+    _vals = std::move(vals);
+}
+
+// Serialize the StringField for transmission and storage.
 std::string StringField::serialize()
 {
-    return MetadataBuffer::generate_string_buf(this->_vals);
+    return MetadataBuffer::generate_string_buf(_vals);
 }
 
+// Add a string to the field
 void StringField::append(const std::string& value)
 {
-    this->_vals.push_back(value);
-    return;
+    _vals.push_back(value);
 }
 
+// Retrieve the number of values in the field
 size_t StringField::size()
 {
-    return this->_vals.size();
+    return _vals.size();
 }
 
+// Clear the values in the field
 void StringField::clear()
 {
-    this->_vals.clear();
-    return;
+    _vals.clear();
 }
 
+// Retrieve a copy of the underlying field string values.
 std::vector<std::string> StringField::values()
 {
-    return std::vector<std::string>(this->_vals);
+    return std::vector<std::string>(_vals);
 }
 
+// Returns a constant reference to the internal std::vectorstd::string object.
 const std::vector<std::string>& StringField::immutable_values()
 {
-    return this->_vals;
+    return _vals;
 }

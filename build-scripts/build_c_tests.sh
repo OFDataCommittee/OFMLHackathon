@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CMAKE=$(python -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
+CMAKE=$(which cmake)
 
 cd ./tests/c/
 

@@ -3,7 +3,7 @@ from smartredis import Client
 
 # Connect a SmartRedis client to Redis database
 db_address = "127.0.0.1:6379"
-client = Client(address=db_address, cluster=False)
+client = Client(address=db_address, cluster=True)
 
 # Send a 2D tensor to the database
 key = "2D_array"

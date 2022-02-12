@@ -1,12 +1,47 @@
+/*
+ * BSD 2-Clause License
+ *
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "c_client.h"
 #include "c_client_test_utils.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "stdint.h"
+#include "srexception.h"
 
 bool cluster = true;
 
+/* This function is a data type agnostic put and
+get for 3D tensors.  The result vector
+is filled with the fetched tensor.  Accuracy
+checking is done outside of this function because
+the type is not known.
+*/
 int put_get_2D_tensor(void* client,
                       void* tensor,
                       size_t* dims,
@@ -14,15 +49,8 @@ int put_get_2D_tensor(void* client,
                       void** result,
                       char* key_suffix,
                       size_t key_suffix_length,
-                      CTensorType type)
+                      SRTensorType type)
 {
-  /* This function is a data type agnostic put and
-  get for 3D tensors.  The result vector
-  is filled with the fetched tensor.  Accuracy
-  checking is done outside of this function because
-  the type is not known.
-  */
-
   char* prefix_str = "2D_tensor_test";
 
   size_t prefix_str_length = strlen(prefix_str);
@@ -39,16 +67,20 @@ int put_get_2D_tensor(void* client,
   pos += key_suffix_length;
   key[pos] = 0;
 
-  CTensorType g_type;
+  SRTensorType g_type;
   size_t* g_dims;
   size_t g_n_dims;
 
-  CMemoryLayout layout = c_nested;
-  put_tensor(client, key, key_length,
-             (void*)tensor, dims, n_dims, type, layout);
-  get_tensor(client, key, key_length,
-             result, &g_dims, &g_n_dims,
-             &g_type, layout);
+  SRMemoryLayout layout = SRMemLayoutNested;
+  if (SRNoError != put_tensor(client, key, key_length,
+                          (void*)tensor, dims, n_dims, type, layout)) {
+    return -1;
+  }
+  if (SRNoError != get_tensor(client, key, key_length,
+                          result, &g_dims, &g_n_dims,
+                          &g_type, layout)) {
+    return -1;
+  }
 
   int r_value = 0;
   if(g_n_dims!=n_dims) {
@@ -78,15 +110,16 @@ int put_get_2D_tensor(void* client,
   return r_value;
 }
 
+/* This function puts and gets a 2D tensor of double
+values.  If the sent and received tensors do not match,
+a non-zero value is returned.
+*/
 int put_get_2D_tensor_double(size_t* dims, int n_dims,
-                  char* key_suffix, int key_suffix_length)
+                             char* key_suffix, int key_suffix_length)
 {
-  /* This function puts and gets a 2D tensor of double
-  values.  If the sent and received tensors do not match,
-  a non-zero value is returned.
-  */
-
-  void* client = SmartRedisCClient(use_cluster());
+  void* client = NULL;
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
+    return -1;
 
   double** tensor = (double**)malloc(dims[0]*sizeof(double*));
   double** result = 0;
@@ -103,7 +136,7 @@ int put_get_2D_tensor_double(size_t* dims, int n_dims,
   r_value = put_get_2D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_dbl);
+                              SRTensorTypeDouble);
 
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++) {
@@ -118,20 +151,22 @@ int put_get_2D_tensor_double(size_t* dims, int n_dims,
     free(tensor[i]);
   }
   free(tensor);
-  DeleteCClient(client);
+  if (SRNoError != DeleteCClient(&client))
+    return -1;
   return r_value;
 }
 
+/* This function puts and gets a 2D tensor of float
+values.  If the sent and received tensors do not match,
+a non-zero value is returned.
+*/
 int put_get_2D_tensor_float(size_t* dims, int n_dims,
                             char* key_suffix,
                             int key_suffix_length)
 {
-  /* This function puts and gets a 2D tensor of float
-  values.  If the sent and received tensors do not match,
-  a non-zero value is returned.
-  */
-
-  void* client = SmartRedisCClient(use_cluster());
+  void* client = NULL;
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
+    return -1;
 
   float** tensor = (float**)malloc(dims[0]*sizeof(float*));
   float** result = 0;
@@ -148,7 +183,7 @@ int put_get_2D_tensor_float(size_t* dims, int n_dims,
   r_value = put_get_2D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_flt);
+                              SRTensorTypeFloat);
 
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++) {
@@ -163,20 +198,22 @@ int put_get_2D_tensor_float(size_t* dims, int n_dims,
     free(tensor[i]);
   }
   free(tensor);
-  DeleteCClient(client);
+  if (SRNoError != DeleteCClient(&client))
+    return -1;
   return r_value;
 }
 
+/* This function puts and gets a 2D tensor of int8_t
+values.  If the sent and received tensors do not match,
+a non-zero value is returned.
+*/
 int put_get_2D_tensor_i8(size_t* dims, int n_dims,
                          char* key_suffix,
                          int key_suffix_length)
 {
-  /* This function puts and gets a 2D tensor of int8_t
-  values.  If the sent and received tensors do not match,
-  a non-zero value is returned.
-  */
-
-  void* client = SmartRedisCClient(use_cluster());
+  void* client = NULL;
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
+    return -1;
 
   int8_t** tensor = (int8_t**)malloc(dims[0]*sizeof(int8_t*));
   int8_t** result = 0;
@@ -197,7 +234,7 @@ int put_get_2D_tensor_i8(size_t* dims, int n_dims,
   r_value = put_get_2D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_int8);
+                              SRTensorTypeInt8);
 
 for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){
@@ -212,20 +249,22 @@ for(int i=0; i<dims[0]; i++) {
     free(tensor[i]);
   }
   free(tensor);
-  DeleteCClient(client);
+  if (SRNoError != DeleteCClient(&client))
+    return -1;
   return r_value;
 }
 
+/* This function puts and gets a 2D tensor of int16_t
+values.  If the sent and received tensors do not match,
+a non-zero value is returned.
+*/
 int put_get_2D_tensor_i16(size_t* dims, int n_dims,
                          char* key_suffix,
                          int key_suffix_length)
 {
-  /* This function puts and gets a 2D tensor of int16_t
-  values.  If the sent and received tensors do not match,
-  a non-zero value is returned.
-  */
-
-  void* client = SmartRedisCClient(use_cluster());
+  void* client = NULL;
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
+    return -1;
 
   int16_t** tensor = (int16_t**)malloc(dims[0]*sizeof(int16_t*));
   int16_t** result = 0;
@@ -246,7 +285,7 @@ int put_get_2D_tensor_i16(size_t* dims, int n_dims,
   r_value = put_get_2D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_int16);
+                              SRTensorTypeInt16);
 
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){
@@ -261,20 +300,22 @@ int put_get_2D_tensor_i16(size_t* dims, int n_dims,
     free(tensor[i]);
   }
   free(tensor);
-  DeleteCClient(client);
+  if (SRNoError != DeleteCClient(&client))
+    return -1;
   return r_value;
 }
 
+/* This function puts and gets a 2D tensor of int32_t
+values.  If the sent and received tensors do not match,
+a non-zero value is returned.
+*/
 int put_get_2D_tensor_i32(size_t* dims, int n_dims,
                          char* key_suffix,
                          int key_suffix_length)
 {
-  /* This function puts and gets a 2D tensor of int32_t
-  values.  If the sent and received tensors do not match,
-  a non-zero value is returned.
-  */
-
-  void* client = SmartRedisCClient(use_cluster());
+  void* client = NULL;
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
+    return -1;
 
   int32_t** tensor = (int32_t**)malloc(dims[0]*sizeof(int32_t*));
   int32_t** result = 0;
@@ -295,7 +336,7 @@ int put_get_2D_tensor_i32(size_t* dims, int n_dims,
   r_value = put_get_2D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_int32);
+                              SRTensorTypeInt32);
 
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){
@@ -310,20 +351,22 @@ int put_get_2D_tensor_i32(size_t* dims, int n_dims,
     free(tensor[i]);
   }
   free(tensor);
-  DeleteCClient(client);
+  if (SRNoError != DeleteCClient(&client))
+    return -1;
   return r_value;
 }
 
+/* This function puts and gets a 2D tensor of int64_t
+values.  If the sent and received tensors do not match,
+a non-zero value is returned.
+*/
 int put_get_2D_tensor_i64(size_t* dims, int n_dims,
                          char* key_suffix,
                          int key_suffix_length)
 {
-  /* This function puts and gets a 2D tensor of int64_t
-  values.  If the sent and received tensors do not match,
-  a non-zero value is returned.
-  */
-
-  void* client = SmartRedisCClient(use_cluster());
+  void* client = NULL;
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
+    return -1;
 
   int64_t** tensor = (int64_t**)malloc(dims[0]*sizeof(int64_t*));
   int64_t** result = 0;
@@ -344,7 +387,7 @@ int put_get_2D_tensor_i64(size_t* dims, int n_dims,
   r_value = put_get_2D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_int64);
+                              SRTensorTypeInt64);
 
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){
@@ -359,20 +402,22 @@ int put_get_2D_tensor_i64(size_t* dims, int n_dims,
     free(tensor[i]);
   }
   free(tensor);
-  DeleteCClient(client);
+  if (SRNoError != DeleteCClient(&client))
+    return -1;
   return r_value;
 }
 
+/* This function puts and gets a 2D tensor of uint8_t
+values.  If the sent and received tensors do not match,
+a non-zero value is returned.
+*/
 int put_get_2D_tensor_ui8(size_t* dims, int n_dims,
                           char* key_suffix,
                           int key_suffix_length)
 {
-  /* This function puts and gets a 2D tensor of uint8_t
-  values.  If the sent and received tensors do not match,
-  a non-zero value is returned.
-  */
-
-  void* client = SmartRedisCClient(use_cluster());
+  void* client = NULL;
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
+    return -1;
 
   uint8_t** tensor = (uint8_t**)malloc(dims[0]*sizeof(uint8_t*));
   uint8_t** result = 0;
@@ -391,7 +436,7 @@ int put_get_2D_tensor_ui8(size_t* dims, int n_dims,
   r_value = put_get_2D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_uint8);
+                              SRTensorTypeUint8);
 
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){
@@ -406,20 +451,22 @@ int put_get_2D_tensor_ui8(size_t* dims, int n_dims,
     free(tensor[i]);
   }
   free(tensor);
-  DeleteCClient(client);
+  if (SRNoError != DeleteCClient(&client))
+    return -1;
   return r_value;
 }
 
+/* This function puts and gets a 2D tensor of uint16_t
+values.  If the sent and received tensors do not match,
+a non-zero value is returned.
+*/
 int put_get_2D_tensor_ui16(size_t* dims, int n_dims,
                           char* key_suffix,
                           int key_suffix_length)
 {
-  /* This function puts and gets a 2D tensor of uint16_t
-  values.  If the sent and received tensors do not match,
-  a non-zero value is returned.
-  */
-
-  void* client = SmartRedisCClient(use_cluster());
+  void* client = NULL;
+  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
+    return -1;
 
   uint16_t** tensor = (uint16_t**)malloc(dims[0]*sizeof(uint16_t*));
   uint16_t** result = 0;
@@ -438,7 +485,7 @@ int put_get_2D_tensor_ui16(size_t* dims, int n_dims,
   r_value = put_get_2D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
-                              c_uint16);
+                              SRTensorTypeUint16);
 
   for(int i=0; i<dims[0]; i++) {
     for(int j=0; j<dims[1]; j++){
@@ -453,7 +500,8 @@ int put_get_2D_tensor_ui16(size_t* dims, int n_dims,
     free(tensor[i]);
   }
   free(tensor);
-  DeleteCClient(client);
+  if (SRNoError != DeleteCClient(&client))
+    return -1;
   return r_value;
 }
 

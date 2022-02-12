@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,22 +26,55 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* Defines the tensor types for c-clients to use as a type specifier
-*/
+#include "stdio.h"
+#include "string.h"
 
-#ifndef SMARTREDIS_CTENSORTYPE_H
-#define SMARTREDIS_CTENSORTYPE_H
+#include "c_client.h"
+#include "srexception.h"
+#include "sr_enums.h"
 
-typedef enum {
-	c_undefined = 0,
-    c_dbl       = 1,
-    c_flt       = 2,
-    c_int8      = 3,
-    c_int16     = 4,
-    c_int32     = 5,
-    c_int64     = 6,
-    c_uint8     = 7,
-    c_uint16    = 8
-} CTensorType;
+int main(int argc, char* argv[]) {
 
-#endif //SMARTREDIS_CTENSORTYPE_H
+    void* client = NULL;
+
+    SRError return_code = SRNoError;
+    return_code = SmartRedisCClient(false, &client);
+
+    if (return_code != SRNoError) {
+        return -1;
+    }
+
+    char* key = "c_docker_tensor";
+    size_t key_length = strlen(key);
+
+    double tensor[3] = {1.0, 2.0, 3.0};
+    SRTensorType type = SRTensorTypeDouble;
+    SRMemoryLayout layout = SRMemLayoutContiguous;
+    size_t dims[1] = {3};
+    size_t n_dims = 1;
+
+    return_code = put_tensor(client, key, key_length,
+                            (void*)(&tensor), (const size_t*)(&dims),
+                            n_dims, type, layout);
+
+    if (return_code != SRNoError) {
+        return -1;
+    }
+
+    double returned[3];
+
+    return_code = unpack_tensor(client, key, key_length,
+                                (void*)(&returned), (const size_t*)(&dims),
+                                n_dims, type, layout);
+
+    if (return_code != SRNoError) {
+        return -1;
+    }
+
+    for (size_t i = 0; i < 3; i++) {
+        if (returned[i] != tensor[i])
+            return -1;
+    }
+
+    return 0;
+}

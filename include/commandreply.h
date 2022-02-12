@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,13 +32,15 @@
 #include "stdlib.h"
 #include <sw/redis++/redis++.h>
 #include <iostream>
+#include <vector>
+#include <queue>
 
 namespace SmartRedis {
 
 class CommandReply;
 
 /*!
-*   \typedef Redis++ command reply type
+*   \brief Redis++ command reply type
 */
 typedef std::unique_ptr<redisReply, sw::redis::ReplyDeleter>
         RedisReplyUPtr;
@@ -78,15 +80,29 @@ class CommandReply {
 
         /*!
         *   \brief CommandReply copy constructor
-        *          not available
+        *   \param reply The CommandReply to copy
         */
-        CommandReply(const CommandReply& reply) = delete;
+        CommandReply(const CommandReply& reply);
 
         /*!
         *   \brief CommandReply copy assignment operator
-        *          not available
+        *   \param reply The CommandReply to copy
         */
-        CommandReply& operator=(const CommandReply& reply) = delete;
+        CommandReply& operator=(const CommandReply& reply);
+
+        /*!
+        *   \brief CommandReply copy assignment operator with
+        *          redisReply as input
+        *   \param reply The redisReply to copy
+        */
+        CommandReply& operator=(const redisReply* reply);
+
+        /*!
+        *   \brief CommandReply copy constructor with
+        *          redisReply as input
+        *   \param reply The redisReply to copy
+        */
+        CommandReply(const redisReply* reply);
 
         /*!
         *   \brief Move constructor with RedisReplyUPtr
@@ -144,15 +160,55 @@ class CommandReply {
         /*!
         *   \brief Get the string field of the reply
         *   \returns C-str for the CommandReply field
-        *   \throw std::runtime_error if the CommandReply
+        *   \throw RuntimeException if the CommandReply
         *          does not have a string field
         */
         char* str();
 
         /*!
+        *   \brief Get the status string of the reply
+        *   \returns string for the CommandReply field
+        *   \throw RuntimeException if the CommandReply
+        *          has a NULL str field
+        */
+        std::string status_str();
+
+        /*!
+        *   \brief Get the double string of the reply
+        *   \returns string for the CommandReply field
+        *   \throw RuntimeException if the CommandReply
+        *          has a NULL str field
+        */
+        std::string dbl_str();
+
+        /*!
+        *   \brief Get the bignum string of the reply
+        *   \returns string for the CommandReply field
+        *   \throw RuntimeException if the CommandReply
+        *          has a NULL str field
+        */
+        std::string bignum_str();
+
+        /*!
+        *   \brief Get the verbatim string of the reply
+        *   \returns string for the CommandReply field
+        *   \throw RuntimeException if the CommandReply
+        *          has a NULL str field
+        */
+        std::string verb_str();
+
+        /*!
+        *   \brief Get the length of the CommandReply field
+        *   \returns The length of the CommandReply field
+        *   \throw RuntimeException if the CommandReply
+        *          does not have a status field
+        */
+        size_t status_str_len();
+
+        /*!
         *   \brief Get the integer field of the reply
         *   \returns long long for the integer CommandReply field
-        *   \throw std::runtime_error if the CommandReply
+        *   \throw RuntimeException if the CommandReply
         *          does not have an integer field
         */
         long long integer();
@@ -160,7 +216,7 @@ class CommandReply {
         /*!
         *   \brief Get the double field of the reply
         *   \returns The double CommandReply field
-        *   \throw std::runtime_error if the CommandReply
+        *   \throw RuntimeException if the CommandReply
         *          does not have a double field
         */
         double dbl();
@@ -168,7 +224,7 @@ class CommandReply {
         /*!
         *   \brief Get the length of the CommandReply string field
         *   \returns The length of the CommandReply string field
-        *   \throw std::runtime_error if the CommandReply
+        *   \throw RuntimeException if the CommandReply
         *          does not have a string field
         */
         size_t str_len();
@@ -176,7 +232,7 @@ class CommandReply {
         /*!
         *   \brief Get the number of elements in the CommandReply
         *   \returns The number of elements in the CommandReply
-        *   \throw std::runtime_error if the CommandReply
+        *   \throw RuntimeException if the CommandReply
         *          does not have a multiple elements (i.e.
         *          not a reply array).
         */
@@ -197,6 +253,15 @@ class CommandReply {
         void print_reply_error();
 
         /*!
+        *   \brief This will return all errors in the CommandReply
+        *          or nested CommandReply. If there is more than one
+        *          error, the order in which the errors are retrieved is
+        *          done so through a level by level search.
+        *   \returns A vector of error strings
+        */
+        std::vector<std::string> get_reply_errors();
+
+        /*!
         *   \brief Return the type of the CommandReply
         *          in the form of a string.
         *   \returns String form of the reply type
@@ -212,10 +277,18 @@ class CommandReply {
     private:
 
         /*!
-        *   \brief CommandReply constructor from a redisReply.
+        *   \brief Helper function for getting a CommandReply
+        *          constructed from shallow copying a redisReply
         *   \param reply redisReply for construction
         */
-        CommandReply(redisReply* reply);
+        CommandReply shallow_clone(redisReply* reply);
+
+        /*!
+        *   \brief Helper function for doing a deep copy of a
+        *          redisReply
+        *   \param reply redisReply to copy
+        */
+        redisReply* deep_clone_reply(const redisReply* reply);
 
         /*!
         *   \brief RedisReplyUPtr that can hold redis reply data

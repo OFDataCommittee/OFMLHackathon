@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 template <class T>
 void Command::add_fields(const std::vector<T>& fields, bool is_key)
 {
-    for(int i=0; i<fields.size(); i++) {
+    for (size_t i = 0; i < fields.size(); i++) {
         this->add_field(std::to_string(fields[i]), is_key);
     }
     return;

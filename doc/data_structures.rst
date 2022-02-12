@@ -32,18 +32,18 @@ a tensor associated with a key from the database.
 
 .. note::
     When utilizing SmartRedis with SmartSim ensemble functionality,
-    the key provided by the user may be manipulated before placement
+    the name provided by the user may be manipulated before placement
     in or retrieval from the database in order to avoid key collisions
     between ensemble members.  Therefore, when using SmartSim ensemble
     functionality, retrieval of a tensor using the Redis command line
-    interface (CLI) will require adapting the expected key.
+    interface (CLI) will require adapting the tensor name.
 
 Sending
 -------
 
 In Python, the ``Client`` infers the type and dimensions of the
 tensor from the NumPy array data structure, and as a result,
-only the key and NumPy array are needed to place a key and tensor
+only the name and NumPy array are needed to place a key and tensor
 pair in the database.  Currently, only NumPy arrays
 are supported as inputs and outputs of Python ``Client``
 tensor functions.
@@ -51,14 +51,14 @@ tensor functions.
 .. code-block:: python
 
     # Python put_tensor() interface
-    put_tensor(self, key, data)
+    put_tensor(self, name, data)
 
 In the compiled clients, more information is needed to inform the
 ``Client`` about the tensor properties.  In the C++ API,
 the dimensions of the tensor are provided via a
 ``std::vector<size_t>`` input parameter.  Additionally, the type
 associated with the tensor data (e.g. ``double``, ``float``)
-is specified with a ``SmartRedis::TensorType`` enum.
+is specified with a ``SRTensorType`` enum.
 Finally, the ``Client`` must know the memory
 layout of the provided tensor data in order to traverse the
 tensor data to generate a tensor data buffer. In C++, tensor
@@ -66,16 +66,16 @@ data can either be in a contiguous memory layout or in a nested,
 non-contiguous memory layout (i.e. nested pointer arrays to
 underlying allocated memory). The memory layout of the tensor
 data to place in the database is specified
-with a ``SmartRedis::MemoryLayout`` enum input parameter.
+with a ``SRMemoryLayout`` enum input parameter.
 
 .. code-block:: cpp
 
     // C++ put_tensor interface
-    void put_tensor(const std::string& key,
+    void put_tensor(const std::string& name,
                     void* data,
                     const std::vector<size_t>& dims,
-                    const TensorType type,
-                    const MemoryLayout mem_layout);
+                    const SRTensorType type,
+                    const SRMemoryLayout mem_layout);
 
 C and Fortran have similar function prototypes compared
 to the C++ client, except the C client uses only C data
@@ -109,16 +109,16 @@ specified memory layout.
 .. code-block:: cpp
 
     // C++ unpack_tensor() interface
-    void unpack_tensor(const std::string& key,
+    void unpack_tensor(const std::string& name,
                        void* data,
                        const std::vector<size_t>& dims,
-                       const TensorType type,
-                       const MemoryLayout mem_layout);
+                       const SRTensorType type,
+                       const SRMemoryLayout mem_layout);
 
 .. note::
 
     When using ``unpack_tensor()`` with a user-provided
-    ``MemoryLayout::contiguous`` memory space,
+    ``SRMemLayoutContiguous`` memory space,
     the provided dimensions should be a
     ``std::vector<size_t>`` with a single value
     equal the total number of allocated
@@ -140,11 +140,11 @@ experience across the C++, C, and Fortran clients.
 .. code-block:: cpp
 
     // C++ get_tensor interface
-    void get_tensor(const std::string& key,
+    void get_tensor(const std::string& name,
                     void*& data,
                     std::vector<size_t>& dims,
-                    TensorType& type,
-                    const MemoryLayout mem_layout);
+                    SRTensorType& type,
+                    const SRMemoryLayout mem_layout);
 
 .. note::
     Memory allocated by C++, C, and Fortran
@@ -166,7 +166,7 @@ will be freed when the NumPy array goes out of scope or is deleted.
 .. code-block:: python
 
     # Python get_tensor() interface
-    get_tensor(self, key):
+    get_tensor(self, name):
 
 Note that all of the client ``get_tensor()`` functions will internally
 modify the provided tensor name if the client is being used with
@@ -182,7 +182,7 @@ group of tensors and metadata which are closely related and
 naturally grouped into a collection for future retrieval.
 The ``DataSet`` object stages these items so that they can be
 more efficiently placed in the redis database and can later be
-retrieved with a single key.
+retrieved with the name given to the ``DataSet``.
 
 Listed below are the supported tensor and metadata types.
 In the following sections, building, sending, and retrieving
@@ -267,7 +267,7 @@ metadata is shown below:
     // C++ add_meta_scalar() interface
     void add_meta_scalar(const std::string& name,
                          const void* data,
-                         const MetaDataType type);
+                         const SRMetaDataType type);
 
     // C++ add_meta_string() interface
     void add_meta_string(const std::string& name,
@@ -284,7 +284,7 @@ existing field.  In this way, the ``DataSet`` metadata supports
 one-dimensional arrays, but the entries in the array must be added
 iteratively by the user.  Also, note that in the above C++ example,
 the metadata scalar type must be specified with a
-``SmartRedis::MetaDataType`` enum value, and similar
+``SRMetaDataType`` enum value, and similar
 requirements exist for C and Fortran ``DataSet`` implementations.
 
 Finally, the ``DataSet`` object is sent to the database using the
@@ -345,7 +345,7 @@ are uniform across all SmartRedis clients, and as an example, the C++
 .. code-block:: cpp
 
     # C++ set_model interface
-    void set_model(const std::string& key,
+    void set_model(const std::string& name,
                    const std::string_view& model,
                    const std::string& backend,
                    const std::string& device,
@@ -374,11 +374,11 @@ of each parameter.
     manipulation, models in a Redis cluster that have been
     set through the SmartRedis ``Client`` can be accessed
     and run through the SmartRedis ``Client`` API
-    using the key provided to ``set_model()``.  The user
+    using the name provided to ``set_model()``.  The user
     does not need any knowledge of the cluster model distribution
     to perform RedisAI model actions.  Moreover,
     a model set by one SmartRedis client (e.g. Python) on a Redis
-    cluster is addressable with the same key through another
+    cluster is addressable with the same name through another
     client (e.g. C++).
 
 Finally, there is a similar function in each client,
@@ -390,7 +390,7 @@ Retrieving
 
 A model can be retrieved from the database using the
 ``Client.get_model()`` function.  While the return
-type varies between languages, only the model key
+type varies between languages, only the model name
 that was used with ``Client.set_model()`` is needed
 to reference the model in the database.  Note that
 in a Redis cluster configuration, only one copy of the
@@ -406,10 +406,10 @@ Executing
 ---------
 
 A model can be executed using the ``Client.run_model()`` function.
-The only required inputs to execute a model are the model key,
+The only required inputs to execute a model are the model name,
 a list of input tensor names, and a list of output tensor names.
 If using a Redis cluster configuration, a copy of the model
-referenced by the provided key will be chosen based on data locality.
+referenced by the provided name will be chosen based on data locality.
 It is worth noting that the names of input and output tensors will be
 altered with ensemble member identifications if the SmartSim
 ensemble compatibility features are used.
@@ -417,7 +417,7 @@ ensemble compatibility features are used.
 .. note::
 
     DataSet tensors can be used as ``run_model()`` input tensors,
-    but the key provided to ``run_model()`` must be prefixed with
+    but the name provided to ``run_model()`` must be prefixed with
     the ``DataSet`` name in the pattern ``{dataset_name}.tensor_name``.
 
 Script
@@ -444,7 +444,7 @@ need to be provided by the user.
 
 .. code-block:: cpp
 
-    void set_script(const std::string& key,
+    void set_script(const std::string& name,
                     const std::string& device,
                     const std::string_view& script);
 
@@ -459,11 +459,11 @@ need to be provided by the user.
     manipulation, scripts in a Redis cluster that have been
     set through the SmartRedis ``Client`` can be accessed
     and run through the SmartRedis ``Client`` API
-    using the key provided to ``set_script()``.  The user
+    using the name provided to ``set_script()``.  The user
     does not need any knowledge of the cluster script distribution
     to perform RedisAI script actions.  Moreover,
     a script set by one SmartRedis client (e.g. Python) on a Redis
-    cluster is addressable with the same key through another
+    cluster is addressable with the same name through another
     client (e.g. C++).
 
 Finally, there is a similar function in each client,
@@ -475,7 +475,7 @@ Retrieving
 
 A script can be retrieved from the database using the
 ``Client.get_script()`` function.  While the return
-type varies between languages, only the script key
+type varies between languages, only the script name
 that was used with ``Client.set_script()`` is needed
 to reference the script in the database.  Note that
 in a Redis cluster configuration, only one copy of the
@@ -491,16 +491,16 @@ Executing
 ---------
 
 A script can be executed using the ``Client.run_script()`` function.
-The only required inputs to execute a script are the script key,
+The only required inputs to execute a script are the script name,
 the name of the function in the script to execute, a list of input
 tensor names, and a list of output tensor names.
 If using a Redis cluster configuration, a copy of the script
-referenced by the provided key will be chosen based on data locality.
+referenced by the provided name will be chosen based on data locality.
 It is worth noting that the names of input and output tensors will be
 altered with ensemble member identifications if the SmartSim
 ensemble compatibility features are used.
 
 .. note::
     DataSet tensors can be used as ``run_script()`` input tensors,
-    but the key provided to ``run_script()`` must be prefixed with
+    but the name provided to ``run_script()`` must be prefixed with
     the ``DataSet`` name in the pattern ``{dataset_name}.tensor_name``.

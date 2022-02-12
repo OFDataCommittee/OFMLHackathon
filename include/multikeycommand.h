@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,47 +26,48 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SMARTSIM_MEMORYLAYOUT_H
-#define SMARTSIM_MEMORYLAYOUT_H
+#ifndef SMARTREDIS_MULTIKEYCOMMAND_H
+#define SMARTREDIS_MULTIKEYCOMMAND_H
 
-#include "enums/c_memory_layout.h"
+#include "keyedcommand.h"
 
-/* The MemoryLayout enum specifies
-the layout of the memory space that
-is provided or requested by the user.
-*/
+///@file
 
 namespace SmartRedis {
 
-enum class MemoryLayout{
-    nested = 1,
-    contiguous = 2,
-    fortran_contiguous = 3
+class RedisServer;
+
+/*!
+*   \brief The MultiKeyCommand class constructs Client
+*          commands with multiple keys. This is a subclass
+*          of the KeyedCommand class.
+*/
+class MultiKeyCommand : public KeyedCommand
+{
+    public:
+        /*!
+        *   \brief Run this Command on the RedisServer.
+        *   \param server A pointer to the RedisServer
+        */
+        virtual CommandReply run_me(RedisServer* server);
+
+        /*!
+        *   \brief Deep copy operator
+        *   \details This method creates a new derived
+        *            type Command and returns a Command*
+        *            pointer.  The new derived type is
+        *            allocated on the heap.  Contents
+        *            are copied using the copy assignment
+        *            operator for the derived type. This is meant
+        *            to provide functionality to deep
+        *            copy a Command.
+        *   \returns A pointer to dynamically allocated
+        *            derived type cast to parent Command
+        *            type.
+        */
+        virtual Command* clone();
 };
 
-inline MemoryLayout convert_layout(CMemoryLayout layout) {
-  /* This function converts the CMemoryLayout to
-  MemoryLayout.  This function is needed because
-  of namespace limitations not allowed for the
-  direct use of MemoryLayout.
-  */
+} //namespace SmartRedis
 
-  switch(layout) {
-    case(c_nested) :
-      return MemoryLayout::nested;
-      break;
-    case(c_contiguous) :
-      return MemoryLayout::contiguous;
-      break;
-    case(c_fortran_contiguous) :
-      return MemoryLayout::fortran_contiguous;
-      break;
-    default :
-      throw std::runtime_error("Unsupported enum "\
-                               "conversion.");
-  }
-}
-
-} // namespace SmartRedis
-
-#endif //SMARTSIM_MEMORYLAYOUT_H
+#endif //MULTIKEYCOMMAND

@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021, Hewlett Packard Enterprise
+! Copyright (c) 2021-2022, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
 
 module fortran_c_interop
 
-use iso_c_binding, only : c_ptr, c_char, c_size_t, c_loc
+use iso_c_binding, only : c_ptr, c_char, c_size_t, c_loc, c_null_ptr
 
 implicit none; private
 
@@ -71,8 +71,12 @@ subroutine convert_char_array_to_c(character_array_f, character_array_c, string_
 
   ! Copy the character into a c_char and create pointers to each of the strings
   do i=1,n_strings
-    character_array_c(i) = transfer(character_array_f(i),character_array_c(i))
-    string_ptrs(i) = c_loc(character_array_c(i))
+     if (string_lengths(i) .gt. 0) then
+        character_array_c(i) = transfer(character_array_f(i),character_array_c(i))
+        string_ptrs(i) = c_loc(character_array_c(i))
+     else
+        string_ptrs(i) = c_null_ptr;
+     endif 
   enddo
   ptr_to_string_ptrs = c_loc(string_ptrs)
 

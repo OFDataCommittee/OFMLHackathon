@@ -27,27 +27,23 @@ int main(int argc, char* argv[]) {
     int64_t meta_scalar_3 = 3;
 
     // Initialize a SmartRedis client
-    SmartRedis::Client client(false);
+    bool cluster_mode = true; // Set to false if not using a clustered database
+    SmartRedis::Client client(cluster_mode);
 
     // Create a DataSet
     SmartRedis::DataSet dataset("example_dataset");
 
     // Add tensors to the DataSet
     dataset.add_tensor("tensor_1", tensor_1.data(), dims,
-                       SmartRedis::TensorType::dbl,
-                       SmartRedis::MemoryLayout::contiguous);
+                       SRTensorTypeDouble, SRMemLayoutContiguous);
 
     dataset.add_tensor("tensor_2", tensor_2.data(), dims,
-                       SmartRedis::TensorType::int64,
-                       SmartRedis::MemoryLayout::contiguous);
+                       SRTensorTypeInt64, SRMemLayoutContiguous);
 
     // Add metadata scalar values to the DataSet
-    dataset.add_meta_scalar("meta_field_1", &meta_scalar_1,
-                            SmartRedis::MetaDataType::uint32);
-    dataset.add_meta_scalar("meta_field_1", &meta_scalar_2,
-                            SmartRedis::MetaDataType::uint32);
-    dataset.add_meta_scalar("meta_field_2", &meta_scalar_3,
-                            SmartRedis::MetaDataType::int64);
+    dataset.add_meta_scalar("meta_field_1", &meta_scalar_1, SRMetadataTypeUint32);
+    dataset.add_meta_scalar("meta_field_1", &meta_scalar_2, SRMetadataTypeUint32);
+    dataset.add_meta_scalar("meta_field_2", &meta_scalar_3, SRMetadataTypeInt64);
 
 
     // Put the DataSet in the database
@@ -62,8 +58,8 @@ int main(int argc, char* argv[]) {
     retrieved_dataset.unpack_tensor("tensor_2",
                                     unpack_dataset_tensor.data(),
                                     {n_values},
-                                    SmartRedis::TensorType::int64,
-                                    SmartRedis::MemoryLayout::contiguous);
+                                    SRTensorTypeInt64,
+                                    SRMemLayoutContiguous);
 
     // Print out the retrieved values
     std::cout<<"Comparing sent and received "\
@@ -77,7 +73,7 @@ int main(int argc, char* argv[]) {
     //Retrieve a metadata field
     size_t get_n_meta_values;
     void* get_meta_values;
-    SmartRedis::MetaDataType get_type;
+    SRMetaDataType get_type;
     dataset.get_meta_scalars("meta_field_1",
                              get_meta_values,
                              get_n_meta_values,

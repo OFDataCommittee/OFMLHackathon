@@ -1,9 +1,12 @@
 program mnist_example
 
   use mpi
+  use iso_c_binding
   use smartredis_client, only : client_type
 
   implicit none
+
+#include "enum_fortran.inc"
 
   character(len=*), parameter :: model_key = "mnist_model"
   character(len=*), parameter :: model_file = "../../../common/mnist_data/mnist_cnn.pt"
@@ -12,6 +15,7 @@ program mnist_example
 
   type(client_type) :: client
   integer :: err_code, pe_id
+  integer(kind=enum_kind) :: result
   character(len=2) :: key_suffix
 
   ! Initialize MPI and get the rank of the processor
@@ -20,20 +24,29 @@ program mnist_example
 
   ! Format the suffix for a key as a zero-padded version of the rank
   write(key_suffix, "(A,I1.1)") "_",pe_id
-  call client%initialize(.true.)
 
+  ! Initialize a client
+  result = client%initialize(.true.) ! Change .false. to .true. if not using a clustered database
+  if (result .ne. SRNoError) stop 'client%initialize failed'
 
+  ! Set up model and script for the computation
   if (pe_id == 0) then
-    call client%set_model_from_file(model_key, model_file, "TORCH", "CPU")
-    call client%set_script_from_file(script_key, "CPU", script_file)
+    result = client%set_model_from_file(model_key, model_file, "TORCH", "CPU")
+    if (result .ne. SRNoError) stop 'client%set_model_from_file failed'
+    result = client%set_script_from_file(script_key, "CPU", script_file)
+    if (result .ne. SRNoError) stop 'client%set_script_from_file failed'
   endif
 
+  ! Get all PEs lined up
   call MPI_barrier(MPI_COMM_WORLD, err_code)
 
+  ! Run the main computation
   call run_mnist(client, key_suffix, model_key, script_key)
 
+  ! Shut down MPI
   call MPI_finalize(err_code)
 
+  ! Check final result
   if (pe_id == 0) then
     print *, "SmartRedis Fortran MPI MNIST example finished without errors."
   endif
@@ -51,7 +64,7 @@ subroutine run_mnist( client, key_suffix, model_name, script_name )
   integer, parameter :: result_dim1 = 10
 
   real, dimension(1,1,mnist_dim1,mnist_dim2) :: array
-  real, dimension(1,result_dim1) :: result
+  real, dimension(1,result_dim1) :: output_result
 
   character(len=255) :: in_key
   character(len=255) :: script_out_key
@@ -65,19 +78,23 @@ subroutine run_mnist( client, key_suffix, model_name, script_name )
   script_out_key = "mnist_processed_input_rank"//trim(key_suffix)
   out_key = "mnist_processed_input_rank"//trim(key_suffix)
 
-  ! Generate some fake data for inference
+  ! Generate some fake data for inference and send it to the database
   call random_number(array)
-  call client%put_tensor(in_key, array, shape(array))
+  result = client%put_tensor(in_key, array, shape(array))
+  if (result .ne. SRNoError) stop 'client%put_tensor failed'
 
   ! Prepare the script inputs and outputs
   inputs(1) = in_key
   outputs(1) = script_out_key
-  call client%run_script(script_name, "pre_process", inputs, outputs)
+  result = client%run_script(script_name, "pre_process", inputs, outputs)
+  if (result .ne. SRNoError) stop 'client%run_script failed'
   inputs(1) = script_out_key
   outputs(1) = out_key
-  call client%run_model(model_name, inputs, outputs)
-  result(:,:) = 0.
-  call client%unpack_tensor(out_key, result, shape(result))
+  result = client%run_model(model_name, inputs, outputs)
+  if (result .ne. SRNoError) stop 'client%run_model failed'
+  output_result(:,:) = 0.
+  result = client%unpack_tensor(out_key, output_result, shape(output_result))
+  if (result .ne. SRNoError) stop 'client%unpack_tensor failed'
 
 end subroutine run_mnist
 

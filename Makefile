@@ -22,11 +22,17 @@ deps: SHELL:=/bin/bash
 deps:
 	@bash ./build-scripts/build_deps.sh
 
-# help: lib                            - Build SmartRedis clients into a static library
+# help: lib                            - Build SmartRedis clients into a dynamic library
 .PHONY: lib
 lib: SHELL:=/bin/bash
 lib: deps
-	@bash ./build-scripts/build_lib.sh
+	@bash ./build-scripts/build_lib.sh $(LIB_BUILD_ARGS)
+
+# help: test-lib                       - Build SmartRedis clients into a dynamic library with least permissive compiler settings
+.PHONY: test-lib
+test-lib: SHELL:=/bin/bash
+test-lib: LIB_BUILD_ARGS="-DWERROR=ON"
+test-lib: lib
 
 # help: test-deps                      - Make SmartRedis testing dependencies
 .PHONY: test-deps
@@ -43,7 +49,7 @@ test-deps-gpu:
 
 # help: build-tests                    - build all tests (C, C++, Fortran)
 .PHONY: build-tests
-build-tests: lib
+build-tests: test-lib
 	./build-scripts/build_cpp_tests.sh
 	./build-scripts/build_cpp_unit_tests.sh
 	./build-scripts/build_c_tests.sh
@@ -52,24 +58,24 @@ build-tests: lib
 
 # help: build-test-cpp                 - build the C++ tests
 .PHONY: build-test-cpp
-build-test-cpp: lib
+build-test-cpp: test-lib
 	./build-scripts/build_cpp_tests.sh
 	./build-scripts/build_cpp_unit_tests.sh
 
 # help: build-unit-test-cpp            - build the C++ unit tests
 .PHONY: build-unit-test-cpp
-build-unit-test-cpp: lib
+build-unit-test-cpp: test-lib
 	./build-scripts/build_cpp_unit_tests.sh
 
 # help: build-test-c                   - build the C tests
 .PHONY: build-test-c
-build-test-c: lib
+build-test-c: test-lib
 	./build-scripts/build_c_tests.sh
 
 
 # help: build-test-fortran             - build the Fortran tests
 .PHONY: build-test-fortran
-build-test-fortran: lib
+build-test-fortran: test-lib
 	./build-scripts/build_fortran_tests.sh
 
 
@@ -175,14 +181,14 @@ cov:
 .PHONY: test
 test: build-tests
 test:
-	@PYTHONFAULTHANDLER=1 python -m pytest -vv ./tests
+	@PYTHONFAULTHANDLER=1 python -m pytest --ignore ./tests/docker -vv ./tests
 
 
 # help: test-verbose                   - Build and run all tests [verbosely]
 .PHONY: test-verbose
 test-verbose: build-tests
 test-verbose:
-	@PYTHONFAULTHANDLER=1 python -m pytest -vv -s ./tests
+	@PYTHONFAULTHANDLER=1 python -m pytest --ignore ./tests/docker -vv -s ./tests
 
 # help: test-c                         - Build and run all C tests
 .PHONY: test-c

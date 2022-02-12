@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 #include <stdexcept>
 #include "tensorbase.h"
 #include "sharedmemorylist.h"
+#include "srexception.h"
 
 ///@file
 
@@ -60,8 +61,8 @@ class Tensor : public TensorBase
         Tensor(const std::string& name,
                void* data,
                const std::vector<size_t>& dims,
-               const TensorType type,
-               const MemoryLayout mem_layout);
+               const SRTensorType type,
+               const SRMemoryLayout mem_layout);
 
         /*!
         *   \brief Tensor copy constructor
@@ -117,7 +118,7 @@ class Tensor : public TensorBase
         *   \param mem_layout The MemoryLayout enum describing
         *          the layout of data view
         */
-        virtual void* data_view(const MemoryLayout mem_layout);
+        virtual void* data_view(const SRMemoryLayout mem_layout);
 
         /*!
         *   \brief Fill a user provided memory space with
@@ -128,7 +129,7 @@ class Tensor : public TensorBase
         */
         virtual void fill_mem_space(void* data,
                                     std::vector<size_t> dims,
-                                    MemoryLayout mem_layout);
+                                    SRMemoryLayout mem_layout);
 
     protected:
 
@@ -147,10 +148,11 @@ class Tensor : public TensorBase
         *            source data value. As a result, the initial
         *            all of this function SHOULD NOT
         *            use the returned value.
-        *   \param data The nested data to copy to the
-        *               contiguous memory location
+        *   \param src_data The nested data to copy to the
+        *                   contiguous memory location
         *   \param dims The dimensions of src_data
-        *   \param mem_layout The destination memory space (contiguous)
+        *   \param n_dims The number of dimensions in dims
+        *   \param dest_data The contiguous buffer to receive copied data
         *   \returns A pointer that is for recursive functionality
         *            only.  The initial caller SHOULD NOT use
         *            this pointer.
@@ -213,7 +215,7 @@ class Tensor : public TensorBase
         */
         virtual void _set_tensor_data(void* src_data,
                                       const std::vector<size_t>& dims,
-                                      const MemoryLayout mem_layout);
+                                      const SRMemoryLayout mem_layout);
 
         /*!
         *   \brief This function will copy a fortran array

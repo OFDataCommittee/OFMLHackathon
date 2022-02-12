@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,204 +27,247 @@
  */
 
 #include "redis.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
+// Redis constructor.
 Redis::Redis() : RedisServer()
 {
-    std::string address_port = this->_get_ssdb();
-    this->_connect(address_port);
-    return;
+    std::string address_port = _get_ssdb();
+    _add_to_address_map(address_port);
+    _connect(address_port);
 }
 
+// Redis constructor. Uses address provided to constructor instead of environment variables
 Redis::Redis(std::string address_port) : RedisServer()
 {
-    this->_connect(address_port);
-    return;
+    _add_to_address_map(address_port);
+    _connect(address_port);
 }
 
+// Redis destructor
 Redis::~Redis()
 {
-    if(this->_redis)
-        delete this->_redis;
+    if (_redis != NULL) {
+        delete _redis;
+        _redis = NULL;
+    }
 }
 
-CommandReply Redis::run(Command& cmd)
-{
-    Command::iterator cmd_fields_start = cmd.begin();
-    Command::iterator cmd_fields_end = cmd.end();
-    CommandReply reply;
-
-    int n_trials = 100;
-
-    while (n_trials > 0) {
-
-        try {
-            reply = this->_redis->command(cmd_fields_start, cmd_fields_end);
-
-            if(reply.has_error()==0)
-                return reply;
-            n_trials = 0;
-        }
-        catch (sw::redis::IoError &e) {
-            n_trials--;
-            std::this_thread::sleep_for(std::chrono::seconds(2));
-        }
-        catch (sw::redis::ClosedError &e) {
-            n_trials--;
-            std::this_thread::sleep_for(std::chrono::seconds(2));
-        }
-        catch (std::exception& e) {
-            throw std::runtime_error(e.what());
-        }
-        catch (...) {
-            throw std::runtime_error("A non-standard exception "\
-                                     "encountered during command " +
-                                     cmd.first_field() +
-                                     " execution. ");
-        }
-    }
-
-    if (n_trials == 0) {
-        if(reply.has_error()>0)
-            reply.print_reply_error();
-        throw std::runtime_error("Redis failed to execute command: " +
-                                 cmd.first_field());
-    }
-
-    return reply;
+// Run a single-key Command on the server
+CommandReply Redis::run(SingleKeyCommand& cmd){
+    return _run(cmd);
 }
 
-CommandReply Redis::run(CommandList& cmds)
+// Run a multi-key Command on the server
+CommandReply Redis::run(MultiKeyCommand& cmd){
+    return _run(cmd);
+}
+
+// Run a compound Command on the server
+CommandReply Redis::run(CompoundCommand& cmd){
+    return _run(cmd);
+}
+
+// Run an address-at Command on the server
+CommandReply Redis::run(AddressAtCommand& cmd){
+    if (not is_addressable(cmd.get_address(), cmd.get_port()))
+        throw SRRuntimeException("The provided host and port do not match "\
+                                 "the host and port used to initialize the "\
+                                 "non-cluster client connection.");
+    return this->_run(cmd);
+}
+
+// Run an address-any Command on the server
+CommandReply Redis::run(AddressAnyCommand& cmd){
+    return _run(cmd);
+}
+
+// Run a Command list on the server
+std::vector<CommandReply> Redis::run(CommandList& cmds)
 {
+    std::vector<CommandReply> replies;
     CommandList::iterator cmd = cmds.begin();
-    CommandList::iterator cmd_end = cmds.end();
-    CommandReply reply;
-    while(cmd != cmd_end) {
-        reply = this->run(**cmd);
-        cmd++;
+    for ( ; cmd != cmds.end(); cmd++) {
+        replies.push_back(dynamic_cast<Command*>(*cmd)->run_me(this));
     }
-    return reply;
+    return replies;
 }
 
+// Check if a model or script key exists in the database
 bool Redis::model_key_exists(const std::string& key)
 {
-    return this->key_exists(key);
+    return key_exists(key);
 }
 
+// Check if a key exists in the database
 bool Redis::key_exists(const std::string& key)
 {
-    Command cmd;
+    // Build the command
+    SingleKeyCommand cmd;
     cmd.add_field("EXISTS");
     cmd.add_field(key);
-    CommandReply reply = this->run(cmd);
-    return reply.integer();
+
+    // Run it
+    CommandReply reply = run(cmd);
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("Error encountered while checking "\
+                                 "for existence of key " + key);
+    return (bool)reply.integer();
 }
 
+// Check if a hash field exists in the database
+bool Redis::hash_field_exists(const std::string& key,
+                              const std::string& field)
+{
+    // Build the command
+    SingleKeyCommand cmd;
+    cmd.add_field("HEXISTS");
+    cmd.add_field(key, true);
+    cmd.add_field(field);
+
+    // Run it
+    CommandReply reply = run(cmd);
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("Error encountered while checking "\
+                                 "for existence of hash field " +
+                                 field + " at key " + key);
+    return (bool)reply.integer();
+}
+
+// Check if address is valid
 bool Redis::is_addressable(const std::string& address,
                            const uint64_t& port)
 {
-    return this->_address_node_map.find(address + ":"
-                        + std::to_string(port))
-                        != this->_address_node_map.end();
+    return _address_node_map.find(address + ":" + std::to_string(port)) !=
+        _address_node_map.end();
 }
 
-
+// Put a Tensor on the server
 CommandReply Redis::put_tensor(TensorBase& tensor)
 {
-    Command cmd;
+    // Build the command
+    SingleKeyCommand cmd;
     cmd.add_field("AI.TENSORSET");
     cmd.add_field(tensor.name());
     cmd.add_field(tensor.type_str());
     cmd.add_fields(tensor.dims());
     cmd.add_field("BLOB");
     cmd.add_field_ptr(tensor.buf());
-    return this->run(cmd);
+
+    // Run it
+    return run(cmd);
 }
 
+// Get a Tensor from the server
 CommandReply Redis::get_tensor(const std::string& key)
 {
-    Command cmd;
+    // Build the command
+    GetTensorCommand cmd;
     cmd.add_field("AI.TENSORGET");
     cmd.add_field(key);
     cmd.add_field("META");
     cmd.add_field("BLOB");
-    return this->run(cmd);
+
+    // Run it
+    return run(cmd);
 }
 
+// Rename a tensor in the database
 CommandReply Redis::rename_tensor(const std::string& key,
                                   const std::string& new_key)
 {
-    Command cmd;
+    // Build the command
+    MultiKeyCommand cmd;
     cmd.add_field("RENAME");
     cmd.add_field(key);
     cmd.add_field(new_key);
-    return this->run(cmd);
+
+    // Run it
+    return run(cmd);
 }
 
+// Delete a tensor in the database
 CommandReply Redis::delete_tensor(const std::string& key)
 {
-    Command cmd;
+    // Build the command
+    SingleKeyCommand cmd;
     cmd.add_field("DEL");
     cmd.add_field(key, true);
-    return this->run(cmd);
+
+    // Run it
+    return run(cmd);
 }
 
+// Copy a tensor from the source key to the destination key
 CommandReply Redis::copy_tensor(const std::string& src_key,
                                 const std::string& dest_key)
 {
     //TODO can we do COPY for same hash slot or database?
-    CommandReply cmd_get_reply;
-    Command cmd_get;
 
+    // Build a GET command to fetch the tensor
+    GetTensorCommand cmd_get;
     cmd_get.add_field("AI.TENSORGET");
     cmd_get.add_field(src_key, true);
     cmd_get.add_field("META");
     cmd_get.add_field("BLOB");
-    cmd_get_reply = this->run(cmd_get);
 
-    std::vector<size_t> dims =
-        CommandReplyParser::get_tensor_dims(cmd_get_reply);
-    std::string_view blob =
-        CommandReplyParser::get_tensor_data_blob(cmd_get_reply);
-    TensorType type =
-        CommandReplyParser::get_tensor_data_type(cmd_get_reply);
+    // Run the GET command
+    CommandReply cmd_get_reply = run(cmd_get);
+    if (cmd_get_reply.has_error() > 0) {
+        throw SRRuntimeException("Failed to retrieve tensor " +
+                                 src_key + "from database");
+    }
 
-    CommandReply cmd_put_reply;
-    Command cmd_put;
+    // Decode the tensor
+    std::vector<size_t> dims = cmd_get.get_dims(cmd_get_reply);
+    std::string_view blob = cmd_get.get_data_blob(cmd_get_reply);
+    SRTensorType type = cmd_get.get_data_type(cmd_get_reply);
 
+    // Build a PUT command to send the tensor back to the database
+    // under the new key
+    MultiKeyCommand cmd_put;
     cmd_put.add_field("AI.TENSORSET");
     cmd_put.add_field(dest_key, true);
     cmd_put.add_field(TENSOR_STR_MAP.at(type));
     cmd_put.add_fields(dims);
     cmd_put.add_field("BLOB");
     cmd_put.add_field_ptr(blob);
-    cmd_put_reply = this->run(cmd_put);
 
-    return cmd_put_reply;
+    // Run the PUT command
+    return run(cmd_put);
 }
 
+// Copy a vector of tensors from source keys to destination keys
 CommandReply Redis::copy_tensors(const std::vector<std::string>& src,
                                  const std::vector<std::string>& dest)
 {
-    std::vector<std::string>::const_iterator src_it = src.cbegin();
-    std::vector<std::string>::const_iterator src_it_end = src.cend();
-
-    std::vector<std::string>::const_iterator dest_it = dest.cbegin();
-    std::vector<std::string>::const_iterator dest_it_end = dest.cend();
-
-    CommandReply reply;
-
-    while(src_it!=src_it_end && dest_it!=dest_it_end)
-    {
-        reply = this->copy_tensor(*src_it, *dest_it);
-        src_it++;
-        dest_it++;
+    // Make sure vectors are the same length
+    if (src.size() != dest.size()) {
+        throw SRRuntimeException("differing size vectors "\
+                                 "passed to copy_tensors");
     }
+
+    // Copy tensors one at a time. We only need to check one iterator
+    // for reaching the end since we know from above that they are the
+    // same length
+    std::vector<std::string>::const_iterator it_src = src.cbegin();
+    std::vector<std::string>::const_iterator it_dest = dest.cbegin();
+    CommandReply reply;
+    for ( ; it_src != src.cend(); it_src++, it_dest++) {
+        reply = copy_tensor(*it_src, *it_dest);
+        if (reply.has_error() > 0) {
+            throw SRRuntimeException("tensor copy failed");
+        }
+
+    }
+
+    // Done
     return reply;
 }
 
-
+// Set a model from std::string_view buffer in the database for future execution
 CommandReply Redis::set_model(const std::string& model_name,
                               std::string_view model,
                               const std::string& backend,
@@ -236,69 +279,85 @@ CommandReply Redis::set_model(const std::string& model_name,
                               const std::vector<std::string>& outputs
                               )
 {
-    Command cmd;
+    // Build the command
+    SingleKeyCommand cmd;
     cmd.add_field("AI.MODELSET");
     cmd.add_field(model_name);
     cmd.add_field(backend);
     cmd.add_field(device);
-    if(tag.size()>0) {
+
+    // Add optional fields if requested
+    if (tag.size() > 0) {
         cmd.add_field("TAG");
         cmd.add_field(tag);
     }
-    if(batch_size>0) {
+    if (batch_size > 0) {
         cmd.add_field("BATCHSIZE");
         cmd.add_field(std::to_string(batch_size));
     }
-    if(min_batch_size>0) {
+    if (min_batch_size > 0) {
         cmd.add_field("MINBATCHSIZE");
         cmd.add_field(std::to_string(min_batch_size));
     }
-    if(inputs.size()>0) {
+    if (inputs.size() > 0) {
         cmd.add_field("INPUTS");
         cmd.add_fields(inputs);
     }
-    if(outputs.size()>0) {
+    if (outputs.size() > 0) {
         cmd.add_field("OUTPUTS");
         cmd.add_fields(outputs);
     }
     cmd.add_field("BLOB");
     cmd.add_field_ptr(model);
-    return this->run(cmd);
+
+    // Run it
+    return run(cmd);
 }
 
+// Set a script from a string_view buffer in the database for future execution
 CommandReply Redis::set_script(const std::string& key,
                                const std::string& device,
                                std::string_view script)
 {
-    Command cmd;
+    // Build the command
+    SingleKeyCommand cmd;
     cmd.add_field("AI.SCRIPTSET");
     cmd.add_field(key, true);
     cmd.add_field(device);
     cmd.add_field("SOURCE");
     cmd.add_field_ptr(script);
-    return this->run(cmd);
+
+    // Run it
+    return run(cmd);
 }
 
+// Run a model in the database using the specificed input and output tensors
 CommandReply Redis::run_model(const std::string& key,
                               std::vector<std::string> inputs,
                               std::vector<std::string> outputs)
 {
-    Command cmd;
+    // Build the command
+    CompoundCommand cmd;
     cmd.add_field("AI.MODELRUN");
     cmd.add_field(key);
     cmd.add_field("INPUTS");
     cmd.add_fields(inputs);
     cmd.add_field("OUTPUTS");
     cmd.add_fields(outputs);
-    return this->run(cmd);
+
+    // Run it
+    return run(cmd);
 }
 
+// Run a script function in the database using the specificed input and
+// output tensors
 CommandReply Redis::run_script(const std::string& key,
                               const std::string& function,
                               std::vector<std::string> inputs,
                               std::vector<std::string> outputs)
 {
-    Command cmd;
+    // Build the command
+    CompoundCommand cmd;
     cmd.add_field("AI.SCRIPTRUN");
     cmd.add_field(key);
     cmd.add_field(function);
@@ -306,83 +365,208 @@ CommandReply Redis::run_script(const std::string& key,
     cmd.add_fields(inputs);
     cmd.add_field("OUTPUTS");
     cmd.add_fields(outputs);
-    return this->run(cmd);
+
+    // Run it
+    return run(cmd);
 }
 
+// Retrieve the model from the database
 CommandReply Redis::get_model(const std::string& key)
 {
-    Command cmd;
+    // Build the command
+    SingleKeyCommand cmd;
     cmd.add_field("AI.MODELGET");
     cmd.add_field(key);
     cmd.add_field("BLOB");
-    return this->run(cmd);
+
+    // Run it
+    return run(cmd);
 }
 
+// Retrieve the script from the database
 CommandReply Redis::get_script(const std::string& key)
 {
-    Command cmd;
+    // Build the command
+    SingleKeyCommand cmd;
     cmd.add_field("AI.SCRIPTGET");
     cmd.add_field(key, true);
     cmd.add_field("SOURCE");
-    return this->run(cmd);
+
+    // Run it
+    return run(cmd);
+}
+
+// Retrieve the model and script AI.INFO
+CommandReply Redis::get_model_script_ai_info(const std::string& address,
+                                             const std::string& key,
+                                             const bool reset_stat)
+{
+    AddressAtCommand cmd;
+
+    // Parse the host and port
+    std::string host = cmd.parse_host(address);
+    uint64_t port = cmd.parse_port(address);
+
+    // Determine the prefix we need for the model or script
+    if (!is_addressable(host, port)) {
+        throw SRRuntimeException("The provided host and port do not match "\
+                                 "the host and port used to initialize the "\
+                                 "non-cluster client connection.");
+    }
+
+    //Build the Command
+    cmd.set_exec_address_port(host, port);
+    cmd.add_field("AI.INFO");
+    cmd.add_field(key);
+
+    // Optionally add RESETSTAT to the command
+    if (reset_stat) {
+        cmd.add_field("RESETSTAT");
+    }
+
+    return run(cmd);
+}
+
+inline CommandReply Redis::_run(const Command& cmd)
+{
+    for (int i = 1; i <= _command_attempts; i++) {
+        try {
+            // Run the command
+            CommandReply reply = _redis->command(cmd.cbegin(), cmd.cend());
+            if (reply.has_error() == 0)
+                return reply;
+
+            // On an error response, print the response and bail
+            reply.print_reply_error();
+            throw SRRuntimeException(
+                "Redis failed to execute command: " + cmd.first_field());
+        }
+        catch (SmartRedis::Exception& e) {
+            // Exception is already prepared, just propagate it
+            throw;
+        }
+        catch (sw::redis::IoError &e) {
+            // For an error from Redis, retry unless we're out of chances
+            if (i == _command_attempts) {
+                throw SRDatabaseException(
+                    std::string("Redis IO error when executing commend: ") +
+                    e.what());
+            }
+            // else, Fall through for a retry
+        }
+        catch (sw::redis::ClosedError &e) {
+            // For an error from Redis, retry unless we're out of chances
+            if (i == _command_attempts) {
+                throw SRDatabaseException(
+                    std::string("Redis Closed error when executing commend: ") +
+                    e.what());
+            }
+            // else, Fall through for a retry
+        }
+        catch (sw::redis::Error &e) {
+            // For other errors from Redis, report them immediately
+            throw SRRuntimeException(
+                std::string("Redis error when executing commend: ") +
+                e.what());
+        }
+        catch (std::exception& e) {
+            // Should never hit this, so bail immediately if we do
+            throw SRInternalException(
+                std::string("Unexpected exception executing command: ") +
+                e.what());
+        }
+        catch (...) {
+            // Should never hit this, so bail immediately if we do
+            throw SRInternalException(
+                "Non-standard exception encountered executing command " +
+                cmd.first_field());
+        }
+
+        // If we get here, the execution attempt failed.
+        // Sleep before the next attempt
+        std::this_thread::sleep_for(std::chrono::milliseconds(_command_interval));
+    }
+
+    // If we get here, we've run out of retry attempts
+    throw SRTimeoutException("Unable to execute command" + cmd.first_field());
+}
+
+inline void Redis::_add_to_address_map(std::string address_port)
+{
+    if (address_port.rfind("tcp://", 0) == 0)
+        address_port = address_port.substr(6, std::string::npos);
+    else if (address_port.rfind("unix://", 0) == 0)
+        address_port = address_port.substr(7, std::string::npos);
+
+    _address_node_map.insert({address_port, nullptr});
 }
 
 inline void Redis::_connect(std::string address_port)
 {
-    // Note that this logic flow differs from a cluster
-    // because the non-cluster Redis constructor
-    // does not form a connection until a command is run
-
-    this->_address_node_map.insert({address_port, nullptr});
-
-    // Try to create the sw::redis::Redis object
-    try {
-        this->_redis = new sw::redis::Redis(address_port);
-    }
-    catch (std::exception& e) {
-        this->_redis = NULL;
-        throw std::runtime_error("Failed to create Redis "\
-                                 "object with error: " +
-                                 std::string(e.what()));
-    }
-    catch (...) {
-        this->_redis = NULL;
-        throw std::runtime_error("A non-standard exception "\
-                                 "encountered during client "\
-                                 "connection.");
-    }
-
-    // Attempt to have the sw::redis::Redis object
-    // make a connection using the PING command
-    int n_trials = 10;
-    bool run_sleep = false;
-
-    for(int i=1; i<=n_trials; i++) {
-        run_sleep = false;
+    for (int i = 1; i <= _connection_attempts; i++) {
         try {
-            if(this->_redis->ping().compare("PONG")==0) {
-                break;
+            // Try to create the sw::redis::Redis object
+            _redis = new sw::redis::Redis(address_port);
+
+            // Attempt to have the sw::redis::Redis object
+            // make a connection using the PING command
+            if (_redis->ping().compare("PONG") == 0) {
+                return;
             }
-            else {
-                run_sleep = true;
+        }
+        catch (std::bad_alloc& e) {
+            // On a memory error, bail immediately
+            if (_redis != NULL) {
+                delete _redis;
+                _redis = NULL;
+            }
+            throw SRBadAllocException("Redis connection");
+        }
+        catch (sw::redis::Error& e) {
+            // For an error from Redis, retry unless we're out of chances
+            if (_redis != NULL) {
+                delete _redis;
+                _redis = NULL;
+            }
+            if (i == _connection_attempts) {
+                throw SRDatabaseException(
+                    std::string("Unable to connect to backend database: ") +
+                                e.what());
             }
         }
         catch (std::exception& e) {
-            if(i == n_trials) {
-                throw std::runtime_error(e.what());
+            // Should never hit this, so bail immediately if we do
+            if (_redis != NULL) {
+                delete _redis;
+                _redis = NULL;
             }
-            run_sleep = true;
+            throw SRInternalException(
+                std::string("Unexpected exception while connecting: ") +
+                e.what());
         }
         catch (...) {
-            if(i == n_trials) {
-                throw std::runtime_error("A non-standard exception "\
-                                         "encountered during client "\
-                                         "connection.");
+            // Should never hit this, so bail immediately if we do
+            if (_redis != NULL) {
+                delete _redis;
+                _redis = NULL;
             }
-            run_sleep = true;
+            throw SRInternalException(
+                "A non-standard exception encountered "\
+                "during client connection.");
         }
-        if(run_sleep)
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+
+        // Delay before the retry
+        if (_redis != NULL) {
+            delete _redis;
+            _redis = NULL;
+        }
+        if (i < _connection_attempts) {
+            std::this_thread::sleep_for(
+                std::chrono::milliseconds(_connection_interval));
+        }
     }
-    return;
+
+    // If we get here, we've run out of retry attempts
+    throw SRTimeoutException(std::string("Connection attempt failed after ") +
+                             std::to_string(_connection_attempts) + "tries");
 }

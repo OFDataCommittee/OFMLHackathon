@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,29 +47,29 @@ class ScalarField : public MetadataField {
         /*!
         *   \brief ScalarField constructor
         *   \param name The name used to reference the scalar field
-        *   \param MetaDataType The metadata type for this field
+        *   \param type The metadata type for this field
         */
-        ScalarField(const std::string& name, MetaDataType type);
+        ScalarField(const std::string& name, SRMetaDataType type);
 
         /*!
         *   \brief ScalarField constructor with initial values
         *   \param name The name used to reference the scalar field
-        *   \param MetaDataType The metadata type for this field
+        *   \param type The metadata type for this field
         *   \param vals Initial values to be copied into the ScalarField
         */
         ScalarField(const std::string& name,
-                    MetaDataType type,
+                    SRMetaDataType type,
                     const std::vector<T>& vals);
 
         /*!
         *   \brief ScalarField constructor with initial values
         *   \param name The name used to reference the scalar field
-        *   \param MetaDataType The metadata type for this field
+        *   \param type The metadata type for this field
         *   \param vals Initial values to be placed in the Scalarfield
         *               via move semantics
         */
         ScalarField(const std::string& name,
-                    MetaDataType type,
+                    SRMetaDataType type,
                     std::vector<T>&& vals);
 
         /*!

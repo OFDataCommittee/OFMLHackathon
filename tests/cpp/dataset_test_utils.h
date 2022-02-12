@@ -1,3 +1,31 @@
+/*
+ * BSD 2-Clause License
+ *
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #ifndef SMARTREDIS_DATASET_TEST_UTILS_H
 #define SMARTREDIS_DATASET_TEST_UTILS_H
 
@@ -6,48 +34,53 @@
 
 namespace DATASET_TEST_UTILS {
 
-const static double dbl_meta_1 =
-    std::numeric_limits<double>::max();
-const static double dbl_meta_2 =
-    std::numeric_limits<double>::min();
+/*
+   The following Client derivative enables checking for
+   a hash field to verify DataSet behavior.  If hash
+   field functionality is introduced to Client, this
+   class can be removed.
+*/
+class DatasetTestClient : public SmartRedis::Client
+{
+    public:
+        DatasetTestClient(bool cluster) : Client(cluster) {};
+
+        bool hash_field_exists(const std::string& key,
+                               const std::string& field) {
+            return _redis_server->hash_field_exists(key, field);
+        }
+        std::string ack_field() {
+            return _DATASET_ACK_FIELD;
+        }
+};
+
+const static double dbl_meta_1 = std::numeric_limits<double>::max();
+const static double dbl_meta_2 = std::numeric_limits<double>::min();
 const static double dbl_meta_3 = M_PI;
 
-const static float flt_meta_1 =
-    std::numeric_limits<float>::max();
-const static float flt_meta_2 =
-    std::numeric_limits<float>::min();
+const static float flt_meta_1 = std::numeric_limits<float>::max();
+const static float flt_meta_2 = std::numeric_limits<float>::min();
 const static float flt_meta_3 = M_PI;
 
-const static int64_t i64_meta_1 =
-    std::numeric_limits<int64_t>::max();
-const static int64_t i64_meta_2 =
-    std::numeric_limits<int64_t>::min();
+const static int64_t i64_meta_1 = std::numeric_limits<int64_t>::max();
+const static int64_t i64_meta_2 = std::numeric_limits<int64_t>::min();
 const static int64_t i64_meta_3 = (int64_t)M_PI;
 
-const static int32_t i32_meta_1 =
-    std::numeric_limits<int32_t>::max();
-const static int32_t i32_meta_2 =
-    std::numeric_limits<int32_t>::min();
+const static int32_t i32_meta_1 = std::numeric_limits<int32_t>::max();
+const static int32_t i32_meta_2 = std::numeric_limits<int32_t>::min();
 const static int32_t i32_meta_3 = (int32_t)M_PI;
 
-const static uint64_t ui64_meta_1 =
-    std::numeric_limits<uint64_t>::max();
-const static uint64_t ui64_meta_2 =
-    std::numeric_limits<uint64_t>::min();
+const static uint64_t ui64_meta_1 = std::numeric_limits<uint64_t>::max();
+const static uint64_t ui64_meta_2 = std::numeric_limits<uint64_t>::min();
 const static uint64_t ui64_meta_3 = (uint64_t)M_PI;
 
-const static uint32_t ui32_meta_1 =
-    std::numeric_limits<uint32_t>::max();
-const static uint32_t ui32_meta_2 =
-    std::numeric_limits<uint32_t>::min();
+const static uint32_t ui32_meta_1 = std::numeric_limits<uint32_t>::max();
+const static uint32_t ui32_meta_2 = std::numeric_limits<uint32_t>::min();
 const static uint32_t ui32_meta_3 = (uint32_t)M_PI;
 
-const static std::string str_meta_1 =
-    std::string("test_meta_string_1");
-const static std::string str_meta_2 =
-    std::string("test_meta_string_2");
-const static std::string str_meta_3 =
-    std::string("test_meta_string_3");
+const static std::string str_meta_1("test_meta_string_1");
+const static std::string str_meta_2("test_meta_string_2");
+const static std::string str_meta_3("test_meta_string_3");
 
 /*!
 *   \brief This fills a DataSet with metadata
@@ -59,73 +92,33 @@ inline void fill_dataset_with_metadata(SmartRedis::DataSet& dataset)
 {
     //Add metadata fields to the DataSet.  _meta_1 and _meta_2
     //values added to _field_1 and _meta_3 is added to _field_2.
-    dataset.add_meta_scalar("dbl_field_1",
-                            &dbl_meta_1,
-                            SmartRedis::MetaDataType::dbl);
-    dataset.add_meta_scalar("dbl_field_1",
-                            &dbl_meta_2,
-                            SmartRedis::MetaDataType::dbl);
-    dataset.add_meta_scalar("dbl_field_2",
-                            &dbl_meta_3,
-                            SmartRedis::MetaDataType::dbl);
+    dataset.add_meta_scalar("dbl_field_1", &dbl_meta_1, SRMetadataTypeDouble);
+    dataset.add_meta_scalar("dbl_field_1", &dbl_meta_2, SRMetadataTypeDouble);
+    dataset.add_meta_scalar("dbl_field_2", &dbl_meta_3, SRMetadataTypeDouble);
 
-    dataset.add_meta_scalar("flt_field_1",
-                            &flt_meta_1,
-                            SmartRedis::MetaDataType::flt);
-    dataset.add_meta_scalar("flt_field_1",
-                            &flt_meta_2,
-                            SmartRedis::MetaDataType::flt);
-    dataset.add_meta_scalar("flt_field_2",
-                            &flt_meta_3,
-                            SmartRedis::MetaDataType::flt);
+    dataset.add_meta_scalar("flt_field_1", &flt_meta_1, SRMetadataTypeFloat);
+    dataset.add_meta_scalar("flt_field_1", &flt_meta_2, SRMetadataTypeFloat);
+    dataset.add_meta_scalar("flt_field_2", &flt_meta_3, SRMetadataTypeFloat);
 
-    dataset.add_meta_scalar("i64_field_1",
-                            &i64_meta_1,
-                            SmartRedis::MetaDataType::int64);
-    dataset.add_meta_scalar("i64_field_1",
-                            &i64_meta_2,
-                            SmartRedis::MetaDataType::int64);
-    dataset.add_meta_scalar("i64_field_2",
-                            &i64_meta_3,
-                            SmartRedis::MetaDataType::int64);
+    dataset.add_meta_scalar("i64_field_1", &i64_meta_1, SRMetadataTypeInt64);
+    dataset.add_meta_scalar("i64_field_1", &i64_meta_2, SRMetadataTypeInt64);
+    dataset.add_meta_scalar("i64_field_2", &i64_meta_3, SRMetadataTypeInt64);
 
-    dataset.add_meta_scalar("i32_field_1",
-                            &i32_meta_1,
-                            SmartRedis::MetaDataType::int32);
-    dataset.add_meta_scalar("i32_field_1",
-                            &i32_meta_2,
-                            SmartRedis::MetaDataType::int32);
-    dataset.add_meta_scalar("i32_field_2",
-                            &i32_meta_3,
-                            SmartRedis::MetaDataType::int32);
+    dataset.add_meta_scalar("i32_field_1", &i32_meta_1, SRMetadataTypeInt32);
+    dataset.add_meta_scalar("i32_field_1", &i32_meta_2, SRMetadataTypeInt32);
+    dataset.add_meta_scalar("i32_field_2", &i32_meta_3, SRMetadataTypeInt32);
 
-    dataset.add_meta_scalar("ui64_field_1",
-                            &ui64_meta_1,
-                            SmartRedis::MetaDataType::uint64);
-    dataset.add_meta_scalar("ui64_field_1",
-                            &ui64_meta_2,
-                            SmartRedis::MetaDataType::uint64);
-    dataset.add_meta_scalar("ui64_field_2",
-                            &ui64_meta_3,
-                            SmartRedis::MetaDataType::uint64);
+    dataset.add_meta_scalar("ui64_field_1", &ui64_meta_1, SRMetadataTypeUint64);
+    dataset.add_meta_scalar("ui64_field_1", &ui64_meta_2, SRMetadataTypeUint64);
+    dataset.add_meta_scalar("ui64_field_2", &ui64_meta_3, SRMetadataTypeUint64);
 
-    dataset.add_meta_scalar("ui32_field_1",
-                            &ui32_meta_1,
-                            SmartRedis::MetaDataType::uint32);
-    dataset.add_meta_scalar("ui32_field_1",
-                            &ui32_meta_2,
-                            SmartRedis::MetaDataType::uint32);
-    dataset.add_meta_scalar("ui32_field_2",
-                            &ui32_meta_3,
-                            SmartRedis::MetaDataType::uint32);
+    dataset.add_meta_scalar("ui32_field_1", &ui32_meta_1, SRMetadataTypeUint32);
+    dataset.add_meta_scalar("ui32_field_1", &ui32_meta_2, SRMetadataTypeUint32);
+    dataset.add_meta_scalar("ui32_field_2", &ui32_meta_3, SRMetadataTypeUint32);
 
-    dataset.add_meta_string("str_field_1",
-                            str_meta_1);
-    dataset.add_meta_string("str_field_1",
-                            str_meta_2);
-    dataset.add_meta_string("str_field_2",
-                            str_meta_3);
-    return;
+    dataset.add_meta_string("str_field_1", str_meta_1);
+    dataset.add_meta_string("str_field_1", str_meta_2);
+    dataset.add_meta_string("str_field_2", str_meta_3);
 }
 
 /*!
@@ -148,16 +141,14 @@ inline void fill_dataset_with_metadata(SmartRedis::DataSet& dataset)
 template <typename T>
 void check_nested_3D_tensor(SmartRedis::DataSet& dataset,
                             std::string tensor_name,
-                            SmartRedis::TensorType type,
+                            SRTensorType type,
                             T*** vals,
-                            std::vector<size_t> dims
-                            )
+                            std::vector<size_t> dims)
 {
 
     T*** t_unpack = allocate_3D_array<T>(dims[0], dims[1], dims[2]);
 
-    dataset.unpack_tensor(tensor_name, t_unpack, dims, type,
-                          SmartRedis::MemoryLayout::nested);
+    dataset.unpack_tensor(tensor_name, t_unpack, dims, type, SRMemLayoutNested);
 
     //Check that the tensor values are correct
     if(is_equal_3D_array(vals, t_unpack, dims[0], dims[1], dims[2])) {
@@ -175,11 +166,11 @@ void check_nested_3D_tensor(SmartRedis::DataSet& dataset,
     T*** t_get = allocate_3D_array<T>(dims[0], dims[1], dims[2]);
 
     std::vector<size_t> get_dims;
-    SmartRedis::TensorType get_type;
+    SRTensorType get_type;
 
     dataset.get_tensor(tensor_name, (void*&)t_get,
                        get_dims, get_type,
-                       SmartRedis::MemoryLayout::nested);
+                       SRMemLayoutNested);
 
     if(get_type!=type)
         throw std::runtime_error("Retrieved type for " +
@@ -218,12 +209,12 @@ void check_nested_3D_tensor(SmartRedis::DataSet& dataset,
 template <typename T>
 void check_meta_field(SmartRedis::DataSet& dataset,
                       std::string field_name,
-                      SmartRedis::MetaDataType type,
+                      SRMetaDataType type,
                       std::vector<T> vals)
 {
     T* retrieved_vals;
     size_t retrieved_length;
-    SmartRedis::MetaDataType retrieved_type;
+    SRMetaDataType retrieved_type = SRMetadataTypeInvalid;
 
     dataset.get_meta_scalars(field_name,
                             (void*&)retrieved_vals,
@@ -256,10 +247,7 @@ void check_meta_field(SmartRedis::DataSet& dataset,
         }
     }
 
-    std::cout<<"Correct fetched metadata field "
-             <<field_name<<std::endl;
-
-    return;
+    std::cout<<"Correct fetched metadata field "<<field_name<<std::endl;
 }
 
 /*!
@@ -303,77 +291,43 @@ void check_tensor_names(SmartRedis::DataSet& dataset,
 void check_dataset_metadata(SmartRedis::DataSet& dataset)
 {
     //Check that the metadata values are correct for dbl
-    check_meta_field<double>(dataset,
-                            "dbl_field_1",
-                            SmartRedis::MetaDataType::dbl,
+    check_meta_field<double>(dataset, "dbl_field_1", SRMetadataTypeDouble,
                             {dbl_meta_1, dbl_meta_2});
-
-    check_meta_field<double>(dataset,
-                            "dbl_field_2",
-                            SmartRedis::MetaDataType::dbl,
+    check_meta_field<double>(dataset, "dbl_field_2", SRMetadataTypeDouble,
                             {dbl_meta_3});
 
     //Check that the metadata values are correct for flt
-
-    check_meta_field<float>(dataset,
-                            "flt_field_1",
-                            SmartRedis::MetaDataType::flt,
+    check_meta_field<float>(dataset, "flt_field_1", SRMetadataTypeFloat,
                             {flt_meta_1, flt_meta_2});
-
-    check_meta_field<float>(dataset,
-                            "flt_field_2",
-                            SmartRedis::MetaDataType::flt,
+    check_meta_field<float>(dataset, "flt_field_2", SRMetadataTypeFloat,
                             {flt_meta_3});
 
     //Check that the metadata values are correct for i64
-
-    check_meta_field<int64_t>(dataset,
-                                "i64_field_1",
-                                SmartRedis::MetaDataType::int64,
-                                {i64_meta_1, i64_meta_2});
-
-    check_meta_field<int64_t>(dataset,
-                                "i64_field_2",
-                                SmartRedis::MetaDataType::int64,
-                                {i64_meta_3});
+    check_meta_field<int64_t>(dataset, "i64_field_1", SRMetadataTypeInt64,
+                              {i64_meta_1, i64_meta_2});
+    check_meta_field<int64_t>(dataset, "i64_field_2", SRMetadataTypeInt64,
+                              {i64_meta_3});
 
     //Check that the metadata values are correct for i32
-
-    check_meta_field<int32_t>(dataset,
-                                "i32_field_1",
-                                SmartRedis::MetaDataType::int32,
-                                {i32_meta_1, i32_meta_2});
-
-    check_meta_field<int32_t>(dataset,
-                                "i32_field_2",
-                                SmartRedis::MetaDataType::int32,
-                                {i32_meta_3});
+    check_meta_field<int32_t>(dataset, "i32_field_1", SRMetadataTypeInt32,
+                              {i32_meta_1, i32_meta_2});
+    check_meta_field<int32_t>(dataset, "i32_field_2", SRMetadataTypeInt32,
+                              {i32_meta_3});
 
     //Check that the metadata values are correct for ui64
-
-    check_meta_field<uint64_t>(dataset,
-                                "ui64_field_1",
-                                SmartRedis::MetaDataType::uint64,
-                                {ui64_meta_1, ui64_meta_2});
-
-    check_meta_field<uint64_t>(dataset,
-                                "ui64_field_2",
-                                SmartRedis::MetaDataType::uint64,
-                                {ui64_meta_3});
+    check_meta_field<uint64_t>(dataset, "ui64_field_1", SRMetadataTypeUint64,
+                               {ui64_meta_1, ui64_meta_2});
+    check_meta_field<uint64_t>(dataset, "ui64_field_2", SRMetadataTypeUint64,
+                               {ui64_meta_3});
 
     //Check that the metadata values are correct for ui32
-    check_meta_field<uint32_t>(dataset,
-                                "ui32_field_1",
-                                SmartRedis::MetaDataType::uint32,
-                                {ui32_meta_1, ui32_meta_2});
-
-    check_meta_field<uint32_t>(dataset,
-                                "ui32_field_2",
-                                SmartRedis::MetaDataType::uint32,
-                                {ui32_meta_3});
+    check_meta_field<uint32_t>(dataset, "ui32_field_1", SRMetadataTypeUint32,
+                               {ui32_meta_1, ui32_meta_2});
+    check_meta_field<uint32_t>(dataset, "ui32_field_2", SRMetadataTypeUint32,
+                               {ui32_meta_3});
 
     std::vector<std::string> str_meta_field_1 =
-    dataset.get_meta_strings("str_field_1");
+        dataset.get_meta_strings("str_field_1");
 
     if(str_meta_field_1.size()!=2)
         throw std::runtime_error("The number of entries in "\

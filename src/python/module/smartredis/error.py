@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021, Hewlett Packard Enterprise
+# Copyright (c) 2021-2022, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,9 @@
 
 from os import environ
 
+__all__ = ['RedisConnectionError', 'RedisReplyError', 'RedisRuntimeError',
+           'RedisBadAllocError', 'RedisDatabaseError', 'RedisInternalError',
+           'RedisTimeoutError', 'RedisKeyError']
 
 class RedisConnectionError(RuntimeError):
     def __init__(self, cpp_error=""):
@@ -37,21 +40,45 @@ class RedisConnectionError(RuntimeError):
         if cpp_error:
             msg = cpp_error + "\n"
         if "SSDB" in environ:
-            msg += f"Could not connect to Redis at {environ['SSDB']}"
-            return msg
-        msg += "Could not connect to database. $SSDB not set"
+            msg += f"Could not connect to Orchestrator at {environ['SSDB']}"
         return msg
 
 
 class RedisReplyError(RuntimeError):
-    def __init__(self, cpp_error, method, key=""):
+    def __init__(self, cpp_error, method="", key=""):
         super().__init__(self._check_error(cpp_error, method, key))
 
     @staticmethod
-    def _check_error(cpp_error, method, key):
-        msg = f"Client.{method} execution failed\n"
+    def _check_error(cpp_error, method="", key=""):
+        msg = ""
+        if method:
+            msg = f"{method} execution failed\n"
+        msg += cpp_error
+        return msg
+
+class RedisRuntimeError(RedisReplyError):
+    @staticmethod
+    def _check_error(cpp_error, method="", key=""):
+        msg = ""
+        if method:
+            msg = f"{method} execution failed\n"
         if "REDIS_REPLY_NIL" in cpp_error:
             msg += f"No Dataset stored at key: {key}"
             return msg
         msg += cpp_error
         return msg
+
+class RedisBadAllocError(RedisReplyError):
+    pass
+
+class RedisDatabaseError(RedisReplyError):
+    pass
+
+class RedisInternalError(RedisReplyError):
+    pass
+
+class RedisTimeoutError(RedisReplyError):
+    pass
+
+class RedisKeyError(RedisReplyError):
+    pass

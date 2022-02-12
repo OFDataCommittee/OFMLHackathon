@@ -15,7 +15,7 @@ def two_to_one(data, data_2):
 
 # Connect a SmartRedis client to the Redis database
 db_address = "127.0.0.1:6379"
-client = Client(address=db_address, cluster=False)
+client = Client(address=db_address, cluster=True)
 
 # Generate some test data to feed to the two_to_one function
 data = np.array([[1, 2, 3, 4]])

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@ class PyClient
         *              in the database
         *   \param type The data type of the tensor
         *   \param data Numpy array with Pybind*
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         void put_tensor(std::string& key,
                         std::string& type,
@@ -93,14 +93,14 @@ class PyClient
         *            use PyClient.unpack_tensor() for large tensor
         *            data and to limit memory use by the PyClient.
         *   \param key The name used to reference the tensor
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         py::array get_tensor(const std::string& key);
 
         /*!
         *   \brief delete a tensor stored in the database
         *   \param key The key of tensor to delete
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         void delete_tensor(const std::string& key);
 
@@ -108,7 +108,7 @@ class PyClient
         *   \brief rename a tensor stored in the database
         *   \param key The key of tensor to rename
         *   \param new_key the new name of the tensor
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         void rename_tensor(const std::string& key,
                            const std::string& new_key);
@@ -117,7 +117,7 @@ class PyClient
         *   \brief copy a tensor to a new key
         *   \param key The key of tensor to copy
         *   \param dest_key the key to store tensor copy at
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         void copy_tensor(const std::string& key,
                          const std::string& dest_key);
@@ -126,7 +126,7 @@ class PyClient
         /*!
         *   \brief Send a PyDataSet object to the database
         *   \param dataset The PyDataSet object to send to the database
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         void put_dataset(PyDataset& dataset);
 
@@ -136,7 +136,7 @@ class PyClient
         *   \param name The name of the dataset to retrieve
         *   \returns Pointer to the PyDataSet
         *            object retrieved from the database
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         PyDataset* get_dataset(const std::string& name);
 
@@ -144,7 +144,7 @@ class PyClient
         /*!
         *   \brief delete a dataset stored in the database
         *   \param key The key of dataset to delete
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         void delete_dataset(const std::string& key);
 
@@ -152,7 +152,7 @@ class PyClient
         *   \brief rename a dataset stored in the database
         *   \param key The key of dataset to rename
         *   \param new_key the new name of the dataset
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         void rename_dataset(const std::string& key, const std::string& new_key);
 
@@ -160,7 +160,7 @@ class PyClient
         *   \brief copy a dataset to a new key
         *   \param key The key of datalset to copy
         *   \param dest_key the key to store dataset copy at
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         void copy_dataset(const std::string& key, const std::string& dest_key);
 
@@ -172,7 +172,7 @@ class PyClient
         *   \param device The name of the device for execution
         *                 (e.g. CPU or GPU)
         *   \param script_file The source file for the script
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         void set_script_from_file(const std::string& key,
                                 const std::string& device,
@@ -185,7 +185,7 @@ class PyClient
         *   \param device The name of the device for execution
         *                 (e.g. CPU or GPU)
         *   \param script The script source in a std::string_view
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         void set_script(const std::string& key,
                         const std::string& device,
@@ -198,7 +198,7 @@ class PyClient
         *            The memory associated with the script
         *            is managed by the PyClient and is valid
         *            until the destruction of the PyClient.
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         std::string_view get_script(const std::string& key);
 
@@ -212,7 +212,7 @@ class PyClient
         *                 in the script
         *   \param outputs The keys of output tensors that
         *                 will be used to save script results
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         void run_script(const std::string& key,
                         const std::string& function,
@@ -237,7 +237,7 @@ class PyClient
         *                 (TF models only)
         *   \param outputs One or more names of model output nodes
         *                 (TF models only)
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         void set_model(const std::string& key,
                         const std::string_view& model,
@@ -269,7 +269,7 @@ class PyClient
         *                 (TF models only)
         *   \param outputs One or more names of model output nodes
         *                 (TF models only)
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         void set_model_from_file(const std::string& key,
                                 const std::string& model_file,
@@ -291,7 +291,7 @@ class PyClient
         *                 in the model
         *   \param outputs The keys of output tensors that
         *                 will be used to save model results
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         void run_model(const std::string& key,
                         std::vector<std::string> inputs,
@@ -301,7 +301,7 @@ class PyClient
         *   \brief Retrieve the model from the database
         *   \param key The key associated with the model
         *   \returns A py:bytes object containing the model
-        *   \throw std::runtime_error for all client errors
+        *   \throw RuntimeException for all client errors
         */
         py::bytes get_model(const std::string& key);
 
@@ -314,14 +314,24 @@ class PyClient
         bool key_exists(const std::string& key);
 
         /*!
-        *   \brief Check if the tensor or dataset exists in the database
+        *   \brief Check if the tensor exists in the database
         *   \param name The name that will be checked in the database
         *               depending on the current prefixing
         *               behavior, the name will be automatically prefixed
         *               to form the corresponding key.
-        *   \returns Returns true if the tensor or dataset exists in the database
+        *   \returns Returns true if the tensor exists in the database
         */
         bool tensor_exists(const std::string& name);
+
+        /*!
+        *   \brief Check if the dataset exists in the database
+        *   \param name The name that will be checked in the database
+        *               Depending on the current prefixing
+        *               behavior, the name will be automatically prefixed
+        *               to form the corresponding key.
+        *   \returns Returns true if the dataset exists in the database
+        */
+        bool dataset_exists(const std::string& name);
 
         /*!
         *   \brief Check if the model or script exists in the database
@@ -341,9 +351,7 @@ class PyClient
         *   \param poll_frequency_ms The frequency of checks for the
         *                            key in milliseconds
         *   \param num_tries The total number of times to check for
-        *                    the specified number of keys.  If the
-        *                    value is set to -1, the key will be
-        *                    polled indefinitely.
+        *                    the specified number of keys.
         *   \returns Returns true if the key is found within the
         *            specified number of tries, otherwise false.
         */
@@ -352,7 +360,7 @@ class PyClient
                       int num_tries);
 
         /*!
-        *   \brief Check if a tensor or dataset exists in the database at a
+        *   \brief Check if a tensor exists in the database at a
         *          specified frequency for a specified number
         *          of times. The name will be automatically prefixed
         *          base on prefixing behavior.
@@ -360,15 +368,33 @@ class PyClient
         *   \param poll_frequency_ms The frequency of checks for the
         *                            key in milliseconds
         *   \param num_tries The total number of times to check for
-        *                    the specified number of keys.  If the
-        *                    value is set to -1, the key will be
-        *                    polled indefinitely.
+        *                    the specified number of keys.
         *   \returns Returns true if the key is found within the
         *            specified number of tries, otherwise false.
         */
         bool poll_tensor(const std::string& name,
                          int poll_frequency_ms,
                          int num_tries);
+
+        /*!
+        *   \brief Check if a dataset exists in the database at a
+        *          specified frequency for a specified number
+        *          of times. The name will be automatically prefixed
+        *          base on prefixing behavior.
+        *   \param name The key that will be checked in the database
+        *               Depending on the current prefixing behavior,
+        *               the name could be automatically prefixed
+        *               to form the corresponding key.
+        *   \param poll_frequency_ms The frequency of checks for the
+        *                            key in milliseconds
+        *   \param num_tries The total number of times to check for
+        *                    the specified number of keys.
+        *   \returns Returns true if the key is found within the
+        *            specified number of tries, otherwise false.
+        */
+        bool poll_dataset(const std::string& name,
+                          int poll_frequency_ms,
+                          int num_tries);
 
         /*!
         *   \brief Check if a model or script exists in the database at a
@@ -379,9 +405,7 @@ class PyClient
         *   \param poll_frequency_ms The frequency of checks for the
         *                            key in milliseconds
         *   \param num_tries The total number of times to check for
-        *                    the specified number of keys.  If the
-        *                    value is set to -1, the key will be
-        *                    polled indefinitely.
+        *                    the specified number of keys.
         *   \returns Returns true if the key is found within the
         *            specified number of tries, otherwise false.
         */
@@ -428,36 +452,103 @@ class PyClient
 
         /*!
         *   \brief Returns information about the given database nodes
-        *   \param addresses The addresses of the database nodes
+        *   \param addresses The addresses of the database nodes. Each address is
+        *                    formatted as address:port e.g. 127.0.0.1:6379
         *   \returns A list of parsed_map objects containing all the
         *            information about the given database nodes
-	*   \throws std::runtime_error if the address is not addressable by this
-        *           client.  In the case of using a cluster of database nodes,
-        *           it is best practice to bind each node in the cluster
-        *           to a specific adddress to avoid inconsistencies in
-        *           addresses retreived with the CLUSTER SLOTS command.
-        *           Inconsistencies in node addresses across
-        *           CLUSTER SLOTS comands will lead to std::runtime_error
-        *           being thrown.
+        *   \throw RuntimeException if the address is not addressable by this
+        *          client.  In the case of using a cluster of database nodes,
+        *          it is best practice to bind each node in the cluster
+        *          to a specific adddress to avoid inconsistencies in
+        *          addresses retreived with the CLUSTER SLOTS command.
+        *          Inconsistencies in node addresses across
+        *          CLUSTER SLOTS comands will lead to SRRuntimeException
+        *          being thrown.
         */
         std::vector<py::dict> get_db_node_info(std::vector<std::string> addresses);
 
         /*!
         *   \brief \brief Returns the CLUSTER INFO command reply addressed to one
         *                 or multiple cluster nodes.
-        *   \param addresses The addresses of the database nodes
+        *   \param addresses The addresses of the database nodes. Each address is
+        *                    formatted as address:port e.g. 127.0.0.1:6379
         *   \returns A list of parsed_map objects containing all the cluster
         *            information about the given database nodes
-	*   \throws std::runtime_error if the address is not addressable by this
-        *           client.  In the case of using a cluster of database nodes,
-        *           it is best practice to bind each node in the cluster
-        *           to a specific adddress to avoid inconsistencies in
-        *           addresses retreived with the CLUSTER SLOTS command.
-        *           Inconsistencies in node addresses across
-        *           CLUSTER SLOTS comands will lead to std::runtime_error
-        *           being thrown.
+        *   \throw RuntimeException if the address is not addressable by this
+        *          client.  In the case of using a cluster of database nodes,
+        *          it is best practice to bind each node in the cluster
+        *          to a specific adddress to avoid inconsistencies in
+        *          addresses retreived with the CLUSTER SLOTS command.
+        *          Inconsistencies in node addresses across
+        *          CLUSTER SLOTS comands will lead to SRRuntimeException
+        *          being thrown.
         */
         std::vector<py::dict> get_db_cluster_info(std::vector<std::string> addresses);
+
+        /*!
+        *   \brief Returns the AI.INFO command reply from the database
+        *          shard at the provided address
+        *   \param addresses std::vector of addresses of the database
+        *                    nodes (host:port)
+        *   \param key The model or script key
+        *   \param reset_stat Boolean indicating if the counters associated
+        *                     with the model or script should be reset.
+        *   \returns A std::vector of dictionaries that map AI.INFO
+        *            field names to values for each of the provided
+        *            database addresses.
+        *   \throw SmartRedis::RuntimeException or derivative error object
+        *          if command execution or reply parsing fails.
+        */
+        std::vector<py::dict>
+        get_ai_info(const std::vector<std::string>& addresses,
+                    const std::string& key,
+                    const bool reset_stat);
+
+        /*!
+        *   \brief Delete all the keys of the given database
+        *   \param addresses The addresses of the database nodes. Each address is
+        *                    formatted as address:port e.g. 127.0.0.1:6379
+        */
+        void flush_db(std::vector<std::string> addresses);
+
+        /*!
+        *   \brief Read the configuration parameters of a running server.
+        *   \param  expression Parameter used in the configuration or a
+        *                      glob pattern (Use '*' to retrieve all
+        *                      configuration parameters)
+        *   \param address The address of the database node execute on
+        *   \returns A dictionary that maps configuration parameters to their values
+        *            If the provided expression does not exist, then an empty
+        *            dictionary is returned.
+        *   \throw RuntimeException if the address is not addressable by this
+        *          client
+        */
+        py::dict config_get(std::string expression,std::string address);
+
+        /*!
+        *   \brief Reconfigure the server. It can change both trivial
+        *          parameters or switch from one to another persistence option.
+        *          All the configuration parameters set using this command are
+        *          immediately loaded by Redis and will take effect starting with
+        *          the next command executed.
+        *   \param config_param A configuration parameter to set
+        *   \param value The value to assign to the configuration parameter
+        *   \param address The address of the database node execute on
+        *   \throw RuntimeException if the address is not addressable by this
+        *          client or if command fails to execute or if the config_param
+        *          is unsupported.
+        */
+        void config_set(std::string config_param, std::string value, std::string address);
+
+        /*!
+        *   \brief Performs a synchronous save of the database shard producing a point in
+        *          time snapshot of all the data inside the Redis instance  in the form of
+        *          an RDB file.
+        *   \param addresses The addressees of database nodes (host:port)
+        *   \throw RuntimeException if the address is not addressable by this
+        *          client or if command fails to execute
+        */
+        void save(std::vector<std::string> addresses);
 
     private:
 

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,19 +30,21 @@
 
 using namespace SmartRedis;
 
-MetadataField::MetadataField(const std::string& name,
-                             MetaDataType type)
+// MetadataField constructor
+MetadataField::MetadataField(const std::string& name, SRMetaDataType type)
+ : _name(name), _type(type)
 {
-    this->_name = name;
-    this->_type = type;
+    // NOP
 }
 
+// Retrieve the MetadataField name
 std::string MetadataField::name()
 {
-    return this->_name;
+    return _name;
 }
 
-MetaDataType MetadataField::type()
+// Retrieve the MetadataField name
+SRMetaDataType MetadataField::type()
 {
-    return this->_type;
+    return _type;
 }

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,8 +101,8 @@ class TensorPack
         void add_tensor(const std::string& name,
                         void* data,
                         const std::vector<size_t>& dims,
-                        const TensorType type,
-                        const MemoryLayout mem_layout);
+                        const SRTensorType type,
+                        const SRMemoryLayout mem_layout);
 
         /*!
         *   \brief Method to add a tensor object that has
@@ -117,14 +117,14 @@ class TensorPack
         void add_tensor(TensorBase* tensor);
 
         /*!
-        *   \typedef An iterator type for iterating
+        *   \brief An iterator type for iterating
         *            over all TensorBase items
         */
         typedef std::forward_list<TensorBase*>::iterator
                 tensorbase_iterator;
 
         /*!
-        *   \typedef A const iterator type for iterating
+        *   \brief A const iterator type for iterating
         *            over all TensorBase items
         */
         typedef std::forward_list<TensorBase*>::const_iterator

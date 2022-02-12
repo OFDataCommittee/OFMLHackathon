@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,19 +26,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* Defines the memory layout of
-tensor data for c-clients to use
-as a specifier.
-*/
+#include "dbinfocommand.h"
+#include "redisserver.h"
 
-#ifndef SMARTREDIS_CMEMORYLAYOUT_H
-#define SMARTREDIS_CMEMORYLAYOUT_H
+using namespace SmartRedis;
 
-typedef enum{
-    c_nested=1,
-    c_contiguous=2,
-    c_fortran_nested=3,
-    c_fortran_contiguous=4
-}CMemoryLayout;
+// Parse database info into nested unordered map
+parsed_reply_nested_map DBInfoCommand::parse_db_node_info(std::string info)
+{
+    parsed_reply_nested_map info_map;
 
-#endif //SMARTREDIS_CMEMORYLAYOUT_H
+    std::string delim = "\r\n";
+    std::string currKey = "";
+    size_t start = 0U;
+    size_t end = info.find(delim);
+
+    while (end != std::string::npos)
+    {
+        std::string line = info.substr(start, end-start);
+        start = end + delim.length();
+        end = info.find(delim, start);
+        if (line.length() == 0)
+            continue;
+        if (line[0] == '#')
+        {
+            currKey = line.substr(2);
+            if (info_map.find(currKey)==info_map.end())
+                info_map[currKey] = {};
+        }
+        else
+        {
+            std::size_t separatorIdx = line.find(':');
+            info_map[currKey][line.substr(0, separatorIdx)] =
+                                line.substr(separatorIdx+1);
+        }
+    }
+
+    return info_map;
+}

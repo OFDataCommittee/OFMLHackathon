@@ -2,7 +2,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,9 +32,8 @@
 ///@file
 ///\brief C-wrappers for the C++ DataSet class
 #include "dataset.h"
-#include "enums/c_memory_layout.h"
-#include "enums/c_tensor_type.h"
-#include "enums/c_metadata_type.h"
+#include "sr_enums.h"
+#include "srexception.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,235 +42,185 @@ extern "C" {
 /*!
 *   \brief C-DataSet constructor
 *   \param name The name of the dataset
-*   \param name_length The length of the dataset
-*                      name c-string, excluding
-*                      null terminating character
-*   \return Returns NULL on failure
+*   \param name_length The length of the dataset name string,
+*                      excluding null terminating character
+*   \param new_dataset Receives the new dataset
+*   \return Returns SRNoError on success or an error code on failure
 */
-void* CDataSet(const char* name,
-               const size_t name_length);
+SRError CDataSet(const char* name,
+                 const size_t name_length,
+                 void** new_dataset);
 
 /*!
 *   \brief C-DataSet destructor
-*   \param dataset A c-ptr to receive the dataset object
+*   \param dataset A pointer to the dataset to release. The dataset is
+*                  set to NULL on completion
+*   \return Returns SRNoError on success or an error code on failure
 */
-void DeallocateeDataSet(void* dataset);
+SRError DeallocateeDataSet(void** dataset);
 
 /*!
 *   \brief Add a tensor to the DataSet.
-*   \param dataset A c-ptr to the dataset object
-*   \param name The name used to reference the tensor
-*               within the DataSet
-*   \param name_length The length of the tensor
-*                      name c-string, excluding null
-*                      terminating character
-*   \param data A c-ptr to the tensor data memory location
-*   \param dims The dimensions of the tensor
-*   \param n_dims The number of dimensions of the tensor
+*   \param dataset The dataset to use for this operation
+*   \param name The name by which this tensor should be referenced
+*               in the DataSet
+*   \param name_length The length of the dataset name string,
+*                      excluding null terminating character
+*   \param data Tensor data to be stored in the dataset
+*   \param dims The number of elements in each dimension of the tensor
+*   \param n_dims The number of dimensions for the tensor
 *   \param type The data type of the tensor data
-*   \param mem_layout The MemoryLayout enum describing the
-*                     layout of the provided tensor
-*                     data
+*   \param mem_layout Memory layout of the provided tensor data
+*   \return Returns SRNoError on success or an error code on failure
 */
-void add_tensor(void* dataset,
-                const char* name,
-                const size_t name_length,
-                void* data,
-                const size_t* dims,
-                const size_t n_dims,
-                const CTensorType type,
-                const CMemoryLayout mem_layout);
+SRError add_tensor(void* dataset,
+                   const char* name,
+                   const size_t name_length,
+                   void* data,
+                   const size_t* dims,
+                   const size_t n_dims,
+                   const SRTensorType type,
+                   const SRMemoryLayout mem_layout);
 
 /*!
-*   \brief Add metadata scalar field (non-string)
-*          with value to the DataSet.  If the
-*          field does not exist, it will be created.
-*          If the field exists, the value
-*          will be appended to existing field.
-*   \param dataset A c-ptr to the dataset object
-*   \param name The name used to reference the metadata
-*               field
-*   \param name_length The length of the metadata
-*                      name c-string, excluding null
-*                      terminating character
-*   \param data A c-ptr to the metadata field data
-*   \param type The data type of the metadata
+*   \brief Append a metadata scalar value to a field in the DataSet.
+*          If the field does not exist, it will be created.
+*          For string scalars, use add_meta_string.
+*   \param dataset The dataset to use for this operation
+*   \param name The name for the metadata field
+*   \param name_length The length of the dataset name string,
+*                      excluding null terminating character
+*   \param data The scalar data to be appended to the metadata field
+*   \param type The data type of the metadata scalar
+*   \return Returns SRNoError on success or an error code on failure
 */
-void add_meta_scalar(void* dataset,
-                     const char* name,
-                     const size_t name_length,
-                     const void* data,
-                     const CMetaDataType type);
-
-
-/*!
-*   \brief Add metadata string field with value
-*          to the DataSet.  If the field
-*          does not exist, it will be created.
-*          If the field exists the value will
-*          be appended to existing field.
-*   \param dataset A c-ptr to the dataset object
-*   \param name The name used to reference the metadata
-*               field
-*   \param name_length The length of the metadata
-*                      name c-string, excluding
-*                      null terminating character
-*   \param data The string to add to the field
-*   \param data_length The length of the metadata
-*                      string value
-*/
-void add_meta_string(void* dataset,
-                     const char* name,
-                     const size_t name_length,
-                     const char* data,
-                     const size_t data_length);
-
-
-/*!
-*   \brief Get the tensor data, dimensions,
-*          and type for the tensor in the dataset.
-*          This function will allocate and retain
-*          management of the memory for the tensor
-*          data.
-*   \details The memory of the data pointer is valid
-*            until the dataset is destroyed. This method
-*            is meant to be used when the dimensions and
-*            type of the tensor are unknown or the user does
-*            not want to manage memory.  However, given that
-*            the memory associated with the return data is
-*            valid until dataset destruction, this method
-*            should not be used repeatedly for large tensor
-*            data.  Instead  it is recommended that the user
-*            use unpack_tensor() for large tensor data and
-*            to limit memory use by the dataset.
-*   \param dataset A c-ptr to the dataset object
-*   \param name The name used to reference the tensor in
-*               the dataset
-*   \param name_length The length of the tensor name
-                       c-string, excluding null terminating
-                       character
-*   \param data A c-ptr reference that will be pointed to
-*               newly allocated memory
-*   \param dims A reference to a dimensions vector
-*               that will be filled with the retrieved
-*               tensor dimensions
-*   \param n_dims The number of dimensions of the tensor
-*   \param type A reference to a TensorType enum that will
-*               be set to the value of the retrieved
-*               tensor type
-*   \param mem_layout The MemoryLayout that the newly
-*                     allocated memory should conform to
-*/
-void get_dataset_tensor(void* dataset,
+SRError add_meta_scalar(void* dataset,
                         const char* name,
                         const size_t name_length,
-                        void** data,
-                        size_t** dims,
-                        size_t* n_dims,
-                        CTensorType* type,
-                        const CMemoryLayout mem_layout);
+                        const void* data,
+                        const SRMetaDataType type);
+
 
 /*!
-*   \brief Get tensor data and fill an already allocated
-*          array memory space that has the specified
-*          MemoryLayout.  The provided type and dimensions
-*          are checked against retrieved values to ensure
-*          the provided memory space is sufficient.  This
-*          method is the most memory efficient way
-*          to retrieve tensor data from a dataset.
-*   \param dataset A c-ptr to the dataset object
-*   \param name The name used to reference the tensor
-*               in the dataset
-*   \param name_length The length of the tensor name
-                       c-string, excluding null terminating
-                       character
-*   \param data A c-ptr to the memory space to be filled
-*               with tensor data
-*   \param dims The dimensions of the memory space
-*   \param n_dims The number of dimensions of the
-*                 tensor in the memory space
-*   \param type The TensorType matching the data
-*               type of the memory space
-*   \param mem_layout The MemoryLayout of the provided
-*               memory space.
+*   \brief Append a metadata string to a field the DataSet.  If the field
+*          does not exist, it will be created.
+*   \param dataset The dataset to use for this operation
+*   \param name The name for the metadata field
+*   \param name_length The length of the dataset name string,
+*                      excluding null terminating character
+*   \param data The string to add to the field
+*   \param data_length The length of the metadata string value,
+*                      excluding null terminating character
+*   \return Returns SRNoError on success or an error code on failure
 */
-void unpack_dataset_tensor(void* dataset,
+SRError add_meta_string(void* dataset,
+                        const char* name,
+                        const size_t name_length,
+                        const char* data,
+                        const size_t data_length);
+
+
+/*!
+*   \brief Get the data, dimensions, and type for a tensor in the dataset
+*   \details The memory returned in data is valid until the dataset is
+*            destroyed. This method is meant to be used when the dimensions
+*            and type of the tensor are unknown or the user does not want to
+*            manage memory.  However, given that the memory associated with the
+*            return data is valid until dataset destruction, this method should
+*            not be used repeatedly for large tensor data.  Instead  it is
+*            recommended that the user use unpack_dataset_tensor() for large
+*            tensor data and to limit memory use by the dataset.
+*   \param dataset The dataset to use for this operation
+*   \param name The name for the tensor in the dataset
+*   \param name_length The length of the dataset name string,
+*                      excluding null terminating character
+*   \param data Receives data for the tensor, allocated by the library
+*   \param dims Receives the number of elements in each dimension of the tensor
+*   \param n_dims Receives the number of dimensions for the tensor
+*   \param type Receives the retrieved tensor type
+*   \param mem_layout The requested memory layout to which newly allocated
+*          memory should conform
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError get_dataset_tensor(void* dataset,
                            const char* name,
                            const size_t name_length,
-                           void* data,
-                           const size_t* dims,
-                           const size_t n_dims,
-                           const CTensorType type,
-                           const CMemoryLayout mem_layout);
+                           void** data,
+                           size_t** dims,
+                           size_t* n_dims,
+                           SRTensorType* type,
+                           const SRMemoryLayout mem_layout);
 
 /*!
-*   \brief Get the metadata scalar field values
-*          from the DataSet.  The data pointer
-*          reference will be pointed to newly
-*          allocated memory that will contain
-*          all values in the metadata field.
-*          The length variable will be set to
-*          the number of entries in the allocated
-*          memory space to allow for iteration over
-*          the values.  The TensorType enum
-*          will be set to the type of the MetaData
-*          field.
-*   \param dataset A c-ptr to the dataset object
-*   \param name The name used to reference the metadata
-*               field in the DataSet
-*   \param name_length The length of the metadata field
-*                      name c-string, excluding null
-*                      terminating character
-*   \param length The number of values in the metadata
-*                 field
-*   \param type The MetadataType enum describing
-*               the data type of the metadata field
-*   \returns A c-ptr to newly allocated memory containing
-*            the metadata or NULL on bad parameters
+*   \brief Retrieve tensor data into a caller-provided memory buffer with
+*          a specified MemoryLayout. This method is the most
+*          memory efficient way to retrieve tensor data from a dataset.
+*   \details The provided type and dimensions are checked against retrieved
+*            values to ensure the provided memory space is sufficient.
+*   \param dataset The dataset to use for this operation
+*   \param name The name for the tensor in the dataset
+*   \param name_length The length of the dataset name string,
+*                      excluding null terminating character
+*   \param data The buffer into which to receive tensor data
+*   \param dims The number of elements provided in each dimension of
+*          the supplied memory buffer
+*   \param n_dims The number of dimensions in the supplied memory buffer
+*   \param type The tensor type for the supplied memory buffer
+*   \param mem_layout The memory layout for the supplied memory buffer
+*   \return Returns SRNoError on success or an error code on failure
 */
-void* get_meta_scalars(void* dataset,
-                      const char* name,
-                      const size_t name_length,
-                      size_t* length,
-                      CMetaDataType* type);
+SRError unpack_dataset_tensor(void* dataset,
+                              const char* name,
+                              const size_t name_length,
+                              void* data,
+                              const size_t* dims,
+                              const size_t n_dims,
+                              const SRTensorType type,
+                              const SRMemoryLayout mem_layout);
 
 /*!
-*   \brief Get the metadata string field values
-*          from the dataset.  The data pointer
-*          reference will be pointed to newly
-*          allocated memory that will contain
-*          all values in the metadata field.
-*          The n_strings input variable
-*          reference will be set to the number of
-*          strings in the field.  The lengths
-*          c-ptr variable will be pointed to a
-*          new memory space that contains
-*          the length of each field string.  The
-*          memory for the data and lengths pointers
-*          will be managed by the DataSet object
-*          and remain valid until the DataSet
-*          object is destroyed.
-*   \param dataset A c-ptr to the dataset object
-*   \param name The name used to reference the metadata
-*               field in the DataSet
-*   \param name_length The length of the metadata field
-*                      name c-string, excluding null
-*                      terminating character
-*   \param data A c-ptr to the char** pointer that will
-*               be redirected to the string values
-*   \param n_strings A reference to a size_t variable
-*                    that will be set to the number of
-*                    strings in the field
-*   \param lengths A c-ptr that will be pointed to a
-*                  memory space that contains the length
-*                  of each field string
+*   \brief Retrieve metadata scalar field values from the DataSet.
+*          This function will allocate and retain management of the
+*          memory for the scalar data. For string scalar metadata,
+*          use the get_meta_strings() function
+*   \param dataset The dataset to use for this operation
+*   \param name The name for the metadata field in the DataSet
+*   \param name_length The length of the name string,
+*                      excluding null terminating character
+*   \param length Receives the number of values returned in \p scalar_data
+*   \param type Receives the data type for the metadata field
+*   \param scalar_data Receives an array of the metadata field values
+*   \return Returns SRNoError on success or an error code on failure
 */
-void get_meta_strings(void* dataset,
-                      const char* name,
-                      const size_t name_length,
-                      char*** data,
-                      size_t* n_strings,
-                      size_t** lengths);
+SRError get_meta_scalars(void* dataset,
+                         const char* name,
+                         const size_t name_length,
+                         size_t* length,
+                         SRMetaDataType* type,
+                         void** scalar_data);
+
+
+/*!
+*   \brief Retrieve metadata string field values from the dataset.
+*          This function will allocate and retain management of the
+*          memory for the scalar string data.
+*          object and remain valid until the DataSet object is destroyed.
+*   \param dataset The dataset to use for this operation
+*   \param name The name for the metadata field in the DataSet
+*   \param name_length The length of the name string,
+*                      excluding null terminating character
+*   \param data Receives an array of string values
+*   \param n_strings Receives the number of strings returned in \p data
+*   \param lengths Receives an array containing the lengths of the strings
+*                  returned in \p data
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError get_meta_strings(void* dataset,
+                         const char* name,
+                         const size_t name_length,
+                         char*** data,
+                         size_t* n_strings,
+                         size_t** lengths);
 
 #ifdef __cplusplus
 }

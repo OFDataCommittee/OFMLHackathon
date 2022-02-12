@@ -1,3 +1,31 @@
+/*
+ * BSD 2-Clause License
+ *
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "client.h"
 #include "client_test_utils.h"
 #include <vector>
@@ -5,8 +33,8 @@
 
 template <typename T_send, typename T_recv>
 void put_get_3D_array(
-		    std::vector<size_t> dims,
-        SmartRedis::TensorType type,
+            std::vector<size_t> dims,
+        SRTensorType type,
         std::string key_suffix="")
 {
   SmartRedis::Client client(use_cluster());
@@ -41,10 +69,8 @@ void put_get_3D_array(
   }
   */
 
-  client.put_tensor(key, (void*)array, dims,
-                    type, SmartRedis::MemoryLayout::nested);
-  client.unpack_tensor(key, u_result, dims,
-                       type, SmartRedis::MemoryLayout::nested);
+  client.put_tensor(key, (void*)array, dims, type, SRMemLayoutNested);
+  client.unpack_tensor(key, u_result, dims, type, SRMemLayoutNested);
 
   /*
   for(int i = 0; i < dims[0]; i++) {
@@ -65,18 +91,17 @@ void put_get_3D_array(
         if( (array[i][j][k]!=(T_send)(b+2)) ||
             (u_result[i][j][k]!=(T_recv)(b+2)) ) {
               throw std::runtime_error("The results do not match for "\
-				                               "the 3d put and get test!");
+                                       "the 3d put and get test!");
             }
         b++;
       }
     }
   }
 
-  SmartRedis::TensorType g_type;
+  SRTensorType g_type = SRTensorTypeInvalid;
   std::vector<size_t> g_dims;
   void* g_result;
-  client.get_tensor(key, g_result, g_dims,
-                    g_type, SmartRedis::MemoryLayout::nested);
+  client.get_tensor(key, g_result, g_dims, g_type, SRMemLayoutNested);
   T_recv*** g_type_result = (T_recv***)g_result;
 
   if(type!=g_type)
@@ -108,7 +133,7 @@ void put_get_3D_array(
         if( (array[i][j][k]!=(T_send)(c+2)) ||
             (g_type_result[i][j][k]!=(T_recv)(c+2)) ) {
               throw std::runtime_error("The results do not match for "\
-				                               "the 3d put and get test!");
+                                       "the 3d put and get test!");
             }
         c++;
       }
@@ -117,8 +142,6 @@ void put_get_3D_array(
 
   free_3D_array(array, dims[0], dims[1]);
   free_3D_array(u_result, dims[0], dims[1]);
-
-  return;
 }
 
 int main(int argc, char* argv[]) {
@@ -129,29 +152,14 @@ int main(int argc, char* argv[]) {
 
   std::vector<size_t> dims = {dim1, dim2, dim3};
 
-  put_get_3D_array<double,double>(
-				  dims, SmartRedis::TensorType::dbl, "_dbl");
-
-  put_get_3D_array<float,float>(
-				dims, SmartRedis::TensorType::flt, "_flt");
-
-  put_get_3D_array<int64_t,int64_t>(
-				    dims, SmartRedis::TensorType::int64, "_i64");
-
-  put_get_3D_array<int32_t,int32_t>(
-				    dims, SmartRedis::TensorType::int32, "_i32");
-
-  put_get_3D_array<int16_t,int16_t>(
-				      dims, SmartRedis::TensorType::int16, "_i16");
-
-  put_get_3D_array<int8_t,int8_t>(
-				      dims, SmartRedis::TensorType::int8, "_i8");
-
-  put_get_3D_array<uint16_t,uint16_t>(
-				      dims, SmartRedis::TensorType::uint16, "_ui16");
-
-  put_get_3D_array<uint8_t,uint8_t>(
-				      dims, SmartRedis::TensorType::uint8, "_ui8");
+  put_get_3D_array<double,double>(dims, SRTensorTypeDouble, "_dbl");
+  put_get_3D_array<float,float>(dims, SRTensorTypeFloat, "_flt");
+  put_get_3D_array<int64_t,int64_t>(dims, SRTensorTypeInt64, "_i64");
+  put_get_3D_array<int32_t,int32_t>(dims, SRTensorTypeInt32, "_i32");
+  put_get_3D_array<int16_t,int16_t>(dims, SRTensorTypeInt16, "_i16");
+  put_get_3D_array<int8_t,int8_t>(dims, SRTensorTypeInt8, "_i8");
+  put_get_3D_array<uint16_t,uint16_t>(dims, SRTensorTypeUint16, "_ui16");
+  put_get_3D_array<uint8_t,uint8_t>(dims, SRTensorTypeUint8, "_ui8");
 
 
   std::cout<<"3D put and get test using "\

@@ -1,5 +1,43 @@
-#include "../../../third-party/catch/catch.hpp"
+/*
+ * BSD 2-Clause License
+ *
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "dataset.h"
+#include "srexception.h"
+#include <cxxabi.h>
+
+using namespace SmartRedis;
+
+const char *currentExceptionTypeName() {
+    int status;
+//    return abi::__cxa_demangle(abi::__cxa_current_exception_type()->name(), 0, 0, &status);
+    return abi::__cxa_current_exception_type()->name();
+}
 
 SCENARIO("Testing DataSet object", "[DataSet]")
 {
@@ -14,11 +52,11 @@ SCENARIO("Testing DataSet object", "[DataSet]")
         {
             std::string tensor_name = "test_tensor";
             std::vector<size_t> dims = {1, 2, 3};
-            TensorType type = TensorType::flt;
+            SRTensorType type = SRTensorTypeFloat;
             size_t tensor_size = dims.at(0) * dims.at(1) * dims.at(2);
             std::vector<float> tensor(tensor_size, 2.0);
             void* data = tensor.data();
-            MemoryLayout mem_layout = MemoryLayout::contiguous;
+            SRMemoryLayout mem_layout = SRMemLayoutContiguous;
             dataset.add_tensor(tensor_name, data, dims, type, mem_layout);
 
             THEN("The tensor name can be retrieved")
@@ -32,7 +70,7 @@ SCENARIO("Testing DataSet object", "[DataSet]")
             {
                 void* retrieved_data;
                 std::vector<size_t> retrieved_dims;
-                TensorType retrieved_type;
+                SRTensorType retrieved_type;
                 dataset.get_tensor(tensor_name, retrieved_data, retrieved_dims,
                                    retrieved_type, mem_layout);
 
@@ -53,7 +91,7 @@ SCENARIO("Testing DataSet object", "[DataSet]")
                 void* retrieved_data;
                 size_t* retrieved_dims;
                 size_t retrieved_n_dims;
-                TensorType retrieved_type;
+                SRTensorType retrieved_type;
                 dataset.get_tensor(tensor_name, retrieved_data,
                                    retrieved_dims, retrieved_n_dims,
                                    retrieved_type, mem_layout);
@@ -95,13 +133,14 @@ SCENARIO("Testing DataSet object", "[DataSet]")
             {
                 void* retrieved_data;
                 std::vector<size_t> retrieved_dims;
-                TensorType retrieved_type;
+                SRTensorType retrieved_type;
 
                 CHECK_THROWS_AS(
                     dataset.get_tensor("does_not_exist", retrieved_data,
                                        retrieved_dims, retrieved_type,
                                        mem_layout),
-                    std::runtime_error);
+                    SmartRedis::KeyException
+                );
             }
         }
 
@@ -109,7 +148,7 @@ SCENARIO("Testing DataSet object", "[DataSet]")
         {
             std::string meta_scalar_name = "flt_meta_scalars";
             float meta_scalar = 10.0;
-            MetaDataType type = MetaDataType::flt;
+            SRMetaDataType type = SRMetadataTypeFloat;
 
             CHECK(dataset.has_field(meta_scalar_name) == false);
             dataset.add_meta_scalar(meta_scalar_name, &meta_scalar, type);
@@ -138,7 +177,8 @@ SCENARIO("Testing DataSet object", "[DataSet]")
                     dataset.get_meta_scalars(meta_scalar_name,
                                             (void*&)retrieved_data,
                                              retrieved_length, type),
-                    std::runtime_error);
+                    SmartRedis::RuntimeException
+                );
             }
         }
 

@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021, Hewlett Packard Enterprise
+# Copyright (c) 2021-2022, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,18 +29,58 @@ from numbers import Number
 import numpy as np
 
 from .smartredisPy import PyDataset
-from .util import Dtypes
+from .util import Dtypes, exception_handler, typecheck
 
+from .error import *
 
-class Dataset(PyDataset):
+class Dataset:
     def __init__(self, name):
         """Initialize a Dataset object
 
         :param name: name of dataset
         :type name: str
         """
-        super().__init__(name)
+        typecheck(name, "name", str)
+        self._data = PyDataset(name)
 
+    @staticmethod
+    def from_pybind(dataset):
+        """Initialize a Dataset object from
+        a PyDataset object
+
+        :param dataset: The pybind PyDataset object
+                        to use for construction
+        :type dataset: PyDataset
+        :return: The newly constructor Dataset from
+                 the PyDataset
+        :rtype: Dataset
+        """
+        typecheck(dataset, "dataset", PyDataset)
+        new_dataset = Dataset(dataset.get_name())
+        new_dataset.set_data(dataset)
+        return new_dataset
+
+    @exception_handler
+    def get_data(self):
+        """Return the PyDataset attribute
+
+        :return: The PyDataset attribute containing
+                 the dataset information
+        :rtype: PyDataset
+        """
+        return self._data
+
+    @exception_handler
+    def set_data(self, dataset):
+        """Set the PyDataset attribute
+
+        :param dataset: The PyDataset object
+        :type dataset: PyDataset
+        """
+        typecheck(dataset, "dataset", PyDataset)
+        self._data = dataset
+
+    @exception_handler
     def add_tensor(self, name, data):
         """Add a named tensor to this dataset
 
@@ -49,11 +89,12 @@ class Dataset(PyDataset):
         :param data: tensor data
         :type data: np.array
         """
-        if not isinstance(data, np.ndarray):
-            raise TypeError("Argument provided was not a numpy array")
+        typecheck(name, "name", str)
+        typecheck(data, "data", np.ndarray)
         dtype = Dtypes.tensor_from_numpy(data)
-        super().add_tensor(name, data, dtype)
+        self._data.add_tensor(name, data, dtype)
 
+    @exception_handler
     def get_tensor(self, name):
         """Get a tensor from the Dataset
 
@@ -62,8 +103,10 @@ class Dataset(PyDataset):
         :return: a numpy array of tensor data
         :rtype: np.array
         """
-        return super().get_tensor(name)
+        typecheck(name, "name", str)
+        return self._data.get_tensor(name)
 
+    @exception_handler
     def add_meta_scalar(self, name, data):
         """Add metadata scalar field (non-string) with value to the DataSet
 
@@ -77,6 +120,7 @@ class Dataset(PyDataset):
         :param data: a scalar
         :type data: int | float
         """
+        typecheck(name, "name", str)
 
         # We want to support numpy datatypes and avoid pybind ones
         data_as_array = np.asarray(data)
@@ -84,8 +128,9 @@ class Dataset(PyDataset):
             raise TypeError("Argument provided is not a scalar")
         # We keep dtype, in case data has a non-standard python format
         dtype = Dtypes.metadata_from_numpy(data_as_array)
-        super().add_meta_scalar(name, data_as_array, dtype)
+        self._data.add_meta_scalar(name, data_as_array, dtype)
 
+    @exception_handler
     def add_meta_string(self, name, data):
         """Add metadata string field with value to the DataSet
 
@@ -99,8 +144,11 @@ class Dataset(PyDataset):
         :param data: The string to add to the field
         :type data: str
         """
-        super().add_meta_string(name, data)
+        typecheck(name, "name", str)
+        typecheck(data, "data", str)
+        self._data.add_meta_string(name, data)
 
+    @exception_handler
     def get_meta_scalars(self, name):
         """Get the metadata scalar field values from the DataSet
 
@@ -108,8 +156,10 @@ class Dataset(PyDataset):
                      field in the DataSet
         :type name: str
         """
-        return super().get_meta_scalars(name)
+        typecheck(name, "name", str)
+        return self._data.get_meta_scalars(name)
 
+    @exception_handler
     def get_meta_strings(self, name):
         """Get the metadata scalar field values from the DataSet
 
@@ -117,4 +167,5 @@ class Dataset(PyDataset):
                         field in the DataSet
         :type name: str
         """
-        return super().get_meta_strings(name)
+        typecheck(name, "name", str)
+        return self._data.get_meta_strings(name)

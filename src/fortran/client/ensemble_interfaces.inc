@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021, Hewlett Packard Enterprise
+! Copyright (c) 2021-2022, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -25,26 +25,32 @@
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 interface
-  subroutine set_data_source_c( client, source_id, source_id_length ) bind(c, name="set_data_source")
+  function set_data_source_c( client, source_id, source_id_length ) bind(c, name="set_data_source")
     use iso_c_binding, only : c_ptr, c_char, c_bool, c_size_t
+    import :: enum_kind
+    integer(kind=enum_kind)       :: set_data_source_c
     type(c_ptr),            value :: client
     character(kind=c_char)        :: source_id(*)
     integer(kind=c_size_t), value :: source_id_length
-  end subroutine set_data_source_c
+  end function set_data_source_c
 end interface
 
 interface
-  subroutine use_model_ensemble_prefix_c( client, use_prefix) bind(c, name="use_model_ensemble_prefix")
+  function use_model_ensemble_prefix_c( client, use_prefix) bind(c, name="use_model_ensemble_prefix")
     use iso_c_binding, only : c_ptr, c_bool
+    import :: enum_kind
+    integer(kind=enum_kind)       :: use_model_ensemble_prefix_c
     type(c_ptr),            value :: client
     logical(kind=c_bool),   value :: use_prefix
-  end subroutine use_model_ensemble_prefix_c
+  end function use_model_ensemble_prefix_c
 end interface
 
 interface
-  subroutine use_tensor_ensemble_prefix_c( client, use_prefix) bind(c, name="use_tensor_ensemble_prefix")
+  function use_tensor_ensemble_prefix_c( client, use_prefix) bind(c, name="use_tensor_ensemble_prefix")
     use iso_c_binding, only : c_ptr, c_bool
+    import :: enum_kind
+    integer(kind=enum_kind)       :: use_tensor_ensemble_prefix_c
     type(c_ptr),            value :: client
     logical(kind=c_bool),   value :: use_prefix
-  end subroutine use_tensor_ensemble_prefix_c
+  end function use_tensor_ensemble_prefix_c
 end interface

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,22 +26,48 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SMARTREDIS_CMETADATATYPE_H
-#define SMARTREDIS_CMETADATATYPE_H
+#ifndef SMARTREDIS_SINGLEKEYCOMMAND_H
+#define SMARTREDIS_SINGLEKEYCOMMAND_H
 
-/* Defines the metadata types
-for c-clients to use as a
-metadata type specifier
+#include "keyedcommand.h"
+
+///@file
+
+namespace SmartRedis {
+
+class RedisServer;
+
+/*!
+*   \brief The SingleKeyCommand class constructs Client
+*          commands with only one key. This is a subclass
+*          of the KeyedCommand class.
 */
+class SingleKeyCommand : public KeyedCommand
+{
+    public:
+        /*!
+        *   \brief Run this Command on the RedisServer.
+        *   \param server A pointer to the RedisServer
+        */
+        virtual CommandReply run_me(RedisServer* server);
 
-typedef enum{
-    c_meta_dbl    = 1,
-    c_meta_flt    = 2,
-    c_meta_int32  = 3,
-    c_meta_int64  = 4,
-    c_meta_uint32 = 5,
-    c_meta_uint64 = 6,
-    c_meta_string = 7
-}CMetaDataType;
+        /*!
+        *   \brief Deep copy operator
+        *   \details This method creates a new derived
+        *            type Command and returns a Command*
+        *            pointer.  The new derived type is
+        *            allocated on the heap.  Contents
+        *            are copied using the copy assignment
+        *            operator for the derived type. This is meant
+        *            to provide functionality to deep
+        *            copy a Command.
+        *   \returns A pointer to dynamically allocated
+        *            derived type cast to parent Command
+        *            type.
+        */
+        virtual Command* clone();
+};
 
-#endif //SMARTREDIS_CMETADATATYPE_H
+} //namespace SmartRedis
+
+#endif //SINGLEKEYCOMMAND

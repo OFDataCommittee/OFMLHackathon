@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021, Hewlett Packard Enterprise
+! Copyright (c) 2021-2022, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -25,21 +25,26 @@
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 interface
-  type(c_ptr) function get_model_c( c_client, key, key_length, model, model_length) bind(c,name="get_model")
+  function get_model_c( c_client, key, key_length, model, model_length, model_data) bind(c,name="get_model")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
-    type(c_ptr), value,            intent(in)    :: c_client   !< Initialized SmartRedis client
-    character(kind=c_char),        intent(in)    :: key(*)     !< The key to use to place the model
-    integer(kind=c_size_t), value, intent(in)    :: key_length !< The length of the key c-string, excluding null
-    type(c_ptr),                   intent(inout) :: model      !< The model as a continuous buffer
+    import :: enum_kind
+    integer(kind=enum_kind)                      :: get_model_c
+    type(c_ptr), value,            intent(in)    :: c_client    !< Initialized SmartRedis client
+    character(kind=c_char),        intent(in)    :: key(*)      !< The key to use to place the model
+    integer(kind=c_size_t), value, intent(in)    :: key_length  !< The length of the key c-string, excluding null
+    type(c_ptr),                   intent(inout) :: model       !< The model as a continuous buffer
     integer(kind=c_size_t),        intent(  out) :: model_length !< Length of the model buffer c-string
+    type(c_ptr),                   intent(  out) :: model_data   !< Reeives model information
   end function get_model_c
 end interface
 
 interface
-  subroutine set_model_from_file_c( c_client, key, key_length, model_file, model_file_length,      &
+  function set_model_from_file_c( c_client, key, key_length, model_file, model_file_length,      &
       backend, backend_length, device, device_length, batch_size, min_batch_size, tag, tag_length, &
       inputs, input_lengths, n_inputs, outputs, output_lengths, n_outputs ) bind(c, name="set_model_from_file")
     use iso_c_binding, only : c_ptr, c_size_t, c_int, c_char
+    import :: enum_kind
+    integer(kind=enum_kind)                   :: set_model_from_file_c
     type(c_ptr), value,            intent(in) :: c_client          !< Initialized SmartRedis client
     character(kind=c_char),        intent(in) :: key(*)            !< The key to use to place the model
     integer(kind=c_size_t), value, intent(in) :: key_length        !< The length of the key c-string, excluding null
@@ -67,14 +72,16 @@ interface
     type(c_ptr),            value, intent(in) :: output_lengths    !< The length of each output name c-string,
                                                                    !! excluding null terminating character
     integer(kind=c_size_t), value, intent(in) :: n_outputs         !< The number of outputs
-  end subroutine set_model_from_file_c
+  end function set_model_from_file_c
 end interface
 
 interface
-  subroutine set_model_c( c_client, key, key_length, model, model_length,      &
+  function set_model_c( c_client, key, key_length, model, model_length,      &
       backend, backend_length, device, device_length, batch_size, min_batch_size, tag, tag_length, &
       inputs, input_lengths, n_inputs, outputs, output_lengths, n_outputs ) bind(c, name="set_model")
     use iso_c_binding, only : c_ptr, c_size_t, c_int, c_char
+    import :: enum_kind
+    integer(kind=enum_kind)                   :: set_model_c
     type(c_ptr), value,            intent(in) :: c_client          !< Initialized SmartRedis client
     character(kind=c_char),        intent(in) :: key(*)            !< The key to use to place the model
     integer(kind=c_size_t), value, intent(in) :: key_length        !< The length of the key c-string, excluding null
@@ -102,13 +109,15 @@ interface
     type(c_ptr),            value, intent(in) :: output_lengths    !< The length of each output name c-string,
                                                                    !! excluding null terminating character
     integer(kind=c_size_t), value, intent(in) :: n_outputs         !< The number of outputs
-  end subroutine set_model_c
+  end function set_model_c
 end interface
 
 interface
-  subroutine run_model_c(c_client, key, key_length, inputs, input_lengths, n_inputs, &
+  function run_model_c(c_client, key, key_length, inputs, input_lengths, n_inputs, &
                          outputs, output_lengths, n_outputs) bind(c, name="run_model")
     use iso_c_binding, only : c_ptr, c_size_t, c_char
+    import :: enum_kind
+    integer(kind=enum_kind)                   :: run_model_c
     type(c_ptr), value,            intent(in) :: c_client          !< Initialized SmartRedis client
     character(kind=c_char),        intent(in) :: key(*)            !< The key to use to place the model
     integer(kind=c_size_t), value, intent(in) :: key_length        !< The length of the key c-string, excluding null
@@ -122,5 +131,5 @@ interface
                                                                    !! excluding null terminating character
     integer(kind=c_size_t), value, intent(in) :: n_outputs         !< The number of outputs
 
-  end subroutine run_model_c
+  end function run_model_c
 end interface

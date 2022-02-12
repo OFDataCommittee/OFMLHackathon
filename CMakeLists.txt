@@ -6,8 +6,14 @@ option(BUILD_PYTHON "Build the python module" ON)
 
 set(CMAKE_BUILD_TYPE RELEASE)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_EXE_LINKER_FLAGS "-lpthread")
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
+add_link_options(-lpthread)
+
+add_compile_options(-fvisibility=default)
+
+if (WERROR)
+    add_compile_options(-Wall -Werror)
+endif()
 
 find_library(REDISPP redis++ PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
 find_library(HIREDIS hiredis PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
@@ -17,9 +23,20 @@ set(EXT_CLIENT_LIBRARIES ${REDISPP} ${HIREDIS})
 set(CLIENT_SRC
     src/c/c_client.cpp
     src/c/c_dataset.cpp
+    src/c/c_error.cpp
     src/cpp/client.cpp
     src/cpp/dataset.cpp
     src/cpp/command.cpp
+    src/cpp/keyedcommand.cpp
+    src/cpp/nonkeyedcommand.cpp
+    src/cpp/multikeycommand.cpp
+    src/cpp/singlekeycommand.cpp
+    src/cpp/compoundcommand.cpp
+    src/cpp/addressatcommand.cpp
+    src/cpp/addressanycommand.cpp
+    src/cpp/clusterinfocommand.cpp
+    src/cpp/dbinfocommand.cpp
+    src/cpp/gettensorcommand.cpp
     src/cpp/commandlist.cpp
     src/cpp/metadata.cpp
     src/cpp/tensorbase.cpp

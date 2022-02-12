@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,6 @@ namespace SmartRedis {
 
 ///@file
 
-class Redis;
-
 /*!
 *   \brief  The Redis class executes RedisServer
 *           commands on a non-cluster redis server.
@@ -46,7 +44,6 @@ class Redis : public RedisServer
     public:
         /*!
         *   \brief Redis constructor.
-        *          Initializes default values but does not connect.
         */
         Redis();
 
@@ -88,15 +85,45 @@ class Redis : public RedisServer
         */
         Redis& operator=(Redis&& cluster) = default;
 
-        /*!
-        *   \brief Run a single-key or single-hash slot
-        *          Command on the server
-        *   \param cmd The single-key or single-hash
-        *              slot Comand to run
+       /*!
+        *   \brief Run a SingleKeyCommand on the server
+        *   \param cmd The SingleKeyCommand to run
         *   \returns The CommandReply from the
         *            command execution
         */
-        virtual CommandReply run(Command& cmd);
+        virtual CommandReply run(SingleKeyCommand& cmd);
+
+        /*!
+        *   \brief Run a MultiKeyCommand on the server
+        *   \param cmd The MultiKeyCommand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(MultiKeyCommand& cmd);
+
+        /*!
+        *   \brief Run a CompoundCommand on the server
+        *   \param cmd The CompoundCommand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(CompoundCommand& cmd);
+
+        /*!
+        *   \brief Run an AddressAtCommand on the server
+        *   \param cmd The AddressAtCommand command to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAtCommand& cmd);
+
+        /*!
+        *   \brief Run an AddressAnyCommand on the server
+        *   \param cmd The AddressAnyCommand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAnyCommand& cmd);
 
         /*!
         *   \brief Run multiple single-key or single-hash slot
@@ -105,10 +132,10 @@ class Redis : public RedisServer
         *   \param cmd The CommandList containing multiple
         *              single-key or single-hash
         *              slot Comand to run
-        *   \returns The CommandReply from the last
-        *            command execution
+        *   \returns A list of CommandReply for each Command
+        *            in the CommandList
         */
-        virtual CommandReply run(CommandList& cmd);
+        virtual std::vector<CommandReply> run(CommandList& cmd);
 
         /*!
         *   \brief Check if a key exists in the database. This
@@ -121,6 +148,15 @@ class Redis : public RedisServer
         virtual bool key_exists(const std::string& key);
 
         /*!
+        *   \brief Check if a hash field exists
+        *   \param key The key containing the field
+        *   \param field The field in the key to check
+        *   \returns True if the hash field exists, otherwise False
+        */
+        virtual bool hash_field_exists(const std::string& key,
+                                       const std::string& field);
+
+        /*!
         *   \brief Check if a model or script key exists in the database
         *   \param key The key to check
         *   \returns True if the key exists, otherwise False
@@ -129,7 +165,7 @@ class Redis : public RedisServer
 
         /*!
          *  \brief Check if address is valid
-         *  \param addresss Address of database
+         *  \param address Address of database
          *  \param port Port of database
          *  \return True if address is valid
          */
@@ -183,8 +219,8 @@ class Redis : public RedisServer
         /*!
         *   \brief Copy a vector of tensors from source keys
         *          to destination keys
-        *   \param src_key Vector of source keys
-        *   \param dest_key Vector of destination keys
+        *   \param src Vector of source keys
+        *   \param dest Vector of destination keys
         *   \returns The CommandReply from the last put command
         *            associated with the tensor copy
         */
@@ -286,6 +322,20 @@ class Redis : public RedisServer
         */
         virtual CommandReply get_script(const std::string& key);
 
+        /*!
+        *   \brief Retrieve model/script runtime statistics
+        *   \param address The address of the database node (host:port)
+        *   \param key The key associated with the model or script
+        *   \param reset_stat Boolean indicating if the counters associated
+        *                     with the model or script should be reset.
+        *   \returns The CommandReply that contains the result
+        *            of the AI.INFO execution on the server
+        */
+        virtual CommandReply
+        get_model_script_ai_info(const std::string& address,
+                                 const std::string& key,
+                                 const bool reset_stat);
+
     private:
 
         /*!
@@ -294,9 +344,24 @@ class Redis : public RedisServer
         sw::redis::Redis* _redis;
 
         /*!
+        *   \brief Run a Command on the server
+        *   \param cmd The Command to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        inline CommandReply _run(const Command& cmd);
+
+        /*!
+        *   \brief Inserts a string formatted as address:port
+                   into _address_node_map. Strips the protocol
+                   (tcp:// or unix://) before inserting.
+        *   \param address_port A string formatted as protocol://address:port
+        */
+        inline void _add_to_address_map(std::string address_port);
+
+        /*!
         *   \brief Connect to the server at the address and port
-        *   \param address_port A string formatted as
-        *                       tcp:://address:port
+        *   \param address_port A string formatted as tcp://address:port
         *                       for redis connection
         */
         inline void _connect(std::string address_port);

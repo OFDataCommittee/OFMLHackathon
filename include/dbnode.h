@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,7 +110,7 @@ class DBNode{
         *          if the lower hash slot of this
         *          node is less than the other lower
         *          hash slot.
-        *   \param db_nodes DBNode to compare to
+        *   \param db_node DBNode to compare to
         */
         bool operator<(const DBNode& db_node) const;
 

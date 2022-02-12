@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021, Hewlett Packard Enterprise
+! Copyright (c) 2021-2022, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -24,11 +24,12 @@
 ! OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  !** Beginning of code common to all put_tensor subroutines
+  !** Beginning of code common to all add_tensor subroutines
 
-  class(dataset_type),                   intent(in) :: self !< Fortran SLIC dataset
-  character(len=*),                      intent(in) :: name !< The unique name used to store in the database
-  integer, dimension(:),                 intent(in) :: dims !< The length of each dimension
+  class(dataset_type),   intent(in)  :: self !< Fortran SLIC dataset
+  character(len=*),      intent(in)  :: name !< The unique name used to store in the database
+  integer, dimension(:), intent(in)  :: dims !< The length of each dimension
+  integer(kind=enum_kind)            :: code !< Result of the operation
   ! Local variables
   integer(kind=c_size_t)                      :: c_n_dims ! Number of dimensions
   type(c_ptr) :: data_ptr, c_dims_ptr
@@ -50,4 +51,4 @@
   c_dims(:) = dims(:)
   c_dims_ptr = c_loc(c_dims)
 
-  !** End of code common to all put_tensor subroutines
+  !** End of code common to all add_tensor subroutines

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,8 @@
 #include <unordered_set>
 #include "redisserver.h"
 #include "dbnode.h"
+#include "nonkeyedcommand.h"
+#include "keyedcommand.h"
 
 namespace SmartRedis {
 
@@ -49,7 +51,6 @@ class RedisCluster : public RedisServer
 
         /*!
         *   \brief RedisCluster constructor.
-        *          Initializes default values but does not connect.
         */
         RedisCluster();
 
@@ -92,14 +93,48 @@ class RedisCluster : public RedisServer
         RedisCluster& operator=(RedisCluster&& cluster) = default;
 
         /*!
-        *   \brief Run a single-key or single-hash slot
-        *          Command on the server
-        *   \param cmd The single-key or single-hash
-        *              slot Command to run
+        *   \brief Run a single-key Command on the server
+        *   \param cmd The single-key Comand to run
         *   \returns The CommandReply from the
         *            command execution
         */
-        virtual CommandReply run(Command& cmd);
+        virtual CommandReply run(SingleKeyCommand& cmd);
+
+        /*!
+        *   \brief Run a multi-key Command on the server
+        *   \param cmd The multi-key Comand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(MultiKeyCommand& cmd);
+
+        /*!
+        *   \brief Run a compound Command on the server
+        *   \param cmd The compound Comand to run
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(CompoundCommand& cmd);
+
+        /*!
+        *   \brief Run a non-keyed Command that
+        *          addresses the given db node on the server
+        *   \param cmd The non-keyed Command that
+        *              addresses the given db node
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAtCommand& cmd);
+
+        /*!
+        *   \brief Run a non-keyed Command that
+        *          addresses any db node on the server
+        *   \param cmd The non-keyed Command that
+        *              addresses any db node
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAnyCommand& cmd);
 
         /*!
         *   \brief Run multiple single-key or single-hash slot
@@ -108,10 +143,10 @@ class RedisCluster : public RedisServer
         *   \param cmd The CommandList containing multiple
         *              single-key or single-hash
         *              slot Command to run
-        *   \returns The CommandReply from the last
-        *            command execution
+        *   \returns A list of CommandReply for each Command
+        *            in the CommandList
         */
-        virtual CommandReply run(CommandList& cmd);
+        virtual std::vector<CommandReply> run(CommandList& cmd);
 
         /*!
         *   \brief Check if a key exists in the database. This
@@ -124,6 +159,15 @@ class RedisCluster : public RedisServer
         virtual bool key_exists(const std::string& key);
 
         /*!
+        *   \brief Check if a hash field exists
+        *   \param key The key containing the field
+        *   \param field The field in the key to check
+        *   \returns True if the hash field exists, otherwise False
+        */
+        virtual bool hash_field_exists(const std::string& key,
+                                       const std::string& field);
+
+        /*!
         *   \brief Check if a model or script key exists in the database
         *   \param key The key to check
         *   \returns True if the key exists, otherwise False
@@ -132,7 +176,7 @@ class RedisCluster : public RedisServer
 
         /*!
          *  \brief Check if address is valid
-         *  \param addresss address of database
+         *  \param address address of database
          *  \param port port of database
          *  \return True if address is valid
          */
@@ -190,8 +234,8 @@ class RedisCluster : public RedisServer
         /*!
         *   \brief Copy a vector of tensors from source keys
         *          to destination keys
-        *   \param src_key Vector of source keys
-        *   \param dest_key Vector of destination keys
+        *   \param src Vector of source keys
+        *   \param dest Vector of destination keys
         *   \returns The CommandReply from the last Command
         *            execution in the copying of the tensor.
         *            Different implementations may have different
@@ -293,6 +337,31 @@ class RedisCluster : public RedisServer
         */
         virtual CommandReply get_script(const std::string& key);
 
+        /*!
+        *   \brief Retrieve model/script runtime statistics
+        *   \param address The address of the database node (host:port)
+        *   \param key The key associated with the model or script
+        *   \param reset_stat Boolean indicating if the counters associated
+        *                     with the model or script should be reset.
+        *   \returns The CommandReply that contains the result
+        *            of the AI.INFO execution on the server
+        */
+        virtual CommandReply
+        get_model_script_ai_info(const std::string& address,
+                                 const std::string& key,
+                                 const bool reset_stat);
+
+    protected:
+
+        /*!
+        *   \brief Get a DBNode prefix for the provided hash slot
+        *   \param hash_slot The hash slot to get a prefix for
+        *   \throw RuntimeException if there is an error
+        *          creating a prefix for a particular hash slot
+        *          or if hash_slot is greater than 16384.
+        */
+        std::string _get_crc16_prefix(uint64_t hash_slot);
+
     private:
 
         /*!
@@ -304,6 +373,21 @@ class RedisCluster : public RedisServer
         *   \brief Vector of DBNodes in the cluster
         */
         std::vector<DBNode> _db_nodes;
+
+        /*!
+        *   \brief Prefix of the most recently used DBNode
+        */
+        std::string _last_prefix;
+
+        /*!
+        *   \brief Run the command on the correct db node
+        *   \param cmd The command to run on the server
+        *   \param db_prefix The prefix of the db node the
+        *                    command addresses
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        inline CommandReply _run(const Command& cmd, std::string db_prefix);
 
         /*!
         *   \brief Connect to the cluster at the address and port
@@ -324,7 +408,7 @@ class RedisCluster : public RedisServer
         *          the correct database for a given command
         *   \param cmd The Command to analyze for DBNode prefix
         *   \returns The DBNode prefix as a string
-        *   \throw std::runtime_error if the Command does not have
+        *   \throw RuntimeException if the Command does not have
         *          keys or if multiple keys have different prefixes
         */
         std::string _get_db_node_prefix(Command& cmd);
@@ -333,29 +417,45 @@ class RedisCluster : public RedisServer
         *   \brief Processes the CommandReply for CLUSTER SLOTS
         *          to build DBNode information
         *   \param reply The CommandReply for CLUSTER SLOTS
-        *   \throw std::runtime_error if there is an error
+        *   \throw RuntimeException if there is an error
         *          creating a prefix for a particular DBNode
         */
         inline void _parse_reply_for_slots(CommandReply& reply);
 
         /*!
-        *   \brief Get a DBNode prefix for the provided hash slot
-        *   \param hash_slot The hash slot to get a prefix for
-        *   \throw std::runtime_error if there is an error
-        *          creating a prefix for a particular DBNode
+        *   \brief Perfrom an inverse XOR and shift using
+        *          the CRC16 polynomial starting at the bit
+        *          position specified by initial_shift.
+        *          The XOR shift will be performed on n_bits.
+        *          The XOR operation is performed on every
+        *          non-zero bit starting from the right, following
+        *          the same pattern as the forward CRC16 calculation
+        *          (which starts on the left).
+        *   \param remainder The polynomial expression used
+        *          with the CRC16 polynomial.  remainder
+        *          is modified and contains the result of the
+        *          inverse CRC16 XOR shifts.
+        *   \param initial_shift An initial shift applied to
+        *          the polynomial so the inverse XOR shift can be
+        *          restarted at the initial_shift bit position.
+        *   \param n_bits The number of bits (e.g. the number of
+        *                 times) the XOR operation should be
+        *                 applied to remainder
         */
-        std::string _get_crc16_prefix(uint64_t hash_slot);
+        void _crc_xor_shift(uint64_t& remainder,
+                            const size_t initial_shift,
+                            const size_t n_bits);
 
         /*!
-        *   \brief Perform an inverse CRC16 calculation.
-        *   \details Given a remainder, this function will
-        *            calculate a number that when divded by
-        *            the CRC16 polynomial, yields the remainder.
-        *   \param remainder The polynomial remainder
-        *   \returns A 64-bit number that when divided by the
-        *            CRC16 polynomial yields the remainder.
+        *   \brief Check if the current CRC16 inverse
+        *          contains any forbidden characters
+        *   \param char_bits The character bits (current solution)
+        *   \param n_chars The current number of characters
+        *   \return True if the char_bits contain a forbidden
+        *           character, otherwise False.
         */
-        uint64_t _crc16_inverse(uint64_t remainder);
+        bool _is_valid_inverse(uint64_t char_bits,
+                               const size_t n_chars);
 
         /*!
         *   \brief Determine if the key has a substring
@@ -401,7 +501,7 @@ class RedisCluster : public RedisServer
         *           enforce identical hash slot constraint
         *   \param names The keys that need to be updated for identical
         *                hash slot constraint
-        *   \param prefix The prefix to attach
+        *   \param db_prefix The prefix to attach
         *   \returns A vector of updated names
         */
         std::vector<std::string>  _get_tmp_names(std::vector<std::string> names,
@@ -410,13 +510,10 @@ class RedisCluster : public RedisServer
         /*!
         *   \brief  Delete multiple keys with the assumption that all
         *           keys use the same hash slot
-        *   \param names The keys that need to be updated for identical
-        *                hash slot constraint
-        *   \param prefix The prefix to attach
+        *   \param keys The keys to be deleted
         *   \returns A vector of updated names
         */
-        void _delete_keys(std::vector<std::string> key
-                          );
+        void _delete_keys(std::vector<std::string> keys);
 
         /*!
         *   \brief  Run a model in the database that uses dagrun

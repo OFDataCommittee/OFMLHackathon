@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 
 #include <vector>
 #include <string>
-#include "enums/cpp_metadata_type.h"
+#include "sr_enums.h"
 
 namespace SmartRedis {
 
@@ -48,9 +48,9 @@ class MetadataField {
     /*!
     *   \brief MetadataField constructor
     *   \param name The name used to reference the metadata field
-    *   \param MetaDataType The metadata type for this field
+    *   \param type The metadata type for this field
     */
-    MetadataField(const std::string& name, MetaDataType type);
+    MetadataField(const std::string& name, SRMetaDataType type);
 
     /*!
     *   \brief Default MetadataField destructor
@@ -73,7 +73,7 @@ class MetadataField {
     *   \brief Retrieve the Metadatafield type
     *   \returns MetadataField type
     */
-    MetaDataType type();
+    SRMetaDataType type();
 
     /*!
     *   \brief Retrieve the number of values in the field
@@ -96,7 +96,7 @@ class MetadataField {
     /*!
     *   \brief The field type.
     */
-    MetaDataType _type;
+    SRMetaDataType _type;
 
 };
 

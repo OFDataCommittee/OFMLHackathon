@@ -1,4 +1,32 @@
-#include "../../../third-party/catch/catch.hpp"
+/*
+ * BSD 2-Clause License
+ *
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "client.h"
 #include "dataset.h"
 #include "../client_test_utils.h"
@@ -96,7 +124,7 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
         std::string dataset_name = "mnist_input_dataset_ds";
         std::string dataset_in_key = "{" + dataset_name + "}." + in_key_ds;
         // for consumer tensor
-        TensorType g_type;
+        SRTensorType g_type;
         std::vector<size_t> g_dims;
         void* g_result;
 
@@ -115,8 +143,8 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
             for(int i=0; i<dims[0]; i++)
                 array[i] = (float)(rand()/((float)RAND_MAX/10.0));
             producer_client.put_tensor(tensor_key, (void*)array,
-                              dims, TensorType::flt,
-                              MemoryLayout::nested);
+                              dims, SRTensorTypeFloat,
+                              SRMemLayoutNested);
             CHECK(producer_client.tensor_exists(tensor_key) == true);
             CHECK(producer_client.key_exists(producer_keyout+"."+tensor_key) ==
                   true);
@@ -136,7 +164,7 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
             float**** mnist_array = allocate_4D_array<float>(1,1,28,28);
             load_mnist_image_to_array(mnist_array);
             producer_client.put_tensor(in_key, mnist_array, {1,1,28,28},
-                              TensorType::flt, MemoryLayout::nested);
+                              SRTensorTypeFloat, SRMemLayoutNested);
             producer_client.run_script(script_name, "pre_process",
                              {in_key}, {script_out_key});
             producer_client.run_model(model_name, {script_out_key}, {out_key});
@@ -144,9 +172,9 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
             // Setup mnist with dataset
             DataSet dataset = DataSet(dataset_name);
             dataset.add_tensor(in_key_ds, mnist_array, {1,1,28,28},
-                               TensorType::flt, MemoryLayout::nested);
+                               SRTensorTypeFloat, SRMemLayoutNested);
             producer_client.put_dataset(dataset);
-            CHECK(producer_client.tensor_exists(dataset_name) == true);
+            CHECK(producer_client.dataset_exists(dataset_name) == true);
             producer_client.run_script(script_name, "pre_process",
                              {dataset_in_key}, {script_out_key_ds});
             producer_client.run_model(model_name, {script_out_key_ds},
@@ -173,17 +201,17 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
                   true);
 
             consumer_client.unpack_tensor(tensor_key, u_result,
-                                          dims, TensorType::flt,
-                                          MemoryLayout::nested);
+                                          dims, SRTensorTypeFloat,
+                                          SRMemLayoutNested);
             for(int i=0; i<dims[0]; i++)
                 CHECK(array[i] == u_result[i]);
 
             consumer_client.get_tensor(tensor_key, g_result, g_dims,
-                                       g_type, MemoryLayout::nested);
+                                       g_type, SRMemLayoutNested);
             float* g_type_result = (float*)g_result;
             for(int i=0; i<dims[0]; i++)
                 CHECK(array[i] == g_type_result[i]);
-            CHECK(TensorType::flt == g_type);
+            CHECK(SRTensorTypeFloat == g_type);
             CHECK(g_dims == dims);
 
             free_1D_array(array);
@@ -204,11 +232,11 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
             // Get mnist result
             float** mnist_result = allocate_2D_array<float>(1, 10);
             consumer_client.unpack_tensor(out_key, mnist_result,
-                                          {1,10}, TensorType::flt,
-                                          MemoryLayout::nested);
+                                          {1,10}, SRTensorTypeFloat,
+                                          SRMemLayoutNested);
             consumer_client.unpack_tensor(out_key_ds, mnist_result,
-                                          {1,10}, TensorType::flt,
-                                          MemoryLayout::nested);
+                                          {1,10}, SRTensorTypeFloat,
+                                          SRMemLayoutNested);
             free_2D_array(mnist_result, 1);
 
             // reset environment variables to their original state

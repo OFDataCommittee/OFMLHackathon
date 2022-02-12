@@ -5,6 +5,8 @@ program main
 
   implicit none
 
+#include "enum_fortran.inc"
+
   integer, parameter :: dim1 = 10
   integer, parameter :: dim2 = 20
   integer, parameter :: dim3 = 30
@@ -14,14 +16,18 @@ program main
 
   integer :: i, j, k
   type(client_type) :: client
-
-  integer :: err_code, pe_id
+  integer(kind=enum_kind) :: result
 
   call random_number(send_array_real_64)
 
-  call client%initialize(.false.) ! Change .true. to false if using a clustered database
+  ! Initialize a client
+  result = client%initialize(.true.) ! Change .false. to .true. if not using a clustered database
+  if (result .ne. SRNoError) stop 'client%initialize failed'
 
-  call client%put_tensor("send_array", send_array_real_64, shape(send_array_real_64))
-  call client%unpack_tensor("send_array", recv_array_real_64, shape(recv_array_real_64))
+  ! Send a tensor to the database via the client and verify that we can retrieve it
+  result = client%put_tensor("send_array", send_array_real_64, shape(send_array_real_64))
+  if (result .ne. SRNoError) stop 'client%put_tensor failed'
+  result = client%unpack_tensor("send_array", recv_array_real_64, shape(recv_array_real_64))
+  if (result .ne. SRNoError) stop 'client%unpack_tensor failed'
 
 end program main

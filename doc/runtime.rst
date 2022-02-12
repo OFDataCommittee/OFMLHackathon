@@ -107,4 +107,26 @@ The functions for changing this default behavior are:
     The function ``Client.use_model_ensemble_prefix()`` controls
     object prefixing for model and script data.
 
+Connection and Command Execution Environment Variables
+======================================================
 
+SmartRedis allows for client connection and command execution
+behavior to be adjusted via environment variables.
+
+During client initialization, the environment variables ``SR_CONN_INTERVAL``
+and ``SR_CONN_TIMEOUT`` are used by SmartRedis to determine
+the frequency of connection attempts and the cumulative amount of time
+before a timeout error is thrown, respectively.  The user can set
+these environment variables to adjust client connection behavior.
+``SR_CONN_INTERVAL`` should be specified in milliseconds and
+``SR_CONN_TIMEOUT`` should be specified in seconds.
+
+The environment variables ``SR_CMD_INTERVAL`` and ``SR_CMD_TIMEOUT``
+are used are used by SmartRedis to determine
+the frequency of command execution attempts and the
+cumulative amount of time before a timeout error is thrown, respectively.
+The user can set these environment variables to adjust command execution behavior.
+``SR_CMD_INTERVAL`` should be specified in milliseconds and
+``SR_CMD_TIMEOUT`` should be specified in seconds.  Note that ``SR_CMD_INTERVAL``
+and ``SR_CMD_TIMEOUT`` are read during client initialization and not
+before each command execution.

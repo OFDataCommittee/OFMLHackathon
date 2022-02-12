@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,9 +29,10 @@
 #ifndef SMARTREDIS_COMMANDLIST_H
 #define SMARTREDIS_COMMANDLIST_H
 
-#include "stdlib.h"
+#include <stdlib.h>
 #include <vector>
 #include "command.h"
+#include "srexception.h"
 
 namespace SmartRedis {
 
@@ -82,20 +83,20 @@ class CommandList
         ~CommandList();
 
         /*!
-        *   \brief Dynamically allocate a new Command
-        *          and return a pointer to the new Command
-        *   \returns Pointer to a new Command
+        *   \brief Add new Commmand of type C to the CommandList
+        *   \tparam C Any type of Command
         */
-        Command* add_command();
+        template <class T>
+        T* add_command();
 
         /*!
-        *   \typedef An iterator type for iterating
+        *   \brief An iterator type for iterating
         *            over all Commands
         */
         typedef std::vector<Command*>::iterator iterator;
 
         /*!
-        *   \typedef A const iterator type for iterating
+        *   \brief A const iterator type for iterating
         *            over all Commands
         */
         typedef std::vector<Command*>::const_iterator const_iterator;
@@ -134,9 +135,9 @@ class CommandList
         *   \brief A vector container a pointer to all Command
         */
         std::vector<Command*> _commands;
-
-
 };
+
+#include "commandlist.tcc"
 
 } //namespace SmartRedis
 

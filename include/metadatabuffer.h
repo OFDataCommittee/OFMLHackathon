@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,7 @@
 #include <vector>
 #include <string>
 #include <cstring>
+#include "srexception.h"
 
 using namespace SmartRedis;
 
@@ -50,16 +51,16 @@ typedef int8_t type_t;
 *   \param buf The metadata buffer
 *   \return The MetaDataType embedded in the buffer
 */
-extern inline MetaDataType get_type(const std::string_view& buf)
+extern inline SRMetaDataType get_type(const std::string_view& buf)
 {
-    if(buf.size() < sizeof(type_t))
-        throw std::runtime_error("The MetadataField type cannot "\
+    if (buf.size() < sizeof(type_t))
+        throw SRRuntimeException("The MetadataField type cannot "\
                                  "be retrived from buffer of " +
                                  std::to_string(buf.size()) +
                                  "characters.");
 
     type_t* data = (type_t*)(buf.data());
-    return (MetaDataType)(*data);
+    return (SRMetaDataType)(*data);
 }
 
 /*!
@@ -105,10 +106,9 @@ extern inline bool safe_to_read(const size_t& byte_position,
 *   \param buf The data buffer
 *   \param byte_position The current position in the buffer
 *   \param total_bytes The total bytes in the buffer
-*   \param n_values The number of values to read
 *   \tparam T The data type that is to be read from buffer
 *   \return The value read from the buffer
-*   \throw std::runtime_error if an attempt is made to read
+*   \throw RuntimeException if an attempt is made to read
 *          beyond the buffer length.
 */
 template <typename T>
@@ -116,8 +116,8 @@ extern inline T read(void* buf,
                      const size_t& byte_position,
                      const size_t& total_bytes)
 {
-    if(!safe_to_read<T>(byte_position, total_bytes, 1))
-        throw std::runtime_error("A request to read one scalar value "
+    if (!safe_to_read<T>(byte_position, total_bytes, 1))
+        throw SRRuntimeException("A request to read one scalar value "
                                  "from the metadata buffer "
                                  "was made, but the buffer "
                                  "contains insufficient bytes. "
@@ -148,7 +148,7 @@ extern inline bool advance(void*& buf,
                            const size_t& total_bytes,
                            const size_t& n_values)
 {
-    if(!safe_to_read<T>(byte_position, total_bytes, n_values))
+    if (!safe_to_read<T>(byte_position, total_bytes, n_values))
         return false;
 
     byte_position += n_values * sizeof(T);
@@ -164,7 +164,7 @@ extern inline bool advance(void*& buf,
 *   \param n_chars The number of characters in the string
 *                  to be read
 *   \return The string read from the buffer
-*   \throw std::runtime_error if an attempt is made to read
+*   \throw RuntimeException if an attempt is made to read
 *          beyond the buffer length.
 */
 extern inline std::string read_string(void* buf,
@@ -172,8 +172,8 @@ extern inline std::string read_string(void* buf,
                                       const size_t& total_bytes,
                                       const size_t& n_chars)
 {
-    if(!safe_to_read<char>(byte_position, total_bytes, n_chars))
-        throw std::runtime_error("A request to read a string "
+    if (!safe_to_read<char>(byte_position, total_bytes, n_chars))
+        throw SRRuntimeException("A request to read a string "
                                  "from the metadata buffer "
                                  "was made, but the buffer "
                                  "contains insufficient bytes. "
@@ -193,7 +193,7 @@ extern inline std::string read_string(void* buf,
 *   \return std::string of the serialized data
 */
 template <typename T>
-extern inline std::string generate_scalar_buf(MetaDataType type,
+extern inline std::string generate_scalar_buf(SRMetaDataType type,
                                               const std::vector<T>& data)
 {
     /*
@@ -274,7 +274,7 @@ extern inline std::string generate_string_buf(
     size_t pos = 0;
 
     // Add the type ID
-    type_t type_id = (type_t)MetaDataType::string;
+    type_t type_id = (type_t)SRMetadataTypeString;
     n_bytes = sizeof(type_t);
     add_buf_data(buf, pos, &type_id, n_bytes);
     pos += n_bytes;
@@ -307,22 +307,21 @@ extern inline std::vector<std::string> unpack_string_buf(
     size_t byte_position = 0;
     size_t total_bytes = buf.size();
 
-    if(total_bytes==0)
+    if (total_bytes == 0)
         return std::vector<std::string>();
 
     void* data = (void*)(buf.data());
 
     type_t type = read<type_t>(data, byte_position, total_bytes);
 
-
-    if(type!=(type_t)MetaDataType::string)
-        throw std::runtime_error("The buffer string metadata type "\
+    if (type != (type_t)SRMetadataTypeString)
+        throw SRRuntimeException("The buffer string metadata type "\
                                  "does not contain the expected "\
                                  "type of string.");
 
     std::vector<std::string> vals;
 
-    if(!advance<type_t>(data, byte_position, total_bytes, 1))
+    if (!advance<type_t>(data, byte_position, total_bytes, 1))
         return vals;
 
     size_t str_len;
@@ -331,13 +330,13 @@ extern inline std::vector<std::string> unpack_string_buf(
 
         str_len = read<size_t>(data, byte_position, total_bytes);
 
-        if(!advance<size_t>(data, byte_position, total_bytes, 1))
+        if (!advance<size_t>(data, byte_position, total_bytes, 1))
             return vals;
 
         vals.push_back(
             read_string(data, byte_position, total_bytes, str_len));
 
-        if(!advance<char>(data, byte_position, total_bytes, str_len))
+        if (!advance<char>(data, byte_position, total_bytes, str_len))
             return vals;
     }
     return vals;
@@ -362,12 +361,12 @@ extern inline std::vector<T> unpack_scalar_buf(
 
     type_t type = read<type_t>(data, byte_position, total_bytes);
 
-    if(!advance<type_t>(data, byte_position,
+    if (!advance<type_t>(data, byte_position,
                          total_bytes, 1))
         return std::vector<T>();
 
-    if( (total_bytes - byte_position) % sizeof(T))
-        throw std::runtime_error("The data portion of the provided "\
+    if ( (total_bytes - byte_position) % sizeof(T))
+        throw SRRuntimeException("The data portion of the provided "\
                                  "metadata buffer does not contain "
                                  "the correct number of bytes for "
                                  "a " + std::to_string(sizeof(T)) +

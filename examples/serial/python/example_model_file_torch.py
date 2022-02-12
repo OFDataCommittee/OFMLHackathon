@@ -17,7 +17,7 @@ class Net(nn.Module):
 
 # Connect a SmartRedis client
 db_address = "127.0.0.1:6379"
-client = Client(address=db_address, cluster=False)
+client = Client(address=db_address, cluster=True)
 
 try:
     net = Net()

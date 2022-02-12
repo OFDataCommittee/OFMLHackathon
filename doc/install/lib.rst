@@ -4,23 +4,23 @@ release:
 
 .. code-block:: bash
 
-    git clone https://github.com/CrayLabs/SmartRedis.git --depth=1 --branch v0.2.0 smartredis
+    git clone https://github.com/CrayLabs/SmartRedis.git --depth=1 --branch v0.3.0 smartredis
 
 Note that the release tarball can also be used instead of cloning
 the git repository, but the preferred method is a repository
 clone.
 
 To build the SmartRedis library for the C++, C, and Fortran,
-make sure to be in the top level directory of ``smartredis-0.2.0``.
+make sure to be in the top level directory of ``smartredis-0.3.0``.
 
 .. code-block:: bash
 
   make lib
 
 The SmartRedis library will be installed in
-``smartredis-0.2.0/install/lib/`` and the SmartRedis
+``smartredis-0.3.0/install/lib/`` and the SmartRedis
 header files will be installed in
-``smartredis-0.2.0/install/include/``.
+``smartredis-0.3.0/install/include/``.
 The library installation can be used to easily include SmartRedis
 capabilities in C++, C, and Fortran applications.
 For example, the CMake instructions below illustrate how to

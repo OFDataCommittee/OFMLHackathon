@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021, Hewlett Packard Enterprise
+! Copyright (c) 2021-2022, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -24,6 +24,8 @@
 ! OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+  !** Beginning of code common to all add_meta_scalar subroutines
+
   character(kind=c_char, len=len_trim(name))  :: c_name
   integer(kind=enum_kind) :: c_data_type, expected_data_type
   integer(kind=c_size_t) :: name_length
@@ -33,4 +35,6 @@
   name_length = len_trim(name)
   meta_ptr = c_loc(meta)
 
-  call add_meta_scalar_c(self%dataset_ptr, c_name, name_length, meta_ptr, meta_type)
+  code = add_meta_scalar_c(self%dataset_ptr, c_name, name_length, meta_ptr, meta_type)
+
+  !** End of code common to all add_meta_scalar subroutines

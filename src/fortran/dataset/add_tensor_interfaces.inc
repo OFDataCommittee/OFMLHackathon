@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021, Hewlett Packard Enterprise
+! Copyright (c) 2021-2022, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -25,11 +25,12 @@
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 interface
-  subroutine add_tensor_c(dataset, name, name_length, data, dims, n_dims, data_type, mem_layout) &
+  function add_tensor_c(dataset, name, name_length, data, dims, n_dims, data_type, mem_layout) &
       bind(c, name="add_tensor")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
-    type(c_ptr),             value, intent(in) :: dataset      !< Pointer to the initialized client
+    integer(kind=enum_kind)                    :: add_tensor_c
+    type(c_ptr),             value, intent(in) :: dataset     !< Pointer to the initialized client
     character(kind=c_char),         intent(in) :: name(*)     !< The name to use to place the tensor
     integer(kind=c_size_t),  value, intent(in) :: name_length !< The length of the name c-string,
                                                               !! excluding null terminating character
@@ -38,5 +39,5 @@ interface
     integer(kind=c_size_t),  value, intent(in) :: n_dims      !< The number of dimensions of the tensor
     integer(kind=enum_kind), value, intent(in) :: data_type   !< The data type of the tensor
     integer(kind=enum_kind), value, intent(in) :: mem_layout  !< The memory layout of the data
-  end subroutine add_tensor_c
+  end function add_tensor_c
 end interface

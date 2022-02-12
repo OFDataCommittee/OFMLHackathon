@@ -1,3 +1,31 @@
+/*
+ * BSD 2-Clause License
+ *
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "client.h"
 #include "dataset.h"
 #include "client_test_utils.h"
@@ -7,7 +35,7 @@ void rename_dataset(std::string keyout)
 {
     std::vector<size_t> dims({10,10,2});
 
-    SmartRedis::Client client(use_cluster());
+    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster());
     client.use_tensor_ensemble_prefix(true);
 
     double*** t_send_1 =
@@ -28,44 +56,60 @@ void rename_dataset(std::string keyout)
     std::string t_name_2 = "tensor_2";
 
     dataset.add_tensor(t_name_1, t_send_1, dims,
-                       SmartRedis::TensorType::dbl,
-                       SmartRedis::MemoryLayout::nested);
-
+                       SRTensorTypeDouble, SRMemLayoutNested);
     dataset.add_tensor(t_name_2, t_send_2, dims,
-                       SmartRedis::TensorType::dbl,
-                       SmartRedis::MemoryLayout::nested);
+                       SRTensorTypeDouble, SRMemLayoutNested);
 
-
+    // Put the DataSet into the database
     client.put_dataset(dataset);
 
+    // Rename the DataSet
     std::string new_name = "ensemble_dataset_renamed";
-
     client.rename_dataset(name, new_name);
 
-    if(!client.key_exists(keyout + "." + new_name))
+    // Build strings for testing that the DataSet has been renamed.
+    // It is assumed the keys are of the form:
+    // ensemble_member.{dataset_name}
+    std::string new_dataset_key = keyout + "." + "{"  + new_name + "}";
+    std::string old_dataset_key = keyout + "." + "{" + name + "}";
+    std::string ack_field = client.ack_field();
+
+    // Test that the acknowledgement hash field in the
+    // ensemble_member.{dataset_name.meta} key is present
+    // for the new DataSet
+    if(!client.hash_field_exists(new_dataset_key + ".meta", ack_field))
         throw std::runtime_error("The dataset ack key for the new "\
                                  "DataSet does not exist in the "
                                  "database.");
 
-    if(client.key_exists(keyout + "." + name))
+    // Test that the acknowledgement hash field in the
+    // ensemble_member.{dataset_name.meta} key has been deleted
+    // for the old DataSet
+    if(client.hash_field_exists(old_dataset_key + ".meta", ack_field))
         throw std::runtime_error("The dataset ack key for the old "\
                                  "DataSet was not deleted.");
 
-    if(client.key_exists(keyout + "." + name + ".meta"))
+    // Test that the metadata key ensemble_member.{dataset_name.meta}.meta
+    // for the old DataSet has been deleted
+    if(client.key_exists(old_dataset_key + ".meta"))
         throw std::runtime_error("The dataset meta key for the old "\
                                  "DataSet was not deleted.");
 
-    if(client.key_exists(keyout + "." + name + "." + t_name_1))
+    // Test that tensor key ensemble_member.{dataset_name.meta}.tensor_name
+    // for the old DataSet has been deleted
+    if(client.key_exists(old_dataset_key + "." + t_name_1))
         throw std::runtime_error("The dataset tensor key for " +
                                  t_name_1 +
                                  " was not deleted.");
 
-    if(client.key_exists(keyout + "." + name + "." + t_name_2))
+    // Test that tensor key ensemble_member.{dataset_name.meta}.tensor_name
+    // for the old DataSet has been deleted
+    if(client.key_exists(old_dataset_key + "." + t_name_2))
         throw std::runtime_error("The dataset tensor key for " +
                                  t_name_2 +
                                  " was not deleted.");
 
-    //Retrieving a dataset
+    //Retrieve the new dataset
     SmartRedis::DataSet retrieved_dataset =
         client.get_dataset(new_name);
 
@@ -76,11 +120,11 @@ void rename_dataset(std::string keyout)
     //Check that the tensors are the same
     DATASET_TEST_UTILS::check_nested_3D_tensor(retrieved_dataset,
                                                t_name_1,
-                                               SmartRedis::TensorType::dbl,
+                                               SRTensorTypeDouble,
                                                t_send_1, dims);
     DATASET_TEST_UTILS::check_nested_3D_tensor(retrieved_dataset,
                                                t_name_2,
-                                               SmartRedis::TensorType::dbl,
+                                               SRTensorTypeDouble,
                                                t_send_2, dims);
 
     //Check that the metadata values are correct for the metadata
@@ -90,6 +134,7 @@ void rename_dataset(std::string keyout)
 }
 
 int main(int argc, char* argv[]) {
+
 
     const char* old_keyin = std::getenv("SSKEYIN");
     const char* old_keyout = std::getenv("SSKEYOUT");

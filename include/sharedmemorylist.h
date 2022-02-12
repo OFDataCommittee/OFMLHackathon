@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@
 #include <forward_list>
 #include <cstring>
 #include <memory>
+#include "srexception.h"
 
 namespace SmartRedis {
 
@@ -42,7 +43,7 @@ namespace SmartRedis {
 *            allocations of ype T that need to be
 *            managed.  The SharedMemoryList class uses
 *            shared pointers which means that memory will
-*            not be freed until all copies of a
+*            not be deleted until all copies of a
 *            SharedMemoryList are destroyed.
 *   \tparam T The data type for allocation
 */
@@ -88,15 +89,14 @@ class SharedMemoryList {
     ~SharedMemoryList() = default;
 
     /*!
-    *   \brief Add a malloc memory allocation performed
-    *          external to SharedMemoryList
+    *   \brief Add a memory allocation performed external to SharedMemoryList
     *   \param bytes The number of bytes in the allocation
     *   \param ptr A pointer to the memory allocation
     */
     void add_allocation(size_t bytes, T* ptr);
 
     /*!
-    *   \brief  Perform a malloc based on total
+    *   \brief  Perform an alocation based on total
     *           bytes and store in the inventory
     *   \param bytes The number of bytes to allocate
     *   \returns A pointer to the memory allocation
@@ -105,17 +105,16 @@ class SharedMemoryList {
     T* allocate_bytes(size_t bytes);
 
     /*!
-    *   \brief  Perform a malloc based on number of
+    *   \brief  Perform an allocation based on number of
     *           values and store in the inventory
-    *   \param bytes The number of values to allocate
+    *   \param n_values The number of values to allocate
     *   \returns A pointer to the memory allocation
     */
     T* allocate(size_t n_values);
 
     private:
     /*!
-    *   \brief  Forward list to track allocation
-    *           sizes and locations in memory
+    *   \brief  Forward list to track allocation sizes and locations in memory
     */
     typename std::forward_list<std::shared_ptr<T>> _inventory;
 
