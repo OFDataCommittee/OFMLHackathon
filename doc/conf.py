@@ -19,10 +19,10 @@
 
 project = 'SmartRedis'
 copyright = '2022, Hewlett Packard Enterprise'
-author = 'HPE AI & Advanced Productivity'
+author = 'Hewlett Packard Enterprise'
 
 # The full version, including alpha/beta/rc tags
-release = '0.2.0'
+release = '0.3.0'
 
 
 # -- General configuration ---------------------------------------------------

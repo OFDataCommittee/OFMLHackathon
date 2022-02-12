@@ -18,8 +18,8 @@ SmartRedis ``DataSet`` API is also provided.
 .. note::
 
     The Python API examples are written
-    to connect to a non-cluster Redis database.  Update the
-    ``Client`` constructor call to connect to a Redis cluster.
+    to connect to a Redis cluster database.  Update the
+    ``Client`` constructor call to connect to a Redis non-cluster database.
 
 Tensors
 =======

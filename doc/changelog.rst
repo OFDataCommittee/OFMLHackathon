@@ -9,13 +9,13 @@ Release on Febuary 11, 2022
 Description
 
  - Improve error handling across all SmartRedis clients (PR159_) (PR191_) (PR199_) (PR205_) (PR206_)
-  
+
   - Includes changes to C and Fortran function prototypes that are not backwards compatible
   - Includes changes to error class names and enum type names that are not backwards compatible
- 
+
  - Add ``poll_dataset`` functionality to all SmartRedis clients (PR184_)
 
-  - Due to other breaking changes made this release, applications using methods other than ``poll_dataset`` to check for the existence of a dataset should now use ``poll_dataset``
+  - Due to other breaking changes made in this release, applications using methods other than ``poll_dataset`` to check for the existence of a dataset should now use ``poll_dataset``
 
  - Add environment variables to control client connection and command timeout behavior (PR194_)
  - Add AI.INFO command to retrieve statistics on scripts and models via Python and C++ clients (PR197_)

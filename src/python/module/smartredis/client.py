@@ -954,7 +954,7 @@ class Client(PyClient):
     @exception_handler
     def save(self, addresses):
         """Performs a synchronous save of the database shard
-        producinga point in time snapshot of all the data
+        producing a point in time snapshot of all the data
         inside the Redis instance, in the form of an RBD file.
 
         :param addresses: The addresses of the database nodes
