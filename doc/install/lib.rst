@@ -30,7 +30,7 @@ compile a C or C++ application with SmartRedis.
 
     project(Example)
 
-    cmake_minimum_required(VERSION 3.10)
+    cmake_minimum_required(VERSION 3.13)
 
     set(CMAKE_CXX_STANDARD 17)
 
@@ -64,7 +64,7 @@ shown below for a Fortran application.
 
     project(Example)
 
-    cmake_minimum_required(VERSION 3.10)
+    cmake_minimum_required(VERSION 3.13)
 
     enable_language(Fortran)
 
