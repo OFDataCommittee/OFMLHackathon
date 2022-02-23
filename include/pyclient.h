@@ -70,13 +70,13 @@ class PyClient
 
         /*!
         *   \brief Put a tensor into the database
-        *   \param key The key to associate with this tensor
+        *   \param name The name to associate with this tensor
         *              in the database
         *   \param type The data type of the tensor
         *   \param data Numpy array with Pybind*
         *   \throw RuntimeException for all client errors
         */
-        void put_tensor(std::string& key,
+        void put_tensor(std::string& name,
                         std::string& type,
                         py::array data);
 
@@ -92,35 +92,35 @@ class PyClient
         *            data.  Instead it is recommended that the user
         *            use PyClient.unpack_tensor() for large tensor
         *            data and to limit memory use by the PyClient.
-        *   \param key The name used to reference the tensor
+        *   \param name The name used to reference the tensor
         *   \throw RuntimeException for all client errors
         */
-        py::array get_tensor(const std::string& key);
+        py::array get_tensor(const std::string& name);
 
         /*!
         *   \brief delete a tensor stored in the database
-        *   \param key The key of tensor to delete
+        *   \param name The name of tensor to delete
         *   \throw RuntimeException for all client errors
         */
-        void delete_tensor(const std::string& key);
+        void delete_tensor(const std::string& name);
 
         /*!
         *   \brief rename a tensor stored in the database
-        *   \param key The key of tensor to rename
-        *   \param new_key the new name of the tensor
+        *   \param old_name The original name of tensor to rename
+        *   \param new_name the new name of the tensor
         *   \throw RuntimeException for all client errors
         */
-        void rename_tensor(const std::string& key,
-                           const std::string& new_key);
+        void rename_tensor(const std::string& old_name,
+                           const std::string& new_name);
 
         /*!
-        *   \brief copy a tensor to a new key
-        *   \param key The key of tensor to copy
-        *   \param dest_key the key to store tensor copy at
+        *   \brief copy a tensor to a new name
+        *   \param src_name The name of tensor to copy
+        *   \param dest_name the name to store tensor copy at
         *   \throw RuntimeException for all client errors
         */
-        void copy_tensor(const std::string& key,
-                         const std::string& dest_key);
+        void copy_tensor(const std::string& src_name,
+                         const std::string& dest_name);
 
 
         /*!
@@ -143,78 +143,80 @@ class PyClient
 
         /*!
         *   \brief delete a dataset stored in the database
-        *   \param key The key of dataset to delete
+        *   \param name The name of dataset to delete
         *   \throw RuntimeException for all client errors
         */
-        void delete_dataset(const std::string& key);
+        void delete_dataset(const std::string& name);
 
         /*!
         *   \brief rename a dataset stored in the database
-        *   \param key The key of dataset to rename
-        *   \param new_key the new name of the dataset
+        *   \param old_name The original name of dataset to rename
+        *   \param new_name the new name for the dataset
         *   \throw RuntimeException for all client errors
         */
-        void rename_dataset(const std::string& key, const std::string& new_key);
+        void rename_dataset(const std::string& old_name,
+                            const std::string& new_name);
 
         /*!
-        *   \brief copy a dataset to a new key
-        *   \param key The key of datalset to copy
-        *   \param dest_key the key to store dataset copy at
+        *   \brief copy a dataset to a new name
+        *   \param src_name The name of dataset to copy
+        *   \param dest_name the name to store dataset copy at
         *   \throw RuntimeException for all client errors
         */
-        void copy_dataset(const std::string& key, const std::string& dest_key);
+        void copy_dataset(const std::string& src_name,
+                          const std::string& dest_name);
 
 
         /*!
         *   \brief Set a script from file in the
         *          database for future execution
-        *   \param key The key to associate with the script
+        *   \param name The name to associate with the script
         *   \param device The name of the device for execution
         *                 (e.g. CPU or GPU)
         *   \param script_file The source file for the script
         *   \throw RuntimeException for all client errors
         */
-        void set_script_from_file(const std::string& key,
-                                const std::string& device,
-                                const std::string& script_file);
+        void set_script_from_file(const std::string& name,
+                                  const std::string& device,
+                                  const std::string& script_file);
 
         /*!
         *   \brief Set a script from std::string_view buffer in the
         *          database for future execution
-        *   \param key The key to associate with the script
+        *   \param name The name to associate with the script
         *   \param device The name of the device for execution
         *                 (e.g. CPU or GPU)
         *   \param script The script source in a std::string_view
         *   \throw RuntimeException for all client errors
         */
-        void set_script(const std::string& key,
+        void set_script(const std::string& name,
                         const std::string& device,
                         const std::string_view& script);
 
         /*!
         *   \brief Retrieve the script from the database
-        *   \param key The key associated with the script
+        *   \param name The name associated with the script
         *   \returns A std::string_view containing the script.
         *            The memory associated with the script
         *            is managed by the PyClient and is valid
         *            until the destruction of the PyClient.
         *   \throw RuntimeException for all client errors
         */
-        std::string_view get_script(const std::string& key);
+        std::string_view get_script(const std::string& name);
 
         /*!
         *   \brief Run a script function in the database using the
         *          specificed input and output tensors
-        *   \param key The key associated with the script
+        *   \param name The name associated with the script
         *   \param function The name of the function in the script
         *                   to run
-        *   \param inputs The keys of inputs tensors to use
+        *   \param inputs The names of input tensors to use
         *                 in the script
-        *   \param outputs The keys of output tensors that
+        *   \param outputs The names of output tensors that
         *                 will be used to save script results
         *   \throw RuntimeException for all client errors
         */
-        void run_script(const std::string& key,
+        void run_script(const std::string& name,
                         const std::string& function,
                         std::vector<std::string>& inputs,
                         std::vector<std::string>& outputs);
@@ -222,7 +224,7 @@ class PyClient
         /*!
         *   \brief Set a model from std::string_view buffer in the
         *          database for future execution
-        *   \param key The key to associate with the model
+        *   \param name The name to associate with the model
         *   \param model The model as a continuous buffer string_view
         *   \param backend The name of the backend
         *                  (TF, TFLITE, TORCH, ONNX)
@@ -239,7 +241,7 @@ class PyClient
         *                 (TF models only)
         *   \throw RuntimeException for all client errors
         */
-        void set_model(const std::string& key,
+        void set_model(const std::string& name,
                         const std::string_view& model,
                         const std::string& backend,
                         const std::string& device,
@@ -254,7 +256,7 @@ class PyClient
         /*!
         *   \brief Set a model from file in the
         *          database for future execution
-        *   \param key The key to associate with the model
+        *   \param name The name to associate with the model
         *   \param model_file The source file for the model
         *   \param backend The name of the backend
         *                  (TF, TFLITE, TORCH, ONNX)
@@ -271,7 +273,7 @@ class PyClient
         *                 (TF models only)
         *   \throw RuntimeException for all client errors
         */
-        void set_model_from_file(const std::string& key,
+        void set_model_from_file(const std::string& name,
                                 const std::string& model_file,
                                 const std::string& backend,
                                 const std::string& device,
@@ -286,24 +288,24 @@ class PyClient
         /*!
         *   \brief Run a model in the database using the
         *          specificed input and output tensors
-        *   \param key The key associated with the model
-        *   \param inputs The keys of inputs tensors to use
+        *   \param name The name associated with the model
+        *   \param inputs The names of input tensors to use
         *                 in the model
-        *   \param outputs The keys of output tensors that
+        *   \param outputs The names of output tensors that
         *                 will be used to save model results
         *   \throw RuntimeException for all client errors
         */
-        void run_model(const std::string& key,
+        void run_model(const std::string& name,
                         std::vector<std::string> inputs,
                         std::vector<std::string> outputs);
 
         /*!
         *   \brief Retrieve the model from the database
-        *   \param key The key associated with the model
+        *   \param name The name associated with the model
         *   \returns A py:bytes object containing the model
         *   \throw RuntimeException for all client errors
         */
-        py::bytes get_model(const std::string& key);
+        py::bytes get_model(const std::string& name);
 
         /*!
         *   \brief Check if the key exists in the database
@@ -350,8 +352,7 @@ class PyClient
         *   \param key The key that will be checked in the database
         *   \param poll_frequency_ms The frequency of checks for the
         *                            key in milliseconds
-        *   \param num_tries The total number of times to check for
-        *                    the specified number of keys.
+        *   \param num_tries The total number of times to check for the key.
         *   \returns Returns true if the key is found within the
         *            specified number of tries, otherwise false.
         */
@@ -364,12 +365,12 @@ class PyClient
         *          specified frequency for a specified number
         *          of times. The name will be automatically prefixed
         *          base on prefixing behavior.
-        *   \param name The key that will be checked in the database
+        *   \param name The name that will be checked in the database
         *   \param poll_frequency_ms The frequency of checks for the
-        *                            key in milliseconds
+        *                            name in milliseconds
         *   \param num_tries The total number of times to check for
-        *                    the specified number of keys.
-        *   \returns Returns true if the key is found within the
+        *                    the tensor.
+        *   \returns Returns true if the tensor is found within the
         *            specified number of tries, otherwise false.
         */
         bool poll_tensor(const std::string& name,
@@ -381,15 +382,15 @@ class PyClient
         *          specified frequency for a specified number
         *          of times. The name will be automatically prefixed
         *          base on prefixing behavior.
-        *   \param name The key that will be checked in the database
+        *   \param name The name that will be checked in the database
         *               Depending on the current prefixing behavior,
         *               the name could be automatically prefixed
-        *               to form the corresponding key.
+        *               to form the corresponding name.
         *   \param poll_frequency_ms The frequency of checks for the
-        *                            key in milliseconds
+        *                            name in milliseconds
         *   \param num_tries The total number of times to check for
-        *                    the specified number of keys.
-        *   \returns Returns true if the key is found within the
+        *                    the dataset.
+        *   \returns Returns true if the dataset is found within the
         *            specified number of tries, otherwise false.
         */
         bool poll_dataset(const std::string& name,
@@ -401,12 +402,12 @@ class PyClient
         *          specified frequency for a specified number
         *          of times. The name will be automatically prefixed
         *          base on prefixing behavior.
-        *   \param name The key that will be checked in the database
+        *   \param name The name that will be checked in the database
         *   \param poll_frequency_ms The frequency of checks for the
-        *                            key in milliseconds
+        *                            name in milliseconds
         *   \param num_tries The total number of times to check for
-        *                    the specified number of keys.
-        *   \returns Returns true if the key is found within the
+        *                    the model or script.
+        *   \returns Returns true if the model or script is found within the
         *            specified number of tries, otherwise false.
         */
         bool poll_model(const std::string& name,

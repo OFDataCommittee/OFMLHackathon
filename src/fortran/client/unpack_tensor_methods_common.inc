@@ -27,20 +27,20 @@
   !** Beginning of code common to all unpack_tensor subroutines
 
   class(client_type),                   intent(in) :: self  !< Pointer to the initialized client
-  character(len=*),                     intent(in) :: key   !< The key to use to place the tensor
+  character(len=*),                     intent(in) :: name  !< The name to use to place the tensor
   integer, dimension(:),                intent(in) :: dims  !< Length along each dimension of the tensor
   integer(kind=enum_kind)                          :: code
 
   ! Local variables
   integer(kind=c_size_t) :: ndim ! Number of dimensions
   type(c_ptr) :: data_ptr, c_dims_ptr
-  character(kind=c_char, len=len_trim(key)) :: c_key !< Transformed fortran 'key' to a c-string
-  integer(kind=c_size_t) :: key_length, c_n_dims
+  character(kind=c_char, len=len_trim(name)) :: c_name !< Transformed fortran 'name' to a c-string
+  integer(kind=c_size_t) :: name_length, c_n_dims
   integer(kind=c_size_t), target :: c_dims(size(dims))
   integer(kind=enum_kind) :: data_type, mem_layout
 
-  c_key = trim(key)
-  key_length = len_trim(key)
+  c_name = trim(name)
+  name_length = len_trim(name)
   data_ptr = c_loc(result)
   c_dims(:) = dims(:)
   c_n_dims = size(dims)

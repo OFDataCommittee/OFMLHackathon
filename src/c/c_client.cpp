@@ -157,18 +157,18 @@ SRError get_dataset(void* c_client, const char* name,
 
 // Rename a dataset in the database.
 extern "C"
-SRError rename_dataset(void* c_client, const char* name,
-                       const size_t name_length, const char* new_name,
+SRError rename_dataset(void* c_client, const char* old_name,
+                       const size_t old_name_length, const char* new_name,
                        const size_t new_name_length)
 {
   SRError result = SRNoError;
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && new_name != NULL);
+    SR_CHECK_PARAMS(c_client != NULL && old_name != NULL && new_name != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
+    std::string name_str(old_name, old_name_length);
     std::string new_name_str(new_name, new_name_length);
 
     s->rename_dataset(name_str, new_name_str);
@@ -245,8 +245,8 @@ SRError delete_dataset(void* c_client, const char* name, const size_t name_lengt
 // Put a tensor of a specified type into the database
 extern "C"
 SRError put_tensor(void* c_client,
-                  const char* key,
-                  const size_t key_length,
+                  const char* name,
+                  const size_t name_length,
                   void* data,
                   const size_t* dims,
                   const size_t n_dims,
@@ -257,16 +257,16 @@ SRError put_tensor(void* c_client,
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL &&
                     data != NULL && dims != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
 
     std::vector<size_t> dims_vec;
     dims_vec.assign(dims, dims + n_dims);
 
-    s->put_tensor(key_str, data, dims_vec, type, mem_layout);
+    s->put_tensor(name_str, data, dims_vec, type, mem_layout);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -283,8 +283,8 @@ SRError put_tensor(void* c_client,
 // Get a tensor of a specified type from the database
 extern "C"
 SRError get_tensor(void* c_client,
-                  const char* key,
-                  const size_t key_length,
+                  const char* name,
+                  const size_t name_length,
                   void** result,
                   size_t** dims,
                   size_t* n_dims,
@@ -295,13 +295,13 @@ SRError get_tensor(void* c_client,
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && result != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && result != NULL &&
                     dims != NULL && n_dims != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
 
-    s->get_tensor(key_str, *result, *dims, *n_dims, *type, mem_layout);
+    s->get_tensor(name_str, *result, *dims, *n_dims, *type, mem_layout);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -319,8 +319,8 @@ SRError get_tensor(void* c_client,
 // and put the values into the user provided memory space.
 extern "C"
 SRError unpack_tensor(void* c_client,
-                     const char* key,
-                     const size_t key_length,
+                     const char* name,
+                     const size_t name_length,
                      void* result,
                      const size_t* dims,
                      const size_t n_dims,
@@ -331,16 +331,16 @@ SRError unpack_tensor(void* c_client,
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && result != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && result != NULL &&
                     dims != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
 
     std::vector<size_t> dims_vec;
     dims_vec.assign(dims, dims + n_dims);
 
-    s->unpack_tensor(key_str, result, dims_vec, type, mem_layout);
+    s->unpack_tensor(name_str, result, dims_vec, type, mem_layout);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -354,23 +354,23 @@ SRError unpack_tensor(void* c_client,
   return outcome;
 }
 
-// Rename a tensor from key to new_key
+// Rename a tensor from old_name to new_name
 extern "C"
-SRError rename_tensor(void* c_client, const char* key,
-                     const size_t key_length, const char* new_key,
-                     const size_t new_key_length)
+SRError rename_tensor(void* c_client,
+                      const char* old_name, const size_t old_name_length,
+                      const char* new_name, const size_t new_name_length)
 {
   SRError result = SRNoError;
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && new_key != NULL);
+    SR_CHECK_PARAMS(c_client != NULL && old_name != NULL && new_name != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
-    std::string new_key_str(new_key, new_key_length);
+    std::string old_name_str(old_name, old_name_length);
+    std::string new_name_str(new_name, new_name_length);
 
-    s->rename_tensor(key_str, new_key_str);
+    s->rename_tensor(old_name_str, new_name_str);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -386,19 +386,19 @@ SRError rename_tensor(void* c_client, const char* key,
 
 // Delete a tensor from the database.
 extern "C"
-SRError delete_tensor(void* c_client, const char* key,
-                      const size_t key_length)
+SRError delete_tensor(void* c_client, const char* name,
+                      const size_t name_length)
 {
   SRError result = SRNoError;
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL);
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
 
-    s->delete_tensor(key_str);
+    s->delete_tensor(name_str);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -462,7 +462,7 @@ bool CompareCaseInsensitive(const char* a,const char* b) {
 // Set a model stored in a binary file.
 extern "C"
 SRError set_model_from_file(void* c_client,
-                           const char* key, const size_t key_length,
+                           const char* name, const size_t name_length,
                            const char* model_file, const size_t model_file_length,
                            const char* backend, const size_t backend_length,
                            const char* device, const size_t device_length,
@@ -478,7 +478,7 @@ SRError set_model_from_file(void* c_client,
   {
     // Sanity check params. Tag is strictly optional, and inputs/outputs are
     // mandatory IFF backend is TensorFlow (TF or TFLITE)
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && model_file != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && model_file != NULL &&
                     backend != NULL && device != NULL);
     bool isTensorFlow = CompareCaseInsensitive(backend, "TF") || CompareCaseInsensitive(backend, "TFLITE");
     if (isTensorFlow) {
@@ -511,7 +511,7 @@ SRError set_model_from_file(void* c_client,
     }
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
     std::string model_file_str(model_file, model_file_length);
     std::string backend_str(backend, backend_length);
     std::string device_str(device, device_length);
@@ -536,7 +536,7 @@ SRError set_model_from_file(void* c_client,
       }
     }
 
-    s->set_model_from_file(key_str, model_file_str, backend_str, device_str,
+    s->set_model_from_file(name_str, model_file_str, backend_str, device_str,
                            batch_size, min_batch_size, tag_str, input_vec,
                            output_vec);
   }
@@ -555,7 +555,7 @@ SRError set_model_from_file(void* c_client,
 // Set a model stored in a buffer c-string.
 extern "C"
 SRError set_model(void* c_client,
-                 const char* key, const size_t key_length,
+                 const char* name, const size_t name_length,
                  const char* model, const size_t model_length,
                  const char* backend, const size_t backend_length,
                  const char* device, const size_t device_length,
@@ -571,7 +571,7 @@ SRError set_model(void* c_client,
   {
     // Sanity check params. Tag is strictly optional, and inputs/outputs are
     // mandatory IFF backend is TensorFlow (TF or TFLITE)
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && model != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && model != NULL &&
                     backend != NULL && device != NULL);
     bool isTensorFlow = CompareCaseInsensitive(backend, "TF") || CompareCaseInsensitive(backend, "TFLITE");
     if (isTensorFlow) {
@@ -604,7 +604,7 @@ SRError set_model(void* c_client,
     }
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
     std::string model_str(model, model_length);
     std::string backend_str(backend, backend_length);
     std::string device_str(device, device_length);
@@ -629,7 +629,7 @@ SRError set_model(void* c_client,
       }
     }
 
-    s->set_model(key_str, model_str, backend_str, device_str,
+    s->set_model(name_str, model_str, backend_str, device_str,
                 batch_size, min_batch_size, tag_str, input_vec,
                 output_vec);
   }
@@ -648,8 +648,8 @@ SRError set_model(void* c_client,
 // Retrieve the model and model length from the database
 extern "C"
 SRError get_model(void* c_client,
-                  const char* key,
-                  const size_t key_length,
+                  const char* name,
+                  const size_t name_length,
                   size_t* model_length,
                   const char** model)
 {
@@ -657,12 +657,12 @@ SRError get_model(void* c_client,
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && model_length != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && model_length != NULL &&
                     model != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
-    std::string_view model_str_view(s->get_model(key_str));
+    std::string name_str(name, name_length);
+    std::string_view model_str_view(s->get_model(name_str));
 
     *model_length = model_str_view.size();
     *model = model_str_view.data();
@@ -682,8 +682,8 @@ SRError get_model(void* c_client,
 // Put a script in the database that is stored in a file.
 extern "C"
 SRError set_script_from_file(void* c_client,
-                            const char* key,
-                            const size_t key_length,
+                            const char* name,
+                            const size_t name_length,
                             const char* device,
                             const size_t device_length,
                             const char* script_file,
@@ -693,15 +693,15 @@ SRError set_script_from_file(void* c_client,
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && device != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && device != NULL &&
                     script_file != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
     std::string device_str(device, device_length);
     std::string script_file_str(script_file, script_file_length);
 
-    s->set_script_from_file(key_str, device_str, script_file_str);
+    s->set_script_from_file(name_str, device_str, script_file_str);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -718,8 +718,8 @@ SRError set_script_from_file(void* c_client,
 // Put a script in the database that is stored in a string.
 extern "C"
 SRError set_script(void* c_client,
-                  const char* key,
-                  const size_t key_length,
+                  const char* name,
+                  const size_t name_length,
                   const char* device,
                   const size_t device_length,
                   const char* script,
@@ -729,16 +729,16 @@ SRError set_script(void* c_client,
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && device != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && device != NULL &&
                     script != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
 
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
     std::string device_str(device, device_length);
     std::string script_str(script, script_length);
 
-    s->set_script(key_str, device_str, script_str);
+    s->set_script(name_str, device_str, script_str);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -755,8 +755,8 @@ SRError set_script(void* c_client,
 // Retrieve the script stored in the database
 extern "C"
 SRError get_script(void* c_client,
-                  const char* key,
-                  const size_t key_length,
+                  const char* name,
+                  const size_t name_length,
                   const char** script,
                   size_t* script_length)
 {
@@ -764,12 +764,12 @@ SRError get_script(void* c_client,
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && script != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && script != NULL &&
                     script_length != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
-    std::string_view script_str_view(s->get_script(key_str));
+    std::string name_str(name, name_length);
+    std::string_view script_str_view(s->get_script(name_str));
 
     (*script) = script_str_view.data();
     (*script_length) = script_str_view.size();
@@ -789,8 +789,8 @@ SRError get_script(void* c_client,
 // Run  a script function in the database
 extern "C"
 SRError run_script(void* c_client,
-                  const char* key,
-                  const size_t key_length,
+                  const char* name,
+                  const size_t name_length,
                   const char* function,
                   const size_t function_length,
                   const char** inputs,
@@ -804,7 +804,7 @@ SRError run_script(void* c_client,
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && function != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && function != NULL &&
                     inputs != NULL && input_lengths != NULL &&
                     outputs != NULL && output_lengths != NULL);
 
@@ -822,7 +822,7 @@ SRError run_script(void* c_client,
       }
     }
 
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
     std::string function_str(function, function_length);
 
     std::vector<std::string> input_vec;
@@ -840,7 +840,7 @@ SRError run_script(void* c_client,
     }
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    s->run_script(key_str, function_str, input_vec, output_vec);
+    s->run_script(name_str, function_str, input_vec, output_vec);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -857,8 +857,8 @@ SRError run_script(void* c_client,
 // Run a model in the database
 extern "C"
 SRError run_model(void* c_client,
-                 const char* key,
-                 const size_t key_length,
+                 const char* name,
+                 const size_t name_length,
                  const char** inputs,
                  const size_t* input_lengths,
                  const size_t n_inputs,
@@ -870,7 +870,7 @@ SRError run_model(void* c_client,
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL &&
                     inputs != NULL && input_lengths != NULL &&
                     outputs != NULL && output_lengths != NULL);
 
@@ -888,7 +888,7 @@ SRError run_model(void* c_client,
       }
     }
 
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
 
     std::vector<std::string> input_vec;
     if (n_inputs != 1 || input_lengths[0] != 0) {
@@ -905,7 +905,7 @@ SRError run_model(void* c_client,
     }
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    s->run_model(key_str, input_vec, output_vec);
+    s->run_model(name_str, input_vec, output_vec);
   }
   catch (const Exception& e) {
     SRSetLastError(e);

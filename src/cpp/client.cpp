@@ -106,11 +106,11 @@ DataSet Client::get_dataset(const std::string& name)
 }
 
 // Rename the current dataset
-void Client::rename_dataset(const std::string& name,
+void Client::rename_dataset(const std::string& old_name,
                             const std::string& new_name)
 {
-    copy_dataset(name, new_name);
-    delete_dataset(name);
+    copy_dataset(old_name, new_name);
+    delete_dataset(old_name);
 }
 
 // Clone the dataset to a new name
@@ -182,40 +182,40 @@ void Client::delete_dataset(const std::string& name)
 }
 
 // Put a tensor into the database
-void Client::put_tensor(const std::string& key,
+void Client::put_tensor(const std::string& name,
                         void* data,
                         const std::vector<size_t>& dims,
                         const SRTensorType type,
                         const SRMemoryLayout mem_layout)
 {
-    std::string p_key = _build_tensor_key(key, false);
+    std::string key = _build_tensor_key(name, false);
 
     TensorBase* tensor = NULL;
     try {
         switch (type) {
             case SRTensorTypeDouble:
-                tensor = new Tensor<double>(p_key, data, dims, type, mem_layout);
+                tensor = new Tensor<double>(key, data, dims, type, mem_layout);
                 break;
             case SRTensorTypeFloat:
-                tensor = new Tensor<float>(p_key, data, dims, type, mem_layout);
+                tensor = new Tensor<float>(key, data, dims, type, mem_layout);
                 break;
             case SRTensorTypeInt64:
-                tensor = new Tensor<int64_t>(p_key, data, dims, type, mem_layout);
+                tensor = new Tensor<int64_t>(key, data, dims, type, mem_layout);
                 break;
             case SRTensorTypeInt32:
-                tensor = new Tensor<int32_t>(p_key, data, dims, type, mem_layout);
+                tensor = new Tensor<int32_t>(key, data, dims, type, mem_layout);
                 break;
             case SRTensorTypeInt16:
-                tensor = new Tensor<int16_t>(p_key, data, dims, type, mem_layout);
+                tensor = new Tensor<int16_t>(key, data, dims, type, mem_layout);
                 break;
             case SRTensorTypeInt8:
-                tensor = new Tensor<int8_t>(p_key, data, dims, type, mem_layout);
+                tensor = new Tensor<int8_t>(key, data, dims, type, mem_layout);
                 break;
             case SRTensorTypeUint16:
-                tensor = new Tensor<uint16_t>(p_key, data, dims, type, mem_layout);
+                tensor = new Tensor<uint16_t>(key, data, dims, type, mem_layout);
                 break;
             case SRTensorTypeUint8:
-                tensor = new Tensor<uint8_t>(p_key, data, dims, type, mem_layout);
+                tensor = new Tensor<uint8_t>(key, data, dims, type, mem_layout);
                 break;
             default:
                 throw SRTypeException("Invalid type for put_tensor");
@@ -235,17 +235,17 @@ void Client::put_tensor(const std::string& key,
         throw SRRuntimeException("put_tensor failed");
 }
 
-// Get the tensor data, dimensions, and type for the provided tensor key.
+// Get the tensor data, dimensions, and type for the provided tensor name.
 // This function will allocate and retain management of the memory for the
 // tensor data.
-void Client::get_tensor(const std::string& key,
+void Client::get_tensor(const std::string& name,
                         void*& data,
                         std::vector<size_t>& dims,
                         SRTensorType& type,
                         const SRMemoryLayout mem_layout)
 {
     // Retrieve the TensorBase from the database
-    TensorBase* ptr = _get_tensorbase_obj(key);
+    TensorBase* ptr = _get_tensorbase_obj(name);
 
     // Set the user values
     dims = ptr->dims();
@@ -256,11 +256,11 @@ void Client::get_tensor(const std::string& key,
     _tensor_memory.add_tensor(ptr);
 }
 
-// Get the tensor data, dimensions, and type for the provided tensor key.
+// Get the tensor data, dimensions, and type for the provided tensor name.
 // This function will allocate and retain management of the memory for the
 // tensor data and dimensions. This is a c-style interface for the tensor
 // dimensions. Another function exists for std::vector dimensions.
- void Client::get_tensor(const std::string& key,
+ void Client::get_tensor(const std::string& name,
                         void*& data,
                         size_t*& dims,
                         size_t& n_dims,
@@ -269,7 +269,7 @@ void Client::get_tensor(const std::string& key,
 {
 
     std::vector<size_t> dims_vec;
-    get_tensor(key, data, dims_vec, type, mem_layout);
+    get_tensor(name, data, dims_vec, type, mem_layout);
 
     size_t dims_bytes = sizeof(size_t) * dims_vec.size();
     dims = _dim_queries.allocate_bytes(dims_bytes);
@@ -285,7 +285,7 @@ void Client::get_tensor(const std::string& key,
 // checked against retrieved values to ensure the provided memory space is
 // sufficient. This method is the most memory efficient way to retrieve
 // tensor data.
-void Client::unpack_tensor(const std::string& key,
+void Client::unpack_tensor(const std::string& name,
                            void* data,
                            const std::vector<size_t>& dims,
                            const SRTensorType type,
@@ -298,7 +298,7 @@ void Client::unpack_tensor(const std::string& key,
                                  "layout is contiguous.");
     }
 
-    std::string get_key = _build_tensor_key(key, true);
+    std::string get_key = _build_tensor_key(name, true);
     CommandReply reply = _redis_server->get_tensor(get_key);
 
     std::vector<size_t> reply_dims = GetTensorCommand::get_dims(reply);
@@ -405,39 +405,39 @@ void Client::unpack_tensor(const std::string& key,
     tensor = NULL;
 }
 
-// Move a tensor from one key to another key
-void Client::rename_tensor(const std::string& key,
-                           const std::string& new_key)
+// Move a tensor from one name to another name
+void Client::rename_tensor(const std::string& old_name,
+                           const std::string& new_name)
 {
-    std::string p_key = _build_tensor_key(key, true);
-    std::string p_new_key = _build_tensor_key(new_key, false);
-    CommandReply reply = _redis_server->rename_tensor(p_key, p_new_key);
+    std::string old_key = _build_tensor_key(old_name, true);
+    std::string new_key = _build_tensor_key(new_name, false);
+    CommandReply reply = _redis_server->rename_tensor(old_key, new_key);
     if (reply.has_error())
         throw SRRuntimeException("rename_tensor failed");
 }
 
 // Delete a tensor from the database
-void Client::delete_tensor(const std::string& key)
+void Client::delete_tensor(const std::string& name)
 {
-    std::string p_key = _build_tensor_key(key, true);
-    CommandReply reply = _redis_server->delete_tensor(p_key);
+    std::string key = _build_tensor_key(name, true);
+    CommandReply reply = _redis_server->delete_tensor(key);
     if (reply.has_error())
         throw SRRuntimeException("delete_tensor failed");
 }
 
-// Copy the tensor from the source key to the destination key
-void Client::copy_tensor(const std::string& src_key,
-                         const std::string& dest_key)
+// Copy the tensor from the source name to the destination name
+void Client::copy_tensor(const std::string& src_name,
+                         const std::string& dest_name)
 {
-    std::string p_src_key = _build_tensor_key(src_key, true);
-    std::string p_dest_key = _build_tensor_key(dest_key, false);
-    CommandReply reply = _redis_server->copy_tensor(p_src_key, p_dest_key);
+    std::string src_key = _build_tensor_key(src_name, true);
+    std::string dest_key = _build_tensor_key(dest_name, false);
+    CommandReply reply = _redis_server->copy_tensor(src_key, dest_key);
     if (reply.has_error())
         throw SRRuntimeException("copy_tensor failed");
 }
 
 // Set a model from file in the database for future execution
-void Client::set_model_from_file(const std::string& key,
+void Client::set_model_from_file(const std::string& name,
                                  const std::string& model_file,
                                  const std::string& backend,
                                  const std::string& device,
@@ -459,12 +459,12 @@ void Client::set_model_from_file(const std::string& key,
     const std::string tmp = ostream.str();
     std::string_view model(tmp.data(), tmp.length());
 
-    set_model(key, model, backend, device, batch_size,
+    set_model(name, model, backend, device, batch_size,
               min_batch_size, tag, inputs, outputs);
 }
 
 // Set a model from a string buffer in the database for future execution
-void Client::set_model(const std::string& key,
+void Client::set_model(const std::string& name,
                        const std::string_view& model,
                        const std::string& backend,
                        const std::string& device,
@@ -474,8 +474,8 @@ void Client::set_model(const std::string& key,
                        const std::vector<std::string>& inputs,
                        const std::vector<std::string>& outputs)
 {
-    if (key.size() == 0) {
-        throw SRParameterException("key is a required parameter of set_model.");
+    if (name.size() == 0) {
+        throw SRParameterException("name is a required parameter of set_model.");
     }
 
     if (backend.size() == 0) {
@@ -511,16 +511,16 @@ void Client::set_model(const std::string& key,
         throw SRRuntimeException(device + " is not a valid device.");
     }
 
-    std::string p_key = _build_model_key(key, false);
-    _redis_server->set_model(p_key, model, backend, device,
+    std::string key = _build_model_key(name, false);
+    _redis_server->set_model(key, model, backend, device,
                              batch_size, min_batch_size,
                              tag, inputs, outputs);
 }
 
 // Retrieve the model from the database
-std::string_view Client::get_model(const std::string& key)
+std::string_view Client::get_model(const std::string& name)
 {
-    std::string get_key = _build_model_key(key, true);
+    std::string get_key = _build_model_key(name, true);
     CommandReply reply = _redis_server->get_model(get_key);
     if (reply.has_error())
         throw SRRuntimeException("failed to get model from server");
@@ -533,7 +533,7 @@ std::string_view Client::get_model(const std::string& key)
 }
 
 // Set a script from file in the database for future execution
-void Client::set_script_from_file(const std::string& key,
+void Client::set_script_from_file(const std::string& name,
                                   const std::string& device,
                                   const std::string& script_file)
 {
@@ -546,11 +546,11 @@ void Client::set_script_from_file(const std::string& key,
     std::string_view script(tmp.data(), tmp.length());
 
     // Send it to the database
-    set_script(key, device, script);
+    set_script(name, device, script);
 }
 
 // Set a script from a string buffer in the database for future execution
-void Client::set_script(const std::string& key,
+void Client::set_script(const std::string& name,
                         const std::string& device,
                         const std::string_view& script)
 {
@@ -563,14 +563,14 @@ void Client::set_script(const std::string& key,
         throw SRRuntimeException(device + " is not a valid device.");
     }
 
-    std::string s_key = _build_model_key(key, false);
-    _redis_server->set_script(s_key, device, script);
+    std::string key = _build_model_key(name, false);
+    _redis_server->set_script(key, device, script);
 }
 
 // Retrieve the script from the database
-std::string_view Client::get_script(const std::string& key)
+std::string_view Client::get_script(const std::string& name)
 {
-    std::string get_key = _build_model_key(key, true);
+    std::string get_key = _build_model_key(name, true);
     CommandReply reply = _redis_server->get_script(get_key);
     char* script = _model_queries.allocate(reply.str_len());
     if (script == NULL)
@@ -580,32 +580,32 @@ std::string_view Client::get_script(const std::string& key)
 }
 
 // Run a model in the database using the specificed input and output tensors
-void Client::run_model(const std::string& key,
+void Client::run_model(const std::string& name,
                        std::vector<std::string> inputs,
                        std::vector<std::string> outputs)
 {
-    std::string get_key = _build_model_key(key, true);
+    std::string key = _build_model_key(name, true);
 
     if (_use_tensor_prefix) {
         _append_with_get_prefix(inputs);
         _append_with_put_prefix(outputs);
     }
-    _redis_server->run_model(get_key, inputs, outputs);
+    _redis_server->run_model(key, inputs, outputs);
 }
 
 // Run a script function in the database using the specificed input and output tensors
-void Client::run_script(const std::string& key,
+void Client::run_script(const std::string& name,
                         const std::string& function,
                         std::vector<std::string> inputs,
                         std::vector<std::string> outputs)
 {
-    std::string get_key = _build_model_key(key, true);
+    std::string key = _build_model_key(name, true);
 
     if (_use_tensor_prefix) {
         _append_with_get_prefix(inputs);
         _append_with_put_prefix(outputs);
     }
-    _redis_server->run_script(get_key, function, inputs, outputs);
+    _redis_server->run_script(key, function, inputs, outputs);
 }
 
 // Check if the key exists in the database
@@ -617,8 +617,8 @@ bool Client::key_exists(const std::string& key)
 // Check if the tensor (or the dataset) exists in the database
 bool Client::tensor_exists(const std::string& name)
 {
-    std::string get_key = _build_tensor_key(name, true);
-    return _redis_server->key_exists(get_key);
+    std::string key = _build_tensor_key(name, true);
+    return _redis_server->key_exists(key);
 }
 
 // Check if the dataset exists in the database
@@ -631,8 +631,8 @@ bool Client::dataset_exists(const std::string& name)
 // Check if the model (or the script) exists in the database
 bool Client::model_exists(const std::string& name)
 {
-    std::string get_key = _build_model_key(name, true);
-    return _redis_server->model_key_exists(get_key);
+    std::string key = _build_model_key(name, true);
+    return _redis_server->model_key_exists(key);
 }
 
 // Check if the key exists in the database at a specified frequency for a specified number of times
@@ -707,7 +707,7 @@ void Client::set_data_source(std::string source_id)
     size_t num_prefix = _get_key_prefixes.size();
     size_t save_index = -1;
     for (size_t i = 0; i < num_prefix; i++) {
-        if (_get_key_prefixes[i].compare(source_id )== 0) {
+        if (_get_key_prefixes[i].compare(source_id) == 0) {
             valid_prefix = true;
             save_index = i;
             break;
@@ -857,8 +857,8 @@ void Client::flush_db(std::string address)
 }
 
 // Read the configuration parameters of a running server
-std::unordered_map<std::string,std::string> Client::config_get(std::string expression,
-                                                               std::string address)
+std::unordered_map<std::string,std::string>
+Client::config_get(std::string expression, std::string address)
 {
     AddressAtCommand cmd;
     std::string host = cmd.parse_host(address);

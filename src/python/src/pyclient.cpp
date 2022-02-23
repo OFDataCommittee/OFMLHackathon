@@ -65,7 +65,7 @@ PyClient::~PyClient()
     }
 }
 
-void PyClient::put_tensor(std::string& key,
+void PyClient::put_tensor(std::string& name,
                           std::string& type,
                           py::array data)
 {
@@ -81,7 +81,7 @@ void PyClient::put_tensor(std::string& key,
     SRTensorType ttype = TENSOR_TYPE_MAP.at(type);
 
     try {
-        _client->put_tensor(key, ptr, dims, ttype, SRMemLayoutContiguous);
+        _client->put_tensor(name, ptr, dims, ttype, SRMemLayoutContiguous);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -98,11 +98,11 @@ void PyClient::put_tensor(std::string& key,
     }
 }
 
-py::array PyClient::get_tensor(const std::string& key)
+py::array PyClient::get_tensor(const std::string& name)
 {
     TensorBase* tensor = NULL;
     try {
-        tensor = _client->_get_tensorbase_obj(key);
+        tensor = _client->_get_tensorbase_obj(name);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -171,9 +171,9 @@ py::array PyClient::get_tensor(const std::string& key)
     }
 }
 
-void PyClient::delete_tensor(const std::string& key) {
+void PyClient::delete_tensor(const std::string& name) {
     try {
-        _client->delete_tensor(key);
+        _client->delete_tensor(name);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -190,10 +190,10 @@ void PyClient::delete_tensor(const std::string& key) {
     }
 }
 
-void PyClient::copy_tensor(const std::string& key,
-                           const std::string& dest_key) {
+void PyClient::copy_tensor(const std::string& src_name,
+                           const std::string& dest_name) {
     try {
-        _client->copy_tensor(key, dest_key);
+        _client->copy_tensor(src_name, dest_name);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -210,10 +210,10 @@ void PyClient::copy_tensor(const std::string& key,
     }
 }
 
-void PyClient::rename_tensor(const std::string& key,
-                             const std::string& new_key) {
+void PyClient::rename_tensor(const std::string& old_name,
+                             const std::string& new_name) {
     try {
-        _client->rename_tensor(key, new_key);
+        _client->rename_tensor(old_name, new_name);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -277,9 +277,9 @@ PyDataset* PyClient::get_dataset(const std::string& name)
     return dataset;
 }
 
-void PyClient::delete_dataset(const std::string& key) {
+void PyClient::delete_dataset(const std::string& name) {
     try {
-        _client->delete_dataset(key);
+        _client->delete_dataset(name);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -296,10 +296,10 @@ void PyClient::delete_dataset(const std::string& key) {
     }
 }
 
-void PyClient::copy_dataset(const std::string& key,
-                           const std::string& dest_key) {
+void PyClient::copy_dataset(const std::string& src_name,
+                           const std::string& dest_name) {
     try {
-        _client->copy_dataset(key, dest_key);
+        _client->copy_dataset(src_name, dest_name);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -316,10 +316,10 @@ void PyClient::copy_dataset(const std::string& key,
     }
 }
 
-void PyClient::rename_dataset(const std::string& key,
-                             const std::string& new_key) {
+void PyClient::rename_dataset(const std::string& old_name,
+                             const std::string& new_name) {
     try {
-        _client->rename_dataset(key, new_key);
+        _client->rename_dataset(old_name, new_name);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -336,12 +336,12 @@ void PyClient::rename_dataset(const std::string& key,
     }
 }
 
-void PyClient::set_script_from_file(const std::string& key,
+void PyClient::set_script_from_file(const std::string& name,
                                     const std::string& device,
                                     const std::string& script_file)
 {
     try {
-        _client->set_script_from_file(key, device, script_file);
+        _client->set_script_from_file(name, device, script_file);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -358,12 +358,12 @@ void PyClient::set_script_from_file(const std::string& key,
     }
 }
 
-void PyClient::set_script(const std::string& key,
+void PyClient::set_script(const std::string& name,
                           const std::string& device,
                           const std::string_view& script)
 {
     try {
-        _client->set_script(key, device, script);
+        _client->set_script(name, device, script);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -380,11 +380,11 @@ void PyClient::set_script(const std::string& key,
     }
 }
 
-std::string_view PyClient::get_script(const std::string& key)
+std::string_view PyClient::get_script(const std::string& name)
 {
     std::string_view script;
     try {
-        script = _client->get_script(key);
+        script = _client->get_script(name);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -402,13 +402,13 @@ std::string_view PyClient::get_script(const std::string& key)
     return script;
 }
 
-void PyClient::run_script(const std::string& key,
+void PyClient::run_script(const std::string& name,
                 const std::string& function,
                 std::vector<std::string>& inputs,
                 std::vector<std::string>& outputs)
 {
     try {
-      _client->run_script(key, function, inputs, outputs);
+      _client->run_script(name, function, inputs, outputs);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -425,10 +425,10 @@ void PyClient::run_script(const std::string& key,
     }
 }
 
-py::bytes PyClient::get_model(const std::string& key)
+py::bytes PyClient::get_model(const std::string& name)
 {
     try {
-        std::string model(_client->get_model(key));
+        std::string model(_client->get_model(name));
         return py::bytes(model);
     }
     catch (Exception& e) {
@@ -446,7 +446,7 @@ py::bytes PyClient::get_model(const std::string& key)
     }
 }
 
-void PyClient::set_model(const std::string& key,
+void PyClient::set_model(const std::string& name,
                  const std::string_view& model,
                  const std::string& backend,
                  const std::string& device,
@@ -457,7 +457,7 @@ void PyClient::set_model(const std::string& key,
                  const std::vector<std::string>& outputs)
 {
     try {
-        _client->set_model(key, model, backend, device,
+        _client->set_model(name, model, backend, device,
                            batch_size, min_batch_size, tag,
                            inputs, outputs);
     }
@@ -476,7 +476,7 @@ void PyClient::set_model(const std::string& key,
     }
 }
 
-void PyClient::set_model_from_file(const std::string& key,
+void PyClient::set_model_from_file(const std::string& name,
                                    const std::string& model_file,
                                    const std::string& backend,
                                    const std::string& device,
@@ -487,7 +487,7 @@ void PyClient::set_model_from_file(const std::string& key,
                                    const std::vector<std::string>& outputs)
 {
     try {
-        _client->set_model_from_file(key, model_file, backend, device,
+        _client->set_model_from_file(name, model_file, backend, device,
                                            batch_size, min_batch_size, tag,
                                            inputs, outputs);
     }
@@ -506,12 +506,12 @@ void PyClient::set_model_from_file(const std::string& key,
     }
 }
 
-void PyClient::run_model(const std::string& key,
+void PyClient::run_model(const std::string& name,
                          std::vector<std::string> inputs,
                          std::vector<std::string> outputs)
 {
     try {
-        _client->run_model(key, inputs, outputs);
+        _client->run_model(name, inputs, outputs);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
