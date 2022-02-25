@@ -279,7 +279,7 @@ py::array PyDataset::get_meta_scalars(const std::string& name)
 std::string PyDataset::get_name()
 {
     try {
-        return _dataset->name;
+        return _dataset->get_name();
     }
     catch (Exception& e) {
         // exception is already prepared for caller

@@ -139,7 +139,7 @@ void Client::copy_dataset(const std::string& src_name,
     // Update the DataSet name to the destination name
     // so we can reuse the object for placing metadata
     // and ack commands
-    dataset.name = dest_name;
+    dataset.set_name(dest_name);
     CommandList put_meta_cmds;
     _append_dataset_metadata_commands(put_meta_cmds, dataset);
     _append_dataset_ack_command(put_meta_cmds, dataset);
@@ -164,12 +164,12 @@ void Client::delete_dataset(const std::string& name)
 
     // Delete the metadata (which contains the ack key)
     cmd.add_field("DEL");
-    cmd.add_field(_build_dataset_meta_key(dataset.name, true), true);
+    cmd.add_field(_build_dataset_meta_key(dataset.get_name(), true), true);
 
     // Add in all the tensors to be deleted
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
     std::vector<std::string> tensor_keys =
-        _build_dataset_tensor_keys(dataset.name, tensor_names, true);
+        _build_dataset_tensor_keys(dataset.get_name(), tensor_names, true);
     cmd.add_fields(tensor_keys, true);
 
     // Run the command
@@ -1077,7 +1077,7 @@ Client::_build_dataset_ack_key(const std::string& dataset_name,
 void Client::_append_dataset_metadata_commands(CommandList& cmd_list,
                                                DataSet& dataset)
 {
-    std::string meta_key = _build_dataset_meta_key(dataset.name, false);
+    std::string meta_key = _build_dataset_meta_key(dataset.get_name(), false);
 
     std::vector<std::pair<std::string, std::string>> mdf =
         dataset.get_metadata_serialization_map();
@@ -1113,7 +1113,7 @@ void Client::_append_dataset_tensor_commands(CommandList& cmd_list,
     for ( ; it != dataset.tensor_end(); it++) {
         TensorBase* tensor = *it;
         std::string tensor_key = _build_dataset_tensor_key(
-            dataset.name, tensor->name(), false);
+            dataset.get_name(), tensor->name(), false);
         SingleKeyCommand* cmd = cmd_list.add_command<SingleKeyCommand>();
         cmd->add_field("AI.TENSORSET");
         cmd->add_field(tensor_key, true);
@@ -1128,7 +1128,7 @@ void Client::_append_dataset_tensor_commands(CommandList& cmd_list,
 // (all put commands processed) to the CommandList
 void Client::_append_dataset_ack_command(CommandList& cmd_list, DataSet& dataset)
 {
-    std::string key = _build_dataset_ack_key(dataset.name, false);
+    std::string key = _build_dataset_ack_key(dataset.get_name(), false);
     SingleKeyCommand* cmd = cmd_list.add_command<SingleKeyCommand>();
     cmd->add_field("HSET");
     cmd->add_field(key, true);
