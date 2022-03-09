@@ -26,10 +26,12 @@
 
 module fortran_c_interop
 
-use iso_c_binding, only : c_ptr, c_char, c_size_t, c_loc, c_null_ptr
+use iso_c_binding, only : c_ptr, c_char, c_size_t, c_loc, c_null_ptr, c_int
 
 implicit none; private
 
+integer, parameter, public :: enum_kind = c_int !< The kind of integer equivalent to a C enum. According
+                                                !! to the standard this is a c_int
 public :: convert_char_array_to_c
 
 contains
@@ -76,7 +78,7 @@ subroutine convert_char_array_to_c(character_array_f, character_array_c, string_
         string_ptrs(i) = c_loc(character_array_c(i))
      else
         string_ptrs(i) = c_null_ptr;
-     endif 
+     endif
   enddo
   ptr_to_string_ptrs = c_loc(string_ptrs)
 

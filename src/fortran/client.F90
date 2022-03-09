@@ -33,7 +33,7 @@ use iso_c_binding, only : c_loc, c_f_pointer
 use, intrinsic :: iso_fortran_env, only: stderr => error_unit
 
 use smartredis_dataset, only : dataset_type
-use fortran_c_interop, only : convert_char_array_to_c
+use fortran_c_interop, only : convert_char_array_to_c, enum_kind
 
 implicit none; private
 
@@ -46,6 +46,11 @@ implicit none; private
 #include "client/script_interfaces.inc"
 #include "client/client_dataset_interfaces.inc"
 #include "client/ensemble_interfaces.inc"
+
+public :: enum_kind !< The kind of integer equivalent to a C enum. According to C an Fortran
+                    !! standards this should be c_int, but is renamed here to ensure that
+                    !! users do not have to import the iso_c_binding module into their
+                    !! programs
 
 !> Stores all data and methods associated with the SmartRedis client that is used to communicate with the database
 type, public :: client_type

@@ -72,7 +72,7 @@ program main
   type(client_type) :: client
 
   integer :: err_code
-  integer(kind=enum_kind) :: result
+  integer :: result
   logical(kind=c_bool) :: exists
 
   call random_number(true_array_real_32)

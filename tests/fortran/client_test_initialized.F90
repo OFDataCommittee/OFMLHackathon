@@ -36,7 +36,7 @@ program main
 #include "enum_fortran.inc"
 
   type(client_type) :: client
-  integer(kind=enum_kind) :: result
+  integer :: result
 
   if (client%isinitialized()) stop 'client not initialized'
 

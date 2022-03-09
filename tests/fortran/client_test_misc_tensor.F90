@@ -43,7 +43,7 @@ program main
   real, dimension(10,10,10) :: array
 
   integer :: err_code
-  integer(kind=enum_kind) :: result
+  integer :: result
   logical(kind=c_bool) :: exists
 
   result = client%initialize(use_cluster())

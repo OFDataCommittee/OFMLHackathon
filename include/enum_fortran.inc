@@ -24,13 +24,7 @@
 ! OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-! Dummy enum, used to set the integer kind used
-enum, bind(c)
-  enumerator :: dummy = 0
-end enum
-integer, parameter :: enum_kind = kind(dummy)
-
-! The following enums have analogues to the C and C++ clients. Fortran does not haven named enums, but the name:value
+! The following enums have analogues to the C and C++ clients. Fortran does not have named enums, but the name:value
 ! parameters must be the same. By convention negative enums, represent items that are not supported in the Fortran
 ! client.
 

@@ -42,7 +42,7 @@ character(len=255) :: script_file, model_file
 
 real, dimension(10) :: tensor
 type(client_type) :: client
-integer(kind=enum_kind) :: result
+integer :: result
 logical(kind=c_bool) :: exists
 
 ensemble_keyout = "producer_0"

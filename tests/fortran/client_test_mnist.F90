@@ -42,7 +42,7 @@ program mnist_test
   type(client_type) :: client
   integer :: err_code
   character(len=2) :: key_suffix
-  integer(kind=enum_kind) :: result
+  integer :: result
 
   result = client%initialize(use_cluster())
   if (result .ne. SRNoError) stop
@@ -74,7 +74,7 @@ subroutine run_mnist( client, model_name, script_name )
 
   character(len=255), dimension(1) :: inputs
   character(len=255), dimension(1) :: outputs
-  integer(kind=enum_kind) :: call_result
+  integer :: call_result
 
   ! Construct the keys used for the specifiying inputs and outputs
   in_key = "mnist_input"

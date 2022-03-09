@@ -56,7 +56,7 @@ program main
   integer :: i, j, k
   type(client_type)  :: client
   type(dataset_type) :: send_dataset, recv_dataset
-  integer(kind=enum_kind) :: result
+  integer :: result
   logical(kind=c_bool) :: exists
 
   integer :: err_code
