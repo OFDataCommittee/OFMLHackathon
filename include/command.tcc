@@ -35,7 +35,14 @@ void Command::add_fields(const std::vector<T>& fields, bool is_key)
     for (size_t i = 0; i < fields.size(); i++) {
         this->add_field(std::to_string(fields[i]), is_key);
     }
-    return;
+}
+
+template <class T>
+void Command::add_keys(const std::vector<T>& keyfields)
+{
+    for (size_t i = 0; i < keyfields.size(); i++) {
+        this->add_field(std::to_string(keyfields[i]), true);
+    }
 }
 
 #endif //SMARTREDIS_COMMAND_TCC

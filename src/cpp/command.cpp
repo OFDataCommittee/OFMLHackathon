@@ -187,6 +187,19 @@ void Command::add_fields(const std::vector<std::string>& fields, bool is_key)
     }
 }
 
+// Add fields to the Command from a vector of strings.
+void Command::add_keys(const std::vector<std::string>& keyfields)
+{
+    /* Copy field strings into a char* that is stored
+    locally in the Command object.  The new string is not
+    null terminated because the fields vector is of type
+    string_view which stores the length of the string
+    */
+    for (size_t i = 0; i < keyfields.size(); i++) {
+        add_field(keyfields[i], true);
+    }
+}
+
 // Get the value of the field field
 std::string Command::first_field() const
 {

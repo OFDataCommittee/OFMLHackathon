@@ -66,6 +66,7 @@ class CompoundCommand : public KeyedCommand
         *            type.
         */
         virtual Command* clone();
+
 };
 
 } //namespace SmartRedis

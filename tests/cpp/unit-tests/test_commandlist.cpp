@@ -53,11 +53,11 @@ SCENARIO("Testing CommandList object", "[CommandList]")
             AddressAnyCommand* aany_cmd = cmd_lst.add_command<AddressAnyCommand>();
 
             std::vector<std::string> fields = {"TAG", "BLOB", "TAG", "INFO", "FLUSHALL"};
-            sk_cmd->add_field(fields[0], true);
-            mk_cmd->add_field(fields[1], true);
-            c_cmd->add_field(fields[2], true);
-            aat_cmd->add_field(fields[3]);
-            aany_cmd->add_field(fields[4]);
+            *sk_cmd << Keyfield(fields[0]);
+            *mk_cmd << Keyfield(fields[1]);
+            *c_cmd << Keyfield(fields[2]);
+            *aat_cmd << fields[3];
+            *aany_cmd << fields[4];
 
             THEN("The commands in the CommandList can be iterated "
                  "over with regular and const iterators")
@@ -196,7 +196,7 @@ SCENARIO("Testing CommandList object", "[CommandList]")
             {
                 CommandList* cmd_lst_cpy = new CommandList;
                 Command* tmp_cmd = cmd_lst_cpy->add_command<SingleKeyCommand>();
-                tmp_cmd->add_field("tmp_field", true);
+                *tmp_cmd << Keyfield("tmp_field");
 
                 *cmd_lst_cpy = cmd_lst;
 
@@ -285,16 +285,16 @@ SCENARIO("Testing CommandList object on heap", "[CommandList]")
         CompoundCommand* c_cmd = cmd_lst->add_command<CompoundCommand>();
 
         std::vector<std::string> fields = {"TAG", "BLOB", "TAG"};
-        sk_cmd->add_field(fields[0], true);
-        mk_cmd->add_field(fields[1], true);
-        c_cmd->add_field(fields[2], true);
+        *sk_cmd << Keyfield(fields[0]);
+        *mk_cmd << Keyfield(fields[1]);
+        *c_cmd << Keyfield(fields[2]);
 
         WHEN("A new CommandList is created usig the assignment "
              "operator and then the original is deleted")
         {
             CommandList* cmd_lst_cpy = new CommandList;
             SingleKeyCommand* tmp_cmd = cmd_lst_cpy->add_command<SingleKeyCommand>();
-            tmp_cmd->add_field("tmp_field", true);
+            *tmp_cmd << Keyfield("tmp_field");
 
             *cmd_lst_cpy = *cmd_lst;
 
