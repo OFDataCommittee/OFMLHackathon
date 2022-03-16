@@ -330,7 +330,7 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
 
         // Build the MODELSET commnd
         CompoundCommand cmd;
-        cmd << "AI.MODELSET" << Keyfield(prefixed_key) << backend << device;
+        cmd << "AI.MODELSTORE" << Keyfield(prefixed_key) << backend << device;
 
         // Add optional fields as requested
         if (tag.size() > 0) {
@@ -343,10 +343,10 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
             cmd << "MINBATCHSIZE" << std::to_string(min_batch_size);
         }
         if ( inputs.size() > 0) {
-            cmd << "INPUTS" << inputs;
+            cmd << "INPUTS" << std::to_string(inputs.size()) << inputs;
         }
         if (outputs.size() > 0) {
-            cmd << "OUTPUTS" << outputs;
+            cmd << "OUTPUTS" << std::to_string(outputs.size()) << outputs;
         }
         cmd << "BLOB" << model;
 
@@ -389,10 +389,15 @@ CommandReply RedisCluster::set_script(const std::string& key,
 }
 
 // Run a model in the database using the specificed input and output tensors
-CommandReply RedisCluster::run_model(const std::string& key,
+CommandReply RedisCluster::run_model(const std::string& model_name,
                                      std::vector<std::string> inputs,
                                      std::vector<std::string> outputs)
 {
+    // Check for a non-default timeout setting
+    int run_timeout;
+    _init_integer_from_env(run_timeout, _MODEL_TIMEOUT_ENV_VAR,
+                           _DEFAULT_MODEL_TIMEOUT);
+
     /*  For this version of run model, we have to copy all
         input and output tensors, so we will randomly select
         a model.  We can't use rand, because MPI would then
@@ -414,11 +419,15 @@ CommandReply RedisCluster::run_model(const std::string& key,
     // Copy all input tensors to temporary names to align hash slots
     copy_tensors(inputs, tmp_inputs);
 
+    // Use the model on our selected node
+    std::string model_key = "{" + db->prefix + "}." + std::string(model_name);
+
     // Build the MODELRUN command
-    std::string model_name = "{" + db->prefix + "}." + std::string(key);
     CompoundCommand cmd;
-    cmd << "AI.MODELRUN" << Keyfield(model_name) << "INPUTS" << tmp_inputs
-        << "OUTPUTS" << tmp_outputs;
+    cmd << "AI.MODELEXECUTE" << Keyfield(model_key)
+        << "INPUTS" << std::to_string(tmp_inputs.size()) << tmp_inputs
+        << "OUTPUTS" << std::to_string(tmp_outputs.size()) << tmp_outputs
+        << "TIMEOUT" << std::to_string(run_timeout);
 
     // Run it
     CommandReply reply = run(cmd);
@@ -433,12 +442,10 @@ CommandReply RedisCluster::run_model(const std::string& key,
 
     // Clean up the temp keys
     std::vector<std::string> keys_to_delete;
-    keys_to_delete.insert(keys_to_delete.end(),
-                            tmp_outputs.begin(),
-                            tmp_outputs.end());
-    keys_to_delete.insert(keys_to_delete.end(),
-                            tmp_inputs.begin(),
-                            tmp_inputs.end());
+    keys_to_delete.insert(
+        keys_to_delete.end(), tmp_outputs.begin(), tmp_outputs.end());
+    keys_to_delete.insert(
+        keys_to_delete.end(), tmp_inputs.begin(), tmp_inputs.end());
     _delete_keys(keys_to_delete);
 
     // Done

@@ -473,12 +473,17 @@ class Client
 
         /*!
         *   \brief Run a model in the database using the
+        *          specificed input and output tensors
         *   \details The model key used to locate the model to be run
         *            may be formed by applying a prefix to the supplied
         *            name. Similarly, the tensor names in the
         *            input and output vectors may be prefixed.
         *            See set_data_source(), use_model_ensemble_prefix(), and
-        *            use_tensor_ensemble_prefix() for more details
+        *            use_tensor_ensemble_prefix() for more details.
+        *            By default, models will run with a one hour timeout. To
+        *            modify the length of time that a model is allowed to run,
+        *            update the SR_MODEL_TIMEOUT to give a new value, in
+        *            milliseconds.
         *   \param name The name associated with the model
         *   \param inputs The tensor keys for inputs tensors to use
         *                 in the model

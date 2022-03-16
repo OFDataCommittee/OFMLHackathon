@@ -389,6 +389,11 @@ class RedisServer {
         static constexpr int _DEFAULT_CMD_TIMEOUT = 100;
 
         /*!
+        *   \brief Default value of model execution timeout (milliseconds)
+        */
+        static constexpr int _DEFAULT_MODEL_TIMEOUT = 60 * 1000 * 1000;
+
+        /*!
         *   \brief Default value of command execution attempt
         *          intervals (milliseconds)
         */
@@ -417,6 +422,12 @@ class RedisServer {
         */
         inline static const std::string _CMD_INTERVAL_ENV_VAR =
             "SR_CMD_INTERVAL";
+
+        /*!
+        *   \brief Environment variable for model execution timeout
+        */
+        inline static const std::string _MODEL_TIMEOUT_ENV_VAR =
+            "SR_MODEL_TIMEOUT";
 
         /*!
         *   \brief Retrieve a single address, randomly
