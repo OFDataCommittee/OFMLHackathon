@@ -32,12 +32,9 @@
 
 using namespace SmartRedis;
 
-// We should never seed srand more than once. There are more elegant ways
-// to prevent it, but this will suffice
-static bool ___srand_seeded = false;
-
 // RedisServer constructor
 RedisServer::RedisServer()
+    : _gen(_rd())
 {
     _init_integer_from_env(_connection_timeout, _CONN_TIMEOUT_ENV_VAR,
                            _DEFAULT_CONN_TIMEOUT);
@@ -86,19 +83,9 @@ std::string RedisServer::_get_ssdb()
         hosts_ports.push_back("tcp://"+
         env_str.substr(i_pos, j_pos - i_pos));
 
-    // Pick an entry from the list at random, seeding the RNG if needed
-    if (!___srand_seeded) {
-        std::chrono::high_resolution_clock::time_point t =
-            std::chrono::high_resolution_clock::now();
-
-        srand(std::chrono::time_point_cast<std::chrono::nanoseconds>(t).
-            time_since_epoch().count());
-        ___srand_seeded = true;
-    }
-    size_t hp = ((size_t)rand()) % hosts_ports.size();
-
-    // Done
-    return hosts_ports[hp];
+    // Pick an entry from the list at random
+    std::uniform_int_distribution<> distrib(0, hosts_ports.size() - 1);
+    return hosts_ports[distrib(_gen)];
 }
 
 // Check that the SSDB environment variable value does not have any errors

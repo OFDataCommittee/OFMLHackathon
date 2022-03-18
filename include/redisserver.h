@@ -31,6 +31,7 @@
 
 #include <thread>
 #include <iostream>
+#include <random>
 #include "limits.h"
 
 #include <sw/redis++/redis++.h>
@@ -398,6 +399,16 @@ class RedisServer {
         *          intervals (milliseconds)
         */
         static constexpr int _DEFAULT_CMD_INTERVAL = 1000;
+
+        /*!
+        *   \brief Seeding for the random number engine
+        */
+        std::random_device _rd;
+
+        /*!
+        *   \brief Random number generator
+        */
+        std::mt19937 _gen;
 
         /*!
         *   \brief Environment variable for connection timeout
