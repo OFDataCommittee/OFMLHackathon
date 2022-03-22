@@ -16,6 +16,7 @@ env:
   HOMEBREW_NO_BOTTLE_SOURCE_FALLBACK: "ON"
   HOMEBREW_NO_GITHUB_API: "ON"
   HOMEBREW_NO_INSTALL_CLEANUP: "ON"
+  DEBIAN_FRONTEND: "noninteractive" # disable interactive apt installs
   SSDB: "127.0.0.1:6379"
   SMARTREDIS_TEST_CLUSTER: False
 
@@ -29,7 +30,7 @@ jobs:
       matrix:
         os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
         compiler: [intel, 8, 9, 10, 11] # intel compiler, and versions of GNU compiler
-        rai_v: [1.2.4, 1.2.5] # verisons of RedisAI
+        rai_v: [1.2.4, 1.2.5] # versions of RedisAI
         py_v: ['3.7.x', '3.8.x', '3.9.x'] # versions of Python
     env:
       FC: gfortran-${{ matrix.compiler }}
@@ -40,7 +41,7 @@ jobs:
       # Label used to access the service container
       redis:
         # Docker Hub image
-        image: redislabs/redisai:${{ matrix.rai_v }}-cpu-xenial
+        image: redislabs/redisai:${{ matrix.rai_v }}-cpu-bionic
 
         # Set health checks to wait until redis has started
         options: >-
@@ -84,7 +85,7 @@ jobs:
           echo "CC=icc" >> $GITHUB_ENV &&
           echo "CXX=icpc" >> $GITHUB_ENV &&
           echo "FC=ifort" >> $GITHUB_ENV
-          
+
       - name: Install Cmake Linux
         if: contains(matrix.os, 'ubuntu')
         run: sudo apt-get install cmake
@@ -116,3 +117,40 @@ jobs:
         uses: codecov/codecov-action@v2
         with:
           files: ./tests/cpp/unit-tests/build/CMakeFiles/cpp_unit_tests.dir/coverage.info
+
+      - name: Install docker and redis-server
+        run: |
+          sudo apt-get update && sudo apt-get -y install curl gnupg lsb-release software-properties-common ca-certificates && \
+          # Add latest redis to apt sources
+          echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list && \
+          curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg && \
+          # Add latest docker to apt sources
+          echo  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
+          sudo apt-get update && \
+          sudo apt-get -y install iputils-ping docker-ce docker-ce-cli containerd.io redis-tools=6:6.2.5-1rl1~focal1 redis-server=6:6.2.5-1rl1~focal1
+
+      - name: Copy redisai from docker image
+        run: |
+          docker create --name redisai --rm redislabs/redisai:${{ matrix.rai_v }}-cpu-bionic && \
+          docker cp redisai:/usr/lib/redis/modules/redisai.so $HOME &&
+          sudo mkdir -p /usr/lib/redis/modules/ &&
+          sudo docker cp redisai:/usr/lib/redis/modules/backends/ /usr/lib/redis/modules/
+
+      - name: Setup local redis servers
+        run: |
+          redis-server --port 7000 --daemonize yes --cluster-enabled yes --cluster-config-file 7000.conf --protected-mode no --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so  &
+          redis-server --port 7001 --daemonize yes --cluster-enabled yes --cluster-config-file 7001.conf --protected-mode no --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so  &
+          redis-server --port 7002 --daemonize yes --cluster-enabled yes --cluster-config-file 7002.conf --protected-mode no --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so
+
+      - name: Overwrite redis cluster env vars
+        run: |
+         echo "SSDB=127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7002" >> $GITHUB_ENV &&
+         echo "SMARTREDIS_TEST_CLUSTER=True" >> $GITHUB_ENV
+
+      - name: Start redis cluster
+        run: redis-cli --cluster create $(echo $SSDB | tr "," " ") --cluster-yes
+
+      - name: Run testing with redis cluster
+        run: make test-verbose
+
