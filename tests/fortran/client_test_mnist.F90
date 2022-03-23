@@ -45,12 +45,12 @@ program mnist_test
   integer :: result
 
   result = client%initialize(use_cluster())
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
 
   result = client%set_model_from_file(model_key, model_file, "TORCH", "CPU")
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
   result = client%set_script_from_file(script_key, "CPU", script_file)
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
 
   call run_mnist(client, model_key, script_key)
 
@@ -84,20 +84,20 @@ subroutine run_mnist( client, model_name, script_name )
   ! Generate some fake data for inference
   call random_number(array)
   call_result = client%put_tensor(in_key, array, shape(array))
-  if (call_result .ne. SRNoError) stop
+  if (call_result .ne. SRNoError) error stop
 
   ! Prepare the script inputs and outputs
   inputs(1) = in_key
   outputs(1) = script_out_key
   call_result = client%run_script(script_name, "pre_process", inputs, outputs)
-  if (call_result .ne. SRNoError) stop
+  if (call_result .ne. SRNoError) error stop
   inputs(1) = script_out_key
   outputs(1) = out_key
   call_result = client%run_model(model_name, inputs, outputs)
-  if (call_result .ne. SRNoError) stop
+  if (call_result .ne. SRNoError) error stop
   result(:,:) = 0.
   call_result = client%unpack_tensor(out_key, result, shape(result))
-  if (call_result .ne. SRNoError) stop
+  if (call_result .ne. SRNoError) error stop
 
   print *, "Result: ", result
   print *, "Fortran test mnist: passed"

@@ -505,6 +505,54 @@ CommandReply RedisCluster::run_script(const std::string& key,
     return reply;
 }
 
+// Delete a model from the database
+CommandReply RedisCluster::delete_model(const std::string& key)
+{
+    CommandReply reply;
+    std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
+    for ( ; node != _db_nodes.cend(); node++) {
+        // Build the node prefix
+        std::string prefixed_key = "{" + node->prefix + "}." + key;
+
+        // Build the MODELDEL command
+        SingleKeyCommand cmd;
+        cmd << "AI.MODELDEL" << Keyfield(prefixed_key);
+
+        // Run the command
+        reply = run(cmd);
+        if (reply.has_error() > 0) {
+            throw SRRuntimeException("delete_model failed for node " + node->name);
+        }
+    }
+
+    // Done
+    return reply;
+}
+
+// Delete a script from the database
+CommandReply RedisCluster::delete_script(const std::string& key)
+{
+    CommandReply reply;
+    std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
+    for ( ; node != _db_nodes.cend(); node++) {
+        // Build the node prefix
+        std::string prefixed_key = "{" + node->prefix + "}." + key;
+
+        // Build the SCRIPTSET command
+        SingleKeyCommand cmd;
+        cmd << "AI.SCRIPTDEL" << Keyfield(prefixed_key);
+
+        // Run the command
+        reply = run(cmd);
+        if (reply.has_error() > 0) {
+            throw SRRuntimeException("delete_script failed for node " + node->name);
+        }
+    }
+
+    // Done
+    return reply;
+}
+
 // Retrieve the model from the database
 CommandReply RedisCluster::get_model(const std::string& key)
 {

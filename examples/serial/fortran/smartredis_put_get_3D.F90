@@ -48,12 +48,12 @@ program main
 
   ! Initialize a client
   result = client%initialize(.true.) ! Change .false. to .true. if not using a clustered database
-  if (result .ne. SRNoError) stop 'client%initialize failed'
+  if (result .ne. SRNoError) error stop 'client%initialize failed'
 
   ! Send a tensor to the database via the client and verify that we can retrieve it
   result = client%put_tensor("send_array", send_array_real_64, shape(send_array_real_64))
-  if (result .ne. SRNoError) stop 'client%put_tensor failed'
+  if (result .ne. SRNoError) error stop 'client%put_tensor failed'
   result = client%unpack_tensor("send_array", recv_array_real_64, shape(recv_array_real_64))
-  if (result .ne. SRNoError) stop 'client%unpack_tensor failed'
+  if (result .ne. SRNoError) error stop 'client%unpack_tensor failed'
 
 end program main

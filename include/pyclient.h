@@ -300,6 +300,20 @@ class PyClient
                         std::vector<std::string> outputs);
 
         /*!
+        *   \brief Remove a model from the database
+        *   \param name The name associated with the model
+        *   \throw RuntimeException for all client errors
+        */
+        void delete_model(const std::string& name);
+
+        /*!
+        *   \brief Remove a script from the database
+        *   \param name The name associated with the script
+        *   \throw RuntimeException for all client errors
+        */
+        void delete_script(const std::string& name);
+
+        /*!
         *   \brief Retrieve the model from the database
         *   \param name The name associated with the model
         *   \returns A py:bytes object containing the model

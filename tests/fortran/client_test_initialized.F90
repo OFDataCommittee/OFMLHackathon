@@ -38,12 +38,12 @@ program main
   type(client_type) :: client
   integer :: result
 
-  if (client%isinitialized()) stop 'client not initialized'
+  if (client%isinitialized()) error stop 'client not initialized'
 
   result = client%initialize(use_cluster())
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
 
-  if (.not. client%isinitialized()) stop 'client is initialized'
+  if (.not. client%isinitialized()) error stop 'client is initialized'
 
   write(*,*) "client initialized: passed"
 

@@ -201,6 +201,14 @@ void consume(std::vector<size_t> dims,
 
   std::string out_key_ds = "mnist_output_ds";
   client.unpack_tensor(out_key_ds, mnist_result, {1,10}, SRTensorTypeFloat, SRMemLayoutNested);
+
+  client.delete_model(model_key);
+  if(client.model_exists(model_key))
+    throw std::runtime_error("The model still exists in the database after being deleted.");
+  client.delete_script(script_key);
+  if(client.model_exists(script_key))
+    throw std::runtime_error("The script still exists in the database after being deleted.");
+
   free_2D_array(mnist_result, 1);
 }
 

@@ -115,6 +115,10 @@ type, public :: client_type
   procedure :: run_script
   !> Run a model that has already been stored in the database
   procedure :: run_model
+  !> Remove a script from the database
+  procedure :: delete_script
+  !> Remove a model from the database
+  procedure :: delete_model
   !> Put a SmartRedis dataset into the database
   procedure :: put_dataset
   !> Retrieve a SmartRedis dataset from the database
@@ -780,6 +784,22 @@ function run_model(self, name, inputs, outputs) result(code)
   deallocate(ptrs_to_outputs)
 end function run_model
 
+!> Remove a model from the database
+function delete_model(self, name) result(code)
+  class(client_type),             intent(in) :: self    !< An initialized SmartRedis client
+  character(len=*),               intent(in) :: name    !< The name to use to remove the model
+  integer(kind=enum_kind)                    :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  integer(kind=c_size_t) :: name_length
+
+  c_name = trim(name)
+  name_length = len_trim(name)
+
+  code = delete_model_c(self%client_ptr, c_name, name_length)
+end function delete_model
+
 !> Retrieve the script from the database
 function get_script(self, name, script) result(code)
   class(client_type), intent(in  ) :: self   !< An initialized SmartRedis client
@@ -903,6 +923,22 @@ function run_script(self, name, func, inputs, outputs) result(code)
   deallocate(output_lengths)
   deallocate(ptrs_to_outputs)
 end function run_script
+
+!> Remove a script from the database
+function delete_script(self, name) result(code)
+  class(client_type),             intent(in) :: self    !< An initialized SmartRedis client
+  character(len=*),               intent(in) :: name    !< The name to use to delete the script
+  integer(kind=enum_kind)                    :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  integer(kind=c_size_t) :: name_length
+
+  c_name = trim(name)
+  name_length = len_trim(name)
+
+  code = delete_script_c(self%client_ptr, c_name, name_length)
+end function delete_script
 
 !> Store a dataset in the database
 function put_dataset(self, dataset) result(code)

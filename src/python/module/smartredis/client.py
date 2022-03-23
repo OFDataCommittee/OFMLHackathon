@@ -378,6 +378,22 @@ class Client(PyClient):
         super().run_script(name, fn_name, inputs, outputs)
 
     @exception_handler
+    def delete_script(self, name):
+        """Remove a script from the database
+
+        The script key used to locate the script to be run
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source() and use_model_ensemble_prefix()
+        for more details
+
+        :param name: the name the script is stored under
+        :type name: str
+        :raises RedisReplyError: if script deletion fails
+        """
+        typecheck(name, "name", str)
+        super().delete_script(name)
+
+    @exception_handler
     def get_model(self, name):
         """Get a stored model
 
@@ -548,6 +564,22 @@ class Client(PyClient):
         typecheck(name, "name", str)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
         super().run_model(name, inputs, outputs)
+
+    @exception_handler
+    def delete_model(self, name):
+        """Remove a model from the database
+
+        The model key used to locate the script to be run
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source() and use_model_ensemble_prefix()
+        for more details
+
+        :param name: the name the model is stored under
+        :type name: str
+        :raises RedisReplyError: if model deletion fails
+        """
+        typecheck(name, "name", str)
+        super().delete_model(name)
 
     @exception_handler
     def tensor_exists(self, name):

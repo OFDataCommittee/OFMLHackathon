@@ -592,6 +592,28 @@ SRError run_model(void* c_client,
                   const size_t n_outputs);
 
 /*!
+*   \brief Remove a model from the database
+*   \param c_client The client object to use for communication
+*   \param name The name associated with the model
+*   \param name_length The length of the name string,
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError delete_model(void* c_client,
+                     const char* name,
+                     const size_t name_length);
+
+/*!
+*   \brief Remove a script from the database
+*   \param c_client The client object to use for communication
+*   \param name The name associated with the script
+*   \param name_length The length of the name string,
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError delete_script(void* c_client,
+                      const char* name,
+                      const size_t name_length);
+
+/*!
 *   \brief Check if a key exists in the database
 *   \details The key to be checked is not prefixed in any way. If prefixing
 *            is enabled, callers must manually prefix names to form

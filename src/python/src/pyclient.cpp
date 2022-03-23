@@ -425,6 +425,26 @@ void PyClient::run_script(const std::string& name,
     }
 }
 
+void PyClient::delete_script(const std::string& name)
+{
+    try {
+        _client->delete_script(name);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing delete_script.");
+    }
+}
+
 py::bytes PyClient::get_model(const std::string& name)
 {
     try {
@@ -525,6 +545,26 @@ void PyClient::run_model(const std::string& name,
         // should never happen
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing run_model.");
+    }
+}
+
+void PyClient::delete_model(const std::string& name)
+{
+    try {
+        _client->delete_model(name);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing delete_model.");
     }
 }
 

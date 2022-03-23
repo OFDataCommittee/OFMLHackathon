@@ -97,3 +97,14 @@ interface
 
   end function run_script_c
 end interface
+
+interface
+  function delete_script_c(c_client, key, key_length) bind(c, name="delete_script")
+    use iso_c_binding, only : c_ptr, c_size_t, c_char
+    import :: enum_kind
+    integer(kind=enum_kind)                   :: delete_script_c
+    type(c_ptr), value,            intent(in) :: c_client       !< Initialized SmartRedis client
+    character(kind=c_char),        intent(in) :: key(*)         !< The key to use to place the script
+    integer(kind=c_size_t), value, intent(in) :: key_length     !< The length of the key c-string, excluding null
+  end function delete_script_c
+end interface

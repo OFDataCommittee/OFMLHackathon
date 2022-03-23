@@ -335,6 +335,28 @@ CommandReply Redis::run_script(const std::string& key,
     return run(cmd);
 }
 
+// Delete a model from the database
+CommandReply Redis::delete_model(const std::string& key)
+{
+    // Build the command
+    SingleKeyCommand cmd;
+    cmd << "AI.MODELDEL" << Keyfield(key);
+
+    // Run it
+    return run(cmd);
+}
+
+// Delete a script from the database
+CommandReply Redis::delete_script(const std::string& key)
+{
+    // Build the command
+    SingleKeyCommand cmd;
+    cmd << "AI.SCRIPTDEL" << Keyfield(key);
+
+    // Run it
+    return run(cmd);
+}
+
 // Retrieve the model from the database
 CommandReply Redis::get_model(const std::string& key)
 {

@@ -605,6 +605,26 @@ void Client::run_script(const std::string& name,
     _redis_server->run_script(key, function, inputs, outputs);
 }
 
+// Delete a model from the database
+void Client::delete_model(const std::string& name)
+{
+    std::string key = _build_model_key(name, true);
+    CommandReply reply = _redis_server->delete_model(key);
+
+    if (reply.has_error())
+        throw SRRuntimeException("AI.MODELDEL command failed on server");
+}
+
+// Delete a script from the database
+void Client::delete_script(const std::string& name)
+{
+    std::string key = _build_model_key(name, true);
+    CommandReply reply = _redis_server->delete_script(key);
+
+    if (reply.has_error())
+        throw SRRuntimeException("AI.SCRIPTDEL command failed on server");
+}
+
 // Check if the key exists in the database
 bool Client::key_exists(const std::string& key)
 {
@@ -826,7 +846,6 @@ parsed_reply_map Client::get_ai_info(const std::string& address,
                                       " has an unexpected type.");
         reply_map[map_key] = value;
     }
-    printf("Leaving Client::get_ai_info()\n");
     return reply_map;
 }
 

@@ -307,6 +307,22 @@ class Redis : public RedisServer
                                         std::vector<std::string> outputs);
 
         /*!
+        *   \brief Remove a model from the database
+        *   \param key The key associated with the model
+        *   \returns The CommandReply from model delete Command execution
+        *   \throw SmartRedis::Exception if model deletion fails
+        */
+        CommandReply delete_model(const std::string& key);
+
+        /*!
+        *   \brief Remove a script from the database
+        *   \param key The key associated with the script
+        *   \returns The CommandReply from script delete Command execution
+        *   \throw SmartRedis::Exception if script deletion fails
+        */
+        CommandReply delete_script(const std::string& key);
+
+        /*!
         *   \brief Retrieve the model from the database
         *   \param key The key associated with the model
         *   \returns The CommandReply that contains the result

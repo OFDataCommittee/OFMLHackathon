@@ -130,6 +130,16 @@ interface
     type(c_ptr),            value, intent(in) :: output_lengths    !< The length of each output name c-string,
                                                                    !! excluding null terminating character
     integer(kind=c_size_t), value, intent(in) :: n_outputs         !< The number of outputs
-
   end function run_model_c
+end interface
+
+interface
+  function delete_model_c(c_client, key, key_length) bind(c, name="delete_model")
+    use iso_c_binding, only : c_ptr, c_size_t, c_char
+    import :: enum_kind
+    integer(kind=enum_kind)                   :: delete_model_c
+    type(c_ptr), value,            intent(in) :: c_client          !< Initialized SmartRedis client
+    character(kind=c_char),        intent(in) :: key(*)            !< The key to use to delete the model
+    integer(kind=c_size_t), value, intent(in) :: key_length        !< The length of the key c-string, excluding null
+  end function delete_model_c
 end interface

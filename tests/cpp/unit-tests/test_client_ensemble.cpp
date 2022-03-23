@@ -237,6 +237,14 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
             consumer_client.unpack_tensor(out_key_ds, mnist_result,
                                           {1,10}, SRTensorTypeFloat,
                                           SRMemLayoutNested);
+
+            // Cleanup
+            consumer_client.delete_model(model_key);
+            if(consumer_client.model_exists(model_key))
+                throw std::runtime_error("The model still exists in the database after being deleted.");
+            consumer_client.delete_script(script_key);
+            if(consumer_client.model_exists(script_key))
+                throw std::runtime_error("The script still exists in the database after being deleted.");
             free_2D_array(mnist_result, 1);
 
             // reset environment variables to their original state

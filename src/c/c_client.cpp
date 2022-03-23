@@ -919,6 +919,62 @@ SRError run_model(void* c_client,
   return result;
 }
 
+// Remove a model from the database
+extern "C"
+SRError delete_model(void* c_client,
+                     const char* name,
+                     const size_t name_length)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+
+    std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->delete_model(name_str);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Remove a script from the database
+extern "C"
+SRError delete_script(void* c_client,
+                      const char* name,
+                      const size_t name_length)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+
+    std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->delete_script(name_str);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
 // Check whether a key exists in the database
 extern "C"
 SRError key_exists(void* c_client, const char* key, const size_t key_length,

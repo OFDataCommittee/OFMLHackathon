@@ -518,6 +518,29 @@ class Client
                         std::vector<std::string> outputs);
 
         /*!
+        *   \brief Remove a model from the database
+        *   \details The model key used to locate the model to be deleted
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source() and use_model_ensemble_prefix()
+        *            for more details.
+        *   \param name The name associated with the model
+        *   \throw SmartRedis::Exception if model deletion fails
+        */
+        void delete_model(const std::string& name);
+
+        /*!
+        *   \brief Remove a script from the database
+        *   \details The script key used to locate the script to be deleted
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source() and use_model_ensemble_prefix()
+        *            for more details.
+        *   \param name The name associated with the script
+        *   \throw SmartRedis::Exception if script deletion fails
+        */
+        void delete_script(const std::string& name);
+
+
+        /*!
         *   \brief Check if a key exists in the database
         *   \param key The key that will be checked in the database.
         *              No prefix will be added to \p key.

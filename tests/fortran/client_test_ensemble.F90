@@ -50,24 +50,24 @@ call setenv("SSKEYIN", "producer_0,producer_1")
 call setenv("SSKEYOUT", ensemble_keyout)
 
 result = client%initialize(use_cluster())
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) error stop
 result = client%use_model_ensemble_prefix(.true.)
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) error stop
 
 ! Put tensor, script, and model into the database. Then check to make
 ! sure that keys were prefixed correctly
 
 tensor_key = "ensemble_tensor"
 result = client%put_tensor(tensor_key, tensor, shape(tensor))
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) error stop
 result = client%tensor_exists(tensor_key, exists)
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) error stop
 if (.not. exists) then
   write(STDERR,*) 'Tensor does not exist: ', tensor_key
   error stop
 endif
 result = client%key_exists(trim(ensemble_keyout)//"."//trim(tensor_key), exists)
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) error stop
 if (.not. exists) then
   write(STDERR,*) 'Key does not exist: ', trim(ensemble_keyout)//"."//tensor_key
   error stop
@@ -76,9 +76,9 @@ endif
 script_key = "ensemble_script"
 script_file = "../../cpp/mnist_data/data_processing_script.txt"
 result = client%set_script_from_file(script_key, "CPU", script_file)
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) error stop
 result = client%model_exists(script_key, exists)
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) error stop
 if (.not. exists) then
   write(STDERR,*) 'Script does not exist: ', script_key
   error stop
@@ -87,16 +87,16 @@ endif
 model_key = "ensemble_model"
 model_file = "../../cpp/mnist_data/mnist_cnn.pt"
 result = client%set_model_from_file(model_key, model_file, "TORCH", "CPU")
-if (result .ne. SRNoError) stop 'set_model_from_file failed'
+if (result .ne. SRNoError) error stop 'set_model_from_file failed'
 result = client%model_exists(model_key, exists)
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) error stop
 if (.not. exists) then
   write(STDERR,*) 'Model does not exist: ', model_key
   error stop
 endif
 
 result = client%destructor()
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) error stop
 
 ! Now set the consumer tests
 ensemble_keyout = "producer_1"
@@ -104,41 +104,58 @@ call setenv("SSKEYIN", "producer_1,producer_0")
 call setenv("SSKEYOUT", ensemble_keyout)
 
 result = client%initialize(use_cluster())
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) error stop
 result = client%use_model_ensemble_prefix(.true.)
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) error stop
 
 ! Check that the keys associated with producer_1 do not exist
 result = client%tensor_exists(tensor_key, exists)
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) error stop
 if (exists) then
   write(STDERR,*) "Tensor should not exist: ", tensor_key
   error stop
 endif
 result = client%key_exists(trim(ensemble_keyout)//"."//trim(tensor_key), exists)
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) error stop
 if (exists) then
   write(STDERR,*) "Key should not exist: "//trim(ensemble_keyout)//"."//tensor_key
   error stop
 endif
 result = client%set_data_source("producer_0")
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) error stop
 result = client%tensor_exists(tensor_key, exists)
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) error stop
 if (.not. exists) then
   write(STDERR,*) "Tensor does not exist: ", tensor_key
   error stop
 endif
 result = client%model_exists(model_key, exists)
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) error stop
 if (.not. exists) then
   write(STDERR,*) "Model does not exist: "//model_key
   error stop
 endif
 result = client%model_exists(script_key, exists)
-if (result .ne. SRNoError) stop
+if (result .ne. SRNoError) error stop
 if (.not. exists) then
   write(STDERR,*) "Script does not exist: "//script_key
+  error stop
+endif
+
+result = client%delete_model(model_key)
+if (result .ne. SRNoError) error stop
+result = client%model_exists(model_key, exists)
+if (result .ne. SRNoError) error stop
+if (exists) then
+  write(STDERR,*) "Model exists after deletion: "//model_key
+  error stop
+endif
+result = client%delete_script(script_key)
+if (result .ne. SRNoError) error stop
+result = client%model_exists(script_key, exists)
+if (result .ne. SRNoError) error stop
+if (exists) then
+  write(STDERR,*) "Script exists after deletion: "//script_key
   error stop
 endif
 
