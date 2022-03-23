@@ -48,10 +48,9 @@ program main
   real(kind=c_float),  dimension(dim1) :: meta_flt_vec
   real(kind=c_float), dimension(:), pointer :: meta_flt_recv
 
-  integer :: i, j, k
+  integer :: i, j, k, result
   type(dataset_type) :: dataset
   type(client_type) :: client
-  integer(kind=enum_kind) :: result
 
   integer :: err_code, pe_id
   character(len=9) :: key_prefix
@@ -96,5 +95,8 @@ program main
   ! Shut down MPI
   call mpi_finalize(err_code)
   if (pe_id == 0) write(*,*) "SmartRedis Fortran MPI Dataset example finished without errors."
+
+  ! Done
+  call exit()
 
 end program main

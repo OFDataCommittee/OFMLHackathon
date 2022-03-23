@@ -42,7 +42,7 @@ void run_mnist(const std::string& model_name,
     std::vector<float> img(n_values, 0);
 
     // Load the mnist image from a file using MPI rank 0
-    if(rank==0) {
+    if (rank == 0) {
         std::string image_file = "../../../common/mnist_data/one.raw";
         std::ifstream fin(image_file, std::ios::binary);
         std::ostringstream ostream;
@@ -85,7 +85,7 @@ void run_mnist(const std::string& model_name,
                          SRTensorTypeFloat, SRMemLayoutContiguous);
 
     // Print out the results of the model for Rank 0
-    if(rank==0)
+    if (rank == 0)
         for(size_t i=0; i<result.size(); i++)
             std::cout<<"Rank 0: Result["<<i<<"] = "<<result[i]<<std::endl;
 
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
 
     // Set the model and script that will be used by all ranks
     // from MPI rank 0.
-    if(rank==0) {
+    if (rank == 0) {
         // Build model key, file name, and then set model
         // from file using client API
         std::string model_key = "mnist_model";
@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
     MPI_Barrier(MPI_COMM_WORLD);
     run_mnist("mnist_model", "mnist_script", client);
 
-    if(rank==0)
+    if (rank == 0)
         std::cout<<"Finished SmartRedis MNIST example."<<std::endl;
 
     // Finalize MPI Comm World

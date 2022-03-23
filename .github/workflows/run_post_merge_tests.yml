@@ -1,13 +1,9 @@
-name: run_tests
+name: run_post_merge_tests
 
-# This file is for tests that are to be run frequently, with each push to a PR.
+# This file is for tests that are to be run rarely, once on each merge.
 
 on:
   push:
-    branches:
-      - master
-      - develop
-  pull_request:
     branches:
       - master
       - develop
@@ -98,30 +94,7 @@ jobs:
         run: python -m pip install -e .[dev]
 
       # CI tests that should be run with standalone Redis go here
-      - name: Build and run tests
-        run: |
-            mkdir -p ./third-party &&
-            cd ./third-party &&
-            bash ../build-scripts/build-lcov.sh &&
-            bash ../build-scripts/build-catch.sh &&
-            cd ../ &&
-            make test-verbose
-
-      - name: Run Python coverage tests
-        run: python -m pytest --cov=./src/python/module/smartredis/ --cov-report=xml --cov-append -vv ./tests/python/
-
-      - name: Run C++ coverage tests # unit tests already built
-        run: bash ./build-scripts/build_cpp_cov.sh
-
-      - name: Upload Python coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          files: ./coverage.xml
-
-      - name: Upload C++ coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          files: ./tests/cpp/unit-tests/build/CMakeFiles/cpp_unit_tests.dir/coverage.info
+      # (none at present)
 
       # Set up clustered Redis environment
       - name: Install docker and redis-server
@@ -158,6 +131,11 @@ jobs:
         run: redis-cli --cluster create $(echo $SSDB | tr "," " ") --cluster-yes
 
       # CI tests that should be run with clustered Redis go here
-      - name: Run testing with redis cluster
-        run: make test-verbose
+      - name: Install MPI for parallel examples -- for GCC, we can just use the std install
+        if: contains(matrix.os, 'ubuntu') && !contains(matrix.compiler, 'intel')
+        run: sudo apt-get install -y mpich
+
+      - name: Build and run examples # Only with GNU compiler as that's what mpich is built for
+        if: contains(matrix.os, 'ubuntu') && !contains(matrix.compiler, 'intel')
+        run: make test-examples
 

@@ -47,10 +47,9 @@ program main
   real(kind=c_float),  dimension(dim1) :: meta_flt_vec
   real(kind=c_float), dimension(:), pointer :: meta_flt_recv
 
-  integer :: i
+  integer :: i, result
   type(dataset_type) :: dataset
   type(client_type) :: client
-  integer(kind=enum_kind) :: result
 
   ! Fill array
   call random_number(true_array_real_32)
@@ -82,5 +81,8 @@ program main
   ! Send the dataset to the database via the client
   result = client%put_dataset(dataset)
   if (result .ne. SRNoError) error stop 'client%put_dataset failed'
+
+  ! Done
+  call exit()
 
 end program main

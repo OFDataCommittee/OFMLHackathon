@@ -42,9 +42,8 @@ program main
 
   real(kind=c_double),    dimension(dim1, dim2, dim3) :: true_array_real_64
 
-  integer :: i, j, k
+  integer :: i, j, k, result
   type(client_type) :: client
-  integer(kind=enum_kind) :: result
 
   integer :: err_code, pe_id
   character(len=9) :: key_prefix
@@ -71,5 +70,8 @@ program main
   ! Shut down MPI
   call mpi_finalize(err_code)
   if (pe_id == 0) write(*,*) "SmartRedis MPI Fortran example 3D put/get finished."
+
+  ! Done
+  call exit()
 
 end program main

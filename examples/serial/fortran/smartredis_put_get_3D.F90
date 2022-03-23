@@ -40,9 +40,8 @@ program main
   real(kind=8),    dimension(dim1, dim2, dim3) :: recv_array_real_64
   real(kind=c_double),    dimension(dim1, dim2, dim3) :: send_array_real_64
 
-  integer :: i, j, k
+  integer :: i, j, k, result
   type(client_type) :: client
-  integer(kind=enum_kind) :: result
 
   call random_number(send_array_real_64)
 
@@ -55,5 +54,8 @@ program main
   if (result .ne. SRNoError) error stop 'client%put_tensor failed'
   result = client%unpack_tensor("send_array", recv_array_real_64, shape(recv_array_real_64))
   if (result .ne. SRNoError) error stop 'client%unpack_tensor failed'
+
+  ! Done
+  call exit()
 
 end program main

@@ -30,11 +30,15 @@ cmake_minimum_required(VERSION 3.13)
 
 enable_language(Fortran)
 
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 99)
 
-find_package(MPI)
+find_package(MPI REQUIRED)
+IF(NOT MPI_Fortran_FOUND)
+	message(FATAL_ERROR "Could not find Fortran MPI components")
+endif()
 
 find_library(SR_LIB smartredis PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
 
