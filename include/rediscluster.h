@@ -277,6 +277,39 @@ class RedisCluster : public RedisServer
                                             = std::vector<std::string>());
 
         /*!
+        *   \brief Set a model from std::string_view buffer in the
+        *          database for future execution in a multi-GPU system
+        *   \param name The name to associate with the model
+        *   \param model The model as a continuous buffer string_view
+        *   \param backend The name of the backend
+        *                  (TF, TFLITE, TORCH, ONNX)
+        *   \param first_gpu The first GPU to use with this model
+        *   \param num_gpus The number of GPUs to use with this model
+        *   \param batch_size The batch size for model execution
+        *   \param min_batch_size The minimum batch size for model
+        *                         execution
+        *   \param tag A tag to attach to the model for
+        *              information purposes
+        *   \param inputs One or more names of model input nodes
+        *                 (TF models only)
+        *   \param outputs One or more names of model output nodes
+        *                 (TF models only)
+        *   \throw RuntimeException for all client errors
+        */
+        virtual void set_model_multigpu(const std::string& name,
+                                        const std::string_view& model,
+                                        const std::string& backend,
+                                        int first_gpu,
+                                        int num_gpus,
+                                        int batch_size = 0,
+                                        int min_batch_size = 0,
+                                        const std::string& tag = "",
+                                        const std::vector<std::string>& inputs
+                                            = std::vector<std::string>(),
+                                        const std::vector<std::string>& outputs
+                                            = std::vector<std::string>());
+
+        /*!
         *   \brief Set a script from std::string_view buffer in the
         *          database for future execution
         *   \param key The key to associate with the script
@@ -288,6 +321,20 @@ class RedisCluster : public RedisServer
         virtual CommandReply set_script(const std::string& key,
                                         const std::string& device,
                                         std::string_view script);
+
+        /*!
+        *   \brief Set a script from std::string_view buffer in the
+        *          database for future execution in a multi-GPU system
+        *   \param name The name to associate with the script
+        *   \param script The script source in a std::string_view
+        *   \param first_gpu The first GPU to use with this script
+        *   \param num_gpus The number of GPUs to use with this script
+        *   \throw RuntimeException for all client errors
+        */
+        virtual void set_script_multigpu(const std::string& name,
+                                         const std::string_view& script,
+                                         int first_gpu,
+                                         int num_gpus);
 
         /*!
         *   \brief Run a model in the database using the
@@ -305,6 +352,26 @@ class RedisCluster : public RedisServer
                                        std::vector<std::string> outputs);
 
         /*!
+        *   \brief Run a model in the database using the
+        *          specified input and output tensors in a multi-GPU system
+        *   \param name The name associated with the model
+        *   \param inputs The names of input tensors to use in the model
+        *   \param outputs The names of output tensors that will be used
+        *                  to save model results
+        *   \param offset index of the current image, such as a processor
+        *                   ID or MPI rank
+        *   \param first_gpu The first GPU to use with this model
+        *   \param num_gpus the number of gpus for which the script was stored
+        *   \throw RuntimeException for all client errors
+        */
+        virtual void run_model_multigpu(const std::string& name,
+                                        std::vector<std::string> inputs,
+                                        std::vector<std::string> outputs,
+                                        int offset,
+                                        int first_gpu,
+                                        int num_gpus);
+
+        /*!
         *   \brief Run a script function in the database using the
         *          specificed input and output tensors
         *   \param key The key associated with the script
@@ -320,6 +387,28 @@ class RedisCluster : public RedisServer
                                         const std::string& function,
                                         std::vector<std::string> inputs,
                                         std::vector<std::string> outputs);
+
+        /*!
+        *   \brief Run a script function in the database using the
+        *          specificed input and output tensors in a multi-GPU system
+        *   \param name The name associated with the script
+        *   \param function The name of the function in the script to run
+        *   \param inputs The names of input tensors to use in the script
+        *   \param outputs The names of output tensors that will be used
+        *                  to save script results
+        *   \param offset index of the current image, such as a processor
+        *                   ID or MPI rank
+        *   \param first_gpu The first GPU to use with this script
+        *   \param num_gpus the number of gpus for which the script was stored
+        *   \throw RuntimeException for all client errors
+        */
+        virtual void run_script_multigpu(const std::string& name,
+                                         const std::string& function,
+                                         std::vector<std::string>& inputs,
+                                         std::vector<std::string>& outputs,
+                                         int offset,
+                                         int first_gpu,
+                                         int num_gpus);
 
         /*!
         *   \brief Remove a model from the database

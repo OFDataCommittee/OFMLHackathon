@@ -361,6 +361,43 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
     return reply;
 }
 
+// Set a model from std::string_view buffer in the
+// database for future execution in a multi-GPU system
+void RedisCluster::set_model_multigpu(const std::string& name,
+                                      const std::string_view& model,
+                                      const std::string& backend,
+                                      int first_gpu,
+                                      int num_gpus,
+                                      int batch_size,
+                                      int min_batch_size,
+                                      const std::string& tag,
+                                      const std::vector<std::string>& inputs,
+                                      const std::vector<std::string>& outputs)
+{
+    // Store a copy of the model for each GPU
+    for (int i = first_gpu; i < num_gpus; i++) {
+        // Set up parameters for this copy of the script
+        std::string device = "GPU:" + std::to_string(i);
+        std::string model_key = name + "." + device;
+
+        // Store it
+        CommandReply result = set_model(
+            model_key, model, backend, device, batch_size, min_batch_size,
+            tag, inputs, outputs);
+        if (result.has_error() > 0) {
+            throw SRRuntimeException("Failed to set model for " + device);
+        }
+    }
+
+    // Add a version for get_model to find
+    CommandReply result = set_model(
+        name, model, backend, "GPU", batch_size, min_batch_size,
+        tag, inputs, outputs);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException("Failed to set general model");
+    }
+}
+
 // Set a script from a string buffer in the database for future execution
 CommandReply RedisCluster::set_script(const std::string& key,
                                       const std::string& device,
@@ -380,12 +417,39 @@ CommandReply RedisCluster::set_script(const std::string& key,
         // Run the command
         reply = run(cmd);
         if (reply.has_error() > 0) {
-            throw SRRuntimeException("SetModel failed for node " + node->name);
+            throw SRRuntimeException("SetScript failed for node " + node->name);
         }
     }
 
     // Done
     return reply;
+}
+
+// Set a script from std::string_view buffer in the
+// database for future execution in a multi-GPU system
+void RedisCluster::set_script_multigpu(const std::string& name,
+                                       const std::string_view& script,
+                                       int first_gpu,
+                                       int num_gpus)
+{
+    // Store a copy of the script for each GPU
+    for (int i = first_gpu; i < num_gpus; i++) {
+        // Set up parameters for this copy of the script
+        std::string device = "GPU:" + std::to_string(i);
+        std::string script_key = name + "." + device;
+
+        // Store it
+        CommandReply result = set_script(script_key, device, script);
+        if (result.has_error() > 0) {
+            throw SRRuntimeException("Failed to set script for " + device);
+        }
+    }
+
+    // Add a copy for get_script to find
+    CommandReply result = set_script(name, "GPU", script);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException("Failed to set general script");
+    }
 }
 
 // Run a model in the database using the specificed input and output tensors
@@ -452,6 +516,25 @@ CommandReply RedisCluster::run_model(const std::string& model_name,
     return reply;
 }
 
+// Run a model in the database using the
+// specified input and output tensors in a multi-GPU system
+void RedisCluster::run_model_multigpu(const std::string& name,
+                                      std::vector<std::string> inputs,
+                                      std::vector<std::string> outputs,
+                                      int offset,
+                                      int first_gpu,
+                                      int num_gpus)
+{
+    int gpu = first_gpu + _modulo(offset, num_gpus);
+    std::string device = "GPU:" + std::to_string(gpu);
+    std::string target_model = name + "." + device;
+    CommandReply result = run_model(target_model, inputs, outputs);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException(
+            "An error occurred while executing the model on " + device);
+    }
+}
+
 // Run a script function in the database using the specificed input
 // and output tensors
 CommandReply RedisCluster::run_script(const std::string& key,
@@ -503,6 +586,37 @@ CommandReply RedisCluster::run_script(const std::string& key,
 
     // Done
     return reply;
+}
+
+/*!
+*   \brief Run a script function in the database using the
+*          specificed input and output tensors in a multi-GPU system
+*   \param name The name associated with the script
+*   \param function The name of the function in the script to run
+*   \param inputs The names of input tensors to use in the script
+*   \param outputs The names of output tensors that will be used
+*                  to save script results
+*   \param offset index of the current image, such as a processor
+*                   ID or MPI rank
+*   \param num_gpus the number of gpus for which the script was stored
+*   \throw RuntimeException for all client errors
+*/
+void RedisCluster::run_script_multigpu(const std::string& name,
+                                       const std::string& function,
+                                       std::vector<std::string>& inputs,
+                                       std::vector<std::string>& outputs,
+                                       int offset,
+                                       int first_gpu,
+                                       int num_gpus)
+{
+    int gpu = first_gpu + _modulo(offset, num_gpus);
+    std::string device = "GPU:" + std::to_string(gpu);
+    std::string target_script = name + "." + device;
+    CommandReply result = run_script(target_script, function, inputs, outputs);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException(
+            "An error occurred while executing the script on " + device);
+    }
 }
 
 // Delete a model from the database

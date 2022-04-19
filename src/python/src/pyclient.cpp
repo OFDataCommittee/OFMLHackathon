@@ -358,6 +358,30 @@ void PyClient::set_script_from_file(const std::string& name,
     }
 }
 
+void PyClient::set_script_from_file_multigpu(const std::string& name,
+                                             const std::string& script_file,
+                                             int first_gpu,
+                                             int num_gpus)
+{
+    try {
+        _client->set_script_from_file_multigpu(name, script_file, first_gpu, num_gpus);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing set_script_from_file_multigpu.");
+    }
+}
+
+
 void PyClient::set_script(const std::string& name,
                           const std::string& device,
                           const std::string_view& script)
@@ -377,6 +401,29 @@ void PyClient::set_script(const std::string& name,
         // should never happen
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing set_script.");
+    }
+}
+
+void PyClient::set_script_multigpu(const std::string& name,
+                                   const std::string_view& script,
+                                   int first_gpu,
+                                   int num_gpus)
+{
+    try {
+        _client->set_script_multigpu(name, script, first_gpu, num_gpus);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing set_script_multigpu.");
     }
 }
 
@@ -424,6 +471,34 @@ void PyClient::run_script(const std::string& name,
                                   "while executing run_script.");
     }
 }
+
+void PyClient::run_script_multigpu(const std::string& name,
+                                   const std::string& function,
+                                   std::vector<std::string>& inputs,
+                                   std::vector<std::string>& outputs,
+                                   int offset,
+                                   int first_gpu,
+                                   int num_gpus)
+{
+    try {
+      _client->run_script_multigpu(
+          name, function, inputs, outputs, offset, first_gpu, num_gpus);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing run_script_multigpu.");
+    }
+}
+
 
 void PyClient::delete_script(const std::string& name)
 {
@@ -496,6 +571,37 @@ void PyClient::set_model(const std::string& name,
     }
 }
 
+void PyClient::set_model_multigpu(const std::string& name,
+                                  const std::string_view& model,
+                                  const std::string& backend,
+                                  int first_gpu,
+                                  int num_gpus,
+                                  int batch_size,
+                                  int min_batch_size,
+                                  const std::string& tag,
+                                  const std::vector<std::string>& inputs,
+                                  const std::vector<std::string>& outputs)
+{
+    try {
+        _client->set_model_multigpu(name, model, backend, first_gpu, num_gpus,
+                                    batch_size, min_batch_size, tag,
+                                    inputs, outputs);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing set_model_multigpu.");
+    }
+}
+
 void PyClient::set_model_from_file(const std::string& name,
                                    const std::string& model_file,
                                    const std::string& backend,
@@ -526,6 +632,37 @@ void PyClient::set_model_from_file(const std::string& name,
     }
 }
 
+void PyClient::set_model_from_file_multigpu(const std::string& name,
+                                            const std::string& model_file,
+                                            const std::string& backend,
+                                            int first_gpu,
+                                            int num_gpus,
+                                            int batch_size,
+                                            int min_batch_size,
+                                            const std::string& tag,
+                                            const std::vector<std::string>& inputs,
+                                            const std::vector<std::string>& outputs)
+{
+    try {
+        _client->set_model_from_file_multigpu(
+            name, model_file, backend, first_gpu, num_gpus, batch_size,
+            min_batch_size, tag, inputs, outputs);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing set_model_from_file_multigpu.");
+    }
+}
+
 void PyClient::run_model(const std::string& name,
                          std::vector<std::string> inputs,
                          std::vector<std::string> outputs)
@@ -545,6 +682,31 @@ void PyClient::run_model(const std::string& name,
         // should never happen
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing run_model.");
+    }
+}
+
+void PyClient::run_model_multigpu(const std::string& name,
+                                  std::vector<std::string> inputs,
+                                  std::vector<std::string> outputs,
+                                  int offset,
+                                  int first_gpu,
+                                  int num_gpus)
+{
+    try {
+        _client->run_model_multigpu(name, inputs, outputs, offset, first_gpu, num_gpus);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing run_model_multigpu.");
     }
 }
 
