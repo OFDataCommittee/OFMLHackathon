@@ -84,6 +84,11 @@ CommandReply Redis::run(AddressAnyCommand& cmd){
     return _run(cmd);
 }
 
+// Run an address-all Command on the server
+CommandReply Redis::run(AddressAllCommand& cmd){
+    return _run(cmd);
+}
+
 // Run a Command list on the server
 std::vector<CommandReply> Redis::run(CommandList& cmds)
 {

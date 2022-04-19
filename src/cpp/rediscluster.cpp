@@ -126,6 +126,43 @@ CommandReply RedisCluster::run(AddressAnyCommand &cmd)
     return _run(cmd, _last_prefix);
 }
 
+// Run a non-keyed Command that addresses any db node on the server
+CommandReply RedisCluster::run(AddressAllCommand &cmd)
+{
+    // Bounds check the key_index
+    if (cmd.key_index != -1 && cmd.get_field_count() < cmd.key_index) {
+        throw SRInternalException("Invalid key_index executing command!");
+    }
+
+    // Find the segment to be tweaked for each node
+    std::string field;
+    if (cmd.key_index != -1) {
+        Command::const_iterator it = cmd.cbegin();
+        int i = 0;
+        for ( ; it != cmd.cend(); it++) {
+            if (i == cmd.key_index)
+                field = std::string(it->data(), it->size());
+            i++;
+        }
+    }
+
+    // Loop through all nodes to execute the command at each
+    std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
+    CommandReply reply;
+    for ( ; node != _db_nodes.cend(); node++) {
+        // swap in a replacement segment for each one
+        std::string new_field = "{" + node->prefix + "}." + field;
+        cmd.set_field_at(new_field, cmd.key_index, true);
+
+        // Execute the updated command
+        cmd.set_exec_address_port(node->ip, node->port);
+        reply = _run(cmd, node->prefix);
+        if (reply.has_error() > 0)
+            break; // Short-circuit failure on error
+    }
+    return reply;
+}
+
 // Run multiple single-key or single-hash slot Command on the server.
 // Each Command in the CommandList is run sequentially
 std::vector<CommandReply> RedisCluster::run(CommandList& cmds)
@@ -322,39 +359,34 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
                                      const std::vector<std::string>& inputs,
                                      const std::vector<std::string>& outputs)
 {
-    std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
+    // Build the basic command
     CommandReply reply;
-    for ( ; node != _db_nodes.cend(); node++) {
-        // Build the node prefix
-        std::string prefixed_key = "{" + node->prefix + "}." + model_name;
+    AddressAllCommand cmd;
+    cmd.key_index = 1;
+    cmd << "AI.MODELSTORE" << Keyfield(model_name) << backend << device;
 
-        // Build the MODELSET commnd
-        CompoundCommand cmd;
-        cmd << "AI.MODELSTORE" << Keyfield(prefixed_key) << backend << device;
+    // Add optional fields as requested
+    if (tag.size() > 0) {
+        cmd << "TAG" << tag;
+    }
+    if (batch_size > 0) {
+        cmd << "BATCHSIZE" << std::to_string(batch_size);
+    }
+    if (min_batch_size > 0) {
+        cmd << "MINBATCHSIZE" << std::to_string(min_batch_size);
+    }
+    if ( inputs.size() > 0) {
+        cmd << "INPUTS" << std::to_string(inputs.size()) << inputs;
+    }
+    if (outputs.size() > 0) {
+        cmd << "OUTPUTS" << std::to_string(outputs.size()) << outputs;
+    }
+    cmd << "BLOB" << model;
 
-        // Add optional fields as requested
-        if (tag.size() > 0) {
-            cmd << "TAG" << tag;
-        }
-        if (batch_size > 0) {
-            cmd << "BATCHSIZE" << std::to_string(batch_size);
-        }
-        if (min_batch_size > 0) {
-            cmd << "MINBATCHSIZE" << std::to_string(min_batch_size);
-        }
-        if ( inputs.size() > 0) {
-            cmd << "INPUTS" << std::to_string(inputs.size()) << inputs;
-        }
-        if (outputs.size() > 0) {
-            cmd << "OUTPUTS" << std::to_string(outputs.size()) << outputs;
-        }
-        cmd << "BLOB" << model;
-
-        // Run the command
-        reply = run(cmd);
-        if (reply.has_error() > 0) {
-            throw SRRuntimeException("SetModel failed for node " + node->name);
-        }
+    // Run it
+    reply = run(cmd);
+    if (reply.has_error() > 0) {
+        throw SRRuntimeException("set_model failed!");
     }
 
     // Done
@@ -403,22 +435,16 @@ CommandReply RedisCluster::set_script(const std::string& key,
                                       const std::string& device,
                                       std::string_view script)
 {
+    // Build the basic command
     CommandReply reply;
-    std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
-    for ( ; node != _db_nodes.cend(); node++) {
-        // Build the node prefix
-        std::string prefix_key = "{" + node->prefix + "}." + key;
+    AddressAllCommand cmd;
+    cmd.key_index = 1;
+    cmd << "AI.SCRIPTSET" << Keyfield(key) << device << "SOURCE" << script;
 
-        // Build the SCRIPTSET command
-        SingleKeyCommand cmd;
-        cmd << "AI.SCRIPTSET" << Keyfield(prefix_key) << device
-            << "SOURCE" << script;
-
-        // Run the command
-        reply = run(cmd);
-        if (reply.has_error() > 0) {
-            throw SRRuntimeException("SetScript failed for node " + node->name);
-        }
+    // Run it
+    reply = run(cmd);
+    if (reply.has_error() > 0) {
+        throw SRRuntimeException("set_script failed!");
     }
 
     // Done
@@ -622,21 +648,16 @@ void RedisCluster::run_script_multigpu(const std::string& name,
 // Delete a model from the database
 CommandReply RedisCluster::delete_model(const std::string& key)
 {
+    // Build the command
     CommandReply reply;
-    std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
-    for ( ; node != _db_nodes.cend(); node++) {
-        // Build the node prefix
-        std::string prefixed_key = "{" + node->prefix + "}." + key;
+    AddressAllCommand cmd;
+    cmd.key_index = 1;
+    cmd << "AI.MODELDEL" << Keyfield(key);
 
-        // Build the MODELDEL command
-        SingleKeyCommand cmd;
-        cmd << "AI.MODELDEL" << Keyfield(prefixed_key);
-
-        // Run the command
-        reply = run(cmd);
-        if (reply.has_error() > 0) {
-            throw SRRuntimeException("delete_model failed for node " + node->name);
-        }
+    // Run it
+    reply = run(cmd);
+    if (reply.has_error() > 0) {
+        throw SRRuntimeException("delete_model failed!");
     }
 
     // Done
@@ -647,20 +668,14 @@ CommandReply RedisCluster::delete_model(const std::string& key)
 CommandReply RedisCluster::delete_script(const std::string& key)
 {
     CommandReply reply;
-    std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
-    for ( ; node != _db_nodes.cend(); node++) {
-        // Build the node prefix
-        std::string prefixed_key = "{" + node->prefix + "}." + key;
+    AddressAllCommand cmd;
+    cmd.key_index = 1;
+    cmd << "AI.SCRIPTDEL" << Keyfield(key);
 
-        // Build the SCRIPTSET command
-        SingleKeyCommand cmd;
-        cmd << "AI.SCRIPTDEL" << Keyfield(prefixed_key);
-
-        // Run the command
-        reply = run(cmd);
-        if (reply.has_error() > 0) {
-            throw SRRuntimeException("delete_script failed for node " + node->name);
-        }
+    // Run it
+    reply = run(cmd);
+    if (reply.has_error() > 0) {
+        throw SRRuntimeException("delete_script failed!");
     }
 
     // Done

@@ -137,6 +137,16 @@ class RedisCluster : public RedisServer
         virtual CommandReply run(AddressAnyCommand& cmd);
 
         /*!
+        *   \brief Run a non-keyed Command that
+        *          addresses every db node on the server
+        *   \param cmd The non-keyed Command that
+        *              addresses any db node
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAllCommand& cmd);
+
+        /*!
         *   \brief Run multiple single-key or single-hash slot
         *          Command on the server.  Each Command in the
         *          CommandList is run sequentially.

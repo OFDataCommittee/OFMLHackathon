@@ -48,6 +48,7 @@
 #include "compoundcommand.h"
 #include "addressatcommand.h"
 #include "addressanycommand.h"
+#include "addressallcommand.h"
 #include "clusterinfocommand.h"
 #include "dbinfocommand.h"
 #include "gettensorcommand.h"
@@ -120,6 +121,16 @@ class RedisServer {
         *            command execution
         */
         virtual CommandReply run(AddressAnyCommand& cmd) = 0;
+
+        /*!
+        *   \brief Run a non-keyed Command that
+        *          addresses every db node on the server
+        *   \param cmd The non-keyed Command that
+        *              addresses any db node
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAllCommand& cmd) = 0;
 
         /*!
         *   \brief Run multiple single-key or single-hash slot

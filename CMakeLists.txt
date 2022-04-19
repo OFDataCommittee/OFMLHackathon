@@ -60,6 +60,7 @@ set(CLIENT_SRC
     src/cpp/compoundcommand.cpp
     src/cpp/addressatcommand.cpp
     src/cpp/addressanycommand.cpp
+    src/cpp/addressallcommand.cpp
     src/cpp/clusterinfocommand.cpp
     src/cpp/dbinfocommand.cpp
     src/cpp/gettensorcommand.cpp

@@ -45,6 +45,7 @@ include_directories(SYSTEM
 set(SOURCES
 	../../../src/cpp/addressanycommand.cpp
 	../../../src/cpp/addressatcommand.cpp
+	../../../src/cpp/addressallcommand.cpp
 	../../../src/cpp/client.cpp
 	../../../src/cpp/clusterinfocommand.cpp
 	../../../src/cpp/command.cpp

@@ -949,8 +949,8 @@ parsed_reply_nested_map Client::get_db_node_info(std::string address)
         throw SRRuntimeException("INFO EVERYTHING command failed on server");
 
     // Parse the results
-    return DBInfoCommand::parse_db_node_info(std::string(reply.str(),
-                                                        reply.str_len()));
+    std::string db_node_info(reply.str(), reply.str_len());
+    return DBInfoCommand::parse_db_node_info(db_node_info);
 }
 
 // Returns the CLUSTER INFO command reply addressed to a single cluster node.
@@ -971,8 +971,8 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
         throw SRRuntimeException("CLUSTER INFO command failed on server");
 
     // Parse the results
-    return ClusterInfoCommand::parse_db_cluster_info(std::string(reply.str(),
-                                                     reply.str_len()));
+    std::string db_cluster_info(reply.str(), reply.str_len());
+    return ClusterInfoCommand::parse_db_cluster_info(db_cluster_info);
 }
 
 // Returns the AI.INFO command reply

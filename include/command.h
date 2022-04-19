@@ -369,13 +369,27 @@ class Command
         */
         iterator end();
 
-
         /*!
         *   \brief Returns a const iterator pointing to the
         *          past-the-end field in the Command
         *   \returns const Command iterator to the past-the-end field
         */
         const_iterator cend() const;
+
+        /*!
+        *   \brief Returns the number of fields in the Command
+        *   \returns the number of fields in the Command
+        */
+        int get_field_count() const { return _fields.size(); }
+
+        /*!
+        *   \brief Replace a field in a command
+        *   \param new_field The string to swap in
+        *   \param pos The location to swap
+        */
+        void set_field_at(std::string new_field,
+                          size_t pos,
+                          bool is_key=false);
 
     private:
 
