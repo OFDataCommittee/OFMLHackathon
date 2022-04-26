@@ -111,7 +111,7 @@ TensorBase* Tensor<T>::clone()
     }
 }
 
-// Get a pointer to a specificed memory view of the Tensor data
+// Get a pointer to a specified memory view of the Tensor data
 template <class T>
 void* Tensor<T>::data_view(const SRMemoryLayout mem_layout)
 {

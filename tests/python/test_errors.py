@@ -462,6 +462,33 @@ def test_bad_type_run_model_multigpu(use_cluster):
     with pytest.raises(ValueError):
         c.run_model_multigpu("simple_cnn", 0, 0, 0)
 
+def test_bad_type_delete_model_multigpu(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.delete_model_multigpu(42, 0, 1)
+    with pytest.raises(TypeError):
+        c.delete_model_multigpu("simple_cnn",  "not an integer", 1)
+    with pytest.raises(TypeError):
+        c.delete_model_multigpu("simple_cnn", 0, "not an integer")
+    with pytest.raises(ValueError):
+        c.delete_model_multigpu("simple_cnn", -1, 1)
+    with pytest.raises(ValueError):
+        c.delete_model_multigpu("simple_cnn", 0, 0)
+
+def test_bad_type_delete_script_multigpu(use_cluster):
+    c = Client(None, use_cluster)
+    script_name = "my_script"
+    with pytest.raises(TypeError):
+        c.delete_script_multigpu(42, 0, 1)
+    with pytest.raises(TypeError):
+        c.delete_script_multigpu(script_name,  "not an integer", 1)
+    with pytest.raises(TypeError):
+        c.delete_script_multigpu(script_name, 0, "not an integer")
+    with pytest.raises(ValueError):
+        c.delete_script_multigpu(script_name, -1, 1)
+    with pytest.raises(ValueError):
+        c.delete_script_multigpu(script_name, 0, 0)
+
 def test_bad_type_tensor_exists(use_cluster):
     c = Client(None, use_cluster)
     with pytest.raises(TypeError):

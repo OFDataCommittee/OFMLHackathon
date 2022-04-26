@@ -520,6 +520,27 @@ void PyClient::delete_script(const std::string& name)
     }
 }
 
+void PyClient::delete_script_multigpu(
+    const std::string& name, int first_gpu, int num_gpus)
+{
+    try {
+        _client->delete_script_multigpu(name, first_gpu, num_gpus);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing delete_script_multigpu.");
+    }
+}
+
 py::bytes PyClient::get_model(const std::string& name)
 {
     try {
@@ -727,6 +748,27 @@ void PyClient::delete_model(const std::string& name)
         // should never happen
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing delete_model.");
+    }
+}
+
+void PyClient::delete_model_multigpu(
+    const std::string& name, int first_gpu, int num_gpus)
+{
+    try {
+        _client->delete_model_multigpu(name, first_gpu, num_gpus);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing delete_model_multigpu.");
     }
 }
 

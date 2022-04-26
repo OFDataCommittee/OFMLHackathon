@@ -914,5 +914,37 @@ SCENARIO("Testing Multi-GPU Function error cases", "[Client]")
                                 ParameterException);
             }
         }
+        AND_WHEN("delete_model_multigpu() called with invalid number of GPUs")
+        {
+            THEN("An error is thrown")
+            {
+                CHECK_THROWS_AS(client.delete_model_multigpu(model_key, 0, 0),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("delete_model_multigpu() called with invalid first GPU")
+        {
+            THEN("An error is thrown")
+            {
+                CHECK_THROWS_AS(client.delete_model_multigpu(model_key, -1, 1),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("delete_script_multigpu() called with invalid number of GPUs")
+        {
+            THEN("An error is thrown")
+            {
+                CHECK_THROWS_AS(client.delete_script_multigpu(script_key, 0, 0),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("delete_script_multigpu() called with invalid first GPU")
+        {
+            THEN("An error is thrown")
+            {
+                CHECK_THROWS_AS(client.delete_script_multigpu(script_key, -1, 1),
+                                ParameterException);
+            }
+        }
     }
 }

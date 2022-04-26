@@ -515,6 +515,28 @@ class Client(PyClient):
         super().delete_script(name)
 
     @exception_handler
+    def delete_script_multigpu(self, name, first_gpu, num_gpus):
+        """Remove a script from the database
+
+        The script key used to locate the script to be run
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source() and use_model_ensemble_prefix()
+        for more details
+
+        :param name: the name the script is stored under
+        :type name: str
+        :param first_gpu: the first GPU (zero-based) to use in processing this script
+        :type first_gpu: int
+        :param num_gpus: the number of gpus for which the script was stored
+        :type num_gpus: int
+        :raises RedisReplyError: if script deletion fails
+        """
+        typecheck(name, "name", str)
+        typecheck(first_gpu, "first_gpu", int)
+        typecheck(num_gpus, "num_gpus", int)
+        super().delete_script_multigpu(name, first_gpu, num_gpus)
+
+    @exception_handler
     def get_model(self, name):
         """Get a stored model
 
@@ -877,6 +899,28 @@ class Client(PyClient):
         """
         typecheck(name, "name", str)
         super().delete_model(name)
+
+    @exception_handler
+    def delete_model_multigpu(self, name, first_gpu, num_gpus):
+        """Remove a model from the database that was stored for use with multiple GPUs
+
+        The model key used to locate the script to be run
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source() and use_model_ensemble_prefix()
+        for more details
+
+        :param name: the name the model is stored under
+        :type name: str
+        :param first_gpu: the first GPU (zero-based) to use in processing this model
+        :type first_gpu: int
+        :param num_gpus: the number of gpus for which the model was stored
+        :type num_gpus: int
+        :raises RedisReplyError: if model deletion fails
+        """
+        typecheck(name, "name", str)
+        typecheck(first_gpu, "first_gpu", int)
+        typecheck(num_gpus, "num_gpus", int)
+        super().delete_model_multigpu(name, first_gpu, num_gpus)
 
     @exception_handler
     def tensor_exists(self, name):

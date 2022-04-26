@@ -521,7 +521,7 @@ SRError get_script(void* c_client,
                    size_t* script_length);
 
 /*!
-*   \brief Run a script function in the database using the specificed input
+*   \brief Run a script function in the database using the specified input
 *          and output tensors
 *   \details The script key used to locate the script to be run
 *            may be formed by applying a prefix to the supplied
@@ -560,7 +560,7 @@ SRError run_script(void* c_client,
                    const size_t n_outputs);
 
 /*!
-*   \brief Run a model in the database using the specificed input and
+*   \brief Run a model in the database using the specified input and
 *          output tensors
 *   \details The model key used to locate the model to be run
 *            may be formed by applying a prefix to the supplied

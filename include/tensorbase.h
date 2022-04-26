@@ -196,7 +196,7 @@ class TensorBase{
         virtual std::string_view buf();
 
         /*!
-        *   \brief Get a pointer to a specificed memory
+        *   \brief Get a pointer to a specified memory
         *          view of the TensorBase data
         *   \param mem_layout The MemoryLayout enum describing
         *          the layout of data view

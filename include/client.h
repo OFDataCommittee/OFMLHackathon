@@ -587,7 +587,7 @@ class Client
 
         /*!
         *   \brief Run a model in the database using the
-        *          specificed input and output tensors
+        *          specified input and output tensors
         *   \details The model key used to locate the model to be run
         *            may be formed by applying a prefix to the supplied
         *            name. Similarly, the tensor names in the
@@ -641,7 +641,7 @@ class Client
 
         /*!
         *   \brief Run a script function in the database using the
-        *          specificed input and output tensors
+        *          specified input and output tensors
         *   \details The script key used to locate the script to be run
         *            may be formed by applying a prefix to the supplied
         *            name. Similarly, the tensor names in the
@@ -663,7 +663,7 @@ class Client
 
         /*!
         *   \brief Run a script function in the database using the
-        *          specificed input and output tensors in a multi-GPU system
+        *          specified input and output tensors in a multi-GPU system
         *   \details The script key used to locate the script to be run
         *            may be formed by applying a prefix to the supplied
         *            name. Similarly, the tensor names in the
@@ -690,7 +690,8 @@ class Client
                                  int num_gpus);
 
         /*!
-        *   \brief Remove a model from the database
+        *   \brief Remove a model from the database that was stored
+        *          for use with multiple GPUs
         *   \details The model key used to locate the model to be deleted
         *            may be formed by applying a prefix to the supplied
         *            name. See set_data_source() and use_model_ensemble_prefix()
@@ -699,6 +700,21 @@ class Client
         *   \throw SmartRedis::Exception if model deletion fails
         */
         void delete_model(const std::string& name);
+
+        /*!
+        *   \brief Remove a model from the database
+        *   \details The model key used to locate the model to be deleted
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source() and use_model_ensemble_prefix()
+        *            for more details.
+        *            The first_gpu and num_gpus parameters must match those used
+        *            when the model was stored.
+        *   \param name The name associated with the model
+        *   \param first_cpu the first GPU (zero-based) to use with the model
+        *   \param num_gpus the number of gpus for which the model was stored
+        *   \throw SmartRedis::Exception if model deletion fails
+        */
+        void delete_model_multigpu(const std::string& name, int first_gpu, int num_gpus);
 
         /*!
         *   \brief Remove a script from the database
@@ -711,6 +727,21 @@ class Client
         */
         void delete_script(const std::string& name);
 
+        /*!
+        *   \brief Remove a script from the database that was stored
+        *          for use with multiple GPUs
+        *   \details The script key used to locate the script to be deleted
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source() and use_model_ensemble_prefix()
+        *            for more details.
+        *            The first_gpu and num_gpus parameters must match those used
+        *            when the script was stored.
+        *   \param name The name associated with the script
+        *   \param first_cpu the first GPU (zero-based) to use with the script
+        *   \param num_gpus the number of gpus for which the script was stored
+        *   \throw SmartRedis::Exception if script deletion fails
+        */
+        void delete_script_multigpu(const std::string& name, int first_gpu, int num_gpus);
 
         /*!
         *   \brief Check if a key exists in the database
