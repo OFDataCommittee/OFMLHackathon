@@ -148,6 +148,23 @@ class Redis : public RedisServer
         virtual std::vector<CommandReply> run(CommandList& cmd);
 
         /*!
+        *   \brief Run multiple single-key or single-hash slot
+        *          Command on the server in pipelines.  The
+        *          Command in the CommandList will be grouped
+        *          by shard, and executed in groups by shard.
+        *          Commands are not guaranteed to be executed
+        *          in any sequence or ordering.
+        *   \param cmd The CommandList containing multiple
+        *              single-key or single-hash
+        *              slot Command to run
+        *   \returns A list of CommandReply for each Command
+        *            in the CommandList. The order of the result
+        *            matches the order of the input CommandList.
+        */
+        virtual PipelineReply
+        run_via_unordered_pipelines(CommandList& cmd_list);
+
+        /*!
         *   \brief Check if a key exists in the database. This
         *          function does not work for models and scripts.
         *          For models and scripts, model_key_exists should

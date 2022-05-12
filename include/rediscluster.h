@@ -34,6 +34,7 @@
 #include "dbnode.h"
 #include "nonkeyedcommand.h"
 #include "keyedcommand.h"
+#include "pipelinereply.h"
 
 namespace SmartRedis {
 
@@ -157,6 +158,23 @@ class RedisCluster : public RedisServer
         *            in the CommandList
         */
         virtual std::vector<CommandReply> run(CommandList& cmd);
+
+        /*!
+        *   \brief Run multiple single-key or single-hash slot
+        *          Command on the server in pipelines.  The
+        *          Command in the CommandList will be grouped
+        *          by shard, and executed in groups by shard.
+        *          Commands are not guaranteed to be executed
+        *          in any sequence or ordering.
+        *   \param cmd The CommandList containing multiple
+        *              single-key or single-hash
+        *              slot Command to run
+        *   \returns A list of CommandReply for each Command
+        *            in the CommandList. The order of the result
+        *            matches the order of the input CommandList.
+        */
+        virtual PipelineReply
+        run_via_unordered_pipelines(CommandList& cmd_list);
 
         /*!
         *   \brief Check if a key exists in the database. This
@@ -551,6 +569,14 @@ class RedisCluster : public RedisServer
         std::string _get_db_node_prefix(Command& cmd);
 
         /*!
+        *   \brief Get the index of the database node corresponding
+        *          to the provided key
+        *   \param key The command key
+        *   \returns The index in _db_nodes corresponding to the key
+        */
+        inline uint16_t _get_db_node_index(const std::string& key);
+
+        /*!
         *   \brief Processes the CommandReply for CLUSTER SLOTS
         *          to build DBNode information
         *   \param reply The CommandReply for CLUSTER SLOTS
@@ -629,9 +655,9 @@ class RedisCluster : public RedisServer
         *              search (inclusive)
         *   \returns DBNode index responsible for the hash slot
         */
-        uint16_t _get_dbnode_index(uint16_t hash_slot,
-                                   unsigned lhs,
-                                   unsigned rhs);
+        uint16_t _db_node_hash_search(uint16_t hash_slot,
+                                      unsigned lhs,
+                                      unsigned rhs);
 
         /*!
         *   \brief  Attaches a prefix and constant suffix to keys to
@@ -676,6 +702,22 @@ class RedisCluster : public RedisServer
         DBNode* _get_model_script_db(const std::string& name,
                                      std::vector<std::string>& inputs,
                                      std::vector<std::string>& outputs);
+
+        /*!
+        *   \brief Execute a pipeline for the provided commands.
+        *          The provided commands MUST be executable on a single
+        *          shard.
+        *   \param cmds Vector of Command pointers to execute
+        *   \param shard_prefix The prefix corresponding to the shard
+        *                       where the pipeline is executed
+        *   \throw SmartRedis::Exception if an error is encountered following
+        *          multiple attempts
+        *   \return A PipelineReply for the provided commands.  The
+        *           PipelineReply will be in the same order as the provided
+        *           Command vector.
+        */
+        PipelineReply _run_pipeline(std::vector<Command*>& cmds,
+                                    std::string& shard_prefix);
 };
 
 } //namespace SmartRedis

@@ -48,6 +48,13 @@ target_link_libraries(client_test_dataset
   ${SR_LIB}
 )
 
+add_executable(client_test_dataset_aggregation
+  client_test_dataset_aggregation.cpp
+)
+target_link_libraries(client_test_dataset_aggregation
+  ${SR_LIB}
+)
+
 add_executable(client_test_dataset_no_tensors
   client_test_dataset_no_tensors.cpp
 )

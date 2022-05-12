@@ -324,6 +324,54 @@ metadata field to be retrieved, and this name is the same name that
 was used when constructing the metadata field with
 ``add_meta_scalar()`` and ``add_meta_string()`` functions.
 
+Aggregating
+-----------
+
+An API is provided to aggregate multiple ``DataSet`` objects that
+are stored on one or more database nodes.  This is accomplished
+through an interface referred to as ``aggregation lists``.
+An ``aggregation list`` in SmartRedis stores references to
+``DataSet`` objects that are stored in the database.  ``DataSet``
+objects can be appended to the ``aggregation list`` and then
+``SmartRedis`` clients in the same application or a different application
+can retrieve all or some of the ``DataSet`` objects referenced in that
+``aggregation list``.
+
+For example, the C++ client function to append a ``DataSet`` to an
+aggregation list is shown below:
+
+.. code-block:: cpp
+
+    # C++ aggregation list append interface
+    void append_to_list(const std::string& list_name,
+                        const DataSet& dataset);
+
+The above function will append the provided ``DataSet`` to the
+``aggregation list``, which can be referenced in all user-facing functions
+by the provided list name.  Note that a list can be appended by
+any client in the same or different application.  Additionally, all
+appends are performed at the end of the list, and if the list does not
+already exist, it is automatically created.
+
+For retrieval of ``aggregation list`` contents,
+the SmartRedis ``Client`` method provides an API function that
+will return an iterable container with all of the ``DataSet`` objects
+that were appended to the ``aggregation list``.  For example, the C++ client
+function to retrieve the ``aggregation list`` contents is shown below:
+
+.. code-block:: cpp
+
+    # C++ aggregation list retrieval interface
+    std::vector<DataSet> get_datasets_from_list(const std::string& list_name);
+
+Additional functions are provided to retrieve only a portion of the
+``aggregation list`` contents, copy an ``aggregation list``, rename
+an ``aggregation list` and retrieve ``aggregation list`` length.
+A blocking method to poll the ``aggregation list`` length is also
+provided as a means to wait for list completion before performing
+another task in the same application or a separate application.
+
+
 Model
 =====
 

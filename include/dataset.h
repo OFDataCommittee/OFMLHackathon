@@ -281,7 +281,7 @@ class DataSet
         *   \brief Retrieve the name of the DataSet
         *   \returns The name of the DataSet
         */
-        std::string get_name() { return _dsname; }
+        std::string get_name() const { return _dsname; }
 
         /*!
         *   \brief Change the name for the DataSet

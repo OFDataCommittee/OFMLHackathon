@@ -100,6 +100,23 @@ std::vector<CommandReply> Redis::run(CommandList& cmds)
     return replies;
 }
 
+PipelineReply
+Redis::run_via_unordered_pipelines(CommandList& cmd_list)
+{
+    // Get pipeline object (no new connection)
+    sw::redis::Pipeline pipeline = _redis->pipeline(false);
+
+    // Iterator over all commands and add to pipeline
+    CommandList::iterator cmd = cmd_list.begin();
+
+    for ( ; cmd != cmd_list.end(); cmd++) {
+        pipeline.command((*cmd)->cbegin(), (*cmd)->cend());
+    }
+
+    // Execute the pipeline and return value
+    return PipelineReply(pipeline.exec());
+}
+
 // Check if a model or script key exists in the database
 bool Redis::model_key_exists(const std::string& key)
 {

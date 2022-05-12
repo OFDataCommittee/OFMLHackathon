@@ -274,21 +274,21 @@ class CommandReply {
         void print_reply_structure(std::string index_tracker="reply[0]");
 
 
-    private:
-
         /*!
         *   \brief Helper function for getting a CommandReply
         *          constructed from shallow copying a redisReply
         *   \param reply redisReply for construction
         */
-        CommandReply shallow_clone(redisReply* reply);
+        static CommandReply shallow_clone(redisReply* reply);
 
         /*!
         *   \brief Helper function for doing a deep copy of a
         *          redisReply
         *   \param reply redisReply to copy
         */
-        redisReply* deep_clone_reply(const redisReply* reply);
+        static redisReply* deep_clone_reply(const redisReply* reply);
+
+    private:
 
         /*!
         *   \brief RedisReplyUPtr that can hold redis reply data

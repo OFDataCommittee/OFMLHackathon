@@ -61,6 +61,7 @@ set(SOURCES
 	../../../src/cpp/metadatafield.cpp
 	../../../src/cpp/multikeycommand.cpp
 	../../../src/cpp/nonkeyedcommand.cpp
+    ../../../src/cpp/pipelinereply.cpp
 	../../../src/cpp/redis.cpp
 	../../../src/cpp/rediscluster.cpp
 	../../../src/cpp/redisserver.cpp
@@ -73,6 +74,7 @@ set(SOURCES
 # The unit tests to be executed
 set(UNIT_TESTS
 	main.cpp
+    test_aggregation_list.cpp
 	test_client.cpp
 	test_client_ensemble.cpp
 	test_dataset.cpp

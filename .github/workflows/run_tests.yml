@@ -145,9 +145,9 @@ jobs:
 
       - name: Setup local redis servers
         run: |
-          redis-server --port 7000 --daemonize yes --cluster-enabled yes --cluster-config-file 7000.conf --protected-mode no --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so  &
-          redis-server --port 7001 --daemonize yes --cluster-enabled yes --cluster-config-file 7001.conf --protected-mode no --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so  &
-          redis-server --port 7002 --daemonize yes --cluster-enabled yes --cluster-config-file 7002.conf --protected-mode no --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so
+          redis-server --port 7000 --daemonize yes --cluster-enabled yes --cluster-config-file 7000.conf --protected-mode no --save "" --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so &
+          redis-server --port 7001 --daemonize yes --cluster-enabled yes --cluster-config-file 7001.conf --protected-mode no --save "" --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so &
+          redis-server --port 7002 --daemonize yes --cluster-enabled yes --cluster-config-file 7002.conf --protected-mode no --save "" --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so
 
       - name: Overwrite redis cluster env vars
         run: |

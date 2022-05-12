@@ -75,6 +75,7 @@ set(CLIENT_SRC
     src/cpp/redis.cpp
     src/cpp/metadatafield.cpp
     src/cpp/stringfield.cpp
+    src/cpp/pipelinereply.cpp
     src/fortran/fortran_c_interop.F90
     src/fortran/dataset.F90
     src/fortran/client.F90)

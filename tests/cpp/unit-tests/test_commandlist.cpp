@@ -89,6 +89,18 @@ SCENARIO("Testing CommandList object", "[CommandList]")
                 }
             }
 
+            AND_THEN("The [] operator can be used to retrieve a Command "\
+                     "reference")
+            {
+                Command& first_cmd = cmd_lst[0];
+                CHECK(first_cmd.cbegin() != first_cmd.cend());
+            }
+
+            AND_THEN("An error is thrown if the [] operator is out of range")
+            {
+                CHECK_THROWS_AS(cmd_lst[1000], InternalException);
+            }
+
             AND_THEN("A new CommandList object can be constructed "
                      "with the move constructor")
             {

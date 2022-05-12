@@ -27,6 +27,8 @@ large, distributed HPC architectures:
     maintain contextual relationships between tensors.
     This is useful when clients produce tensors and
     metadata that are referenced or utilized together.
+-   An API for efficiently aggregating ``DataSet`` objects
+    distributed on more or more database node
 -   Compatibility with SmartSim ensemble capabilities to
     prevent key collisions with
     tensors, ``DataSet``, models, and scripts when
