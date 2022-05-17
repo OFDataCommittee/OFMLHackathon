@@ -224,28 +224,75 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
     std::vector<size_t> cmd_list_index_ooe;
     cmd_list_index_ooe.reserve(cmd_list.size());
 
+    volatile size_t pipeline_completion_count = 0;
+    size_t num_shards = shard_cmd_index_list.size();
+    Exception error_response = Exception("no error");
+    bool success_status[num_shards];
+    std::mutex results_mutex;
+
     // Loop over all shards and execute pipelines
-    for (size_t s = 0; s < shard_cmd_index_list.size(); s++) {
-
-        // Only execute if there are commands
-        if (shard_cmd_index_list[s].size() == 0)
-            continue;
-
+    for (size_t s = 0; s < num_shards; s++) {
         // Get shard prefix
         std::string shard_prefix = _db_nodes[s].prefix;
 
-        // Build and execute the pipeline
-        PipelineReply reply =
-            _run_pipeline(shard_cmds[s], shard_prefix);
+        // Only execute if there are commands
+        if (shard_cmd_index_list[s].size() == 0) {
+            success_status[s] = true;
+            {
+                // Avoid race condition on update of completion_count
+                std::unique_lock<std::mutex> lock(results_mutex);
+                ++pipeline_completion_count;
+            } // End scope and release lock
+            continue;
+        }
 
-        // Add the CommandList indices into vector for later reordering
-        cmd_list_index_ooe.insert(cmd_list_index_ooe.end(),
-                                  shard_cmd_index_list[s].begin(),
-                                  shard_cmd_index_list[s].end());
+        // Submit a task to execute these commands
+        _tp->submit_job([this, &shard_cmds, s, shard_prefix, &success_status,
+                         &results_mutex, &cmd_list_index_ooe,
+                         &shard_cmd_index_list, &all_replies,
+                         &pipeline_completion_count, &error_response]() mutable
+        {
+            // Run the pipeline, catching any exceptions thrown
+            PipelineReply reply;
+            try {
+                reply = _run_pipeline(shard_cmds[s], shard_prefix);
+                success_status[s] = true;
+            }
+            catch (Exception& e) {
+                error_response = e;
+                success_status[s] = false;
+            }
 
+            // Acquire the lock to store our results
+            {
+                std::unique_lock<std::mutex> results_lock(results_mutex);
 
-        // Append to all_replies via move
-        all_replies += std::move(reply);
+                // Skip storing results if we hit an error
+                if (success_status[s]) {
+                    // Add the CommandList indices into vector for later reordering
+                    cmd_list_index_ooe.insert(cmd_list_index_ooe.end(),
+                                            shard_cmd_index_list[s].begin(),
+                                            shard_cmd_index_list[s].end());
+
+                    // Store results
+                    all_replies += std::move(reply);
+                }
+
+                // Increment completion counter
+                ++pipeline_completion_count;
+            }  // Release the lock
+        });
+    }
+
+    // Wait until all jobs have finished
+    while (pipeline_completion_count != num_shards)
+        ; // Spin
+
+    // Throw an exception if one was generated in processing the threads
+    for (size_t i = 0; i < num_shards; i++) {
+        if (!success_status[i]) {
+            throw error_response;
+        }
     }
 
     // Reorder the command replies in all_replies to align

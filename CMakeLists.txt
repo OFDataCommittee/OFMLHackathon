@@ -33,7 +33,7 @@ option(BUILD_PYTHON "Build the python module" ON)
 set(CMAKE_BUILD_TYPE RELEASE)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
-add_link_options(-lpthread)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 add_compile_options(-fvisibility=default)
 
@@ -43,6 +43,7 @@ endif()
 
 find_library(REDISPP redis++ PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
 find_library(HIREDIS hiredis PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
+find_package(Threads REQUIRED)
 
 set(EXT_CLIENT_LIBRARIES ${REDISPP} ${HIREDIS})
 
@@ -76,6 +77,7 @@ set(CLIENT_SRC
     src/cpp/metadatafield.cpp
     src/cpp/stringfield.cpp
     src/cpp/pipelinereply.cpp
+    src/cpp/threadpool.cpp
     src/fortran/fortran_c_interop.F90
     src/fortran/dataset.F90
     src/fortran/client.F90)
@@ -89,7 +91,7 @@ include_directories(SYSTEM
 # Build dynamic library
 add_library(smartredis SHARED ${CLIENT_SRC})
 set_target_properties(smartredis PROPERTIES SUFFIX ".so")
-target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES})
+target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES} PRIVATE Threads::Threads)
 
 # Install dynamic library and headers
 install(TARGETS smartredis

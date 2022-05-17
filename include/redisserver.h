@@ -53,6 +53,7 @@
 #include "dbinfocommand.h"
 #include "gettensorcommand.h"
 #include "pipelinereply.h"
+#include "threadpool.h"
 
 ///@file
 
@@ -75,9 +76,9 @@ class RedisServer {
         RedisServer();
 
         /*!
-        *   \brief Default destructor
+        *   \brief Destructor
         */
-        virtual ~RedisServer() = default;
+        virtual ~RedisServer();
 
         /*!
         *   \brief Run a single-key Command on the server
@@ -557,6 +558,13 @@ class RedisServer {
         static constexpr int _DEFAULT_CMD_INTERVAL = 1000;
 
         /*!
+        *   \brief Default number of threads for thread pool
+        *          (zero, special value that translates to one
+        *          per hardware context)
+        */
+        static constexpr int _DEFAULT_THREAD_COUNT = 0;
+
+        /*!
         *   \brief Seeding for the random number engine
         */
         std::random_device _rd;
@@ -565,6 +573,16 @@ class RedisServer {
         *   \brief Random number generator
         */
         std::mt19937 _gen;
+
+        /*!
+        *   \brief Number of threads for thread pool
+        */
+        int _thread_count;
+
+        /*!
+        *   \brief The thread pool
+        */
+        ThreadPool *_tp;
 
         /*!
         *   \brief Environment variable for connection timeout
@@ -595,6 +613,12 @@ class RedisServer {
         */
         inline static const std::string _MODEL_TIMEOUT_ENV_VAR =
             "SR_MODEL_TIMEOUT";
+
+        /*!
+        *   \brief Environment variable for thread count in thread pool
+        */
+        inline static const std::string _TP_THREAD_COUNT =
+            "SR_THREAD_COUNT";
 
         /*!
         *   \brief Retrieve a single address, randomly

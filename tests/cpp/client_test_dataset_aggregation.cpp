@@ -154,7 +154,6 @@ int main(int argc, char* argv[]) {
     client.append_to_list(list_name, dataset_3);
     client.append_to_list(list_name, dataset_4);
 
-
     int actual_length = 4;
 
     // Confirm that poll for list length works correctly
@@ -173,7 +172,6 @@ int main(int argc, char* argv[]) {
                                  " returned true for known length of " +
                                  std::to_string(actual_length) + ".");
     }
-
 
     // Confirm that poll for greater than or equal list length works correctly
     poll_result = client.poll_list_length_gte(list_name, actual_length - 1, 100, 5);
@@ -233,7 +231,6 @@ int main(int argc, char* argv[]) {
 
     // Check the list length
     int list_length = client.get_list_length(list_name);
-
     if (list_length != actual_length) {
         throw std::runtime_error("The list length of " +
                                  std::to_string(list_length) +

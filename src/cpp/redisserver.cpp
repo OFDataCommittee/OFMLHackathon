@@ -44,6 +44,8 @@ RedisServer::RedisServer()
                            _DEFAULT_CMD_TIMEOUT);
     _init_integer_from_env(_command_interval, _CMD_INTERVAL_ENV_VAR,
                            _DEFAULT_CMD_INTERVAL);
+    _init_integer_from_env(_thread_count, _TP_THREAD_COUNT,
+                           _DEFAULT_THREAD_COUNT);
 
     _check_runtime_variables();
 
@@ -52,7 +54,18 @@ RedisServer::RedisServer()
 
     _command_attempts = (_command_timeout * 1000) /
                          _command_interval + 1;
+
+    _tp = new ThreadPool(_thread_count);
 }
+
+// RedisServer destructor
+RedisServer::~RedisServer()
+{
+    // Terminate the thread pool
+    _tp->shutdown();
+    delete _tp;
+}
+
 
 // Retrieve a single address, randomly chosen from a list of addresses if
 // applicable, from the SSDB environment variable

@@ -30,6 +30,8 @@
 #define SMARTREDIS_CPP_CLUSTER_H
 
 #include <unordered_set>
+#include <mutex>
+
 #include "redisserver.h"
 #include "dbnode.h"
 #include "nonkeyedcommand.h"
