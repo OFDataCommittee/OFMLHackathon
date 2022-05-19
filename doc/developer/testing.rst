@@ -1,7 +1,24 @@
 *******************
-Unit Test Framework
+Testing Description
 *******************
 
+##################
+Quick instructions
+##################
+
+To run the tests, assuming that all requirements have been installed
+1. Activate your environment with SmartSim and SmartRedis installed
+2. Modify `SMARTREDIS_TEST_CLUSTER` (`True` or `False` and 
+   `SMARTREDIS_TEST_DEVICE` (`gpu` or `cpu`) as necessary in
+   `setup_test_env.sh`.
+3. `source setup_test_env.sh`
+4. `pushd utils/create_cluster; python local_cluster.py; popd`
+5. `export SSDB="127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381"`
+5. Run the desired tests (see `make help` for more details)
+
+###################
+Unit Test Framework
+###################
 All unit tests for the C++ client are located at ``tests/cpp/unit-tests/`` and use the Catch2
 test framework. The unit tests mostly follow a Behavior Driven Development (BDD) style by
 using Catch2's ``SCENARIO``, ``GIVEN``, ``WHEN``, and ``THEN`` syntax.

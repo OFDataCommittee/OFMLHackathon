@@ -376,7 +376,7 @@ class Client
         *   \param model_file The source file for the model
         *   \param backend The name of the backend
         *                  (TF, TFLITE, TORCH, ONNX)
-        *   \param first_cpu the first GPU (zero-based) to use with the model
+        *   \param first_gpu the first GPU (zero-based) to use with the model
         *   \param num_gpus The number of GPUs to use with the model
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
@@ -455,7 +455,7 @@ class Client
         *   \param model The model as a continuous buffer string_view
         *   \param backend The name of the backend
         *                  (TF, TFLITE, TORCH, ONNX)
-        *   \param first_cpu the first GPU (zero-based) to use with the model
+        *   \param first_gpu the first GPU (zero-based) to use with the model
         *   \param num_gpus The number of GPUs to use with the model
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
@@ -524,7 +524,7 @@ class Client
         *            for more details.
         *   \param name The name to associate with the script
         *   \param script_file The source file for the script
-        *   \param first_cpu the first GPU (zero-based) to use with the script
+        *   \param first_gpu the first GPU (zero-based) to use with the script
         *   \param num_gpus The number of GPUs to use with the script
         *   \throw SmartRedis::Exception if multi-GPU set script command fails
         */
@@ -561,7 +561,7 @@ class Client
         *            for more details.
         *   \param name The name to associate with the script
         *   \param script The script source in a std::string_view
-        *   \param first_cpu the first GPU (zero-based) to use with the script
+        *   \param first_gpu the first GPU (zero-based) to use with the script
         *   \param num_gpus The number of GPUs to use with the script
         *   \throw SmartRedis::Exception if multi-GPU set script command fails
         */
@@ -628,7 +628,7 @@ class Client
         *                  to save model results
         *   \param offset index of the current image, such as a processor
         *                   ID or MPI rank
-        *   \param first_cpu the first GPU (zero-based) to use with the model
+        *   \param first_gpu the first GPU (zero-based) to use with the model
         *   \param num_gpus the number of gpus for which the script was stored
         *   \throw SmartRedis::Exception if run model command fails
         */
@@ -677,7 +677,7 @@ class Client
         *                  to save script results
         *   \param offset index of the current image, such as a processor
         *                   ID or MPI rank
-        *   \param first_cpu the first GPU (zero-based) to use with the script
+        *   \param first_gpu the first GPU (zero-based) to use with the script
         *   \param num_gpus the number of gpus for which the script was stored
         *   \throw SmartRedis::Exception if run script command fails
         */
@@ -690,8 +690,7 @@ class Client
                                  int num_gpus);
 
         /*!
-        *   \brief Remove a model from the database that was stored
-        *          for use with multiple GPUs
+        *   \brief Remove a model from the database
         *   \details The model key used to locate the model to be deleted
         *            may be formed by applying a prefix to the supplied
         *            name. See set_data_source() and use_model_ensemble_prefix()
@@ -702,7 +701,8 @@ class Client
         void delete_model(const std::string& name);
 
         /*!
-        *   \brief Remove a model from the database
+        *   \brief Remove a model from the database that was stored
+        *          for use with multiple GPUs
         *   \details The model key used to locate the model to be deleted
         *            may be formed by applying a prefix to the supplied
         *            name. See set_data_source() and use_model_ensemble_prefix()

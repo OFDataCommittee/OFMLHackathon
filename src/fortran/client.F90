@@ -101,24 +101,40 @@ type, public :: client_type
   procedure :: copy_tensor
   !> Set a model from a file
   procedure :: set_model_from_file
+  !> Set a model from a file on a system with multiple GPUs
+  procedure :: set_model_from_file_multigpu
   !> Set a model from a byte string that has been loaded within the application
   procedure :: set_model
+  !> Set a model from a byte string that has been loaded within the application on a system with multiple GPUs
+  procedure :: set_model_multigpu
   !> Retrieve the model as a byte string
   procedure :: get_model
   !> Set a script from a specified file
   procedure :: set_script_from_file
+  !> Set a script from a specified file on a system with multiple GPUS
+  procedure :: set_script_from_file_multigpu
   !> Set a script as a byte or text string
   procedure :: set_script
+  !> Set a script as a byte or text string on a system with multiple GPUs
+  procedure :: set_script_multigpu
   !> Retrieve the script from the database
   procedure :: get_script
   !> Run a script that has already been stored in the database
   procedure :: run_script
+  !> Run a script that has already been stored in the database with multiple GPUs
+  procedure :: run_script_multigpu
   !> Run a model that has already been stored in the database
   procedure :: run_model
+  !> Run a model that has already been stored in the database with multiple GPUs
+  procedure :: run_model_multigpu
   !> Remove a script from the database
   procedure :: delete_script
+  !> Remove a script from the database with multiple GPUs
+  procedure :: delete_script_multigpu
   !> Remove a model from the database
   procedure :: delete_model
+  !> Remove a model from the database with multiple GPUs
+  procedure :: delete_model_multigpu
   !> Put a SmartRedis dataset into the database
   procedure :: put_dataset
   !> Retrieve a SmartRedis dataset from the database
@@ -668,14 +684,109 @@ function set_model_from_file(self, name, model_file, backend, device, batch_size
                              c_backend, backend_length, c_device, device_length, c_batch_size, c_min_batch_size, &
                              c_tag, tag_length, inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, &
                              output_lengths_ptr, n_outputs)
-  deallocate(c_inputs)
-  deallocate(input_lengths)
-  deallocate(ptrs_to_inputs)
-  deallocate(c_outputs)
-  deallocate(output_lengths)
-  deallocate(ptrs_to_outputs)
-  deallocate(c_tag)
+  if (allocated(c_inputs))        deallocate(c_inputs)
+  if (allocated(input_lengths))   deallocate(input_lengths)
+  if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
+  if (allocated(c_outputs))       deallocate(c_outputs)
+  if (allocated(output_lengths))  deallocate(output_lengths)
+  if (allocated(ptrs_to_outputs)) deallocate(ptrs_to_outputs)
 end function set_model_from_file
+
+!> Load the machine learning model from a file and set the configuration for use in multi-GPU systems
+function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu, num_gpus, batch_size, min_batch_size, &
+                                      tag, inputs, outputs) result(code)
+  class(client_type),                       intent(in) :: self           !< An initialized SmartRedis client
+  character(len=*),                         intent(in) :: name           !< The name to use to place the model
+  character(len=*),                         intent(in) :: model_file     !< The file storing the model
+  character(len=*),                         intent(in) :: backend        !< The name of the backend (TF, TFLITE, TORCH, ONNX)
+  integer,                                  intent(in) :: first_gpu      !< The first GPU (zero-based) to use with the model
+  integer,                                  intent(in) :: num_gpus       !< The number of GPUs to use with the model
+  integer,                        optional, intent(in) :: batch_size     !< The batch size for model execution
+  integer,                        optional, intent(in) :: min_batch_size !< The minimum batch size for model execution
+  character(len=*),               optional, intent(in) :: tag            !< A tag to attach to the model for
+                                                                         !! information purposes
+  character(len=*), dimension(:), optional, intent(in) :: inputs         !< One or more names of model input nodes (TF
+                                                                         !! models)
+  character(len=*), dimension(:), optional, intent(in) :: outputs        !< One or more names of model output nodes (TF models)
+  integer(kind=enum_kind)                              :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  character(kind=c_char, len=len_trim(model_file)) :: c_model_file
+  character(kind=c_char, len=len_trim(backend)) :: c_backend
+  character(kind=c_char, len=:), allocatable :: c_tag
+
+  character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
+  character(kind=c_char,len=1), target, dimension(1) :: dummy_inputs, dummy_outputs
+
+  integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
+  integer(kind=c_size_t) :: name_length, model_file_length, backend_length, tag_length, n_inputs, &
+                            n_outputs
+  integer(kind=c_int)    :: c_batch_size, c_min_batch_size, c_first_gpu, c_num_gpus
+  type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
+  type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
+
+  integer :: i
+  integer :: max_length, length
+
+  ! Set default values for the optional inputs
+  c_batch_size = 0
+  if (present(batch_size)) c_batch_size = batch_size
+  c_min_batch_size = 0
+  if (present(min_batch_size)) c_min_batch_size = min_batch_size
+  if (present(tag)) then
+    allocate(character(kind=c_char, len=len_trim(tag)) :: c_tag)
+    c_tag = tag
+    tag_length = len_trim(tag)
+  else
+    allocate(character(kind=c_char, len=1) :: c_tag)
+    c_tag = ''
+    tag_length = 1
+  endif
+
+  ! Cast to c_char kind stringts
+  c_name = trim(name)
+  c_model_file = trim(model_file)
+  c_backend = trim(backend)
+
+  name_length = len_trim(name)
+  model_file_length = len_trim(model_file)
+  backend_length = len_trim(backend)
+
+  ! Convert to C int
+  c_first_gpu = first_gpu
+  c_num_gpus  = num_gpus
+
+  dummy_inputs = ''
+  if (present(inputs)) then
+    call convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
+                                  n_inputs)
+  else
+    call convert_char_array_to_c(dummy_inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr,&
+                                  n_inputs)
+  endif
+
+  dummy_outputs =''
+  if (present(outputs)) then
+    call convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, output_lengths_ptr,&
+                                  n_outputs)
+  else
+    call convert_char_array_to_c(dummy_outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+                                  output_lengths_ptr, n_outputs)
+  endif
+
+  code = set_model_from_file_multigpu_c(self%client_ptr, c_name, name_length, c_model_file, model_file_length, &
+                             c_backend, backend_length, c_first_gpu, c_num_gpus, c_batch_size, c_min_batch_size, &
+                             c_tag, tag_length, inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, &
+                             output_lengths_ptr, n_outputs)
+
+  if (allocated(c_inputs))        deallocate(c_inputs)
+  if (allocated(input_lengths))   deallocate(input_lengths)
+  if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
+  if (allocated(c_outputs))       deallocate(c_outputs)
+  if (allocated(output_lengths))  deallocate(output_lengths)
+  if (allocated(ptrs_to_outputs)) deallocate(ptrs_to_outputs)
+end function set_model_from_file_multigpu
 
 !> Establish a model to run
 function set_model(self, name, model, backend, device, batch_size, min_batch_size, tag, &
@@ -737,15 +848,82 @@ function set_model(self, name, model, backend, device, batch_size, min_batch_siz
                  c_device, device_length, batch_size, min_batch_size, c_tag, tag_length, &
                  inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, output_lengths_ptr, n_outputs)
 
-  deallocate(c_inputs)
-  deallocate(input_lengths)
-  deallocate(ptrs_to_inputs)
-  deallocate(c_outputs)
-  deallocate(output_lengths)
-  deallocate(ptrs_to_outputs)
+  if (allocated(c_inputs))        deallocate(c_inputs)
+  if (allocated(input_lengths))   deallocate(input_lengths)
+  if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
+  if (allocated(c_outputs))       deallocate(c_outputs)
+  if (allocated(output_lengths))  deallocate(output_lengths)
+  if (allocated(ptrs_to_outputs)) deallocate(ptrs_to_outputs)
 end function set_model
 
-!> Execute a model
+!> Set a model from a byte string to run on a system with multiple GPUs
+function set_model_multigpu(self, name, model, backend, first_gpu, num_gpus, batch_size, min_batch_size, tag, &
+    inputs, outputs) result(code)
+  class(client_type),             intent(in) :: self           !< An initialized SmartRedis client
+  character(len=*),               intent(in) :: name           !< The name to use to place the model
+  character(len=*),               intent(in) :: model          !< The binary representation of the model
+  character(len=*),               intent(in) :: backend        !< The name of the backend (TF, TFLITE, TORCH, ONNX)
+  integer,                        intent(in) :: first_gpu      !< The first GPU (zero-based) to use with the model
+  integer,                        intent(in) :: num_gpus       !< The number of GPUs to use with the model
+  integer,                        intent(in) :: batch_size     !< The batch size for model execution
+  integer,                        intent(in) :: min_batch_size !< The minimum batch size for model execution
+  character(len=*),               intent(in) :: tag            !< A tag to attach to the model for information purposes
+  character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of model input nodes (TF models)
+  character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of model output nodes (TF models)
+  integer(kind=enum_kind)                    :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  character(kind=c_char, len=len_trim(model)) :: c_model
+  character(kind=c_char, len=len_trim(backend)) :: c_backend
+  character(kind=c_char, len=len_trim(tag)) :: c_tag
+
+  character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
+
+  integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
+  integer(kind=c_size_t) :: name_length, model_length, backend_length, tag_length, n_inputs, n_outputs
+  integer(kind=c_int)    :: c_batch_size, c_min_batch_size, c_first_gpu, c_num_gpus
+  type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
+  type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
+
+  integer :: i
+  integer :: max_length, length
+
+  c_name = trim(name)
+  c_model = trim(model)
+  c_backend = trim(backend)
+  c_tag = trim(tag)
+
+  name_length = len_trim(name)
+  model_length = len_trim(model)
+  backend_length = len_trim(backend)
+  tag_length = len_trim(tag)
+
+  ! Copy the input array into a c_char
+  call convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
+                                n_inputs)
+  call convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+                                output_lengths_ptr, n_outputs)
+
+  ! Cast the batch sizes to C integers
+  c_batch_size = batch_size
+  c_min_batch_size = min_batch_size
+  c_first_gpu = first_gpu
+  c_num_gpus = num_gpus
+
+  code = set_model_multigpu_c(self%client_ptr, c_name, name_length, c_model, model_length, c_backend, backend_length, &
+                 c_first_gpu, c_num_gpus, c_batch_size, c_min_batch_size, c_tag, tag_length, &
+                 inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, output_lengths_ptr, n_outputs)
+
+  if (allocated(c_inputs))        deallocate(c_inputs)
+  if (allocated(input_lengths))   deallocate(input_lengths)
+  if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
+  if (allocated(c_outputs))       deallocate(c_outputs)
+  if (allocated(output_lengths))  deallocate(output_lengths)
+  if (allocated(ptrs_to_outputs)) deallocate(ptrs_to_outputs)
+end function set_model_multigpu
+
+!> Run a model in the database using the specified input and output tensors
 function run_model(self, name, inputs, outputs) result(code)
   class(client_type),             intent(in) :: self    !< An initialized SmartRedis client
   character(len=*),               intent(in) :: name    !< The name to use to place the model
@@ -776,13 +954,61 @@ function run_model(self, name, inputs, outputs) result(code)
   code = run_model_c(self%client_ptr, c_name, name_length, inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, &
                           output_lengths_ptr, n_outputs)
 
-  deallocate(c_inputs)
-  deallocate(input_lengths)
-  deallocate(ptrs_to_inputs)
-  deallocate(c_outputs)
-  deallocate(output_lengths)
-  deallocate(ptrs_to_outputs)
+  if (allocated(c_inputs))        deallocate(c_inputs)
+  if (allocated(input_lengths))   deallocate(input_lengths)
+  if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
+  if (allocated(c_outputs))       deallocate(c_outputs)
+  if (allocated(output_lengths))  deallocate(output_lengths)
+  if (allocated(ptrs_to_outputs)) deallocate(ptrs_to_outputs)
 end function run_model
+
+!> Run a model in the database using the specified input and output tensors in a multi-GPU system
+function run_model_multigpu(self, name, inputs, outputs, offset, first_gpu, num_gpus) result(code)
+  class(client_type),             intent(in) :: self    !< An initialized SmartRedis client
+  character(len=*),               intent(in) :: name    !< The name to use to place the model
+  character(len=*), dimension(:), intent(in) :: inputs  !< One or more names of model input nodes (TF models)
+  character(len=*), dimension(:), intent(in) :: outputs !< One or more names of model output nodes (TF models)
+  integer,                        intent(in) :: offset  !< Index of the current image, such as a processor ID
+                                                        !! or MPI rank
+  integer,                        intent(in) :: first_gpu !< The first GPU (zero-based) to use with the model
+  integer,                        intent(in) :: num_gpus  !< The number of GPUs to use with the model
+  integer(kind=enum_kind)                    :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
+
+  integer(kind=c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
+  integer(kind=c_size_t) :: n_inputs, n_outputs, name_length
+  integer(kind=c_int) :: c_first_gpu, c_num_gpus, c_offset
+  type(c_ptr) :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
+  type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
+
+  integer :: i
+  integer :: max_length, length
+
+  c_name = trim(name)
+  name_length = len_trim(name)
+
+  call convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
+                                n_inputs)
+  call convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+                                output_lengths_ptr, n_outputs)
+
+  ! Cast to c integer
+  c_offset = offset
+  c_first_gpu = first_gpu
+  c_num_gpus = num_gpus
+  code = run_model_multigpu_c(self%client_ptr, c_name, name_length, inputs_ptr, input_lengths_ptr, n_inputs, &
+                              outputs_ptr, output_lengths_ptr, n_outputs, c_offset, c_first_gpu, c_num_gpus)
+
+  if (allocated(c_inputs))        deallocate(c_inputs)
+  if (allocated(input_lengths))   deallocate(input_lengths)
+  if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
+  if (allocated(c_outputs))       deallocate(c_outputs)
+  if (allocated(output_lengths))  deallocate(output_lengths)
+  if (allocated(ptrs_to_outputs)) deallocate(ptrs_to_outputs)
+end function run_model_multigpu
 
 !> Remove a model from the database
 function delete_model(self, name) result(code)
@@ -799,6 +1025,27 @@ function delete_model(self, name) result(code)
 
   code = delete_model_c(self%client_ptr, c_name, name_length)
 end function delete_model
+
+!> Remove a model from the database
+function delete_model_multigpu(self, name, first_gpu, num_gpus) result(code)
+  class(client_type),             intent(in) :: self    !< An initialized SmartRedis client
+  character(len=*),               intent(in) :: name    !< The name to use to remove the model
+  integer,                        intent(in) :: first_gpu !< The first GPU (zero-based) to use with the model
+  integer,                        intent(in) :: num_gpus !< The number of GPUs to use with the model
+  integer(kind=enum_kind)                    :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  integer(kind=c_size_t) :: name_length
+  integer(kind=c_int)    :: c_first_gpu, c_num_gpus
+
+  c_name = trim(name)
+  name_length = len_trim(name)
+  c_first_gpu = first_gpu
+  c_num_gpus  = num_gpus
+
+  code = delete_model_multigpu_c(self%client_ptr, c_name, name_length, c_first_gpu, c_num_gpus )
+end function delete_model_multigpu
 
 !> Retrieve the script from the database
 function get_script(self, name, script) result(code)
@@ -826,6 +1073,7 @@ function get_script(self, name, script) result(code)
   enddo
 end function get_script
 
+!> Set a script (from file) in the database for future execution
 function set_script_from_file(self, name, device, script_file) result(code)
   class(client_type), intent(in) :: self        !< An initialized SmartRedis client
   character(len=*),   intent(in) :: name        !< The name to use to place the script
@@ -854,6 +1102,38 @@ function set_script_from_file(self, name, device, script_file) result(code)
                               c_script_file, script_file_length)
 end function set_script_from_file
 
+!> Set a script (from file) in the database for future execution in a multi-GPU system
+function set_script_from_file_multigpu(self, name, script_file, first_gpu, num_gpus) result(code)
+  class(client_type), intent(in) :: self        !< An initialized SmartRedis client
+  character(len=*),   intent(in) :: name        !< The name to use to place the script
+  character(len=*),   intent(in) :: script_file !< The file storing the script
+  integer,            intent(in) :: first_gpu   !< The first GPU (zero-based) to use with the model
+  integer,            intent(in) :: num_gpus    !< The number of GPUs to use with the model
+  integer(kind=enum_kind)        :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(name))        :: c_name
+  character(kind=c_char, len=len_trim(script_file)) :: c_script_file
+
+  integer(kind=c_size_t) :: name_length
+  integer(kind=c_size_t) :: script_file_length
+  integer(kind=c_size_t) :: device_length
+  integer(kind=c_int)    :: c_first_gpu, c_num_gpus
+
+  c_name = trim(name)
+  c_script_file = trim(script_file)
+
+  name_length = len_trim(name)
+  script_file_length = len_trim(script_file)
+
+  c_first_gpu = first_gpu
+  c_num_gpus  = num_gpus
+
+  code = set_script_from_file_multigpu_c(self%client_ptr, c_name, name_length, c_script_file, script_file_length, &
+                                        c_first_gpu, c_num_gpus)
+end function set_script_from_file_multigpu
+
+!> Set a script (from buffer) in the database for future execution
 function set_script(self, name, device, script) result(code)
   class(client_type), intent(in) :: self   !< An initialized SmartRedis client
   character(len=*),   intent(in) :: name   !< The name to use to place the script
@@ -880,6 +1160,36 @@ function set_script(self, name, device, script) result(code)
 
   code = set_script_c(self%client_ptr, c_name, name_length, c_device, device_length, c_script, script_length)
 end function set_script
+
+!> Set a script (from buffer) in the database for future execution in a multi-GPU system
+function set_script_multigpu(self, name, script, first_gpu, num_gpus) result(code)
+  class(client_type), intent(in) :: self   !< An initialized SmartRedis client
+  character(len=*),   intent(in) :: name   !< The name to use to place the script
+  character(len=*),   intent(in) :: script !< The file storing the script
+  integer,            intent(in) :: first_gpu !< The first GPU (zero-based) to use with the model
+  integer,            intent(in) :: num_gpus  !< The number of GPUs to use with the model
+  integer(kind=enum_kind)        :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  character(kind=c_char, len=len_trim(script)) :: c_script
+
+  integer(kind=c_size_t) :: name_length
+  integer(kind=c_size_t) :: script_length
+  integer(kind=c_size_t) :: device_length
+  integer(kind=c_int)    :: c_first_gpu, c_num_gpus
+
+  c_name = trim(name)
+  c_script = trim(script)
+
+  name_length = len_trim(name)
+  script_length = len_trim(script)
+  
+  c_first_gpu = first_gpu
+  c_num_gpus = num_gpus
+
+  code = set_script_multigpu_c(self%client_ptr, c_name, name_length, c_script, script_length, c_first_gpu, c_num_gpus)
+end function set_script_multigpu
 
 function run_script(self, name, func, inputs, outputs) result(code)
   class(client_type),             intent(in) :: self           !< An initialized SmartRedis client
@@ -916,13 +1226,65 @@ function run_script(self, name, func, inputs, outputs) result(code)
   code = run_script_c(self%client_ptr, c_name, name_length, c_func, func_length, inputs_ptr, input_lengths_ptr, &
                             n_inputs, outputs_ptr, output_lengths_ptr, n_outputs)
 
-  deallocate(c_inputs)
-  deallocate(input_lengths)
-  deallocate(ptrs_to_inputs)
-  deallocate(c_outputs)
-  deallocate(output_lengths)
-  deallocate(ptrs_to_outputs)
+  if (allocated(c_inputs))        deallocate(c_inputs)
+  if (allocated(input_lengths))   deallocate(input_lengths)
+  if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
+  if (allocated(c_outputs))       deallocate(c_outputs)
+  if (allocated(output_lengths))  deallocate(output_lengths)
+  if (allocated(ptrs_to_outputs)) deallocate(ptrs_to_outputs)
 end function run_script
+
+function run_script_multigpu(self, name, func, inputs, outputs, offset, first_gpu, num_gpus) result(code)
+  class(client_type),             intent(in) :: self           !< An initialized SmartRedis client
+  character(len=*),               intent(in) :: name           !< The name to use to place the script
+  character(len=*),               intent(in) :: func           !< The name of the function in the script to call
+  character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of script input nodes (TF scripts)
+  character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of script output nodes (TF scripts)
+  integer,                        intent(in) :: offset  !< Index of the current image, such as a processor ID
+                                                        !! or MPI rank
+  integer,                        intent(in) :: first_gpu !< The first GPU (zero-based) to use with the model
+  integer,                        intent(in) :: num_gpus  !< The number of GPUs to use with the model
+  integer(kind=enum_kind)                    :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  character(kind=c_char, len=len_trim(func)) :: c_func
+  integer(kind=c_int) :: c_first_gpu, c_num_gpus, c_offset
+  character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
+
+  integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
+  integer(kind=c_size_t) :: n_inputs, n_outputs, name_length, func_length
+  type(c_ptr) :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
+  type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
+
+  integer :: i
+  integer :: max_length, length
+
+  c_name  = trim(name)
+  c_func = trim(func)
+
+  name_length = len_trim(name)
+  func_length = len_trim(func)
+
+  call convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
+                                n_inputs)
+  call convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+                                output_lengths_ptr, n_outputs)
+
+  ! Cast to c integer
+  c_offset = offset
+  c_first_gpu = first_gpu
+  c_num_gpus = num_gpus
+  code = run_script_multigpu_c(self%client_ptr, c_name, name_length, c_func, func_length, inputs_ptr, input_lengths_ptr, &
+                            n_inputs, outputs_ptr, output_lengths_ptr, n_outputs, c_offset, c_first_gpu, c_num_gpus)
+
+  if (allocated(c_inputs))        deallocate(c_inputs)
+  if (allocated(input_lengths))   deallocate(input_lengths)
+  if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
+  if (allocated(c_outputs))       deallocate(c_outputs)
+  if (allocated(output_lengths))  deallocate(output_lengths)
+  if (allocated(ptrs_to_outputs)) deallocate(ptrs_to_outputs)
+end function run_script_multigpu
 
 !> Remove a script from the database
 function delete_script(self, name) result(code)
@@ -939,6 +1301,28 @@ function delete_script(self, name) result(code)
 
   code = delete_script_c(self%client_ptr, c_name, name_length)
 end function delete_script
+
+!> Remove a script_multigpu from the database
+function delete_script_multigpu(self, name, first_gpu, num_gpus) result(code)
+  class(client_type),             intent(in) :: self    !< An initialized SmartRedis client
+  character(len=*),               intent(in) :: name    !< The name to use to delete the script_multigpu
+  integer,                        intent(in) :: first_gpu !< The first GPU (zero-based) to use with the model
+  integer,                        intent(in) :: num_gpus !< The number of GPUs to use with the model
+  integer(kind=enum_kind)                    :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  integer(kind=c_int)    :: c_first_gpu, c_num_gpus
+  integer(kind=c_size_t) :: name_length
+
+  c_name = trim(name)
+  name_length = len_trim(name)
+  
+  c_first_gpu = first_gpu
+  c_num_gpus = num_gpus
+
+  code = delete_script_multigpu_c(self%client_ptr, c_name, name_length, c_first_gpu, c_num_gpus)
+end function delete_script_multigpu
 
 !> Store a dataset in the database
 function put_dataset(self, dataset) result(code)

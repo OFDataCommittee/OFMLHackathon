@@ -84,6 +84,15 @@ target_link_libraries(client_test_mnist
 	${SR_LIB}
 )
 
+add_executable(client_test_mnist_multigpu
+	client_test_mnist_multigpu.F90
+	${ftn_client_src}
+        test_utils.F90
+)
+target_link_libraries(client_test_mnist_multigpu
+	${SR_LIB}
+)
+
 add_executable(client_test_dataset
 	client_test_dataset.F90
 	${ftn_client_src}

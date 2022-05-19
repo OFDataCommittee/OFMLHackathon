@@ -36,6 +36,9 @@ echo "Setting up SmartRedis environment for testing"
 export SMARTREDIS_TEST_CLUSTER=True
 echo SMARTREDIS_TEST_CLUSTER set to $SMARTREDIS_TEST_CLUSTER
 
+export SMARTREDIS_TEST_DEVICE=cpu
+echo SMARTREDIS_TEST_DEVICE set to $SMARTREDIS_TEST_DEVICE
+
 # Redis
 if [[ -f ./third-party/redis/src/redis-server ]]; then
     export REDIS_INSTALL_PATH="$(pwd)/third-party/redis/src"

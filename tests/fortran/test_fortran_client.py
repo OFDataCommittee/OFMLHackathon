@@ -26,10 +26,13 @@
 
 import pytest
 from os import path as osp
+import os
 from glob import glob
 from shutil import which
 from subprocess import Popen, PIPE, TimeoutExpired
 import time
+
+test_gpu = os.environ.get("SMARTREDIS_TEST_DEVICE","cpu").lower() == "gpu"
 
 RANKS = 1
 TEST_PATH = osp.dirname(osp.abspath(__file__))
@@ -40,8 +43,8 @@ def get_test_names():
     """
     glob_path = osp.join(TEST_PATH, "build/client_test*")
     test_names = glob(glob_path)
-    test_names = [(pytest.param(test,
-                                id=osp.basename(test))) for test in test_names]
+    test_names = [(pytest.param(test, id=osp.basename(test)))
+                  for test in test_names if not "gpu" in test]
     return test_names
 
 
@@ -91,3 +94,17 @@ def execute_cmd(cmd_list):
         print("OUTPUT:", output.decode("utf-8"))
         print("ERROR:", errs.decode("utf-8"))
         assert(False)
+
+@pytest.mark.skipif(
+    not test_gpu,
+    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
+)
+def test_client_multigpu_mnist():
+    """
+    Test setting and running a machine learning model via the Fortran client
+    on an orchestrator with multiple GPUs
+    """
+    
+    tester_path = osp.join(TEST_PATH, "build/client_test_mnist_multigpu")
+    test_fortran_client(tester_path)
+    

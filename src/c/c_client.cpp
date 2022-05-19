@@ -459,6 +459,52 @@ bool CompareCaseInsensitive(const char* a,const char* b) {
   return (*a == *b);
 }
 
+// Return True if the backend is TF or TFLITE
+bool _isTensorFlow(const char* backend)
+{
+  return CompareCaseInsensitive(backend, "TF") || CompareCaseInsensitive(backend, "TFLITE");
+}
+
+// Check the parameters common to all set_model functions
+void _check_params_set_model(void* c_client,
+                            const char* name, const char* backend, 
+                            const char** inputs, const size_t* input_lengths, const size_t n_inputs,
+                            const char** outputs, const size_t* output_lengths, const size_t n_outputs)
+{
+  // Sanity check params. Tag is strictly optional, and inputs/outputs are
+  // mandatory IFF backend is TensorFlow (TF or TFLITE)
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && backend != NULL);
+                  
+  if (_isTensorFlow(backend)) {
+    if (inputs == NULL || input_lengths == NULL ||
+        outputs == NULL || output_lengths == NULL) {
+      throw SRParameterException("Inputs and outputs are required with TensorFlow");
+    }
+  }
+
+  // For the inputs and outputs arrays, a single empty string is ok (this means
+  // that the array should be skipped) but if more than one entry is present, the
+  // strings must be nonzero length
+  if (_isTensorFlow(backend)) {
+    if (n_inputs != 1 && input_lengths[0] != 0) {
+      for (size_t i = 0; i < n_inputs; i++){
+        if (inputs[i] == NULL || input_lengths[i] == 0) {
+          throw SRParameterException(
+            "inputs[" + std::to_string(i) + "] is NULL or empty");
+        }
+      }
+    }
+    if (n_outputs != 1 && output_lengths[0] != 0) {
+      for (size_t i = 0; i < n_outputs; i++) {
+        if (outputs[i] == NULL || output_lengths[i] == 0) {
+          throw SRParameterException(
+            "outputs[" + std::to_string(i) + "] is NULL or empty");
+        }
+      }
+    }
+  }
+}                              
+
 // Set a model stored in a binary file.
 extern "C"
 SRError set_model_from_file(void* c_client,
@@ -478,38 +524,10 @@ SRError set_model_from_file(void* c_client,
   {
     // Sanity check params. Tag is strictly optional, and inputs/outputs are
     // mandatory IFF backend is TensorFlow (TF or TFLITE)
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && model_file != NULL &&
-                    backend != NULL && device != NULL);
-    bool isTensorFlow = CompareCaseInsensitive(backend, "TF") || CompareCaseInsensitive(backend, "TFLITE");
-    if (isTensorFlow) {
-      if (inputs == NULL || input_lengths == NULL ||
-          outputs == NULL || output_lengths == NULL) {
-        throw SRParameterException("Inputs and outputs are required with TensorFlow");
-      }
-    }
-
-    // For the inputs and outputs arrays, a single empty string is ok (this means
-    // that the array should be skipped) but if more than one entry is present, the
-    // strings must be nonzero length
-    if (isTensorFlow) {
-      if (n_inputs != 1 && input_lengths[0] != 0) {
-        for (size_t i = 0; i < n_inputs; i++){
-          if (inputs[i] == NULL || input_lengths[i] == 0) {
-            throw SRParameterException(
-              std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
-          }
-        }
-      }
-      if (n_outputs != 1 && output_lengths[0] != 0) {
-        for (size_t i = 0; i < n_outputs; i++) {
-          if (outputs[i] == NULL || output_lengths[i] == 0) {
-            throw SRParameterException(
-              std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
-          }
-        }
-      }
-    }
-
+    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                          outputs, output_lengths, n_outputs);
+    SR_CHECK_PARAMS(model_file != NULL && device != NULL);
+  
     Client* s = reinterpret_cast<Client*>(c_client);
     std::string name_str(name, name_length);
     std::string model_file_str(model_file, model_file_length);
@@ -519,7 +537,7 @@ SRError set_model_from_file(void* c_client,
 
     // Catch the case where an empty string was sent (default C++ client behavior)
     std::vector<std::string> input_vec;
-    if (isTensorFlow) {
+    if (_isTensorFlow(backend)) {
       if (n_inputs != 1 || input_lengths[0] != 0) {
         for (size_t i = 0; i < n_inputs; i++) {
           input_vec.push_back(std::string(inputs[i], input_lengths[i]));
@@ -528,7 +546,7 @@ SRError set_model_from_file(void* c_client,
     }
 
     std::vector<std::string> output_vec;
-    if (isTensorFlow) {
+    if (_isTensorFlow(backend)) {
       if (n_outputs != 1 || output_lengths[0] != 0) {
         for (size_t i = 0; i < n_outputs; i++) {
           output_vec.push_back(std::string(outputs[i], output_lengths[i]));
@@ -539,6 +557,67 @@ SRError set_model_from_file(void* c_client,
     s->set_model_from_file(name_str, model_file_str, backend_str, device_str,
                            batch_size, min_batch_size, tag_str, input_vec,
                            output_vec);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+extern "C"
+SRError set_model_from_file_multigpu(void* c_client,
+                                     const char* name, const size_t name_length,
+                                     const char* model_file, const size_t model_file_length,
+                                     const char* backend, const size_t backend_length,
+                                     const int first_gpu, const int num_gpus,
+                                     const int batch_size, const int min_batch_size,
+                                     const char* tag, const size_t tag_length,
+                                     const char** inputs, const size_t* input_lengths,
+                                     const size_t n_inputs, const char** outputs,
+                                     const size_t* output_lengths, const size_t n_outputs)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params. Tag is strictly optional, and inputs/outputs are
+    // mandatory IFF backend is TensorFlow (TF or TFLITE)
+    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                          outputs, output_lengths, n_outputs);
+    SR_CHECK_PARAMS(model_file != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+    std::string model_file_str(model_file, model_file_length);
+    std::string backend_str(backend, backend_length);
+    std::string tag_str(tag, tag_length);
+
+    // Catch the case where an empty string was sent (default C++ client behavior)
+    std::vector<std::string> input_vec;
+    if (_isTensorFlow(backend)) {
+      if (n_inputs != 1 || input_lengths[0] != 0) {
+        for (size_t i = 0; i < n_inputs; i++) {
+          input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+        }
+      }
+    }
+
+    std::vector<std::string> output_vec;
+    if (_isTensorFlow(backend)) {
+      if (n_outputs != 1 || output_lengths[0] != 0) {
+        for (size_t i = 0; i < n_outputs; i++) {
+          output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+        }
+      }
+    }
+
+    s->set_model_from_file_multigpu(name_str, model_file_str, backend_str, first_gpu,
+                                   num_gpus, batch_size, min_batch_size, tag_str,
+                                   input_vec, output_vec);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -571,37 +650,9 @@ SRError set_model(void* c_client,
   {
     // Sanity check params. Tag is strictly optional, and inputs/outputs are
     // mandatory IFF backend is TensorFlow (TF or TFLITE)
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && model != NULL &&
-                    backend != NULL && device != NULL);
-    bool isTensorFlow = CompareCaseInsensitive(backend, "TF") || CompareCaseInsensitive(backend, "TFLITE");
-    if (isTensorFlow) {
-      if (inputs == NULL || input_lengths == NULL ||
-          outputs == NULL || output_lengths == NULL) {
-        throw SRParameterException("Inputs and outputs are required with TensorFlow");
-      }
-    }
-
-    // For the inputs and outputs arrays, a single empty string is ok (this means
-    // that the array should be skipped) but if more than one entry is present, the
-    // strings must be nonzero length
-    if (isTensorFlow) {
-      if (n_inputs != 1 && input_lengths[0] != 0) {
-        for (size_t i = 0; i < n_inputs; i++){
-          if (inputs[i] == NULL || input_lengths[i] == 0) {
-            throw SRParameterException(
-              std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
-          }
-        }
-      }
-      if (n_outputs != 1 && output_lengths[0] != 0) {
-        for (size_t i = 0; i < n_outputs; i++) {
-          if (outputs[i] == NULL || output_lengths[i] == 0) {
-            throw SRParameterException(
-              std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
-          }
-        }
-      }
-    }
+    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                          outputs, output_lengths, n_outputs);
+    SR_CHECK_PARAMS(model != NULL && device != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
     std::string name_str(name, name_length);
@@ -612,7 +663,7 @@ SRError set_model(void* c_client,
 
     // Catch the case where an empty string was sent (default C++ client behavior)
     std::vector<std::string> input_vec;
-    if (isTensorFlow) {
+    if (_isTensorFlow(backend)) {
       if (n_inputs != 1 || input_lengths[0] != 0) {
         for (size_t i = 0; i < n_inputs; i++) {
           input_vec.push_back(std::string(inputs[i], input_lengths[i]));
@@ -621,7 +672,7 @@ SRError set_model(void* c_client,
     }
 
     std::vector<std::string> output_vec;
-    if (isTensorFlow) {
+    if (_isTensorFlow(backend)) {
       if (n_outputs != 1 || output_lengths[0] != 0) {
         for (size_t i = 0; i < n_outputs; i++) {
           output_vec.push_back(std::string(outputs[i], output_lengths[i]));
@@ -644,6 +695,71 @@ SRError set_model(void* c_client,
 
   return result;
 }
+
+// Set a model stored in a buffer c-string.
+extern "C"
+SRError set_model_multigpu(void* c_client,
+                          const char* name, const size_t name_length,
+                          const char* model, const size_t model_length,
+                          const char* backend, const size_t backend_length,
+                          const int first_gpu, const int num_gpus,
+                          const int batch_size, const int min_batch_size,
+                          const char* tag, const size_t tag_length,
+                          const char** inputs, const size_t* input_lengths,
+                          const size_t n_inputs,
+                          const char** outputs, const size_t* output_lengths,
+                          const size_t n_outputs)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params. Tag is strictly optional, and inputs/outputs are
+    // mandatory IFF backend is TensorFlow (TF or TFLITE)
+    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                          outputs, output_lengths, n_outputs);
+    SR_CHECK_PARAMS(model != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+    std::string model_str(model, model_length);
+    std::string backend_str(backend, backend_length);
+    std::string tag_str(tag, tag_length);
+
+    // Catch the case where an empty string was sent (default C++ client behavior)
+    std::vector<std::string> input_vec;
+    if (_isTensorFlow(backend)) {
+      if (n_inputs != 1 || input_lengths[0] != 0) {
+        for (size_t i = 0; i < n_inputs; i++) {
+          input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+        }
+      }
+    }
+
+    std::vector<std::string> output_vec;
+    if (_isTensorFlow(backend)) {
+      if (n_outputs != 1 || output_lengths[0] != 0) {
+        for (size_t i = 0; i < n_outputs; i++) {
+          output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+        }
+      }
+    }
+
+    s->set_model_multigpu(name_str, model_str, backend_str, first_gpu, num_gpus,
+                         batch_size, min_batch_size, tag_str, input_vec,
+                         output_vec);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
 
 // Retrieve the model and model length from the database
 extern "C"
@@ -715,6 +831,40 @@ SRError set_script_from_file(void* c_client,
   return result;
 }
 
+// Put a script in the database that is stored in a file in a multi-GPU system
+extern "C"
+SRError set_script_from_file_multigpu(void* c_client,
+                                     const char* name,
+                                     const size_t name_length,
+                                     const char* script_file,
+                                     const size_t script_file_length,
+                                     const int first_gpu,
+                                     const int num_gpus)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && script_file != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+    std::string script_file_str(script_file, script_file_length);
+
+    s->set_script_from_file_multigpu(name_str, script_file_str, first_gpu, num_gpus);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
 // Put a script in the database that is stored in a string.
 extern "C"
 SRError set_script(void* c_client,
@@ -752,6 +902,43 @@ SRError set_script(void* c_client,
   return result;
 }
 
+// Put a script in the database that is stored in a string in a multi-GPU system
+extern "C"
+SRError set_script_multigpu(void* c_client,
+                           const char* name,
+                           const size_t name_length,
+                           const char* script,
+                           const size_t script_length,
+                           const int first_gpu,
+                           const int num_gpus)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && script != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+
+    std::string name_str(name, name_length);
+    std::string script_str(script, script_length);
+
+    s->set_script_multigpu(name_str, script_str, first_gpu, num_gpus);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+
+
 // Retrieve the script stored in the database
 extern "C"
 SRError get_script(void* c_client,
@@ -786,6 +973,36 @@ SRError get_script(void* c_client,
   return result;
 }
 
+void _check_params_run_script(void* c_client,
+                              const char* name,
+                              const char* function,
+                              const char** inputs,
+                              const size_t* input_lengths,
+                              const size_t n_inputs,
+                              const char** outputs,
+                              const size_t* output_lengths,
+                              const size_t n_outputs)
+{
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && function != NULL &&
+                    inputs != NULL && input_lengths != NULL &&
+                    outputs != NULL && output_lengths != NULL);
+
+    // Inputs and outputs are mandatory for run_script
+    for (size_t i = 0; i < n_inputs; i++){
+      if (inputs[i] == NULL || input_lengths[i] == 0) {
+        throw SRParameterException(
+          "inputs[" + std::to_string(i) + "] is NULL or empty");
+      }
+    }
+    for (size_t i = 0; i < n_outputs; i++) {
+      if (outputs[i] == NULL || output_lengths[i] == 0) {
+        throw SRParameterException(
+          "outputs[" + std::to_string(i) + "] is NULL or empty");
+      }
+    }
+}
+
 // Run  a script function in the database
 extern "C"
 SRError run_script(void* c_client,
@@ -803,25 +1020,9 @@ SRError run_script(void* c_client,
   SRError result = SRNoError;
   try
   {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && function != NULL &&
-                    inputs != NULL && input_lengths != NULL &&
-                    outputs != NULL && output_lengths != NULL);
-
-    // Inputs and outputs are mandatory for run_script
-    for (size_t i = 0; i < n_inputs; i++){
-      if (inputs[i] == NULL || input_lengths[i] == 0) {
-        throw SRParameterException(
-          std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
-      }
-    }
-    for (size_t i = 0; i < n_outputs; i++) {
-      if (outputs[i] == NULL || output_lengths[i] == 0) {
-        throw SRParameterException(
-          std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
-      }
-    }
-
+    _check_params_run_script(c_client, name, function, 
+                             inputs, input_lengths, n_inputs,
+                             outputs, output_lengths, n_outputs);
     std::string name_str(name, name_length);
     std::string function_str(function, function_length);
 
@@ -854,6 +1055,91 @@ SRError run_script(void* c_client,
   return result;
 }
 
+// Run  a script function in the database in a multi-GPU system
+extern "C"
+SRError run_script_multigpu(void* c_client,
+                           const char* name,
+                           const size_t name_length,
+                           const char* function,
+                           const size_t function_length,
+                           const char** inputs,
+                           const size_t* input_lengths,
+                           const size_t n_inputs,
+                           const char** outputs,
+                           const size_t* output_lengths,
+                           const size_t n_outputs,
+                           const int offset,
+                           const int first_gpu,
+                           const int num_gpus)
+{
+  SRError result = SRNoError;
+  try
+  {
+    _check_params_run_script(c_client, name, function, 
+                             inputs, input_lengths, n_inputs,
+                             outputs, output_lengths, n_outputs);
+    std::string name_str(name, name_length);
+    std::string function_str(function, function_length);
+
+    std::vector<std::string> input_vec;
+    if (n_inputs != 1 || input_lengths[0] != 0) {
+      for (size_t i = 0; i < n_inputs; i++) {
+        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+      }
+    }
+
+    std::vector<std::string> output_vec;
+    if (n_outputs != 1 || output_lengths[0] != 0) {
+      for (size_t i = 0; i < n_outputs; i++) {
+        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+      }
+    }
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->run_script_multigpu(name_str, function_str, input_vec, output_vec,
+                           offset, first_gpu, num_gpus);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+void _check_params_run_model(void* c_client,
+                  const char* name,
+                  const char** inputs,
+                  const size_t* input_lengths,
+                  const size_t n_inputs,
+                  const char** outputs,
+                  const size_t* output_lengths,
+                  const size_t n_outputs)
+{
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL &&
+                    inputs != NULL && input_lengths != NULL &&
+                    outputs != NULL && output_lengths != NULL);
+
+    // Inputs and outputs are mandatory for run_script
+    for (size_t i = 0; i < n_inputs; i++){
+      if (inputs[i] == NULL || input_lengths[i] == 0) {
+        throw SRParameterException(
+          "inputs[" + std::to_string(i) + "] is NULL or empty");
+      }
+    }
+    for (size_t i = 0; i < n_outputs; i++) {
+      if (outputs[i] == NULL || output_lengths[i] == 0) {
+        throw SRParameterException(
+          "outputs[" + std::to_string(i) + "] is NULL or empty");
+      }
+    }
+}                  
+
 // Run a model in the database
 extern "C"
 SRError run_model(void* c_client,
@@ -869,25 +1155,8 @@ SRError run_model(void* c_client,
   SRError result = SRNoError;
   try
   {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL &&
-                    inputs != NULL && input_lengths != NULL &&
-                    outputs != NULL && output_lengths != NULL);
-
-    // Inputs and outputs are mandatory for run_script
-    for (size_t i = 0; i < n_inputs; i++){
-      if (inputs[i] == NULL || input_lengths[i] == 0) {
-        throw SRParameterException(
-          std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
-      }
-    }
-    for (size_t i = 0; i < n_outputs; i++) {
-      if (outputs[i] == NULL || output_lengths[i] == 0) {
-        throw SRParameterException(
-          std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
-      }
-    }
-
+    _check_params_run_model(c_client, name, inputs, input_lengths, n_inputs,
+                           outputs, output_lengths, n_outputs);
     std::string name_str(name, name_length);
 
     std::vector<std::string> input_vec;
@@ -906,6 +1175,58 @@ SRError run_model(void* c_client,
 
     Client* s = reinterpret_cast<Client*>(c_client);
     s->run_model(name_str, input_vec, output_vec);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Run a model in the database
+extern "C"
+SRError run_model_multigpu(void* c_client,
+                          const char* name,
+                          const size_t name_length,
+                          const char** inputs,
+                          const size_t* input_lengths,
+                          const size_t n_inputs,
+                          const char** outputs,
+                          const size_t* output_lengths,
+                          const size_t n_outputs,
+                          const int offset,
+                          const int first_gpu,
+                          const int num_gpus)
+{
+  SRError result = SRNoError;
+  try
+  {
+    _check_params_run_model(c_client, name, inputs, input_lengths, n_inputs,
+                           outputs, output_lengths, n_outputs);
+    std::string name_str(name, name_length);
+
+    std::vector<std::string> input_vec;
+    if (n_inputs != 1 || input_lengths[0] != 0) {
+      for (size_t i = 0; i < n_inputs; i++) {
+        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+      }
+    }
+
+    std::vector<std::string> output_vec;
+    if (n_outputs != 1 || output_lengths[0] != 0) {
+      for (size_t i = 0; i < n_outputs; i++) {
+        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+      }
+    }
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->run_model_multigpu(name_str, input_vec, output_vec, offset, 
+                         first_gpu, num_gpus);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -947,6 +1268,36 @@ SRError delete_model(void* c_client,
   return result;
 }
 
+// Remove a model from the database on a system with multiple GPUs
+extern "C"
+SRError delete_model_multigpu(void* c_client,
+                              const char* name,
+                              const size_t name_length,
+                              const int first_gpu,
+                              const int num_gpus)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+
+    std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->delete_model_multigpu(name_str, first_gpu, num_gpus);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
 // Remove a script from the database
 extern "C"
 SRError delete_script(void* c_client,
@@ -962,6 +1313,36 @@ SRError delete_script(void* c_client,
     std::string name_str(name, name_length);
     Client* s = reinterpret_cast<Client*>(c_client);
     s->delete_script(name_str);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Remove a script from the database in a system with multiple GPUs
+extern "C"
+SRError delete_script_multigpu(void* c_client,
+                               const char* name,
+                               const size_t name_length,
+                               const int first_gpu,
+                               const int num_gpus)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+
+    std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->delete_script_multigpu(name_str, first_gpu, num_gpus);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
