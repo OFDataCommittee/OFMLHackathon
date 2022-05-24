@@ -78,13 +78,24 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("set_data_source", &PyClient::set_data_source)
         .def("use_tensor_ensemble_prefix", &PyClient::use_tensor_ensemble_prefix)
         .def("use_model_ensemble_prefix", &PyClient::use_model_ensemble_prefix)
+        .def("use_list_ensemble_prefix", &PyClient::use_list_ensemble_prefix)
         .def("get_db_node_info", &PyClient::get_db_node_info)
         .def("get_db_cluster_info", &PyClient::get_db_cluster_info)
         .def("get_ai_info", &PyClient::get_ai_info)
         .def("flush_db", &PyClient::flush_db)
         .def("config_set", &PyClient::config_set)
         .def("config_get", &PyClient::config_get)
-        .def("save", &PyClient::save);
+        .def("save", &PyClient::save)
+        .def("append_to_list", &PyClient::append_to_list)
+        .def("delete_list", &PyClient::delete_list)
+        .def("copy_list", &PyClient::copy_list)
+        .def("rename_list", &PyClient::rename_list)
+        .def("get_list_length", &PyClient::get_list_length)
+        .def("poll_list_length", &PyClient::poll_list_length)
+        .def("poll_list_length_gte", &PyClient::poll_list_length_gte)
+        .def("poll_list_length_lte", &PyClient::poll_list_length_lte)
+        .def("get_datasets_from_list", &PyClient::get_datasets_from_list)
+        .def("get_dataset_list_range", &PyClient::get_dataset_list_range);
 
     // Python Dataset class
     py::class_<PyDataset>(m, "PyDataset")

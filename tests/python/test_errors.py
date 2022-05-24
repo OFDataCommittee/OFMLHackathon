@@ -581,6 +581,12 @@ def test_bad_type_use_model_ensemble_prefix(use_cluster):
         c.use_model_ensemble_prefix("not a boolean")
 
 
+def test_bad_type_use_list_ensemble_prefix(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.use_list_ensemble_prefix("not a boolean")
+
+
 def test_bad_type_use_tensor_ensemble_prefix(use_cluster):
     c = Client(None, use_cluster)
     with pytest.raises(TypeError):
@@ -643,6 +649,96 @@ def test_bad_type_save(use_cluster):
     with pytest.raises(TypeError):
         c.save("not a list")
 
+def test_bad_type_append_to_list(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.append_to_list(42, 42)
+
+def test_bad_type_delete_list(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.delete_list(42)
+
+def test_bad_type_copy_list(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.copy_list(42, "dest")
+    with pytest.raises(TypeError):
+        c.copy_list("src", 42)
+
+def test_bad_type_rename_list(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.rename_list(42, "dest")
+    with pytest.raises(TypeError):
+        c.rename_list("src", 42)
+
+def test_bad_type_get_list_length(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.get_list_length(42)
+
+def test_bad_type_poll_list_length(use_cluster):
+    c = Client(None, use_cluster)
+    name = "mylist"
+    len = 42
+    pollfreq = 42
+    num_tries = 42
+    with pytest.raises(TypeError):
+        c.poll_list_length(42, len, pollfreq, num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length(name, "not an integer", pollfreq, num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length(name, len, "not an integer", num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length(name, len, pollfreq, "not an integer")
+
+def test_bad_type_poll_list_length_gte(use_cluster):
+    c = Client(None, use_cluster)
+    name = "mylist"
+    len = 42
+    pollfreq = 42
+    num_tries = 42
+    with pytest.raises(TypeError):
+        c.poll_list_length_gte(42, len, pollfreq, num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length_gte(name, "not an integer", pollfreq, num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length_gte(name, len, "not an integer", num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length_gte(name, len, pollfreq, "not an integer")
+
+def test_bad_type_poll_list_length_lte(use_cluster):
+    c = Client(None, use_cluster)
+    name = "mylist"
+    len = 42
+    pollfreq = 42
+    num_tries = 42
+    with pytest.raises(TypeError):
+        c.poll_list_length_lte(42, len, pollfreq, num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length_lte(name, "not an integer", pollfreq, num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length_lte(name, len, "not an integer", num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length_lte(name, len, pollfreq, "not an integer")
+
+def test_bad_type_get_datasets_from_list(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.get_datasets_from_list(42)
+
+def test_bad_type_get_dataset_list_range(use_cluster):
+    c = Client(None, use_cluster)
+    listname = "my_list"
+    start_index = 0
+    end_index = 42
+    with pytest.raises(TypeError):
+        c.get_dataset_list_range(42, start_index, end_index)
+    with pytest.raises(TypeError):
+        c.get_dataset_list_range(listname, "not an integer", end_index)
+    with pytest.raises(TypeError):
+        c.get_dataset_list_range(listname, start_index, "not an integer")
 
 #####
 # Test type errors from bad parameter types to Dataset API calls

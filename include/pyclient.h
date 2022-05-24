@@ -605,6 +605,29 @@ class PyClient
         void use_model_ensemble_prefix(bool use_prefix);
 
         /*!
+        *   \brief Control whether aggregation lists are prefixed
+        *   \details This function can be used to avoid key collisions in an
+        *            ensemble by prepending the string value from the
+        *            environment variable SSKEYIN and/or SSKEYOUT to
+        *            aggregation list names.  Prefixes will only be used if
+        *            they were previously set through the environment variables
+        *            SSKEYOUT and SSKEYIN. Keys for aggregation lists created
+        *            before this function is called will not be retroactively
+        *            prefixed. By default, the client prefixes aggregation
+        *            list keys with the first prefix specified with the SSKEYIN
+        *            and SSKEYOUT environment variables.  Note that
+        *            use_tensor_ensemble_prefix() controls prefixing
+        *            for the entities in the aggregation list, and
+        *            use_tensor_ensemble_prefix() should be given the
+        *            same value that was used during the initial
+        *            setting of the DataSet into the database.
+        *  \param use_prefix If set to true, all future operations
+        *                    on aggregation lists will use
+        *                    a prefix, if available.
+        */
+        void use_list_ensemble_prefix(bool use_prefix);
+
+        /*!
         * \brief Set whether names of tensors or datasets should be
         *        prefixed (e.g. in an ensemble) to form database keys.
         *        Prefixes will only be used if they were previously set through
@@ -719,6 +742,172 @@ class PyClient
         *          client or if command fails to execute
         */
         void save(std::vector<std::string> addresses);
+
+        /*!
+        *   \brief Appends a dataset to the aggregation list
+        *   \details When appending a dataset to an aggregation list,
+        *            the list will automatically be created if it does not
+        *            exist (i.e. this is the first entry in the list).
+        *            Aggregation lists work by referencing the dataset
+        *            by storing its key, so appending a dataset
+        *            to an aggregation list does not create a copy of the
+        *            dataset.  Also, for this reason, the dataset
+        *            must have been previously placed into the database
+        *            with a separate call to put_dataset().
+        *   \param list_name The name of the aggregation list
+        *   \param dataset The DataSet to append
+        *   \throw SmartRedis::Exception if the command fails
+        */
+        void append_to_list(const std::string& list_name,
+                            PyDataset& dataset);
+
+        /*!
+        *   \brief Delete an aggregation list
+        *   \details The key used to locate the aggregation list to be
+        *            deleted may be formed by applying a prefix to the
+        *            supplied name. See set_data_source()
+        *            and use_list_ensemble_prefix() for more details.
+        *   \param list_name The name of the aggregation list
+        *   \throw SmartRedis::Exception if the command fails
+        */
+        void delete_list(const std::string& list_name);
+
+        /*!
+        *   \brief Copy an aggregation list
+        *   \details The source and destination aggregation list keys used to
+        *            locate and store the aggregation list may be formed by
+        *            applying prefixes to the supplied src_name and dest_name.
+        *            See set_data_source() and use_list_ensemble_prefix()
+        *            for more details.
+        *   \param src_name The source list name
+        *   \param dest_name The destination list name
+        *   \throw SmartRedis::Exception if the command fails
+        */
+        void copy_list(const std::string& src_name,
+                       const std::string& dest_name);
+
+        /*!
+        *   \brief Rename an aggregation list
+        *   \details The old and new aggregation list key used to find and
+        *            relocate the list may be formed by applying prefixes to
+        *            the supplied old_name and new_name. See set_data_source()
+        *            and use_list_ensemble_prefix() for more details.
+        *   \param old_name The old list name
+        *   \param new_name The new list name
+        *   \throw SmartRedis::Exception if the command fails
+        */
+        void rename_list(const std::string& src_name,
+                         const std::string& dest_name);
+
+        /*!
+        *   \brief Get the number of entries in the list
+        *   \param list_name The list name
+        *   \throw SmartRedis::Exception if the command fails
+        */
+        int get_list_length(const std::string& list_name);
+
+        /*!
+        *   \brief Poll list length until length is equal
+        *          to the provided length.  If maximum number of
+        *          attempts is exceeded, false is returned.
+        *   \details The aggregation list key used to check for list length
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source() and use_list_ensemble_prefix()
+        *            for more details.
+        *   \param name The name of the list
+        *   \param list_length The desired length of the list
+        *   \param poll_frequency_ms The time delay between checks,
+        *                            in milliseconds
+        *   \param num_tries The total number of times to check for the name
+        *   \returns Returns true if the list is found with a length greater
+        *            than or equal to the provided length, otherwise false
+        *   \throw SmartRedis::Exception if poll list length command fails
+        */
+        bool poll_list_length(const std::string& name, int list_length,
+                              int poll_frequency_ms, int num_tries);
+
+        /*!
+        *   \brief Poll list length until length is greater than or equal
+        *          to the user-provided length. If maximum number of
+        *          attempts is exceeded, false is returned.
+        *   \details The aggregation list key used to check for list length
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source() and use_list_ensemble_prefix()
+        *            for more details.
+        *   \param name The name of the list
+        *   \param list_length The desired minimum length of the list
+        *   \param poll_frequency_ms The time delay between checks,
+        *                            in milliseconds
+        *   \param num_tries The total number of times to check for the name
+        *   \returns Returns true if the list is found with a length greater
+        *            than or equal to the provided length, otherwise false
+        *   \throw SmartRedis::Exception if poll list length command fails
+        */
+        bool poll_list_length_gte(const std::string& name, int list_length,
+                                  int poll_frequency_ms, int num_tries);
+
+        /*!
+        *   \brief Poll list length until length is less than or equal
+        *          to the user-provided length. If maximum number of
+        *          attempts is exceeded, false is returned.
+        *   \details The aggregation list key used to check for list length
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source() and use_list_ensemble_prefix()
+        *            for more details.
+        *   \param name The name of the list
+        *   \param list_length The desired maximum length of the list
+        *   \param poll_frequency_ms The time delay between checks,
+        *                            in milliseconds
+        *   \param num_tries The total number of times to check for the name
+        *   \returns Returns true if the list is found with a length less
+        *            than or equal to the provided length, otherwise false
+        *   \throw SmartRedis::Exception if poll list length command fails
+        */
+        bool poll_list_length_lte(const std::string& name, int list_length,
+                                  int poll_frequency_ms, int num_tries);
+
+        /*!
+        *   \brief Get datasets from an aggregation list
+        *   \details The aggregation list key used to retrieve datasets
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source() and use_list_ensemble_prefix()
+        *            for more details.  An empty or nonexistant
+        *            aggregation list returns an empty vector.
+        *   \param list_name The name of the aggregation list
+        *   \returns A vector containing DataSet objects.
+        *   \throw SmartRedis::Exception if retrieval fails.
+        */
+        py::list get_datasets_from_list(const std::string& list_name);
+
+        /*!
+        *   \brief Get a range of datasets (by index) from an aggregation list
+        *   \details The aggregation list key used to retrieve datasets
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source()  and use_list_ensemble_prefix()
+        *            for more details.  An empty or nonexistant aggregation
+        *            list returns an empty vector.  If the provided
+        *            end_index is beyond the end of the list, that index will
+        *            be treated as the last index of the list.  If start_index
+        *            and end_index are inconsistent (e.g. end_index is less
+        *            than start_index), an empty list of datasets will be returned.
+        *   \param list_name The name of the aggregation list
+        *   \param start_index The starting index of the range (inclusive,
+        *                      starting at zero).  Negative values are
+        *                      supported.  A negative value indicates offsets
+        *                      starting at the end of the list. For example, -1 is
+        *                      the last element of the list.
+        *   \param end_index The ending index of the range (inclusive,
+        *                    starting at zero).  Negative values are
+        *                    supported.  A negative value indicates offsets
+        *                    starting at the end of the list. For example, -1 is
+        *                    the last element of the list.
+        *   \returns A vector containing DataSet objects.
+        *   \throw SmartRedis::Exception if retrieval fails or
+        *          input parameters are invalid
+        */
+        py::list get_dataset_list_range(const std::string& list_name,
+                                        const int start_index,
+                                        const int end_index);
 
     private:
 
