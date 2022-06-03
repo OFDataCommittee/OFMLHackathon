@@ -1674,3 +1674,348 @@ SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix)
 
   return result;
 }
+
+// Control whether aggregation lists are prefixed
+extern "C"
+SRError use_list_ensemble_prefix(void* c_client, bool use_prefix)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->use_list_ensemble_prefix(use_prefix);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Append a dataset to the aggregation list
+extern "C"
+SRError append_to_list(void* c_client, const char* list_name,
+                       const size_t list_name_length, const void* dataset)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL && dataset != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    const DataSet* d = reinterpret_cast<const DataSet*>(dataset);
+    std::string lname(list_name, list_name_length);
+
+    s->append_to_list(lname, *d);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Delete an aggregation list
+extern "C"
+SRError delete_list(void* c_client, const char* list_name,
+                    const size_t list_name_length)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(list_name, list_name_length);
+
+    s->delete_list(lname);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Copy an aggregation list
+extern "C"
+SRError copy_list(void* c_client,
+                  const char* src_name, const size_t src_name_length,
+                  const char* dest_name, const size_t dest_name_length)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string sname(src_name, src_name_length);
+    std::string dname(dest_name, dest_name_length);
+
+    s->copy_list(sname, dname);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Rename an aggregation list
+extern "C"
+SRError rename_list(void* c_client,
+                    const char* src_name, const size_t src_name_length,
+                    const char* dest_name, const size_t dest_name_length)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string sname(src_name, src_name_length);
+    std::string dname(dest_name, dest_name_length);
+
+    s->rename_list(sname, dname);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Get the number of entries in the list
+extern "C"
+SRError get_list_length(void* c_client, const char* list_name,
+                        const size_t list_name_length, int* result_length)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(list_name, list_name_length);
+
+    *result_length = s->get_list_length(lname);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Poll list length until length is equal to the provided length
+extern "C"
+SRError poll_list_length(void* c_client, const char* name,
+                         const size_t name_length, int list_length,
+                         int poll_frequency_ms, int num_tries,
+                         bool* poll_result)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(name, name_length);
+
+    *poll_result = s->poll_list_length(
+      lname, list_length, poll_frequency_ms, num_tries);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Poll list length until length is greater than or equal to the provided length
+extern "C"
+SRError poll_list_length_gte(void* c_client, const char* name,
+                             const size_t name_length, int list_length,
+                             int poll_frequency_ms, int num_tries,
+                             bool* poll_result)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(name, name_length);
+
+    *poll_result = s->poll_list_length_gte(
+      lname, list_length, poll_frequency_ms, num_tries);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Poll list length until length is less than or equal to the provided length
+extern "C"
+SRError poll_list_length_lte(void* c_client, const char* name,
+                             const size_t name_length, int list_length,
+                             int poll_frequency_ms, int num_tries,
+                             bool* poll_result)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(name, name_length);
+
+    *poll_result = s->poll_list_length_lte(
+      lname, list_length, poll_frequency_ms, num_tries);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Get datasets from an aggregation list
+extern "C"
+SRError get_datasets_from_list(void* c_client, const char* list_name,
+                               const size_t list_name_length,
+                               void*** datasets, size_t* num_datasets)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
+                    datasets != NULL && num_datasets != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(list_name, list_name_length);
+
+    std::vector<DataSet> result_datasets = s->get_datasets_from_list(lname);
+    size_t ndatasets = result_datasets.size();
+    *datasets = NULL;
+    if (ndatasets > 0) {
+      DataSet** alloc = new DataSet*[ndatasets];
+      for (size_t i = 0; i < ndatasets; i++) {
+        alloc[i] = new DataSet(std::move(result_datasets[i]));
+      }
+      *datasets = (void**)alloc;
+    }
+    *num_datasets = ndatasets;
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Get a range of datasets (by index) from an aggregation list
+extern "C"
+SRError get_dataset_list_range(void* c_client, const char* list_name,
+                               const size_t list_name_length,
+                               const int start_index, const int end_index,
+                               void*** datasets, size_t* num_datasets)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
+                    datasets != NULL && num_datasets != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(list_name, list_name_length);
+
+    std::vector<DataSet> result_datasets = s->get_dataset_list_range(
+      lname, start_index, end_index);
+    size_t ndatasets = result_datasets.size();
+    *datasets = NULL;
+    if (*num_datasets > 0) {
+      DataSet** alloc = new DataSet*[ndatasets];
+      for (size_t i = 0; i < ndatasets; i++) {
+        alloc[i] = new DataSet(std::move(result_datasets[i]));
+      }
+      *datasets = (void**)alloc;
+    }
+    *num_datasets = ndatasets;
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}

@@ -40,6 +40,14 @@ include_directories(SYSTEM
     ../../install/include
 )
 
+add_executable(client_test_dataset_aggregation
+client_test_dataset_aggregation.c
+)
+
+target_link_libraries(client_test_dataset_aggregation
+        ${SR_LIB}
+)
+
 add_executable(client_test_dataset_exists
 	client_test_dataset_exists.c
 )
@@ -79,4 +87,3 @@ add_executable(client_test_put_get_3D
 target_link_libraries(client_test_put_get_3D
         ${SR_LIB}
 )
-

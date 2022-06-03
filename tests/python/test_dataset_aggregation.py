@@ -32,33 +32,23 @@ from smartredis.error import *
 
 
 def test_aggregation(use_cluster):
+    num_datasets = 4
     client = Client(None, use_cluster)
 
     # Build datasets
-    dataset_1 = create_dataset("dataset_1")
-    dataset_2 = create_dataset("dataset_2")
-    dataset_3 = create_dataset("dataset_3")
-    dataset_4 = create_dataset("dataset_4")
+    original_datasets = [create_dataset(f"dataset_{i}") for i in range(num_datasets)]
 
     # Make sure the list is cleared
     list_name = "dataset_test_list"
     client.delete_list(list_name)
 
-    # Put two datasets into the list
-    client.put_dataset(dataset_1)
-    client.put_dataset(dataset_2)
-    client.append_to_list(list_name, dataset_1)
-    client.append_to_list(list_name, dataset_2)
-
-    # Put the final two datasets into the list
-    client.put_dataset(dataset_3)
-    client.put_dataset(dataset_4)
-    client.append_to_list(list_name, dataset_3)
-    client.append_to_list(list_name, dataset_4)
-
-    actual_length = 4
+    # Put datasets into the list
+    for i in range(num_datasets):
+        client.put_dataset(original_datasets[i])
+        client.append_to_list(list_name, original_datasets[i])
 
     # Confirm that poll for list length works correctly
+    actual_length = num_datasets
     poll_result = client.poll_list_length(list_name, actual_length, 100, 5)
     if (poll_result == False):
         raise RuntimeError(
