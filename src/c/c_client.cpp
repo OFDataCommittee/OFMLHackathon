@@ -467,14 +467,14 @@ bool _isTensorFlow(const char* backend)
 
 // Check the parameters common to all set_model functions
 void _check_params_set_model(void* c_client,
-                            const char* name, const char* backend, 
+                            const char* name, const char* backend,
                             const char** inputs, const size_t* input_lengths, const size_t n_inputs,
                             const char** outputs, const size_t* output_lengths, const size_t n_outputs)
 {
   // Sanity check params. Tag is strictly optional, and inputs/outputs are
   // mandatory IFF backend is TensorFlow (TF or TFLITE)
   SR_CHECK_PARAMS(c_client != NULL && name != NULL && backend != NULL);
-                  
+
   if (_isTensorFlow(backend)) {
     if (inputs == NULL || input_lengths == NULL ||
         outputs == NULL || output_lengths == NULL) {
@@ -503,7 +503,7 @@ void _check_params_set_model(void* c_client,
       }
     }
   }
-}                              
+}
 
 // Set a model stored in a binary file.
 extern "C"
@@ -527,7 +527,7 @@ SRError set_model_from_file(void* c_client,
     _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
                           outputs, output_lengths, n_outputs);
     SR_CHECK_PARAMS(model_file != NULL && device != NULL);
-  
+
     Client* s = reinterpret_cast<Client*>(c_client);
     std::string name_str(name, name_length);
     std::string model_file_str(model_file, model_file_length);
@@ -1020,7 +1020,7 @@ SRError run_script(void* c_client,
   SRError result = SRNoError;
   try
   {
-    _check_params_run_script(c_client, name, function, 
+    _check_params_run_script(c_client, name, function,
                              inputs, input_lengths, n_inputs,
                              outputs, output_lengths, n_outputs);
     std::string name_str(name, name_length);
@@ -1075,7 +1075,7 @@ SRError run_script_multigpu(void* c_client,
   SRError result = SRNoError;
   try
   {
-    _check_params_run_script(c_client, name, function, 
+    _check_params_run_script(c_client, name, function,
                              inputs, input_lengths, n_inputs,
                              outputs, output_lengths, n_outputs);
     std::string name_str(name, name_length);
@@ -1138,7 +1138,7 @@ void _check_params_run_model(void* c_client,
           "outputs[" + std::to_string(i) + "] is NULL or empty");
       }
     }
-}                  
+}
 
 // Run a model in the database
 extern "C"
@@ -1225,7 +1225,7 @@ SRError run_model_multigpu(void* c_client,
     }
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    s->run_model_multigpu(name_str, input_vec, output_vec, offset, 
+    s->run_model_multigpu(name_str, input_vec, output_vec, offset,
                          first_gpu, num_gpus);
   }
   catch (const Exception& e) {
@@ -2007,6 +2007,50 @@ SRError get_dataset_list_range(void* c_client, const char* list_name,
       *datasets = (void**)alloc;
     }
     *num_datasets = ndatasets;
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+// Get a range of datasets (by index) from an aggregation list into an
+// already allocated vector of datasets
+extern "C"
+SRError _get_dataset_list_range_allocated(void* c_client, const char* list_name,
+                               const size_t list_name_length,
+                               const int start_index, const int end_index,
+                               void** datasets)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
+                    datasets != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(list_name, list_name_length);
+
+    std::vector<DataSet> result_datasets = s->get_dataset_list_range(
+      lname, start_index, end_index);
+    size_t num_datasets = result_datasets.size();
+    if ( num_datasets != (size_t) (end_index-start_index+1)) {
+      SRSetLastError(SRInternalException(
+        "Returned dataset list is not equal to the requested range"
+      ));
+    }
+
+    if (num_datasets > 0) {
+      for (size_t i = 0; i < num_datasets; i++) {
+        datasets[i] = (void*)(new DataSet(std::move(result_datasets[i])));
+      }
+    }
   }
   catch (const Exception& e) {
     SRSetLastError(e);

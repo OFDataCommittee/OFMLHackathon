@@ -1281,6 +1281,7 @@ SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix);
 SRError use_model_ensemble_prefix(void* c_client, bool use_prefix);
 
 /*!
+<<<<<<< HEAD
 *   \brief Control whether aggregation lists are prefixed
 *   \details This function can be used to avoid key collisions in an
 *            ensemble by prepending the string value from the
@@ -1521,6 +1522,42 @@ SRError get_dataset_list_range(void* c_client, const char* list_name,
                                const size_t list_name_length,
                                const int start_index, const int end_index,
                                void*** datasets, size_t* num_datasets);
+/*
+*   \brief Get a range of datasets (by index) from an aggregation list and
+           copy them into an already allocated vector of datasets. Note,
+           while this method could be used by C clients, its primary
+           use case is for the Fortran client.
+*   \details The aggregation list key used to retrieve datasets
+*            may be formed by applying a prefix to the supplied
+*            name. See set_data_source()  and use_list_ensemble_prefix()
+*            for more details.  An empty or nonexistant aggregation
+*            list returns an empty vector.  If the provided
+*            end_index is beyond the end of the list, that index will
+*            be treated as the last index of the list.  If start_index
+*            and end_index are inconsistent (e.g. end_index is less
+*            than start_index), an empty list of datasets will be returned.
+*   \param c_client The client object to use for communication
+*   \param list_name The name of the aggregation list
+*   \param list_name_length The size in characters of the list name,
+*                           including null terminator
+*   \param start_index The starting index of the range (inclusive,
+*                      starting at zero).  Negative values are
+*                      supported.  A negative value indicates offsets
+*                      starting at the end of the list. For example, -1 is
+*                      the last element of the list.
+*   \param end_index The ending index of the range (inclusive,
+*                    starting at zero).  Negative values are
+*                    supported.  A negative value indicates offsets
+*                    starting at the end of the list. For example, -1 is
+*                    the last element of the list.
+*   \param datasets Receives an array of datasets included in the list
+*   \param num_datasets Receives the number of datasets returned
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError _get_dataset_list_range_allocated(void* c_client, const char* list_name,
+                                         const size_t list_name_length,
+                                         const int start_index, const int end_index,
+                                         void** datasets);
 
 #ifdef __cplusplus
 }

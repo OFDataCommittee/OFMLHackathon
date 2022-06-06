@@ -111,6 +111,15 @@ target_link_libraries(client_test_put_get_unpack_dataset
 	${SR_LIB}
 )
 
+add_executable(client_test_dataset_aggregation
+	client_test_dataset_aggregation.F90
+	${ftn_client_src}
+        test_utils.F90
+)
+target_link_libraries(client_test_dataset_aggregation
+	${SR_LIB}
+)
+
 add_executable(client_test_misc_tensor
 	client_test_misc_tensor.F90
 	${ftn_client_src}
