@@ -559,10 +559,8 @@ class RedisServer {
 
         /*!
         *   \brief Default number of threads for thread pool
-        *          (zero, special value that translates to one
-        *          per hardware context)
         */
-        static constexpr int _DEFAULT_THREAD_COUNT = 0;
+        static constexpr int _DEFAULT_THREAD_COUNT = 4;
 
         /*!
         *   \brief Seeding for the random number engine
