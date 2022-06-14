@@ -23,7 +23,7 @@ dependencies for testing and documentation with:
     pip install smartredis\[dev\]
 
 Now, when inside your virtual environment, you should be able to import
-the ``Client`` from ``smartredis`` as follows
+the ``Client`` from ``smartredis`` as follows:
 
 .. code-block:: python
 
