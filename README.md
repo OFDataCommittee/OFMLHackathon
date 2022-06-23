@@ -18,9 +18,9 @@ The workshop is **fully virtual**. There is no geographical restriction for part
 
 ## Time line
 
-- **May 15, 2022**: start of the application process
+- ~~**May 15, 2022**: start of the application process~~
 - ~~**June 15, 2022**: end of the application process~~
-- **June 22, 2022**: end of the application process
+- ~~**June 22, 2022**: end of the application process~~
 - **July 1, 2022**: feedback on the applications
 - **July 25-27, 2022**: hackathon
 
@@ -30,7 +30,7 @@ A detailed schedule for the hackathon will be provided two weeks prior to the ev
 
 Since we aim to provide all participants with close support during the hackathon, the number of participants is limited to **20**. Applications are accepted until ~~**June 15, 2022**~~ **June 22, 2022**. There are **no registration fees** or other costs, but admission is not guaranteed. Based on all applications, we will select the most suitable candidates.
 
-[application form](https://forms.gle/jTkDnXyn3BQNw4tt5)
+New applications are no longer accepted.
 
 ## Evaluation criteria
 
