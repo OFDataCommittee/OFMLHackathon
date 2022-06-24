@@ -37,7 +37,7 @@ SCENARIO("Ensuring the iterators for an AddressAtCommand are correct", "[Address
     {
         AddressAtCommand cmd;
         std::string field = "INFO";
-        cmd.add_field(field);
+        cmd << field;
         WHEN("Iterators from the AddressAtKeyCommand object's "
              "_fields data member are retrieved")
         {
@@ -83,20 +83,16 @@ SCENARIO("Testing assignment operator for AddressAtCommand on heap", "[AddressAt
             std::vector<std::string> cmd_keys;
 
             // add fields
-            cmd->add_field(field_1, false);
-            cmd->add_field(field_2);
-            cmd->add_field(field_3);
+            *cmd << field_1 << field_2 << field_3;
             cmd->add_field_ptr(field_4, field_size_4);
-            cmd->add_field_ptr(field_5);
-            cmd->add_fields(fields_1);
-            cmd->add_field_ptr(field_sv);
+            *cmd << field_5 << fields_1 << field_sv;
 
             THEN("The AddressAtCommand can be copied with the assign "
                 "operator and then can be deleted while preserving "
                 "the original AddressAtCommand's state")
             {
                 AddressAtCommand* cmd_cpy = new AddressAtCommand;
-                cmd_cpy->add_field("field_to_be_destroyed", true);
+                *cmd_cpy << Keyfield("field_to_be_destroyed");
 
                 *cmd_cpy = *cmd;
 

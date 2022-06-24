@@ -56,19 +56,16 @@ SCENARIO("Testing assignment operator for AddressAnyCommand", "[AddressAnyComman
             std::vector<std::string> cmd_keys;
 
             // add the fields to the Command
-            cmd.add_field(field_1, false);
-            cmd.add_field(field_2);
-            cmd.add_field(field_3);
+            cmd << field_1 << field_2 << field_3;
             cmd.add_field_ptr(field_4, field_size_4);
-            cmd.add_field_ptr(field_5);
-            cmd.add_fields(fields_1);
+            cmd << field_5 << fields_1;
 
 
             THEN("The AddressAnyCommand object can be copied "
                      "with the assignment operator")
             {
                 AddressAnyCommand* cmd_cpy = new AddressAnyCommand;
-                cmd_cpy->add_field("field_to_be_destroyed", true);
+                *cmd_cpy << Keyfield("field_to_be_destroyed");
 
                 *cmd_cpy = cmd;
 

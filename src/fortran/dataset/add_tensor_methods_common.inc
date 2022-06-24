@@ -26,10 +26,6 @@
 
   !** Beginning of code common to all add_tensor subroutines
 
-  class(dataset_type),   intent(in)  :: self !< Fortran SLIC dataset
-  character(len=*),      intent(in)  :: name !< The unique name used to store in the database
-  integer, dimension(:), intent(in)  :: dims !< The length of each dimension
-  integer(kind=enum_kind)            :: code !< Result of the operation
   ! Local variables
   integer(kind=c_size_t)                      :: c_n_dims ! Number of dimensions
   type(c_ptr) :: data_ptr, c_dims_ptr

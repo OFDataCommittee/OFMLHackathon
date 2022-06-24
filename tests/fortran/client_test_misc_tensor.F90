@@ -43,35 +43,35 @@ program main
   real, dimension(10,10,10) :: array
 
   integer :: err_code
-  integer(kind=enum_kind) :: result
+  integer :: result
   logical(kind=c_bool) :: exists
 
   result = client%initialize(use_cluster())
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
 
   print *, "Putting tensor"
   result = client%put_tensor( "test_initial", array, shape(array) )
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
 
   print *, "Renaming tensor"
   result = client%rename_tensor( "test_initial", "test_rename" )
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
   result = client%key_exists("test_rename", exists)
-  if (result .ne. SRNoError) stop
-  if (.not. exists) stop 'Renamed tensor does not exist'
+  if (result .ne. SRNoError) error stop
+  if (.not. exists) error stop 'Renamed tensor does not exist'
 
   result = client%copy_tensor("test_rename", "test_copy")
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
 
   result = client%key_exists("test_copy", exists)
-  if (result .ne. SRNoError) stop
-  if (.not. exists) stop 'Copied tensor does not exist'
+  if (result .ne. SRNoError) error stop
+  if (.not. exists) error stop 'Copied tensor does not exist'
 
   result = client%delete_tensor("test_copy")
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
   result = client%key_exists("test_copy", exists)
-  if (result .ne. SRNoError) stop
-  if (exists) stop 'Copied tensor incorrectly exists'
+  if (result .ne. SRNoError) error stop
+  if (exists) error stop 'Copied tensor incorrectly exists'
 
   print *, "Fortran Client misc tensor: passed"
 

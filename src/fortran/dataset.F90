@@ -29,6 +29,7 @@ module smartredis_dataset
 use iso_c_binding,   only : c_ptr, c_bool, c_null_ptr, c_char, c_int
 use iso_c_binding,   only : c_int8_t, c_int16_t, c_int32_t, c_int64_t, c_float, c_double, c_size_t
 use iso_c_binding,   only : c_loc, c_f_pointer
+use fortran_c_interop, only : enum_kind
 
 implicit none; private
 
@@ -37,6 +38,11 @@ include 'dataset/dataset_interfaces.inc'
 include 'dataset/add_tensor_interfaces.inc'
 include 'dataset/unpack_dataset_tensor_interfaces.inc'
 include 'dataset/metadata_interfaces.inc'
+
+public :: enum_kind !< The kind of integer equivalent to a C enum. According to C an Fortran
+                    !! standards this should be c_int, but is renamed here to ensure that
+                    !! users do not have to import the iso_c_binding module into their
+                    !! programs
 
 !> Contains multiple tensors and metadata used to describe an entire set of data
 type, public :: dataset_type
@@ -107,6 +113,11 @@ end function initialize_dataset
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'int8' C-type
 function add_tensor_i8(self, name, data, dims) result(code)
   integer(kind=c_int8_t), dimension(..), target, intent(in) :: data !< Data to be sent
+  class(dataset_type),   intent(in)  :: self !< Fortran SmartRedis dataset
+  character(len=*),      intent(in)  :: name !< The unique name used to store in the database
+  integer, dimension(:), intent(in)  :: dims !< The length of each dimension
+  integer(kind=enum_kind)            :: code !< Result of the operation
+
   include 'dataset/add_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
@@ -118,6 +129,11 @@ end function add_tensor_i8
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'int16' C-type
 function add_tensor_i16(self, name, data, dims) result(code)
   integer(kind=c_int16_t), dimension(..), target, intent(in) :: data !< Data to be sent
+  class(dataset_type),   intent(in)  :: self !< Fortran SmartRedis dataset
+  character(len=*),      intent(in)  :: name !< The unique name used to store in the database
+  integer, dimension(:), intent(in)  :: dims !< The length of each dimension
+  integer(kind=enum_kind)            :: code !< Result of the operation
+
   include 'dataset/add_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
@@ -129,6 +145,11 @@ end function add_tensor_i16
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'int32' C-type
 function add_tensor_i32(self, name, data, dims) result(code)
   integer(kind=c_int32_t), dimension(..), target, intent(in) :: data !< Data to be sent
+  class(dataset_type),   intent(in)  :: self !< Fortran SmartRedis dataset
+  character(len=*),      intent(in)  :: name !< The unique name used to store in the database
+  integer, dimension(:), intent(in)  :: dims !< The length of each dimension
+  integer(kind=enum_kind)            :: code !< Result of the operation
+
   include 'dataset/add_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
@@ -140,6 +161,11 @@ end function add_tensor_i32
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'int64' C-type
 function add_tensor_i64(self, name, data, dims) result(code)
   integer(kind=c_int64_t), dimension(..), target, intent(in) :: data !< Data to be sent
+  class(dataset_type),   intent(in)  :: self !< Fortran SmartRedis dataset
+  character(len=*),      intent(in)  :: name !< The unique name used to store in the database
+  integer, dimension(:), intent(in)  :: dims !< The length of each dimension
+  integer(kind=enum_kind)            :: code !< Result of the operation
+
   include 'dataset/add_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
@@ -151,6 +177,11 @@ end function add_tensor_i64
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'float' C-type
 function add_tensor_float(self, name, data, dims) result(code)
   real(kind=c_float), dimension(..), target, intent(in) :: data !< Data to be sent
+  class(dataset_type),   intent(in)  :: self !< Fortran SmartRedis dataset
+  character(len=*),      intent(in)  :: name !< The unique name used to store in the database
+  integer, dimension(:), intent(in)  :: dims !< The length of each dimension
+  integer(kind=enum_kind)            :: code !< Result of the operation
+
   include 'dataset/add_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
@@ -162,6 +193,11 @@ end function add_tensor_float
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'double' C-type
 function add_tensor_double(self, name, data, dims) result(code)
   real(kind=c_double), dimension(..), target, intent(in) :: data !< Data to be sent
+  class(dataset_type),   intent(in)  :: self !< Fortran SmartRedis dataset
+  character(len=*),      intent(in)  :: name !< The unique name used to store in the database
+  integer, dimension(:), intent(in)  :: dims !< The length of each dimension
+  integer(kind=enum_kind)            :: code !< Result of the operation
+
   include 'dataset/add_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
@@ -174,6 +210,11 @@ end function add_tensor_double
 !> Unpack a tensor into already allocated memory whose Fortran type is the equivalent 'int8' C-type
 function unpack_dataset_tensor_i8(self, name, result, dims) result(code)
   integer(kind=c_int8_t), dimension(..), target, intent(out) :: result !< Array to be populated with data
+  class(dataset_type),                  intent(in) :: self !< Pointer to the initialized dataset
+  character(len=*),                     intent(in) :: name !< The name to use to place the tensor
+  integer, dimension(:),                intent(in) :: dims !< Length along each dimension of the tensor
+  integer(kind=enum_kind)                          :: code
+
   include 'dataset/unpack_dataset_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
@@ -185,6 +226,11 @@ end function unpack_dataset_tensor_i8
 !> Unpack a tensor into already allocated memory whose Fortran type is the equivalent 'int16' C-type
 function unpack_dataset_tensor_i16(self, name, result, dims) result(code)
   integer(kind=c_int16_t), dimension(..), target, intent(out) :: result !< Array to be populated with data
+  class(dataset_type),                  intent(in) :: self !< Pointer to the initialized dataset
+  character(len=*),                     intent(in) :: name !< The name to use to place the tensor
+  integer, dimension(:),                intent(in) :: dims !< Length along each dimension of the tensor
+  integer(kind=enum_kind)                          :: code
+
   include 'dataset/unpack_dataset_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
@@ -196,6 +242,11 @@ end function unpack_dataset_tensor_i16
 !> Unpack a tensor into already allocated memory whose Fortran type is the equivalent 'int32' C-type
 function unpack_dataset_tensor_i32(self, name, result, dims) result(code)
   integer(kind=c_int32_t), dimension(..), target, intent(out) :: result !< Array to be populated with data
+  class(dataset_type),                  intent(in) :: self !< Pointer to the initialized dataset
+  character(len=*),                     intent(in) :: name !< The name to use to place the tensor
+  integer, dimension(:),                intent(in) :: dims !< Length along each dimension of the tensor
+  integer(kind=enum_kind)                          :: code
+
   include 'dataset/unpack_dataset_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
@@ -207,6 +258,11 @@ end function unpack_dataset_tensor_i32
 !> Unpack a tensor into already allocated memory whose Fortran type is the equivalent 'int64' C-type
 function unpack_dataset_tensor_i64(self, name, result, dims) result(code)
   integer(kind=c_int64_t), dimension(..), target, intent(out) :: result !< Array to be populated with data
+  class(dataset_type),                  intent(in) :: self !< Pointer to the initialized dataset
+  character(len=*),                     intent(in) :: name !< The name to use to place the tensor
+  integer, dimension(:),                intent(in) :: dims !< Length along each dimension of the tensor
+  integer(kind=enum_kind)                          :: code
+
   include 'dataset/unpack_dataset_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
@@ -218,6 +274,11 @@ end function unpack_dataset_tensor_i64
 !> Unpack a tensor into already allocated memory whose Fortran type is the equivalent 'float' C-type
 function unpack_dataset_tensor_float(self, name, result, dims) result(code)
   real(kind=c_float), dimension(..), target, intent(out) :: result !< Array to be populated with data
+  class(dataset_type),                  intent(in) :: self !< Pointer to the initialized dataset
+  character(len=*),                     intent(in) :: name !< The name to use to place the tensor
+  integer, dimension(:),                intent(in) :: dims !< Length along each dimension of the tensor
+  integer(kind=enum_kind)                          :: code
+
   include 'dataset/unpack_dataset_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface
@@ -229,6 +290,11 @@ end function unpack_dataset_tensor_float
 !> Unpack a tensor into already allocated memory whose Fortran type is the equivalent 'double' C-type
 function unpack_dataset_tensor_double(self, name, result, dims) result(code)
   real(kind=c_double), dimension(..), target, intent(out) :: result !< Array to be populated with data
+  class(dataset_type),                  intent(in) :: self !< Pointer to the initialized dataset
+  character(len=*),                     intent(in) :: name !< The name to use to place the tensor
+  integer, dimension(:),                intent(in) :: dims !< Length along each dimension of the tensor
+  integer(kind=enum_kind)                          :: code
+
   include 'dataset/unpack_dataset_tensor_methods_common.inc'
 
   ! Define the type and call the C-interface

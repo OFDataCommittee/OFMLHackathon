@@ -18,7 +18,7 @@ SmartRedis includes the following features developed for
 large, distributed HPC architectures:
 
 -   Redis cluster support for RedisAI data types (tensors,
-    models, and scripts)
+    models, and scripts).
 -   Distributed model and script placement for parallel
     evaluation that maximizes hardware utilization and throughput
 -   A ``DataSet`` storage format to aggregate multiple tensors
@@ -27,10 +27,12 @@ large, distributed HPC architectures:
     maintain contextual relationships between tensors.
     This is useful when clients produce tensors and
     metadata that are referenced or utilized together.
+-   An API for efficiently aggregating ``DataSet`` objects
+    distributed on one or more database nodes.
 -   Compatibility with SmartSim ensemble capabilities to
     prevent key collisions with
     tensors, ``DataSet``, models, and scripts when
-    clients are part of an ensemble of applications
+    clients are part of an ensemble of applications.
 
 SmartRedis provides clients in Python, C++, C, and Fortran.
 These clients have been written to provide a

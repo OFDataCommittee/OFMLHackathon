@@ -278,9 +278,16 @@ class DataSet
         std::vector<std::string> get_tensor_names();
 
         /*!
-        *  \brief The name of the DataSet
+        *   \brief Retrieve the name of the DataSet
+        *   \returns The name of the DataSet
         */
-        std::string name;
+        std::string get_name() const { return _dsname; }
+
+        /*!
+        *   \brief Change the name for the DataSet
+        *   \param name The name for the DataSet
+        */
+        void set_name(std::string name) { _dsname = name; }
 
         friend class Client;
         friend class PyDataset;
@@ -380,6 +387,10 @@ class DataSet
 
     private:
 
+        /*!
+        *  \brief The name of the DataSet
+        */
+        std::string _dsname;
 
         /*!
         *   \brief A repository for all metadata associated with this DataSet

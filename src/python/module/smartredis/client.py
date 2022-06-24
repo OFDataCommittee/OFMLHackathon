@@ -283,6 +283,38 @@ class Client(PyClient):
         super().set_script(name, device, fn_src)
 
     @exception_handler
+    def set_function_multigpu(self, name, function, first_gpu, num_gpus):
+        """Set a callable function into the database for use
+        in a multi-GPU system
+
+        The final script key used to store the function may be formed
+        by applying a prefix to the supplied name.
+        See use_model_ensemble_prefix() for more details.
+
+        Function must be a callable TorchScript function and have at least
+        one input and one output. Call the function with the Client.run_script
+        method.
+
+        :param name: name to store function at
+        :type name: str
+        :param function: callable function
+        :type function: callable
+        :param first_gpu: the first GPU (zero-based) to use in processing this function
+        :type first_gpu: int
+        :param num_gpus: the number of GPUs to use for this function
+        :type num_gpus: int
+        :raises TypeError: if argument was not a callable function
+        :raises RedisReplyError: if function failed to set
+        """
+        typecheck(name, "name", str)
+        typecheck(first_gpu, "first_gpu", int)
+        typecheck(num_gpus, "num_gpus", int)
+        if not callable(function):
+            raise TypeError(f"Argument provided for function, {type(function)}, is not callable")
+        fn_src = inspect.getsource(function)
+        super().set_script_multigpu(name, fn_src, first_gpu, num_gpus)
+
+    @exception_handler
     def set_script(self, name, script, device="CPU"):
         """Store a TorchScript at a key in the database
 
@@ -308,6 +340,30 @@ class Client(PyClient):
         super().set_script(name, device, script)
 
     @exception_handler
+    def set_script_multigpu(self, name, script, first_gpu, num_gpus):
+        """Store a TorchScript at a key in the database
+
+        The final script key used to store the script may be formed
+        by applying a prefix to the supplied name.
+        See use_model_ensemble_prefix() for more details.
+
+        :param name: name to store the script under
+        :type name: str
+        :param script: TorchScript code
+        :type script: str
+        :param first_gpu: the first GPU (zero-based) to use in processing this script
+        :type first_gpu: int
+        :param num_gpus: the number of GPUs to use in processing this script
+        :type num_gpus: int
+        :raises RedisReplyError: if script fails to set
+        """
+        typecheck(name, "name", str)
+        typecheck(script, "script", str)
+        typecheck(first_gpu, "first_gpu", int)
+        typecheck(num_gpus, "num_gpus", int)
+        super().set_script_multigpu(name, script, first_gpu, num_gpus)
+
+    @exception_handler
     def set_script_from_file(self, name, file, device="CPU"):
         """Same as Client.set_script, but from file
 
@@ -329,6 +385,31 @@ class Client(PyClient):
         device = self.__check_device(device)
         file_path = self.__check_file(file)
         super().set_script_from_file(name, device, file_path)
+
+    @exception_handler
+    def set_script_from_file_multigpu(self, name, file, first_gpu, num_gpus):
+        """Same as Client.set_script_multigpu, but from file
+
+        The final script key used to store the script may be formed
+        by applying a prefix to the supplied name.
+        See use_model_ensemble_prefix() for more details.
+
+        :param name: key to store script under
+        :type name: str
+        :param file: path to text file containing TorchScript code
+        :type file: str
+        :param first_gpu: the first GPU (zero-based) to use in processing this script
+        :type first_gpu: int
+        :param num_gpus: the number of GPUs to use in processing this script
+        :type num_gpus: int
+        :raises RedisReplyError: if script fails to set
+        """
+        typecheck(name, "name", str)
+        typecheck(file, "file", str)
+        typecheck(first_gpu, "first_gpu", int)
+        typecheck(num_gpus, "num_gpus", int)
+        file_path = self.__check_file(file)
+        super().set_script_from_file_multigpu(name, file_path, first_gpu, num_gpus)
 
     @exception_handler
     def get_script(self, name):
@@ -376,6 +457,84 @@ class Client(PyClient):
         typecheck(outputs, "outputs", list)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
         super().run_script(name, fn_name, inputs, outputs)
+
+    @exception_handler
+    def run_script_multigpu(
+        self, name, fn_name, inputs, outputs, offset, first_gpu, num_gpus):
+        """Execute TorchScript stored inside the database
+
+        The script key used to locate the script to be run
+        may be formed by applying a prefix to the supplied
+        name. Similarly, the tensor names in the
+        input and output lists may be prefixed. See
+        set_data_source(), use_model_ensemble_prefix(), and
+        use_tensor_ensemble_prefix() for more details
+
+        :param name: the name the script is stored under
+        :type name: str
+        :param fn_name: name of a function within the script to execute
+        :type fn_name: str
+        :param inputs: database tensor names to use as script inputs
+        :type inputs: list[str]
+        :param outputs: database tensor names to receive script outputs
+        :type outputs: list[str]
+        :param offset: index of the current image, such as a processor ID
+                         or MPI rank
+        :type offset: int
+        :param first_gpu: the first GPU (zero-based) to use in processing this script
+        :type first_gpu: int
+        :param num_gpus: the number of gpus for which the script was stored
+        :type num_gpus: int
+        :raises RedisReplyError: if script execution fails
+        """
+        typecheck(name, "name", str)
+        typecheck(fn_name, "fn_name", str)
+        typecheck(inputs, "inputs", list)
+        typecheck(outputs, "outputs", list)
+        typecheck(offset, "offset", int)
+        typecheck(first_gpu, "first_gpu", int)
+        typecheck(num_gpus, "num_gpus", int)
+        inputs, outputs = self.__check_tensor_args(inputs, outputs)
+        super().run_script_multigpu(
+            name, fn_name, inputs, outputs, offset, first_gpu, num_gpus)
+
+    @exception_handler
+    def delete_script(self, name):
+        """Remove a script from the database
+
+        The script key used to locate the script to be run
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source() and use_model_ensemble_prefix()
+        for more details
+
+        :param name: the name the script is stored under
+        :type name: str
+        :raises RedisReplyError: if script deletion fails
+        """
+        typecheck(name, "name", str)
+        super().delete_script(name)
+
+    @exception_handler
+    def delete_script_multigpu(self, name, first_gpu, num_gpus):
+        """Remove a script from the database
+
+        The script key used to locate the script to be run
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source() and use_model_ensemble_prefix()
+        for more details
+
+        :param name: the name the script is stored under
+        :type name: str
+        :param first_gpu: the first GPU (zero-based) to use in processing this script
+        :type first_gpu: int
+        :param num_gpus: the number of gpus for which the script was stored
+        :type num_gpus: int
+        :raises RedisReplyError: if script deletion fails
+        """
+        typecheck(name, "name", str)
+        typecheck(first_gpu, "first_gpu", int)
+        typecheck(num_gpus, "num_gpus", int)
+        super().delete_script_multigpu(name, first_gpu, num_gpus)
 
     @exception_handler
     def get_model(self, name):
@@ -462,6 +621,74 @@ class Client(PyClient):
         )
 
     @exception_handler
+    def set_model_multigpu(
+        self,
+        name,
+        model,
+        backend,
+        first_gpu,
+        num_gpus,
+        batch_size=0,
+        min_batch_size=0,
+        tag="",
+        inputs=None,
+        outputs=None
+    ):
+        """Put a TF, TF-lite, PT, or ONNX model in the database for use
+        in a multi-GPU system
+
+        The final model key used to store the model
+        may be formed by applying a prefix to the supplied
+        name. Similarly, the tensor names in the
+        input and output nodes for TF models may be prefixed.
+        See set_data_source(), use_model_ensemble_prefix(), and
+        use_tensor_ensemble_prefix() for more details.
+
+        :param name: name to store model under
+        :type name: str
+        :param model: serialized model
+        :type model: bytes
+        :param backend: name of the backend (TORCH, TF, TFLITE, ONNX)
+        :type backend: str
+        :param first_gpu: the first GPU (zero-based) to use in processing this model
+        :type first_gpu: int
+        :param num_gpus: the number of GPUs to use in processing this model
+        :type num_gpus: int
+        :param batch_size: batch size for execution, defaults to 0
+        :type batch_size: int, optional
+        :param min_batch_size: minimum batch size for model execution, defaults to 0
+        :type min_batch_size: int, optional
+        :param tag: additional tag for model information, defaults to ""
+        :type tag: str, optional
+        :param inputs: model inputs (TF only), defaults to None
+        :type inputs: list[str], optional
+        :param outputs: model outputs (TF only), defaults to None
+        :type outputs: list[str], optional
+        :raises RedisReplyError: if model fails to set
+        """
+        typecheck(name, "name", str)
+        typecheck(backend, "backend", str)
+        typecheck(first_gpu, "first_gpu", int)
+        typecheck(num_gpus, "num_gpus", int)
+        typecheck(batch_size, "batch_size", int)
+        typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(tag, "tag", str)
+        backend = self.__check_backend(backend)
+        inputs, outputs = self.__check_tensor_args(inputs, outputs)
+        super().set_model_multigpu(
+            name,
+            model,
+            backend,
+            first_gpu,
+            num_gpus,
+            batch_size,
+            min_batch_size,
+            tag,
+            inputs,
+            outputs
+        )
+
+    @exception_handler
     def set_model_from_file(
         self,
         name,
@@ -529,6 +756,76 @@ class Client(PyClient):
         )
 
     @exception_handler
+    def set_model_from_file_multigpu(
+        self,
+        name,
+        model_file,
+        backend,
+        first_gpu,
+        num_gpus,
+        batch_size=0,
+        min_batch_size=0,
+        tag="",
+        inputs=None,
+        outputs=None,
+    ):
+        """Put a TF, TF-lite, PT, or ONNX model from file in the database
+        for use in a multi-GPU system
+
+        The final model key used to store the model
+        may be formed by applying a prefix to the supplied
+        name. Similarly, the tensor names in the
+        input and output nodes for TF models may be prefixed.
+        See set_data_source(), use_model_ensemble_prefix(), and
+        use_tensor_ensemble_prefix() for more details.
+
+        :param name: name to store model under
+        :type name: str
+        :param model_file: serialized model
+        :type model_file: file path to model
+        :param backend: name of the backend (TORCH, TF, TFLITE, ONNX)
+        :type backend: str
+        :param first_gpu: the first GPU (zero-based) to use in processing this model
+        :type first_gpu: int
+        :param num_gpus: the number of GPUs to use in processing this model
+        :type num_gpus: int
+        :param batch_size: batch size for execution, defaults to 0
+        :type batch_size: int, optional
+        :param min_batch_size: minimum batch size for model execution, defaults to 0
+        :type min_batch_size: int, optional
+        :param tag: additional tag for model information, defaults to ""
+        :type tag: str, optional
+        :param inputs: model inputs (TF only), defaults to None
+        :type inputs: list[str], optional
+        :param outputs: model outupts (TF only), defaults to None
+        :type outputs: list[str], optional
+        :raises RedisReplyError: if model fails to set
+        """
+        typecheck(name, "name", str)
+        typecheck(model_file, "model_file", str)
+        typecheck(backend, "backend", str)
+        typecheck(first_gpu, "first_gpu", int)
+        typecheck(num_gpus, "num_gpus", int)
+        typecheck(batch_size, "batch_size", int)
+        typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(tag, "tag", str)
+        backend = self.__check_backend(backend)
+        m_file = self.__check_file(model_file)
+        inputs, outputs = self.__check_tensor_args(inputs, outputs)
+        super().set_model_from_file_multigpu(
+            name,
+            m_file,
+            backend,
+            first_gpu,
+            num_gpus,
+            batch_size,
+            min_batch_size,
+            tag,
+            inputs,
+            outputs,
+        )
+
+    @exception_handler
     def run_model(self, name, inputs=None, outputs=None):
         """Execute a stored model
 
@@ -548,6 +845,82 @@ class Client(PyClient):
         typecheck(name, "name", str)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
         super().run_model(name, inputs, outputs)
+
+    @exception_handler
+    def run_model_multigpu(
+        self,
+        name,
+        offset,
+        first_gpu,
+        num_gpus,
+        inputs=None,
+        outputs=None):
+        """Execute a model stored for a multi-GPU system
+
+        The model key used to locate the model to be run
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source()
+        and use_model_ensemble_prefix() for more details.
+
+        :param name: name for stored model
+        :type name: str
+        :param offset: index of the current image, such as a processor ID
+                         or MPI rank
+        :type offset: int
+        :param first_gpu: the first GPU (zero-based) to use in processing this model
+        :type first_gpu: int
+        :param num_gpus: the number of gpus for which the model was stored
+        :type num_gpus: int
+        :param inputs: names of stored inputs to provide model, defaults to None
+        :type inputs: list[str], optional
+        :param outputs: names to store outputs under, defaults to None
+        :type outputs: list[str], optional
+        :raises RedisReplyError: if model execution fails
+        """
+        typecheck(name, "name", str)
+        typecheck(offset, "offset", int)
+        typecheck(first_gpu, "first_gpu", int)
+        typecheck(num_gpus, "num_gpus", int)
+        inputs, outputs = self.__check_tensor_args(inputs, outputs)
+        super().run_model_multigpu(name, inputs, outputs, offset, first_gpu, num_gpus)
+
+    @exception_handler
+    def delete_model(self, name):
+        """Remove a model from the database
+
+        The model key used to locate the script to be run
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source() and use_model_ensemble_prefix()
+        for more details
+
+        :param name: the name the model is stored under
+        :type name: str
+        :raises RedisReplyError: if model deletion fails
+        """
+        typecheck(name, "name", str)
+        super().delete_model(name)
+
+    @exception_handler
+    def delete_model_multigpu(self, name, first_gpu, num_gpus):
+        """Remove a model from the database that was stored for use with multiple GPUs
+
+        The model key used to locate the script to be run
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source() and use_model_ensemble_prefix()
+        for more details
+
+        :param name: the name the model is stored under
+        :type name: str
+        :param first_gpu: the first GPU (zero-based) to use in processing this model
+        :type first_gpu: int
+        :param num_gpus: the number of gpus for which the model was stored
+        :type num_gpus: int
+        :raises RedisReplyError: if model deletion fails
+        """
+        typecheck(name, "name", str)
+        typecheck(first_gpu, "first_gpu", int)
+        typecheck(num_gpus, "num_gpus", int)
+        super().delete_model_multigpu(name, first_gpu, num_gpus)
 
     @exception_handler
     def tensor_exists(self, name):
@@ -773,6 +1146,35 @@ class Client(PyClient):
         return super().use_model_ensemble_prefix(use_prefix)
 
     @exception_handler
+    def use_list_ensemble_prefix(self, use_prefix):
+        """Control whether aggregation lists are prefixed
+           when forming database keys
+
+        This function can be used to avoid key collisions in an
+        ensemble by prepending the string value from the
+        environment variable SSKEYIN and/or SSKEYOUT to
+        aggregation list names.  Prefixes will only be used if
+        they were previously set through the environment variables
+        SSKEYOUT and SSKEYIN. Keys for aggregation lists created
+        before this function is called will not be retroactively
+        prefixed. By default, the client prefixes aggregation
+        list keys with the first prefix specified with the SSKEYIN
+        and SSKEYOUT environment variables.  Note that
+        use_tensor_ensemble_prefix() controls prefixing
+        for the entities in the aggregation list, and
+        use_tensor_ensemble_prefix() should be given the
+        same value that was used during the initial
+        setting of the DataSet into the database.
+
+        :param use_prefix: If set to true, all future operations
+                           on aggregation lists will use a prefix, if
+                           available.
+        :type use_prefix: bool
+        """
+        typecheck(use_prefix, "use_prefix", bool)
+        return super().use_list_ensemble_prefix(use_prefix)
+
+    @exception_handler
     def use_tensor_ensemble_prefix(self, use_prefix):
         """Control whether tensor and dataset keys are
            prefixed (e.g. in an ensemble) when forming database keys
@@ -972,6 +1374,257 @@ class Client(PyClient):
         """
         typecheck(addresses, "addresses", list)
         super().save(addresses)
+
+    @exception_handler
+    def append_to_list(self, list_name, dataset):
+        """Appends a dataset to the aggregation list
+
+        When appending a dataset to an aggregation list,
+        the list will automatically be created if it does not
+        exist (i.e. this is the first entry in the list).
+        Aggregation lists work by referencing the dataset
+        by storing its key, so appending a dataset
+        to an aggregation list does not create a copy of the
+        dataset.  Also, for this reason, the dataset
+        must have been previously placed into the database
+        with a separate call to put_dataset().
+
+        :param list_name: The name of the aggregation list
+        :type list_name: str
+        :param dataset: The DataSet to append
+        :type dataset: Dataset
+        :raises TypeError: if argument is not a Dataset
+        :raises RedisReplyError: if there is an error
+                in command execution.
+        """
+        typecheck(list_name, "list_name", str)
+        typecheck(dataset, "dataset", Dataset)
+        pybind_dataset = dataset.get_data()
+        super().append_to_list(list_name, pybind_dataset)
+
+    @exception_handler
+    def delete_list(self, list_name):
+        """Delete an aggregation list
+
+        The key used to locate the aggregation list to be
+        deleted may be formed by applying a prefix to the
+        supplied name. See set_data_source()
+        and use_list_ensemble_prefix() for more details.
+
+        :param list_name: The name of the aggregation list
+        :type list_name: str
+        :raises RedisReplyError: if there is an error
+                in command execution.
+        """
+        typecheck(list_name, "list_name", str)
+        super().delete_list(list_name)
+
+    @exception_handler
+    def copy_list(self, src_name, dest_name):
+        """Copy an aggregation list
+
+        The source and destination aggregation list keys used to
+        locate and store the aggregation list may be formed by
+        applying prefixes to the supplied src_name and dest_name.
+        See set_data_source() and use_list_ensemble_prefix()
+        for more details.
+
+        :param  src_name The source list name
+        :type src_name: str
+        :param  dest_name The destination list name
+        :type dest_name: str
+        :raises RedisReplyError: if there is an error
+                in command execution.
+        """
+        typecheck(src_name, "src_name", str)
+        typecheck(dest_name, "dest_name", str)
+        super().copy_list(src_name, dest_name)
+
+    @exception_handler
+    def rename_list(self, src_name, dest_name):
+        """Rename an aggregation list
+
+        The old and new aggregation list key used to find and
+        relocate the list may be formed by applying prefixes to
+        the supplied old_name and new_name. See set_data_source()
+        and use_list_ensemble_prefix() for more details.
+
+        :param  src_name The source list name
+        :type src_name: str
+        :param  dest_name The destination list name
+        :type dest_name: str
+        :raises RedisReplyError: if there is an error
+                in command execution.
+        """
+        typecheck(src_name, "src_name", str)
+        typecheck(dest_name, "dest_name", str)
+        super().rename_list(src_name, dest_name)
+
+    @exception_handler
+    def get_list_length(self, list_name):
+        """Get the number of entries in the list
+
+        :param  list_name The list name
+        :type list_name: str
+        :return: The length of the list
+        :rtype: int
+        :raises RedisReplyError: if there is an error
+                in command execution.
+        """
+        typecheck(list_name, "list_name", str)
+        return super().get_list_length(list_name)
+
+    @exception_handler
+    def poll_list_length(self, name, list_length, poll_frequency_ms, num_tries):
+        """Poll list length until length is equal
+        to the provided length.  If maximum number of
+        attempts is exceeded, returns False
+
+        The aggregation list key used to check for list length
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source() and use_list_ensemble_prefix()
+        for more details.
+
+        :param  name The name of the list
+        :type name: str
+        :param  list_length The desired length of the list
+        :type list_length: int
+        :param  poll_frequency_ms The time delay between checks, in milliseconds
+        :type poll_frequency_ms: int
+        :param  num_tries The total number of times to check for the name
+        :type num_tries: int
+        :return:  Returns true if the list is found with a length greater
+                  than or equal to the provided length, otherwise false
+        :rtype: bool
+        :raises RedisReplyError: if there is an error
+                in command execution.
+        """
+        typecheck(name, "name", str)
+        typecheck(list_length, "list_length", int)
+        typecheck(poll_frequency_ms, "poll_frequency_ms", int)
+        typecheck(num_tries, "num_tries", int)
+        return super().poll_list_length(
+            name, list_length, poll_frequency_ms, num_tries)
+
+    @exception_handler
+    def poll_list_length_gte(self, name, list_length, poll_frequency_ms, num_tries):
+        """Poll list length until length is greater than or equal
+        to the user-provided length. If maximum number of
+        attempts is exceeded, false is returned.
+
+        The aggregation list key used to check for list length
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source() and use_list_ensemble_prefix()
+        for more details.
+
+        :param  name The name of the list
+        :type name: str
+        :param  list_length The desired minimum length of the list
+        :type list_length: int
+        :param  poll_frequency_ms The time delay between checks, in milliseconds
+        :type poll_frequency_ms: int
+        :param  num_tries The total number of times to check for the name
+        :type num_tries: int
+        :return:  Returns true if the list is found with a length greater
+                  than or equal to the provided length, otherwise false
+        :rtype: bool
+        :raises RedisReplyError: if there is an error
+                in command execution.
+        """
+        typecheck(name, "name", str)
+        typecheck(list_length, "list_length", int)
+        typecheck(poll_frequency_ms, "poll_frequency_ms", int)
+        typecheck(num_tries, "num_tries", int)
+        return super().poll_list_length_gte(
+            name, list_length, poll_frequency_ms, num_tries)
+
+    @exception_handler
+    def poll_list_length_lte(self, name, list_length, poll_frequency_ms, num_tries):
+        """Poll list length until length is less than or equal
+        to the user-provided length. If maximum number of
+        attempts is exceeded, false is returned.
+
+        The aggregation list key used to check for list length
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source() and use_list_ensemble_prefix()
+        for more details.
+
+        :param  name The name of the list
+        :type name: str
+        :param  list_length The desired maximum length of the list
+        :type list_length: int
+        :param  poll_frequency_ms The time delay between checks, in milliseconds
+        :type poll_frequency_ms: int
+        :param  num_tries The total number of times to check for the name
+        :type num_tries: int
+        :return:  Returns true if the list is found with a length less
+                  than or equal to the provided length, otherwise false
+        :rtype: bool
+        :raises RedisReplyError: if there is an error
+                in command execution.
+        """
+        typecheck(name, "name", str)
+        typecheck(list_length, "list_length", int)
+        typecheck(poll_frequency_ms, "poll_frequency_ms", int)
+        typecheck(num_tries, "num_tries", int)
+        return super().poll_list_length_lte(
+            name, list_length, poll_frequency_ms, num_tries)
+
+    @exception_handler
+    def get_datasets_from_list(self, list_name):
+        """Get datasets from an aggregation list
+
+        The aggregation list key used to retrieve datasets
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source() and use_list_ensemble_prefix()
+        for more details.  An empty or nonexistant
+        aggregation list returns an empty vector.
+
+        :param  list_name The name of the list
+        :type list_name: str
+        :return:  A list of DataSet objects.
+        :rtype: list[DataSet]
+        :raises RedisReplyError: if there is an error in command execution.
+        """
+        typecheck(list_name, "list_name", str)
+        return super().get_datasets_from_list(list_name)
+
+    @exception_handler
+    def get_dataset_list_range(self, list_name, start_index, end_index):
+        """Get a range of datasets (by index) from an aggregation list
+
+        The aggregation list key used to retrieve datasets
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source()  and use_list_ensemble_prefix()
+        for more details.  An empty or nonexistant aggregation
+        list returns an empty vector.  If the provided
+        end_index is beyond the end of the list, that index will
+        be treated as the last index of the list.  If start_index
+        and end_index are inconsistent (e.g. end_index is less
+        than start_index), an empty list of datasets will be returned.
+
+        :param  list_name The name of the list
+        :type list_name: str
+        :param  start_index The starting index of the range (inclusive,
+                starting at zero).  Negative values are
+                supported.  A negative value indicates offsets
+                starting at the end of the list. For example, -1 is
+                the last element of the list.
+        :type start_index: int
+        :param end_index The ending index of the range (inclusive,
+               starting at zero).  Negative values are
+               supported.  A negative value indicates offsets
+               starting at the end of the list. For example, -1 is
+               the last element of the list.
+        :return:  A list of DataSet objects.
+        :rtype: list[DataSet]
+        :raises RedisReplyError: if there is an error in command execution.
+        """
+        typecheck(list_name, "list_name", str)
+        typecheck(start_index, "start_index", int)
+        typecheck(end_index, "end_index", int)
+        return super().get_dataset_list_range(
+            list_name, start_index, end_index)
 
     # ---- helpers --------------------------------------------------------
 

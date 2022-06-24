@@ -228,3 +228,10 @@ testpy-cov:
 .PHONY: testcpp-cov
 testcpp-cov: unit-test-cpp
 	./build-scripts/build_cpp_cov.sh
+
+# help: test-examples                   - Build and run all examples
+.PHONY: test-examples
+test-examples: build-examples
+test-examples:
+	@python -m pytest -vv -s ./examples
+

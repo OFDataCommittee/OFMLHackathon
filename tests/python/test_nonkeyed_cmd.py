@@ -169,4 +169,4 @@ def test_save_command(use_cluster, mock_data):
         client.save([address])
         save_time_after = client.get_db_node_info([address])[0]["Persistence"]["rdb_last_save_time"]
 
-        assert save_time_before < save_time_after
+        assert save_time_before <= save_time_after

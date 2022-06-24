@@ -48,6 +48,8 @@ def test_set_model_from_file(mock_model, use_cluster):
         with open("./torch_cnn.pt", "rb") as f:
             model = f.read()
         assert model == returned_model
+        c.delete_model("file_cnn")
+        assert not c.model_exists("file_cnn")
     finally:
         os.remove("torch_cnn.pt")
 

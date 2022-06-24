@@ -38,7 +38,7 @@ If you wish to run tests on GPU hardware, run the following command:
    - GCC > 5
    - CMake > 3
 
-  Since these are usually system libraries we do not install them
+  Since these are usually system libraries, we do not install them
   for the user
 
 After installing dependencies and setting up your testing environment with

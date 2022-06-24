@@ -72,7 +72,7 @@ program main
   type(client_type) :: client
 
   integer :: err_code
-  integer(kind=enum_kind) :: result
+  integer :: result
   logical(kind=c_bool) :: exists
 
   call random_number(true_array_real_32)
@@ -94,44 +94,44 @@ program main
   enddo; enddo; enddo
 
   result = dataset%initialize( "test_dataset" )
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
 
   ! Test adding and retrieving a tensor of every supported type
   result = dataset%add_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
   result = dataset%unpack_dataset_tensor("true_array_real_32", recv_array_real_32, shape(recv_array_real_32))
-  if (result .ne. SRNoError) stop
-  if (.not. all(true_array_real_32 == recv_array_real_32)) stop 'true_array_real_32: FAILED'
+  if (result .ne. SRNoError) error stop
+  if (.not. all(true_array_real_32 == recv_array_real_32)) error stop 'true_array_real_32: FAILED'
 
   result = dataset%add_tensor("true_array_real_64", true_array_real_64, shape(true_array_real_64))
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
   result = dataset%unpack_dataset_tensor("true_array_real_64", recv_array_real_64, shape(recv_array_real_64))
-  if (result .ne. SRNoError) stop
-  if (.not. all(true_array_real_64 == recv_array_real_64)) stop 'true_array_real_64: FAILED'
+  if (result .ne. SRNoError) error stop
+  if (.not. all(true_array_real_64 == recv_array_real_64)) error stop 'true_array_real_64: FAILED'
 
   result = dataset%add_tensor("true_array_integer_8", true_array_integer_8, shape(true_array_integer_8))
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
   result = dataset%unpack_dataset_tensor("true_array_integer_8", recv_array_integer_8, shape(recv_array_integer_8))
-  if (result .ne. SRNoError) stop
-  if (.not. all(true_array_integer_8 == recv_array_integer_8)) stop 'true_array_integer_8: FAILED'
+  if (result .ne. SRNoError) error stop
+  if (.not. all(true_array_integer_8 == recv_array_integer_8)) error stop 'true_array_integer_8: FAILED'
 
   result = dataset%add_tensor("true_array_integer_16", true_array_integer_16, shape(true_array_integer_16))
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
   result = dataset%unpack_dataset_tensor("true_array_integer_16", recv_array_integer_16, shape(recv_array_integer_16))
-  if (result .ne. SRNoError) stop
-  if (.not. all(true_array_integer_16 == recv_array_integer_16)) stop 'true_array_integer_16: FAILED'
+  if (result .ne. SRNoError) error stop
+  if (.not. all(true_array_integer_16 == recv_array_integer_16)) error stop 'true_array_integer_16: FAILED'
 
   result = dataset%add_tensor("true_array_integer_32", true_array_integer_32, shape(true_array_integer_32))
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
   result = dataset%unpack_dataset_tensor("true_array_integer_32", recv_array_integer_32, shape(recv_array_integer_32))
-  if (result .ne. SRNoError) stop
-  if (.not. all(true_array_integer_32 == recv_array_integer_32)) stop 'true_array_integer_32: FAILED'
+  if (result .ne. SRNoError) error stop
+  if (.not. all(true_array_integer_32 == recv_array_integer_32)) error stop 'true_array_integer_32: FAILED'
 
   result = dataset%add_tensor("true_array_integer_64", true_array_integer_64, shape(true_array_integer_64))
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
   result = dataset%unpack_dataset_tensor("true_array_integer_64", recv_array_integer_64, shape(recv_array_integer_64))
-  if (result .ne. SRNoError) stop
-  if (.not. all(true_array_integer_64 == recv_array_integer_64)) stop 'true_array_integer_64: FAILED'
+  if (result .ne. SRNoError) error stop
+  if (.not. all(true_array_integer_64 == recv_array_integer_64)) error stop 'true_array_integer_64: FAILED'
 
   ! Test adding scalar metadata of all supported types to the dataset
   call random_number(meta_dbl_vec)
@@ -141,45 +141,45 @@ program main
 
   do i=1,dim1
     result = dataset%add_meta_scalar(str_meta_dbl, meta_dbl_vec(i))
-    if (result .ne. SRNoError) stop
+    if (result .ne. SRNoError) error stop
     result = dataset%add_meta_scalar(str_meta_flt, meta_flt_vec(i))
-    if (result .ne. SRNoError) stop
+    if (result .ne. SRNoError) error stop
     result = dataset%add_meta_scalar(str_meta_int32, meta_int32_vec(i))
-    if (result .ne. SRNoError) stop
+    if (result .ne. SRNoError) error stop
     result = dataset%add_meta_scalar(str_meta_int64, meta_int64_vec(i))
-    if (result .ne. SRNoError) stop
+    if (result .ne. SRNoError) error stop
   enddo
 
   result = dataset%get_meta_scalars(str_meta_dbl, meta_dbl_recv)
-  if (result .ne. SRNoError) stop
-  if (.not. all(meta_dbl_recv == meta_dbl_vec)) stop 'meta_dbl: FAILED'
+  if (result .ne. SRNoError) error stop
+  if (.not. all(meta_dbl_recv == meta_dbl_vec)) error stop 'meta_dbl: FAILED'
   result = dataset%get_meta_scalars(str_meta_flt, meta_flt_recv)
-  if (result .ne. SRNoError) stop
-  if (.not. all(meta_flt_recv == meta_flt_vec)) stop 'meta_flt: FAILED'
+  if (result .ne. SRNoError) error stop
+  if (.not. all(meta_flt_recv == meta_flt_vec)) error stop 'meta_flt: FAILED'
   result = dataset%get_meta_scalars(str_meta_int32, meta_int32_recv)
-  if (result .ne. SRNoError) stop
-  if (.not. all(meta_int32_recv == meta_int32_vec)) stop 'meta_int32: FAILED'
+  if (result .ne. SRNoError) error stop
+  if (.not. all(meta_int32_recv == meta_int32_vec)) error stop 'meta_int32: FAILED'
   result = dataset%get_meta_scalars(str_meta_int64, meta_int64_recv)
-  if (result .ne. SRNoError) stop
-  if (.not. all(meta_int64_recv == meta_int64_vec)) stop 'meta_int64: FAILED'
+  if (result .ne. SRNoError) error stop
+  if (.not. all(meta_int64_recv == meta_int64_vec)) error stop 'meta_int64: FAILED'
 
   ! test dataset_existence
   result = client%initialize(use_cluster())
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
   result = client%dataset_exists("nonexistent", exists)
-  if (result .ne. SRNoError) stop
-  if (exists) stop 'non-existant dataset: FAILED'
+  if (result .ne. SRNoError) error stop
+  if (exists) error stop 'non-existant dataset: FAILED'
   result = client%poll_dataset("nonexistent", 50, 5, exists)
-  if (result .ne. SRNoError) stop
-  if (exists) stop 'non-existant dataset: FAILED'
+  if (result .ne. SRNoError) error stop
+  if (exists) error stop 'non-existant dataset: FAILED'
   result = client%put_dataset(dataset)
-  if (result .ne. SRNoError) stop
+  if (result .ne. SRNoError) error stop
   result = client%dataset_exists("test_dataset", exists)
-  if (result .ne. SRNoError) stop
-  if (.not. exists) stop 'existant dataset: FAILED'
+  if (result .ne. SRNoError) error stop
+  if (.not. exists) error stop 'existant dataset: FAILED'
   result = client%poll_dataset("test_dataset", 50, 5, exists)
-  if (result .ne. SRNoError) stop
-  if (.not. exists) stop 'existant dataset: FAILED'
+  if (result .ne. SRNoError) error stop
+  if (.not. exists) error stop 'existant dataset: FAILED'
 
 
   write(*,*) "Fortran Dataset: passed"

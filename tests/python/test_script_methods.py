@@ -59,6 +59,8 @@ def test_set_script_from_file(use_cluster):
     assert c.model_exists("test-script-file")
     returned_script = c.get_script("test-script-file")
     assert sent_script == returned_script
+    c.delete_script("test-script-file")
+    assert not c.model_exists("test-script-file")
 
 
 def test_run_script(use_cluster):

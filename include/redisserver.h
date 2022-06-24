@@ -31,6 +31,7 @@
 
 #include <thread>
 #include <iostream>
+#include <random>
 #include "limits.h"
 
 #include <sw/redis++/redis++.h>
@@ -47,9 +48,12 @@
 #include "compoundcommand.h"
 #include "addressatcommand.h"
 #include "addressanycommand.h"
+#include "addressallcommand.h"
 #include "clusterinfocommand.h"
 #include "dbinfocommand.h"
 #include "gettensorcommand.h"
+#include "pipelinereply.h"
+#include "threadpool.h"
 
 ///@file
 
@@ -72,9 +76,9 @@ class RedisServer {
         RedisServer();
 
         /*!
-        *   \brief Default destructor
+        *   \brief Destructor
         */
-        virtual ~RedisServer() = default;
+        virtual ~RedisServer();
 
         /*!
         *   \brief Run a single-key Command on the server
@@ -121,6 +125,16 @@ class RedisServer {
         virtual CommandReply run(AddressAnyCommand& cmd) = 0;
 
         /*!
+        *   \brief Run a non-keyed Command that
+        *          addresses every db node on the server
+        *   \param cmd The non-keyed Command that
+        *              addresses any db node
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAllCommand& cmd) = 0;
+
+        /*!
         *   \brief Run multiple single-key or single-hash slot
         *          Command on the server.  Each Command in the
         *          CommandList is run sequentially.
@@ -131,6 +145,23 @@ class RedisServer {
         *            in the CommandList
         */
         virtual std::vector<CommandReply> run(CommandList& cmd) = 0;
+
+        /*!
+        *   \brief Run multiple single-key or single-hash slot
+        *          Command on the server in pipelines.  The
+        *          Command in the CommandList will be grouped
+        *          by shard, and executed in groups by shard.
+        *          Commands are not guaranteed to be executed
+        *          in any sequence or ordering.
+        *   \param cmd The CommandList containing multiple
+        *              single-key or single-hash
+        *              slot Command to run
+        *   \returns A list of CommandReply for each Command
+        *            in the CommandList. The order of the result
+        *            matches the order of the input CommandList.
+        */
+        virtual PipelineReply
+        run_via_unordered_pipelines(CommandList& cmd_list) = 0;
 
         /*!
         *   \brief Check if a key exists in the database
@@ -262,6 +293,39 @@ class RedisServer {
                                        ) = 0;
 
         /*!
+        *   \brief Set a model from std::string_view buffer in the
+        *          database for future execution in a multi-GPU system
+        *   \param name The name to associate with the model
+        *   \param model The model as a continuous buffer string_view
+        *   \param backend The name of the backend
+        *                  (TF, TFLITE, TORCH, ONNX)
+        *   \param first_gpu The first GPU to use with this model
+        *   \param num_gpus The number of GPUs to use with this model
+        *   \param batch_size The batch size for model execution
+        *   \param min_batch_size The minimum batch size for model
+        *                         execution
+        *   \param tag A tag to attach to the model for
+        *              information purposes
+        *   \param inputs One or more names of model input nodes
+        *                 (TF models only)
+        *   \param outputs One or more names of model output nodes
+        *                 (TF models only)
+        *   \throw RuntimeException for all client errors
+        */
+        virtual void set_model_multigpu(const std::string& name,
+                                        const std::string_view& model,
+                                        const std::string& backend,
+                                        int first_gpu,
+                                        int num_gpus,
+                                        int batch_size = 0,
+                                        int min_batch_size = 0,
+                                        const std::string& tag = "",
+                                        const std::vector<std::string>& inputs
+                                            = std::vector<std::string>(),
+                                        const std::vector<std::string>& outputs
+                                            = std::vector<std::string>()) = 0;
+
+        /*!
         *   \brief Set a script from std::string_view buffer in the
         *          database for future execution
         *   \param key The key to associate with the script
@@ -275,8 +339,22 @@ class RedisServer {
                                         std::string_view script) = 0;
 
         /*!
+        *   \brief Set a script from std::string_view buffer in the
+        *          database for future execution in a multi-GPU system
+        *   \param name The name to associate with the script
+        *   \param script The script source in a std::string_view
+        *   \param first_gpu The first GPU to use with this script
+        *   \param num_gpus The number of GPUs to use with this script
+        *   \throw RuntimeException for all client errors
+        */
+        virtual void set_script_multigpu(const std::string& name,
+                                         const std::string_view& script,
+                                         int first_gpu,
+                                         int num_gpus) = 0;
+
+        /*!
         *   \brief Run a model in the database using the
-        *          specificed input and output tensors
+        *          specified input and output tensors
         *   \param key The key associated with the model
         *   \param inputs The keys of inputs tensors to use
         *                 in the model
@@ -292,8 +370,28 @@ class RedisServer {
                                        std::vector<std::string> outputs) = 0;
 
         /*!
+        *   \brief Run a model in the database using the
+        *          specified input and output tensors in a multi-GPU system
+        *   \param name The name associated with the model
+        *   \param inputs The names of input tensors to use in the model
+        *   \param outputs The names of output tensors that will be used
+        *                  to save model results
+        *   \param offset index of the current image, such as a processor
+        *                   ID or MPI rank
+        *   \param first_gpu The first GPU to use with this model
+        *   \param num_gpus the number of gpus for which the script was stored
+        *   \throw RuntimeException for all client errors
+        */
+        virtual void run_model_multigpu(const std::string& name,
+                                        std::vector<std::string> inputs,
+                                        std::vector<std::string> outputs,
+                                        int offset,
+                                        int first_gpu,
+                                        int num_gpus) = 0;
+
+        /*!
         *   \brief Run a script function in the database using the
-        *          specificed input and output tensors
+        *          specified input and output tensors
         *   \param key The key associated with the script
         *   \param function The name of the function in the script to run
         *   \param inputs The keys of inputs tensors to use
@@ -310,6 +408,66 @@ class RedisServer {
                                         std::vector<std::string> inputs,
                                         std::vector<std::string> outputs)
                                          = 0;
+
+        /*!
+        *   \brief Run a script function in the database using the
+        *          specified input and output tensors in a multi-GPU system
+        *   \param name The name associated with the script
+        *   \param function The name of the function in the script to run
+        *   \param inputs The names of input tensors to use in the script
+        *   \param outputs The names of output tensors that will be used
+        *                  to save script results
+        *   \param offset index of the current image, such as a processor
+        *                   ID or MPI rank
+        *   \param first_gpu The first GPU to use with this script
+        *   \param num_gpus the number of gpus for which the script was stored
+        *   \throw RuntimeException for all client errors
+        */
+        virtual void run_script_multigpu(const std::string& name,
+                                         const std::string& function,
+                                         std::vector<std::string>& inputs,
+                                         std::vector<std::string>& outputs,
+                                         int offset,
+                                         int first_gpu,
+                                         int num_gpus) = 0;
+
+        /*!
+        *   \brief Remove a model from the database
+        *   \param key The key associated with the model
+        *   \returns The CommandReply from script delete Command execution
+        *   \throw SmartRedis::Exception if model deletion fails
+        */
+        virtual CommandReply delete_model(const std::string& key) = 0;
+
+        /*!
+        *   \brief Remove a model from the database that was stored
+        *          for use with multiple GPUs
+        *   \param name The name associated with the model
+        *   \param first_cpu the first GPU (zero-based) to use with the model
+        *   \param num_gpus the number of gpus for which the model was stored
+        *   \throw SmartRedis::Exception if model deletion fails
+        */
+        virtual void delete_model_multigpu(
+            const std::string& name, int first_gpu, int num_gpus) = 0;
+
+        /*!
+        *   \brief Remove a script from the database
+        *   \param key The key associated with the script
+        *   \returns The CommandReply from script delete Command execution
+        *   \throw SmartRedis::Exception if script deletion fails
+        */
+        virtual CommandReply delete_script(const std::string& key) = 0;
+
+        /*!
+        *   \brief Remove a script from the database that was stored
+        *          for use with multiple GPUs
+        *   \param name The name associated with the script
+        *   \param first_cpu the first GPU (zero-based) to use with the script
+        *   \param num_gpus the number of gpus for which the script was stored
+        *   \throw SmartRedis::Exception if script deletion fails
+        */
+        virtual void delete_script_multigpu(
+            const std::string& name, int first_gpu, int num_gpus) = 0;
 
         /*!
         *   \brief Retrieve the model from the database
@@ -389,10 +547,40 @@ class RedisServer {
         static constexpr int _DEFAULT_CMD_TIMEOUT = 100;
 
         /*!
+        *   \brief Default value of model execution timeout (milliseconds)
+        */
+        static constexpr int _DEFAULT_MODEL_TIMEOUT = 60 * 1000 * 1000;
+
+        /*!
         *   \brief Default value of command execution attempt
         *          intervals (milliseconds)
         */
         static constexpr int _DEFAULT_CMD_INTERVAL = 1000;
+
+        /*!
+        *   \brief Default number of threads for thread pool
+        */
+        static constexpr int _DEFAULT_THREAD_COUNT = 4;
+
+        /*!
+        *   \brief Seeding for the random number engine
+        */
+        std::random_device _rd;
+
+        /*!
+        *   \brief Random number generator
+        */
+        std::mt19937 _gen;
+
+        /*!
+        *   \brief Number of threads for thread pool
+        */
+        int _thread_count;
+
+        /*!
+        *   \brief The thread pool
+        */
+        ThreadPool *_tp;
 
         /*!
         *   \brief Environment variable for connection timeout
@@ -417,6 +605,18 @@ class RedisServer {
         */
         inline static const std::string _CMD_INTERVAL_ENV_VAR =
             "SR_CMD_INTERVAL";
+
+        /*!
+        *   \brief Environment variable for model execution timeout
+        */
+        inline static const std::string _MODEL_TIMEOUT_ENV_VAR =
+            "SR_MODEL_TIMEOUT";
+
+        /*!
+        *   \brief Environment variable for thread count in thread pool
+        */
+        inline static const std::string _TP_THREAD_COUNT =
+            "SR_THREAD_COUNT";
 
         /*!
         *   \brief Retrieve a single address, randomly
@@ -469,6 +669,15 @@ class RedisServer {
         */
         void _check_runtime_variables();
 
+        /*!
+        *   \brief Modular arithmetic that supports negative numbers
+        *   \param value The number to be modularized
+        *   \param modulus the modulus for the operation
+        *   \returns value modulo modulus
+        */
+        int _modulo(int value, int modulus) {
+            return (((value % modulus) + modulus) % modulus);
+         }
 
 };
 

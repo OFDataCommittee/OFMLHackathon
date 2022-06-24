@@ -157,18 +157,18 @@ SRError get_dataset(void* c_client, const char* name,
 
 // Rename a dataset in the database.
 extern "C"
-SRError rename_dataset(void* c_client, const char* name,
-                       const size_t name_length, const char* new_name,
+SRError rename_dataset(void* c_client, const char* old_name,
+                       const size_t old_name_length, const char* new_name,
                        const size_t new_name_length)
 {
   SRError result = SRNoError;
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && new_name != NULL);
+    SR_CHECK_PARAMS(c_client != NULL && old_name != NULL && new_name != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
+    std::string name_str(old_name, old_name_length);
     std::string new_name_str(new_name, new_name_length);
 
     s->rename_dataset(name_str, new_name_str);
@@ -245,8 +245,8 @@ SRError delete_dataset(void* c_client, const char* name, const size_t name_lengt
 // Put a tensor of a specified type into the database
 extern "C"
 SRError put_tensor(void* c_client,
-                  const char* key,
-                  const size_t key_length,
+                  const char* name,
+                  const size_t name_length,
                   void* data,
                   const size_t* dims,
                   const size_t n_dims,
@@ -257,16 +257,16 @@ SRError put_tensor(void* c_client,
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL &&
                     data != NULL && dims != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
 
     std::vector<size_t> dims_vec;
     dims_vec.assign(dims, dims + n_dims);
 
-    s->put_tensor(key_str, data, dims_vec, type, mem_layout);
+    s->put_tensor(name_str, data, dims_vec, type, mem_layout);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -283,8 +283,8 @@ SRError put_tensor(void* c_client,
 // Get a tensor of a specified type from the database
 extern "C"
 SRError get_tensor(void* c_client,
-                  const char* key,
-                  const size_t key_length,
+                  const char* name,
+                  const size_t name_length,
                   void** result,
                   size_t** dims,
                   size_t* n_dims,
@@ -295,13 +295,13 @@ SRError get_tensor(void* c_client,
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && result != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && result != NULL &&
                     dims != NULL && n_dims != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
 
-    s->get_tensor(key_str, *result, *dims, *n_dims, *type, mem_layout);
+    s->get_tensor(name_str, *result, *dims, *n_dims, *type, mem_layout);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -319,8 +319,8 @@ SRError get_tensor(void* c_client,
 // and put the values into the user provided memory space.
 extern "C"
 SRError unpack_tensor(void* c_client,
-                     const char* key,
-                     const size_t key_length,
+                     const char* name,
+                     const size_t name_length,
                      void* result,
                      const size_t* dims,
                      const size_t n_dims,
@@ -331,16 +331,16 @@ SRError unpack_tensor(void* c_client,
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && result != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && result != NULL &&
                     dims != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
 
     std::vector<size_t> dims_vec;
     dims_vec.assign(dims, dims + n_dims);
 
-    s->unpack_tensor(key_str, result, dims_vec, type, mem_layout);
+    s->unpack_tensor(name_str, result, dims_vec, type, mem_layout);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -354,23 +354,23 @@ SRError unpack_tensor(void* c_client,
   return outcome;
 }
 
-// Rename a tensor from key to new_key
+// Rename a tensor from old_name to new_name
 extern "C"
-SRError rename_tensor(void* c_client, const char* key,
-                     const size_t key_length, const char* new_key,
-                     const size_t new_key_length)
+SRError rename_tensor(void* c_client,
+                      const char* old_name, const size_t old_name_length,
+                      const char* new_name, const size_t new_name_length)
 {
   SRError result = SRNoError;
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && new_key != NULL);
+    SR_CHECK_PARAMS(c_client != NULL && old_name != NULL && new_name != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
-    std::string new_key_str(new_key, new_key_length);
+    std::string old_name_str(old_name, old_name_length);
+    std::string new_name_str(new_name, new_name_length);
 
-    s->rename_tensor(key_str, new_key_str);
+    s->rename_tensor(old_name_str, new_name_str);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -386,19 +386,19 @@ SRError rename_tensor(void* c_client, const char* key,
 
 // Delete a tensor from the database.
 extern "C"
-SRError delete_tensor(void* c_client, const char* key,
-                      const size_t key_length)
+SRError delete_tensor(void* c_client, const char* name,
+                      const size_t name_length)
 {
   SRError result = SRNoError;
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL);
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
 
-    s->delete_tensor(key_str);
+    s->delete_tensor(name_str);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -459,10 +459,56 @@ bool CompareCaseInsensitive(const char* a,const char* b) {
   return (*a == *b);
 }
 
+// Return True if the backend is TF or TFLITE
+bool _isTensorFlow(const char* backend)
+{
+  return CompareCaseInsensitive(backend, "TF") || CompareCaseInsensitive(backend, "TFLITE");
+}
+
+// Check the parameters common to all set_model functions
+void _check_params_set_model(void* c_client,
+                            const char* name, const char* backend,
+                            const char** inputs, const size_t* input_lengths, const size_t n_inputs,
+                            const char** outputs, const size_t* output_lengths, const size_t n_outputs)
+{
+  // Sanity check params. Tag is strictly optional, and inputs/outputs are
+  // mandatory IFF backend is TensorFlow (TF or TFLITE)
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && backend != NULL);
+
+  if (_isTensorFlow(backend)) {
+    if (inputs == NULL || input_lengths == NULL ||
+        outputs == NULL || output_lengths == NULL) {
+      throw SRParameterException("Inputs and outputs are required with TensorFlow");
+    }
+  }
+
+  // For the inputs and outputs arrays, a single empty string is ok (this means
+  // that the array should be skipped) but if more than one entry is present, the
+  // strings must be nonzero length
+  if (_isTensorFlow(backend)) {
+    if (n_inputs != 1 && input_lengths[0] != 0) {
+      for (size_t i = 0; i < n_inputs; i++){
+        if (inputs[i] == NULL || input_lengths[i] == 0) {
+          throw SRParameterException(
+            "inputs[" + std::to_string(i) + "] is NULL or empty");
+        }
+      }
+    }
+    if (n_outputs != 1 && output_lengths[0] != 0) {
+      for (size_t i = 0; i < n_outputs; i++) {
+        if (outputs[i] == NULL || output_lengths[i] == 0) {
+          throw SRParameterException(
+            "outputs[" + std::to_string(i) + "] is NULL or empty");
+        }
+      }
+    }
+  }
+}
+
 // Set a model stored in a binary file.
 extern "C"
 SRError set_model_from_file(void* c_client,
-                           const char* key, const size_t key_length,
+                           const char* name, const size_t name_length,
                            const char* model_file, const size_t model_file_length,
                            const char* backend, const size_t backend_length,
                            const char* device, const size_t device_length,
@@ -478,40 +524,12 @@ SRError set_model_from_file(void* c_client,
   {
     // Sanity check params. Tag is strictly optional, and inputs/outputs are
     // mandatory IFF backend is TensorFlow (TF or TFLITE)
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && model_file != NULL &&
-                    backend != NULL && device != NULL);
-    bool isTensorFlow = CompareCaseInsensitive(backend, "TF") || CompareCaseInsensitive(backend, "TFLITE");
-    if (isTensorFlow) {
-      if (inputs == NULL || input_lengths == NULL ||
-          outputs == NULL || output_lengths == NULL) {
-        throw SRParameterException("Inputs and outputs are required with TensorFlow");
-      }
-    }
-
-    // For the inputs and outputs arrays, a single empty string is ok (this means
-    // that the array should be skipped) but if more than one entry is present, the
-    // strings must be nonzero length
-    if (isTensorFlow) {
-      if (n_inputs != 1 && input_lengths[0] != 0) {
-        for (size_t i = 0; i < n_inputs; i++){
-          if (inputs[i] == NULL || input_lengths[i] == 0) {
-            throw SRParameterException(
-              std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
-          }
-        }
-      }
-      if (n_outputs != 1 && output_lengths[0] != 0) {
-        for (size_t i = 0; i < n_outputs; i++) {
-          if (outputs[i] == NULL || output_lengths[i] == 0) {
-            throw SRParameterException(
-              std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
-          }
-        }
-      }
-    }
+    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                          outputs, output_lengths, n_outputs);
+    SR_CHECK_PARAMS(model_file != NULL && device != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
     std::string model_file_str(model_file, model_file_length);
     std::string backend_str(backend, backend_length);
     std::string device_str(device, device_length);
@@ -519,7 +537,7 @@ SRError set_model_from_file(void* c_client,
 
     // Catch the case where an empty string was sent (default C++ client behavior)
     std::vector<std::string> input_vec;
-    if (isTensorFlow) {
+    if (_isTensorFlow(backend)) {
       if (n_inputs != 1 || input_lengths[0] != 0) {
         for (size_t i = 0; i < n_inputs; i++) {
           input_vec.push_back(std::string(inputs[i], input_lengths[i]));
@@ -528,7 +546,7 @@ SRError set_model_from_file(void* c_client,
     }
 
     std::vector<std::string> output_vec;
-    if (isTensorFlow) {
+    if (_isTensorFlow(backend)) {
       if (n_outputs != 1 || output_lengths[0] != 0) {
         for (size_t i = 0; i < n_outputs; i++) {
           output_vec.push_back(std::string(outputs[i], output_lengths[i]));
@@ -536,9 +554,70 @@ SRError set_model_from_file(void* c_client,
       }
     }
 
-    s->set_model_from_file(key_str, model_file_str, backend_str, device_str,
+    s->set_model_from_file(name_str, model_file_str, backend_str, device_str,
                            batch_size, min_batch_size, tag_str, input_vec,
                            output_vec);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+extern "C"
+SRError set_model_from_file_multigpu(void* c_client,
+                                     const char* name, const size_t name_length,
+                                     const char* model_file, const size_t model_file_length,
+                                     const char* backend, const size_t backend_length,
+                                     const int first_gpu, const int num_gpus,
+                                     const int batch_size, const int min_batch_size,
+                                     const char* tag, const size_t tag_length,
+                                     const char** inputs, const size_t* input_lengths,
+                                     const size_t n_inputs, const char** outputs,
+                                     const size_t* output_lengths, const size_t n_outputs)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params. Tag is strictly optional, and inputs/outputs are
+    // mandatory IFF backend is TensorFlow (TF or TFLITE)
+    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                          outputs, output_lengths, n_outputs);
+    SR_CHECK_PARAMS(model_file != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+    std::string model_file_str(model_file, model_file_length);
+    std::string backend_str(backend, backend_length);
+    std::string tag_str(tag, tag_length);
+
+    // Catch the case where an empty string was sent (default C++ client behavior)
+    std::vector<std::string> input_vec;
+    if (_isTensorFlow(backend)) {
+      if (n_inputs != 1 || input_lengths[0] != 0) {
+        for (size_t i = 0; i < n_inputs; i++) {
+          input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+        }
+      }
+    }
+
+    std::vector<std::string> output_vec;
+    if (_isTensorFlow(backend)) {
+      if (n_outputs != 1 || output_lengths[0] != 0) {
+        for (size_t i = 0; i < n_outputs; i++) {
+          output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+        }
+      }
+    }
+
+    s->set_model_from_file_multigpu(name_str, model_file_str, backend_str, first_gpu,
+                                   num_gpus, batch_size, min_batch_size, tag_str,
+                                   input_vec, output_vec);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -555,7 +634,7 @@ SRError set_model_from_file(void* c_client,
 // Set a model stored in a buffer c-string.
 extern "C"
 SRError set_model(void* c_client,
-                 const char* key, const size_t key_length,
+                 const char* name, const size_t name_length,
                  const char* model, const size_t model_length,
                  const char* backend, const size_t backend_length,
                  const char* device, const size_t device_length,
@@ -571,40 +650,12 @@ SRError set_model(void* c_client,
   {
     // Sanity check params. Tag is strictly optional, and inputs/outputs are
     // mandatory IFF backend is TensorFlow (TF or TFLITE)
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && model != NULL &&
-                    backend != NULL && device != NULL);
-    bool isTensorFlow = CompareCaseInsensitive(backend, "TF") || CompareCaseInsensitive(backend, "TFLITE");
-    if (isTensorFlow) {
-      if (inputs == NULL || input_lengths == NULL ||
-          outputs == NULL || output_lengths == NULL) {
-        throw SRParameterException("Inputs and outputs are required with TensorFlow");
-      }
-    }
-
-    // For the inputs and outputs arrays, a single empty string is ok (this means
-    // that the array should be skipped) but if more than one entry is present, the
-    // strings must be nonzero length
-    if (isTensorFlow) {
-      if (n_inputs != 1 && input_lengths[0] != 0) {
-        for (size_t i = 0; i < n_inputs; i++){
-          if (inputs[i] == NULL || input_lengths[i] == 0) {
-            throw SRParameterException(
-              std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
-          }
-        }
-      }
-      if (n_outputs != 1 && output_lengths[0] != 0) {
-        for (size_t i = 0; i < n_outputs; i++) {
-          if (outputs[i] == NULL || output_lengths[i] == 0) {
-            throw SRParameterException(
-              std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
-          }
-        }
-      }
-    }
+    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                          outputs, output_lengths, n_outputs);
+    SR_CHECK_PARAMS(model != NULL && device != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
     std::string model_str(model, model_length);
     std::string backend_str(backend, backend_length);
     std::string device_str(device, device_length);
@@ -612,7 +663,7 @@ SRError set_model(void* c_client,
 
     // Catch the case where an empty string was sent (default C++ client behavior)
     std::vector<std::string> input_vec;
-    if (isTensorFlow) {
+    if (_isTensorFlow(backend)) {
       if (n_inputs != 1 || input_lengths[0] != 0) {
         for (size_t i = 0; i < n_inputs; i++) {
           input_vec.push_back(std::string(inputs[i], input_lengths[i]));
@@ -621,7 +672,7 @@ SRError set_model(void* c_client,
     }
 
     std::vector<std::string> output_vec;
-    if (isTensorFlow) {
+    if (_isTensorFlow(backend)) {
       if (n_outputs != 1 || output_lengths[0] != 0) {
         for (size_t i = 0; i < n_outputs; i++) {
           output_vec.push_back(std::string(outputs[i], output_lengths[i]));
@@ -629,7 +680,7 @@ SRError set_model(void* c_client,
       }
     }
 
-    s->set_model(key_str, model_str, backend_str, device_str,
+    s->set_model(name_str, model_str, backend_str, device_str,
                 batch_size, min_batch_size, tag_str, input_vec,
                 output_vec);
   }
@@ -645,11 +696,76 @@ SRError set_model(void* c_client,
   return result;
 }
 
+// Set a model stored in a buffer c-string.
+extern "C"
+SRError set_model_multigpu(void* c_client,
+                          const char* name, const size_t name_length,
+                          const char* model, const size_t model_length,
+                          const char* backend, const size_t backend_length,
+                          const int first_gpu, const int num_gpus,
+                          const int batch_size, const int min_batch_size,
+                          const char* tag, const size_t tag_length,
+                          const char** inputs, const size_t* input_lengths,
+                          const size_t n_inputs,
+                          const char** outputs, const size_t* output_lengths,
+                          const size_t n_outputs)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params. Tag is strictly optional, and inputs/outputs are
+    // mandatory IFF backend is TensorFlow (TF or TFLITE)
+    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                          outputs, output_lengths, n_outputs);
+    SR_CHECK_PARAMS(model != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+    std::string model_str(model, model_length);
+    std::string backend_str(backend, backend_length);
+    std::string tag_str(tag, tag_length);
+
+    // Catch the case where an empty string was sent (default C++ client behavior)
+    std::vector<std::string> input_vec;
+    if (_isTensorFlow(backend)) {
+      if (n_inputs != 1 || input_lengths[0] != 0) {
+        for (size_t i = 0; i < n_inputs; i++) {
+          input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+        }
+      }
+    }
+
+    std::vector<std::string> output_vec;
+    if (_isTensorFlow(backend)) {
+      if (n_outputs != 1 || output_lengths[0] != 0) {
+        for (size_t i = 0; i < n_outputs; i++) {
+          output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+        }
+      }
+    }
+
+    s->set_model_multigpu(name_str, model_str, backend_str, first_gpu, num_gpus,
+                         batch_size, min_batch_size, tag_str, input_vec,
+                         output_vec);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+
 // Retrieve the model and model length from the database
 extern "C"
 SRError get_model(void* c_client,
-                  const char* key,
-                  const size_t key_length,
+                  const char* name,
+                  const size_t name_length,
                   size_t* model_length,
                   const char** model)
 {
@@ -657,12 +773,12 @@ SRError get_model(void* c_client,
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && model_length != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && model_length != NULL &&
                     model != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
-    std::string_view model_str_view(s->get_model(key_str));
+    std::string name_str(name, name_length);
+    std::string_view model_str_view(s->get_model(name_str));
 
     *model_length = model_str_view.size();
     *model = model_str_view.data();
@@ -682,8 +798,8 @@ SRError get_model(void* c_client,
 // Put a script in the database that is stored in a file.
 extern "C"
 SRError set_script_from_file(void* c_client,
-                            const char* key,
-                            const size_t key_length,
+                            const char* name,
+                            const size_t name_length,
                             const char* device,
                             const size_t device_length,
                             const char* script_file,
@@ -693,15 +809,49 @@ SRError set_script_from_file(void* c_client,
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && device != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && device != NULL &&
                     script_file != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
     std::string device_str(device, device_length);
     std::string script_file_str(script_file, script_file_length);
 
-    s->set_script_from_file(key_str, device_str, script_file_str);
+    s->set_script_from_file(name_str, device_str, script_file_str);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Put a script in the database that is stored in a file in a multi-GPU system
+extern "C"
+SRError set_script_from_file_multigpu(void* c_client,
+                                     const char* name,
+                                     const size_t name_length,
+                                     const char* script_file,
+                                     const size_t script_file_length,
+                                     const int first_gpu,
+                                     const int num_gpus)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && script_file != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+    std::string script_file_str(script_file, script_file_length);
+
+    s->set_script_from_file_multigpu(name_str, script_file_str, first_gpu, num_gpus);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -718,8 +868,8 @@ SRError set_script_from_file(void* c_client,
 // Put a script in the database that is stored in a string.
 extern "C"
 SRError set_script(void* c_client,
-                  const char* key,
-                  const size_t key_length,
+                  const char* name,
+                  const size_t name_length,
                   const char* device,
                   const size_t device_length,
                   const char* script,
@@ -729,16 +879,16 @@ SRError set_script(void* c_client,
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && device != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && device != NULL &&
                     script != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
 
-    std::string key_str(key, key_length);
+    std::string name_str(name, name_length);
     std::string device_str(device, device_length);
     std::string script_str(script, script_length);
 
-    s->set_script(key_str, device_str, script_str);
+    s->set_script(name_str, device_str, script_str);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -752,11 +902,48 @@ SRError set_script(void* c_client,
   return result;
 }
 
+// Put a script in the database that is stored in a string in a multi-GPU system
+extern "C"
+SRError set_script_multigpu(void* c_client,
+                           const char* name,
+                           const size_t name_length,
+                           const char* script,
+                           const size_t script_length,
+                           const int first_gpu,
+                           const int num_gpus)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && script != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+
+    std::string name_str(name, name_length);
+    std::string script_str(script, script_length);
+
+    s->set_script_multigpu(name_str, script_str, first_gpu, num_gpus);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+
+
 // Retrieve the script stored in the database
 extern "C"
 SRError get_script(void* c_client,
-                  const char* key,
-                  const size_t key_length,
+                  const char* name,
+                  const size_t name_length,
                   const char** script,
                   size_t* script_length)
 {
@@ -764,12 +951,12 @@ SRError get_script(void* c_client,
   try
   {
     // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && script != NULL &&
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && script != NULL &&
                     script_length != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
-    std::string_view script_str_view(s->get_script(key_str));
+    std::string name_str(name, name_length);
+    std::string_view script_str_view(s->get_script(name_str));
 
     (*script) = script_str_view.data();
     (*script_length) = script_str_view.size();
@@ -786,11 +973,41 @@ SRError get_script(void* c_client,
   return result;
 }
 
+void _check_params_run_script(void* c_client,
+                              const char* name,
+                              const char* function,
+                              const char** inputs,
+                              const size_t* input_lengths,
+                              const size_t n_inputs,
+                              const char** outputs,
+                              const size_t* output_lengths,
+                              const size_t n_outputs)
+{
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && function != NULL &&
+                    inputs != NULL && input_lengths != NULL &&
+                    outputs != NULL && output_lengths != NULL);
+
+    // Inputs and outputs are mandatory for run_script
+    for (size_t i = 0; i < n_inputs; i++){
+      if (inputs[i] == NULL || input_lengths[i] == 0) {
+        throw SRParameterException(
+          "inputs[" + std::to_string(i) + "] is NULL or empty");
+      }
+    }
+    for (size_t i = 0; i < n_outputs; i++) {
+      if (outputs[i] == NULL || output_lengths[i] == 0) {
+        throw SRParameterException(
+          "outputs[" + std::to_string(i) + "] is NULL or empty");
+      }
+    }
+}
+
 // Run  a script function in the database
 extern "C"
 SRError run_script(void* c_client,
-                  const char* key,
-                  const size_t key_length,
+                  const char* name,
+                  const size_t name_length,
                   const char* function,
                   const size_t function_length,
                   const char** inputs,
@@ -803,26 +1020,10 @@ SRError run_script(void* c_client,
   SRError result = SRNoError;
   try
   {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && function != NULL &&
-                    inputs != NULL && input_lengths != NULL &&
-                    outputs != NULL && output_lengths != NULL);
-
-    // Inputs and outputs are mandatory for run_script
-    for (size_t i = 0; i < n_inputs; i++){
-      if (inputs[i] == NULL || input_lengths[i] == 0) {
-        throw SRParameterException(
-          std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
-      }
-    }
-    for (size_t i = 0; i < n_outputs; i++) {
-      if (outputs[i] == NULL || output_lengths[i] == 0) {
-        throw SRParameterException(
-          std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
-      }
-    }
-
-    std::string key_str(key, key_length);
+    _check_params_run_script(c_client, name, function,
+                             inputs, input_lengths, n_inputs,
+                             outputs, output_lengths, n_outputs);
+    std::string name_str(name, name_length);
     std::string function_str(function, function_length);
 
     std::vector<std::string> input_vec;
@@ -840,7 +1041,7 @@ SRError run_script(void* c_client,
     }
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    s->run_script(key_str, function_str, input_vec, output_vec);
+    s->run_script(name_str, function_str, input_vec, output_vec);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -854,41 +1055,31 @@ SRError run_script(void* c_client,
   return result;
 }
 
-// Run a model in the database
+// Run  a script function in the database in a multi-GPU system
 extern "C"
-SRError run_model(void* c_client,
-                 const char* key,
-                 const size_t key_length,
-                 const char** inputs,
-                 const size_t* input_lengths,
-                 const size_t n_inputs,
-                 const char** outputs,
-                 const size_t* output_lengths,
-                 const size_t n_outputs)
+SRError run_script_multigpu(void* c_client,
+                           const char* name,
+                           const size_t name_length,
+                           const char* function,
+                           const size_t function_length,
+                           const char** inputs,
+                           const size_t* input_lengths,
+                           const size_t n_inputs,
+                           const char** outputs,
+                           const size_t* output_lengths,
+                           const size_t n_outputs,
+                           const int offset,
+                           const int first_gpu,
+                           const int num_gpus)
 {
   SRError result = SRNoError;
   try
   {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL &&
-                    inputs != NULL && input_lengths != NULL &&
-                    outputs != NULL && output_lengths != NULL);
-
-    // Inputs and outputs are mandatory for run_script
-    for (size_t i = 0; i < n_inputs; i++){
-      if (inputs[i] == NULL || input_lengths[i] == 0) {
-        throw SRParameterException(
-          std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
-      }
-    }
-    for (size_t i = 0; i < n_outputs; i++) {
-      if (outputs[i] == NULL || output_lengths[i] == 0) {
-        throw SRParameterException(
-          std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
-      }
-    }
-
-    std::string key_str(key, key_length);
+    _check_params_run_script(c_client, name, function,
+                             inputs, input_lengths, n_inputs,
+                             outputs, output_lengths, n_outputs);
+    std::string name_str(name, name_length);
+    std::string function_str(function, function_length);
 
     std::vector<std::string> input_vec;
     if (n_inputs != 1 || input_lengths[0] != 0) {
@@ -905,7 +1096,253 @@ SRError run_model(void* c_client,
     }
 
     Client* s = reinterpret_cast<Client*>(c_client);
-    s->run_model(key_str, input_vec, output_vec);
+    s->run_script_multigpu(name_str, function_str, input_vec, output_vec,
+                           offset, first_gpu, num_gpus);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+void _check_params_run_model(void* c_client,
+                  const char* name,
+                  const char** inputs,
+                  const size_t* input_lengths,
+                  const size_t n_inputs,
+                  const char** outputs,
+                  const size_t* output_lengths,
+                  const size_t n_outputs)
+{
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL &&
+                    inputs != NULL && input_lengths != NULL &&
+                    outputs != NULL && output_lengths != NULL);
+
+    // Inputs and outputs are mandatory for run_script
+    for (size_t i = 0; i < n_inputs; i++){
+      if (inputs[i] == NULL || input_lengths[i] == 0) {
+        throw SRParameterException(
+          "inputs[" + std::to_string(i) + "] is NULL or empty");
+      }
+    }
+    for (size_t i = 0; i < n_outputs; i++) {
+      if (outputs[i] == NULL || output_lengths[i] == 0) {
+        throw SRParameterException(
+          "outputs[" + std::to_string(i) + "] is NULL or empty");
+      }
+    }
+}
+
+// Run a model in the database
+extern "C"
+SRError run_model(void* c_client,
+                 const char* name,
+                 const size_t name_length,
+                 const char** inputs,
+                 const size_t* input_lengths,
+                 const size_t n_inputs,
+                 const char** outputs,
+                 const size_t* output_lengths,
+                 const size_t n_outputs)
+{
+  SRError result = SRNoError;
+  try
+  {
+    _check_params_run_model(c_client, name, inputs, input_lengths, n_inputs,
+                           outputs, output_lengths, n_outputs);
+    std::string name_str(name, name_length);
+
+    std::vector<std::string> input_vec;
+    if (n_inputs != 1 || input_lengths[0] != 0) {
+      for (size_t i = 0; i < n_inputs; i++) {
+        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+      }
+    }
+
+    std::vector<std::string> output_vec;
+    if (n_outputs != 1 || output_lengths[0] != 0) {
+      for (size_t i = 0; i < n_outputs; i++) {
+        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+      }
+    }
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->run_model(name_str, input_vec, output_vec);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Run a model in the database
+extern "C"
+SRError run_model_multigpu(void* c_client,
+                          const char* name,
+                          const size_t name_length,
+                          const char** inputs,
+                          const size_t* input_lengths,
+                          const size_t n_inputs,
+                          const char** outputs,
+                          const size_t* output_lengths,
+                          const size_t n_outputs,
+                          const int offset,
+                          const int first_gpu,
+                          const int num_gpus)
+{
+  SRError result = SRNoError;
+  try
+  {
+    _check_params_run_model(c_client, name, inputs, input_lengths, n_inputs,
+                           outputs, output_lengths, n_outputs);
+    std::string name_str(name, name_length);
+
+    std::vector<std::string> input_vec;
+    if (n_inputs != 1 || input_lengths[0] != 0) {
+      for (size_t i = 0; i < n_inputs; i++) {
+        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+      }
+    }
+
+    std::vector<std::string> output_vec;
+    if (n_outputs != 1 || output_lengths[0] != 0) {
+      for (size_t i = 0; i < n_outputs; i++) {
+        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+      }
+    }
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->run_model_multigpu(name_str, input_vec, output_vec, offset,
+                         first_gpu, num_gpus);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Remove a model from the database
+extern "C"
+SRError delete_model(void* c_client,
+                     const char* name,
+                     const size_t name_length)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+
+    std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->delete_model(name_str);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Remove a model from the database on a system with multiple GPUs
+extern "C"
+SRError delete_model_multigpu(void* c_client,
+                              const char* name,
+                              const size_t name_length,
+                              const int first_gpu,
+                              const int num_gpus)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+
+    std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->delete_model_multigpu(name_str, first_gpu, num_gpus);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Remove a script from the database
+extern "C"
+SRError delete_script(void* c_client,
+                      const char* name,
+                      const size_t name_length)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+
+    std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->delete_script(name_str);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Remove a script from the database in a system with multiple GPUs
+extern "C"
+SRError delete_script_multigpu(void* c_client,
+                               const char* name,
+                               const size_t name_length,
+                               const int first_gpu,
+                               const int num_gpus)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+
+    std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->delete_script_multigpu(name_str, first_gpu, num_gpus);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -1225,6 +1662,395 @@ SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix)
 
     Client* s = reinterpret_cast<Client*>(c_client);
     s->use_tensor_ensemble_prefix(use_prefix);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Control whether aggregation lists are prefixed
+extern "C"
+SRError use_list_ensemble_prefix(void* c_client, bool use_prefix)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->use_list_ensemble_prefix(use_prefix);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Append a dataset to the aggregation list
+extern "C"
+SRError append_to_list(void* c_client, const char* list_name,
+                       const size_t list_name_length, const void* dataset)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL && dataset != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    const DataSet* d = reinterpret_cast<const DataSet*>(dataset);
+    std::string lname(list_name, list_name_length);
+
+    s->append_to_list(lname, *d);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Delete an aggregation list
+extern "C"
+SRError delete_list(void* c_client, const char* list_name,
+                    const size_t list_name_length)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(list_name, list_name_length);
+
+    s->delete_list(lname);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Copy an aggregation list
+extern "C"
+SRError copy_list(void* c_client,
+                  const char* src_name, const size_t src_name_length,
+                  const char* dest_name, const size_t dest_name_length)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string sname(src_name, src_name_length);
+    std::string dname(dest_name, dest_name_length);
+
+    s->copy_list(sname, dname);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Rename an aggregation list
+extern "C"
+SRError rename_list(void* c_client,
+                    const char* src_name, const size_t src_name_length,
+                    const char* dest_name, const size_t dest_name_length)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string sname(src_name, src_name_length);
+    std::string dname(dest_name, dest_name_length);
+
+    s->rename_list(sname, dname);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Get the number of entries in the list
+extern "C"
+SRError get_list_length(void* c_client, const char* list_name,
+                        const size_t list_name_length, int* result_length)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(list_name, list_name_length);
+
+    *result_length = s->get_list_length(lname);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Poll list length until length is equal to the provided length
+extern "C"
+SRError poll_list_length(void* c_client, const char* name,
+                         const size_t name_length, int list_length,
+                         int poll_frequency_ms, int num_tries,
+                         bool* poll_result)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(name, name_length);
+
+    *poll_result = s->poll_list_length(
+      lname, list_length, poll_frequency_ms, num_tries);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Poll list length until length is greater than or equal to the provided length
+extern "C"
+SRError poll_list_length_gte(void* c_client, const char* name,
+                             const size_t name_length, int list_length,
+                             int poll_frequency_ms, int num_tries,
+                             bool* poll_result)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(name, name_length);
+
+    *poll_result = s->poll_list_length_gte(
+      lname, list_length, poll_frequency_ms, num_tries);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Poll list length until length is less than or equal to the provided length
+extern "C"
+SRError poll_list_length_lte(void* c_client, const char* name,
+                             const size_t name_length, int list_length,
+                             int poll_frequency_ms, int num_tries,
+                             bool* poll_result)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(name, name_length);
+
+    *poll_result = s->poll_list_length_lte(
+      lname, list_length, poll_frequency_ms, num_tries);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Get datasets from an aggregation list
+extern "C"
+SRError get_datasets_from_list(void* c_client, const char* list_name,
+                               const size_t list_name_length,
+                               void*** datasets, size_t* num_datasets)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
+                    datasets != NULL && num_datasets != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(list_name, list_name_length);
+
+    std::vector<DataSet> result_datasets = s->get_datasets_from_list(lname);
+    size_t ndatasets = result_datasets.size();
+    *datasets = NULL;
+    if (ndatasets > 0) {
+      DataSet** alloc = new DataSet*[ndatasets];
+      for (size_t i = 0; i < ndatasets; i++) {
+        alloc[i] = new DataSet(std::move(result_datasets[i]));
+      }
+      *datasets = (void**)alloc;
+    }
+    *num_datasets = ndatasets;
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Get a range of datasets (by index) from an aggregation list
+extern "C"
+SRError get_dataset_list_range(void* c_client, const char* list_name,
+                               const size_t list_name_length,
+                               const int start_index, const int end_index,
+                               void*** datasets, size_t* num_datasets)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
+                    datasets != NULL && num_datasets != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(list_name, list_name_length);
+
+    std::vector<DataSet> result_datasets = s->get_dataset_list_range(
+      lname, start_index, end_index);
+    size_t ndatasets = result_datasets.size();
+    *datasets = NULL;
+    if (*num_datasets > 0) {
+      DataSet** alloc = new DataSet*[ndatasets];
+      for (size_t i = 0; i < ndatasets; i++) {
+        alloc[i] = new DataSet(std::move(result_datasets[i]));
+      }
+      *datasets = (void**)alloc;
+    }
+    *num_datasets = ndatasets;
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+// Get a range of datasets (by index) from an aggregation list into an
+// already allocated vector of datasets
+extern "C"
+SRError _get_dataset_list_range_allocated(void* c_client, const char* list_name,
+                               const size_t list_name_length,
+                               const int start_index, const int end_index,
+                               void** datasets)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
+                    datasets != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(list_name, list_name_length);
+
+    std::vector<DataSet> result_datasets = s->get_dataset_list_range(
+      lname, start_index, end_index);
+    size_t num_datasets = result_datasets.size();
+    if ( num_datasets != (size_t) (end_index-start_index+1)) {
+      SRSetLastError(SRInternalException(
+        "Returned dataset list is not equal to the requested range"
+      ));
+    }
+
+    if (num_datasets > 0) {
+      for (size_t i = 0; i < num_datasets; i++) {
+        datasets[i] = (void*)(new DataSet(std::move(result_datasets[i])));
+      }
+    }
   }
   catch (const Exception& e) {
     SRSetLastError(e);

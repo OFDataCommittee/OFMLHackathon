@@ -113,7 +113,7 @@ class Tensor : public TensorBase
         Tensor<T>& operator=(Tensor<T>&& tensor);
 
         /*!
-        *   \brief Get a pointer to a specificed memory
+        *   \brief Get a pointer to a specified memory
         *          view of the Tensor data
         *   \param mem_layout The MemoryLayout enum describing
         *          the layout of data view

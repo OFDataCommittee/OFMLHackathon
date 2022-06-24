@@ -221,6 +221,20 @@ def test_bad_type_set_function(use_cluster):
     with pytest.raises(TypeError):
         c.set_function("key", bad_function, 42)
 
+def test_bad_type_set_function_multigpu(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.set_function_multigpu(42, bad_function, 0, 1)
+    with pytest.raises(TypeError):
+        c.set_function_multigpu("key", "not-a-function", 0, 1)
+    with pytest.raises(TypeError):
+        c.set_function_multigpu("key", bad_function, "not an integer", 1)
+    with pytest.raises(TypeError):
+        c.set_function_multigpu("key", bad_function, 0, "not an integer")
+    with pytest.raises(ValueError):
+        c.set_function_multigpu("key", bad_function, -1, 1) # invalid first GPU
+    with pytest.raises(ValueError):
+        c.set_function_multigpu("key", bad_function, 0, 0) # invalid num GPUs
 
 def test_bad_type_set_script(use_cluster):
     c = Client(None, use_cluster)
@@ -234,6 +248,24 @@ def test_bad_type_set_script(use_cluster):
     with pytest.raises(TypeError):
         c.set_script(key, script, 42)
 
+def test_bad_type_set_script_multigpu(use_cluster):
+    c = Client(None, use_cluster)
+    key = "key_for_script"
+    script = "bad script but correct parameter type"
+    first_gpu = 0
+    num_gpus = 1
+    with pytest.raises(TypeError):
+        c.set_script_multigpu(42, script, first_gpu, num_gpus)
+    with pytest.raises(TypeError):
+        c.set_script_multigpu(key, 42, first_gpu, num_gpus)
+    with pytest.raises(TypeError):
+        c.set_script_multigpu(key, script, "not an integer", num_gpus)
+    with pytest.raises(TypeError):
+        c.set_script_multigpu(key, script, first_gpu, "not an integer")
+    with pytest.raises(ValueError):
+        c.set_script_multigpu(key, script, -1, num_gpus)
+    with pytest.raises(ValueError):
+        c.set_script_multigpu(key, script, first_gpu, 0)
 
 def test_bad_type_set_script_from_file(use_cluster):
     c = Client(None, use_cluster)
@@ -247,6 +279,20 @@ def test_bad_type_set_script_from_file(use_cluster):
     with pytest.raises(TypeError):
         c.set_script_from_file(key, scriptfile, 42)
 
+def test_bad_type_set_script_from_file_multigpu(use_cluster):
+    c = Client(None, use_cluster)
+    key = "key_for_script"
+    scriptfile = "bad filename but correct parameter type"
+    first_gpu = 0
+    num_gpus = 1
+    with pytest.raises(TypeError):
+        c.set_script_from_file_multigpu(42, scriptfile, first_gpu, num_gpus)
+    with pytest.raises(TypeError):
+        c.set_script_from_file_multigpu(key, 42, first_gpu, num_gpus)
+    with pytest.raises(TypeError):
+        c.set_script_from_file_multigpu(key, scriptfile, "not an integer", num_gpus)
+    with pytest.raises(TypeError):
+        c.set_script_from_file_multigpu(key, scriptfile, first_gpu, "not an integer")
 
 def test_bad_type_get_script(use_cluster):
     c = Client(None, use_cluster)
@@ -268,6 +314,35 @@ def test_bad_type_run_script(use_cluster):
         c.run_script(key, fn_name, 42, outputs)
     with pytest.raises(TypeError):
         c.run_script(key, fn_name, inputs, 42)
+
+
+def test_bad_type_run_script_multigpu(use_cluster):
+    c = Client(None, use_cluster)
+    key = "my_script"
+    fn_name = "phred"
+    inputs = ["list", "of", "strings"]
+    outputs = ["another", "string", "list"]
+    offset = 0
+    first_gpu = 0
+    num_gpus = 1
+    with pytest.raises(TypeError):
+        c.run_script_multigpu(42, fn_name, inputs, outputs, offset, first_gpu, num_gpus)
+    with pytest.raises(TypeError):
+        c.run_script_multigpu(key, 42, inputs, outputs, offset, first_gpu, num_gpus)
+    with pytest.raises(TypeError):
+        c.run_script_multigpu(key, fn_name, 42, outputs, offset, first_gpu, num_gpus)
+    with pytest.raises(TypeError):
+        c.run_script_multigpu(key, fn_name, inputs, 42, offset, first_gpu, num_gpus)
+    with pytest.raises(TypeError):
+        c.run_script_multigpu(key, fn_name, inputs, outputs, "not an integer", first_gpu, num_gpus)
+    with pytest.raises(TypeError):
+        c.run_script_multigpu(key, fn_name, inputs, outputs, offset, "not an integer", num_gpus)
+    with pytest.raises(TypeError):
+        c.run_script_multigpu(key, fn_name, inputs, outputs, offset, first_gpu, "not an integer")
+    with pytest.raises(ValueError):
+        c.run_script_multigpu(key, fn_name, inputs, outputs, offset, -1, num_gpus)
+    with pytest.raises(ValueError):
+        c.run_script_multigpu(key, fn_name, inputs, outputs, offset, first_gpu, 0)
 
 
 def test_bad_type_get_model(use_cluster):
@@ -296,6 +371,31 @@ def test_bad_type_set_model(mock_model, use_cluster):
     with pytest.raises(TypeError):
         c.set_model("simple_cnn", model, "TORCH", "CPU", tag=42)
 
+def test_bad_type_set_model_multigpu(mock_model, use_cluster):
+    c = Client(None, use_cluster)
+    model = mock_model.create_torch_cnn()
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.set_model_multigpu(42, model, "TORCH", 0, 1)
+    with pytest.raises(TypeError):
+        c.set_model_multigpu("simple_cnn", model, 42, 0, 1)
+    with pytest.raises(TypeError):
+        c.set_model_multigpu("simple_cnn", model, "UNSUPPORTED_ENGINE", 0, 1)
+    with pytest.raises(TypeError):
+        c.set_model_multigpu("simple_cnn", model, "TORCH", "not an integer", 1)
+    with pytest.raises(TypeError):
+        c.set_model_multigpu("simple_cnn", model, "TORCH", 0, "not an integer")
+    with pytest.raises(ValueError):
+        c.set_model_multigpu("simple_cnn", model, "TORCH", -1, 1)
+    with pytest.raises(ValueError):
+        c.set_model_multigpu("simple_cnn", model, "TORCH", 0, 0)
+    with pytest.raises(TypeError):
+        c.set_model_multigpu("simple_cnn", model, "TORCH", 0, 1, batch_size="not_an_integer")
+    with pytest.raises(TypeError):
+        c.set_model_multigpu("simple_cnn", model, "TORCH", 0, 1, min_batch_size="not_an_integer")
+    with pytest.raises(TypeError):
+        c.set_model_multigpu("simple_cnn", model, "TORCH", 0, 1, tag=42)
+
 
 def test_bad_type_set_model_from_file(use_cluster):
     modelfile = "bad filename but right parameter type"
@@ -319,12 +419,75 @@ def test_bad_type_set_model_from_file(use_cluster):
     with pytest.raises(TypeError):
         c.set_model_from_file("simple_cnn", modelfile, "TORCH", "CPU", tag=42)
 
+def test_bad_type_set_model_from_file_multigpu(use_cluster):
+    modelfile = "bad filename but right parameter type"
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.set_model_from_file_multigpu(42, modelfile, "TORCH", 0, 1)
+    with pytest.raises(TypeError):
+        c.set_model_from_file_multigpu("simple_cnn", 42, "TORCH", 0, 1)
+    with pytest.raises(TypeError):
+        c.set_model_from_file_multigpu("simple_cnn", modelfile, 42, 0, 1)
+    with pytest.raises(TypeError):
+        c.set_model_from_file_multigpu("simple_cnn", modelfile, "UNSUPPORTED_ENGINE", 0, 1)
+    with pytest.raises(TypeError):
+        c.set_model_from_file_multigpu("simple_cnn", modelfile, "TORCH", "not an integer", 1)
+    with pytest.raises(TypeError):
+        c.set_model_from_file_multigpu("simple_cnn", modelfile, "TORCH", 0, "not an integer")
+    with pytest.raises(TypeError):
+        c.set_model_from_file_multigpu("simple_cnn", modelfile, "TORCH", 0, 1, batch_size="not_an_integer")
+    with pytest.raises(TypeError):
+        c.set_model_from_file_multigpu("simple_cnn", modelfile, "TORCH", 0, 1, min_batch_size="not_an_integer")
+    with pytest.raises(TypeError):
+        c.set_model_from_file_multigpu("simple_cnn", modelfile, "TORCH", 0, 1, tag=42)
 
 def test_bad_type_run_model(use_cluster):
     c = Client(None, use_cluster)
     with pytest.raises(TypeError):
         c.run_model(42)
 
+
+def test_bad_type_run_model_multigpu(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.run_model_multigpu(42, 0, 0, 1)
+    with pytest.raises(TypeError):
+        c.run_model_multigpu("simple_cnn", "not an integer", 0, 1)
+    with pytest.raises(TypeError):
+        c.run_model_multigpu("simple_cnn", 0, "not an integer", 1)
+    with pytest.raises(TypeError):
+        c.run_model_multigpu("simple_cnn", 0, 0, "not an integer")
+    with pytest.raises(ValueError):
+        c.run_model_multigpu("simple_cnn", 0, -1, 1)
+    with pytest.raises(ValueError):
+        c.run_model_multigpu("simple_cnn", 0, 0, 0)
+
+def test_bad_type_delete_model_multigpu(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.delete_model_multigpu(42, 0, 1)
+    with pytest.raises(TypeError):
+        c.delete_model_multigpu("simple_cnn",  "not an integer", 1)
+    with pytest.raises(TypeError):
+        c.delete_model_multigpu("simple_cnn", 0, "not an integer")
+    with pytest.raises(ValueError):
+        c.delete_model_multigpu("simple_cnn", -1, 1)
+    with pytest.raises(ValueError):
+        c.delete_model_multigpu("simple_cnn", 0, 0)
+
+def test_bad_type_delete_script_multigpu(use_cluster):
+    c = Client(None, use_cluster)
+    script_name = "my_script"
+    with pytest.raises(TypeError):
+        c.delete_script_multigpu(42, 0, 1)
+    with pytest.raises(TypeError):
+        c.delete_script_multigpu(script_name,  "not an integer", 1)
+    with pytest.raises(TypeError):
+        c.delete_script_multigpu(script_name, 0, "not an integer")
+    with pytest.raises(ValueError):
+        c.delete_script_multigpu(script_name, -1, 1)
+    with pytest.raises(ValueError):
+        c.delete_script_multigpu(script_name, 0, 0)
 
 def test_bad_type_tensor_exists(use_cluster):
     c = Client(None, use_cluster)
@@ -418,6 +581,12 @@ def test_bad_type_use_model_ensemble_prefix(use_cluster):
         c.use_model_ensemble_prefix("not a boolean")
 
 
+def test_bad_type_use_list_ensemble_prefix(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.use_list_ensemble_prefix("not a boolean")
+
+
 def test_bad_type_use_tensor_ensemble_prefix(use_cluster):
     c = Client(None, use_cluster)
     with pytest.raises(TypeError):
@@ -480,6 +649,96 @@ def test_bad_type_save(use_cluster):
     with pytest.raises(TypeError):
         c.save("not a list")
 
+def test_bad_type_append_to_list(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.append_to_list(42, 42)
+
+def test_bad_type_delete_list(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.delete_list(42)
+
+def test_bad_type_copy_list(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.copy_list(42, "dest")
+    with pytest.raises(TypeError):
+        c.copy_list("src", 42)
+
+def test_bad_type_rename_list(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.rename_list(42, "dest")
+    with pytest.raises(TypeError):
+        c.rename_list("src", 42)
+
+def test_bad_type_get_list_length(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.get_list_length(42)
+
+def test_bad_type_poll_list_length(use_cluster):
+    c = Client(None, use_cluster)
+    name = "mylist"
+    len = 42
+    pollfreq = 42
+    num_tries = 42
+    with pytest.raises(TypeError):
+        c.poll_list_length(42, len, pollfreq, num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length(name, "not an integer", pollfreq, num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length(name, len, "not an integer", num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length(name, len, pollfreq, "not an integer")
+
+def test_bad_type_poll_list_length_gte(use_cluster):
+    c = Client(None, use_cluster)
+    name = "mylist"
+    len = 42
+    pollfreq = 42
+    num_tries = 42
+    with pytest.raises(TypeError):
+        c.poll_list_length_gte(42, len, pollfreq, num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length_gte(name, "not an integer", pollfreq, num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length_gte(name, len, "not an integer", num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length_gte(name, len, pollfreq, "not an integer")
+
+def test_bad_type_poll_list_length_lte(use_cluster):
+    c = Client(None, use_cluster)
+    name = "mylist"
+    len = 42
+    pollfreq = 42
+    num_tries = 42
+    with pytest.raises(TypeError):
+        c.poll_list_length_lte(42, len, pollfreq, num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length_lte(name, "not an integer", pollfreq, num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length_lte(name, len, "not an integer", num_tries)
+    with pytest.raises(TypeError):
+        c.poll_list_length_lte(name, len, pollfreq, "not an integer")
+
+def test_bad_type_get_datasets_from_list(use_cluster):
+    c = Client(None, use_cluster)
+    with pytest.raises(TypeError):
+        c.get_datasets_from_list(42)
+
+def test_bad_type_get_dataset_list_range(use_cluster):
+    c = Client(None, use_cluster)
+    listname = "my_list"
+    start_index = 0
+    end_index = 42
+    with pytest.raises(TypeError):
+        c.get_dataset_list_range(42, start_index, end_index)
+    with pytest.raises(TypeError):
+        c.get_dataset_list_range(listname, "not an integer", end_index)
+    with pytest.raises(TypeError):
+        c.get_dataset_list_range(listname, start_index, "not an integer")
 
 #####
 # Test type errors from bad parameter types to Dataset API calls

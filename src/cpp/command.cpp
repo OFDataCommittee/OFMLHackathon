@@ -119,6 +119,44 @@ void Command::add_field(std::string field, bool is_key)
     }
 }
 
+//  Replace a field in a command
+void Command::set_field_at(std::string new_field, size_t pos, bool is_key)
+{
+    size_t field_size = new_field.size();
+    char* f = NULL;
+    try {
+        f = (char*)new unsigned char[field_size + 1];
+    }
+    catch (std::bad_alloc& e) {
+        throw SRBadAllocException("field");
+    }
+
+    new_field.copy(f, field_size, 0);
+    f[field_size] = '\0';
+
+    // Free memory from the previous occupant of this
+    // field if locally allocated. Replace if we find it,
+    // otherwise, add it fresh (happens if we're not
+    // replacing a field that was locally allcoated)
+    bool replaced = false;
+    std::vector<std::pair<char*, size_t> >::iterator it =
+        _local_fields.begin();
+    for ( ; it != _local_fields.end(); it++) {
+        if (it->second == pos) {
+            delete(it->first);
+            it->first = f;
+            replaced = true;
+        }
+    }
+    if (!replaced)
+        _local_fields.push_back({f, pos});
+    _fields.at(pos) = std::string_view(f, field_size);
+
+    if (is_key) {
+        _cmd_keys[std::string_view(f, field_size)] = pos;
+    }
+}
+
 // Add a field to the Command from a c-string.
 void Command::add_field(const char* field, bool is_key)
 {
@@ -184,6 +222,19 @@ void Command::add_fields(const std::vector<std::string>& fields, bool is_key)
     */
     for (size_t i = 0; i < fields.size(); i++) {
         add_field(fields[i], is_key);
+    }
+}
+
+// Add fields to the Command from a vector of strings.
+void Command::add_keys(const std::vector<std::string>& keyfields)
+{
+    /* Copy field strings into a char* that is stored
+    locally in the Command object.  The new string is not
+    null terminated because the fields vector is of type
+    string_view which stores the length of the string
+    */
+    for (size_t i = 0; i < keyfields.size(); i++) {
+        add_field(keyfields[i], true);
     }
 }
 

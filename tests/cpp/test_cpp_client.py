@@ -62,7 +62,7 @@ def execute_cmd(cmd_list):
     proc = Popen(
         cmd_list, stderr=PIPE, stdout=PIPE, stdin=PIPE, cwd=run_path)
     try:
-        out, err = proc.communicate(timeout=120)
+        out, err = proc.communicate(timeout=180)
         if out:
             print("OUTPUT:", out.decode("utf-8"))
         if err:

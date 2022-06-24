@@ -126,6 +126,16 @@ class Redis : public RedisServer
         virtual CommandReply run(AddressAnyCommand& cmd);
 
         /*!
+        *   \brief Run a non-keyed Command that
+        *          addresses every db node on the server
+        *   \param cmd The non-keyed Command that
+        *              addresses any db node
+        *   \returns The CommandReply from the
+        *            command execution
+        */
+        virtual CommandReply run(AddressAllCommand& cmd);
+
+        /*!
         *   \brief Run multiple single-key or single-hash slot
         *          Command on the server.  Each Command in the
         *          CommandList is run sequentially.
@@ -136,6 +146,23 @@ class Redis : public RedisServer
         *            in the CommandList
         */
         virtual std::vector<CommandReply> run(CommandList& cmd);
+
+        /*!
+        *   \brief Run multiple single-key or single-hash slot
+        *          Command on the server in pipelines.  The
+        *          Command in the CommandList will be grouped
+        *          by shard, and executed in groups by shard.
+        *          Commands are not guaranteed to be executed
+        *          in any sequence or ordering.
+        *   \param cmd The CommandList containing multiple
+        *              single-key or single-hash
+        *              slot Command to run
+        *   \returns A list of CommandReply for each Command
+        *            in the CommandList. The order of the result
+        *            matches the order of the input CommandList.
+        */
+        virtual PipelineReply
+        run_via_unordered_pipelines(CommandList& cmd_list);
 
         /*!
         *   \brief Check if a key exists in the database. This
@@ -261,6 +288,39 @@ class Redis : public RedisServer
                                             = std::vector<std::string>());
 
         /*!
+        *   \brief Set a model from std::string_view buffer in the
+        *          database for future execution in a multi-GPU system
+        *   \param name The name to associate with the model
+        *   \param model The model as a continuous buffer string_view
+        *   \param backend The name of the backend
+        *                  (TF, TFLITE, TORCH, ONNX)
+        *   \param first_gpu The first GPU to use with this model
+        *   \param num_gpus The number of GPUs to use with this model
+        *   \param batch_size The batch size for model execution
+        *   \param min_batch_size The minimum batch size for model
+        *                         execution
+        *   \param tag A tag to attach to the model for
+        *              information purposes
+        *   \param inputs One or more names of model input nodes
+        *                 (TF models only)
+        *   \param outputs One or more names of model output nodes
+        *                 (TF models only)
+        *   \throw RuntimeException for all client errors
+        */
+        virtual void set_model_multigpu(const std::string& name,
+                                        const std::string_view& model,
+                                        const std::string& backend,
+                                        int first_gpu,
+                                        int num_gpus,
+                                        int batch_size = 0,
+                                        int min_batch_size = 0,
+                                        const std::string& tag = "",
+                                        const std::vector<std::string>& inputs
+                                            = std::vector<std::string>(),
+                                        const std::vector<std::string>& outputs
+                                            = std::vector<std::string>());
+
+        /*!
         *   \brief Set a script from std::string_view buffer in the
         *          database for future execution
         *   \param key The key to associate with the script
@@ -273,10 +333,23 @@ class Redis : public RedisServer
                                         const std::string& device,
                                         std::string_view script);
 
+        /*!
+        *   \brief Set a script from std::string_view buffer in the
+        *          database for future execution in a multi-GPU system
+        *   \param name The name to associate with the script
+        *   \param script The script source in a std::string_view
+        *   \param first_gpu The first GPU to use with this script
+        *   \param num_gpus The number of GPUs to use with this script
+        *   \throw RuntimeException for all client errors
+        */
+        virtual void set_script_multigpu(const std::string& name,
+                                         const std::string_view& script,
+                                         int first_cpu,
+                                         int num_gpus);
 
         /*!
         *   \brief Run a model in the database using the
-        *          specificed input and output tensors
+        *          specified input and output tensors
         *   \param key The key associated with the model
         *   \param inputs The keys of inputs tensors to use
         *                 in the model
@@ -290,8 +363,28 @@ class Redis : public RedisServer
                                        std::vector<std::string> outputs);
 
         /*!
+        *   \brief Run a model in the database using the
+        *          specified input and output tensors in a multi-GPU system
+        *   \param name The name associated with the model
+        *   \param inputs The names of input tensors to use in the model
+        *   \param outputs The names of output tensors that will be used
+        *                  to save model results
+        *   \param offset index of the current image, such as a processor
+        *                   ID or MPI rank
+        *   \param first_gpu The first GPU to use with this model
+        *   \param num_gpus the number of gpus for which the script was stored
+        *   \throw RuntimeException for all client errors
+        */
+        virtual void run_model_multigpu(const std::string& name,
+                                        std::vector<std::string> inputs,
+                                        std::vector<std::string> outputs,
+                                        int offset,
+                                        int first_gpu,
+                                        int num_gpus);
+
+        /*!
         *   \brief Run a script function in the database using the
-        *          specificed input and output tensors
+        *          specified input and output tensors
         *   \param key The key associated with the script
         *   \param function The name of the function in the script to run
         *   \param inputs The keys of inputs tensors to use
@@ -305,6 +398,66 @@ class Redis : public RedisServer
                                         const std::string& function,
                                         std::vector<std::string> inputs,
                                         std::vector<std::string> outputs);
+
+        /*!
+        *   \brief Run a script function in the database using the
+        *          specified input and output tensors in a multi-GPU system
+        *   \param name The name associated with the script
+        *   \param function The name of the function in the script to run
+        *   \param inputs The names of input tensors to use in the script
+        *   \param outputs The names of output tensors that will be used
+        *                  to save script results
+        *   \param offset index of the current image, such as a processor
+        *                   ID or MPI rank
+        *   \param first_gpu The first GPU to use with this script
+        *   \param num_gpus the number of gpus for which the script was stored
+        *   \throw RuntimeException for all client errors
+        */
+        virtual void run_script_multigpu(const std::string& name,
+                                         const std::string& function,
+                                         std::vector<std::string>& inputs,
+                                         std::vector<std::string>& outputs,
+                                         int offset,
+                                         int first_gpu,
+                                         int num_gpus);
+
+        /*!
+        *   \brief Remove a model from the database
+        *   \param key The key associated with the model
+        *   \returns The CommandReply from model delete Command execution
+        *   \throw SmartRedis::Exception if model deletion fails
+        */
+        virtual CommandReply delete_model(const std::string& key);
+
+        /*!
+        *   \brief Remove a model from the database that was stored
+        *          for use with multiple GPUs
+        *   \param name The name associated with the model
+        *   \param first_cpu the first GPU (zero-based) to use with the model
+        *   \param num_gpus the number of gpus for which the model was stored
+        *   \throw SmartRedis::Exception if model deletion fails
+        */
+        virtual void delete_model_multigpu(
+            const std::string& name, int first_gpu, int num_gpus);
+
+        /*!
+        *   \brief Remove a script from the database
+        *   \param key The key associated with the script
+        *   \returns The CommandReply from script delete Command execution
+        *   \throw SmartRedis::Exception if script deletion fails
+        */
+        virtual CommandReply delete_script(const std::string& key);
+
+        /*!
+        *   \brief Remove a script from the database that was stored
+        *          for use with multiple GPUs
+        *   \param name The name associated with the script
+        *   \param first_cpu the first GPU (zero-based) to use with the script
+        *   \param num_gpus the number of gpus for which the script was stored
+        *   \throw SmartRedis::Exception if script deletion fails
+        */
+        virtual void delete_script_multigpu(
+            const std::string& name, int first_gpu, int num_gpus);
 
         /*!
         *   \brief Retrieve the model from the database

@@ -802,3 +802,149 @@ SCENARIO("Test that prefixing covers all hash slots of a cluster", "[Client]")
 
     }
 }
+
+SCENARIO("Testing Multi-GPU Function error cases", "[Client]")
+{
+    GIVEN("A Client object, a script, and a model")
+    {
+        Client client(use_cluster());
+        std::string model_key = "a_model";
+        std::string model_file = "./../../mnist_data/mnist_cnn.pt";
+        std::string script_key = "a_script";
+        std::string script_file = "./../../mnist_data/data_processing_script.txt";
+        std::string backend = "TORCH";
+
+        WHEN("set_model_multigpu() called with invalid first gpu")
+        {
+            THEN("An error is thrown")
+            {
+                CHECK_THROWS_AS(client.set_model_multigpu(model_key, "bogus model text", backend, -1, 1),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("set_model_multigpu() called with invalid number of GPUs")
+        {
+            THEN("An error is thrown")
+            {
+                CHECK_THROWS_AS(client.set_model_multigpu(model_key, "bogus model text", backend, 0, 0),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("set_model_from_file_multigpu() called with invalid first gpu")
+        {
+            THEN("An error is thrown")
+            {
+                CHECK_THROWS_AS(client.set_model_from_file_multigpu(model_key, model_file, backend, -1, 1),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("set_model_from_file_multigpu() called with invalid number of GPUs")
+        {
+            THEN("An error is thrown")
+            {
+                CHECK_THROWS_AS(client.set_model_from_file_multigpu(model_key, model_file, backend, 0, 0),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("set_script_multigpu() called with invalid number of GPUs")
+        {
+            THEN("An error is thrown")
+            {
+                CHECK_THROWS_AS(client.set_script_multigpu(script_key, "bogus script text", -1, 0),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("set_script_multigpu() called with invalid number of GPUs")
+        {
+            THEN("An error is thrown")
+            {
+                CHECK_THROWS_AS(client.set_script_multigpu(script_key, "bogus script text", 0, 0),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("set_script_from_file_multigpu() called with invalid number of GPUs")
+        {
+            THEN("An error is thrown")
+            {
+                CHECK_THROWS_AS(client.set_script_from_file_multigpu(script_key, script_file, -1, 1),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("set_script_from_file_multigpu() called with invalid number of GPUs")
+        {
+            THEN("An error is thrown")
+            {
+                CHECK_THROWS_AS(client.set_script_from_file_multigpu(script_key, script_file, 0, 0),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("run_model_multigpu() called with invalid first GPU")
+        {
+            THEN("An error is thrown")
+            {
+                std::vector<std::string> inputs, outputs;
+                CHECK_THROWS_AS(client.run_model_multigpu(model_key, inputs, outputs, 0, -1, 1),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("run_model_multigpu() called with invalid number of GPUs")
+        {
+            THEN("An error is thrown")
+            {
+                std::vector<std::string> inputs, outputs;
+                CHECK_THROWS_AS(client.run_model_multigpu(model_key, inputs, outputs, 0, 0, 0),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("run_script_multigpu() called with invalid first GPU")
+        {
+            THEN("An error is thrown")
+            {
+                std::vector<std::string> inputs, outputs;
+                CHECK_THROWS_AS(client.run_script_multigpu(script_key, "script_function", inputs, outputs, 0, -1, 1),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("run_script_multigpu() called with invalid number of GPUs")
+        {
+            THEN("An error is thrown")
+            {
+                std::vector<std::string> inputs, outputs;
+                CHECK_THROWS_AS(client.run_script_multigpu(script_key, "script_function", inputs, outputs, 0, 0, 0),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("delete_model_multigpu() called with invalid number of GPUs")
+        {
+            THEN("An error is thrown")
+            {
+                CHECK_THROWS_AS(client.delete_model_multigpu(model_key, 0, 0),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("delete_model_multigpu() called with invalid first GPU")
+        {
+            THEN("An error is thrown")
+            {
+                CHECK_THROWS_AS(client.delete_model_multigpu(model_key, -1, 1),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("delete_script_multigpu() called with invalid number of GPUs")
+        {
+            THEN("An error is thrown")
+            {
+                CHECK_THROWS_AS(client.delete_script_multigpu(script_key, 0, 0),
+                                ParameterException);
+            }
+        }
+        AND_WHEN("delete_script_multigpu() called with invalid first GPU")
+        {
+            THEN("An error is thrown")
+            {
+                CHECK_THROWS_AS(client.delete_script_multigpu(script_key, -1, 1),
+                                ParameterException);
+            }
+        }
+    }
+}

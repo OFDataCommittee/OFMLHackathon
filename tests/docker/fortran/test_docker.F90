@@ -32,7 +32,7 @@ program main
 
 #include "enum_fortran.inc"
 
-    integer(kind=enum_kind) :: result
+    integer :: result
     type(client_type) :: client
     integer, parameter :: dim1 = 10
     real(kind=8), dimension(dim1) :: tensor

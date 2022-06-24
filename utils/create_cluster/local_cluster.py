@@ -65,7 +65,8 @@ def create_cluster(n_nodes, port):
     # Start servers
     host = '127.0.0.1'
     redis = os.getenv('REDIS_INSTALL_PATH') + '/redis-server'
-    redisai = os.getenv('REDISAI_CPU_INSTALL_PATH') + '/redisai.so '
+    test_device = os.environ.get("SMARTREDIS_TEST_DEVICE","cpu").lower()
+    redisai = os.getenv(f'REDISAI_{test_device.upper()}_INSTALL_PATH') + '/redisai.so '
     pids = []
 
     for i in range(n_nodes):

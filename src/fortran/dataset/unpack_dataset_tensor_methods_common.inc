@@ -26,11 +26,6 @@
 
   !** Beginning of code common to all unpack_dataset_tensor subroutines
 
-  class(dataset_type),                  intent(in) :: self !< Pointer to the initialized dataset
-  character(len=*),                     intent(in) :: name !< The name to use to place the tensor
-  integer, dimension(:),                intent(in) :: dims !< Length along each dimension of the tensor
-  integer(kind=enum_kind)                          :: code
-
   ! Local variables
   integer(kind=c_size_t) :: ndim ! Number of dimensions
   type(c_ptr) :: data_ptr, c_dims_ptr

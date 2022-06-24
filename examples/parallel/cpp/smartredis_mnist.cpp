@@ -1,3 +1,31 @@
+/*
+ * BSD 2-Clause License
+ *
+ * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "client.h"
 #include <mpi.h>
 
@@ -14,7 +42,7 @@ void run_mnist(const std::string& model_name,
     std::vector<float> img(n_values, 0);
 
     // Load the mnist image from a file using MPI rank 0
-    if(rank==0) {
+    if (rank == 0) {
         std::string image_file = "../../../common/mnist_data/one.raw";
         std::ifstream fin(image_file, std::ios::binary);
         std::ostringstream ostream;
@@ -57,7 +85,7 @@ void run_mnist(const std::string& model_name,
                          SRTensorTypeFloat, SRMemLayoutContiguous);
 
     // Print out the results of the model for Rank 0
-    if(rank==0)
+    if (rank == 0)
         for(size_t i=0; i<result.size(); i++)
             std::cout<<"Rank 0: Result["<<i<<"] = "<<result[i]<<std::endl;
 
@@ -79,7 +107,7 @@ int main(int argc, char* argv[]) {
 
     // Set the model and script that will be used by all ranks
     // from MPI rank 0.
-    if(rank==0) {
+    if (rank == 0) {
         // Build model key, file name, and then set model
         // from file using client API
         std::string model_key = "mnist_model";
@@ -105,7 +133,7 @@ int main(int argc, char* argv[]) {
     MPI_Barrier(MPI_COMM_WORLD);
     run_mnist("mnist_model", "mnist_script", client);
 
-    if(rank==0)
+    if (rank == 0)
         std::cout<<"Finished SmartRedis MNIST example."<<std::endl;
 
     // Finalize MPI Comm World

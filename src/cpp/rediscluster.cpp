@@ -126,6 +126,43 @@ CommandReply RedisCluster::run(AddressAnyCommand &cmd)
     return _run(cmd, _last_prefix);
 }
 
+// Run a non-keyed Command that addresses any db node on the server
+CommandReply RedisCluster::run(AddressAllCommand &cmd)
+{
+    // Bounds check the key_index
+    if (cmd.key_index != -1 && cmd.get_field_count() < cmd.key_index) {
+        throw SRInternalException("Invalid key_index executing command!");
+    }
+
+    // Find the segment to be tweaked for each node
+    std::string field;
+    if (cmd.key_index != -1) {
+        Command::const_iterator it = cmd.cbegin();
+        int i = 0;
+        for ( ; it != cmd.cend(); it++) {
+            if (i == cmd.key_index)
+                field = std::string(it->data(), it->size());
+            i++;
+        }
+    }
+
+    // Loop through all nodes to execute the command at each
+    std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
+    CommandReply reply;
+    for ( ; node != _db_nodes.cend(); node++) {
+        // swap in a replacement segment for each one
+        std::string new_field = "{" + node->prefix + "}." + field;
+        cmd.set_field_at(new_field, cmd.key_index, true);
+
+        // Execute the updated command
+        cmd.set_exec_address_port(node->ip, node->port);
+        reply = _run(cmd, node->prefix);
+        if (reply.has_error() > 0)
+            break; // Short-circuit failure on error
+    }
+    return reply;
+}
+
 // Run multiple single-key or single-hash slot Command on the server.
 // Each Command in the CommandList is run sequentially
 std::vector<CommandReply> RedisCluster::run(CommandList& cmds)
@@ -136,6 +173,133 @@ std::vector<CommandReply> RedisCluster::run(CommandList& cmds)
         replies.push_back(dynamic_cast<Command*>(*cmd)->run_me(this));
     }
     return replies;
+}
+
+// Run multiple single-key or single-hash slot Command on the server.
+PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
+{
+    // Map for shard index to Command indices so we can track order of execution
+    std::vector<std::vector<size_t>> shard_cmd_index_list(_db_nodes.size());
+
+    // Map for shard index to Command pointers so pipelines can be easily rebuilt
+    std::vector<std::vector<Command*>> shard_cmds(_db_nodes.size());
+
+    // Calculate shard for execution of each Command
+    CommandList::iterator cmd = cmd_list.begin();
+    size_t cmd_num = 0;
+
+    for ( ; cmd != cmd_list.end(); cmd++, cmd_num++) {
+
+        // Make sure we have at least one key
+        if ((*cmd)->has_keys() == false) {
+            throw SRInternalException("Only single key commands are supported "\
+                                      "by RedisCluster::run_via_unordered"\
+                                      "_pipelines.");
+        }
+
+        // Get keys for the command
+        std::vector<std::string> keys = (*cmd)->get_keys();
+
+        // Check that there is only one key
+        if (keys.size() != 1) {
+            throw SRInternalException("Only single key commands are supported "\
+                                      "by RedisCluster::run_via_unordered_"\
+                                      "pipelines.");
+        }
+
+        // Get the shard index for the first key
+        size_t db_index = _get_db_node_index(keys[0]);
+
+        // Push back the command index to the shard list of commands
+        shard_cmd_index_list[db_index].push_back(cmd_num);
+
+        // Push back a pointer to the command for pipeline construction
+        shard_cmds[db_index].push_back(*cmd);
+    }
+
+    // Define an empty PipelineReply object to store all shard replies
+    PipelineReply all_replies;
+
+    // Keep track of CommandList index order of execution (ooe)
+    std::vector<size_t> cmd_list_index_ooe;
+    cmd_list_index_ooe.reserve(cmd_list.size());
+
+    volatile size_t pipeline_completion_count = 0;
+    size_t num_shards = shard_cmd_index_list.size();
+    Exception error_response = Exception("no error");
+    bool success_status[num_shards];
+    std::mutex results_mutex;
+
+    // Loop over all shards and execute pipelines
+    for (size_t s = 0; s < num_shards; s++) {
+        // Get shard prefix
+        std::string shard_prefix = _db_nodes[s].prefix;
+
+        // Only execute if there are commands
+        if (shard_cmd_index_list[s].size() == 0) {
+            success_status[s] = true;
+            {
+                // Avoid race condition on update of completion_count
+                std::unique_lock<std::mutex> lock(results_mutex);
+                ++pipeline_completion_count;
+            } // End scope and release lock
+            continue;
+        }
+
+        // Submit a task to execute these commands
+        _tp->submit_job([this, &shard_cmds, s, shard_prefix, &success_status,
+                         &results_mutex, &cmd_list_index_ooe,
+                         &shard_cmd_index_list, &all_replies,
+                         &pipeline_completion_count, &error_response]() mutable
+        {
+            // Run the pipeline, catching any exceptions thrown
+            PipelineReply reply;
+            try {
+                reply = _run_pipeline(shard_cmds[s], shard_prefix);
+                success_status[s] = true;
+            }
+            catch (Exception& e) {
+                error_response = e;
+                success_status[s] = false;
+            }
+
+            // Acquire the lock to store our results
+            {
+                std::unique_lock<std::mutex> results_lock(results_mutex);
+
+                // Skip storing results if we hit an error
+                if (success_status[s]) {
+                    // Add the CommandList indices into vector for later reordering
+                    cmd_list_index_ooe.insert(cmd_list_index_ooe.end(),
+                                            shard_cmd_index_list[s].begin(),
+                                            shard_cmd_index_list[s].end());
+
+                    // Store results
+                    all_replies += std::move(reply);
+                }
+
+                // Increment completion counter
+                ++pipeline_completion_count;
+            }  // Release the lock
+        });
+    }
+
+    // Wait until all jobs have finished
+    while (pipeline_completion_count != num_shards)
+        ; // Spin
+
+    // Throw an exception if one was generated in processing the threads
+    for (size_t i = 0; i < num_shards; i++) {
+        if (!success_status[i]) {
+            throw error_response;
+        }
+    }
+
+    // Reorder the command replies in all_replies to align
+    // with order of execution
+    all_replies.reorder(cmd_list_index_ooe);
+
+    return all_replies;
 }
 
 // Check if a model or script key exists in the database
@@ -156,8 +320,7 @@ bool RedisCluster::key_exists(const std::string& key)
 {
     // Build the command
     SingleKeyCommand cmd;
-    cmd.add_field("EXISTS");
-    cmd.add_field(key, true);
+    cmd << "EXISTS" << Keyfield(key);
 
     // Run it
     CommandReply reply = run(cmd);
@@ -173,9 +336,7 @@ bool RedisCluster::hash_field_exists(const std::string& key,
 {
     // Build the command
     SingleKeyCommand cmd;
-    cmd.add_field("HEXISTS");
-    cmd.add_field(key, true);
-    cmd.add_field(field);
+    cmd << "HEXISTS" << Keyfield(key) << field;
 
     // Run it
     CommandReply reply = run(cmd);
@@ -199,12 +360,8 @@ CommandReply RedisCluster::put_tensor(TensorBase& tensor)
 {
     // Build the command
     SingleKeyCommand cmd;
-    cmd.add_field("AI.TENSORSET");
-    cmd.add_field(tensor.name(), true);
-    cmd.add_field(tensor.type_str());
-    cmd.add_fields(tensor.dims());
-    cmd.add_field("BLOB");
-    cmd.add_field_ptr(tensor.buf());
+    cmd << "AI.TENSORSET" << Keyfield(tensor.name()) << tensor.type_str()
+        << tensor.dims() << "BLOB" << tensor.buf();
 
     // Run it
     return run(cmd);
@@ -215,10 +372,7 @@ CommandReply RedisCluster::get_tensor(const std::string& key)
 {
     // Build the command
     GetTensorCommand cmd;
-    cmd.add_field("AI.TENSORGET");
-    cmd.add_field(key, true);
-    cmd.add_field("META");
-    cmd.add_field("BLOB");
+    cmd << "AI.TENSORGET"<< Keyfield(key) << "META" << "BLOB";
 
     // Run it
     return run(cmd);
@@ -237,9 +391,7 @@ CommandReply RedisCluster::rename_tensor(const std::string& key,
     if (key_hash_slot == new_key_hash_slot) {
         // Build the command
         CompoundCommand cmd;
-        cmd.add_field("RENAME");
-        cmd.add_field(key, true);
-        cmd.add_field(new_key, true);
+        cmd << "RENAME" << Keyfield(key) << Keyfield(new_key);
 
         // Run it
         reply = run(cmd);
@@ -260,8 +412,7 @@ CommandReply RedisCluster::delete_tensor(const std::string& key)
 {
     // Build the command
     SingleKeyCommand cmd;
-    cmd.add_field("UNLINK");
-    cmd.add_field(key, true);
+    cmd << "UNLINK" << Keyfield(key);
 
     // Run it
     return run(cmd);
@@ -275,10 +426,7 @@ CommandReply RedisCluster::copy_tensor(const std::string& src_key,
 
     // Build the GET command
     GetTensorCommand cmd_get;
-    cmd_get.add_field("AI.TENSORGET");
-    cmd_get.add_field(src_key, true);
-    cmd_get.add_field("META");
-    cmd_get.add_field("BLOB");
+    cmd_get << "AI.TENSORGET" << Keyfield(src_key) << "META" << "BLOB";
 
     // Run the GET command
     CommandReply cmd_get_reply = run(cmd_get);
@@ -292,12 +440,8 @@ CommandReply RedisCluster::copy_tensor(const std::string& src_key,
 
     // Build the PUT command
     MultiKeyCommand cmd_put;
-    cmd_put.add_field("AI.TENSORSET");
-    cmd_put.add_field(dest_key, true);
-    cmd_put.add_field(TENSOR_STR_MAP.at(type));
-    cmd_put.add_fields(dims);
-    cmd_put.add_field("BLOB");
-    cmd_put.add_field_ptr(blob);
+    cmd_put << "AI.TENSORSET" << Keyfield(dest_key) << TENSOR_STR_MAP.at(type)
+            << dims << "BLOB" << blob;
 
     // Run the PUT command
     return run(cmd_put);
@@ -342,52 +486,75 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
                                      const std::vector<std::string>& inputs,
                                      const std::vector<std::string>& outputs)
 {
-    std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
+    // Build the basic command
     CommandReply reply;
-    for ( ; node != _db_nodes.cend(); node++) {
-        // Build the node prefix
-        std::string prefixed_key = "{" + node->prefix + "}." + model_name;
+    AddressAllCommand cmd;
+    cmd.key_index = 1;
+    cmd << "AI.MODELSTORE" << Keyfield(model_name) << backend << device;
 
-        // Build the MODELSET commnd
-        CompoundCommand cmd;
-        cmd.add_field("AI.MODELSET");
-        cmd.add_field(prefixed_key, true);
-        cmd.add_field(backend);
-        cmd.add_field(device);
+    // Add optional fields as requested
+    if (tag.size() > 0) {
+        cmd << "TAG" << tag;
+    }
+    if (batch_size > 0) {
+        cmd << "BATCHSIZE" << std::to_string(batch_size);
+    }
+    if (min_batch_size > 0) {
+        cmd << "MINBATCHSIZE" << std::to_string(min_batch_size);
+    }
+    if ( inputs.size() > 0) {
+        cmd << "INPUTS" << std::to_string(inputs.size()) << inputs;
+    }
+    if (outputs.size() > 0) {
+        cmd << "OUTPUTS" << std::to_string(outputs.size()) << outputs;
+    }
+    cmd << "BLOB" << model;
 
-        // Add optional fields as requested
-        if (tag.size() > 0) {
-            cmd.add_field("TAG");
-            cmd.add_field(tag);
-        }
-        if (batch_size > 0) {
-            cmd.add_field("BATCHSIZE");
-            cmd.add_field(std::to_string(batch_size));
-        }
-        if (min_batch_size > 0) {
-            cmd.add_field("MINBATCHSIZE");
-            cmd.add_field(std::to_string(min_batch_size));
-        }
-        if ( inputs.size() > 0) {
-            cmd.add_field("INPUTS");
-            cmd.add_fields(inputs);
-        }
-        if (outputs.size() > 0) {
-            cmd.add_field("OUTPUTS");
-            cmd.add_fields(outputs);
-        }
-        cmd.add_field("BLOB");
-        cmd.add_field_ptr(model);
-
-        // Run the command
-        reply = run(cmd);
-        if (reply.has_error() > 0) {
-            throw SRRuntimeException("SetModel failed for node " + node->name);
-        }
+    // Run it
+    reply = run(cmd);
+    if (reply.has_error() > 0) {
+        throw SRRuntimeException("set_model failed!");
     }
 
     // Done
     return reply;
+}
+
+// Set a model from std::string_view buffer in the
+// database for future execution in a multi-GPU system
+void RedisCluster::set_model_multigpu(const std::string& name,
+                                      const std::string_view& model,
+                                      const std::string& backend,
+                                      int first_gpu,
+                                      int num_gpus,
+                                      int batch_size,
+                                      int min_batch_size,
+                                      const std::string& tag,
+                                      const std::vector<std::string>& inputs,
+                                      const std::vector<std::string>& outputs)
+{
+    // Store a copy of the model for each GPU
+    for (int i = first_gpu; i < num_gpus; i++) {
+        // Set up parameters for this copy of the script
+        std::string device = "GPU:" + std::to_string(i);
+        std::string model_key = name + "." + device;
+
+        // Store it
+        CommandReply result = set_model(
+            model_key, model, backend, device, batch_size, min_batch_size,
+            tag, inputs, outputs);
+        if (result.has_error() > 0) {
+            throw SRRuntimeException("Failed to set model for " + device);
+        }
+    }
+
+    // Add a version for get_model to find
+    CommandReply result = set_model(
+        name, model, backend, "GPU", batch_size, min_batch_size,
+        tag, inputs, outputs);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException("Failed to set general model");
+    }
 }
 
 // Set a script from a string buffer in the database for future execution
@@ -395,36 +562,59 @@ CommandReply RedisCluster::set_script(const std::string& key,
                                       const std::string& device,
                                       std::string_view script)
 {
+    // Build the basic command
     CommandReply reply;
-    std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
-    for ( ; node != _db_nodes.cend(); node++) {
-        // Build the node prefix
-        std::string prefix_key = "{" + node->prefix + "}." + key;
+    AddressAllCommand cmd;
+    cmd.key_index = 1;
+    cmd << "AI.SCRIPTSET" << Keyfield(key) << device << "SOURCE" << script;
 
-        // Build the SCRIPTSET command
-        SingleKeyCommand cmd;
-        cmd.add_field("AI.SCRIPTSET");
-        cmd.add_field(prefix_key, true);
-        cmd.add_field(device);
-        cmd.add_field("SOURCE");
-        cmd.add_field_ptr(script);
-
-        // Run the command
-        reply = run(cmd);
-        if (reply.has_error() > 0) {
-            throw SRRuntimeException("SetModel failed for node " + node->name);
-        }
+    // Run it
+    reply = run(cmd);
+    if (reply.has_error() > 0) {
+        throw SRRuntimeException("set_script failed!");
     }
 
     // Done
     return reply;
 }
 
-// Run a model in the database using the specificed input and output tensors
-CommandReply RedisCluster::run_model(const std::string& key,
+// Set a script from std::string_view buffer in the
+// database for future execution in a multi-GPU system
+void RedisCluster::set_script_multigpu(const std::string& name,
+                                       const std::string_view& script,
+                                       int first_gpu,
+                                       int num_gpus)
+{
+    // Store a copy of the script for each GPU
+    for (int i = first_gpu; i < num_gpus; i++) {
+        // Set up parameters for this copy of the script
+        std::string device = "GPU:" + std::to_string(i);
+        std::string script_key = name + "." + device;
+
+        // Store it
+        CommandReply result = set_script(script_key, device, script);
+        if (result.has_error() > 0) {
+            throw SRRuntimeException("Failed to set script for " + device);
+        }
+    }
+
+    // Add a copy for get_script to find
+    CommandReply result = set_script(name, "GPU", script);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException("Failed to set general script");
+    }
+}
+
+// Run a model in the database using the specified input and output tensors
+CommandReply RedisCluster::run_model(const std::string& model_name,
                                      std::vector<std::string> inputs,
                                      std::vector<std::string> outputs)
 {
+    // Check for a non-default timeout setting
+    int run_timeout;
+    _init_integer_from_env(run_timeout, _MODEL_TIMEOUT_ENV_VAR,
+                           _DEFAULT_MODEL_TIMEOUT);
+
     /*  For this version of run model, we have to copy all
         input and output tensors, so we will randomly select
         a model.  We can't use rand, because MPI would then
@@ -433,7 +623,7 @@ CommandReply RedisCluster::run_model(const std::string& key,
     */
 
     uint16_t hash_slot = _get_hash_slot(inputs[0]);
-    uint16_t db_index = _get_dbnode_index(hash_slot, 0, _db_nodes.size()-1);
+    uint16_t db_index = _db_node_hash_search(hash_slot, 0, _db_nodes.size()-1);
     DBNode* db = &(_db_nodes[db_index]);
     if (db == NULL) {
         throw SRRuntimeException("Missing DB node found in run_model");
@@ -446,15 +636,15 @@ CommandReply RedisCluster::run_model(const std::string& key,
     // Copy all input tensors to temporary names to align hash slots
     copy_tensors(inputs, tmp_inputs);
 
+    // Use the model on our selected node
+    std::string model_key = "{" + db->prefix + "}." + std::string(model_name);
+
     // Build the MODELRUN command
-    std::string model_name = "{" + db->prefix + "}." + std::string(key);
     CompoundCommand cmd;
-    cmd.add_field("AI.MODELRUN");
-    cmd.add_field(model_name, true);
-    cmd.add_field("INPUTS");
-    cmd.add_fields(tmp_inputs);
-    cmd.add_field("OUTPUTS");
-    cmd.add_fields(tmp_outputs);
+    cmd << "AI.MODELEXECUTE" << Keyfield(model_key)
+        << "INPUTS" << std::to_string(tmp_inputs.size()) << tmp_inputs
+        << "OUTPUTS" << std::to_string(tmp_outputs.size()) << tmp_outputs
+        << "TIMEOUT" << std::to_string(run_timeout);
 
     // Run it
     CommandReply reply = run(cmd);
@@ -469,19 +659,36 @@ CommandReply RedisCluster::run_model(const std::string& key,
 
     // Clean up the temp keys
     std::vector<std::string> keys_to_delete;
-    keys_to_delete.insert(keys_to_delete.end(),
-                            tmp_outputs.begin(),
-                            tmp_outputs.end());
-    keys_to_delete.insert(keys_to_delete.end(),
-                            tmp_inputs.begin(),
-                            tmp_inputs.end());
+    keys_to_delete.insert(
+        keys_to_delete.end(), tmp_outputs.begin(), tmp_outputs.end());
+    keys_to_delete.insert(
+        keys_to_delete.end(), tmp_inputs.begin(), tmp_inputs.end());
     _delete_keys(keys_to_delete);
 
     // Done
     return reply;
 }
 
-// Run a script function in the database using the specificed input
+// Run a model in the database using the
+// specified input and output tensors in a multi-GPU system
+void RedisCluster::run_model_multigpu(const std::string& name,
+                                      std::vector<std::string> inputs,
+                                      std::vector<std::string> outputs,
+                                      int offset,
+                                      int first_gpu,
+                                      int num_gpus)
+{
+    int gpu = first_gpu + _modulo(offset, num_gpus);
+    std::string device = "GPU:" + std::to_string(gpu);
+    std::string target_model = name + "." + device;
+    CommandReply result = run_model(target_model, inputs, outputs);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException(
+            "An error occurred while executing the model on " + device);
+    }
+}
+
+// Run a script function in the database using the specified input
 // and output tensors
 CommandReply RedisCluster::run_script(const std::string& key,
                                       const std::string& function,
@@ -490,7 +697,7 @@ CommandReply RedisCluster::run_script(const std::string& key,
 {
     // Locate the DB node for the script
     uint16_t hash_slot = _get_hash_slot(inputs[0]);
-    uint16_t db_index = _get_dbnode_index(hash_slot, 0, _db_nodes.size() - 1);
+    uint16_t db_index = _db_node_hash_search(hash_slot, 0, _db_nodes.size() - 1);
     DBNode* db = &(_db_nodes[db_index]);
     if (db == NULL) {
         throw SRRuntimeException("Missing DB node found in run_script");
@@ -506,17 +713,11 @@ CommandReply RedisCluster::run_script(const std::string& key,
 
     // Build the SCRIPTRUN command
     CompoundCommand cmd;
-    CommandReply reply;
-    cmd.add_field("AI.SCRIPTRUN");
-    cmd.add_field(script_name, true);
-    cmd.add_field(function);
-    cmd.add_field("INPUTS");
-    cmd.add_fields(tmp_inputs);
-    cmd.add_field("OUTPUTS");
-    cmd.add_fields(tmp_outputs);
+    cmd << "AI.SCRIPTRUN" << Keyfield(script_name) << function
+        << "INPUTS" << tmp_inputs << "OUTPUTS" << tmp_outputs;
 
     // Run it
-    reply = run(cmd);
+    CommandReply reply = run(cmd);
     if (reply.has_error() > 0) {
         std::string error("run_model failed for node ");
         error += db_index;
@@ -540,6 +741,120 @@ CommandReply RedisCluster::run_script(const std::string& key,
     return reply;
 }
 
+/*!
+*   \brief Run a script function in the database using the
+*          specified input and output tensors in a multi-GPU system
+*   \param name The name associated with the script
+*   \param function The name of the function in the script to run
+*   \param inputs The names of input tensors to use in the script
+*   \param outputs The names of output tensors that will be used
+*                  to save script results
+*   \param offset index of the current image, such as a processor
+*                   ID or MPI rank
+*   \param num_gpus the number of gpus for which the script was stored
+*   \throw RuntimeException for all client errors
+*/
+void RedisCluster::run_script_multigpu(const std::string& name,
+                                       const std::string& function,
+                                       std::vector<std::string>& inputs,
+                                       std::vector<std::string>& outputs,
+                                       int offset,
+                                       int first_gpu,
+                                       int num_gpus)
+{
+    int gpu = first_gpu + _modulo(offset, num_gpus);
+    std::string device = "GPU:" + std::to_string(gpu);
+    std::string target_script = name + "." + device;
+    CommandReply result = run_script(target_script, function, inputs, outputs);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException(
+            "An error occurred while executing the script on " + device);
+    }
+}
+
+// Delete a model from the database
+CommandReply RedisCluster::delete_model(const std::string& key)
+{
+    // Build the command
+    CommandReply reply;
+    AddressAllCommand cmd;
+    cmd.key_index = 1;
+    cmd << "AI.MODELDEL" << Keyfield(key);
+
+    // Run it
+    reply = run(cmd);
+    if (reply.has_error() > 0) {
+        throw SRRuntimeException("delete_model failed!");
+    }
+
+    // Done
+    return reply;
+}
+
+// Remove a model from the database that was stored
+// for use with multiple GPUs
+void RedisCluster::delete_model_multigpu(
+    const std::string& name, int first_gpu, int num_gpus)
+{
+    // Remove a copy of the model for each GPU
+    CommandReply result;
+    for (int i = first_gpu; i < num_gpus; i++) {
+        std::string device = "GPU:" + std::to_string(i);
+        std::string model_key = name + "." + device;
+        result = delete_model(model_key);
+        if (result.has_error() > 0) {
+            throw SRRuntimeException("Failed to remove model for GPU " + std::to_string(i));
+        }
+    }
+
+    // Remove the copy that was added for get_model to find
+    result = delete_model(name);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException("Failed to remove general model");
+    }
+}
+
+// Delete a script from the database
+CommandReply RedisCluster::delete_script(const std::string& key)
+{
+    CommandReply reply;
+    AddressAllCommand cmd;
+    cmd.key_index = 1;
+    cmd << "AI.SCRIPTDEL" << Keyfield(key);
+
+    // Run it
+    reply = run(cmd);
+    if (reply.has_error() > 0) {
+        throw SRRuntimeException("delete_script failed!");
+    }
+
+    // Done
+    return reply;
+}
+
+// Remove a script from the database that was stored
+// for use with multiple GPUs
+void RedisCluster::delete_script_multigpu(
+    const std::string& name, int first_gpu, int num_gpus)
+{
+    // Remove a copy of the script for each GPU
+    CommandReply result;
+    for (int i = first_gpu; i < num_gpus; i++) {
+        std::string device = "GPU:" + std::to_string(i);
+        std::string script_key = name + "." + device;
+        result = delete_script(script_key);
+        if (result.has_error() > 0) {
+            throw SRRuntimeException("Failed to remove script for GPU " + std::to_string(i));
+        }
+    }
+
+    // Remove the copy that was added for get_script to find
+    result = delete_script(name);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException("Failed to remove general script");
+    }
+}
+
 // Retrieve the model from the database
 CommandReply RedisCluster::get_model(const std::string& key)
 {
@@ -548,9 +863,7 @@ CommandReply RedisCluster::get_model(const std::string& key)
 
     // Build the MODELGET command
     SingleKeyCommand cmd;
-    cmd.add_field("AI.MODELGET");
-    cmd.add_field(prefixed_str, true);
-    cmd.add_field("BLOB");
+    cmd << "AI.MODELGET" << Keyfield(prefixed_str) << "BLOB";
 
     // Run it
     return run(cmd);
@@ -559,12 +872,14 @@ CommandReply RedisCluster::get_model(const std::string& key)
 // Retrieve the script from the database
 CommandReply RedisCluster::get_script(const std::string& key)
 {
+    // Build the node prefix
     std::string prefixed_str = "{" + _db_nodes[0].prefix + "}." + key;
 
+    // Build the SCRIPTGET command
     SingleKeyCommand cmd;
-    cmd.add_field("AI.SCRIPTGET");
-    cmd.add_field(prefixed_str, true);
-    cmd.add_field("SOURCE");
+    cmd << "AI.SCRIPTGET" << Keyfield(prefixed_str) << "SOURCE";
+
+    // Run it
     return run(cmd);
 }
 
@@ -592,12 +907,11 @@ CommandReply RedisCluster::get_model_script_ai_info(const std::string& address,
 
     // Build the Command
     cmd.set_exec_address_port(host, port);
-    cmd.add_field("AI.INFO");
-    cmd.add_field(prefixed_key);
+    cmd << "AI.INFO" << Keyfield(prefixed_key);
 
     // Optionally add RESETSTAT to the command
     if (reset_stat) {
-        cmd.add_field("RESETSTAT");
+        cmd << "RESETSTAT";
     }
 
     return run(cmd);
@@ -630,7 +944,7 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
             // For an error from Redis, retry unless we're out of chances
             if (i == _command_attempts) {
                 throw SRDatabaseException(
-                    std::string("Redis IO error when executing commend: ") +
+                    std::string("Redis IO error when executing command: ") +
                     e.what());
             }
             // else, Fall through for a retry
@@ -639,7 +953,7 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
             // For an error from Redis, retry unless we're out of chances
             if (i == _command_attempts) {
                 throw SRDatabaseException(
-                    std::string("Redis Closed error when executing commend: ") +
+                    std::string("Redis Closed error when executing command: ") +
                     e.what());
             }
             // else, Fall through for a retry
@@ -647,7 +961,7 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
         catch (sw::redis::Error &e) {
             // For other errors from Redis, report them immediately
             throw SRRuntimeException(
-                std::string("Redis error when executing commend: ") +
+                std::string("Redis error when executing command: ") +
                 e.what());
         }
         catch (std::exception& e) {
@@ -730,8 +1044,7 @@ inline void RedisCluster::_map_cluster()
 
     // Build the CLUSTER SLOTS command
     AddressAnyCommand cmd;
-    cmd.add_field("CLUSTER");
-    cmd.add_field("SLOTS");
+    cmd << "CLUSTER" << "SLOTS";
 
     // Run it
     CommandReply reply(_redis_cluster->
@@ -759,9 +1072,7 @@ std::string RedisCluster::_get_db_node_prefix(Command& cmd)
     std::string prefix;
     std::vector<std::string>::iterator key_it = keys.begin();
     for ( ; key_it != keys.end(); key_it++) {
-        uint16_t hash_slot = _get_hash_slot(*key_it);
-        uint16_t db_index = _get_dbnode_index(hash_slot, 0,
-                                           _db_nodes.size() - 1);
+        uint16_t db_index = _get_db_node_index(*key_it);
         if (prefix.size() == 0) {
             prefix = _db_nodes[db_index].prefix;
         }
@@ -773,6 +1084,13 @@ std::string RedisCluster::_get_db_node_prefix(Command& cmd)
 
     // Done
     return prefix;
+}
+
+// Get the index in _db_nodes for the provided key
+inline uint16_t RedisCluster::_get_db_node_index(const std::string& key)
+{
+    uint16_t hash_slot = _get_hash_slot(key);
+    return  _db_node_hash_search(hash_slot, 0, _db_nodes.size() - 1);
 }
 
 // Process the CommandReply for CLUSTER SLOTS to build DBNode information
@@ -927,8 +1245,9 @@ uint16_t RedisCluster::_get_hash_slot(const std::string& key)
 }
 
 // Get the index of the DBNode responsible for the hash slot
-uint16_t RedisCluster::_get_dbnode_index(uint16_t hash_slot,
-                                   unsigned lhs, unsigned rhs)
+uint16_t RedisCluster::_db_node_hash_search(uint16_t hash_slot,
+                                            unsigned lhs,
+                                            unsigned rhs)
 {
     // Find the DBNode via binary search
     uint16_t m = (lhs + rhs) / 2;
@@ -942,9 +1261,9 @@ uint16_t RedisCluster::_get_dbnode_index(uint16_t hash_slot,
     // Otherwise search in the appropriate half
     else {
         if (_db_nodes[m].lower_hash_slot > hash_slot)
-            return _get_dbnode_index(hash_slot, lhs, m - 1);
+            return _db_node_hash_search(hash_slot, lhs, m - 1);
         else
-            return _get_dbnode_index(hash_slot, m + 1, rhs);
+            return _db_node_hash_search(hash_slot, m + 1, rhs);
     }
 }
 
@@ -968,103 +1287,11 @@ void RedisCluster::_delete_keys(std::vector<std::string> keys)
 {
     // Build the command
     MultiKeyCommand cmd;
-    cmd.add_field("DEL");
-    cmd.add_fields(keys, true);
+    cmd << "DEL";
+    cmd.add_keys(keys);
 
     // Run it, ignoring failure
     (void)run(cmd);
-}
-
-// Run a model in the database that uses dagrun
-void RedisCluster::__run_model_dagrun(const std::string& key,
-                                      std::vector<std::string> inputs,
-                                      std::vector<std::string> outputs)
-{
-    /* This function will run a RedisAI model.  Because the RedisAI
-    AI.RUNMODEL and AI.DAGRUN commands assume that the tensors
-    and model are all on the same node.  As a result, we will
-    have to retrieve all input tensors that are not on the same
-    node as the model and set temporary
-    */
-
-    // TODO We need to make sure that no other clients are using the
-    // same keys and model because we may end up overwriting or having
-    // race conditions on who can use the model, etc.
-
-    DBNode* db = _get_model_script_db(key, inputs, outputs);
-
-    // Create list of input tensors that do not hash to db slots
-    std::unordered_set<std::string> remote_inputs;
-    for (size_t i = 0; i < inputs.size(); i++) {
-        uint16_t hash_slot = _get_hash_slot(inputs[i]);
-        if (hash_slot < db->lower_hash_slot ||
-            hash_slot > db->upper_hash_slot) {
-            remote_inputs.insert(inputs[i]);
-        }
-    }
-
-    // Retrieve tensors that do not hash to db,
-    // rename the tensors to {prefix}.tensor_name.TMP
-    // TODO we need to make sure users don't use the .TMP suffix
-    // or check that the key does not exist
-    for (size_t i = 0; i < inputs.size(); i++) {
-        if (remote_inputs.count(inputs[i]) > 0) {
-            std::string new_key = "{" + db->prefix + "}." + inputs[i] + ".TMP";
-            copy_tensor(inputs[i], new_key);
-            remote_inputs.erase(inputs[i]);
-            remote_inputs.insert(new_key);
-            inputs[i] = new_key;
-        }
-    }
-
-    // Create a renaming scheme for output tensor
-    std::unordered_map<std::string, std::string> remote_outputs;
-    for (size_t i = 0; i < outputs.size(); i++) {
-        uint16_t hash_slot = _get_hash_slot(outputs[i]);
-        if (hash_slot < db->lower_hash_slot ||
-            hash_slot > db->upper_hash_slot) {
-            std::string tmp = "{" + db->prefix + "}." + outputs[i] + ".TMP";
-            remote_outputs.insert({outputs[i], tmp});
-            outputs[i] = remote_outputs[outputs[i]];
-        }
-    }
-
-    // Build the DAGRUN command
-    std::string model_name = "{" + db->prefix + "}." + key;
-    CompoundCommand cmd;
-    cmd.add_field("AI.DAGRUN");
-    cmd.add_field("LOAD");
-    cmd.add_field(std::to_string(inputs.size()));
-    cmd.add_fields(inputs);
-    cmd.add_field("PERSIST");
-    cmd.add_field(std::to_string(outputs.size()));
-    cmd.add_fields(outputs);
-    cmd.add_field("|>");
-    cmd.add_field("AI.MODELRUN");
-    cmd.add_field(model_name, true);
-    cmd.add_field("INPUTS");
-    cmd.add_fields(inputs);
-    cmd.add_field("OUTPUTS");
-    cmd.add_fields(outputs);
-
-    // Run it
-    CommandReply reply = run(cmd);
-    if (reply.has_error()) {
-        throw SRRuntimeException("Failed to execute DAGRUN");
-    }
-
-    // Delete temporary input tensors
-    std::unordered_set<std::string>::const_iterator i_it =
-        remote_inputs.begin();
-    for ( ; i_it !=  remote_inputs.end(); i_it++)
-        delete_tensor(*i_it);
-
-    // Move temporary output to the correct location and
-    // delete temporary output tensors
-    std::unordered_map<std::string, std::string>::const_iterator j_it =
-        remote_outputs.begin();
-    for ( ; j_it != remote_outputs.end(); j_it++)
-        rename_tensor(j_it->second, j_it->first);
 }
 
 // Retrieve the optimum model prefix for the set of inputs
@@ -1083,13 +1310,13 @@ DBNode* RedisCluster::_get_model_script_db(const std::string& name,
 
     for (size_t i = 0; i < inputs.size(); i++) {
         uint16_t hash_slot = _get_hash_slot(inputs[i]);
-        uint16_t db_index = _get_dbnode_index(hash_slot, 0, _db_nodes.size());
+        uint16_t db_index = _db_node_hash_search(hash_slot, 0, _db_nodes.size());
         hash_slot_tally[db_index]++;
     }
 
     for (size_t i = 0; i < outputs.size(); i++) {
         uint16_t hash_slot = _get_hash_slot(outputs[i]);
-        uint16_t db_index = _get_dbnode_index(hash_slot, 0, _db_nodes.size());
+        uint16_t db_index = _db_node_hash_search(hash_slot, 0, _db_nodes.size());
         hash_slot_tally[db_index]++;
     }
 
@@ -1103,4 +1330,84 @@ DBNode* RedisCluster::_get_model_script_db(const std::string& name,
         }
     }
     return db;
+}
+
+// Build and run unordered pipeline
+PipelineReply
+RedisCluster::_run_pipeline(std::vector<Command*>& cmds,
+                            std::string& shard_prefix)
+{
+    PipelineReply reply;
+    for (int i = 1; i <= _command_attempts; i++) {
+        try {
+            // Get pipeline object for shard (no new connection)
+            sw::redis::Pipeline pipeline =
+                _redis_cluster->pipeline(shard_prefix, false);
+
+            // Loop over all commands and add to the pipeline
+            for (size_t i = 0; i < cmds.size(); i++) {
+                // Add the commands to the pipeline
+                pipeline.command(cmds[i]->cbegin(), cmds[i]->cend());
+            }
+
+            // Execute the pipeline
+            reply = pipeline.exec();
+
+            // Check the replies
+            if (reply.has_error()) {
+                throw SRRuntimeException("Redis failed to execute the pipeline");
+            }
+        }
+        catch (SmartRedis::Exception& e) {
+            // Exception is already prepared, just propagate it
+            throw;
+        }
+        catch (sw::redis::IoError &e) {
+            // For an error from Redis, retry unless we're out of chances
+            if (i == _command_attempts) {
+                throw SRDatabaseException(
+                    std::string("Redis IO error when executing the pipeline: ") +
+                    e.what());
+            }
+            // else, Fall through for a retry
+        }
+        catch (sw::redis::ClosedError &e) {
+            // For an error from Redis, retry unless we're out of chances
+            if (i == _command_attempts) {
+                throw SRDatabaseException(
+                    std::string("Redis Closed error when executing the "\
+                                "pipeline: ") + e.what());
+            }
+            // else, Fall through for a retry
+        }
+        catch (sw::redis::Error &e) {
+            // For other errors from Redis, report them immediately
+            throw SRRuntimeException(
+                std::string("Redis error when executing the pipeline: ") +
+                    e.what());
+        }
+        catch (std::exception& e) {
+            // Should never hit this, so bail immediately if we do
+            throw SRInternalException(
+                std::string("Unexpected exception executing the pipeline: ") +
+                    e.what());
+        }
+        catch (...) {
+            // Should never hit this, so bail immediately if we do
+            throw SRInternalException(
+                "Non-standard exception encountered executing the pipeline");
+        }
+
+        // Sleep before the next attempt
+        std::this_thread::sleep_for(std::chrono::milliseconds(_command_interval));
+
+        // Return the reply
+        return reply;
+    }
+
+    // If we get here, we've run out of retry attempts
+    throw SRTimeoutException("Unable to execute pipeline");
+
+    // Return the reply
+    return reply;
 }

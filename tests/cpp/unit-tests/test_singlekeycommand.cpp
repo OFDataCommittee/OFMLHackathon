@@ -76,13 +76,11 @@ SCENARIO("Testing copy constructor for SingleKeyCommand on heap", "[SingleKeyCom
         std::vector<std::string> cmd_keys;
 
         // add fields
-        cmd->add_field(field_1, false);
-        cmd->add_field(field_2, true);
-        cmd->add_field(field_3, true);
+        *cmd << field_1 << Keyfield(field_2) << Keyfield(field_3);
         cmd->add_field_ptr(field_4, field_size_4);
-        cmd->add_field_ptr(field_5);
-        cmd->add_fields(fields_1, true);
-        cmd->add_field_ptr(field_sv);
+        *cmd << field_5;
+        cmd->add_keys(fields_1);
+        *cmd << field_sv;
 
         THEN("The SingleKeyCommand can be copied with the copy "
                  "constructor and then can be deleted while "

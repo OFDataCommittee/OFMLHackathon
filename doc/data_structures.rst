@@ -324,6 +324,54 @@ metadata field to be retrieved, and this name is the same name that
 was used when constructing the metadata field with
 ``add_meta_scalar()`` and ``add_meta_string()`` functions.
 
+Aggregating
+-----------
+
+An API is provided to aggregate multiple ``DataSet`` objects that
+are stored on one or more database nodes.  This is accomplished
+through an interface referred to as ``aggregation lists``.
+An ``aggregation list`` in SmartRedis stores references to
+``DataSet`` objects that are stored in the database.  ``DataSet``
+objects can be appended to the ``aggregation list`` and then
+``SmartRedis`` clients in the same application or a different application
+can retrieve all or some of the ``DataSet`` objects referenced in that
+``aggregation list``.
+
+For example, the C++ client function to append a ``DataSet`` to an
+aggregation list is shown below:
+
+.. code-block:: cpp
+
+    # C++ aggregation list append interface
+    void append_to_list(const std::string& list_name,
+                        const DataSet& dataset);
+
+The above function will append the provided ``DataSet`` to the
+``aggregation list``, which can be referenced in all user-facing functions
+by the provided list name.  Note that a list can be appended by
+any client in the same or different application.  Additionally, all
+appends are performed at the end of the list, and if the list does not
+already exist, it is automatically created.
+
+For retrieval of ``aggregation list`` contents,
+the SmartRedis ``Client`` method provides an API function that
+will return an iterable container with all of the ``DataSet`` objects
+that were appended to the ``aggregation list``.  For example, the C++ client
+function to retrieve the ``aggregation list`` contents is shown below:
+
+.. code-block:: cpp
+
+    # C++ aggregation list retrieval interface
+    std::vector<DataSet> get_datasets_from_list(const std::string& list_name);
+
+Additional functions are provided to retrieve only a portion of the
+``aggregation list`` contents, copy an ``aggregation list``, rename
+an ``aggregation list` and retrieve ``aggregation list`` length.
+A blocking method to poll the ``aggregation list`` length is also
+provided as a means to wait for list completion before performing
+another task in the same application or a separate application.
+
+
 Model
 =====
 
@@ -420,6 +468,42 @@ ensemble compatibility features are used.
     but the name provided to ``run_model()`` must be prefixed with
     the ``DataSet`` name in the pattern ``{dataset_name}.tensor_name``.
 
+Support on Systems with Multiple GPUs
+-------------------------------------
+
+SmartRedis has special support for models on systems with multiple GPUs.
+On these systems, the model can be set via the ``Client.set_model_multigpu()``
+function, which differs from the ``Client.set_model()`` function only in that
+(1) there is no need to specify a device (GPU is implicit) and (2) the caller
+must supply the index of the first GPU to use with the model and the total
+number of GPUs on the system's nodes to use with the model. The function will
+then create separate copies of the model for each GPU by appending ``.GPU:n``
+to the supplied name, where ``n`` is a number from ``first_gpu`` to
+``first_gpu + num_gpus - 1``, inclusive.
+
+Executing models on systems with multiple GPUs may be done via the
+``Client.run_model_multigpu()`` function. This method parallels
+``Client.run_model()`` except that it requires three additional parameters:
+the first GPU to use for execution, the number of GPUs to use for execution,
+and an offset for the currently executing thread or image. The model execution
+is then dispatched to the copy of the script on the GPU corresponding to
+``first_gpu`` plus the offset modulo ``num_gpus``.  The image offset may
+be an MPI rank, or a thread ID, or any other indexing scheme.
+
+Finally, models stored for multiple GPUs may be deleted via the
+``Client.delete_model_multigpu()`` function. This method parallels
+``Client.delete_model()`` except that it requires two additional parameters:
+the first GPU and the number of GPUs that the model was stored with. This
+function will delete all the extra copies of the model that were stored
+via ``Client.set_model_multigpu()``.
+
+.. note::
+
+    In order for a model to be executed via ``Client.run_model_multigpu()``,
+    or deleted via ``Client.delete_model_multigpu()``,
+    it must have been set via ``Client.set_model_multigpu()``. The
+    ``first_gpu`` and ``num_gpus`` parameters must be constant across both calls.
+
 Script
 ======
 
@@ -504,3 +588,39 @@ ensemble compatibility features are used.
     DataSet tensors can be used as ``run_script()`` input tensors,
     but the name provided to ``run_script()`` must be prefixed with
     the ``DataSet`` name in the pattern ``{dataset_name}.tensor_name``.
+
+Support on Systems with Multiple GPUs
+-------------------------------------
+
+SmartRedis has special support for scripts on systems with multiple GPUs.
+On these systems, the script can be set via the ``Client.set_script_multigpu()``
+function, which differs from the ``Client.set_script()`` function only in that
+(1) there is no need to specify a device (GPU is implicit) and (2) the caller
+must supply the index of the first GPU to use with the script and the total
+number of GPUs on the system's nodes to use with the script. The function will
+then create separate copies of the script for each GPU by appending ``.GPU:n``
+to the supplied name, where ``n`` is a number from ``first_gpu`` to
+``first_gpu + num_gpus - 1``, inclusive.
+
+Executing scripts on systems with multiple GPUs may be done via the
+``Client.run_script_multigpu()`` function. This method parallels
+``Client.run_script()`` except that it requires three additional parameters:
+the first GPU to use for execution, the number of GPUs to use for execution,
+and an offset for the currently executing thread or image. The script execution
+is then dispatched to the copy of the script on the GPU corresponding to
+``first_gpu`` plus the offset modulo ``num_gpus``.  The image offset may
+be an MPI rank, or a thread ID, or any other indexing scheme.
+
+Finally, scripts stored for multiple GPUs may be deleted via the
+``Client.delete_script_multigpu()`` function. This method parallels
+``Client.delete_script()`` except that it requires two additional parameters:
+the first GPU and the number of GPUs that the model was stored with. This
+function will delete all the extra copies of the model that were stored
+via ``Client.set_script_multigpu()``.
+
+.. note::
+
+    In order for a script to be executed via ``Client.run_script_multigpu()``,
+    or deleted via ``Client.delete_script_multigpu()``,
+    it must have been set via ``Client.set_script_multigpu()``. The
+    ``first_gpu`` and ``num_gpus`` parameters must be constant across both calls.

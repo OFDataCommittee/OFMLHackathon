@@ -45,8 +45,9 @@ def launch_db(host, port, dpn):
     set log file
     """
 
+    test_device = os.environ.get("SMARTREDIS_TEST_DEVICE","cpu").lower()
     redis = environ['REDIS_INSTALL_PATH'] + '/redis-server '
-    redisai = "--loadmodule " +  environ['REDISAI_CPU_INSTALL_PATH'] + "/redisai.so "
+    redisai = "--loadmodule " +  environ[f'REDISAI_{test_device.upper()}_INSTALL_PATH'] + "/redisai.so "
     if(dpn < 3):
         cmd = "srun -N 1 -n 1 " + redis + "./smartredisdb.conf " + redisai + "--cluster-enabled yes  " + "--bind " + get_ip_from_host(host) + " "
         log_file = "--logfile " + host + "-" + str(port) + ".log"
