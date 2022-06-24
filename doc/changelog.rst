@@ -72,33 +72,33 @@ Detailed Notes
 
 - Renamed variables internally to more cleanly differentiate between names that are given to clients for tensors, models, scripts, datasets, etc., and the keys that are used when storing them in the backend database. (PR213_) This change should not be visible to clients.
 
- .. _SSPR214: https://github.com/CrayLabs/SmartSim/pull/214
- .. _PR261: https://github.com/CrayLabs/SmartRedis/pull/261
- .. _PR260: https://github.com/CrayLabs/SmartRedis/pull/260
- .. _PR259: https://github.com/CrayLabs/SmartRedis/pull/259
- .. _PR258: https://github.com/CrayLabs/SmartRedis/pull/258
- .. _PR257: https://github.com/CrayLabs/SmartRedis/pull/257
- .. _PR256: https://github.com/CrayLabs/SmartRedis/pull/256
- .. _PR254: https://github.com/CrayLabs/SmartRedis/pull/254
- .. _PR251: https://github.com/CrayLabs/SmartRedis/pull/251
- .. _PR250: https://github.com/CrayLabs/SmartRedis/pull/250
- .. _PR248: https://github.com/CrayLabs/SmartRedis/pull/248
- .. _PR246: https://github.com/CrayLabs/SmartRedis/pull/246
- .. _PR244: https://github.com/CrayLabs/SmartRedis/pull/244
- .. _PR240: https://github.com/CrayLabs/SmartRedis/pull/240
- .. _PR239: https://github.com/CrayLabs/SmartRedis/pull/239
- .. _PR234: https://github.com/CrayLabs/SmartRedis/pull/234
- .. _PR233: https://github.com/CrayLabs/SmartRedis/pull/233
- .. _PR231: https://github.com/CrayLabs/SmartRedis/pull/231
- .. _PR223: https://github.com/CrayLabs/SmartRedis/pull/223
- .. _PR221: https://github.com/CrayLabs/SmartRedis/pull/221
- .. _PR220: https://github.com/CrayLabs/SmartRedis/pull/220
- .. _PR219: https://github.com/CrayLabs/SmartRedis/pull/219
- .. _PR218: https://github.com/CrayLabs/SmartRedis/pull/218
- .. _PR217: https://github.com/CrayLabs/SmartRedis/pull/217
- .. _PR215: https://github.com/CrayLabs/SmartRedis/pull/215
- .. _PR214: https://github.com/CrayLabs/SmartRedis/pull/214
- .. _PR213: https://github.com/CrayLabs/SmartRedis/pull/213
+.. _SSPR214: https://github.com/CrayLabs/SmartSim/pull/214
+.. _PR261: https://github.com/CrayLabs/SmartRedis/pull/261
+.. _PR260: https://github.com/CrayLabs/SmartRedis/pull/260
+.. _PR259: https://github.com/CrayLabs/SmartRedis/pull/259
+.. _PR258: https://github.com/CrayLabs/SmartRedis/pull/258
+.. _PR257: https://github.com/CrayLabs/SmartRedis/pull/257
+.. _PR256: https://github.com/CrayLabs/SmartRedis/pull/256
+.. _PR254: https://github.com/CrayLabs/SmartRedis/pull/254
+.. _PR251: https://github.com/CrayLabs/SmartRedis/pull/251
+.. _PR250: https://github.com/CrayLabs/SmartRedis/pull/250
+.. _PR248: https://github.com/CrayLabs/SmartRedis/pull/248
+.. _PR246: https://github.com/CrayLabs/SmartRedis/pull/246
+.. _PR244: https://github.com/CrayLabs/SmartRedis/pull/244
+.. _PR240: https://github.com/CrayLabs/SmartRedis/pull/240
+.. _PR239: https://github.com/CrayLabs/SmartRedis/pull/239
+.. _PR234: https://github.com/CrayLabs/SmartRedis/pull/234
+.. _PR233: https://github.com/CrayLabs/SmartRedis/pull/233
+.. _PR231: https://github.com/CrayLabs/SmartRedis/pull/231
+.. _PR223: https://github.com/CrayLabs/SmartRedis/pull/223
+.. _PR221: https://github.com/CrayLabs/SmartRedis/pull/221
+.. _PR220: https://github.com/CrayLabs/SmartRedis/pull/220
+.. _PR219: https://github.com/CrayLabs/SmartRedis/pull/219
+.. _PR218: https://github.com/CrayLabs/SmartRedis/pull/218
+.. _PR217: https://github.com/CrayLabs/SmartRedis/pull/217
+.. _PR215: https://github.com/CrayLabs/SmartRedis/pull/215
+.. _PR214: https://github.com/CrayLabs/SmartRedis/pull/214
+.. _PR213: https://github.com/CrayLabs/SmartRedis/pull/213
 
 0.3.0
 -----
