@@ -1,10 +1,106 @@
 Changelog
 =========
 
+0.3.1
+-----
+
+Released on June 24, 2022
+
+Description
+
+Version 0.3.1 adds new functionality in the form of DataSet aggregation lists for pipelined retrieval of data, conveniuent support for multiple GPUs, and the ability to delete scripts and models from the backend database. It also introduces multithreaded execution for certain tasks that span multiple shards of a clustered database, and it incorporates a variety of internal improvements that will enhance the library going forward.
+
+Detailed Notes
+
+ - Implemented DataSet aggregation lists in all client languages, for pipelined retrieval of data across clustered and non-clustered backend databases. (PR258_) (PR257_) (PR256_) (PR248_) New commands are:
+  - append_to_list()
+  - delete_list()
+  - copy_list()
+  - rename_list()
+  - get_list_length()
+  - poll_list_length()
+  - poll_list_length_gte()
+  - poll_list_length_lte()
+  - get_datasets_from_list()
+  - get_dataset_list_range()
+  - use_list_ensemble_prefix()
+
+ - Implemented multithreaded execution for parallel dataset list retrieval on clustered databases. The number of threads devoted for this purpose is controlled by the new environment variable SR_THERAD_COUNT. The value defaults to 4, but may be any positive integer or special value zero, which will cause the SmartRedis runtime to allocate one thread for each available hardware context. (PR251_) (PR246_)
+
+ - Augment support for GPUs by implementing multi-GPU convenience functions for all client languages. (PR254_) (PR250_) (PR244_) New commands are:
+  - set_model_from_file_multigpu()
+  - set_model_multigpu()
+  - set_script_from_file_multigpu()
+  - set_script_multigpu()
+  - run_model_multigpu()
+  - run_script_multigpu()
+  - delete_model_multigpu()
+  - delete_script_multigpu()
+
+ - Added API calls for all clients to delete models and scripts from the backend database. (PR240_) New commands are:
+  - delete_script()
+  - delete_model()
+
+ - Updated the use of backend RedisAI API calls to discontinue use of deprecated methods for model selection (AI.MODELSET) and execution (AI.MODELRUN) in favor of current methods AI.MODELSTORE and AI.MODELEXECUTE, respectively. (PR234_)
+
+ - SmartRedis will no longer call the C runtime method srand() to ensure that it does not interfere with random number generation in client code. It now uses a separate instance of the C++ random number generator. (PR233_)
+
+ - Updated the way that the Fortran enum_kind type defined in the fortran_c_interop module is defined in order to better comply with Fortran standard and not interfere with GCC 6.3.0. (PR231_)
+
+ - Corrected the spelling of the word "command" in a few error message strings. (PR221_)
+
+ - SmartRedis now requires a CMake version 3.13 or later in order to utilize the add_link_options CMake command. (PR217_)
+
+ - Updated and improved the documentation of the SmartRedis library. In particular, a new SmartRedis Integration Guide provides an introduction to using the SmartRedis library and integrating it with existing software. (PR261_) (PR260_) (PR259_) (SSPR214_)
+
+ - Added clustered Redis testing to automated GitHub check-in testing. (PR239_)
+
+ - Updated the SmartRedis internal API for building commands for the backend database. (PR223_) This change should not be visible to clients.
+
+ - The SmartRedis example code is now validated through the automated GitHub checkin process. This will help ensure that the examples do not fall out of date. (PR220)
+
+ - Added missing copyright statements to CMakeLists.txt and the SmartRedis examples. (PR219_)
+
+ - Updated the C++ test coverage to ensure that all test files are properly executed when running "make test". (PR218_)
+
+ - Fixed an internal naming conflict between a local variable and a class member variable in the DataSet class. (PR215_)  This should not be visible to clients.
+
+ - Updated the internal documentation of methods in SmartRedis C++ classes with the override keyword to improve compliance with the latest C++ standards. (PR214_) This change should not be visible to clients.
+
+ - Renamed variables internally to more cleanly differentiate between names that are given to clients for tensors, models, scripts, datasets, etc., and the keys that are used when storing them in the backend database. (PR213_) This change should not be visible to clients.
+
+ .. _SSPR214: https://github.com/CrayLabs/SmartSim/pull/214
+ .. _PR261: https://github.com/CrayLabs/SmartRedis/pull/261
+ .. _PR260: https://github.com/CrayLabs/SmartRedis/pull/260
+ .. _PR259: https://github.com/CrayLabs/SmartRedis/pull/259
+ .. _PR258: https://github.com/CrayLabs/SmartRedis/pull/258
+ .. _PR257: https://github.com/CrayLabs/SmartRedis/pull/257
+ .. _PR256: https://github.com/CrayLabs/SmartRedis/pull/256
+ .. _PR254: https://github.com/CrayLabs/SmartRedis/pull/254
+ .. _PR251: https://github.com/CrayLabs/SmartRedis/pull/251
+ .. _PR250: https://github.com/CrayLabs/SmartRedis/pull/250
+ .. _PR248: https://github.com/CrayLabs/SmartRedis/pull/248
+ .. _PR246: https://github.com/CrayLabs/SmartRedis/pull/246
+ .. _PR244: https://github.com/CrayLabs/SmartRedis/pull/244
+ .. _PR240: https://github.com/CrayLabs/SmartRedis/pull/240
+ .. _PR239: https://github.com/CrayLabs/SmartRedis/pull/239
+ .. _PR234: https://github.com/CrayLabs/SmartRedis/pull/234
+ .. _PR233: https://github.com/CrayLabs/SmartRedis/pull/233
+ .. _PR231: https://github.com/CrayLabs/SmartRedis/pull/231
+ .. _PR223: https://github.com/CrayLabs/SmartRedis/pull/223
+ .. _PR221: https://github.com/CrayLabs/SmartRedis/pull/221
+ .. _PR220: https://github.com/CrayLabs/SmartRedis/pull/220
+ .. _PR219: https://github.com/CrayLabs/SmartRedis/pull/219
+ .. _PR218: https://github.com/CrayLabs/SmartRedis/pull/218
+ .. _PR217: https://github.com/CrayLabs/SmartRedis/pull/217
+ .. _PR215: https://github.com/CrayLabs/SmartRedis/pull/215
+ .. _PR214: https://github.com/CrayLabs/SmartRedis/pull/214
+ .. _PR213: https://github.com/CrayLabs/SmartRedis/pull/213
+
 0.3.0
 -----
 
-Release on Febuary 11, 2022
+Released on Febuary 11, 2022
 
 Description
 
@@ -65,7 +161,7 @@ Description
 0.2.0
 -----
 
-Release on August, 5, 2021
+Released on August, 5, 2021
 
 Description
 
