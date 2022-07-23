@@ -8,7 +8,8 @@ Tomislav Maric, MMA, Mathematics Department, TU Darmstadt, maric@mma.tu-darmstad
 
 ### Dependencies 
 
-* OpenFOAM-v2112
+* OpenFOAM-v2112, compiled with the [C++20 standard](https://gcc.gnu.org/projects/cxx-status.html#cxx20)
+    * To compile OpenFOAM with `-std=c++2a`, edit `$WM_PROJECT_DIR/wmake/rules/General/Gcc/c++` and use `CC = g++-10 -std=c++2a` to compile OpenFOAM. 
 * python Pandas, matplotlib
 
 ### Installation 
