@@ -16,9 +16,12 @@ then
     exit 1
 fi
 
-if [ ! -f "libtorch-cxx11-abi-shared-with-deps-1.7.1+cpu.zip" ]; 
-then 
-    wget https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-1.7.1%2Bcpu.zip && \
+if [ ! -d "libtorch" ]; 
+then
+    if [ ! -f "libtorch-cxx11-abi-shared-with-deps-1.7.1+cpu.zip" ];
+    then
+        wget https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-1.7.1%2Bcpu.zip
+    fi
     unzip libtorch-cxx11-abi-shared-with-deps-1.7.1+cpu.zip
 fi
 

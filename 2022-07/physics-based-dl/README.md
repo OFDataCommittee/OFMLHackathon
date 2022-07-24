@@ -8,30 +8,39 @@ Tomislav Maric, MMA, Mathematics Department, TU Darmstadt, maric@mma.tu-darmstad
 
 ### Dependencies 
 
-* OpenFOAM-v2112, compiled with the [C++20 standard](https://gcc.gnu.org/projects/cxx-status.html#cxx20)
-    * To compile OpenFOAM with `-std=c++2a`, edit `$WM_PROJECT_DIR/wmake/rules/General/Gcc/c++` and use `CC = g++-10 -std=c++2a` to compile OpenFOAM. 
+* OpenFOAM-v2206, compiled with the [C++20 standard](https://gcc.gnu.org/projects/cxx-status.html#cxx20)
+    * to compile OpenFOAM with `-std=c++2a`, edit `$WM_PROJECT_DIR/wmake/rules/General/Gcc/c++` and use `CC = g++-10 -std=c++2a` to compile OpenFOAM.
+    * the pre-built binary work as well on most systems, e.g., if you follow these [installation instructions](https://develop.openfoam.com/Development/openfoam/-/wikis/precompiled/debian)
+    * older version starting *v1912* should work as well
 * python Pandas, matplotlib
 
 ### Installation 
 
+At the top-level of this repository, run:
 ```
-   ofw17-training-physics-based-dl> ./Allwmake
+source setup-torch.sh
+./Allwmake
 ```
+This script will:
+- check if required environment variables are available
+- download *LibTorch* if needed (PyTorch C++ API)
+- compile everything in *applications*
 
 ### Usage 
 
-In `ofw17-training-physics-based-dl/run/unit_box_domain`
+Navigate to the *unit_box_domain* test case and execute the command below:
 
 ```
-    unit_box_domain > blockMesh && pinnFoamSetSphere && pinnFoam 
+cd run/unit_box_domain
+cp -r 0.org 0 && blockMesh && pinnFoamSetSphere && pinnFoam 
 ```
 
 ### Visualization 
 
-Run 
+In *unit_box_domain*, open the ParaView state file:
 
 ```
-    unit_box_domain > paraview --state=visualize.pvsm 
+paraview --state=visualize.pvsm 
 ```
 
 To view training loss diagrams `jupyter notebook` and open `pinnFoam-visualize-single-training.ipynb', then execute `Re-run and Clear Data`. 
