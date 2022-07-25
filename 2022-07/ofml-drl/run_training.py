@@ -7,15 +7,9 @@ from shutil import copytree
 import os
 from os import makedirs
 from os.path import join
-<<<<<<< HEAD
-=======
-import sys
 from typing import List
 from torch import Tensor
 
-sys.path.insert(0, "src")
-
->>>>>>> Fixed dumping results to pkl files during training
 
 def print_statistics(actions: List[Tensor], rewards: List[Tensor]):
     rt = [r.mean().item() for r in rewards]
