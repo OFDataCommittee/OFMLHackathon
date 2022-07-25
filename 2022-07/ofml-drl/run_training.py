@@ -5,6 +5,7 @@ from python.environment import RotatingCylinder2D
 import pickle
 from shutil import copytree
 from os import makedirs
+from os.path import join
 import sys
 
 sys.path.insert(0, "src")
@@ -37,7 +38,7 @@ def main():
              join(training_path, "base"), dirs_exist_ok=True)
     env = RotatingCylinder2D()
     env.path = join(training_path, "base")
-    env.end_time = 6
+    env.end_time = 6.
     env.reset()
 
     # create a trajectory buffer
