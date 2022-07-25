@@ -23,7 +23,7 @@ class LocalBuffer(Buffer):
 
     def _create_copies(self):
         envs = []
-        for i in range(self._n_runners):
+        for i in range(self._size):
             dest = join(self._path, f"runner_{i}")
             copytree(self._base_env.path, dest, dirs_exist_ok=True)
             envs.append(deepcopy(self._base_env))
@@ -41,6 +41,13 @@ class LocalBuffer(Buffer):
         process_count = 0
         proc = []
 
+        # set the n_workers
+        print("Buffer size: ", self._size)
+        for t in range(int(max(self._size, self._n_runners))):
+            item = "proc_" + str(t)
+            proc.append(item)
+        print(proc)
+
         # execute the n = n_workers trajectory simultaneously
         # set the counter to count the number of trajectory
         buffer_counter = 0
@@ -56,7 +63,7 @@ class LocalBuffer(Buffer):
         while process_count > 0:
             job_name, rc = results.get()
             print("job : ", job_name, "finished with rc =", rc)
-            if self.buffer_size > buffer_counter:
+            if self._size > buffer_counter:
                 #self.run_trajectory(buffer_counter, proc, results, sample, action_bounds, env)
                 self.run_trajectory2(buffer_counter, proc, results, self._envs[buffer_counter])
                 process_count += 1
@@ -155,8 +162,11 @@ class LocalBuffer(Buffer):
         #         f'sed -i "s/absOmegaMax.*/absOmegaMax       {action_bounds[1]};/g" {traj_path}/processor{i}/4/U'
         #     )
         print(f"CWD: {env.path}")
-        print(f"CWD absolute:{join(os.getcwd(), env.path)}")
+        print(f"CWD absolute: {join(os.getcwd(), env.path)}")
+        print(f"Buffer counter: {buffer_counter}")
         # executing Allrun to start trajectory
-        proc[buffer_counter] = subprocess.Popen([f'wait.sh'], cwd=f'{join(os.getcwd(), env.path)}')
+        proc[buffer_counter] = subprocess.Popen(f'./wait.sh', cwd=f'{join(os.getcwd(), env.path)}')
+        #proc[buffer_counter] = subprocess.Popen([f'{env.run_script}'], cwd=f'{join(os.getcwd(), env.path)}')
+       
         _thread.start_new_thread(self.process_waiter,
-                                 (proc[buffer_counter], f"trajectory_{buffer_counter}", results))
+                                 (proc[buffer_counter], f"runner_{buffer_counter}", results))
