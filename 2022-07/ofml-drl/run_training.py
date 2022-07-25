@@ -7,7 +7,6 @@ from shutil import copytree
 from os import makedirs
 from os.path import join
 
-
 def print_statistics(actions, rewards):
     rt = [r.mean().item() for r in rewards]
     at_mean = [a.mean().item() for a in actions]

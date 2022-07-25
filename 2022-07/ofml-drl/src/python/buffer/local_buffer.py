@@ -23,7 +23,7 @@ class LocalBuffer(Buffer):
     def _create_copies(self):
         envs = []
         for i in range(self._size):
-            dest = join(self._path, f"copy_{i}")
+            dest = join(self._path, f"runner_{i}")
             copytree(self._base_env.path, dest, dirs_exist_ok=True)
             envs.append(deepcopy(self._base_env))
             envs[-1].path = dest
@@ -91,3 +91,4 @@ class LocalBuffer(Buffer):
             proc.wait()
         finally:
             que.put((job_name, proc.returncode))
+
