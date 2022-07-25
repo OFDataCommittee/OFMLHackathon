@@ -62,4 +62,7 @@ python3 -m run_training.py
 - the main challenge in DRL with CFD is the relatively large cost of the *environment*; the training might be accelerated as follows:
   - buffer size: a larger buffer size requires more computational resources but stabilizes the training; find and implement a criterion to adjust the buffer size during training
   - trajectory length: if the trajectory is shorter, the training is accelerated, but there might be too little exploration to learn; find and implement a criterion to adjust the trajectory length during training
+- implement control for another `Environment`, e.g., with changed state or actuation:
+  - use the [probes](https://www.openfoam.com/documentation/guides/latest/api/classFoam_1_1probes.html) functionObject to define a more general state
+  - use a jet as actuation as done [here](https://github.com/jerabaul29/Cylinder2DFlowControlDRL)
 - one important question for applications is knowing the applicability of a policy under changed flow conditions, e.g., are we extrapolating in the feature space? Use a Bayesian network as policy to provide uncertainty bounds for the control
