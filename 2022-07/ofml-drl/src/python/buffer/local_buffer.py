@@ -3,6 +3,7 @@ from os.path import join
 import os
 from shutil import copytree
 from copy import deepcopy
+<<<<<<< HEAD
 from subprocess import Popen
 from _thread import start_new_thread
 from queue import Queue
@@ -10,6 +11,14 @@ import torch as pt
 from .buffer import Buffer
 import numpy as np
 from ..environment import Environment
+=======
+import subprocess
+import _thread
+import queue
+import torch as pt
+from .buffer import Buffer
+import numpy as np
+>>>>>>> Initial implementation of fill_buffer to get minimal working example running
 
 
 class LocalBuffer(Buffer):
@@ -83,11 +92,3 @@ class LocalBuffer(Buffer):
             env.reset()
         self._states, self._actions, self._rewards, self._log_p = [], [], [], []
 
-    def process_waiter(self, proc, job_name, que):
-        """
-             This method is to wait for the executed process till it is completed
-         """
-        try:
-            proc.wait()
-        finally:
-            que.put((job_name, proc.returncode))
