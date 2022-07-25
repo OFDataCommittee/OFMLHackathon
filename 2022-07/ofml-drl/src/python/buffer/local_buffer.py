@@ -91,4 +91,3 @@ class LocalBuffer(Buffer):
         for env in self._envs:
             env.reset()
         self._states, self._actions, self._rewards, self._log_p = [], [], [], []
-
