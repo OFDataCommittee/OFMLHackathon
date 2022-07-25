@@ -91,4 +91,3 @@ class LocalBuffer(Buffer):
             proc.wait()
         finally:
             que.put((job_name, proc.returncode))
-
