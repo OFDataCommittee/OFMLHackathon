@@ -1,5 +1,9 @@
 # Prerequisites
 *.d
+__pycache__
+.vscode
+dynamicCode
+linux64GccDPInt32Opt
 
 # Compiled Object files
 *.slo

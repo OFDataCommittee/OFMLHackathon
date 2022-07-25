@@ -1,0 +1,58 @@
+Invalid MIT-MAGIC-COOKIE-1 key/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2206                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _76d719d1-20220624 OPENFOAM=2206 version=2206
+Arch   : "LSB;label=32;scalar=64"
+Exec   : renumberMesh -parallel -overwrite
+Date   : Jul 24 2022
+Time   : 23:20:25
+Host   : andre-XP1511
+PID    : 479417
+I/O    : uncollated
+Case   : /home/andre/Development/ofml-drl/test_cases/rotatingCylinder2D
+nProcs : 2
+Hosts  :
+(
+    (andre-XP1511 2)
+)
+Pstream initialized with:
+    floatTransfer      : 0
+    nProcsSimpleSum    : 0
+    commsType          : nonBlocking
+    polling iterations : 0
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Mesh region0 size: 5325
+Before renumbering :
+    band           : 2007
+    profile        : 472136
+
+Using default renumberMethod.
+
+Selecting renumberMethod CuthillMcKee
+
+Reading volScalarField: p
+Reading volVectorField: U
+
+Renumbering processor cell decomposition map cellProcAddressing
+Renumbering processor face decomposition map faceProcAddressing
+Renumbering processor point decomposition map pointProcAddressing
+After renumbering :
+    band           : 51
+    profile        : 176602
+
+Writing mesh to "constant"
+End
+
+Finalising parallel run
