@@ -9,10 +9,11 @@ from queue import Queue
 import torch as pt
 from .buffer import Buffer
 import numpy as np
+from ..environment import Environment
 
 
 class LocalBuffer(Buffer):
-    def __init__(self, path: str, env, size: int, n_runners: int):
+    def __init__(self, path: str, env: Environment, size: int, n_runners: int):
         self._path = path
         self._base_env = env
         self._size = size
@@ -82,7 +83,6 @@ class LocalBuffer(Buffer):
             env.reset()
         self._states, self._actions, self._rewards, self._log_p = [], [], [], []
 
-    # Added helper code
     def process_waiter(self, proc, job_name, que):
         """
              This method is to wait for the executed process till it is completed
