@@ -4,14 +4,17 @@ from python.agent import PPOAgent
 from python.environment import RotatingCylinder2D
 import pickle
 from shutil import copytree
+import os
 from os import makedirs
 from os.path import join
 import sys
+from typing import List
+from torch import Tensor
 
 sys.path.insert(0, "src")
 
 
-def print_statistics(actions, rewards):
+def print_statistics(actions: List[Tensor], rewards: List[Tensor]):
     rt = [r.mean().item() for r in rewards]
     at_mean = [a.mean().item() for a in actions]
     at_std = [a.std().item() for a in actions]
@@ -53,7 +56,7 @@ def main():
         buffer.fill()
         states, actions, rewards, log_p = buffer.sample()
         print_statistics(actions, rewards)
-        with open(join(training_path, f"observations_e{e}.pkl")) as f:
+        with open(join(os.getcwd(), training_path, f"observations_e{e}.pkl"), 'wb') as f:
             pickle.dump((states, actions, rewards, log_p), f)
         agent.update(states, actions, rewards, log_p)
         buffer.reset()
@@ -62,7 +65,7 @@ def main():
                    join(training_path, f"value_{e}.pt"))
 
     # save statistics
-    with open(join(training_path, "training_history.pkl")) as f:
+    with open(join(training_path, "training_history.pkl"), 'wb') as f:
         pickle.dump(agent.history, f)
 
 
