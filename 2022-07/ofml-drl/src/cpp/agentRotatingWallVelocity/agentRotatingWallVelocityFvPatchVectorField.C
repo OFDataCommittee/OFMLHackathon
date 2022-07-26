@@ -61,9 +61,10 @@ Foam::agentRotatingWallVelocityFvPatchVectorField::
       gen_(seed_),
       omega_(0.0),
       omega_old_(0.0),
-      control_time_(0.0)
+      control_time_(0.0),
+      update_omega_(false)
 {
-    if (dict.found("value"))
+   /* if (dict.found("value"))
     {
         fvPatchField<vector>::operator=(
             vectorField("value", dict, p.size()));
@@ -73,6 +74,8 @@ Foam::agentRotatingWallVelocityFvPatchVectorField::
         // Evaluate the wall velocity
         updateCoeffs();
     }
+    */
+   updateCoeffs();
 }
 
 Foam::agentRotatingWallVelocityFvPatchVectorField::
@@ -95,7 +98,8 @@ Foam::agentRotatingWallVelocityFvPatchVectorField::
       gen_(ptf.gen_),
       omega_(ptf.omega_),
       omega_old_(ptf.omega_old_),
-      control_time_(ptf.control_time_)
+      control_time_(ptf.control_time_),
+      update_omega_(ptf.update_omega_)
 {
 }
 
@@ -116,7 +120,8 @@ Foam::agentRotatingWallVelocityFvPatchVectorField::
       gen_(rwvpvf.gen_),
       omega_(rwvpvf.omega_),
       omega_old_(rwvpvf.omega_old_),
-      control_time_(rwvpvf.control_time_)
+      control_time_(rwvpvf.control_time_),
+      update_omega_(rwvpvf.update_omega_)
 {
 }
 
@@ -138,7 +143,8 @@ Foam::agentRotatingWallVelocityFvPatchVectorField::
       gen_(rwvpvf.gen_),
       omega_(rwvpvf.omega_),
       omega_old_(rwvpvf.omega_old_),
-      control_time_(rwvpvf.control_time_)
+      control_time_(rwvpvf.control_time_),
+      update_omega_(rwvpvf.update_omega_)
 {
 }
 
@@ -161,9 +167,9 @@ void Foam::agentRotatingWallVelocityFvPatchVectorField::updateCoeffs()
             start_iter_ = this->db().time().timeIndex();
             steps_remaining = true;
         }
+
         if (steps_remaining && update_omega_)
         {
-            Info << "Updating Omega with policy.\n";
             omega_old_ = omega_;
             control_time_ = t;
 
@@ -193,6 +199,7 @@ void Foam::agentRotatingWallVelocityFvPatchVectorField::updateCoeffs()
                 {
                     size += gatheredValues[i].size();
                 }
+
                 torch::Tensor features = torch::zeros({ 1, size }, torch::kFloat64);
                 int k = 0;
                 std::vector<scalar> pvec(size);
@@ -278,6 +285,7 @@ void Foam::agentRotatingWallVelocityFvPatchVectorField::write(Ostream &os) const
     os.writeEntry("train", train_);
     os.writeEntry("absOmegaMax", abs_omega_max_);
     os.writeEntry("seed", seed_);
+    //writeEntry("value", os);
 }
 
 void Foam::agentRotatingWallVelocityFvPatchVectorField::saveTrajectory(scalar log_p, scalar entropy, scalar mean, scalar log_std, scalar alpha, scalar beta, std::vector<scalar> pvec, int size) const
