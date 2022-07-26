@@ -1,13 +1,11 @@
 
-from python.buffer import LocalBuffer
-from python.agent import PPOAgent
-from python.environment import RotatingCylinder2D
+from src.python.buffer import LocalBuffer
+from src.python.agent import PPOAgent
+from src.python.environment import RotatingCylinder2D
 import pickle
 from shutil import copytree
 from os import makedirs
-import sys
-
-sys.path.insert(0, "src")
+from os.path import join
 
 
 def print_statistics(actions, rewards):
@@ -25,9 +23,10 @@ def main():
 
     # setting
     training_path = "test_training"
-    epochs = 10
-    buffer_size = 2
-    n_runners = 2
+    episodes = 50
+    buffer_size = 8
+    n_runners = 4
+    end_time = 5.0
 
     # create a directory for training
     makedirs(training_path, exist_ok=True)
@@ -37,7 +36,7 @@ def main():
              join(training_path, "base"), dirs_exist_ok=True)
     env = RotatingCylinder2D()
     env.path = join(training_path, "base")
-    env.end_time = 6
+    env.end_time = end_time
     env.reset()
 
     # create a trajectory buffer
@@ -48,21 +47,25 @@ def main():
                      env.action_bounds, env.action_bounds)
 
     # begin training
-    for e in range(epochs):
+    for e in range(episodes):
+        print(f"Start of episode {e}")
         buffer.fill()
+        print("Buffer full")
         states, actions, rewards, log_p = buffer.sample()
         print_statistics(actions, rewards)
-        with open(join(training_path, f"observations_e{e}.pkl")) as f:
-            pickle.dump((states, actions, rewards, log_p), f)
+        with open(join(training_path, f"observations_e{e}.pkl"), "wb") as f:
+            pickle.dump((states, actions, rewards, log_p), f, protocol=pickle.HIGHEST_PROTOCOL)
         agent.update(states, actions, rewards, log_p)
         buffer.reset()
         buffer.update_policy(agent.trace_policy())
         agent.save(join(training_path, f"policy_{e}.pt"),
                    join(training_path, f"value_{e}.pt"))
+        current_policy = agent.trace_policy()
+        current_policy.save(join(training_path, f"policy_trace_{e}.pt"))
 
     # save statistics
-    with open(join(training_path, "training_history.pkl")) as f:
-        pickle.dump(agent.history, f)
+    with open(join(training_path, "training_history.pkl"), "wb") as f:
+        pickle.dump(agent.history, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 if __name__ == "__main__":
