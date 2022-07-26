@@ -199,7 +199,8 @@ int main(int argc, char *argv[])
 
     torch::Tensor vf_predict = torch::zeros_like(vf_training); // Initialize the array to 0s. 
     torch::Tensor mse = torch::zeros_like(vf_training); // This would be a tensor..
-    torch::Tensor vf_laplace = torch::zeros_like(vf_training);
+    
+    torch::Tensor vf_laplace = torch::zeros_like(vf_training); // 
     size_t epoch = 1; // Can be inceased further
     double min_mse = 1.; // Can be set to an even lower value
 
@@ -210,6 +211,9 @@ int main(int argc, char *argv[])
         Foam::min(deltaCoeffs).value(),-1
     );
     
+    //auto Tile = at::Tensor::repeat(torch::eye(3), 1, n_cells);
+    
+    //std:cout << at::size(Tile, 0), at::size(Tile, 1), at::size(Tile, 2) << endl;
     // - Open the data file for writing the hyperparameters and logs
     auto file_name = getAvailableFileName("pinnFoam");   
     std::ofstream dataFile (file_name);
@@ -236,35 +240,36 @@ int main(int argc, char *argv[])
            true
         );
         
-        auto vf_predict_grad_T = at::transpose(vf_predict_grad[0],n_cells,3);
+        auto vf_predict_grad_T = at::transpose(vf_predict_grad[0],0,1);
         //auto vf_predict_x = vf_predict_grad_[0]
         // back propagation to calculate the hessian - trace (laplace operator)
         //Gradient_x. - N_{train} x 3
         auto vf_predict_grad_x = torch::autograd::grad(
-           {at::transpose(vf_predict_grad_T[0] ,1,n_cells )}, // 3 times 1
+           {vf_predict_grad_T[0]}, // 3 times 1
            {cc_training}, // 3 times 1
-           {torch::ones_like(at::transpose(vf_predict_grad_T[0] ,1,n_cells ))},
+           {torch::ones_like(vf_predict_grad_T[0])},
            true,
            true
         );
+        
         //Gradient_x. - N_{train} x 3
         auto vf_predict_grad_y = torch::autograd::grad(
-           {at::transpose(vf_predict_grad_T[1] ,1,n_cells )}, // 3 times 1
+           {vf_predict_grad_T[1]}, // 3 times 1
            {cc_training}, // 3 times 1
-           {torch::ones_like(at::transpose(vf_predict_grad_T[1] ,1,n_cells ))},
+           {torch::ones_like(vf_predict_grad_T[1])},
            true,
            true
         );
 
         auto vf_predict_grad_z = torch::autograd::grad(
-           {at::transpose(vf_predict_grad_T[2] ,1,n_cells )}, // 3 times 1
+           {vf_predict_grad_T[2]}, // 3 times 1
            {cc_training}, // 3 times 1
-           {torch::ones_like(at::transpose(vf_predict_grad_T[2] ,1,n_cells ))},
+           {torch::ones_like(vf_predict_grad_T[2])},
            true,
            true
         );
         
-        vf_laplace = at::transpose((at::transpose(vf_predict_grad_x[0], n_cells, 1)[0] + at::transpose(vf_predict_grad_y[0], n_cells, 1)[1] + at::transpose(vf_predict_grad_z[0], n_cells, 1)[2]),1,n_cells);
+        vf_laplace = at::transpose(vf_predict_grad_x[0], 0, 1)[0] + at::transpose(vf_predict_grad_y[0], 0, 1)[1] + at::transpose(vf_predict_grad_z[0], 0, 1)[2];
         // Compute the data mse loss.
         auto mse_data = mse_loss(vf_predict, vf_training);
         
@@ -286,7 +291,7 @@ int main(int argc, char *argv[])
             << "Grad MSE = " << mse_grad.item<double>() << "\n"
             << "Training MSE = " << mse.item<double>() << "\n";
         
-        std::cout << "Size = " << at::size(vf_predict_grad_x[0], 0) << "\n" << "Size = " << at::size(vf_predict_grad_y[0], 1) << "\n";
+        std::cout << "Size = " << at::size(vf_predict_grad_x[0], 0) << "\n" << "Size = " << at::size(vf_predict_grad_y[0], 1) << vf_predict_grad[0][0] << "\n";
         // Write the hiddenLayers_ network structure as a string-formatted python list.
         dataFile << "\"";
         for(decltype(hiddenLayers.size()) i = 0; i < hiddenLayers.size() - 1; ++i)
