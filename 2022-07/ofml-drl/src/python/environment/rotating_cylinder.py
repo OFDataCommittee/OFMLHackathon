@@ -149,7 +149,7 @@ class RotatingCylinder2D(Environment):
 
     @property
     def observations(self) -> Tuple[pt.Tensor]:
-        force_path = join(self.path, "postProcessing", "forces", "0", "coefficient.dat")
+        force_path = join(self.path, "postProcessing", "forces", "4", "coefficient.dat")
         forces = _parse_forces(force_path)
         tr_path = join(self.path, "trajectory.csv")
         tr = _parse_trajectory(tr_path, self._n_states)

@@ -9,10 +9,11 @@ import queue
 import torch as pt
 from .buffer import Buffer
 import numpy as np
+from ..environment import Environment
 
 
 class LocalBuffer(Buffer):
-    def __init__(self, path: str, env, size: int, n_runners: int):
+    def __init__(self, path: str, env: Environment, size: int, n_runners: int):
         self._path = path
         self._base_env = env
         self._size = size
@@ -31,7 +32,7 @@ class LocalBuffer(Buffer):
         return envs
 
     def fill(self):
-        # TODO: If fewer runners than buffer size, this needs reimplementation to be different for each buffer entry
+        # Set seed that each trajectory is different
         for i, env in enumerate(self._envs):
             env.seed = i
         
@@ -65,7 +66,13 @@ class LocalBuffer(Buffer):
                 buffer_counter += 1
             process_count -= 1
 
-        # fetch observations    
+        # fetch observations
+        for env in self._envs:
+            states, actions, rewards, log_p = env.observations
+            self._states.append(states)
+            self._actions.append(actions[:-1]) 
+            self._rewards.append(rewards)
+            self._log_p.append(log_p[:-1])
 
     def sample(self):
         return self._states, self._actions, self._rewards, self._log_p
@@ -79,7 +86,6 @@ class LocalBuffer(Buffer):
             env.reset()
         self._states, self._actions, self._rewards, self._log_p = [], [], [], []
 
-    # Added helper code
     def process_waiter(self, proc, job_name, que):
         """
              This method is to wait for the executed process till it is completed
@@ -89,19 +95,17 @@ class LocalBuffer(Buffer):
         finally:
             que.put((job_name, proc.returncode))
 
-    def run_trajectory(self, buffer_counter, proc, results, env):
+    def run_trajectory(self, buffer_counter, proc, results, env: Environment):
         """
         To run the trajectories
         Args:
             buffer_counter: which trajectory to run (n -> traj_0, traj_1, ... traj_n)
             proc: array to hold process waiting flag
             results: array to hold process finish flag
+            env: Environment where the case is run
         Returns: execution of OpenFOAM Allrun file in machine
         """
-
         # executing Allrun to start trajectory
-        #proc[buffer_counter] = subprocess.Popen(f'./wait.sh', cwd=f'{join(os.getcwd(), env.path)}')
         proc[buffer_counter] = subprocess.Popen([f'{env.run_script}'], cwd=f'{join(os.getcwd(), env.path)}')
-       
         _thread.start_new_thread(self.process_waiter,
                                  (proc[buffer_counter], f"runner_{buffer_counter}", results))
