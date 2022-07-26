@@ -1,0 +1,18 @@
+#!/bin/bash
+cd "${0%/*}" || exit
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions
+#------------------------------------------------------------------------------
+
+# create mesh
+runApplication blockMesh
+
+# set inlet velocity
+cp -r 0.org 0
+runApplication setExprBoundaryFields
+
+# decompose and run case
+runApplication decomposePar
+runParallel renumberMesh -overwrite
+runParallel -s "pre" pimpleFoam
+
+#------------------------------------------------------------------------------
