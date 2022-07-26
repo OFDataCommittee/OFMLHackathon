@@ -4,10 +4,20 @@ from src.python.agent import PPOAgent
 from src.python.environment import RotatingCylinder2D
 import pickle
 from shutil import copytree
+import os
 from os import makedirs
 from os.path import join
+<<<<<<< HEAD
+=======
+import sys
+from typing import List
+from torch import Tensor
 
-def print_statistics(actions, rewards):
+sys.path.insert(0, "src")
+
+>>>>>>> Fixed dumping results to pkl files during training
+
+def print_statistics(actions: List[Tensor], rewards: List[Tensor]):
     rt = [r.mean().item() for r in rewards]
     at_mean = [a.mean().item() for a in actions]
     at_std = [a.std().item() for a in actions]
