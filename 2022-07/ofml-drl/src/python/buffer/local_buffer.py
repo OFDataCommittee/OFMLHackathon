@@ -18,7 +18,11 @@ import queue
 import torch as pt
 from .buffer import Buffer
 import numpy as np
+<<<<<<< HEAD
 >>>>>>> Initial implementation of fill_buffer to get minimal working example running
+=======
+from ..environment import Environment
+>>>>>>> Running version of buffer.fill() method and bugfixes to get the case running
 
 
 class LocalBuffer(Buffer):

@@ -3,5 +3,3 @@ libtorch
 *.tar
 *.zip
 test_training
-
-libtorch*
