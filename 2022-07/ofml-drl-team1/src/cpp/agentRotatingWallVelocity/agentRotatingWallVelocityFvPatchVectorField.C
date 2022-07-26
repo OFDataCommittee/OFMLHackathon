@@ -61,7 +61,8 @@ Foam::agentRotatingWallVelocityFvPatchVectorField::
       gen_(seed_),
       omega_(0.0),
       omega_old_(0.0),
-      control_time_(0.0)
+      control_time_(0.0),
+      update_omega_(true)
 {
     if (dict.found("value"))
     {
