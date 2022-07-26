@@ -1,10 +1,11 @@
 
-from python.buffer import LocalBuffer
-from python.agent import PPOAgent
-from python.environment import RotatingCylinder2D
+from src.python.buffer import LocalBuffer
+from src.python.agent import PPOAgent
+from src.python.environment import RotatingCylinder2D
 import pickle
 from shutil import copytree
 from os import makedirs
+from os.path import join
 import sys
 
 sys.path.insert(0, "src")
@@ -37,7 +38,7 @@ def main():
              join(training_path, "base"), dirs_exist_ok=True)
     env = RotatingCylinder2D()
     env.path = join(training_path, "base")
-    env.end_time = 6
+    env.end_time = 6.0
     env.reset()
 
     # create a trajectory buffer
@@ -52,7 +53,7 @@ def main():
         buffer.fill()
         states, actions, rewards, log_p = buffer.sample()
         print_statistics(actions, rewards)
-        with open(join(training_path, f"observations_e{e}.pkl")) as f:
+        with open(join(training_path, f"observations_e{e}.pkl"), "wb") as f:
             pickle.dump((states, actions, rewards, log_p), f)
         agent.update(states, actions, rewards, log_p)
         buffer.reset()
@@ -61,7 +62,7 @@ def main():
                    join(training_path, f"value_{e}.pt"))
 
     # save statistics
-    with open(join(training_path, "training_history.pkl")) as f:
+    with open(join(training_path, "training_history.pkl"), "wb") as f:
         pickle.dump(agent.history, f)
 
 
