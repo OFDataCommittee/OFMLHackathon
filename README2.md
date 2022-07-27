@@ -42,7 +42,7 @@ For the other python scripts used here in the repository:
 ### File structure
 
 ```
-physics-based-dl/
+physics-based-dl-solution-03-4/
 ---applications/
    ---pinnFoam
    ---pinnFoamSetSphere
