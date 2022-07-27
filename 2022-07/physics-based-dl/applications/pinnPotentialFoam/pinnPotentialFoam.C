@@ -325,7 +325,7 @@ int main(int argc, char *argv[])
 
         std::cout << "Epoch = " << epoch << "\n"
             << "DATA_MSE = " << mse_data.item<double>() << "\n"
-            << "U MSE = " << mse_grad.item<double>() << "\n"
+            << "RESIDUAL MSE = " << mse_grad.item<double>() << "\n"
             << "Training MSE = " << mse.item<double>() << "\n";
 
         std::cout << at::size(Ux_predict_grad[0],0) << at::size(Uy_predict_grad[0],0) << at::size(Uz_predict_grad[0],0) << at::size(Phi_predict_grad[0],0) << "\n";
