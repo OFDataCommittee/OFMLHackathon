@@ -86,13 +86,13 @@ physics-based-dl-solution-03-4/
    ---<Other schematic plots>.png 
 ---plots/
    ---<loss convergence plots>.png
-   ---dnn/<Flow field plots>.png (PENDING)
-   ---pinn/<Flow field plots>.png (PENDING)
+   ---dnn/<Flow field plots>.png
+   ---pinn/<Flow field plots>.png
 ---README.md
 ---Allrun
 ---Allmake
 ---Allclean
----Presentation.pdf (PENDING)
+---Presentation.pdf
 ---ProjectReport.pdf (PENDING)
 ```
 The `draw.io` file contains the modifiable source for all the schematics gerated for this project. 
