@@ -1,0 +1,15 @@
+EXE_INC = \
+    -std=c++2a \
+    -DAI_DEBUG \
+    -Wno-deprecated-declarations -Wno-old-style-cast -Wno-redundant-move \
+    -I$(OF_TORCH) \
+    -I$(OF_TORCH_INCLUDE) \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude 
+
+EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -lfiniteVolume \
+    -lmeshTools \
+    -Wl,-rpath=$(OF_TORCH_LIB) $(OF_TORCH_LIB)/libtorch.so 
+    
