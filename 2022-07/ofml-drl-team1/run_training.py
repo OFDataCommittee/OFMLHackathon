@@ -7,9 +7,12 @@ from shutil import copytree
 from os import makedirs
 from os.path import join
 import sys
+from src.python.agent import FCPolicy
+import torch as pt
 
 sys.path.insert(0, "src")
 
+pt.set_default_tensor_type(pt.DoubleTensor)
 
 def print_statistics(actions, rewards):
     rt = [r.mean().item() for r in rewards]
@@ -60,6 +63,8 @@ def main():
         buffer.update_policy(agent.trace_policy())
         agent.save(join(training_path, f"policy_{e}.pt"),
                    join(training_path, f"value_{e}.pt"))
+        script = agent.trace_policy()
+        script.save(join(training_path, f"of_policy_{e}.pt"))
 
     # save statistics
     with open(join(training_path, "training_history.pkl"), "wb") as f:
