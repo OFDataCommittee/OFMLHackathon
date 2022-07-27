@@ -35,15 +35,15 @@ class SlurmBuffer(Buffer):
     def write_jobfile(self, core_count, job_name, file, job_dir):
         with open(join(job_dir, "jobscript.sh"), 'w') as rsh:
             rsh.write(f"""#!/bin/bash -l        
-#SBATCH --partition=standard
+##SBATCH --partition=standard
 #SBATCH --output=R-%x.%j.out
 #SBATCH --error=R-%x.%j.err
-#SBATCH --nodes=1
-#SBATCH --time=01:00:00
+#SBATCH --time=00:15:00
 #SBATCH --job-name={job_name}
-#SBATCH --ntasks-per-node={core_count}
-module load singularity/3.6.0rc2
-module load mpi/openmpi/4.0.1/cuda_aware_gcc_6.3.0
+#SBATCH --ntasks={core_count}
+
+# Load OpenFoam
+source /fsx/OpenFOAM/OpenFOAM-v2206/etc/bashrc
 cd {job_dir}
 {file}
 """)
@@ -124,10 +124,10 @@ cd {job_dir}
             env: Environment where the case is run
         Returns: execution of OpenFOAM Allrun file in machine
         """
-        self.write_jobfile(env.mpi_ranks, job_name=f'traj_{buffer_counter}', file=env.run_script, job_dir=env.path)
+        self.write_jobfile(env.mpi_ranks, job_name=f'traj_{buffer_counter}', file=env.run_script, job_dir=join(os.getcwd(), env.path))
         jobfile_path = './jobscript.sh'
 
         # executing Allrun to start trajectory
-        proc[buffer_counter] = subprocess.Popen(['sh', 'submit_job.sh', jobfile_path], cwd=f'{join(os.getcwd(), env.path)}')
+        proc[buffer_counter] = subprocess.Popen(['bash', 'submit.slm', jobfile_path], cwd=f'{join(os.getcwd(), env.path)}')
         _thread.start_new_thread(self.process_waiter,
                                  (proc[buffer_counter], f"runner_{buffer_counter}", results))

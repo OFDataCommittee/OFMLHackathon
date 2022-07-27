@@ -26,10 +26,10 @@ def main():
 
     # setting
     training_path = "test_training"
-    episodes = 50
-    buffer_size = 8
-    n_runners = 4
-    end_time = 5.0
+    episodes = 10
+    buffer_size = 10
+    n_runners = 10
+    end_time = 10.0
 
     # create a directory for training
     makedirs(training_path, exist_ok=True)
