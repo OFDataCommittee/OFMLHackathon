@@ -300,7 +300,11 @@ int main(int argc, char *argv[])
         
         auto laplacePhi = Phi_predict_grad_x_grad[0].index({Slice(), 0}) + Phi_predict_grad_y_grad[0].index({Slice(), 1}) + Phi_predict_grad_z_grad[0].index({Slice(), 2});
         // Compute the data mse loss.
-        auto mse_data = mse_loss(O_predict, O_training);
+        
+        // O = [ux, uy, uz, Phi], O_pred = [Ux_nn, Uy_nn, Uz_nn, Phi_nn], Mse_data = Sum(Ux - Ux_nn)^2 / N_mesh + Sum(Uy - Uy_nn)^2 / N_mesh + Sum(Uz - Uz_nn)^2 / N_mesh + Sum(Phi - Phi_nn)^2 / N_mesh
+        // O - N \times 4 - 4N elements in the entire tensor
+        // O = [ux, uy, uz, Phi], O_pred = [Ux_nn, Uy_nn, Uz_nn, Phi_nn], Mse_data = Sum(O[:,:] - O_nn[:,:])^2 / 4N_mesh 
+        auto mse_data = 4*mse_loss(O_predict, O_training);  
       //  );
         
         // div.grad(Phi) - div.U = 0
@@ -324,7 +328,7 @@ int main(int argc, char *argv[])
   //        << "U MSE = " << mse_U.item<double>() << "\n"
             << "Training MSE = " << mse.item<double>() << "\n";
 
-
+        std::cout << at::size(mse_data,0)<<"\n";
         std::cout << at::size(Ux_predict_grad[0],0) << at::size(Uy_predict_grad[0],0) << at::size(Uz_predict_grad[0],0) << at::size(Phi_predict_grad[0],0) << "\n";
         // Write the hiddenLayers_ network structure as a string-formatted python list.
         
@@ -412,6 +416,8 @@ int main(int argc, char *argv[])
     Phi_nn.write();
     error_U.write();
     U_nn.write();
+    
+    
     //vf_nn_grad.write();
     //vf_grad.write();
     //error_grad_c.write();
