@@ -3,7 +3,7 @@ from os.path import join
 import os
 from shutil import copytree
 from copy import deepcopy
-<<<<<<< HEAD
+
 from subprocess import Popen
 from _thread import start_new_thread
 from queue import Queue
@@ -11,18 +11,6 @@ import torch as pt
 from .buffer import Buffer
 import numpy as np
 from ..environment import Environment
-=======
-import subprocess
-import _thread
-import queue
-import torch as pt
-from .buffer import Buffer
-import numpy as np
-<<<<<<< HEAD
->>>>>>> Initial implementation of fill_buffer to get minimal working example running
-=======
-from ..environment import Environment
->>>>>>> Running version of buffer.fill() method and bugfixes to get the case running
 
 
 class LocalBuffer(Buffer):
