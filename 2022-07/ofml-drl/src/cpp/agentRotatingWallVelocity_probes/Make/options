@@ -1,0 +1,15 @@
+EXE_INC = \
+    -std=c++2a \
+    -Wno-deprecated-declarations -Wno-old-style-cast -Wno-redundant-move \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude \
+    -I$(OFML_DRL_TORCH)/include \
+    -I$(OFML_DRL_TORCH)/include/torch/csrc/api/include
+
+LIB_LIBS = \
+    -lfiniteVolume \
+    -rdynamic \
+    -Wl,-rpath,$(OFML_DRL_TORCH)/lib $(OFML_DRL_TORCH)/lib/libtorch.so $(OFML_DRL_TORCH)/lib/libc10.so \
+    -Wl,--no-as-needed,$(OFML_DRL_TORCH)/lib/libtorch_cpu.so \
+    -Wl,--as-needed $(OFML_DRL_TORCH)/lib/libc10.so \
+    -Wl,--no-as-needed,$(OFML_DRL_TORCH)/lib/libtorch.so
