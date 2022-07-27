@@ -249,20 +249,10 @@ int main(int argc, char *argv[])
            {vf_predict},//N_{train} x 1
            {cc_training}, // N_{train} x 3
            {torch::ones_like(vf_training)}, // N_{train} x 1
-           true,
            true
         );
 
         
-        auto vf_predict_grad_grad = torch::autograd::grad(
-           {vf_predict_grad[0]},//N_{train} x 3
-           {cc_training}, // N_{train} x 3
-           {torch::ones_like(vf_predict_grad[0])}, // N_{train} x 1
-           true,
-           true
-        );
-        
-                
         //printDimensions(vf_predict_grad);
         // Compute the data mse loss.
         auto mse_data = mse_loss(vf_predict, vf_training);
@@ -286,7 +276,7 @@ int main(int argc, char *argv[])
             << "Training MSE = " << mse.item<double>() << "\n";
         
         
-        std::cout << "Size = " << at::size(vf_predict_grad_grad[0], 0) << "\n" << "Size = " << at::size(vf_predict_grad_grad[0], 1) << "\n";
+        //std::cout << "Size = " << at::size(vf_predict_grad[0], 0) << "\n" << "Size = " << at::size(vf_predict_grad[0], 1) << "\n";
         //std::cout << "Size = " << at::size(vf_predict_grad[0], 2) << "\n" << endl; 
         
         // Write the hiddenLayers_ network structure as a string-formatted python list.
