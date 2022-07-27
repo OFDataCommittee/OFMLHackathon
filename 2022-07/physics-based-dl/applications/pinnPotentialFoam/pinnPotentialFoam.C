@@ -325,7 +325,7 @@ int main(int argc, char *argv[])
 
         std::cout << "Epoch = " << epoch << "\n"
             << "DATA_MSE = " << mse_data.item<double>() << "\n"
-  //        << "U MSE = " << mse_U.item<double>() << "\n"
+            << "U MSE = " << mse_grad.item<double>() << "\n"
             << "Training MSE = " << mse.item<double>() << "\n";
 
         std::cout << at::size(mse_data,0)<<"\n";
@@ -339,11 +339,12 @@ int main(int argc, char *argv[])
             dataFile << hiddenLayers[i] << ",";
         dataFile  << hiddenLayers[hiddenLayers.size() - 1]
             << "\"" << ",";
+       
         // Write the rest of the data.
         dataFile << optimizerStep << "," << maxIterations << ","
             << delta_x << "," << epoch << ","
             << mse_data.item<double>() << ","
-        //    << mse_U.item<double>() << ","
+            << mse_grad.item<double>() << ","
             << mse.item<double>() << std::endl;
 
         if (mse.item<double>() < min_mse)
@@ -405,10 +406,10 @@ int main(int argc, char *argv[])
   //  volScalarField error_grad_c ("error_grad_c", Foam::mag(vf_grad - vf_nn_grad));
 
 
-    Info << "max(|field - field_nn|) = " << error_Phi_inf << endl;
-    Info << "mean(|field - field_nn|) = " << error_Phi_mean << endl;
-    Info << "max(|field - field_nn|) = " << error_U_inf << endl;
-    Info << "mean(|field - field_nn|) = " << error_U_mean << endl;
+    Info << "max(|Phi - Phi_nn|) = " << error_Phi_inf << endl;
+    Info << "mean(|Phi - Phi_nn|) = " << error_Phi_mean << endl;
+    Info << "max(|U - U_nn|) = " << error_U_inf << endl;
+    Info << "mean(|U - U_nn|) = " << error_U_mean << endl;
 
 
     // Write fields
