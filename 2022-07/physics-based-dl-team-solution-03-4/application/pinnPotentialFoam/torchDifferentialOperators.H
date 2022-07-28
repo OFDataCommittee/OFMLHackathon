@@ -46,7 +46,6 @@ namespace AI {
  *  \param[in] input The input field.
  *  \return The divergence of the input field.
  */
-
 torch::Tensor
 div(const torch::Tensor& vel_vec,
     const torch::Tensor& input);
@@ -59,7 +58,6 @@ div(const torch::Tensor& vel_vec,
  *  \return The divergence of the input field.
  * \overload
  */
-
 torch::Tensor
 div(const torch::Tensor& u,
     const torch::Tensor& v,
