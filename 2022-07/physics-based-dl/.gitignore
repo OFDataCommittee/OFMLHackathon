@@ -1,0 +1,99 @@
+# git-ls-files --others --exclude-from=.git/info/exclude
+# Lines that start with '#' are comments.
+
+# Editor and misc backup files - anywhere
+*~
+.*~
+.*.swp
+*.bak
+*.bak[0-9][0-9]
+\#*\#
+
+# File-browser settings - anywhere
+.directory
+
+# Backup/recovery versions - anywhere
+.#*
+
+# Objects and archives - anywhere
+*.[oa]
+*.la
+*.so
+
+# Derived files
+lex.yy.c
+
+# Core dumps
+core
+
+# Dependency files - anywhere
+*.dep
+
+# lnInclude (symlink) directories - anywhere
+lnInclude
+
+# Build directories - anywhere
+linux*Clang*/
+linux*Gcc*/
+linux*Icc*/
+solaris*Gcc*/
+SunOS*Gcc*/
+platforms/
+
+# Top-level build directories
+/build/
+/platforms/
+
+# Reinstate wmake rules that might look like build directories
+!/wmake/rules/*/
+
+# Doxygen generated
+doc/Doxygen/html
+doc/Doxygen/latex
+doc/Doxygen/man
+doc/Doxygen/DTAGS
+
+# Generated files in the main and doc directories
+/*.html
+/doc/*.html
+
+# Untracked configuration/preferences files
+/etc/prefs.csh
+/etc/prefs.sh
+/etc/config.csh/prefs.*
+/etc/config.sh/prefs.*
+/wmake/rules/General/mplibUSER*
+
+# Source packages - anywhere
+*.tar.bz2
+*.tar.gz
+*.tar.xz
+*.tar
+*.tgz
+*.gtgz
+
+# Ignore tags or project files in the main directory
+/.cproject
+/.dir-locals.el
+/.project
+/.tags
+
+# Processing and result data 
+
+PyFoam*
+polyMesh/
+*.vtk
+*.vtp
+*.vtu
+*.foam
+VTK/
+log*
+Data_*
+*.csv
+*.json
+*.pdf
+.vscode/
+uniform/
+*_00*_*/
+libtorch*/
+*.zip
