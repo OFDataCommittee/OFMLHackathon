@@ -40,7 +40,7 @@ cd {job_dir}
             try:
                 p = Popen(['squeue', '-j', f"{job_id}"], stdout=PIPE)
                 jobstatus = str(p.stdout.read(), 'utf-8').split()[12]
-                if jobstatus=='PD' or jobstatus=='R':
+                if jobstatus=='PD' or jobstatus=='R' or jobstatus=='CF':
                     sleep(5)
                 else:
                     queue.put((job_name, '0'))

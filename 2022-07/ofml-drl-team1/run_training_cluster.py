@@ -24,12 +24,14 @@ def print_statistics(actions, rewards):
 
 def main():
 
-
+    loc = sys.argv[1]
+    tim = sys.argv[2]
+    buf = sys.argv[3]
     # setting
-    training_path = f"{os.getcwd()}/test_training"
+    training_path = f"{os.getcwd()}/"+str(loc)
     epochs = 50
-    buffer_size = 8
-    n_runners = 8
+    buffer_size = int(buf)
+    n_runners = int(buf)
 
     # create a directory for training
     makedirs(training_path, exist_ok=True)
@@ -39,7 +41,7 @@ def main():
              join(training_path, "base"), dirs_exist_ok=True)
     env = RotatingCylinder2D()
     env.path = join(training_path, "base")
-    env.end_time = 10.0
+    env.end_time = float(tim)
     env.action_bounds = 5.0
     env.reset()
 
