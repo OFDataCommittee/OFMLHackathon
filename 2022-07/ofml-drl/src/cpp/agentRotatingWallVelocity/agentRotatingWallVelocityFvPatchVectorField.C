@@ -29,6 +29,10 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "functionObjectList.H"
+#include "fvMeshFunctionObject.H"
+
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -62,7 +66,9 @@ Foam::agentRotatingWallVelocityFvPatchVectorField::
       omega_(0.0),
       omega_old_(0.0),
       control_time_(0.0),
-      update_omega_(false)
+      update_omega_(false),
+      observation_source_(dict.getOrDefault<word>("observationSource", "patch")),
+      probes_name_(dict.getOrDefault<word>("probesDictName", "probes"))       
 {
    /* if (dict.found("value"))
     {
@@ -99,7 +105,9 @@ Foam::agentRotatingWallVelocityFvPatchVectorField::
       omega_(ptf.omega_),
       omega_old_(ptf.omega_old_),
       control_time_(ptf.control_time_),
-      update_omega_(ptf.update_omega_)
+      update_omega_(ptf.update_omega_),
+      observation_source_(ptf.observation_source_),
+      probes_name_(ptf.probes_name_)  
 {
 }
 
@@ -121,7 +129,9 @@ Foam::agentRotatingWallVelocityFvPatchVectorField::
       omega_(rwvpvf.omega_),
       omega_old_(rwvpvf.omega_old_),
       control_time_(rwvpvf.control_time_),
-      update_omega_(rwvpvf.update_omega_)
+      update_omega_(rwvpvf.update_omega_),
+      observation_source_(rwvpvf.observation_source_),
+      probes_name_(rwvpvf.probes_name_)  
 {
 }
 
@@ -144,7 +154,10 @@ Foam::agentRotatingWallVelocityFvPatchVectorField::
       omega_(rwvpvf.omega_),
       omega_old_(rwvpvf.omega_old_),
       control_time_(rwvpvf.control_time_),
-      update_omega_(rwvpvf.update_omega_)
+      update_omega_(rwvpvf.update_omega_),
+      observation_source_(rwvpvf.observation_source_),
+      probes_name_(rwvpvf.probes_name_)  
+      
 {
 }
 
@@ -173,7 +186,29 @@ void Foam::agentRotatingWallVelocityFvPatchVectorField::updateCoeffs()
             omega_old_ = omega_;
             control_time_ = t;
 
-            const fvPatchField<scalar> &p = patch().lookupPatchField<volScalarField, scalar>("p");
+            Foam::Field<scalar> p;
+
+            //const fvPatchField<scalar> &p = 
+
+            if (observation_source_ == "patch")
+            {
+                p = patch().lookupPatchField<volScalarField, scalar>("p");
+            }
+            else if (observation_source_ == "probes")
+            {
+                const volScalarField& pressureData = this->db().lookupObject<volScalarField>("p"); 
+                const Foam::functionObject& probeObjFunc = getFunctionObject(probes_name_);
+                const Foam::probes& probeData = dynamic_cast<const Foam::probes&>(probeObjFunc);
+                p = probeData.sample(pressureData);
+            }
+            else 
+            {
+                FatalError << "Uknown observation source: " << observation_source_  << nl
+                << "observationSource options: \"patch\" or \"probes\" " << nl << exit(FatalError);
+            }
+            //const Foam::Field<Foam::scalar> p = probeData.sample(pressureData);
+            
+
             // Create lists of the variables on each processor so that they can be gathered onto the master processor later.
             List<scalar> pList(p.size());
 
@@ -285,6 +320,8 @@ void Foam::agentRotatingWallVelocityFvPatchVectorField::write(Ostream &os) const
     os.writeEntry("train", train_);
     os.writeEntry("absOmegaMax", abs_omega_max_);
     os.writeEntry("seed", seed_);
+    os.writeEntry("observationSource", observation_source_);
+    os.writeEntry("probesDictName", probes_name_);
     //writeEntry("value", os);
 }
 
@@ -313,6 +350,21 @@ void Foam::agentRotatingWallVelocityFvPatchVectorField::saveTrajectory(scalar lo
     {
         trajectory << ", " << pvec[i];
     }
+}
+
+const Foam::functionObject& Foam::agentRotatingWallVelocityFvPatchVectorField::getFunctionObject(Foam::word name) const
+{
+    const Foam::functionObjectList& fObjects = this->db().time().functionObjects();
+    
+    forAll (fObjects, fI)
+    {
+        if (fObjects[fI].name() == name)
+        {
+            return fObjects[fI];
+        }
+    }
+    fObjects.list();
+    FatalError << "function object " << name << " cannot be found" << nl << exit(FatalError);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
