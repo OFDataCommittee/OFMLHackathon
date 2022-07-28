@@ -37,6 +37,7 @@ def main():
     env = RotatingCylinder2D()
     env.path = join(training_path, "base")
     env.end_time = end_time
+    env.action_bounds = 5
     env.reset()
 
     # create a trajectory buffer
