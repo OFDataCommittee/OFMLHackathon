@@ -34,7 +34,7 @@ class SlurmBuffer(Buffer):
 
     def write_jobfile(self, core_count, job_name, file, job_dir):
         with open(join(job_dir, "jobscript.sh"), 'w') as rsh:
-            rsh.write(f"""#!/bin/bash -l        
+            rsh.write(f"""#!/bin/bash -l
 ##SBATCH --partition=standard
 #SBATCH --output=R-%x.%j.out
 #SBATCH --error=R-%x.%j.err
@@ -54,7 +54,7 @@ cd {job_dir}
         # Set seed that each trajectory is different
         for i, env in enumerate(self._envs):
             env.seed = i
-        
+
         # run case
         # get status of trajectory
         results = queue.Queue()
@@ -89,7 +89,7 @@ cd {job_dir}
         for env in self._envs:
             states, actions, rewards, log_p = env.observations
             self._states.append(states)
-            self._actions.append(actions[:-1]) 
+            self._actions.append(actions[:-1])
             self._rewards.append(rewards)
             self._log_p.append(log_p[:-1])
 

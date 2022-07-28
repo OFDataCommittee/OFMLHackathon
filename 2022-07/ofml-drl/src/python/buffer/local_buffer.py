@@ -3,7 +3,6 @@ from os.path import join
 import os
 from shutil import copytree
 from copy import deepcopy
-
 from subprocess import Popen
 from _thread import start_new_thread
 from queue import Queue
