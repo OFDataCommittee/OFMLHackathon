@@ -1,0 +1,16 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+#canCompile || exit 0    # Dynamic code
+
+#restore0Dir
+cp -r  0_OF_orig 0 
+runApplication blockMesh
+
+runApplication $(getApplication) #-withFunctionObjects -writePhi -writephi -writep
+
+#runApplication postProcess -func streamFunction
+
+#------------------------------------------------------------------------------
