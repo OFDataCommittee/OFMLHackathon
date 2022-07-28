@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# set environment variables
+export OFML_DRL="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export OFML_DRL_TORCH=$OFML_DRL/libtorch
