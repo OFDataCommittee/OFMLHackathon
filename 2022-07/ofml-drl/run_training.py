@@ -7,18 +7,10 @@ from shutil import copytree
 import os
 from os import makedirs
 from os.path import join
-<<<<<<< HEAD
-=======
-import sys
->>>>>>> origin/main
 from typing import List
 from torch import Tensor
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/main
 def print_statistics(actions: List[Tensor], rewards: List[Tensor]):
     rt = [r.mean().item() for r in rewards]
     at_mean = [a.mean().item() for a in actions]
@@ -47,12 +39,8 @@ def main():
              join(training_path, "base"), dirs_exist_ok=True)
     env = RotatingCylinder2D()
     env.path = join(training_path, "base")
-<<<<<<< HEAD
     env.end_time = end_time
     env.action_bounds = 5
-=======
-    env.end_time = 6.
->>>>>>> origin/main
     env.reset()
 
     # create a trajectory buffer
@@ -69,13 +57,8 @@ def main():
         print("Buffer full")
         states, actions, rewards, log_p = buffer.sample()
         print_statistics(actions, rewards)
-<<<<<<< HEAD
         with open(join(training_path, f"observations_e{e}.pkl"), "wb") as f:
             pickle.dump((states, actions, rewards, log_p), f, protocol=pickle.HIGHEST_PROTOCOL)
-=======
-        with open(join(os.getcwd(), training_path, f"observations_e{e}.pkl"), 'wb') as f:
-            pickle.dump((states, actions, rewards, log_p), f)
->>>>>>> origin/main
         agent.update(states, actions, rewards, log_p)
         buffer.reset()
         buffer.update_policy(agent.trace_policy())
@@ -85,13 +68,8 @@ def main():
         current_policy.save(join(training_path, f"policy_trace_{e}.pt"))
 
     # save statistics
-<<<<<<< HEAD
     with open(join(training_path, "training_history.pkl"), "wb") as f:
         pickle.dump(agent.history, f, protocol=pickle.HIGHEST_PROTOCOL)
-=======
-    with open(join(training_path, "training_history.pkl"), 'wb') as f:
-        pickle.dump(agent.history, f)
->>>>>>> origin/main
 
 
 if __name__ == "__main__":
