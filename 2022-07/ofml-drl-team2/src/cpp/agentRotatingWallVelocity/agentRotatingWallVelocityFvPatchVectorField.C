@@ -188,27 +188,22 @@ void Foam::agentRotatingWallVelocityFvPatchVectorField::updateCoeffs()
 
             Foam::Field<scalar> p;
 
-            //const fvPatchField<scalar> &p = 
-
             if (observation_source_ == "patch")
             {
                 p = patch().lookupPatchField<volScalarField, scalar>("p");
             }
             else if (observation_source_ == "probes")
             {
-                const volScalarField& pressureData = this->db().lookupObject<volScalarField>("p"); 
                 const Foam::functionObject& probeObjFunc = getFunctionObject(probes_name_);
                 const Foam::probes& probeData = dynamic_cast<const Foam::probes&>(probeObjFunc);
-                p = probeData.sample(pressureData);
+                p = probeData.sample<scalar>("p");
             }
             else 
             {
                 FatalError << "Uknown observation source: " << observation_source_  << nl
                 << "observationSource options: \"patch\" or \"probes\" " << nl << exit(FatalError);
             }
-            //const Foam::Field<Foam::scalar> p = probeData.sample(pressureData);
             
-
             // Create lists of the variables on each processor so that they can be gathered onto the master processor later.
             List<scalar> pList(p.size());
 
@@ -230,23 +225,45 @@ void Foam::agentRotatingWallVelocityFvPatchVectorField::updateCoeffs()
             {
                 // creating the feature vector
                 int size = 0;
-                for (int i = 0; i < gatheredValues.size(); i++)
+
+                if (observation_source_ == "patch")
                 {
-                    size += gatheredValues[i].size();
+                    for (int i = 0; i < gatheredValues.size(); i++)
+                    {
+                        size += gatheredValues[i].size();
+                    }
                 }
+                else if (observation_source_ == "probes")
+                {
+                    size = p.size();
+                }
+
 
                 torch::Tensor features = torch::zeros({ 1, size }, torch::kFloat64);
                 int k = 0;
                 std::vector<scalar> pvec(size);
-                for (int i = 0; i < gatheredValues.size(); i++)
+
+                if (observation_source_ == "patch")
                 {
-                    for (int j = 0; j < gatheredValues[i].size(); j++)
+                    for (int i = 0; i < gatheredValues.size(); i++)
                     {
-                        features[0][k] = gatheredValues[i][j];
-                        pvec[k] = gatheredValues[i][j];
-                        k++;
+                        for (int j = 0; j < gatheredValues[i].size(); j++)
+                        {
+                            features[0][k] = gatheredValues[i][j];
+                            pvec[k] = gatheredValues[i][j];
+                            k++;
+                        }
                     }
                 }
+                else if (observation_source_ == "probes")
+                {
+                    for (int i = 0; i < pList.size(); i++)
+                    {
+                        features[0][i] = pList[i];
+                        pvec[i] = pList[i];
+                    }
+                }
+
                 std::vector<torch::jit::IValue> policyFeatures{features};
                 torch::Tensor dist_parameters = policy_.forward(policyFeatures).toTensor();
                 scalar alpha = dist_parameters[0][0].item<double>();
