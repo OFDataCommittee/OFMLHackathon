@@ -18,7 +18,7 @@ The workshop is **fully virtual**. There is no geographical restriction for part
 ## Time line
 
 - **Nov 11, 2022**: start of the application process
-- **Dev 31, 2022**: end of the application process
+- **Dec 31, 2022**: end of the application process
 - **Jan 09, 2023**: feedback on the applications
 - **Jan 23-25, 2023**: 2nd hackathon
 
