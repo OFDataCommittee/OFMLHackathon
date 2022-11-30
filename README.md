@@ -26,7 +26,7 @@ A detailed schedule will be provided at the beginning of the hackathon. Note tha
 
 ## How can I participate?
 
-Since we aim to provide all participants with close support during the hackathon, the number of participants is limited to **20**. Applications are accepted until **Nov 22, 2022**. There are **no registration fees** or other costs. We can also provide compute resources thanks to AWS, so you do not need any specialized hardware. Admission is not guaranteed. Based on all applications, we will select the most suitable candidates.
+Since we aim to provide all participants with close support during the hackathon, the number of participants is limited to **20**. Applications are accepted until **Dec 31, 2022**. There are **no registration fees** or other costs. We can also provide compute resources thanks to AWS, so you do not need any specialized hardware. Admission is not guaranteed. Based on all applications, we will select the most suitable candidates.
 
 [Apply here](https://forms.gle/DkZCe4JHcExmXpdz9)
 
