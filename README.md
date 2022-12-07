@@ -30,7 +30,7 @@ Since we aim to provide all participants with close support during the hackathon
 
 [Apply here](https://forms.gle/DkZCe4JHcExmXpdz9)
 
-## Projects for the 2nd hackathon Nov 28-30, 2022
+## Projects for the 2nd hackathon Jan 23-25, 2023
 
 - Combining OpenFOAM and physics-based machine learning with Nvidia [Modulus](https://developer.nvidia.com/modulus); refer to the Modulus [user guide](https://docs.nvidia.com/deeplearning/modulus/index.html) to prepare for this project
 - Coupling OpenFOAM and machine learning libraries via [SmartSim](https://github.com/CrayLabs/SmartSim); the goal of this project is to perform online inference and data extraction during the simulation; the test case is based on [this work](https://github.com/AndreWeiner/sgs_model_test_transient); moreover, [this example](https://github.com/CrayLabs/smartsim-openFOAM) provides some guidance for the OpenFOAM-SmartSim coupling
