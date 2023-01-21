@@ -97,7 +97,7 @@ class PPOAgent(Agent):
             # check KL-divergence
             with pt.no_grad():
                 log_p, _ = self._policy.predict(states, actions)
-                kl = (logp_old - log_p).sum()
+                kl = (logp_old - log_p).mean()
                 kl_.append(kl.item())
                 if kl.item() > self._policy_kl_stop:
                     print(f"Stopping policy training after {e} epochs due to KL-criterion.")
