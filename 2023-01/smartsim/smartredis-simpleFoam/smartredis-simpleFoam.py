@@ -16,8 +16,8 @@ print(f"Creating database on  port {db.ports}")
 # by default, SmartSim never blocks execution after the database is launched.
 exp.start(db)
 
+# Print some sutff because it might take a while
 print('DB started...')
-
 
 blockMesh_settings = exp.create_run_settings(exe="blockMesh", 
                                             exe_args=f"-case {openfoam_case}")
