@@ -148,6 +148,7 @@ SourceFiles
 #define smartSimFunctionObject_H
 
 #include "fvMeshFunctionObject.H"
+#include "client.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -166,18 +167,11 @@ class smartSimFunctionObject
 {
     // Private Data
 
-        //- bool
-        bool boolData_;
-
-        //- label
-        label labelData_;
-
-        //- word
-        word wordData_;
-
-        //- scalar
-        scalar scalarData_;
-
+        //- Set to false if not using a clustered database 
+        bool clusterMode_;
+        
+        //- SmartRedis Database Client
+        SmartRedis::Client client_;
 
 public:
 
