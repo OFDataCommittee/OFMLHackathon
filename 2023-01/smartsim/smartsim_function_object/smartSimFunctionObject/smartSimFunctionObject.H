@@ -148,6 +148,8 @@ SourceFiles
 #define smartSimFunctionObject_H
 
 #include "fvMeshFunctionObject.H"
+#include "client.h"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
