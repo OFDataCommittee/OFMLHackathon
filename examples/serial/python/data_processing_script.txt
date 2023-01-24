@@ -1,0 +1,5 @@
+def pre_process(inp):
+    mean = torch.zeros(1).float().to(inp.device)
+    mean[0] = 2.0
+    temp = inp.float() * mean
+    return temp
