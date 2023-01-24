@@ -81,4 +81,5 @@ doc/Doxygen/DTAGS
 # Ignore the test directory
 /tutorialsTest
 polyMesh/
-
+*.out
+*.err
