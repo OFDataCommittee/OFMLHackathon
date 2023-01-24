@@ -30,6 +30,10 @@ License
 #include "fvMesh.H"
 #include "addToRunTimeSelectionTable.H"
 
+#include <vector>
+#include <string>
+
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -52,10 +56,8 @@ Foam::functionObjects::smartSimFunctionObject::smartSimFunctionObject
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    boolData_(dict.getOrDefault<bool>("boolData", true)),
-    labelData_(dict.get<label>("labelData")),
-    wordData_(dict.getOrDefault<word>("wordData", "defaultWord")),
-    scalarData_(dict.getOrDefault<scalar>("scalarData", 1.0))
+    clusterMode_(dict.getOrDefault<bool>("clusterMode", true)),
+    client_(clusterMode_)
 {
     read(dict);
 }
@@ -65,11 +67,7 @@ Foam::functionObjects::smartSimFunctionObject::smartSimFunctionObject
 
 bool Foam::functionObjects::smartSimFunctionObject::read(const dictionary& dict)
 {
-    dict.readEntry("boolData", boolData_);
-    dict.readEntry("labelData", labelData_);
-    dict.readIfPresent("wordData", wordData_);
-    dict.readEntry("scalarData", scalarData_);
-
+    dict.readEntry("clusterMode", clusterMode_);
     return true;
 }
 
@@ -77,6 +75,56 @@ bool Foam::functionObjects::smartSimFunctionObject::read(const dictionary& dict)
 bool Foam::functionObjects::smartSimFunctionObject::execute()
 {
     Info << "Executing SmartSim FunctionObject" << endl;
+    
+    // Initialize tensor dimensions
+    size_t dim1 = 3;
+    size_t dim2 = 2;
+    size_t dim3 = 5;
+    std::vector<size_t> dims = {3, 2, 5};
+
+    // Initialize a tensor to random values.  Note that a dynamically
+    // allocated tensor via malloc is also useable with the client
+    // API.  The std::vector is used here for brevity.
+    size_t n_values = dim1 * dim2 * dim3;
+    std::vector<double> input_tensor(n_values, 0);
+    for(size_t i=0; i<n_values; i++)
+        input_tensor[i] = 2.0*rand()/RAND_MAX - 1.0;
+
+    // Put the tensor in the database
+    std::string key = "3d_tensor";
+    client_.put_tensor(key, input_tensor.data(), dims,
+                      SRTensorTypeDouble, SRMemLayoutContiguous);
+
+    // Retrieve the tensor from the database using the unpack feature.
+    std::vector<double> unpack_tensor(n_values, 0);
+    client_.unpack_tensor(key, unpack_tensor.data(), {n_values},
+                        SRTensorTypeDouble, SRMemLayoutContiguous);
+
+    // Print the values retrieved with the unpack feature
+    std::cout<<"Comparison of the sent and "\
+                "retrieved (via unpack) values: "<<std::endl;
+    for(size_t i=0; i<n_values; i++)
+        std::cout<<"Sent: "<<input_tensor[i]<<" "
+                 <<"Received: "<<unpack_tensor[i]<<std::endl;
+
+
+    // Retrieve the tensor from the database using the get feature.
+    SRTensorType get_type;
+    std::vector<size_t> get_dims;
+    void* get_tensor;
+    client_.get_tensor(key, get_tensor, get_dims, get_type, SRMemLayoutNested);
+
+    // Print the values retrieved with the unpack feature
+    std::cout<<"Comparison of the sent and "\
+                "retrieved (via get) values: "<<std::endl;
+    for(size_t i=0, c=0; i<dims[0]; i++)
+        for(size_t j=0; j<dims[1]; j++)
+            for(size_t k=0; k<dims[2]; k++, c++) {
+                std::cout<<"Sent: "<<input_tensor[c]<<" "
+                         <<"Received: "
+                         <<((double***)get_tensor)[i][j][k]<<std::endl;
+    }
+
     return true;
 }
 
