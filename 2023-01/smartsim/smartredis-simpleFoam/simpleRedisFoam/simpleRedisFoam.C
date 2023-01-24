@@ -24,42 +24,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    simpleFoam
-
-Group
-    grpIncompressibleSolvers
+    simpleRedisFoam
 
 Description
-    Steady-state solver for incompressible, turbulent flows.
-
-    \heading Solver details
-    The solver uses the SIMPLE algorithm to solve the continuity equation:
-
-        \f[
-            \div \vec{U} = 0
-        \f]
-
-    and momentum equation:
-
-        \f[
-            \div \left( \vec{U} \vec{U} \right) - \div \gvec{R}
-          = - \grad p + \vec{S}_U
-        \f]
-
-    Where:
-    \vartable
-        \vec{U} | Velocity
-        p       | Pressure
-        \vec{R} | Stress tensor
-        \vec{S}_U | Momentum source
-    \endvartable
-
-    \heading Required fields
-    \plaintable
-        U       | Velocity [m/s]
-        p       | Kinematic pressure, p/rho [m2/s2]
-        \<turbulence fields\> | As required by user selection
-    \endplaintable
+    simpleFoam with a connection to a Redis DB
 
 \*---------------------------------------------------------------------------*/
 
@@ -93,9 +61,11 @@ int main(int argc, char *argv[])
 
     turbulence->validate();
 
+    // Create Redis client
     Info<< "Creating SmartRedis client..." << endl;
     SmartRedis::Client client(false);
 
+    // Dimensions of communicated fields
     std::vector<size_t> dims = {1, 1, 1};
     dims[0] = mesh.nCells();
 
@@ -135,6 +105,8 @@ int main(int argc, char *argv[])
                             SRTensorTypeDouble,
                             SRMemLayoutContiguous);
 
+    // Check if fetched values reflect the real ones
+    // MAY BE verlunable to floating point issue, but who cares  
     bool isSame = true;
     forAll(p.internalField(), ci) {
         if (p.internalField()[ci] != unpack_p[ci]) {
