@@ -1,0 +1,28 @@
+
+[build-system]
+requires = ["setuptools>=42",
+            "wheel",
+            "cmake>=3.13"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+target-version = ['py37', 'py38']
+exclude = '''
+(
+  | \.egg
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.nox
+  | \.tox
+  | \.venv
+  | _build
+  | build
+  | dist
+  | setup.py
+)
+'''
+
+[tool.pytest.ini_options]
+log_cli = true
+log_cli_level = "debug"
