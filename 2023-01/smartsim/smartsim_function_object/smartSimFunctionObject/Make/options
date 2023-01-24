@@ -3,10 +3,11 @@ EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(FOAM_SMARTREDIS_INCLUDE) \
-    -I$(FOAM_SMARTREDIS_INCLUDE)/sw/redis++ \
+    -I$(FOAM_SMARTREDIS_DEP_INCLUDE)
 
 LIB_LIBS = \
     -L$(FOAM_SMARTREDIS_LIB) \
     -lfiniteVolume \
     -lmeshTools \
+    -L$(FOAM_SMARTREDIS_LIB) -lhiredis -lredis++ \
     -lsmartredis

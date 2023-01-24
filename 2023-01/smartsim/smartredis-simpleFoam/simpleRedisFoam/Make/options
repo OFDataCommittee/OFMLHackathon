@@ -1,5 +1,5 @@
 EXE_INC = \
-    -std=c++17 \
+    -Wno-old-style-cast \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/sampling/lnInclude \
@@ -19,5 +19,5 @@ EXE_LIBS = \
     -lincompressibleTurbulenceModels \
     -lincompressibleTransportModels \
     -latmosphericModels \
-    -L$(FOAM_SMARTREDIS_LIB) -l:libhiredis.a -l:libredis++.a \
+    -L$(FOAM_SMARTREDIS_LIB) -lhiredis -lredis++ \
     -L$(FOAM_SMARTREDIS_BUILD_LIB) -lsmartredis
