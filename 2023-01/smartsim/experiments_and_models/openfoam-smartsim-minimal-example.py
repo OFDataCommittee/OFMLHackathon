@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # This defines a smartsim experiment with a minimal workflow for the cavity case
 # - generate mesh with blockMesh, run the simpleFoam solver 
 from smartsim import Experiment
