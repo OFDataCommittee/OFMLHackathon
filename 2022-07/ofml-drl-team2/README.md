@@ -66,3 +66,17 @@ python3 -m run_training.py
   - use the [probes](https://www.openfoam.com/documentation/guides/latest/api/classFoam_1_1probes.html) functionObject to define a more general state
   - use a jet as actuation as done [here](https://github.com/jerabaul29/Cylinder2DFlowControlDRL)
 - one important question for applications is knowing the applicability of a policy under changed flow conditions, e.g., are we extrapolating in the feature space? Use a Bayesian network as policy to provide uncertainty bounds for the control
+
+## Hackathon Team
+
+This folder contains the final code of team 2 of the DRL challenge of the first OpenFoam + ML Hackathon.
+
+Members:
+- [Ajay Navilarekal Rajgopal](https://github.com/ajaynr)
+- [Darshan Thummar](https://github.com/darshan315)
+- [Mosayeb Shams](https://github.com/mosayebshams)
+- [Julian Bissantz](https://github.com/jbissantz/)
+
+## Acknowledgments
+
+We sincerely thank [Andre Weiner](https://github.com/AndreWeiner/) and [Tomislav Maric](https://github.com/tmaric) for the organisation of the event and their mentoring throughout the event.

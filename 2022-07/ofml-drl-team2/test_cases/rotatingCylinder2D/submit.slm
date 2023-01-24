@@ -1,0 +1,18 @@
+#!/bin/bash -l
+
+sentence=$(sbatch $1)              # get the output from sbatch
+
+jobid=$(echo -ne echo $sentence | awk -F ' ' '{print $5}')   # isolate the job ID
+sentence="$(squeue -j $jobid)"       		   # read job's slurm status
+stringarray=($sentence)
+jobstatus=(${stringarray[12]})            	   # isolate the status of job number jobid
+message=(${stringarray[10]})
+
+while [ "$jobstatus" = "R" ] || [ "$jobstatus" = "PD" ] || [ "$jobstatus" = "CF" ];
+do
+  # echo "waiting for $message ..."
+  sentence="$(squeue -j $jobid)"                     # read job's slurm status
+  stringarray=($sentence)
+  jobstatus=(${stringarray[12]})                     # isolate the status of job number jobid
+  sleep 03
+done

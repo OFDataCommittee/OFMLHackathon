@@ -6,43 +6,35 @@ Welcome to the *OpenFOAM machine learning hackathon* repository! The hackathon i
 
 A hackathon is an intensive get-together for creative problem solving in groups. The corner stones of the OpenFOAM-ML hackathon are as follows:
 
-- **objective**: we prepare 2-3 exciting projects combining recent ML techniques and OpenFOAM; the projects are diverse; for each project, a fully-functioning starter code is provided; your task is to advance the starter code in a self-chosen direction; we provide you with a couple of potential ideas
+- **objective**: we prepare 2-3 exciting projects combining recent ML techniques and OpenFOAM; the topics are diverse and change from event to event; for each project, a starter code is provided; your task is to advance the starter code in a self-chosen direction; we provide a couple of ideas to get you started
 - **time limit**: the hackathon consists of three full days of intense hacking
-- **team work**: each participant chooses the preferred project/starter code; within each project, the participants are split up into groups of 2-5 people
+- **team work**: each participant chooses the preferred project/starter code; within each project, the participants are split up into groups of 2-5 people; we aim for a minimum of one advanced hackathon participant per group to provide some guidance
 - **workshops**: for each project, a workshop introduces the starter code and a necessary minimum of theory
 - **hacking sessions**: the groups advance their projects; we aim to provide close mentor support for all groups via [gather.town](https://www.gather.town/) and [slack](https://slack.com/)
-- **final presentation**: each team presents their final results to a jury of renowned OpenFOAM community members
-- **evaluation**: the jury evaluates all projects according to the *evaluation criteria* listed below; prices provided by our sponsors will be distributed among the participants
+- **final presentation**: each team presents their final results and receives feedback from the other participants and mentors
 
 The workshop is **fully virtual**. There is no geographical restriction for participants, but keep in mind that we cannot accommodate all time zones. The organizers' time zone is **CET**.
 
 ## Time line
 
-- ~~**May 15, 2022**: start of the application process~~
-- ~~**June 15, 2022**: end of the application process~~
-- ~~**June 22, 2022**: end of the application process~~
-- **July 1, 2022**: feedback on the applications
-- **July 25-27, 2022**: hackathon
+- **Nov 11, 2022**: start of the application process
+- **Dec 31, 2022**: end of the application process
+- **Jan 09, 2023**: feedback on the applications
+- **Jan 23-25, 2023**: 2nd hackathon
 
-A detailed schedule for the hackathon will be provided two weeks prior to the event. Note that you should reserve **three full days** for the hackathon.
+A detailed schedule will be provided at the beginning of the hackathon. Note that you should reserve **three full days** for the hackathon.
 
 ## How can I participate?
 
-Since we aim to provide all participants with close support during the hackathon, the number of participants is limited to **20**. Applications are accepted until ~~**June 15, 2022**~~ **June 22, 2022**. There are **no registration fees** or other costs, but admission is not guaranteed. Based on all applications, we will select the most suitable candidates.
+Since we aim to provide all participants with close support during the hackathon, the number of participants is limited to **20**. Applications are accepted until **Dec 31, 2022**. There are **no registration fees** or other costs. We can also provide compute resources thanks to AWS, so you do not need any specialized hardware. Admission is not guaranteed. Based on all applications, we will select the most suitable candidates.
 
-New applications are no longer accepted.
+[Apply here](https://forms.gle/DkZCe4JHcExmXpdz9)
 
-## Evaluation criteria
+## Projects for the 2nd hackathon Jan 23-25, 2023
 
-All submitted projects are evaluated by a jury of renowned OpenFOAM community members. The following criteria are considered:
-
-- originality of the idea
-- code quality
-  - code documentation
-  - instructions for compiling/running the code
-  - reproducibility of results
-- final performance of the algorithm
-- final presentation
+- Combining OpenFOAM and physics-based machine learning with Nvidia [Modulus](https://developer.nvidia.com/modulus); refer to the Modulus [user guide](https://docs.nvidia.com/deeplearning/modulus/index.html) to prepare for this project
+- Coupling OpenFOAM and machine learning libraries via [SmartSim](https://github.com/CrayLabs/SmartSim); the goal of this project is to perform online inference and data extraction during the simulation; the test case is based on [this work](https://github.com/AndreWeiner/sgs_model_test_transient); moreover, [this example](https://github.com/CrayLabs/smartsim-openFOAM) provides some guidance for the OpenFOAM-SmartSim coupling
+- learning and monitoring closed-loop flow control strategies with [drlFoam](https://github.com/OFDataCommittee/drlfoam); we'll apply deep reinforcement learning to new test cases and build a monitoring dashboard with [dash](https://dash.gallery/Portal/?_gl=1*niktbt*_ga*MTM2OTM4Mjc5OS4xNjY4MTcxNzYz*_ga_6G7EE0JNSC*MTY2ODE3MTc2Mi4xLjEuMTY2ODE3MTc2My4wLjAuMA..); to learn about closed-loop control with DRL, refer to [this article](https://arxiv.org/pdf/1906.10382.pdf)
 
 ## Getting in touch
 

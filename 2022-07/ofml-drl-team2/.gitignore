@@ -3,3 +3,4 @@ libtorch
 *.tar
 *.zip
 test_training
+*.mp4

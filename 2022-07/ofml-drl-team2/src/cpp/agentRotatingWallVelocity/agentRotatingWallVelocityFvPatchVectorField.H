@@ -37,6 +37,8 @@ Usage
         Property     | Description             | Required    | Default value
         origin       | origin of rotation in Cartesian coordinates | yes|
         axis         | axis of rotation        | yes         |
+        observationSource  | source of observation data ("patch" or "probes")   | no  | "patch"
+        probesDictName       | probes dictionary name  | no | "probes"
     \endtable
 
     Example of the boundary condition specification:
@@ -52,6 +54,8 @@ Usage
         seed            0;
         train           true;
         absOmegaMax     0.05;
+        observationSource "probes";  // read observation data from probes 
+        probesDictName      "probes";  
     }
     \endverbatim
 
@@ -72,6 +76,9 @@ SourceFiles
 #include <torch/script.h>
 #include "fixedValueFvPatchFields.H"
 #include <random>
+#include "functionObject.H"
+#include "probes.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -132,6 +139,12 @@ class agentRotatingWallVelocityFvPatchVectorField
 
         //- update of next angular velocity value if true
         bool update_omega_;
+
+        //- probes dictionary name
+        word observation_source_;
+
+        //- probes dictionary name
+        word probes_name_;
         
 
 public:
@@ -213,6 +226,7 @@ public:
 
         //- Save trajectory to file
         void saveTrajectory(scalar log_p, scalar entropy, scalar mean, scalar log_std, scalar alpha, scalar beta, std::vector<scalar> pvec, int size) const;
+        const Foam::functionObject& getFunctionObject(Foam::word) const;
 };
 
 
