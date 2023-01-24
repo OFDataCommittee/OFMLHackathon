@@ -1,0 +1,141 @@
+name: run_post_merge_tests
+
+# This file is for tests that are to be run rarely, once on each merge.
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+
+env:
+  HOMEBREW_NO_ANALYTICS: "ON" # Make Homebrew installation a little quicker
+  HOMEBREW_NO_AUTO_UPDATE: "ON"
+  HOMEBREW_NO_BOTTLE_SOURCE_FALLBACK: "ON"
+  HOMEBREW_NO_GITHUB_API: "ON"
+  HOMEBREW_NO_INSTALL_CLEANUP: "ON"
+  DEBIAN_FRONTEND: "noninteractive" # disable interactive apt installs
+  SSDB: "127.0.0.1:6379"
+  SMARTREDIS_TEST_CLUSTER: False
+
+jobs:
+
+  run_tests:
+    name: Run smartredis tests using ${{ matrix.os }}, Python ${{ matrix.py_v }}, RedisAI ${{ matrix.rai_v }}, and compiler ${{ matrix.compiler }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
+        compiler: [intel, 8, 9, 10, 11] # intel compiler, and versions of GNU compiler
+        rai_v: [1.2.4, 1.2.5] # versions of RedisAI
+        py_v: ['3.7.x', '3.8.x', '3.9.x'] # versions of Python
+    env:
+      FC: gfortran-${{ matrix.compiler }}
+      GCC_V: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
+
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      redis:
+        # Docker Hub image
+        image: redislabs/redisai:${{ matrix.rai_v }}-cpu-bionic
+
+        # Set health checks to wait until redis has started
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # map port 6379 on service container to the host
+          - 6379:6379
+
+    steps:
+      # download a copy of SmartRedis before running CI tests
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.py_v }}
+
+      # Install compilers
+      - name: Install GFortran Linux
+        if: "!contains( matrix.compiler, 'intel' )" # if using GNU compiler
+        run: |
+          sudo apt-get update &&
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test &&
+          sudo apt-get update &&
+          sudo apt-get install -y gcc-${GCC_V} gfortran-${GCC_V} &&
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_V} 100 \
+          --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V}
+
+      - name: Install Intel compiler
+        if: "contains( matrix.compiler, 'intel' )" # if using intel compiler
+        run: |
+          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
+          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
+          rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
+          echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list &&
+          sudo apt-get update &&
+          sudo apt-get install intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
+          source /opt/intel/oneapi/setvars.sh &&
+          printenv >> $GITHUB_ENV &&
+          echo "CC=icc" >> $GITHUB_ENV &&
+          echo "CXX=icpc" >> $GITHUB_ENV &&
+          echo "FC=ifort" >> $GITHUB_ENV
+
+      # Set up standalone Redis environment
+      - name: Install Cmake Linux
+        if: contains(matrix.os, 'ubuntu')
+        run: sudo apt-get install cmake
+
+      - name: Build SmartRedis python and install
+        run: python -m pip install -e .[dev]
+
+      # CI tests that should be run with standalone Redis go here
+      # (none at present)
+
+      # Set up clustered Redis environment
+      - name: Install docker and redis-server
+        run: |
+          sudo apt-get update && sudo apt-get -y install curl gnupg lsb-release software-properties-common ca-certificates && \
+          # Add latest redis to apt sources
+          echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list && \
+          curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg && \
+          # Add latest docker to apt sources
+          echo  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
+          sudo apt-get update && \
+          sudo apt-get -y install iputils-ping docker-ce docker-ce-cli containerd.io redis-tools=6:6.2.5-1rl1~focal1 redis-server=6:6.2.5-1rl1~focal1
+
+      - name: Copy redisai from docker image
+        run: |
+          docker create --name redisai --rm redislabs/redisai:${{ matrix.rai_v }}-cpu-bionic && \
+          docker cp redisai:/usr/lib/redis/modules/redisai.so $HOME &&
+          sudo mkdir -p /usr/lib/redis/modules/ &&
+          sudo docker cp redisai:/usr/lib/redis/modules/backends/ /usr/lib/redis/modules/
+
+      - name: Setup local redis servers
+        run: |
+          redis-server --port 7000 --daemonize yes --cluster-enabled yes --cluster-config-file 7000.conf --protected-mode no --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so  &
+          redis-server --port 7001 --daemonize yes --cluster-enabled yes --cluster-config-file 7001.conf --protected-mode no --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so  &
+          redis-server --port 7002 --daemonize yes --cluster-enabled yes --cluster-config-file 7002.conf --protected-mode no --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so
+
+      - name: Overwrite redis cluster env vars
+        run: |
+         echo "SSDB=127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7002" >> $GITHUB_ENV &&
+         echo "SMARTREDIS_TEST_CLUSTER=True" >> $GITHUB_ENV
+
+      - name: Start redis cluster
+        run: redis-cli --cluster create $(echo $SSDB | tr "," " ") --cluster-yes
+
+      # CI tests that should be run with clustered Redis go here
+      - name: Install MPI for parallel examples -- for GCC, we can just use the std install
+        if: contains(matrix.os, 'ubuntu') && !contains(matrix.compiler, 'intel')
+        run: sudo apt-get install -y mpich
+
+      - name: Build and run examples # Only with GNU compiler as that's what mpich is built for
+        if: contains(matrix.os, 'ubuntu') && !contains(matrix.compiler, 'intel')
+        run: make test-examples
+
