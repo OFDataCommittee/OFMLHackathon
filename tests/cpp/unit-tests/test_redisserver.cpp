@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,11 @@
 #include "rediscluster.h"
 #include "redis.h"
 #include "srexception.h"
+#include "logger.h"
+#include "srobject.h"
+#include "logcontext.h"
+
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
@@ -52,6 +57,7 @@ using namespace SmartRedis;
 class RedisTest : public Redis
 {
     public:
+        RedisTest(SRObject* c) : Redis(c) {}
         int get_connection_timeout() {return _connection_timeout;}
         int get_connection_interval() {return _connection_interval;}
         int get_command_timeout() {return _command_timeout;}
@@ -67,6 +73,7 @@ class RedisTest : public Redis
 class RedisClusterTest : public RedisCluster
 {
     public:
+        RedisClusterTest(SRObject* c) : RedisCluster(c) {}
         int get_connection_timeout() {return _connection_timeout;}
         int get_connection_interval() {return _connection_interval;}
         int get_command_timeout() {return _command_timeout;}
@@ -90,11 +97,12 @@ const char* CMD_INTERVAL_ENV_VAR = "SR_CMD_INTERVAL";
 // error to be thrown
 void invoke_constructor()
 {
+    LogContext context("test_redisserver");
     if (use_cluster()) {
-        RedisClusterTest cluster_obj;
+        RedisClusterTest cluster_obj(&context);
     }
     else {
-        RedisTest non_cluster_obj;
+        RedisTest non_cluster_obj(&context);
     }
 }
 
@@ -105,6 +113,44 @@ void unset_all_env_vars()
         unsetenv(CONN_TIMEOUT_ENV_VAR);
         unsetenv(CONN_INTERVAL_ENV_VAR);
         unsetenv(CMD_TIMEOUT_ENV_VAR);
+        unsetenv(CMD_INTERVAL_ENV_VAR);
+}
+
+// Helper function to retrieve original versions of environment vars
+void save_env_vars(
+    char** conn_timeout,
+    char** conn_interval,
+    char** cmd_timeout,
+    char** cmd_interval)
+{
+    *conn_timeout = getenv(CONN_TIMEOUT_ENV_VAR);
+    *conn_interval = getenv(CONN_INTERVAL_ENV_VAR);
+    *cmd_timeout = getenv(CMD_TIMEOUT_ENV_VAR);
+    *cmd_interval = getenv(CMD_INTERVAL_ENV_VAR);
+}
+
+// Helper function to restore environment vars
+void restore_env_vars(
+    char* conn_timeout,
+    char* conn_interval,
+    char* cmd_timeout,
+    char* cmd_interval)
+{
+    if (conn_timeout != NULL)
+        setenv(CONN_TIMEOUT_ENV_VAR, conn_timeout, 1);
+    else
+        unsetenv(CONN_TIMEOUT_ENV_VAR);
+    if (conn_interval != NULL)
+        setenv(CONN_INTERVAL_ENV_VAR, conn_interval, 1);
+    else
+        unsetenv(CONN_INTERVAL_ENV_VAR);
+    if (cmd_timeout != NULL)
+        setenv(CMD_TIMEOUT_ENV_VAR, cmd_timeout, 1);
+    else
+        unsetenv(CMD_TIMEOUT_ENV_VAR);
+    if (cmd_interval != NULL)
+        setenv(CMD_INTERVAL_ENV_VAR, cmd_interval, 1);
+    else
         unsetenv(CMD_INTERVAL_ENV_VAR);
 }
 
@@ -127,18 +173,29 @@ void check_all_defaults(T& server)
 
 SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Test runtime settings are initialized correctly" << std::endl;
+    std::string context("test_redisserver");
+    log_data(context, LLDebug, "***Beginning RedisServer testing***");
+    LogContext lc("test_redisserver");
+
+    char* __conn_timeout;
+    char* __conn_interval;
+    char* __cmd_timeout;
+    char* __cmd_interval;
+    save_env_vars(&__conn_timeout, &__conn_interval, &__cmd_timeout, &__cmd_interval);
+
     GIVEN("A Redis derived object created with all environment variables unset")
     {
         unset_all_env_vars();
         if (use_cluster()) {
-            RedisClusterTest redis_server;
+            RedisClusterTest redis_server(&lc);
             THEN("Default member variable values are used")
             {
                 check_all_defaults(redis_server);
             }
         }
         else {
-            RedisTest redis_server;
+            RedisTest redis_server(&lc);
             THEN("Default member variable values are used")
             {
                 check_all_defaults(redis_server);
@@ -154,14 +211,14 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
         setenv(CMD_INTERVAL_ENV_VAR, "", true);
 
         if (use_cluster()) {
-            RedisClusterTest redis_server;
+            RedisClusterTest redis_server(&lc);
             THEN("Default member variable values are used")
             {
                 check_all_defaults(redis_server);
             }
         }
         else {
-            RedisTest redis_server;
+            RedisTest redis_server(&lc);
             THEN("Default member variable values are used")
             {
                 check_all_defaults(redis_server);
@@ -184,7 +241,7 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
         setenv(CMD_INTERVAL_ENV_VAR, std::to_string(cmd_interval).c_str(), true);
 
         if (use_cluster()) {
-            RedisClusterTest redis_server;
+            RedisClusterTest redis_server(&lc);
             THEN("Environment variables are used for member variables")
             {
                 CHECK(redis_server.get_connection_timeout() ==
@@ -203,7 +260,7 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
             }
         }
         else {
-            RedisTest redis_server;
+            RedisTest redis_server(&lc);
             THEN("Environment variables are used for member variables")
             {
                 CHECK(redis_server.get_connection_timeout() ==
@@ -302,4 +359,6 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
             CHECK_THROWS_AS(invoke_constructor(), ParameterException);
         }
     }
+    restore_env_vars(__conn_timeout, __conn_interval, __cmd_timeout, __cmd_interval);
+    log_data(context, LLDebug, "***End RedisServer testing***");
 }

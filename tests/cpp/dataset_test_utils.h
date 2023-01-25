@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,8 @@ namespace DATASET_TEST_UTILS {
 class DatasetTestClient : public SmartRedis::Client
 {
     public:
-        DatasetTestClient(bool cluster) : Client(cluster) {};
+        DatasetTestClient(bool cluster, const std::string& name)
+            : Client(cluster, name) {};
 
         bool hash_field_exists(const std::string& key,
                                const std::string& field) {
@@ -246,8 +247,6 @@ void check_meta_field(SmartRedis::DataSet& dataset,
                                 " was retrieved.");
         }
     }
-
-    std::cout<<"Correct fetched metadata field "<<field_name<<std::endl;
 }
 
 /*!
@@ -276,7 +275,6 @@ void check_tensor_names(SmartRedis::DataSet& dataset,
                                      "does not match the retrieved "\
                                      "value of " + names[i]);
     }
-    std::cout<<"Correctly fetched metadata tensor names."<<std::endl;
 }
 
 
@@ -348,8 +346,6 @@ void check_dataset_metadata(SmartRedis::DataSet& dataset)
     if(str_meta_3.compare(str_meta_field_2[0])!=0)
         throw std::runtime_error("The retrieved value for "\
                                 "str_meta_3 is incorrect.");
-
-    std::cout<<"Correctly fetched string type metadata"<<std::endl;
 }
 
 };  //Namespace DATASET_TEST_UTILS

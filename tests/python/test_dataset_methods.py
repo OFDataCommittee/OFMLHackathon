@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -82,6 +82,33 @@ def test_add_get_strings(mock_data):
     data = mock_data.create_metadata_strings(10)
     add_get_strings(dataset, data)
 
+def test_dataset_inspection(context):
+    d = Dataset(context)
+    data = np.uint8([2, 4, 6, 8])
+    d.add_tensor("u8_tensor", data)
+    data = np.int16([1, 1, 2, 3, 5, 8])
+    d.add_tensor("i16_tensor", data)
+    d.add_meta_string("metastring", "metavalue")
+    d.add_meta_scalar("u32_scalar", np.uint32(42))
+    d.add_meta_scalar("double_scalar", np.double(3.1415926535))
+
+    tensornames = d.get_tensor_names()
+    assert 2 == len(tensornames)
+    tensornames.sort()
+    assert "i16_tensor" == tensornames[0]
+    assert "u8_tensor" == tensornames[1]
+    assert np.uint8 == d.get_tensor_type("u8_tensor")
+    assert np.int16 == d.get_tensor_type("i16_tensor")
+
+    metanames = d.get_metadata_field_names()
+    assert 3 == len(metanames)
+    metanames.sort()
+    assert "double_scalar" == metanames[0]
+    assert "metastring" == metanames[1]
+    assert "u32_scalar" == metanames[2]
+    assert np.float64 == d.get_metadata_field_type("double_scalar")
+    assert str == d.get_metadata_field_type("metastring")
+    assert np.uint32 == d.get_metadata_field_type("u32_scalar")
 
 # ------- Helper Functions -----------------------------------------------
 

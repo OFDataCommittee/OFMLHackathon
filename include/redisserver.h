@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,14 +26,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SMARTREDIS_CPP_REDISSERVER_H
-#define SMARTREDIS_CPP_REDISSERVER_H
+#ifndef SMARTREDIS_REDISSERVER_H
+#define SMARTREDIS_REDISSERVER_H
 
 #include <thread>
 #include <iostream>
 #include <random>
-#include "limits.h"
-
+#include <limits.h>
 #include <sw/redis++/redis++.h>
 
 #include "command.h"
@@ -54,13 +53,13 @@
 #include "gettensorcommand.h"
 #include "pipelinereply.h"
 #include "threadpool.h"
+#include "address.h"
 
 ///@file
 
 namespace SmartRedis {
 
-class RedisServer;
-
+class SRObject;
 
 /*!
 *   \brief Abstract class that defines interface for
@@ -72,8 +71,9 @@ class RedisServer {
 
         /*!
         *   \brief Default constructor
+        *   \param context The owning context
         */
-        RedisServer();
+        RedisServer(const SRObject* context);
 
         /*!
         *   \brief Destructor
@@ -187,12 +187,11 @@ class RedisServer {
         virtual bool model_key_exists(const std::string& key) = 0;
 
         /*!
-         *  \brief Check if address and port maps to database node
-         *  \param address address of database
-         *  \param port port of database
+         *  \brief Check if address is valid
+         *  \param address Address (TCP or UDS) of database
          *  \return True if address is valid
          */
-        virtual bool is_addressable(const std::string& address, const uint64_t& port) = 0;
+        virtual bool is_addressable(const SRAddress& address) const = 0;
 
         /*!
         *   \brief Put a Tensor on the server
@@ -487,7 +486,7 @@ class RedisServer {
 
         /*!
         *   \brief Retrieve model/script runtime statistics
-        *   \param address The address of the database node (host:port)
+        *   \param address The TCP or UDS address of the database node
         *   \param key The key associated with the model or script
         *   \param reset_stat Boolean indicating if the counters associated
         *                     with the model or script should be reset.
@@ -563,6 +562,11 @@ class RedisServer {
         static constexpr int _DEFAULT_THREAD_COUNT = 4;
 
         /*!
+        *   \brief The owning context
+        */
+        const SRObject* _context;
+
+        /*!
         *   \brief Seeding for the random number engine
         */
         std::random_device _rd;
@@ -581,6 +585,13 @@ class RedisServer {
         *   \brief The thread pool
         */
         ThreadPool *_tp;
+
+        /*
+        *   \brief Indicates whether the server was connected to
+        *          via a Unix domain socket (true) or TCP connection
+        *          (false)
+        */
+        bool _is_domain_socket;
 
         /*!
         *   \brief Environment variable for connection timeout
@@ -623,13 +634,12 @@ class RedisServer {
         *          chosen from a list of addresses if
         *          applicable, from the SSDB environment
         *          variable.
-        *   \returns A address and port pair in the form of
-        *            address:port
+        *   \returns An SRAddress representing the selected server address
         */
-        std::string _get_ssdb();
+        SRAddress _get_ssdb();
 
         /*!
-        *   \brief Unordered map of address:port to DBNode in the cluster
+        *   \brief Unordered map of server address string to DBNode in the cluster
         */
         std::unordered_map<std::string, DBNode*> _address_node_map;
 
@@ -640,24 +650,6 @@ class RedisServer {
         *          in SSDB environment variable format
         */
         void _check_ssdb_string(const std::string& env_str);
-
-        /*!
-        *   \brief Initialize a variable of type integer from an environment
-        *          variable.  If the environment variable is not set,
-        *          the default value is assigned.
-        *   \param value Reference to a integer value which will be assigned
-        *                a default value or environment variable value
-        *   \param env_var std::string of the environment variable name
-        *   \param default_value The default value to assign if the environment
-        *                        variable is not set.
-        *   \throw SmartRedis::RuntimeException if environment variable
-        *          retrieval fails, conversion to integer fails, or
-        *          if the value of the environment value contains
-        *          characters other than [0,9] or a negative sign ('-').
-        */
-        void _init_integer_from_env(int& value,
-                                    const std::string& env_var,
-                                    const int& default_value);
 
         /*!
         *   \brief This function checks that _connection_timeout,
@@ -683,4 +675,4 @@ class RedisServer {
 
 } // namespace SmartRedis
 
-#endif //SMARTREDIS_CPP_REDISSERVER_H
+#endif // SMARTREDIS_REDISSERVER_H

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,11 +28,18 @@
 
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "dbinfocommand.h"
+#include "logger.h"
+
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
 SCENARIO("Parsing an empty string for db info")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Parsing an empty string for db info" << std::endl;
+    std::string context("test_dbinfocommand");
+    log_data(context, LLDebug, "***Beginning DBInfoCommand testing***");
+
     GIVEN("A DBInfoCommand and an empty string")
     {
         DBInfoCommand cmd;
@@ -46,4 +53,5 @@ SCENARIO("Parsing an empty string for db info")
             }
         }
     }
+    log_data(context, LLDebug, "***End DBInfoCommand testing***");
 }

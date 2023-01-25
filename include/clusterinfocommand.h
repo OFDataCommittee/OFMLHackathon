@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,12 +31,12 @@
 
 #include "addressatcommand.h"
 
+///@file
+
 /*!
 *  \brief A map of reply data from a database response
 */
 using parsed_reply_map = std::unordered_map<std::string, std::string>;
-
-///@file
 
 namespace SmartRedis {
 
@@ -57,6 +57,6 @@ class ClusterInfoCommand : public AddressAtCommand
         static parsed_reply_map parse_db_cluster_info(std::string info);
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //CLUSTERINFOCOMMAND
+#endif // SMARTREDIS_CLUSTERINFOCOMMAND_H

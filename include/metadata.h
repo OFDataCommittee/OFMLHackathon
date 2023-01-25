@@ -1,7 +1,7 @@
  /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #ifndef SMARTREDIS_METADATA_H
 #define SMARTREDIS_METADATA_H
 
-#include "stdlib.h"
+#include <stdlib.h>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -64,8 +64,6 @@ static const std::unordered_map<std::string, SRMetaDataType>
         {DATATYPE_METADATA_STR_UINT32, SRMetadataTypeUint32},
         {DATATYPE_METADATA_STR_UINT64, SRMetadataTypeUint64},
         {DATATYPE_METADATA_STR_STRING, SRMetadataTypeString} };
-
-class MetaData;
 
 /*!
 *   \brief The MetaData class stages metadata fields and
@@ -235,7 +233,44 @@ class MetaData
         std::vector<std::pair<std::string, std::string>>
             get_metadata_serialization_map();
 
+        /*!
+        *   \brief Retrieve the type of a metadata field
+        *   \param name The name of the field to check
+        *   \throw KeyException if the name is not present
+        */
+        SRMetaDataType get_field_type(const std::string& name);
 
+        /*!
+        *   \brief Retrieve a vector of metadata field names
+        *   \param skip_internal Omit internal items (such as .tensor_names)
+        *                        from the results
+        */
+        std::vector<std::string> get_field_names(bool skip_internal = false);
+
+        /*!
+        *   \brief  Get metadata field names using a c-style
+        *           interface
+        *   \details This function allocates memory to
+        *            return a pointer (via pointer reference "data")
+        *            to the user and sets the value of n_strings to
+        *            the number of strings in the field.  Memory is also
+        *            allocated to store the length of each string in the
+        *            field, and the provided lengths pointer is pointed
+        *            to this new memory.  The memory for the strings and
+        *            string lengths is valid until the MetaData object is
+        *            destroyed.
+        *   \param data A c-ptr pointed to newly allocated memory
+        *               for the names
+        *   \param n_strings The number of names returned
+        *   \param lengths A size_t pointer pointed to newly allocated
+        *                  memory that stores the length of each string
+        *   \param skip_internal Omit internal items (such as .tensor_names)
+        *                        from the results
+        */
+        void get_field_names(char**& data,
+                             size_t& n_strings,
+                             size_t*& lengths,
+                             bool skip_internal = false);
     private:
 
        /*!
@@ -373,6 +408,6 @@ class MetaData
 
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_METADATA_H
+#endif // SMARTREDIS_METADATA_H

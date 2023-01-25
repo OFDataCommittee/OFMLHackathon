@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+! Copyright (c) 2021-2023, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@ program main
 
   if (client%isinitialized()) error stop 'client not initialized'
 
-  result = client%initialize(use_cluster())
+  result = client%initialize(use_cluster(), "client_test_initialized")
   if (result .ne. SRNoError) error stop
 
   if (.not. client%isinitialized()) error stop 'client is initialized'

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@ void put_get_3D_array(
         SRMemoryLayout send_direction = SRMemLayoutContiguous,
         SRMemoryLayout recv_direction = SRMemLayoutContiguous)
 {
-  SmartRedis::Client client(use_cluster());
+  SmartRedis::Client client(use_cluster(), "client_test_put_get_transpose_3D");
 
   //Allocate and fill arrays
   T_send* array = (T_send*)malloc(dims[0]*dims[1]*dims[2]*sizeof(T_send));

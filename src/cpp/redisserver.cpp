@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,23 +29,25 @@
 #include <ctype.h>
 #include "redisserver.h"
 #include "srexception.h"
+#include "utility.h"
+#include "srobject.h"
 
 using namespace SmartRedis;
 
 // RedisServer constructor
-RedisServer::RedisServer()
-    : _gen(_rd())
+RedisServer::RedisServer(const SRObject* context)
+    : _context(context), _gen(_rd())
 {
-    _init_integer_from_env(_connection_timeout, _CONN_TIMEOUT_ENV_VAR,
-                           _DEFAULT_CONN_TIMEOUT);
-    _init_integer_from_env(_connection_interval, _CONN_INTERVAL_ENV_VAR,
-                           _DEFAULT_CONN_INTERVAL);
-    _init_integer_from_env(_command_timeout, _CMD_TIMEOUT_ENV_VAR,
-                           _DEFAULT_CMD_TIMEOUT);
-    _init_integer_from_env(_command_interval, _CMD_INTERVAL_ENV_VAR,
-                           _DEFAULT_CMD_INTERVAL);
-    _init_integer_from_env(_thread_count, _TP_THREAD_COUNT,
-                           _DEFAULT_THREAD_COUNT);
+    get_config_integer(_connection_timeout, _CONN_TIMEOUT_ENV_VAR,
+                         _DEFAULT_CONN_TIMEOUT);
+    get_config_integer(_connection_interval, _CONN_INTERVAL_ENV_VAR,
+                         _DEFAULT_CONN_INTERVAL);
+    get_config_integer(_command_timeout, _CMD_TIMEOUT_ENV_VAR,
+                         _DEFAULT_CMD_TIMEOUT);
+    get_config_integer(_command_interval, _CMD_INTERVAL_ENV_VAR,
+                         _DEFAULT_CMD_INTERVAL);
+    get_config_integer(_thread_count, _TP_THREAD_COUNT,
+                         _DEFAULT_THREAD_COUNT);
 
     _check_runtime_variables();
 
@@ -55,7 +57,7 @@ RedisServer::RedisServer()
     _command_attempts = (_command_timeout * 1000) /
                          _command_interval + 1;
 
-    _tp = new ThreadPool(_thread_count);
+    _tp = new ThreadPool(_context, _thread_count);
 }
 
 // RedisServer destructor
@@ -69,88 +71,48 @@ RedisServer::~RedisServer()
 
 // Retrieve a single address, randomly chosen from a list of addresses if
 // applicable, from the SSDB environment variable
-std::string RedisServer::_get_ssdb()
+SRAddress RedisServer::_get_ssdb()
 {
     // Retrieve the environment variable
-    char* env_char = getenv("SSDB");
-    if (env_char == NULL)
+    std::string db_spec;
+    get_config_string(db_spec, "SSDB", "");
+    if (db_spec.length() == 0)
         throw SRRuntimeException("The environment variable SSDB "\
                                  "must be set to use the client.");
-    std::string env_str = std::string(env_char);
-    _check_ssdb_string(env_str);
+    _check_ssdb_string(db_spec);
 
     // Parse the data in it
-    std::vector<std::string> hosts_ports;
+    std::vector<SRAddress> address_choices;
     const char delim = ',';
 
     size_t i_pos = 0;
-    size_t j_pos = env_str.find(delim);
+    size_t j_pos = db_spec.find(delim);
     while (j_pos != std::string::npos) {
-        hosts_ports.push_back("tcp://"+
-        env_str.substr(i_pos, j_pos - i_pos));
+        std::string substr = db_spec.substr(i_pos, j_pos - i_pos);
+        SRAddress addr_spec(substr);
+        address_choices.push_back(addr_spec);
         i_pos = j_pos + 1;
-        j_pos = env_str.find(delim, i_pos);
+        j_pos = db_spec.find(delim, i_pos);
     }
-    // Catch the last value that does not have a trailing ';'
-    if (i_pos < env_str.size())
-        hosts_ports.push_back("tcp://"+
-        env_str.substr(i_pos, j_pos - i_pos));
+    // Catch the last value that does not have a trailing ','
+    if (i_pos < db_spec.size()) {
+        std::string substr = db_spec.substr(i_pos, j_pos - i_pos);
+        SRAddress addr_spec(substr);
+        address_choices.push_back(addr_spec);
+    }
 
     // Pick an entry from the list at random
-    std::uniform_int_distribution<> distrib(0, hosts_ports.size() - 1);
-    return hosts_ports[distrib(_gen)];
+    std::uniform_int_distribution<> distrib(0, address_choices.size() - 1);
+    return address_choices[distrib(_gen)];
 }
 
 // Check that the SSDB environment variable value does not have any errors
 void RedisServer::_check_ssdb_string(const std::string& env_str) {
     for (size_t i = 0; i < env_str.size(); i++) {
         char c = env_str[i];
-        if (!isalnum(c) && c != '.' && c != ':' && c != ',') {
+        if (!isalnum(c) && c != '.' && c != ':' && c != ',' && c != '/') {
             throw SRRuntimeException("The provided SSDB value, " + env_str +
                                      " is invalid because of character " + c);
-        }
-    }
-}
-
-//Initialize variable of type integer from environment variable
-void RedisServer::_init_integer_from_env(int& value,
-                                         const std::string& env_var,
-                                         const int& default_value)
-{
-    value = default_value;
-
-    char* env_char = getenv(env_var.c_str());
-
-    if (env_char != NULL && strlen(env_char) > 0) {
-        // Enforce that all characters are digits because std::stoi
-        // will truncate a string like "10xy" to 10.
-        // We want to guard users from input errors they might have.
-        char* c = env_char;
-        while (*c != '\0') {
-            if (!isdigit(*c) && !(*c == '-' && c == env_char)) {
-                throw SRParameterException("The value of " + env_var +
-                                           " must be a valid number.");
-            }
-            c++;
-        }
-
-        try {
-            value = std::stoi(env_char);
-        }
-        catch (std::invalid_argument& e) {
-            throw SRParameterException("The value of " + env_var + " could "\
-                                       "not be converted to type integer.");
-        }
-        catch (std::out_of_range& e) {
-            throw SRParameterException("The value of " + env_var + " is too "\
-                                       "large to be stored as an integer "\
-                                       "value.");
-        }
-        catch (std::exception& e) {
-            throw SRInternalException("An unexpected error occurred  "\
-                                      "while attempting to convert the "\
-                                      "environment variable " + env_var +
-                                      " to an integer.");
         }
     }
 }
@@ -169,7 +131,8 @@ inline void RedisServer::_check_runtime_variables()
     }
 
     if (_command_timeout <= 0) {
-        throw SRParameterException(_CMD_TIMEOUT_ENV_VAR +
+        throw SRParameterException(_CMD_TIMEOUT_ENV_VAR + " " +
+                                   std::to_string(_command_timeout) +
                                    " must be greater than 0.");
     }
 
@@ -185,7 +148,8 @@ inline void RedisServer::_check_runtime_variables()
     }
 
     if (_command_timeout > (INT_MAX / 1000)) {
-        throw SRParameterException(_CMD_TIMEOUT_ENV_VAR +
+        throw SRParameterException(_CMD_TIMEOUT_ENV_VAR + " " +
+                                   std::to_string(_command_timeout) +
                                    " must be less than "
                                    + std::to_string(INT_MAX / 1000));
     }

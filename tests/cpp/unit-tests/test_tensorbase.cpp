@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <iostream>
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "tensorbase.h"
 #include "tensorpack.h"
 #include "srexception.h"
 
+unsigned long get_time_offset();
+
 using namespace SmartRedis;
 
 SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing TensorBase through TensorPack" << std::endl;
+    std::string context("test_tensorbase");
+    log_data(context, LLDebug, "***Beginning TensorBase testing***");
+
     SRTensorType tensor_type = GENERATE(SRTensorTypeDouble, SRTensorTypeFloat,
                                         SRTensorTypeInt64, SRTensorTypeInt32,
                                         SRTensorTypeInt16, SRTensorTypeInt8,
@@ -230,4 +237,5 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
             }
         }
     }
+    log_data(context, LLDebug, "***End TensorBase testing***");
 }

@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,17 +28,25 @@ project(SmartRedis)
 
 cmake_minimum_required(VERSION 3.13)
 
-option(BUILD_PYTHON "Build the python module" ON)
+option(BUILD_PYTHON  "Build the python module" ON)
+option(BUILD_FORTRAN "Build the fortran client library" OFF)
 
 set(CMAKE_BUILD_TYPE RELEASE)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
+set(CMAKE_CXX_VISIBILITY_PRESET default)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-add_compile_options(-fvisibility=default)
+if (BUILD_FORTRAN)
+    enable_language(Fortran)
+endif()
 
 if (WERROR)
-    add_compile_options(-Wall -Werror)
+    if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+        add_compile_options(-Wall -Werror)
+    else()
+        message(WARNING "WERROR was specified, but the CMAKE compiler is not GCC")
+    endif()
 endif()
 
 find_library(REDISPP redis++ PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
@@ -51,6 +59,9 @@ set(CLIENT_SRC
     src/c/c_client.cpp
     src/c/c_dataset.cpp
     src/c/c_error.cpp
+    src/c/c_logcontext.cpp
+    src/c/c_logger.cpp
+    src/cpp/address.cpp
     src/cpp/client.cpp
     src/cpp/dataset.cpp
     src/cpp/command.cpp
@@ -78,30 +89,52 @@ set(CLIENT_SRC
     src/cpp/stringfield.cpp
     src/cpp/pipelinereply.cpp
     src/cpp/threadpool.cpp
-    src/fortran/fortran_c_interop.F90
-    src/fortran/dataset.F90
-    src/fortran/client.F90)
+    src/cpp/utility.cpp
+    src/cpp/logger.cpp
+    src/cpp/srobject.cpp
+)
 
 include_directories(SYSTEM
     include
     install/include
-    src/fortran
 )
+
+if (BUILD_FORTRAN)
+    set(FORTRAN_SRC
+        src/fortran/client.F90
+        src/fortran/dataset.F90
+        src/fortran/errors.F90
+        src/fortran/fortran_c_interop.F90
+        src/fortran/logcontext.F90
+        src/fortran/logger.F90
+    )
+    include_directories(src/fortran)
+    # Note the following has to be before ANY add_library command)
+    set(CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/include")
+    # Fortran library
+    add_library(smartredis-fortran SHARED ${FORTRAN_SRC})
+    set_target_properties(smartredis-fortran PROPERTIES SUFFIX ".so")
+    target_link_libraries(smartredis-fortran PUBLIC smartredis ${EXT_CLIENT_LIBRARIES})
+    # Install dynamic library and headers
+    install(TARGETS smartredis-fortran
+    	LIBRARY DESTINATION lib)
+endif()
+
 
 # Build dynamic library
 add_library(smartredis SHARED ${CLIENT_SRC})
 set_target_properties(smartredis PROPERTIES SUFFIX ".so")
 target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES} PRIVATE Threads::Threads)
 
-# Install dynamic library and headers
-install(TARGETS smartredis
-	LIBRARY DESTINATION lib)
-
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
         DESTINATION "include"
         FILES_MATCHING
         PATTERN "*.h" PATTERN "*.tcc" PATTERN "*.inc"
 )
+
+# Install dynamic library and headers
+install(TARGETS smartredis
+     	LIBRARY DESTINATION lib)
 
 if(BUILD_PYTHON)
 	message("-- Python client build enabled")
@@ -111,6 +144,8 @@ if(BUILD_PYTHON)
     add_library(smartredis_static STATIC ${CLIENT_SRC})
 
 	pybind11_add_module(smartredisPy
+                        src/python/src/pysrobject.cpp
+                        src/python/src/pylogcontext.cpp
 	                    src/python/src/pyclient.cpp
                         src/python/src/pydataset.cpp
                         ${CLIENT_SRC}

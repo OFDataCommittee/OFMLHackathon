@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ void move_constructor(
     fill_array(t_send_3, dims[0], dims[1], dims[2]);
 
     //Create Client and DataSets
-    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster());
+    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster(), "client_test_dataet_move_constructor");
     SmartRedis::DataSet* dataset = new SmartRedis::DataSet(dataset_name);
 
     //Add tensors to the DataSet
@@ -125,11 +125,11 @@ void move_constructor(
                              &DATASET_TEST_UTILS::ui32_meta_1,
                              SRMetadataTypeUint32);
 
-  //Move the DataSet half way through metadata additions to
-  //test that we can continue adding new fields to the old fields
-  SmartRedis::DataSet moved_dataset = SmartRedis::DataSet(std::move(*dataset));
+    //Move the DataSet half way through metadata additions to
+    //test that we can continue adding new fields to the old fields
+    SmartRedis::DataSet moved_dataset = SmartRedis::DataSet(std::move(*dataset));
 
-  moved_dataset.add_meta_scalar("ui32_field_1",
+    moved_dataset.add_meta_scalar("ui32_field_1",
                             &DATASET_TEST_UTILS::ui32_meta_2,
                             SRMetadataTypeUint32);
     moved_dataset.add_meta_scalar("ui32_field_2",

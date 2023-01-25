@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
     // In general, Client objects should be reused, but for this
     // small example, Client objects are not reused.
     bool cluster_mode = true; // Set to false if not using a clustered database
-    SmartRedis::Client client(cluster_mode);
+    SmartRedis::Client client(cluster_mode, __FILE__);
 
     // Build model key, file name, and then set model
     // from file using client API

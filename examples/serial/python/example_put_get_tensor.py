@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@ from smartredis import Client
 
 # Connect a SmartRedis client to Redis database
 db_address = "127.0.0.1:6379"
-client = Client(address=db_address, cluster=True)
+client = Client(address=db_address, cluster=True, logger_name="example_put_get_tensor.py")
 
 # Send a 2D tensor to the database
 key = "2D_array"

@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+! Copyright (c) 2021-2023, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -40,4 +40,18 @@ interface
     integer(kind=enum_kind), value, intent(in) :: data_type   !< The data type of the tensor
     integer(kind=enum_kind), value, intent(in) :: mem_layout  !< The memory layout of the data
   end function add_tensor_c
+end interface
+
+interface
+  function get_tensor_type_c( dataset, name, name_length, ttype ) &
+      bind(c, name="get_tensor_type")
+    use iso_c_binding, only : c_ptr, c_size_t, c_char
+    import :: enum_kind
+    integer(kind=enum_kind)                     :: get_tensor_type_c
+    type(c_ptr),             value, intent(in)  :: dataset     !< A c_ptr to the dataset object
+    character(kind=c_char),         intent(in)  :: name(*)     !< The name of the tensor
+    integer(kind=c_size_t),  value, intent(in)  :: name_length !< The length of the name c-string,
+                                                               !! excluding null terminating character
+    integer(kind=enum_kind),        intent(out) :: ttype       !< Receives the tensor type
+  end function get_tensor_type_c
 end interface

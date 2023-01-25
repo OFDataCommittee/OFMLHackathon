@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ void get_multiple_tensors(
     fill_array(t_send_3, dims[0], dims[1], dims[2]);
 
     //Create Client and DataSet
-    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster());
+    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster(), "client_test_dataset_multiple_get_tensor");
     SmartRedis::DataSet sent_dataset(dataset_name);
 
     //Add metadata to the DataSet

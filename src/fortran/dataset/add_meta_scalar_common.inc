@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+! Copyright (c) 2021-2023, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,6 @@
   !** Beginning of code common to all add_meta_scalar subroutines
 
   character(kind=c_char, len=len_trim(name))  :: c_name
-  integer(kind=enum_kind) :: c_data_type, expected_data_type
   integer(kind=c_size_t) :: name_length
   type(c_ptr) :: meta_ptr
 

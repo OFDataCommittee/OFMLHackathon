@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,19 +29,26 @@ from numbers import Number
 import numpy as np
 
 from .smartredisPy import PyDataset
+from .srobject import SRObject
 from .util import Dtypes, exception_handler, typecheck
 
 from .error import *
 
-class Dataset:
+class Dataset(SRObject):
     def __init__(self, name):
         """Initialize a Dataset object
 
         :param name: name of dataset
         :type name: str
         """
+        super().__init__(PyDataset(name))
         typecheck(name, "name", str)
-        self._data = PyDataset(name)
+
+    @property
+    def _data(self):
+        """Alias _srobject to _data
+        """
+        return self._srobject
 
     @staticmethod
     def from_pybind(dataset):
@@ -78,7 +85,7 @@ class Dataset:
         :type dataset: PyDataset
         """
         typecheck(dataset, "dataset", PyDataset)
-        self._data = dataset
+        self._srobject = dataset
 
     @exception_handler
     def add_tensor(self, name, data):
@@ -169,3 +176,48 @@ class Dataset:
         """
         typecheck(name, "name", str)
         return self._data.get_meta_strings(name)
+
+    @exception_handler
+    def get_metadata_field_names(self):
+        """Get the names of all metadata scalars and strings from the DataSet
+
+        :return: a list of metadata field names
+        :rtype: list
+        """
+        return self._data.get_metadata_field_names()
+
+    @exception_handler
+    def get_metadata_field_type(self, name):
+        """Get the names of all metadata scalars and strings from the DataSet
+
+        :param name: The name used to reference the metadata
+                     field in the DataSet
+        :type name: str
+        :return: the numpy type for the metadata field
+        :rtype: type
+        """
+        typecheck(name, "name", str)
+        type_str = self._data.get_metadata_field_type(name)
+        return Dtypes.from_string(type_str)
+
+    @exception_handler
+    def get_tensor_type(self, name):
+        """Get the type of a tensor in the DataSet
+
+        :param name: The name used to reference the tensor in the DataSet
+        :type name: str
+        :return: the numpy type for the tensor
+        :rtype: type
+        """
+        typecheck(name, "name", str)
+        type_str = self._data.get_tensor_type(name)
+        return Dtypes.from_string(type_str)
+
+    @exception_handler
+    def get_tensor_names(self):
+        """Get the names of all tensors in the DataSet
+
+        :return: a list of tensor names
+        :rtype: list
+        """
+        return self._data.get_tensor_names()

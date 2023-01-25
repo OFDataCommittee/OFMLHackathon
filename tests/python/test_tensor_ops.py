@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,10 +31,10 @@ from smartredis import Client
 from smartredis.error import RedisReplyError
 
 
-def test_copy_tensor(use_cluster):
+def test_copy_tensor(use_cluster, context):
     # test copying tensor
 
-    client = Client(None, use_cluster)
+    client = Client(None, use_cluster, logger_name=context)
     tensor = np.array([1, 2])
     client.put_tensor("test_copy", tensor)
 
@@ -46,10 +46,10 @@ def test_copy_tensor(use_cluster):
     assert np.array_equal(tensor, returned)
 
 
-def test_rename_tensor(use_cluster):
+def test_rename_tensor(use_cluster, context):
     # test renaming tensor
 
-    client = Client(None, use_cluster)
+    client = Client(None, use_cluster, logger_name=context)
     tensor = np.array([1, 2])
     client.put_tensor("test_rename", tensor)
 
@@ -61,10 +61,10 @@ def test_rename_tensor(use_cluster):
     assert np.array_equal(tensor, returned)
 
 
-def test_delete_tensor(use_cluster):
+def test_delete_tensor(use_cluster, context):
     # test renaming tensor
 
-    client = Client(None, use_cluster)
+    client = Client(None, use_cluster, logger_name=context)
     tensor = np.array([1, 2])
     client.put_tensor("test_delete", tensor)
 
@@ -76,25 +76,25 @@ def test_delete_tensor(use_cluster):
 # --------------- Error handling ----------------------
 
 
-def test_rename_nonexisting_key(use_cluster):
+def test_rename_nonexisting_key(use_cluster, context):
 
-    client = Client(None, use_cluster)
+    client = Client(None, use_cluster, logger_name=context)
     with pytest.raises(RedisReplyError):
         client.rename_tensor("not-a-tensor", "still-not-a-tensor")
 
 
-def test_copy_nonexistant_key(use_cluster):
+def test_copy_nonexistant_key(use_cluster, context):
 
-    client = Client(None, use_cluster)
+    client = Client(None, use_cluster, logger_name=context)
     with pytest.raises(RedisReplyError):
         client.copy_tensor("not-a-tensor", "still-not-a-tensor")
 
 
-def test_copy_not_tensor(use_cluster):
+def test_copy_not_tensor(use_cluster, context):
     def test_func(param):
         print(param)
 
-    client = Client(None, use_cluster)
+    client = Client(None, use_cluster, logger_name=context)
     client.set_function("test_func", test_func)
     with pytest.raises(RedisReplyError):
         client.copy_tensor("test_func", "test_fork")

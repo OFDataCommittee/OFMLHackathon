@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,20 +32,13 @@
 using namespace SmartRedis;
 
 // Set address and port for command to be executed on
-void NonKeyedCommand::set_exec_address_port(std::string address, uint64_t port)
+void NonKeyedCommand::set_exec_address(const SRAddress &addr_spec)
 {
-    _address = address;
-    _port = port;
+    _address = addr_spec;
 }
 
 // Get address that command will be to be executed on
-std::string NonKeyedCommand::get_address()
+SRAddress NonKeyedCommand::get_address()
 {
     return _address;
-}
-
-// Get port that command will be to be executed on
-uint64_t NonKeyedCommand::get_port()
-{
-    return _port;
 }

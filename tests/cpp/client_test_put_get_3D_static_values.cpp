@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@ void put_get_3D_array(
         SRTensorType type,
         std::string key_suffix="")
 {
-  SmartRedis::Client client(use_cluster());
+  SmartRedis::Client client(use_cluster(), "client_test_put_get_3D_static_values");
 
   //Allocate and fill arrays
   T_send*** array = allocate_3D_array<T_send>(dims[0], dims[1], dims[2]);

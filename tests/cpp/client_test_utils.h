@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,13 +33,15 @@
 #include <random>
 
 #include "rediscluster.h"
+#include "srobject.h"
 
 using namespace SmartRedis;
 
 class RedisClusterTestObject : public RedisCluster
 {
     public:
-        RedisClusterTestObject() : RedisCluster() {};
+        RedisClusterTestObject(const SRObject* context)
+         : RedisCluster(context) {};
 
         std::string get_crc16_prefix(uint64_t hash_slot) {
             return _get_crc16_prefix(hash_slot);
