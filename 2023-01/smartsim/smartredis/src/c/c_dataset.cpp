@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ SRError CDataSet(const char* name, const size_t name_length, void** new_dataset)
   }
   catch (const std::bad_alloc& e) {
     *new_dataset = NULL;
-    SRSetLastError(SRBadAllocException("client allocation"));
+    SRSetLastError(SRBadAllocException("dataset allocation"));
     result = SRBadAllocError;
   }
   catch (const Exception& e) {
@@ -325,6 +325,116 @@ SRError get_meta_strings(void* dataset,
     DataSet* d = reinterpret_cast<DataSet*>(dataset);
     std::string key_str(name, name_length);
     d->get_meta_strings(key_str, *data, *n_strings, *lengths);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Retrieve the names of tensors in the DataSet
+extern "C"
+SRError get_tensor_names(
+  void* dataset, char*** data, size_t* n_strings, size_t** lengths)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(dataset != NULL && data != NULL &&
+                    n_strings != NULL && lengths != NULL);
+
+    DataSet* d = reinterpret_cast<DataSet*>(dataset);
+    d->get_tensor_names(*data, *n_strings, *lengths);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Retrieve the data type of a Tensor in the DataSet
+extern "C"
+SRError get_tensor_type(
+    void* dataset, const char* name, size_t name_len, SRTensorType* ttype)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(dataset != NULL && ttype != NULL);
+
+    DataSet* d = reinterpret_cast<DataSet*>(dataset);
+    std::string tensor_name(name, name_len);
+    SRTensorType result = d->get_tensor_type(tensor_name);
+    *ttype = result;
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Retrieve the names of all metadata fields in the DataSet
+extern "C"
+SRError get_metadata_field_names(
+  void* dataset, char*** data, size_t* n_strings, size_t** lengths)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(dataset != NULL && data != NULL &&
+                    n_strings != NULL && lengths != NULL);
+
+    DataSet* d = reinterpret_cast<DataSet*>(dataset);
+    d->get_metadata_field_names(*data, *n_strings, *lengths);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Retrieve the data type of a metadata field in the DataSet
+extern "C"
+SRError get_metadata_field_type(
+    void* dataset, const char* name, size_t name_len, SRMetaDataType* mdtype)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(dataset != NULL && mdtype != NULL);
+
+    DataSet* d = reinterpret_cast<DataSet*>(dataset);
+    std::string mdf_name(name, name_len);
+    SRMetaDataType result = d->get_metadata_field_type(mdf_name);
+    *mdtype = result;
   }
   catch (const Exception& e) {
     SRSetLastError(e);

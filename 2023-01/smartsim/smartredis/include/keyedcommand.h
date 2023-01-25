@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,6 +101,6 @@ class KeyedCommand : public Command
         virtual CommandReply run_me(RedisServer* server) = 0;
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //KEYEDCOMMAND
+#endif // SMARTREDIS_KEYEDCOMMAND_H

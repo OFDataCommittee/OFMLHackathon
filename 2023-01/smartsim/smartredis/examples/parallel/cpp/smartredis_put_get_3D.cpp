@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,13 +50,17 @@ int main(int argc, char* argv[]) {
     for(size_t i=0; i<n_values; i++)
         input_tensor[i] = 2.0*rand()/RAND_MAX - 1.0;
 
-    // Initialize a SmartRedis client
-    bool cluster_mode = true; // Set to false if not using a clustered database
-    SmartRedis::Client client(cluster_mode);
-
-    // Put the tensor in the database
+    // Get our rank
     int rank = 0;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    std::string logger_name("Client ");
+    logger_name += std::to_string(rank);
+
+    // Initialize a SmartRedis client
+    bool cluster_mode = true; // Set to false if not using a clustered database
+    SmartRedis::Client client(cluster_mode, logger_name);
+
+    // Put the tensor in the database
     std::string key = "3d_tensor_" + std::to_string(rank);
     client.put_tensor(key, input_tensor.data(), dims,
                       SRTensorTypeDouble, SRMemLayoutContiguous);

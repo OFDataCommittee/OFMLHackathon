@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,14 @@ add_executable(client_test_dataset_exists
 )
 
 target_link_libraries(client_test_dataset_exists
+	${SR_LIB}
+)
+
+add_executable(client_test_logging
+	client_test_logging.c
+)
+
+target_link_libraries(client_test_logging
 	${SR_LIB}
 )
 

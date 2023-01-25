@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,21 +29,19 @@
 #ifndef SMARTREDIS_DBNODE_H
 #define SMARTREDIS_DBNODE_H
 
-#include "stdlib.h"
+#include <stdlib.h>
 #include <string>
+#include "address.h"
 
 ///@file
 
 namespace SmartRedis {
 
-class DBNode;
-
-//@file
 /*!
 *   \brief The DBNode class stores connection and hash slot
 *          information for the database node.
 */
-class DBNode{
+class DBNode {
 
     public:
 
@@ -82,8 +80,7 @@ class DBNode{
         *   \brief DBNode constructor with connection
         *          and hash slot information.
         *   \param name The name of the DBNode
-        *   \param ip The IP address of the DBNode
-        *   \param port The port of the DBNode
+        *   \param addr_spec The TCP or UDS address of the database
         *   \param l_slot The lower hash slot of the DBNode
         *   \param u_slot The upper hash slot of the DBNode
         *   \param prefix A prefix that can be placed into
@@ -93,8 +90,7 @@ class DBNode{
         *
         */
         DBNode(std::string name,
-               std::string ip,
-               uint64_t port,
+               SRAddress& addr_spec,
                uint64_t l_slot,
                uint64_t u_slot,
                std::string prefix
@@ -115,14 +111,9 @@ class DBNode{
         bool operator<(const DBNode& db_node) const;
 
         /*!
-        *   \brief The IP address of the DBNode
+        *   \brief The TCP or UDS address of the DBNode
         */
-        std::string ip;
-
-        /*!
-        *   \brief The port of the DBNode
-        */
-        uint64_t port;
+        SRAddress address;
 
         /*!
         *   \brief The name of the DBNode
@@ -149,6 +140,6 @@ class DBNode{
 
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_DBNODE_H
+#endif // SMARTREDIS_DBNODE_H

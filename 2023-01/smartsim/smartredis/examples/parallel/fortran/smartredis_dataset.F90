@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+! Copyright (c) 2021-2023, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -85,7 +85,7 @@ program main
   if (result .ne. SRNoError) error stop 'dataset%get_meta_scalars failed'
 
   ! Initialize a client
-  result = client%initialize(.true.) ! Change .false. to .true. if not using a clustered database
+  result = client%initialize(.true., "smartredis_dataset") ! Change .false. to .true. if not using a clustered database
   if (result .ne. SRNoError) error stop 'client%initialize failed'
 
   ! Send the dataset to the database via the client

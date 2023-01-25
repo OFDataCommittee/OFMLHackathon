@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -64,6 +64,10 @@ def mock_data():
 @pytest.fixture
 def mock_model():
     return MockTestModel
+
+@pytest.fixture
+def context(request):
+    return request.node.name
 
 class MockTestData:
 

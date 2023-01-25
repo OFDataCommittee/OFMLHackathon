@@ -64,15 +64,16 @@ jobs:
           python-version: ${{ matrix.py_v }}
 
       # Install compilers
-      - name: Install GFortran Linux
+      - name: Install GCC
         if: "!contains( matrix.compiler, 'intel' )" # if using GNU compiler
         run: |
           sudo apt-get update &&
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test &&
           sudo apt-get update &&
-          sudo apt-get install -y gcc-${GCC_V} gfortran-${GCC_V} &&
+          sudo apt-get install -y gcc-${GCC_V} gfortran-${GCC_V} g++-${GCC_V} &&
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_V} 100 \
-          --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V}
+          --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V} \
+          --slave /usr/bin/g++ g++ /usr/bin/g++-${GCC_V}
 
       - name: Install Intel compiler
         if: "contains( matrix.compiler, 'intel' )" # if using intel compiler
@@ -95,7 +96,7 @@ jobs:
         run: sudo apt-get install cmake
 
       - name: Build SmartRedis python and install
-        run: python -m pip install -e .[dev]
+        run: python -m pip install -e .[dev,xarray]
 
       # CI tests that should be run with standalone Redis go here
       - name: Build and run tests
@@ -105,6 +106,9 @@ jobs:
             bash ../build-scripts/build-lcov.sh &&
             bash ../build-scripts/build-catch.sh &&
             cd ../ &&
+            export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib &&
+            export SR_LOG_FILE=smartredis_cicd_tests_log.txt &&
+            export SR_LOG_LEVEL=INFO &&
             make test-verbose
 
       - name: Run Python coverage tests
@@ -159,5 +163,9 @@ jobs:
 
       # CI tests that should be run with clustered Redis go here
       - name: Run testing with redis cluster
-        run: make test-verbose
+        run: |
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib &&
+          export SR_LOG_FILE=smartredis_cicd_tests_log.txt &&
+          export SR_LOG_LEVEL=INFO &&
+          make test-verbose
 

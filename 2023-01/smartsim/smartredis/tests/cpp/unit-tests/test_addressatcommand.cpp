@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,11 +28,18 @@
 
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "addressatcommand.h"
+#include "logger.h"
+
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
 SCENARIO("Ensuring the iterators for an AddressAtCommand are correct", "[AddressAtCommand]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Ensuring the iterators for an AddressAtCommand are correct" << std::endl;
+    std::string context("test_addressatcommand");
+    log_data(context, LLDebug, "***Beginning AddressAtCommand testing***");
+
     GIVEN("An AddressAtCommand with a single field")
     {
         AddressAtCommand cmd;
@@ -56,10 +63,15 @@ SCENARIO("Ensuring the iterators for an AddressAtCommand are correct", "[Address
             }
         }
     }
+    log_data(context, LLDebug, "***End AddressAtCommand testing***");
 }
 
 SCENARIO("Testing assignment operator for AddressAtCommand on heap", "[AddressAtCommand]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing assignment operator for AddressAtCommand on heap" << std::endl;
+    std::string context("test_addressatcommand");
+    log_data(context, LLDebug, "***Beginning AddressAtCommand heap testing***");
+
     GIVEN("An AddressAtCommand object on the heap")
     {
         AddressAtCommand* cmd = new AddressAtCommand;
@@ -126,11 +138,14 @@ SCENARIO("Testing assignment operator for AddressAtCommand on heap", "[AddressAt
             }
         }
     }
+    log_data(context, LLDebug, "***End AddressAtCommand heap testing***");
 }
 
 SCENARIO("Testing AddressAtCommand member variables", "[AddressAtCommand]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing AddressAnyCommand member variables" << std::endl;
+    std::string context("test_addressatcommand");
+    log_data(context, LLDebug, "***Beginning AddressAtCommand variable testing***");
     GIVEN("An AddressAtCommand object")
     {
         AddressAtCommand* cmd = new AddressAtCommand;
@@ -140,8 +155,9 @@ SCENARIO("Testing AddressAtCommand member variables", "[AddressAtCommand]")
 
             THEN("The command's address will be an empty string")
             {
-                CHECK(cmd->get_address() == "");
+                CHECK(cmd->get_address()._tcp_host == "");
             }
         }
     }
+    log_data(context, LLDebug, "***End AddressAtCommand variable testing***");
 }

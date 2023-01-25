@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,11 +34,12 @@
 #include "command.h"
 #include "srexception.h"
 
+///@file
+
 namespace SmartRedis {
 
 class CommandList;
 
-//@file
 /*!
 *   \brief The CommandList class constructs multiple Client
 *          Command.
@@ -154,6 +155,6 @@ class CommandList
 
 #include "commandlist.tcc"
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_COMMANDLIST_H
+#endif // SMARTREDIS_COMMANDLIST_H

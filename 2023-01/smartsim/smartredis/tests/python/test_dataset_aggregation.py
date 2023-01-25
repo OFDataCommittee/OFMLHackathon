@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,23 +29,28 @@ import numpy as np
 import pytest
 from smartredis import Client, Dataset
 from smartredis.error import *
+from smartredis import *
 
 
-def test_aggregation(use_cluster):
+def test_aggregation(use_cluster, context):
     num_datasets = 4
-    client = Client(None, use_cluster)
+    client = Client(None, use_cluster, logger_name=context)
+    log_data(context, LLDebug, "Initialization complete")
 
     # Build datasets
     original_datasets = [create_dataset(f"dataset_{i}") for i in range(num_datasets)]
+    log_data(context, LLDebug, "DataSets built")
 
     # Make sure the list is cleared
     list_name = "dataset_test_list"
     client.delete_list(list_name)
+    log_data(context, LLDebug, "list cleared")
 
     # Put datasets into the list
     for i in range(num_datasets):
         client.put_dataset(original_datasets[i])
         client.append_to_list(list_name, original_datasets[i])
+    log_data(context, LLDebug, "DataSets added to list")
 
     # Confirm that poll for list length works correctly
     actual_length = num_datasets
@@ -54,12 +59,14 @@ def test_aggregation(use_cluster):
         raise RuntimeError(
             f"Polling for list length of {actual_length} returned "
             f"False for known length of {actual_length}.")
+    log_data(context, LLDebug, "Polling 1")
 
     poll_result = client.poll_list_length(list_name, actual_length + 1, 100, 5)
     if (poll_result == True):
         raise RuntimeError(
             f"Polling for list length of {actual_length + 1} returned "
             f"True for known length of {actual_length}.")
+    log_data(context, LLDebug, "Polling 2")
 
     # Confirm that poll for greater than or equal list length works correctly
     poll_result = client.poll_list_length_gte(list_name, actual_length - 1, 100, 5)
@@ -67,18 +74,21 @@ def test_aggregation(use_cluster):
         raise RuntimeError(
             f"Polling for list length greater than or equal to {actual_length - 1} "
             f"returned False for known length of {actual_length}.")
+    log_data(context, LLDebug, "Polling 3")
 
     poll_result = client.poll_list_length_gte(list_name, actual_length, 100, 5)
     if (poll_result == False):
         raise RuntimeError(
             f"Polling for list length greater than or equal to {actual_length} "
             f"returned False for known length of {actual_length}.")
+    log_data(context, LLDebug, "Polling 4")
 
     poll_result = client.poll_list_length_gte(list_name, actual_length + 1, 100, 5)
     if (poll_result == True):
         raise RuntimeError(
             f"Polling for list length greater than or equal to {actual_length + 1} "
             f"returned True for known length of {actual_length}.")
+    log_data(context, LLDebug, "Polling 5")
 
     # Confirm that poll for less than or equal list length works correctly
     poll_result = client.poll_list_length_lte(list_name, actual_length - 1, 100, 5)
@@ -86,26 +96,29 @@ def test_aggregation(use_cluster):
         raise RuntimeError(
             f"Polling for list length less than or equal to {actual_length - 1} "
             f"returned True for known length of {actual_length}.")
+    log_data(context, LLDebug, "Polling 6")
 
     poll_result = client.poll_list_length_lte(list_name, actual_length, 100, 5)
     if (poll_result == False):
         raise RuntimeError(
             f"Polling for list length less than or equal to {actual_length} "
             f"returned False for known length of {actual_length}.")
+    log_data(context, LLDebug, "Polling 7")
 
     poll_result = client.poll_list_length_lte(list_name, actual_length + 1, 100, 5)
     if (poll_result == False):
         raise RuntimeError(
             f"Polling for list length less than or equal to {actual_length + 1} "
             f"returned False for known length of {actual_length}.")
+    log_data(context, LLDebug, "Polling 8")
 
     # Check the list length
     list_length = client.get_list_length(list_name)
-
     if (list_length != actual_length):
         raise RuntimeError(
             f"The list length of {list_length} does not match expected "
             f"value of {actual_length}.")
+    log_data(context, LLDebug, "List length check")
 
     # Retrieve datasets via the aggregation list
     datasets = client.get_datasets_from_list(list_name)
@@ -115,6 +128,7 @@ def test_aggregation(use_cluster):
             f"does not match expected value of {list_length}.")
     for ds in datasets:
         check_dataset(ds)
+    log_data(context, LLDebug, "DataSet retrieval")
 
 # ------------ helper functions ---------------------------------
 

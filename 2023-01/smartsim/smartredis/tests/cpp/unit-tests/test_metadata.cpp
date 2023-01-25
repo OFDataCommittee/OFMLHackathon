@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,9 @@
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "metadata.h"
 #include "srexception.h"
+#include "logger.h"
+
+unsigned long get_time_offset();
 
 // helper function for checking if the MetaData object was copied correctly
 void check_metadata_copied_correctly(MetaData metadata, MetaData metadata_cpy)
@@ -128,7 +131,9 @@ void check_metadata_copied_correctly(MetaData metadata, MetaData metadata_cpy)
 
 SCENARIO("Test MetaData", "[MetaData]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Test MetaData" << std::endl;
+    std::string context("test_metadata");
+    log_data(context, LLDebug, "***Beginning Metadata testing***");
     GIVEN("A MetaData object")
     {
         MetaData metadata;
@@ -355,4 +360,5 @@ SCENARIO("Test MetaData", "[MetaData]")
             }
         }
     }
+    log_data(context, LLDebug, "***End DBNode testing***");
 }

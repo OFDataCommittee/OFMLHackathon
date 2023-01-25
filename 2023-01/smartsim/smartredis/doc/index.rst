@@ -9,6 +9,7 @@
 
    overview
    data_structures
+   dataset_conversions
    installation
    testing
    runtime

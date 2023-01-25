@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@ void rename_dataset(std::string keyout)
 {
     std::vector<size_t> dims({10,10,2});
 
-    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster());
+    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster(), "client_test_ensemble_dataset");
     client.use_tensor_ensemble_prefix(true);
 
     double*** t_send_1 =
@@ -137,7 +137,7 @@ void add_to_aggregation_list(std::string keyout)
 {
     std::vector<size_t> dims({10,10,2});
 
-    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster());
+    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster(), "client_test_ensemble_dataset");
     client.use_tensor_ensemble_prefix(true);
     client.use_list_ensemble_prefix(true);
 
@@ -244,40 +244,28 @@ int main(int argc, char* argv[]) {
 
     const char* old_keyin = std::getenv("SSKEYIN");
     const char* old_keyout = std::getenv("SSKEYOUT");
-    char keyin_env_put[] = "SSKEYIN=producer_0,producer_1";
-    char keyout_env_put[] = "SSKEYOUT=producer_0";
-    putenv( keyin_env_put );
-    putenv( keyout_env_put );
+    const char* keyin_env_put = "producer_0,producer_1";
+    const char* keyout_env_put = "producer_0";
+    setenv("SSKEYIN", keyin_env_put, (NULL != old_keyin));
+    setenv("SSKEYOUT", keyout_env_put, (NULL != old_keyout));
 
     rename_dataset("producer_0");
     add_to_aggregation_list("producer_0");
 
     if (old_keyin != nullptr) {
-        std::string reset_keyin = std::string("SSKEYIN=") + std::string(old_keyin);
-        char* reset_keyin_c = new char[reset_keyin.size() + 1];
-        std::copy(reset_keyin.begin(), reset_keyin.end(), reset_keyin_c);
-        reset_keyin_c[reset_keyin.size()] = '\0';
-        putenv( reset_keyin_c);
-        delete [] reset_keyin_c;
+        setenv("SSKEYIN", old_keyin, 1);
     }
     else {
         unsetenv("SSKEYIN");
     }
 
     if (old_keyout != nullptr) {
-        std::string reset_keyout = std::string("SSKEYOUT=") + std::string(old_keyout);
-        char* reset_keyout_c = new char[reset_keyout.size() + 1];
-        std::copy(reset_keyout.begin(), reset_keyout.end(), reset_keyout_c);
-        reset_keyout_c[reset_keyout.size()] = '\0';
-        putenv( reset_keyout_c);
-        delete [] reset_keyout_c;
+        setenv("SSKEYOUT", old_keyout, 1);
     }
     else {
         unsetenv("SSKEYOUT");
     }
 
-
     std::cout<<"Ensemble test complete"<<std::endl;
-
     return 0;
 }

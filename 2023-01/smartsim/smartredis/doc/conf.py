@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'SmartRedis'
-copyright = '2022, Hewlett Packard Enterprise'
+copyright = '2021-2023, Hewlett Packard Enterprise'
 author = 'Hewlett Packard Enterprise'
 
 # The full version, including alpha/beta/rc tags
@@ -68,7 +68,7 @@ fortran_src = [
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = "sphinx_rtd_theme"
+html_theme = "sphinx_book_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

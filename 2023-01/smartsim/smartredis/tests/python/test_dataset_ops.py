@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,12 +31,12 @@ from smartredis import Client, Dataset
 from smartredis.error import *
 
 
-def test_copy_dataset(use_cluster):
+def test_copy_dataset(use_cluster, context):
     # test copying dataset from one key to another
 
     dataset = create_dataset("test_dataset_copy")
 
-    client = Client(None, use_cluster)
+    client = Client(None, use_cluster, logger_name=context)
     client.put_dataset(dataset)
 
     client.copy_dataset("test_dataset_copy", "test_dataset_copied")
@@ -67,12 +67,12 @@ def test_copy_dataset(use_cluster):
     )
 
 
-def test_rename_dataset(use_cluster):
+def test_rename_dataset(use_cluster, context):
     # test renaming a dataset in the database
 
     dataset = create_dataset("dataset_rename")
 
-    client = Client(None, use_cluster)
+    client = Client(None, use_cluster, logger_name=context)
     client.put_dataset(dataset)
 
     client.rename_dataset("dataset_rename", "dataset_renamed")
@@ -105,12 +105,12 @@ def test_rename_dataset(use_cluster):
     )
 
 
-def test_delete_dataset(use_cluster):
+def test_delete_dataset(use_cluster, context):
     # test renaming a dataset in the database
 
     dataset = create_dataset("dataset_delete")
 
-    client = Client(None, use_cluster)
+    client = Client(None, use_cluster, logger_name=context)
     client.put_dataset(dataset)
 
     client.delete_dataset(
@@ -123,25 +123,25 @@ def test_delete_dataset(use_cluster):
 # ----------- Error handling ------------------------------------
 
 
-def test_rename_nonexisting_dataset(use_cluster):
+def test_rename_nonexisting_dataset(use_cluster, context):
 
-    client = Client(None, use_cluster)
+    client = Client(None, use_cluster, logger_name=context)
     with pytest.raises(RedisReplyError):
         client.rename_dataset("not-a-tensor", "still-not-a-tensor")
 
 
-def test_copy_nonexistant_dataset(use_cluster):
+def test_copy_nonexistant_dataset(use_cluster, context):
 
-    client = Client(None, use_cluster)
+    client = Client(None, use_cluster, logger_name=context)
     with pytest.raises(RedisReplyError):
         client.copy_dataset("not-a-tensor", "still-not-a-tensor")
 
 
-def test_copy_not_dataset(use_cluster):
+def test_copy_not_dataset(use_cluster, context):
     def test_func(param):
         print(param)
 
-    client = Client(None, use_cluster)
+    client = Client(None, use_cluster, logger_name=context)
     client.set_function("test_func_dataset", test_func)
     with pytest.raises(RedisReplyError):
         client.copy_dataset("test_func_dataset", "test_fork_dataset")

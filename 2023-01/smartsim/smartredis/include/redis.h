@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,14 +26,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SMARTREDIS_CPP_REDIS_H
-#define SMARTREDIS_CPP_REDIS_H
+#ifndef SMARTREDIS_REDIS_H
+#define SMARTREDIS_REDIS_H
 
 #include "redisserver.h"
 
+///@file
+
 namespace SmartRedis {
 
-///@file
+class SRObject;
 
 /*!
 *   \brief  The Redis class executes RedisServer
@@ -44,17 +46,18 @@ class Redis : public RedisServer
     public:
         /*!
         *   \brief Redis constructor.
+        *   \param context The owning context
         */
-        Redis();
+        Redis(const SRObject* context);
 
         /*!
         *   \brief Redis constructor.
         *          Uses address provided to constructor instead
         *          of environment variables.
-        *   \param address_port The address and port in the form of
-        *                       "tcp://address:port"
+        *   \param context The owning context
+        *   \param addr_spec The TCP or UDS server address
         */
-        Redis(std::string address_port);
+        Redis(const SRObject* context, std::string addr_spec);
 
         /*!
         *   \brief Redis copy constructor is not allowed
@@ -192,11 +195,10 @@ class Redis : public RedisServer
 
         /*!
          *  \brief Check if address is valid
-         *  \param address Address of database
-         *  \param port Port of database
+         *  \param address Address (TCP or UDS) of database
          *  \return True if address is valid
          */
-        virtual bool is_addressable(const std::string& address, const uint64_t& port);
+        virtual bool is_addressable(const SRAddress& address) const;
 
         /*!
         *   \brief Put a Tensor on the server
@@ -505,21 +507,18 @@ class Redis : public RedisServer
         inline CommandReply _run(const Command& cmd);
 
         /*!
-        *   \brief Inserts a string formatted as address:port
-                   into _address_node_map. Strips the protocol
-                   (tcp:// or unix://) before inserting.
-        *   \param address_port A string formatted as protocol://address:port
+        *   \brief Inserts an address into _address_node_map
+        *   \param db_address The server address
         */
-        inline void _add_to_address_map(std::string address_port);
+        inline void _add_to_address_map(SRAddress& db_address);
 
         /*!
         *   \brief Connect to the server at the address and port
-        *   \param address_port A string formatted as tcp://address:port
-        *                       for redis connection
+        *   \param db_address The server address
         */
-        inline void _connect(std::string address_port);
+        inline void _connect(SRAddress& db_address);
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_CPP_REDIS_H
+#endif // SMARTREDIS_REDIS_H

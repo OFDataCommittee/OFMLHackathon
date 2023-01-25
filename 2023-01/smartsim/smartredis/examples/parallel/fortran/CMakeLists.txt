@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,50 +35,47 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 99)
 
+# Assume by default that users should link against the install directory in this repository
+if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
+  set(SMARTREDIS_INSTALL_PATH "../../../install/")
+endif()
+
+# Specify all pre-processor and library dependencies
 find_package(MPI REQUIRED)
 IF(NOT MPI_Fortran_FOUND)
 	message(FATAL_ERROR "Could not find Fortran MPI components")
 endif()
-
-find_library(SR_LIB smartredis PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
-
+find_library(SMARTREDIS_LIBRARY smartredis PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(SMARTREDIS_FORTRAN_LIBRARY smartredis-fortran PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(HIREDIS hiredis PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(REDISPP redis++ PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH REQUIRED)
+set(SMARTREDIS_LIBRARIES
+	${SMARTREDIS_LIBRARY}
+	${SMARTREDIS_FORTRAN_LIBRARY}
+	${HIREDIS}
+	${REDISPP}
+)
 include_directories(SYSTEM
     /usr/local/include
     ${MPI_INCLUDE_PATH}
-    ../../../install/include
+    ${SMARTREDIS_INSTALL_PATH}/include
 )
 
-set(ftn_client_src
-    ../../../src/fortran/fortran_c_interop.F90
-    ../../../src/fortran/dataset.F90
-    ../../../src/fortran/client.F90
+# Define all the tests to be built
+list(APPEND EXECUTABLES
+	 smartredis_dataset
+	 smartredis_mnist
+	 smartredis_put_get_3D
 )
 
-# build executables
+foreach(EXECUTABLE ${EXECUTABLES})
 
-add_executable(smartredis_put_get_3D
-	smartredis_put_get_3D.F90
-	${ftn_client_src}
-)
-target_link_libraries(smartredis_put_get_3D
-	MPI::MPI_Fortran
-	${SR_LIB}
-)
-
-add_executable(smartredis_mnist
-	smartredis_mnist.F90
-	${ftn_client_src}
-)
-target_link_libraries(smartredis_mnist
-	MPI::MPI_Fortran
-	${SR_LIB}
-)
-
-add_executable(smartredis_dataset
-	smartredis_dataset.F90
-	${ftn_client_src}
-)
-target_link_libraries(smartredis_dataset
-	MPI::MPI_Fortran
-	${SR_LIB}
-)
+	add_executable(${EXECUTABLE}
+		${EXECUTABLE}.F90
+		example_utils.F90
+	)
+	target_link_libraries(${EXECUTABLE}
+		${SMARTREDIS_LIBRARIES}
+		MPI::MPI_Fortran
+	)
+endforeach()

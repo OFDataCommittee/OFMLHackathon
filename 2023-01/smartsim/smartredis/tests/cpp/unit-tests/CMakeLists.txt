@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@ include_directories(SYSTEM
 
 # The source files to assess coverage on
 set(SOURCES
+	../../../src/cpp/address.cpp
 	../../../src/cpp/addressanycommand.cpp
 	../../../src/cpp/addressatcommand.cpp
 	../../../src/cpp/addressallcommand.cpp
@@ -63,7 +64,7 @@ set(SOURCES
 	../../../src/cpp/metadatafield.cpp
 	../../../src/cpp/multikeycommand.cpp
 	../../../src/cpp/nonkeyedcommand.cpp
-    ../../../src/cpp/pipelinereply.cpp
+	../../../src/cpp/pipelinereply.cpp
 	../../../src/cpp/redis.cpp
 	../../../src/cpp/rediscluster.cpp
 	../../../src/cpp/redisserver.cpp
@@ -72,12 +73,15 @@ set(SOURCES
 	../../../src/cpp/tensorbase.cpp
 	../../../src/cpp/tensorpack.cpp
 	../../../src/cpp/threadpool.cpp
+    ../../../src/cpp/utility.cpp
+    ../../../src/cpp/logger.cpp
+    ../../../src/cpp/srobject.cpp
 )
 
 # The unit tests to be executed
 set(UNIT_TESTS
 	main.cpp
-    test_aggregation_list.cpp
+	test_aggregation_list.cpp
 	test_client.cpp
 	test_client_ensemble.cpp
 	test_dataset.cpp
@@ -87,7 +91,6 @@ set(UNIT_TESTS
 	test_tensor.cpp
 	test_metadata.cpp
 	test_stringfield.cpp
-	test_ssdb.cpp
 	test_commandreply.cpp
 	test_singlekeycommand.cpp
 	test_addressatcommand.cpp
@@ -96,7 +99,9 @@ set(UNIT_TESTS
 	test_addressanycommand.cpp
 	test_dbinfocommand.cpp
 	test_clusterinfocommand.cpp
-    test_redisserver.cpp
+	test_redisserver.cpp
+	test_logger.cpp
+	test_ssdb.cpp
 )
 
 # Compare the number of source files given above to the number of source CPP
