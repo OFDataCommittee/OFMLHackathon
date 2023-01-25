@@ -170,6 +170,14 @@ class smartSimFunctionObject
         //- Set to false if not using a clustered database 
         bool clusterMode_;
         
+        //- List of field names to send-receive from SmartRedis
+        wordList fieldNames_;
+
+        //- List of field dimensions to send-receive from SmartRedis. In a
+        //  list (1,3,6), 1 is scalar field dimension, 3 is a vector field
+        //  dimension and 6 is a symmetric tensor field dimension.
+        labelList fieldDimensions_;
+        
         //- SmartRedis Database Client
         SmartRedis::Client client_;
 
