@@ -25,6 +25,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "IOdictionary.H"
 #include "objectRegistry.H"
 #include "smartSimFunctionObject.H"
 #include "Time.H"
@@ -77,6 +78,15 @@ bool Foam::functionObjects::smartSimFunctionObject::read(const dictionary& dict)
 
 bool Foam::functionObjects::smartSimFunctionObject::execute()
 {
+    if (time_.timeIndex() == 1)
+    {
+        // TODO(TM): 
+        // - get non-const refs to the fields.
+        // - for all fields 
+        //  - read the field model from the database 
+        //  - overwrite the field with the field model
+    }
+
     return true;
 }
 
