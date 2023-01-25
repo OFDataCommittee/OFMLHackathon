@@ -7,6 +7,11 @@
 from smartsim import Experiment
 from smartredis import Client 
 import torch
+import numpy as np
+
+def calc_svd(input_tensor):
+    # SVD function from TorchScript API
+    return input_tensor.svd()
 
 openfoam_case = "pitzDaily"
 
@@ -40,14 +45,26 @@ exp.start(simpleFoam_model, block=True, summary=True)
 # Fetch the fields from the database 
 client = Client(address=db.get_address()[0], cluster=False)
 
-# We need field metadata 
-# - function object is not aware of the parameterization. 
-# - how does  
-# parameterization, we run the parameter variation from here. 
-# On the other hand,   
-vfield = client.get_tensor("p")
+# TODO(TM): case parameterization 
+# - Parameterize with PyFoam 
+# - Ensure that fields stored in the database by the FunctionObject
+#   are associated with the parameter vector. 
+# - Extend the SVD to include parameterization, instead of p 
+# - [p_nu1, p_nu2..]
+# - [u_nu1, u_nu2..]
+# - One SVD if stacked, two (n for n fields) otherwise
+# - Replace p with system.controlDict.funcitons.smartRedis FO list
+# - Where does the decomposition take place in parallel? 
+client.set_function("svd", calc_svd)
+client.run_script("svd", "calc_svd", ["p"], ["U", "S", "V"])
 
-torch.svd(torch.from_numpy(vfield))
+U = client.get_tensor("U")
+S = client.get_tensor("S")
+V = client.get_tensor("V")
+print(f"U: {U}\n\n, S: {S}\n\n, V: {V}\n")
+
+p_svd = np.dot(U, np.dot(S, V))
+client.put_tensor("p_svd", p_svd)
 
 # stop the database
 exp.stop(db)
