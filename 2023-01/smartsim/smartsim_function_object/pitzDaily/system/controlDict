@@ -53,11 +53,9 @@ functions
     smartSim 
     {
         type smartSimFunctionObject;
-
-        boolData off; 
-        labelData 1; 
-        wordData cool;
-        scalarData 3.14;
+        clusterMode off; 
+        fieldNames (p); 
+        fieldDimensions (1); 
     }
 }
 
