@@ -1,0 +1,46 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+# Make 2D mesh in slab of cells.
+(
+    cd ahmedBody2D_snappyHexMesh || exit
+
+    mkdir -p constant/triSurface
+
+    cp -rf \
+        ./geometry/ahmed_25deg_m.stl \
+        constant/triSurface/
+
+    runApplication blockMesh
+
+    runApplication snappyHexMesh -overwrite
+
+    runApplication extrudeMesh
+
+    runApplication createPatch -overwrite
+)
+
+# Run DNS pimpleFoam on the 2D mesh
+(
+    cd ahmedBody2D_pimpleFoam || exit
+
+    rm -rf constant/polyMesh
+
+    cp -rf \
+        ../ahmedBody2D_snappyHexMesh/constant/polyMesh \
+        constant
+
+    runApplication topoSet
+
+    runApplication createPatch -overwrite
+
+    restore0Dir
+
+    runApplication decomposePar
+
+    runParallel $(getApplication)
+)
+
+#------------------------------------------------------------------------------

@@ -1,0 +1,37 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2206                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// The topoSetDict comprises a list of actions to perform on different
+// set types (cellSet, faceSet, pointSet, etc).
+
+actions
+(
+  {
+    name    jet1Set;
+    type    faceSet;
+    action  new;
+    source  boxToFace;
+    box (0.94 0.03 0.226505) (0.944 0.07 0.233872);;
+  }
+  {
+    name    jet2Set;
+    type    faceSet;
+    action  new;
+    source  boxToFace;
+    box (0.94 0.03 0.057) (0.944 0.07 0.065);
+  }
+);
+
+// ************************************************************************* //
