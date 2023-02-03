@@ -54,8 +54,26 @@ functions
     {
         type smartSimFunctionObject;
         clusterMode off; 
-        fieldNames (p); 
-        fieldDimensions (1); 
+        fieldNames 
+        (
+            // epsilon  
+            // k  
+            // nut  
+            // nuTilda  
+            // omega  
+            p  
+            U
+        ); 
+        fieldDimensions 
+        (
+            // 1 
+            // 1 
+            // 1 
+            // 1 
+            // 1 
+            1 
+            3 
+        ); 
     }
 }
 
