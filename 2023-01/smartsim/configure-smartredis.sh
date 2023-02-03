@@ -3,8 +3,8 @@
 # Define environmental variables for including and linking SmartRedis in
 # OpenFOAM applications and libraries.
 
-echo The script configure-smartredis.sh must be sourced from the folder it is stored in.
-echo Otherwise, the include files for OpenFOAM application/library compilations will be wrong.
+echo Warning: make sure you sourced configure-smartredis.sh in its folder. 
+# Otherwise, the include files for OpenFOAM application/library compilations will be wrong.
 
 export FOAM_SMARTREDIS=$PWD/smartredis
 export FOAM_SMARTREDIS_INCLUDE=$FOAM_SMARTREDIS/include

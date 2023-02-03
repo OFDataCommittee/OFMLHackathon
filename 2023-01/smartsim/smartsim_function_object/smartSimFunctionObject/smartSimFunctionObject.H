@@ -209,17 +209,13 @@ public:
 
 
     // Member Functions
-
-        //- Read the smartSimFunctionObject data
+    
         virtual bool read(const dictionary& dict);
 
-        //- Execute, currently does nothing
         virtual bool execute();
 
-        //- Execute at the final time-loop, currently does nothing
         virtual bool end();
 
-        //- Write the smartSimFunctionObject
         virtual bool write();
 };
 
