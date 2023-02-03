@@ -83,3 +83,5 @@ doc/Doxygen/DTAGS
 polyMesh/
 *.out
 *.err
+*.csv
+*.dat 
