@@ -10,6 +10,6 @@ This folder contains the solutions to the SmartSim-OpenFOAM Hackathon challenge.
     
     * `smartsim_function_object`: a Function Object that writes OpenFOAM fields into the SmartRedis Database, and a Machine Learning Model (torch.svd) "trained" on OpenFOAM fields. 
 
-    * `smartsim_function_object`: a parameter variation version of `smartsim_function_object` 
+    * `smartsim_function_object_parameterized`: a parameter variation version of `smartsim_function_object` 
     
     * `smartredis-simpleFoam`: **EXPERIMENTAL**: a modification of the `simpleFoam` solver for communication with the smartredis database. Parameterization requires modification of smartsim.Ensemble
