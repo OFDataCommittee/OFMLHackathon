@@ -3,8 +3,8 @@
 # This defines a smartsim experiment that runs the simpleFoam solver 
 # and the pitzDaily case that uses the smartSimFunctionObject. The 
 # smartSimFunctionObject writes a list of OpenFOAM fields to the 
-# smartredis database, the ML model reads them, performs SVD and stores
-# their approximate fields back into the database. 
+# smartredis database, the smartsim client reads them, and performs 
+# singular value decomposition of the field. 
 
 # PyFoam for OpenFOAM input file and folder manipulation 
 from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
