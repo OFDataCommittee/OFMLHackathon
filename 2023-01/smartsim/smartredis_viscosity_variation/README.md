@@ -13,7 +13,7 @@ Two Key points:
   ```bash
   # Do this if you already have a version of smarsim installed  along with everything else
   pip3 install git+https://github.com/FoamScience/SmartSim@multi_step_jobs#egg=smartsim
-- `````
+  ```
 - The input case [input/pitzDaily](input/pitzDaily)
   has a "tagged" `constant/transportProperties` which uses the target parameter (`;nu;`) for parameter
   variation on viscosity
