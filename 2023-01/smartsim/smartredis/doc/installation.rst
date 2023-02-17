@@ -69,19 +69,10 @@ Build and Install SmartRedis Python Client from Release
 
 .. include:: ./install/python_client.rst
 
-----------------------------------------------
-
-Build SmartRedis Library from Release
-=====================================
+Build SmartRedis Library from Source
+====================================
 
 .. include:: ./install/lib.rst
-
------------------------------------------------
-
-Build SmartRedis from Source
-============================
-
-.. include:: ./install/from_source.rst
 
 Build SmartRedis Docker Image
 =============================

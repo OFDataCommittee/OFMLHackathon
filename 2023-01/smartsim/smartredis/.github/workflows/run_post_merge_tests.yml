@@ -60,15 +60,16 @@ jobs:
           python-version: ${{ matrix.py_v }}
 
       # Install compilers
-      - name: Install GFortran Linux
+      - name: Install GCC
         if: "!contains( matrix.compiler, 'intel' )" # if using GNU compiler
         run: |
           sudo apt-get update &&
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test &&
           sudo apt-get update &&
-          sudo apt-get install -y gcc-${GCC_V} gfortran-${GCC_V} &&
+          sudo apt-get install -y gcc-${GCC_V} gfortran-${GCC_V} g++-${GCC_V} &&
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_V} 100 \
-          --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V}
+          --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V} \
+          --slave /usr/bin/g++ g++ /usr/bin/g++-${GCC_V}
 
       - name: Install Intel compiler
         if: "contains( matrix.compiler, 'intel' )" # if using intel compiler
@@ -137,5 +138,9 @@ jobs:
 
       - name: Build and run examples # Only with GNU compiler as that's what mpich is built for
         if: contains(matrix.os, 'ubuntu') && !contains(matrix.compiler, 'intel')
-        run: make test-examples
+        run: |
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib &&
+          export SR_LOG_FILE=smartredis_examples_log.txt &&
+          export SR_LOG_LEVEL=INFO &&
+          make test-examples
 

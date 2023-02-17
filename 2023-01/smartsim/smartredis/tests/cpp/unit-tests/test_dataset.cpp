@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,17 +30,21 @@
 #include "dataset.h"
 #include "srexception.h"
 #include <cxxabi.h>
+#include "logger.h"
+
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
 const char *currentExceptionTypeName() {
-    int status;
-//    return abi::__cxa_demangle(abi::__cxa_current_exception_type()->name(), 0, 0, &status);
     return abi::__cxa_current_exception_type()->name();
 }
 
 SCENARIO("Testing DataSet object", "[DataSet]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing DataSet object" << std::endl;
+    std::string context("test_dataset");
+    log_data(context, LLDebug, "***Beginning DataSet testing***");
 
     GIVEN("A DataSet object")
     {
@@ -206,4 +210,73 @@ SCENARIO("Testing DataSet object", "[DataSet]")
             }
         }
     }
+    log_data(context, LLDebug, "***End DataSet testing***");
+}
+
+SCENARIO("Testing DataSet inspection", "[DataSet]")
+{
+    std::cout << std::to_string(get_time_offset()) << ": Testing DataSet inspection" << std::endl;
+    std::string context("test_dataset_inspection");
+    log_data(context, LLDebug, "***Beginning DataSet Inspection testing***");
+
+    GIVEN("A DataSet object")
+    {
+        std::string dataset_name;
+        dataset_name = "dataset_name";
+        SmartRedis::DataSet dataset(dataset_name);
+
+        WHEN("Meta data is added to the DataSet")
+        {
+            std::string float_scalar_name = "flt_meta_scalar";
+            float meta_scalar = 10.0;
+            SRMetaDataType type = SRMetadataTypeFloat;
+            CHECK(dataset.has_field(float_scalar_name) == false);
+            dataset.add_meta_scalar(float_scalar_name, &meta_scalar, type);
+            CHECK(dataset.has_field(float_scalar_name) == true);
+
+            std::string i32_scalar_name = "i32_meta_scalar";
+            int32_t int_32_scalar = 42;
+            type = SRMetadataTypeInt32;
+            CHECK(dataset.has_field(i32_scalar_name) == false);
+            dataset.add_meta_scalar(i32_scalar_name, &int_32_scalar, type);
+            CHECK(dataset.has_field(i32_scalar_name) == true);
+
+            std::string string_scalar_name = "string_meta_scalar";
+            std::string string_scalar = "Hello, world";
+            CHECK(dataset.has_field(string_scalar_name) == false);
+            dataset.add_meta_string(string_scalar_name, string_scalar);
+            CHECK(dataset.has_field(string_scalar_name) == true);
+
+            THEN("The metadata can be inspected")
+            {
+                auto names = dataset.get_metadata_field_names();
+                CHECK(names.size() == 3);
+                CHECK(std::find(names.begin(), names.end(), float_scalar_name) != names.end());
+                CHECK(std::find(names.begin(), names.end(), i32_scalar_name) != names.end());
+                CHECK(std::find(names.begin(), names.end(), string_scalar_name) != names.end());
+
+                CHECK(SRMetadataTypeFloat == dataset.get_metadata_field_type(float_scalar_name));
+                CHECK(SRMetadataTypeInt32 == dataset.get_metadata_field_type(i32_scalar_name));
+                CHECK(SRMetadataTypeString == dataset.get_metadata_field_type(string_scalar_name));
+            }
+        }
+
+        AND_WHEN("A tensor is added to the DataSet")
+        {
+            std::string tensor_name = "test_tensor";
+            std::vector<size_t> dims = {1, 2, 3};
+            SRTensorType type = SRTensorTypeFloat;
+            size_t tensor_size = dims.at(0) * dims.at(1) * dims.at(2);
+            std::vector<float> tensor(tensor_size, 2.0);
+            void* data = tensor.data();
+            SRMemoryLayout mem_layout = SRMemLayoutContiguous;
+            dataset.add_tensor(tensor_name, data, dims, type, mem_layout);
+
+            THEN("The tensor's type can be inspected")
+            {
+                CHECK(SRTensorTypeFloat == dataset.get_tensor_type(tensor_name));
+            }
+        }
+    }
+    log_data(context, LLDebug, "***End DataSet testing***");
 }

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SMARTREDIS_ASSERT_H
-#define SMARTREDIS_ASSERT_H
+#ifndef SMARTREDIS_SRASSERT_H
+#define SMARTREDIS_SRASSERT_H
 
 #include "srexception.h"
 
@@ -76,4 +76,4 @@ inline bool throw_param_exception(const std::string &txt, const char *file, int 
 #define SR_CHECK_PARAMS(condition) \
     ((condition) || throw_param_exception(std::string("Assertion failed!") + #condition, __FILE__, __LINE__))
 
-#endif // SMARTREDIS_ASSERT_H
+#endif // SMARTREDIS_SRASSERT_H

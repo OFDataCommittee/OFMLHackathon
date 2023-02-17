@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+! Copyright (c) 2021-2023, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ program mnist_test
   character(len=2) :: key_suffix
   integer :: result
 
-  result = client%initialize(use_cluster())
+  result = client%initialize(use_cluster(), "client_test_mnist")
   if (result .ne. SRNoError) error stop
 
   result = client%set_model_from_file(model_key, model_file, "TORCH", "CPU")

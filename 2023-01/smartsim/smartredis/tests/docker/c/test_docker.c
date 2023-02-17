@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,9 +36,11 @@
 int main(int argc, char* argv[]) {
 
     void* client = NULL;
+    const char* logger_name = "test_docker";
+    size_t cid_len = strlen(logger_name);
 
     SRError return_code = SRNoError;
-    return_code = SmartRedisCClient(false, &client);
+    return_code = SmartRedisCClient(false, logger_name, cid_len, &client);
 
     if (return_code != SRNoError) {
         return -1;

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,13 +28,15 @@
 
 #ifndef SMARTREDIS_C_CLIENT_H
 #define SMARTREDIS_C_CLIENT_H
-///@file
-///\brief C-wrappers for the C++ Client class
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include "client.h"
 #include "sr_enums.h"
 #include "srexception.h"
+
+///@file
+///\brief C-wrappers for the C++ Client class
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,10 +45,16 @@ extern "C" {
 /*!
 *   \brief C-client constructor
 *   \param cluster Flag to indicate if a database cluster is being used
+*   \param logger_name Identifier for the current client
+*   \param logger_name_length Length in characters of the logger_name string
 *   \param new_client Receives the new client
 *   \return Returns SRNoError on success or an error code on failure
 */
-SRError SmartRedisCClient(bool cluster, void **new_client);
+SRError SmartRedisCClient(
+    bool cluster,
+    const char* logger_name,
+    const size_t logger_name_length,
+    void **new_client);
 
 /*!
 *   \brief C-client destructor

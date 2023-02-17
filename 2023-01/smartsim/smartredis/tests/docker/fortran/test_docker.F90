@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+! Copyright (c) 2021-2023, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@ program main
     real(kind=8), dimension(dim1) :: tensor
     real(kind=8), dimension(dim1) :: returned
 
-    result = client%initialize(.FALSE.)
+    result = client%initialize(.FALSE., "test_docker.F90")
     if (result .ne. SRNoError) stop
 
     call random_number(tensor)

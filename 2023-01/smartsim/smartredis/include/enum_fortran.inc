@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+! Copyright (c) 2021-2023, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -76,4 +76,13 @@ enum, bind(c)
   enumerator :: SRKeyError       = 7  ! Key error
   enumerator :: SRInvalidError   = -1 ! Uninitialized error variable
   enumerator :: SRTypeError      = 9  ! Type mismatch
+end enum
+
+! SRLoggingLevel
+enum, bind(c)
+  enumerator :: LLInvalid   = -1 ! Invalid or uninitialized logging level
+  enumerator :: LLQuiet     = 1  ! No logging at all
+  enumerator :: LLInfo      = 2  ! Informational logging only
+  enumerator :: LLDebug     = 3  ! Verbose logging for debugging purposes
+  enumerator :: LLDeveloper = 4  ! Extra verbose logging for internal use
 end enum

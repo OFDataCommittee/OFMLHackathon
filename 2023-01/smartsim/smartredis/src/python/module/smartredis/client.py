@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,14 +32,15 @@ import functools
 import numpy as np
 
 from .dataset import Dataset
+from .srobject import SRObject
 from .smartredisPy import PyClient
 from .util import Dtypes, init_default, exception_handler, typecheck
 
 from .error import *
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
 
-class Client(PyClient):
-    def __init__(self, address=None, cluster=False):
+class Client(SRObject):
+    def __init__(self, address=None, cluster=False, logger_name="default"):
         """Initialize a RedisAI client
 
         For clusters, the address can be a single tcp/ip address and port
@@ -52,6 +53,8 @@ class Client(PyClient):
         :param address: Address of the database
         :param cluster: True if connecting to a redis cluster, defaults to False
         :type cluster: bool, optional
+        :param logger_name: Identifier for the current client
+        :type logger_name: str
         :raises RedisConnectionError: if connection initialization fails
         """
         if address:
@@ -59,11 +62,17 @@ class Client(PyClient):
         if "SSDB" not in os.environ:
             raise RedisConnectionError("Could not connect to database. $SSDB not set")
         try:
-            super().__init__(cluster)
+            super().__init__(PyClient(cluster, logger_name))
         except PybindRedisReplyError as e:
             raise RedisConnectionError(str(e)) from None
         except RuntimeError as e:
             raise RedisConnectionError(str(e)) from None
+
+    @property
+    def _client(self):
+        """Alias _srobject to _client
+        """
+        return self._srobject
 
     @exception_handler
     def put_tensor(self, name, data):
@@ -82,7 +91,7 @@ class Client(PyClient):
         typecheck(name, "name", str)
         typecheck(data, "data", np.ndarray)
         dtype = Dtypes.tensor_from_numpy(data)
-        super().put_tensor(name, dtype, data)
+        self._client.put_tensor(name, dtype, data)
 
     @exception_handler
     def get_tensor(self, name):
@@ -100,7 +109,7 @@ class Client(PyClient):
         :rtype: np.array
         """
         typecheck(name, "name", str)
-        return super().get_tensor(name)
+        return self._client.get_tensor(name)
 
     @exception_handler
     def delete_tensor(self, name):
@@ -116,7 +125,7 @@ class Client(PyClient):
         :raises RedisReplyError: if deletion fails
         """
         typecheck(name, "name", str)
-        super().delete_tensor(name)
+        self._client.delete_tensor(name)
 
     @exception_handler
     def copy_tensor(self, src_name, dest_name):
@@ -135,7 +144,7 @@ class Client(PyClient):
         """
         typecheck(src_name, "src_name", str)
         typecheck(dest_name, "dest_name", str)
-        super().copy_tensor(src_name, dest_name)
+        self._client.copy_tensor(src_name, dest_name)
 
     @exception_handler
     def rename_tensor(self, old_name, new_name):
@@ -154,7 +163,7 @@ class Client(PyClient):
         """
         typecheck(old_name, "old_name", str)
         typecheck(new_name, "new_name", str)
-        super().rename_tensor(old_name, new_name)
+        self._client.rename_tensor(old_name, new_name)
 
     @exception_handler
     def put_dataset(self, dataset):
@@ -175,7 +184,7 @@ class Client(PyClient):
         """
         typecheck(dataset, "dataset", Dataset)
         pybind_dataset = dataset.get_data()
-        super().put_dataset(pybind_dataset)
+        self._client.put_dataset(pybind_dataset)
 
     @exception_handler
     def get_dataset(self, name):
@@ -193,7 +202,7 @@ class Client(PyClient):
         :rtype: Dataset
         """
         typecheck(name, "name", str)
-        dataset = super().get_dataset(name)
+        dataset = self._client.get_dataset(name)
         python_dataset = Dataset.from_pybind(dataset)
         return python_dataset
 
@@ -211,7 +220,7 @@ class Client(PyClient):
         :raises RedisReplyError: if deletion fails
         """
         typecheck(name, "name", str)
-        super().delete_dataset(name)
+        self._client.delete_dataset(name)
 
     @exception_handler
     def copy_dataset(self, src_name, dest_name):
@@ -230,7 +239,7 @@ class Client(PyClient):
         """
         typecheck(src_name, "src_name", str)
         typecheck(dest_name, "dest_name", str)
-        super().copy_dataset(src_name, dest_name)
+        self._client.copy_dataset(src_name, dest_name)
 
     @exception_handler
     def rename_dataset(self, old_name, new_name):
@@ -249,7 +258,7 @@ class Client(PyClient):
         """
         typecheck(old_name, "old_name", str)
         typecheck(new_name, "new_name", str)
-        super().rename_dataset(old_name, new_name)
+        self._client.rename_dataset(old_name, new_name)
 
     @exception_handler
     def set_function(self, name, function, device="CPU"):
@@ -280,7 +289,7 @@ class Client(PyClient):
             raise TypeError(f"Argument provided for function, {type(function)}, is not callable")
         device = self.__check_device(device)
         fn_src = inspect.getsource(function)
-        super().set_script(name, device, fn_src)
+        self._client.set_script(name, device, fn_src)
 
     @exception_handler
     def set_function_multigpu(self, name, function, first_gpu, num_gpus):
@@ -312,7 +321,7 @@ class Client(PyClient):
         if not callable(function):
             raise TypeError(f"Argument provided for function, {type(function)}, is not callable")
         fn_src = inspect.getsource(function)
-        super().set_script_multigpu(name, fn_src, first_gpu, num_gpus)
+        self._client.set_script_multigpu(name, fn_src, first_gpu, num_gpus)
 
     @exception_handler
     def set_script(self, name, script, device="CPU"):
@@ -337,7 +346,7 @@ class Client(PyClient):
         typecheck(script, "script", str)
         typecheck(device, "device", str)
         device = self.__check_device(device)
-        super().set_script(name, device, script)
+        self._client.set_script(name, device, script)
 
     @exception_handler
     def set_script_multigpu(self, name, script, first_gpu, num_gpus):
@@ -361,7 +370,7 @@ class Client(PyClient):
         typecheck(script, "script", str)
         typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
-        super().set_script_multigpu(name, script, first_gpu, num_gpus)
+        self._client.set_script_multigpu(name, script, first_gpu, num_gpus)
 
     @exception_handler
     def set_script_from_file(self, name, file, device="CPU"):
@@ -384,7 +393,7 @@ class Client(PyClient):
         typecheck(device, "device", str)
         device = self.__check_device(device)
         file_path = self.__check_file(file)
-        super().set_script_from_file(name, device, file_path)
+        self._client.set_script_from_file(name, device, file_path)
 
     @exception_handler
     def set_script_from_file_multigpu(self, name, file, first_gpu, num_gpus):
@@ -409,7 +418,7 @@ class Client(PyClient):
         typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
         file_path = self.__check_file(file)
-        super().set_script_from_file_multigpu(name, file_path, first_gpu, num_gpus)
+        self._client.set_script_from_file_multigpu(name, file_path, first_gpu, num_gpus)
 
     @exception_handler
     def get_script(self, name):
@@ -427,7 +436,7 @@ class Client(PyClient):
         :rtype: str
         """
         typecheck(name, "name", str)
-        script = super().get_script(name)
+        script = self._client.get_script(name)
         return script
 
     @exception_handler
@@ -456,7 +465,7 @@ class Client(PyClient):
         typecheck(inputs, "inputs", list)
         typecheck(outputs, "outputs", list)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        super().run_script(name, fn_name, inputs, outputs)
+        self._client.run_script(name, fn_name, inputs, outputs)
 
     @exception_handler
     def run_script_multigpu(
@@ -495,7 +504,7 @@ class Client(PyClient):
         typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        super().run_script_multigpu(
+        self._client.run_script_multigpu(
             name, fn_name, inputs, outputs, offset, first_gpu, num_gpus)
 
     @exception_handler
@@ -512,7 +521,7 @@ class Client(PyClient):
         :raises RedisReplyError: if script deletion fails
         """
         typecheck(name, "name", str)
-        super().delete_script(name)
+        self._client.delete_script(name)
 
     @exception_handler
     def delete_script_multigpu(self, name, first_gpu, num_gpus):
@@ -534,7 +543,7 @@ class Client(PyClient):
         typecheck(name, "name", str)
         typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
-        super().delete_script_multigpu(name, first_gpu, num_gpus)
+        self._client.delete_script_multigpu(name, first_gpu, num_gpus)
 
     @exception_handler
     def get_model(self, name):
@@ -552,7 +561,7 @@ class Client(PyClient):
         :rtype: bytes
         """
         typecheck(name, "name", str)
-        model = super().get_model(name)
+        model = self._client.get_model(name)
         return model
 
     @exception_handler
@@ -608,7 +617,7 @@ class Client(PyClient):
         device = self.__check_device(device)
         backend = self.__check_backend(backend)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        super().set_model(
+        self._client.set_model(
             name,
             model,
             backend,
@@ -675,7 +684,7 @@ class Client(PyClient):
         typecheck(tag, "tag", str)
         backend = self.__check_backend(backend)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        super().set_model_multigpu(
+        self._client.set_model_multigpu(
             name,
             model,
             backend,
@@ -743,7 +752,7 @@ class Client(PyClient):
         backend = self.__check_backend(backend)
         m_file = self.__check_file(model_file)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        super().set_model_from_file(
+        self._client.set_model_from_file(
             name,
             m_file,
             backend,
@@ -812,7 +821,7 @@ class Client(PyClient):
         backend = self.__check_backend(backend)
         m_file = self.__check_file(model_file)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        super().set_model_from_file_multigpu(
+        self._client.set_model_from_file_multigpu(
             name,
             m_file,
             backend,
@@ -844,7 +853,7 @@ class Client(PyClient):
         """
         typecheck(name, "name", str)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        super().run_model(name, inputs, outputs)
+        self._client.run_model(name, inputs, outputs)
 
     @exception_handler
     def run_model_multigpu(
@@ -882,7 +891,7 @@ class Client(PyClient):
         typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        super().run_model_multigpu(name, inputs, outputs, offset, first_gpu, num_gpus)
+        self._client.run_model_multigpu(name, inputs, outputs, offset, first_gpu, num_gpus)
 
     @exception_handler
     def delete_model(self, name):
@@ -898,7 +907,7 @@ class Client(PyClient):
         :raises RedisReplyError: if model deletion fails
         """
         typecheck(name, "name", str)
-        super().delete_model(name)
+        self._client.delete_model(name)
 
     @exception_handler
     def delete_model_multigpu(self, name, first_gpu, num_gpus):
@@ -920,7 +929,7 @@ class Client(PyClient):
         typecheck(name, "name", str)
         typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
-        super().delete_model_multigpu(name, first_gpu, num_gpus)
+        self._client.delete_model_multigpu(name, first_gpu, num_gpus)
 
     @exception_handler
     def tensor_exists(self, name):
@@ -938,7 +947,7 @@ class Client(PyClient):
         :raises RedisReplyError: if checking for tensor existence causes an error
         """
         typecheck(name, "name", str)
-        return super().tensor_exists(name)
+        return self._client.tensor_exists(name)
 
     @exception_handler
     def dataset_exists(self, name):
@@ -956,7 +965,7 @@ class Client(PyClient):
         :raises RedisReplyError: if `dataset_exists` fails (i.e. causes an error)
         """
         typecheck(name, "name", str)
-        return super().dataset_exists(name)
+        return self._client.dataset_exists(name)
 
     @exception_handler
     def model_exists(self, name):
@@ -974,7 +983,7 @@ class Client(PyClient):
         :raises RedisReplyError: if `model_exists` fails (i.e. causes an error)
         """
         typecheck(name, "name", str)
-        return super().model_exists(name)
+        return self._client.model_exists(name)
 
     @exception_handler
     def key_exists(self, key):
@@ -987,7 +996,7 @@ class Client(PyClient):
         :raises RedisReplyError: if `key_exists` fails
         """
         typecheck(key, "key", str)
-        return super().key_exists(key)
+        return self._client.key_exists(key)
 
     @exception_handler
     def poll_key(self, key, poll_frequency_ms, num_tries):
@@ -1010,7 +1019,7 @@ class Client(PyClient):
         typecheck(key, "key", str)
         typecheck(poll_frequency_ms, "poll_frequency_ms", int)
         typecheck(num_tries, "num_tries", int)
-        return super().poll_key(key, poll_frequency_ms, num_tries)
+        return self._client.poll_key(key, poll_frequency_ms, num_tries)
 
     @exception_handler
     def poll_tensor(self, name, poll_frequency_ms, num_tries):
@@ -1037,7 +1046,7 @@ class Client(PyClient):
         typecheck(name, "name", str)
         typecheck(poll_frequency_ms, "poll_frequency_ms", int)
         typecheck(num_tries, "num_tries", int)
-        return super().poll_tensor(name, poll_frequency_ms, num_tries)
+        return self._client.poll_tensor(name, poll_frequency_ms, num_tries)
 
     @exception_handler
     def poll_dataset(self, name, poll_frequency_ms, num_tries):
@@ -1064,7 +1073,7 @@ class Client(PyClient):
         typecheck(name, "name", str)
         typecheck(poll_frequency_ms, "poll_frequency_ms", int)
         typecheck(num_tries, "num_tries", int)
-        return super().poll_dataset(name, poll_frequency_ms, num_tries)
+        return self._client.poll_dataset(name, poll_frequency_ms, num_tries)
 
     @exception_handler
     def poll_model(self, name, poll_frequency_ms, num_tries):
@@ -1091,7 +1100,7 @@ class Client(PyClient):
         typecheck(name, "name", str)
         typecheck(poll_frequency_ms, "poll_frequency_ms", int)
         typecheck(num_tries, "num_tries", int)
-        return super().poll_model(name, poll_frequency_ms, num_tries)
+        return self._client.poll_model(name, poll_frequency_ms, num_tries)
 
     @exception_handler
     def set_data_source(self, source_id):
@@ -1120,7 +1129,7 @@ class Client(PyClient):
         :raises RedisReplyError: if set data
         """
         typecheck(source_id, "source_id", str)
-        return super().set_data_source(source_id)
+        return self._client.set_data_source(source_id)
 
     @exception_handler
     def use_model_ensemble_prefix(self, use_prefix):
@@ -1143,7 +1152,7 @@ class Client(PyClient):
         :type use_prefix: bool
         """
         typecheck(use_prefix, "use_prefix", bool)
-        return super().use_model_ensemble_prefix(use_prefix)
+        return self._client.use_model_ensemble_prefix(use_prefix)
 
     @exception_handler
     def use_list_ensemble_prefix(self, use_prefix):
@@ -1172,7 +1181,7 @@ class Client(PyClient):
         :type use_prefix: bool
         """
         typecheck(use_prefix, "use_prefix", bool)
-        return super().use_list_ensemble_prefix(use_prefix)
+        return self._client.use_list_ensemble_prefix(use_prefix)
 
     @exception_handler
     def use_tensor_ensemble_prefix(self, use_prefix):
@@ -1195,7 +1204,7 @@ class Client(PyClient):
         :type use_prefix: bool
         """
         typecheck(use_prefix, "use_prefix", bool)
-        return super().use_tensor_ensemble_prefix(use_prefix)
+        return self._client.use_tensor_ensemble_prefix(use_prefix)
 
     @exception_handler
     def get_db_node_info(self, addresses):
@@ -1218,7 +1227,7 @@ class Client(PyClient):
                 being thrown.
         """
         typecheck(addresses, "addresses", list)
-        return super().get_db_node_info(addresses)
+        return self._client.get_db_node_info(addresses)
 
     @exception_handler
     def get_db_cluster_info(self, addresses):
@@ -1244,7 +1253,7 @@ class Client(PyClient):
                 being thrown.
         """
         typecheck(addresses, "addresses", list)
-        return super().get_db_cluster_info(addresses)
+        return self._client.get_db_cluster_info(addresses)
 
     @exception_handler
     def get_ai_info(self, address, key, reset_stat=False):
@@ -1268,7 +1277,7 @@ class Client(PyClient):
         typecheck(address, "address", list)
         typecheck(key, "key", str)
         typecheck(reset_stat, "reset_stat", bool)
-        return super().get_ai_info(address, key, reset_stat)
+        return self._client.get_ai_info(address, key, reset_stat)
 
     @exception_handler
     def flush_db(self, addresses):
@@ -1288,7 +1297,7 @@ class Client(PyClient):
                 being thrown.
         """
         typecheck(addresses, "addresses", list)
-        super().flush_db(addresses)
+        self._client.flush_db(addresses)
 
     @exception_handler
     def config_get(self, expression, address):
@@ -1319,7 +1328,7 @@ class Client(PyClient):
         """
         typecheck(expression, "expression", str)
         typecheck(address, "address", str)
-        return super().config_get(expression, address)
+        return self._client.config_get(expression, address)
 
     @exception_handler
     def config_set(self, config_param, value, address):
@@ -1351,7 +1360,7 @@ class Client(PyClient):
         typecheck(config_param, "config_param", str)
         typecheck(value, "value", str)
         typecheck(address, "address", str)
-        super().config_set(config_param, value, address)
+        self._client.config_set(config_param, value, address)
 
     @exception_handler
     def save(self, addresses):
@@ -1373,7 +1382,7 @@ class Client(PyClient):
                 being thrown.
         """
         typecheck(addresses, "addresses", list)
-        super().save(addresses)
+        self._client.save(addresses)
 
     @exception_handler
     def append_to_list(self, list_name, dataset):
@@ -1400,7 +1409,7 @@ class Client(PyClient):
         typecheck(list_name, "list_name", str)
         typecheck(dataset, "dataset", Dataset)
         pybind_dataset = dataset.get_data()
-        super().append_to_list(list_name, pybind_dataset)
+        self._client.append_to_list(list_name, pybind_dataset)
 
     @exception_handler
     def delete_list(self, list_name):
@@ -1417,7 +1426,7 @@ class Client(PyClient):
                 in command execution.
         """
         typecheck(list_name, "list_name", str)
-        super().delete_list(list_name)
+        self._client.delete_list(list_name)
 
     @exception_handler
     def copy_list(self, src_name, dest_name):
@@ -1429,16 +1438,16 @@ class Client(PyClient):
         See set_data_source() and use_list_ensemble_prefix()
         for more details.
 
-        :param  src_name The source list name
+        :param src_name: The source list name
         :type src_name: str
-        :param  dest_name The destination list name
+        :param dest_name: The destination list name
         :type dest_name: str
         :raises RedisReplyError: if there is an error
                 in command execution.
         """
         typecheck(src_name, "src_name", str)
         typecheck(dest_name, "dest_name", str)
-        super().copy_list(src_name, dest_name)
+        self._client.copy_list(src_name, dest_name)
 
     @exception_handler
     def rename_list(self, src_name, dest_name):
@@ -1449,22 +1458,22 @@ class Client(PyClient):
         the supplied old_name and new_name. See set_data_source()
         and use_list_ensemble_prefix() for more details.
 
-        :param  src_name The source list name
+        :param src_name: The source list name
         :type src_name: str
-        :param  dest_name The destination list name
+        :param dest_name: The destination list name
         :type dest_name: str
         :raises RedisReplyError: if there is an error
                 in command execution.
         """
         typecheck(src_name, "src_name", str)
         typecheck(dest_name, "dest_name", str)
-        super().rename_list(src_name, dest_name)
+        self._client.rename_list(src_name, dest_name)
 
     @exception_handler
     def get_list_length(self, list_name):
         """Get the number of entries in the list
 
-        :param  list_name The list name
+        :param list_name: The list name
         :type list_name: str
         :return: The length of the list
         :rtype: int
@@ -1472,7 +1481,7 @@ class Client(PyClient):
                 in command execution.
         """
         typecheck(list_name, "list_name", str)
-        return super().get_list_length(list_name)
+        return self._client.get_list_length(list_name)
 
     @exception_handler
     def poll_list_length(self, name, list_length, poll_frequency_ms, num_tries):
@@ -1485,16 +1494,16 @@ class Client(PyClient):
         name. See set_data_source() and use_list_ensemble_prefix()
         for more details.
 
-        :param  name The name of the list
+        :param name: The name of the list
         :type name: str
-        :param  list_length The desired length of the list
+        :param list_length: The desired length of the list
         :type list_length: int
-        :param  poll_frequency_ms The time delay between checks, in milliseconds
+        :param poll_frequency_ms: The time delay between checks, in milliseconds
         :type poll_frequency_ms: int
-        :param  num_tries The total number of times to check for the name
+        :param num_tries: The total number of times to check for the name
         :type num_tries: int
-        :return:  Returns true if the list is found with a length greater
-                  than or equal to the provided length, otherwise false
+        :return: Returns true if the list is found with a length greater
+                than or equal to the provided length, otherwise false
         :rtype: bool
         :raises RedisReplyError: if there is an error
                 in command execution.
@@ -1503,7 +1512,7 @@ class Client(PyClient):
         typecheck(list_length, "list_length", int)
         typecheck(poll_frequency_ms, "poll_frequency_ms", int)
         typecheck(num_tries, "num_tries", int)
-        return super().poll_list_length(
+        return self._client.poll_list_length(
             name, list_length, poll_frequency_ms, num_tries)
 
     @exception_handler
@@ -1517,16 +1526,16 @@ class Client(PyClient):
         name. See set_data_source() and use_list_ensemble_prefix()
         for more details.
 
-        :param  name The name of the list
+        :param name: The name of the list
         :type name: str
-        :param  list_length The desired minimum length of the list
+        :param list_length: The desired minimum length of the list
         :type list_length: int
-        :param  poll_frequency_ms The time delay between checks, in milliseconds
+        :param poll_frequency_ms: The time delay between checks, in milliseconds
         :type poll_frequency_ms: int
-        :param  num_tries The total number of times to check for the name
+        :param num_tries: The total number of times to check for the name
         :type num_tries: int
-        :return:  Returns true if the list is found with a length greater
-                  than or equal to the provided length, otherwise false
+        :return: Returns true if the list is found with a length greater
+                 than or equal to the provided length, otherwise false
         :rtype: bool
         :raises RedisReplyError: if there is an error
                 in command execution.
@@ -1535,7 +1544,7 @@ class Client(PyClient):
         typecheck(list_length, "list_length", int)
         typecheck(poll_frequency_ms, "poll_frequency_ms", int)
         typecheck(num_tries, "num_tries", int)
-        return super().poll_list_length_gte(
+        return self._client.poll_list_length_gte(
             name, list_length, poll_frequency_ms, num_tries)
 
     @exception_handler
@@ -1549,16 +1558,16 @@ class Client(PyClient):
         name. See set_data_source() and use_list_ensemble_prefix()
         for more details.
 
-        :param  name The name of the list
+        :param name: The name of the list
         :type name: str
-        :param  list_length The desired maximum length of the list
+        :param list_length: The desired maximum length of the list
         :type list_length: int
-        :param  poll_frequency_ms The time delay between checks, in milliseconds
+        :param poll_frequency_ms: The time delay between checks, in milliseconds
         :type poll_frequency_ms: int
-        :param  num_tries The total number of times to check for the name
+        :param num_tries: The total number of times to check for the name
         :type num_tries: int
-        :return:  Returns true if the list is found with a length less
-                  than or equal to the provided length, otherwise false
+        :return: Returns true if the list is found with a length less
+                 than or equal to the provided length, otherwise false
         :rtype: bool
         :raises RedisReplyError: if there is an error
                 in command execution.
@@ -1567,7 +1576,7 @@ class Client(PyClient):
         typecheck(list_length, "list_length", int)
         typecheck(poll_frequency_ms, "poll_frequency_ms", int)
         typecheck(num_tries, "num_tries", int)
-        return super().poll_list_length_lte(
+        return self._client.poll_list_length_lte(
             name, list_length, poll_frequency_ms, num_tries)
 
     @exception_handler
@@ -1580,14 +1589,14 @@ class Client(PyClient):
         for more details.  An empty or nonexistant
         aggregation list returns an empty vector.
 
-        :param  list_name The name of the list
+        :param list_name: The name of the list
         :type list_name: str
-        :return:  A list of DataSet objects.
+        :return: A list of DataSet objects.
         :rtype: list[DataSet]
         :raises RedisReplyError: if there is an error in command execution.
         """
         typecheck(list_name, "list_name", str)
-        return super().get_datasets_from_list(list_name)
+        return self._client.get_datasets_from_list(list_name)
 
     @exception_handler
     def get_dataset_list_range(self, list_name, start_index, end_index):
@@ -1603,27 +1612,27 @@ class Client(PyClient):
         and end_index are inconsistent (e.g. end_index is less
         than start_index), an empty list of datasets will be returned.
 
-        :param  list_name The name of the list
+        :param list_name: The name of the list
         :type list_name: str
-        :param  start_index The starting index of the range (inclusive,
-                starting at zero).  Negative values are
-                supported.  A negative value indicates offsets
-                starting at the end of the list. For example, -1 is
-                the last element of the list.
-        :type start_index: int
-        :param end_index The ending index of the range (inclusive,
+        :param start_index: The starting index of the range (inclusive,
                starting at zero).  Negative values are
                supported.  A negative value indicates offsets
                starting at the end of the list. For example, -1 is
                the last element of the list.
-        :return:  A list of DataSet objects.
+        :type start_index: int
+        :param end_index: The ending index of the range (inclusive,
+               starting at zero).  Negative values are
+               supported.  A negative value indicates offsets
+               starting at the end of the list. For example, -1 is
+               the last element of the list.
+        :return: A list of DataSet objects.
         :rtype: list[DataSet]
         :raises RedisReplyError: if there is an error in command execution.
         """
         typecheck(list_name, "list_name", str)
         typecheck(start_index, "start_index", int)
         typecheck(end_index, "end_index", int)
-        return super().get_dataset_list_range(
+        return self._client.get_dataset_list_range(
             list_name, start_index, end_index)
 
     # ---- helpers --------------------------------------------------------

@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,7 @@ import time
 
 RANKS = 1
 TEST_PATH = osp.dirname(osp.abspath(__file__))
+timeout_limit = 180
 
 def get_test_names():
     """Obtain test names by globbing for client_test
@@ -65,7 +66,7 @@ def execute_cmd(cmd_list):
     proc = Popen(
         cmd_list, stderr=PIPE, stdout=PIPE, stdin=PIPE, cwd=run_path)
     try:
-        out, err = proc.communicate(timeout=120)
+        out, err = proc.communicate(timeout=timeout_limit)
         assert(proc.returncode == 0)
         if out:
             print("OUTPUT:", out.decode("utf-8"))
@@ -78,7 +79,7 @@ def execute_cmd(cmd_list):
     except TimeoutExpired:
         proc.kill()
         output, errs = proc.communicate()
-        print("TIMEOUT: test timed out after test timeout limit of 120 seconds")
+        print(f"TIMEOUT: test timed out after test timeout limit of {timeout_limit} seconds")
         print("OUTPUT:", output.decode("utf-8"))
         print("ERROR:", errs.decode("utf-8"))
         assert(False)

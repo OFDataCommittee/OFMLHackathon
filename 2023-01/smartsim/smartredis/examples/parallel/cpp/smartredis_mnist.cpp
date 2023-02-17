@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,10 +100,12 @@ int main(int argc, char* argv[]) {
     // Retrieve the MPI rank
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    std::string logger_name("Client ");
+    logger_name += std::to_string(rank);
 
     // Initialize a Client object
     bool cluster_mode = true; // Set to false if not using a clustered database
-    SmartRedis::Client client(cluster_mode);
+    SmartRedis::Client client(cluster_mode, logger_name);
 
     // Set the model and script that will be used by all ranks
     // from MPI rank 0.

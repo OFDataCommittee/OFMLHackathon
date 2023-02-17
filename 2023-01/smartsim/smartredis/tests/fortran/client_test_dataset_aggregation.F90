@@ -1,6 +1,6 @@
 !! BSD 2-Clause License
 !!
-!! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+!! Copyright (c) 2021-2023, Hewlett Packard Enterprise
 !! All rights reserved.
 !!
 !! Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,8 @@ program main
 #include "enum_fortran.inc"
 
   integer, parameter :: NUM_DATASETS = 5
+  integer, parameter :: START_SUB_DATASETS = 3
+  integer, parameter :: END_SUB_DATASETS = 4
   integer, parameter :: TENSOR_LENGTH = 10
   character(len=7), parameter :: list_name = "example"
   integer :: i, retrieved_length
@@ -44,11 +46,13 @@ program main
   real, dimension(TENSOR_LENGTH) :: vector, retrieved_vector
   type(dataset_type), dimension(NUM_DATASETS) :: datasets
   type(dataset_type), dimension(:), allocatable :: retrieved_datasets
+  type(dataset_type), dimension(:), allocatable :: retrieved_sub_datasets
   type(client_type) :: client
   character(len=12) :: dataset_name
   integer :: result
 
-  result = client%initialize(use_cluster())
+  result = client%initialize(use_cluster(), &
+    "client_test_dataset_aggregation")
   if (result .ne. SRNoError) error stop
 
   call random_number(true_vectors)
@@ -72,19 +76,29 @@ program main
     endif
   enddo
 
-  result = client%get_list_length( list_name, retrieved_length )
+  result = client%get_list_length(list_name, retrieved_length)
   if (retrieved_length/=num_datasets) then
     write(*,*) "Retrieved number of datasets does not equal the expected value: ", retrieved_length, num_datasets
     error stop
   endif
 
-  result = client%get_datasets_from_list( list_name, retrieved_datasets, retrieved_length)
-
+  ! Check that the entire list is returned correctly
+  result = client%get_datasets_from_list(list_name, retrieved_datasets, retrieved_length)
   ! Check to make sure that the dataset contents are as expected
   do i=1,NUM_DATASETS
     result = datasets(i)%unpack_dataset_tensor("tensor", retrieved_vector, SHAPE(retrieved_vector))
     if (.not. all(retrieved_vector == true_vectors(:,i))) then
       write(*,*) "Retrieved tensor in dataset not equal to original"
+      error stop
+    endif
+  enddo
+
+  ! Check that the subset of the entire list is returned correctly
+  result = client%get_datasets_from_list_range(list_name, START_SUB_DATASETS, END_SUB_DATASETS, retrieved_sub_datasets)
+  do i=1,END_SUB_DATASETS-START_SUB_DATASETS+1
+    result = retrieved_sub_datasets(i)%unpack_dataset_tensor("tensor", retrieved_vector, SHAPE(retrieved_vector))
+    if (.not. all(retrieved_vector == true_vectors(:,i+START_SUB_DATASETS))) then
+      write(*,*) "Retrieved tensor in dataset not equal to original in get_datasets_from_list_range"
       error stop
     endif
   enddo

@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+! Copyright (c) 2021-2023, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@ ensemble_keyout = "producer_0"
 call setenv("SSKEYIN", "producer_0,producer_1")
 call setenv("SSKEYOUT", ensemble_keyout)
 
-result = client%initialize(use_cluster())
+result = client%initialize(use_cluster(), "client_test_ensemble")
 if (result .ne. SRNoError) error stop
 result = client%use_model_ensemble_prefix(.true.)
 if (result .ne. SRNoError) error stop
@@ -103,7 +103,7 @@ ensemble_keyout = "producer_1"
 call setenv("SSKEYIN", "producer_1,producer_0")
 call setenv("SSKEYOUT", ensemble_keyout)
 
-result = client%initialize(use_cluster())
+result = client%initialize(use_cluster(), "client_test_ensemble")
 if (result .ne. SRNoError) error stop
 result = client%use_model_ensemble_prefix(.true.)
 if (result .ne. SRNoError) error stop

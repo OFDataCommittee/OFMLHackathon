@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -232,6 +232,67 @@ void MetaData::get_scalar_values(const std::string& name,
                                      "requested unknown MetaDataType.");
             break;
     }
+}
+
+// Retrieve the type of a metadata field
+SRMetaDataType MetaData::get_field_type(const std::string& name)
+{
+    // Make sure the field exists
+    if (_field_map[name] == NULL) {
+        throw SRKeyException(
+            "The metadata field " + name + " does not exist.");
+    }
+
+    // Return the type
+    return _field_map[name]->type();
+}
+
+// Retrieve a vector of metadata field names
+std::vector<std::string> MetaData::get_field_names(bool skip_internal)
+{
+    std::vector<std::string> fieldnames;
+    fieldnames.reserve(_field_map.size());
+
+    for (auto mapping : _field_map) {
+        if (skip_internal && mapping.first == ".tensor_names")
+            continue;
+        fieldnames.push_back(mapping.first);
+    }
+    return fieldnames;
+}
+
+// Get metadata field names using a c-style interface
+void MetaData::get_field_names(char**& data,
+                               size_t& n_strings,
+                               size_t*& lengths,
+                               bool skip_internal /*= false*/)
+{
+    // Retrieve the names
+    std::vector<std::string> name_strings = get_field_names(skip_internal);
+
+    // Allocate space to copy the strings
+    n_strings = 0; // Set to zero until all data copied
+    data = _char_array_mem_mgr.allocate(name_strings.size());
+    if (data == NULL)
+        throw SRBadAllocException("name strings array");
+    lengths = _str_len_mem_mgr.allocate(name_strings.size());
+    if (lengths == NULL)
+        throw SRBadAllocException("name string lengths");
+
+    // Copy each metadata string into the string buffer
+    for (size_t i = 0; i < name_strings.size(); i++) {
+        size_t size = name_strings[i].size();
+        char* cstr = _char_mem_mgr.allocate(size + 1);
+        if (cstr == NULL)
+            throw SRBadAllocException("name string data");
+        name_strings[i].copy(cstr, size, 0);
+        cstr[size] = '\0';
+        data[i] = cstr;
+        lengths[i] = size;
+    }
+
+    // Write down the number of strings copied
+    n_strings = name_strings.size();
 }
 
 // Get metadata string field using a c-style interface.

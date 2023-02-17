@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #ifndef SMARTREDIS_PIPELINEREPLY_H
 #define SMARTREDIS_PIPELINEREPLY_H
 
-#include "stdlib.h"
+#include <stdlib.h>
 #include <sw/redis++/redis++.h>
 #include <iostream>
 #include <vector>
@@ -38,8 +38,6 @@
 #include "commandreply.h"
 
 namespace SmartRedis {
-
-class PipelineReply;
 
 /*!
 *   \brief Redis++ pipeline command reply type
@@ -191,6 +189,6 @@ class PipelineReply {
 
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_PIPELINEREPLY_H
+#endif // SMARTREDIS_PIPELINEREPLY_H

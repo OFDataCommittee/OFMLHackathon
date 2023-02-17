@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+! Copyright (c) 2021-2023, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ program main
   integer :: result
   logical(kind=c_bool) :: exists
 
-  result = client%initialize(use_cluster())
+  result = client%initialize(use_cluster(), "client_test_misc_tensor")
   if (result .ne. SRNoError) error stop
 
   print *, "Putting tensor"

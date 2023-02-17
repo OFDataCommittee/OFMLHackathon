@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -112,7 +112,7 @@ void check_dataset(SmartRedis::DataSet& dataset_1,
 int main(int argc, char* argv[]) {
 
     // Create client for dataset and aggregation list actions
-    SmartRedis::Client client(use_cluster());
+    SmartRedis::Client client(use_cluster(), "client_test_dataset_aggregation");
 
     // Set a fill function for dataset creation
     void (*fill_function)(double***, int, int, int) =

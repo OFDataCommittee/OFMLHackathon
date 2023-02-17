@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,8 @@
 
 int main(int argc, char* argv[]) {
 
+  const char* logger_name = "put_unpack_1d";
+  size_t cid_len = strlen(logger_name);
   size_t* dims = malloc(sizeof(size_t));
   dims[0] = 10;
   size_t n_dims = 1;
@@ -46,7 +48,7 @@ int main(int argc, char* argv[]) {
 
   void* client = NULL;
   bool cluster_mode = true; // Set to false if not using a clustered database
-  if (SRNoError != SmartRedisCClient(cluster_mode, &client)) {
+  if (SRNoError != SmartRedisCClient(cluster_mode, logger_name, cid_len, &client)) {
     printf("Client initialization failed!\n");
     exit(-1);
   }
