@@ -97,6 +97,12 @@ int main(int argc, char *argv[])
     client.put_tensor(p.name(), (void*)p.internalField().cdata(), dims,
                       SRTensorTypeDouble, SRMemLayoutContiguous);
 
+    client.put_tensor("x", (void*)mesh.C().component(0)().cdata(), dims,
+                      SRTensorTypeDouble, SRMemLayoutContiguous);
+    client.put_tensor("y", (void*)mesh.C().component(1)().cdata(), dims,
+                      SRTensorTypeDouble, SRMemLayoutContiguous);
+
+
     // Fetch p from database/dataset
     std::vector<scalar> unpack_p(mesh.nCells(), -100.0);
     client.unpack_tensor(p.name(),

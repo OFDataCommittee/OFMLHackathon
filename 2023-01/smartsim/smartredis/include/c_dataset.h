@@ -2,7 +2,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,11 +29,13 @@
 
 #ifndef SMARTREDIS_C_DATASET_H
 #define SMARTREDIS_C_DATASET_H
-///@file
-///\brief C-wrappers for the C++ DataSet class
+
 #include "dataset.h"
 #include "sr_enums.h"
 #include "srexception.h"
+
+///@file
+///\brief C-wrappers for the C++ DataSet class
 
 #ifdef __cplusplus
 extern "C" {
@@ -222,7 +224,53 @@ SRError get_meta_strings(void* dataset,
                          size_t* n_strings,
                          size_t** lengths);
 
+/*!
+*   \brief Retrieve the names of tensors in the DataSet
+*   \param dataset The dataset to use for this operation
+*   \param data Receives an array of tensor names
+*   \param n_strings Receives the number of strings returned in \p data
+*   \param lengths Receives an array containing the lengths of the strings
+*                  returned in \p data
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError get_tensor_names(
+    void* dataset, char*** data, size_t* n_strings, size_t** lengths);
+
+/*!
+*   \brief Retrieve the data type of a Tensor in the DataSet
+*   \param dataset The dataset to use for this operation
+*   \param name The name of the tensor (null-terminated string)
+*   \param name_len The length in bytes of the tensor name
+*   \param ttype Receives the type for the specified tensor
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError get_tensor_type(
+    void* dataset, const char* name, size_t name_len, SRTensorType* ttype);
+
+/*!
+*   \brief Retrieve the names of all metadata fields in the DataSet
+*   \param dataset The dataset to use for this operation
+*   \param data Receives an array of metadata field names
+*   \param n_strings Receives the number of strings returned in \p data
+*   \param lengths Receives an array containing the lengths of the strings
+*                  returned in \p data
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError get_metadata_field_names(
+    void* dataset, char*** data, size_t* n_strings, size_t** lengths);
+
+/*!
+*   \brief Retrieve the data type of a metadata field in the DataSet
+*   \param dataset The dataset to use for this operation
+*   \param name The name of the metadata field (null-terminated string)
+*   \param name_len The length in bytes of the metadata field name
+*   \param mdtype Receives the type for the specified metadata field
+*   \return Returns SRNoError on success or an error code on failure
+*/
+ SRError get_metadata_field_type(
+    void* dataset, const char* name, size_t name_len, SRMetaDataType* mdtype);
+
 #ifdef __cplusplus
 }
 #endif
-#endif //SMARTREDIS_C_DATASET_H
+#endif // SMARTREDIS_C_DATASET_H

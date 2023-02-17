@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,14 +29,14 @@
 #ifndef SMARTREDIS_COMMAND_H
 #define SMARTREDIS_COMMAND_H
 
-#include "stdlib.h"
-#include "commandreply.h"
+#include <stdlib.h>
 #include <string>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
 #include <cstring>
 #include <iostream>
+#include "commandreply.h"
 
 ///@file
 
@@ -429,6 +429,6 @@ class Command
 
 #include "command.tcc"
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_COMMAND_H
+#endif // SMARTREDIS_COMMAND_H

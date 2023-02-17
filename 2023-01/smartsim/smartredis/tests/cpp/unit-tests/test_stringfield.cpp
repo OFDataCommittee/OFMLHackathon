@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,9 +28,15 @@
 
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "stringfield.h"
+#include "logger.h"
+
+unsigned long get_time_offset();
 
 SCENARIO("Test StringField", "[StringField]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Test StringField" << std::endl;
+    std::string context("test_stringfield");
+    log_data(context, LLDebug, "***Beginning StringField testing***");
 
     GIVEN("A StringField object constructed with the string field name")
     {
@@ -93,4 +99,5 @@ SCENARIO("Test StringField", "[StringField]")
         }
         // TODO: Test serializing the StringField
     }
+    log_data(context, LLDebug, "***End StringField testing***");
 }

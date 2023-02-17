@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,9 @@ int put_unpack_1D_tensor(void* tensor, size_t* dims, size_t n_dims,
                        size_t key_suffix_length)
 {
   void* client = NULL;
-  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
+  const char* logger_name = "put_unpack_1D_tensor";
+  size_t cid_len = strlen(logger_name);
+  if (SRNoError != SmartRedisCClient(use_cluster(), logger_name, cid_len, &client))
     return -1;
   char* prefix_str = "1D_tensor_test";
 

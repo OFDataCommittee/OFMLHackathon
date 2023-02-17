@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ void load_mnist_image_to_array(float**** img)
 void run_mnist(const std::string& model_name,
                const std::string& script_name)
 {
-  SmartRedis::Client client(use_cluster());
+  SmartRedis::Client client(use_cluster(), "client_test_mnist_dataset");
 
   float**** array = allocate_4D_array<float>(1,1,28,28);
   float** result = allocate_2D_array<float>(1, 10);
@@ -82,7 +82,7 @@ void run_mnist(const std::string& model_name,
 
 int main(int argc, char* argv[]) {
 
-  SmartRedis::Client client(use_cluster());
+  SmartRedis::Client client(use_cluster(), "client_test_mnist_dataset");
   std::string model_key = "mnist_model";
   std::string model_file = "./../mnist_data/mnist_cnn.pt";
   client.set_model_from_file(model_key, model_file, "TORCH", "CPU");

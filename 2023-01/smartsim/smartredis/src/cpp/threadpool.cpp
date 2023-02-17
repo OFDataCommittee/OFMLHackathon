@@ -7,21 +7,19 @@
 
 #include "threadpool.h"
 #include "srexception.h"
+#include "logger.h"
+#include "srobject.h"
 
 using namespace SmartRedis;
 using namespace std::chrono_literals;
 
-// TIME_THREADPOOL
-// Enable this flag to display timings for the threadpool activity.
-// Currently, this will be to screen, but eventually it will go to
-// the SmartRedis log
-#undef TIME_THREADPOOL
-
 // Constructor
-ThreadPool::ThreadPool(unsigned int num_threads)
+ThreadPool::ThreadPool(const SRObject* context, unsigned int num_threads)
+    : _context(context)
 {
-    // Flag that we're initializing
+    // Flags that we're initializing and not shutting down
     initialization_complete = false;
+    shutting_down = false;
 
     // By default, we'll make one thread for each hardware context
     if (num_threads == 0)
@@ -30,14 +28,12 @@ ThreadPool::ThreadPool(unsigned int num_threads)
     // Create worker threads
 	if (num_threads < 1) num_threads = 1; // Force a minimum of 1 thread
     for (unsigned int i = 0; i < num_threads; i++) {
-        #ifdef TIME_THREADPOOL
-        std::cout << "Kicking off thread " + std::to_string(i) << std::endl;
-        #endif
+        _context->log_data(
+            LLDeveloper, "Kicking off thread " + std::to_string(i));
         threads.push_back(std::thread(&ThreadPool::perform_jobs, this, i));
     }
 
     // Announce that we're open for business
-    shutting_down = false;
     shutdown_complete = false;
     initialization_complete = true;
 }
@@ -58,49 +54,41 @@ void ThreadPool::shutdown()
     while (!initialization_complete)
         ; // Spin
 
-    #ifdef TIME_THREADPOOL
-    std::cout << "Shutting down thread pool" << std::endl;
-    #endif
+    _context->log_data(LLDeveloper, "Shutting down thread pool");
 
     // We're closed for business
     shutting_down = true;
 
     // Wait for worker threads to finish up
-    #ifdef TIME_THREADPOOL
     int i = 0;
     size_t num_threads = threads.size();
-    #endif
     for (std::thread& thr : threads) {
         cv.notify_all(); // Wake up all the threads
-        #ifdef TIME_THREADPOOL
-        std::cout << "Waiting for a thread to terminate (" << std::to_string(i++) << " of "
-                  << std::to_string(num_threads) << ")" << std::endl;
-        #endif
+        std::string message =
+            "Waiting for thread to terminate (" +
+            std::to_string(i++) + " of " +
+            std::to_string(num_threads) + ")";
+        _context->log_data(LLDeveloper, message);
         thr.join(); // Blocks until the thread finishes execution
     }
 
     // Done
-    #ifdef TIME_THREADPOOL
-    std::cout << "Shutdown complete" << std::endl;
-    #endif
+    _context->log_data(LLDeveloper, "Shutdown complete");
     shutdown_complete = true;
 }
 
 // Worker thread main loop to acquire and perform jobs
 void ThreadPool::perform_jobs(unsigned int tid)
 {
-    #ifdef TIME_THREADPOOL
     int jobid = 0;
-    std::cout << "Thread " << std::to_string(tid) << " reporting for duty" << std::endl;
-    #endif
+    _context->log_data(
+        LLDebug, "Thread " + std::to_string(tid) + " reporting for duty");
 
     // Loop forever processing jobs until we get killed
     std::function<void()> job;
     while (!shutting_down)
     {
-        #ifdef TIME_THREADPOOL
         auto start = std::chrono::steady_clock::now();
-        #endif
 
         // Get a job, blocking until one appears if none immediately available
         do {
@@ -122,25 +110,26 @@ void ThreadPool::perform_jobs(unsigned int tid)
         } // End scope and release lock
         while (!shutting_down);
 
-        #ifdef TIME_THREADPOOL
         auto have_job = std::chrono::steady_clock::now();
-        #endif
+
         // Perform the job
         if (!shutting_down) {
             job();
-            #ifdef TIME_THREADPOOL
             auto job_done = std::chrono::steady_clock::now();
             std::chrono::duration<double> get_job = have_job - start;
             std::chrono::duration<double> execute_job = job_done - have_job;
-            std::cout << "Thread " << std::to_string(tid) << " "
-                      << "time to get job " << std::to_string(jobid++) << ": " << get_job.count() << " s; "
-                      << "time to execute job: " << execute_job.count() << " s" << std::endl;
-            #endif
+            std::string message =
+                "Thread " + std::to_string(tid) +
+                " time to get job " + std::to_string(jobid++) +
+                ": " + std::to_string(get_job.count()) + " s; " +
+                "time to execute job: " +
+                std::to_string(execute_job.count()) + " s";
+            _context->log_data(LLDeveloper, message);
         }
     }
-    #ifdef TIME_THREADPOOL
-    std::cout << "Thread " << std::to_string(tid) << " shutting down" << std::endl;
-    #endif
+
+    _context->log_data(
+        LLDeveloper, "Thread " + std::to_string(tid) + " shutting down");
 }
 
 // Submit a job to threadpool for execution

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,12 +29,17 @@
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "singlekeycommand.h"
 #include "srexception.h"
+#include "logger.h"
 
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
 SCENARIO("Retrieve field to empty SingleKeyCommand", "[SingleKeyCommand]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Retrieve field to empty SingleKeyCommand" << std::endl;
+    std::string context("test_singlekeycommand");
+    log_data(context, LLDebug, "***Beginning SingleKeyCommand empty testing***");
 
     GIVEN("An empty SingleKeyCommand object")
     {
@@ -49,11 +54,15 @@ SCENARIO("Retrieve field to empty SingleKeyCommand", "[SingleKeyCommand]")
             }
         }
     }
-
+    log_data(context, LLDebug, "***End SingleKeyCommand empty testing***");
 }
 
 SCENARIO("Testing copy constructor for SingleKeyCommand on heap", "[SingleKeyCommand]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing copy constructor for SingleKeyCommand on heap" << std::endl;
+    std::string context("test_singlekeycommand");
+    log_data(context, LLDebug, "***Beginning SingleKeyCommand copy testing***");
+
     GIVEN("A SingleKeyCommand object on the heap")
     {
         SingleKeyCommand* cmd = new SingleKeyCommand;
@@ -118,4 +127,5 @@ SCENARIO("Testing copy constructor for SingleKeyCommand on heap", "[SingleKeyCom
             delete cmd_cpy;
         }
     }
+    log_data(context, LLDebug, "***End SingleKeyCommand copy testing***");
 }

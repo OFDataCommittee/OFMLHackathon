@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #ifndef SMARTREDIS_TENSORPACK_H
 #define SMARTREDIS_TENSORPACK_H
 
-#include "stdlib.h"
+#include <stdlib.h>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -40,8 +40,6 @@
 ///@file
 
 namespace SmartRedis {
-
-class TensorPack;
 
 /*!
 *   \brief The TensorPack class is a container that
@@ -216,6 +214,6 @@ class TensorPack
         void _copy_tensor_inventory(const TensorPack& tp);
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_TENSORPACK_H
+#endif // SMARTREDIS_TENSORPACK_H

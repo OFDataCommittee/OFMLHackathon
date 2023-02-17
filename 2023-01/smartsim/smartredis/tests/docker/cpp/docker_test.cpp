@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 
 int main(int argc, char* argv[]) {
 
-    SmartRedis::Client client(false);
+    SmartRedis::Client client(false, __FILE__);
 
     std::vector<double> data = {1.0, 2.0, 3.0};
     std::vector<size_t> dims = {3};

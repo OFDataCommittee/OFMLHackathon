@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 void put_get_empty_dataset(std::string dataset_name)
 {
     //Create Client and DataSet
-    SmartRedis::Client client(use_cluster());
+    SmartRedis::Client client(use_cluster(), "client_test_dataset_empty");
     SmartRedis::DataSet sent_dataset(dataset_name);
 
     //Put the DataSet into the database

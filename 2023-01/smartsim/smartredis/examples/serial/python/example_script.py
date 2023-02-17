@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ def two_to_one(data, data_2):
 
 # Connect a SmartRedis client to the Redis database
 db_address = "127.0.0.1:6379"
-client = Client(address=db_address, cluster=True)
+client = Client(address=db_address, cluster=True, logger_name="example_script.py")
 
 # Generate some test data to feed to the two_to_one function
 data = np.array([[1, 2, 3, 4]])

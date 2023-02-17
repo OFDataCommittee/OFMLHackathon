@@ -22,18 +22,55 @@ library will set the value of ``SSDB`` for the user.
 
 
 The ``SSDB`` environment variable should have the format
-of ``address:port``.  For a cluster, the addresses
-and ports should be separated by a "," character.
+of ``address:port``, and may optionally be prefixed with
+a protocol, such as ``tcp://``.  For a cluster, the addresses
+and ports should be separated by a "," character. If no
+protocol is specified, the default will be taken as TCP.
+Unix domain sockets are supported via the protocol prefex
+``unix://``; however, Unix domain sockets are not supported
+in clusters.
+
 Below is an example of setting ``SSDB`` for a Redis cluster
-at three different addresses using port ``6379``:
+at three different addresses, each using port ``6379``:
 
 .. code-block:: bash
 
     export SSDB="10.128.0.153:6379,10.128.0.154:6379,10.128.0.155:6379"
 
-The Python client also relies on ``SSDB`` to determine database
+The Python client relies on ``SSDB`` to determine database
 location.  However, the Python ``Client`` constructor also allows
-for the database location to be set as an input parameter.
+for the database location to be set as an input parameter. In
+this case, it sets SSDB from the input parameter.
+
+Logging Environment Variables
+=============================
+
+SmartRedis will log events to a file on behalf of a client. There
+are two main environment variables that affect logging, ``SR_LOG_FILE``
+and ``SR_LOG_LEVEL``.
+
+``SR_LOG_FILE`` is the specifier for the location of the file that
+receives logging information. Each entry in the file will be prefixed
+with a timestamp and the identifier of the client that invoked the logging
+message. The path may be relative or absolute, though a relative path risks
+creation of multiple log files if the executables that instantiate SmartRedis
+clients are run from different directories. If this variable is not set,
+logging information will be sent to standard console output (STDOUT in C and
+C++; output_unit in Fortran).
+
+``SR_LOG_LEVEL`` relates to the verbosity of information that wil be logged.
+It may be one of three levels: ``QUIET`` disables logging altogether.
+``INFO`` provides informational logging, such as exception events that
+transpire within the SmartRedis library and creation or destruction of a
+client object.  ``DEBUG`` provides more verbose logging, including information
+on the activities of the SmartRedis thread pool and API function entry and exit.
+Debug level logging will also log the absence of an expected environment variable,
+though this can happen only if the variables to set up logging are in place. If
+this parameter is not set, a default logging level of ``INFO`` will be adopted.
+
+The runtime impact of log levels NONE or INFO should be minimal on
+client performance; however, seting the log level to DEBUG may cause some
+degradation.
 
 Ensemble Environment Variables
 ==============================

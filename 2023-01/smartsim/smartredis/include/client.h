@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,17 +26,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SMARTREDIS_CPP_CLIENT_H
-#define SMARTREDIS_CPP_CLIENT_H
+#ifndef SMARTREDIS_CLIENT_H
+#define SMARTREDIS_CLIENT_H
+
 #ifdef __cplusplus
-#include "string.h"
-#include "stdlib.h"
+#include <string.h>
+#include <stdlib.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <chrono>
 #include <thread>
 #include <algorithm>
+#include "srobject.h"
 #include "redisserver.h"
 #include "rediscluster.h"
 #include "redis.h"
@@ -48,12 +50,11 @@
 #include "tensorbase.h"
 #include "tensor.h"
 #include "sr_enums.h"
+#include "logger.h"
 
 ///@file
 
 namespace SmartRedis {
-
-class Client;
 
 /*!
 *  \brief The database response to a command
@@ -65,7 +66,7 @@ typedef redisReply ReplyElem;
 *   \brief The Client class is the primary user-facing
 *          class for executing server commands.
 */
-class Client
+class Client : public SRObject
 {
 
     public:
@@ -73,10 +74,11 @@ class Client
         /*!
         *   \brief Client constructor
         *   \param cluster Flag for if a database cluster is being used
+        *   \param logger_name Name to use for this client when logging
         *   \throw SmartRedis::Exception if client connection or
         *          object initialization fails
         */
-        Client(bool cluster);
+        Client(bool cluster, const std::string& logger_name = "default");
 
         /*!
         *   \brief Client copy constructor is not available
@@ -102,7 +104,7 @@ class Client
         /*!
         *   \brief Client destructor
         */
-        ~Client();
+        virtual ~Client();
 
         /*!
         *   \brief Send a DataSet object to the database
@@ -1651,7 +1653,7 @@ class Client
 
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //__cplusplus
-#endif //SMARTREDIS_CPP_CLIENT_H
+#endif // __cplusplus
+#endif // SMARTREDIS_CLIENT_H

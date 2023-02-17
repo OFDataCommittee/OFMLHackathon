@@ -1,30 +1,61 @@
 
-Clone the SmartRedis repository and checkout the most recent
-release:
+Clone the SmartRedis repository and optionally checkout a specific branch or tag:
 
 .. code-block:: bash
 
-    git clone https://github.com/CrayLabs/SmartRedis.git --depth=1 --branch v0.3.1 smartredis
+    git clone https://github.com/CrayLabs/SmartRedis.git [--branch tag_name] smartredis
 
-Note that the release tarball can also be used instead of cloning
-the git repository, but the preferred method is a repository
-clone.
+The release tarball can also be used instead of cloning the git repository, but
+the preferred method is a repository clone.
 
-To build the SmartRedis library for the C++, C, and Fortran,
-make sure to be in the top level directory of ``smartredis-0.3.1``.
+The ```Makefile`` included in the top level of the SmartRedis repository has two
+main targets: ``lib`` which will create a dynamic library for C, C++, and Python
+clients and ``lib-with-fortran`` which will also additionally build a library
+for Fortran applications. ``make help`` will list additional targets that are
+used for SmartRedis development.
 
 .. code-block:: bash
 
-  make lib
+  cd SmartRedis
+  make lib #or lib-with-fortran
 
-The SmartRedis library will be installed in
-``smartredis-0.3.1/install/lib/`` and the SmartRedis
-header files will be installed in
-``smartredis-0.3.1/install/include/``.
-The library installation can be used to easily include SmartRedis
-capabilities in C++, C, and Fortran applications.
-For example, the CMake instructions below illustrate how to
-compile a C or C++ application with SmartRedis.
+The SmartRedis library will be installed in ``SmartRedis/install/lib/`` and the
+SmartRedis header files (and optionally the Fortran ``.mod`` files) will be
+installed in ``SmartRedis/install/include/``.  The library installation can be
+used to easily include SmartRedis capabilities in C++, C, and Fortran
+applications.
+
+Linking instructions using compiler flags
+-----------------------------------------
+
+For applications which use pre-defined compiler flags for compilation, the
+following flags should be included for the preprocessor
+
+.. code-block:: text
+
+    -I/path/to/smartredis/install/include
+
+The linking flags will differ slightly whether the Fortran client library needs
+to be included. If so, be sure that you ran ``make lib-with-fortran`` and
+include the SmartRedis fortran library in the following flags
+
+.. code-block:: text
+
+    -L/path/to/smartredis/install/lib -lhiredis -lredis++ -lsmartredis [-lsmartredis-fortran]
+
+.. note::
+
+    Fortran applications need to link in both ``smartredis-fortran`` and
+    ``smartredis`` libraries whereas C/C++ applications require only
+    ``smartredis``
+
+
+Linking instructions for CMake-based build systems
+--------------------------------------------------
+
+The CMake instructions below illustrate how to compile a C or C++ application
+with SmartRedis. To build a Fortran client, uncomment out the lines after the
+``Fortran-only`` comments
 
 .. code-block:: text
 
@@ -34,14 +65,21 @@ compile a C or C++ application with SmartRedis.
 
     set(CMAKE_CXX_STANDARD 17)
 
-    find_library(sr_lib smartredis
-                 PATHS path/to/smartredis/install/lib
+    set(SMARTREDIS_INSTALL_PATH /path/to/smartredis/install)
+    find_library(SMARTREDIS_LIBRARY smartredis
+                 PATHS ${SMARTREDIS_INSTALL_PATH}/lib
                  NO_DEFAULT_PATH REQUIRED
     )
 
+    # Fortran-only:
+    #find_library(SMARTREDIS_FORTRAN_LIBRARY smartredis-fortran
+    #             PATHS SMARTREDIS_INSTALL_PATH/lib
+    #             NO_DEFAULT_PATH REQUIRED
+    #)
+
     include_directories(SYSTEM
         /usr/local/include
-        path/to/smartredis/install/include
+        ${SMARTREDIS_INSTALL_PATH}/include
     )
 
     # Build executables
@@ -50,48 +88,7 @@ compile a C or C++ application with SmartRedis.
         example.cpp
     )
     target_link_libraries(example
-        ${sr_lib}
-    )
-
-Compiling a Fortran application with the SmartRedis
-library is very similar to the instructions above.
-The only difference is that the Fortran SmartRedis
-client source files currently need to be included
-in the compilation. An example CMake file is
-shown below for a Fortran application.
-
-.. code-block:: text
-
-    project(Example)
-
-    cmake_minimum_required(VERSION 3.13)
-
-    enable_language(Fortran)
-
-    set(CMAKE_CXX_STANDARD 17)
-    set(CMAKE_C_STANDARD 99)
-
-    set(ftn_client_src
-        path/to/smartredis/src/fortran/fortran_c_interop.F90
-        path/to/smartredis/src/fortran/dataset.F90
-        path/to/smartredis/src/fortran/client.F90
-    )
-
-    find_library(sr_lib smartredis
-                 PATHS path/to/smartredis/install/lib
-                 NO_DEFAULT_PATH REQUIRED
-    )
-
-    include_directories(SYSTEM
-        /usr/local/include
-        path/to/smartredis/install/include
-    )
-
-    add_executable(example
-    	example.F90
-	    ${ftn_client_src}
-    )
-
-    target_link_libraries(example
-    	${sr_lib}
+        ${SMARTREDIS_LIBRARY}
+        # Fortran-only:
+        #${SMARTREDIS_FORTRAN_LIBRARY}
     )
