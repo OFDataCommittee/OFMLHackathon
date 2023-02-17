@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,4 +59,4 @@ T* SharedMemoryList<T>::allocate(size_t n_values)
     return allocate_bytes(bytes);
 }
 
-#endif //SMARTREDIS_SHAREDMEMORYLIST_TCC
+#endif // SMARTREDIS_SHAREDMEMORYLIST_TCC

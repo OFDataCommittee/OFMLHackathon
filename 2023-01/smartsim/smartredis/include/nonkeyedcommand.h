@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@
 #define SMARTREDIS_NONKEYEDCOMMAND_H
 
 #include "command.h"
+#include "address.h"
 
 ///@file
 
@@ -97,27 +98,16 @@ class NonKeyedCommand : public Command
         /*!
         *   \brief Set address and port for command
         *          to be executed on
-        *   \param address Address of database
-        *   \param port Port of database
+        *   \param addr_spec TCP or UDS address of database
         */
-        void set_exec_address_port(std::string address,
-                                   uint64_t port);
+        void set_exec_address(const SRAddress& addr_spec);
 
         /*!
         *   \brief Get address that command will be
         *          to be executed on
-        *   \return std::string of address
-        *           if an address hasn't been set,
-        *                 returns an empty string
+        *   \return SRAddress of address selected for the command
         */
-        std::string get_address();
-
-        /*!
-        *   \brief Get port that command will be
-        *          to be executed on
-        *   \return uint64_t of port
-        */
-        uint64_t get_port();
+        SRAddress get_address();
 
         /*!
         *   \brief Run this Command on the RedisServer.
@@ -127,16 +117,13 @@ class NonKeyedCommand : public Command
 
     private:
         /*!
-        *   \brief Address of database node
+        *   \brief Address of database node. If none has even
+        *          been set, it will be an address consisting of
+        *          TCP, an empty string for the IP address, and port 0
         */
-        std::string _address;
-
-        /*!
-        *   \brief Port of database node
-        */
-        uint64_t _port;
+        SRAddress _address;
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //NONKEYEDCOMMAND
+#endif // SMARTREDIS_NONKEYEDCOMMAND_H

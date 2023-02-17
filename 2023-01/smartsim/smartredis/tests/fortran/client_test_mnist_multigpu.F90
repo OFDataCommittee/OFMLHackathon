@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+! Copyright (c) 2021-2023, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,8 @@ program mnist_test
   character(len=2) :: key_suffix
   integer :: sr_return_code
 
-  sr_return_code = client%initialize(use_cluster())
+  sr_return_code = client%initialize(use_cluster(), &
+    "client_test_mnist_multigpu")
   if (sr_return_code .ne. SRNoError) error stop
 
   sr_return_code = client%set_model_from_file_multigpu(model_key, model_file, "TORCH", first_gpu, num_gpus)

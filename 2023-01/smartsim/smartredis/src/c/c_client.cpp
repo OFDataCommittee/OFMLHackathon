@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,14 +38,19 @@ using namespace SmartRedis;
 // Return a pointer to a new Client.
 // The caller is responsible for deleting the client via DeleteClient().
 extern "C"
-SRError SmartRedisCClient(bool cluster, void** new_client)
+SRError SmartRedisCClient(
+  bool cluster,
+  const char* logger_name,
+  const size_t logger_name_length,
+  void** new_client)
 {
   SRError result = SRNoError;
   try {
     // Sanity check params
-    SR_CHECK_PARAMS(new_client != NULL);
+    SR_CHECK_PARAMS(new_client != NULL && logger_name != NULL);
 
-    Client* s = new Client(cluster);
+    std::string _logger_name(logger_name, logger_name_length);
+    Client* s = new Client(cluster, _logger_name);
     *new_client = reinterpret_cast<void*>(s);
   }
   catch (const std::bad_alloc& e) {

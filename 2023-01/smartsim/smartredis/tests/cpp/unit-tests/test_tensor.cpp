@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <iostream>
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "tensor.h"
+#include "logger.h"
+
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
 SCENARIO("Testing Tensor", "[Tensor]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing Tensor" << std::endl;
+    std::string context("test_tensor");
+    log_data(context, LLDebug, "***Beginning Tensor testing***");
 
     GIVEN("Two Tensors")
     {
@@ -132,4 +139,5 @@ SCENARIO("Testing Tensor", "[Tensor]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Tensor testing***");
 }

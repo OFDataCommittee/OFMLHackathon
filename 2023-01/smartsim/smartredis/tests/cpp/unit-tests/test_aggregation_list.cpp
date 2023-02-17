@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,9 @@
 #include "../dataset_test_utils.h"
 #include "srexception.h"
 #include <sstream>
+#include "logger.h"
+
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
@@ -143,9 +146,13 @@ bool is_same_dataset(DataSet& dataset_1, DataSet& dataset_2)
 
 SCENARIO("Testing Dataset aggregation via our client", "[List]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing Dataset aggregation via our client" << std::endl;
+    std::string context("test_aggregation_list");
+    log_data(context, LLDebug, "***Beginning DataSet Aggregation testing***");
+
     GIVEN("A Client object and vector of DataSet objects")
     {
-        Client client(use_cluster());
+        Client client(use_cluster(), "test_aggregation_list");
 
         std::vector<DataSet> datasets;
 
@@ -497,4 +504,5 @@ SCENARIO("Testing Dataset aggregation via our client", "[List]")
             }
         }
     }
+    log_data(context, LLDebug, "***End DataSet Aggregation testing***");
 }

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <iostream>
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "dbnode.h"
+#include "logger.h"
+
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
 SCENARIO("Testing DBNode object", "[DBNode]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing DBNode object" << std::endl;
+    std::string context("test_dbnode");
+    log_data(context, LLDebug, "***Beginning DBNode testing***");
 
     GIVEN("Two DBNode objects created with the default contructor")
     {
@@ -42,8 +49,9 @@ SCENARIO("Testing DBNode object", "[DBNode]")
         THEN("The DBNode's data members are set to their default values")
         {
             CHECK(node_1.name == "");
-            CHECK(node_1.ip == "");
-            CHECK(node_1.port == -1);
+            CHECK(node_1.address._is_tcp);
+            CHECK(node_1.address._tcp_host == "");
+            CHECK(node_1.address._tcp_port == 0);
             CHECK(node_1.lower_hash_slot == -1);
             CHECK(node_1.upper_hash_slot == -1);
         }
@@ -61,20 +69,20 @@ SCENARIO("Testing DBNode object", "[DBNode]")
               "and hash slot information")
     {
         std::string name = "name";
-        std::string ip = "192.168.4.1";
-        uint64_t port = -1;
+        SRAddress address("192.168.4.1:0");
         uint64_t l_slot_1 = 2;
         uint64_t l_slot_2 = 1;
         uint64_t u_slot = -1;
         std::string prefix = "prefix";
-        DBNode node_1(ip, name, port, l_slot_1, u_slot, prefix);
-        DBNode node_2(ip, name, port, l_slot_2, u_slot, prefix);
+        DBNode node_1(name, address, l_slot_1, u_slot, prefix);
+        DBNode node_2(name, address, l_slot_2, u_slot, prefix);
 
         THEN("The DBNode's data members are set to their default values")
         {
             CHECK(node_1.name == name);
-            CHECK(node_1.ip == ip);
-            CHECK(node_1.port == port);
+            CHECK(node_1.address._is_tcp);
+            CHECK(node_1.address._tcp_host == address._tcp_host);
+            CHECK(node_1.address._tcp_port == address._tcp_port);
             CHECK(node_1.lower_hash_slot == l_slot_1);
             CHECK(node_1.upper_hash_slot == u_slot);
             CHECK(node_1.prefix == prefix);
@@ -88,4 +96,5 @@ SCENARIO("Testing DBNode object", "[DBNode]")
             CHECK(node_1 < node_2);
         }
     }
+    log_data(context, LLDebug, "***End DBNode testing***");
 }

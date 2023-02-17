@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,9 @@
 from .error import *
 from functools import wraps
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
+from .smartredisPy import c_get_last_error_location
+import numpy as np
+
 class Dtypes:
     @staticmethod
     def tensor_from_numpy(array):
@@ -60,6 +63,24 @@ class Dtypes:
             return mapping[dtype]
         raise TypeError(f"Incompatible metadata type provided {dtype}")
 
+    @staticmethod
+    def from_string(type_name):
+        mapping = {
+            "DOUBLE": np.double,
+            "FLOAT":  np.float64,
+            "UINT8":  np.uint8,
+            "UINT16": np.uint16,
+            "UINT32": np.uint32,
+            "UINT64": np.uint64,
+            "INT8":   np.int8,
+            "INT16":  np.int16,
+            "INT32":  np.int32,
+            "INT64":  np.int64,
+            "STRING": str,
+        }
+        if type_name in mapping:
+            return mapping[type_name]
+        raise TypeError(f"Unrecognized type name {type_name}")
 
 def init_default(default, init_value, expected_type=None):
     """Used for setting a mutable type to a default value.
@@ -95,7 +116,12 @@ def exception_handler(func):
             # The smartredis.error hierarchy exactly
             # parallels the one built via pybind to enable this
             exception_name = cpp_error.__class__.__name__
-            raise globals()[exception_name](str(cpp_error), method_name) from None
+            error_loc = c_get_last_error_location()
+            if error_loc == "unavailable":
+                cpp_error_str = str(cpp_error)
+            else:
+                cpp_error_str = f"File {error_loc}, in SmartRedis library\n{str(cpp_error)}"
+            raise globals()[exception_name](cpp_error_str, method_name) from None
     return smartredis_api_wrapper
 
 def typecheck(arg, name, _type):

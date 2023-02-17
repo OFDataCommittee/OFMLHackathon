@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #ifndef SMARTREDIS_TENSORBASE_H
 #define SMARTREDIS_TENSORBASE_H
 
-#include "stdlib.h"
+#include <stdlib.h>
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -76,8 +76,6 @@ static const std::unordered_map<SRTensorType, std::string>
         {SRTensorTypeInt8, DATATYPE_TENSOR_STR_INT8},
         {SRTensorTypeUint16, DATATYPE_TENSOR_STR_UINT16},
         {SRTensorTypeUint8, DATATYPE_TENSOR_STR_UINT8} };
-
-class TensorBase;
 
 /*!
 *   \brief  The TensorBase class is a base class that
@@ -272,6 +270,6 @@ class TensorBase{
         virtual size_t _n_data_bytes() = 0;
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_TENSORBASE_H
+#endif // SMARTREDIS_TENSORBASE_H

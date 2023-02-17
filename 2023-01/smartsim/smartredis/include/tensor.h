@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #ifndef SMARTREDIS_TENSOR_H
 #define SMARTREDIS_TENSOR_H
 
-#include "stdlib.h"
+#include <stdlib.h>
 #include <string>
 #include <stdexcept>
 #include "tensorbase.h"
@@ -315,6 +315,6 @@ class Tensor : public TensorBase
 
 #include "tensor.tcc"
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_TENSOR_H
+#endif // SMARTREDIS_TENSOR_H

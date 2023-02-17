@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,10 @@
 #include "../client_test_utils.h"
 #include "srexception.h"
 #include <sstream>
+#include "logger.h"
+#include "logcontext.h"
+
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
@@ -92,10 +96,12 @@ void check_all_data(size_t length, std::vector<void*>& original_datas,
 
 SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing Dataset Functions on Client Object" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client testing***");
     GIVEN("A Client object")
     {
-        Client client(use_cluster());
+        Client client(use_cluster(), "test_client");
 
         THEN("get, rename, and copy DataSet called on "
              "a nonexistent DataSet throws errors")
@@ -184,14 +190,17 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client testing***");
 }
 
 SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing Tensor Functions on Client Object" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client tensor testing***");
     GIVEN("A Client object")
     {
-        Client client(use_cluster());
+        Client client(use_cluster(), "test_client");
 
         AND_WHEN("Tensors of each type are created and put into the Client")
         {
@@ -464,14 +473,17 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client tensor testing***");
 }
 
 SCENARIO("Testing INFO Functions on Client Object", "[Client]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing INFO Functions on Client Object" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client INFO testing***");
     GIVEN("A Client object")
     {
-        Client client(use_cluster());
+        Client client(use_cluster(), "test_client");
 
         WHEN("INFO or CLUSTER INFO is called on database with "
              "an invalid address")
@@ -513,13 +525,17 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client tensor testing***");
 }
 
 SCENARIO("Testing AI.INFO Functions on Client Object", "[Client]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing AI.INFO Functions on Client Object" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client AI.INFO testing***");
     GIVEN("A Client object")
     {
-        Client client(use_cluster());
+        Client client(use_cluster(), "test_client");
 
         WHEN("AI.INFO called on database with an invalid address")
         {
@@ -561,14 +577,18 @@ SCENARIO("Testing AI.INFO Functions on Client Object", "[Client]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client AI.INFO testing***");
 }
 
 SCENARIO("Testing FLUSHDB on empty Client Object", "[Client][FLUSHDB]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing FLUSHDB on empty Client Object" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client empty FLIUSHDB testing***");
 
     GIVEN("An empty non-cluster Client object")
     {
-        Client client(use_cluster());
+        Client client(use_cluster(), "test_client");
 
         WHEN("FLUSHDB is called on database with "
              "an invalid address")
@@ -596,10 +616,14 @@ SCENARIO("Testing FLUSHDB on empty Client Object", "[Client][FLUSHDB]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client empty FLUSHDB testing***");
 }
 
 SCENARIO("Testing FLUSHDB on Client Object", "[Client][FLUSHDB]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing FLUSHDB on Client Object" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client FLUSHDB testing***");
 
     GIVEN("A non-cluster Client object")
     {
@@ -608,7 +632,7 @@ SCENARIO("Testing FLUSHDB on Client Object", "[Client][FLUSHDB]")
         if (use_cluster())
             return;
 
-        Client client(use_cluster());
+        Client client(use_cluster(), "test_client");
         std::string dataset_name = "test_dataset_name";
         DataSet dataset(dataset_name);
         dataset.add_meta_string("meta_string_name", "meta_string_val");
@@ -637,14 +661,18 @@ SCENARIO("Testing FLUSHDB on Client Object", "[Client][FLUSHDB]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client FLUSHDB testing***");
 }
 
 SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing CONFIG GET and CONFIG SET on Client Object" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client config get/set testing***");
 
     GIVEN("A Client object")
     {
-        Client client(use_cluster());
+        Client client(use_cluster(), "test_client");
 
         WHEN("CONFIG GET or CONFIG SET are called on databases with "
              "invalid addresses ")
@@ -682,13 +710,18 @@ SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client config get/set testing***");
 }
 
 SCENARIO("Test CONFIG GET on an unsupported command", "[Client]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Test CONFIG GET on an unsupported command" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client config get unsupported testing***");
+
     GIVEN("A client object")
     {
-        Client client(use_cluster());
+        Client client(use_cluster(), "test_client");
         std::string address = parse_SSDB(std::getenv("SSDB"));
 
         WHEN("CONFIG GET is called with an unsupported command")
@@ -702,13 +735,18 @@ SCENARIO("Test CONFIG GET on an unsupported command", "[Client]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client config get unsupported testing***");
 }
 
 SCENARIO("Test CONFIG SET on an unsupported command", "[Client]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Test CONFIG SET on an unsupported command" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client config set unsupported testing***");
+
     GIVEN("A client object")
     {
-        Client client(use_cluster());
+        Client client(use_cluster(), "test_client");
         std::string address = parse_SSDB(std::getenv("SSDB"));
 
         WHEN("CONFIG SET is called with an unsupported command")
@@ -722,14 +760,18 @@ SCENARIO("Test CONFIG SET on an unsupported command", "[Client]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client config get unsupported testing***");
 }
 
 SCENARIO("Testing SAVE command on Client Object", "[!mayfail][Client][SAVE]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing SAVE command on Client Object" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client SAVE unsupported testing***");
 
     GIVEN("A client object and some data")
     {
-        Client client(use_cluster());
+        Client client(use_cluster(), "test_client");
         std::string dataset_name = "test_save_dataset";
         DataSet dataset(dataset_name);
         dataset.add_meta_string("meta_string_save_name", "meta_string_val");
@@ -762,17 +804,22 @@ SCENARIO("Testing SAVE command on Client Object", "[!mayfail][Client][SAVE]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client SAVE unsupported testing***");
 }
 
 SCENARIO("Test that prefixing covers all hash slots of a cluster", "[Client]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Test that prefixing covers all hash slots of a cluster" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client prefix coverage testing***");
 
     if(use_cluster()==false)
         return;
 
     GIVEN("A test RedisCluster test object")
     {
-        RedisClusterTestObject redis_cluster;
+        LogContext context("test_client");
+        RedisClusterTestObject redis_cluster(&context);
 
         WHEN("A prefix is requested for a hash slot between 0 and 16384")
         {
@@ -799,15 +846,19 @@ SCENARIO("Test that prefixing covers all hash slots of a cluster", "[Client]")
                                 RuntimeException);
             }
         }
-
     }
+    log_data(context, LLDebug, "***End Client prefix coverage testing***");
 }
 
 SCENARIO("Testing Multi-GPU Function error cases", "[Client]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing Multi-GPU Function error cases" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client multigpu error testing***");
+
     GIVEN("A Client object, a script, and a model")
     {
-        Client client(use_cluster());
+        Client client(use_cluster(), "test_client");
         std::string model_key = "a_model";
         std::string model_file = "./../../mnist_data/mnist_cnn.pt";
         std::string script_key = "a_script";
@@ -947,4 +998,5 @@ SCENARIO("Testing Multi-GPU Function error cases", "[Client]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client multigpu error testing***");
 }

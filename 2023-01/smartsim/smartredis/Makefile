@@ -22,17 +22,29 @@ deps: SHELL:=/bin/bash
 deps:
 	@bash ./build-scripts/build_deps.sh
 
-# help: lib                            - Build SmartRedis clients into a dynamic library
+# help: lib                            - Build SmartRedis C/C++/Python clients into a dynamic library
 .PHONY: lib
 lib: SHELL:=/bin/bash
 lib: deps
 	@bash ./build-scripts/build_lib.sh $(LIB_BUILD_ARGS)
+
+# help: lib-with-fortran               - Build SmartRedis C/C++/Python and Fortran clients into a dynamic library
+.PHONY: lib-with-fortran
+lib-with-fortran: SHELL:=/bin/bash
+lib-with-fortran: deps
+	@bash ./build-scripts/build_lib.sh $(LIB_BUILD_ARGS) -DBUILD_FORTRAN=ON
 
 # help: test-lib                       - Build SmartRedis clients into a dynamic library with least permissive compiler settings
 .PHONY: test-lib
 test-lib: SHELL:=/bin/bash
 test-lib: LIB_BUILD_ARGS="-DWERROR=ON"
 test-lib: lib
+
+# help: test-lib-with-fortran          - Build SmartRedis clients into a dynamic library with least permissive compiler settings
+.PHONY: test-lib-with-fortran
+test-lib-with-fortran: SHELL:=/bin/bash
+test-lib-with-fortran: LIB_BUILD_ARGS="-DWERROR=ON"
+test-lib-with-fortran: lib-with-fortran
 
 # help: test-deps                      - Make SmartRedis testing dependencies
 .PHONY: test-deps
@@ -49,7 +61,7 @@ test-deps-gpu:
 
 # help: build-tests                    - build all tests (C, C++, Fortran)
 .PHONY: build-tests
-build-tests: test-lib
+build-tests: test-lib-with-fortran
 	./build-scripts/build_cpp_tests.sh
 	./build-scripts/build_cpp_unit_tests.sh
 	./build-scripts/build_c_tests.sh
@@ -75,13 +87,13 @@ build-test-c: test-lib
 
 # help: build-test-fortran             - build the Fortran tests
 .PHONY: build-test-fortran
-build-test-fortran: test-lib
+build-test-fortran: test-lib-with-fortran
 	./build-scripts/build_fortran_tests.sh
 
 
 # help: build-examples                 - build all examples (serial, parallel)
 .PHONY: build-examples
-build-examples: lib
+build-examples: lib-with-fortran
 	./build-scripts/build_serial_examples.sh
 	./build-scripts/build_parallel_examples.sh
 

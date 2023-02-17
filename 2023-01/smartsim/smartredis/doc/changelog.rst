@@ -1,6 +1,66 @@
 Changelog
 =========
 
+Development branch
+------------------
+
+To be released at some future date
+
+Note
+
+This section details changes made in the development branch that have not yet been applied to a released version of the SmartRedis library.
+
+Description
+
+- Change documentation theme to sphinx_book_theme and fix doc strings
+- Add support for inspection of tensors and metadata inside datasets
+- Add support for user-directed logging for Python clients, using Client, Dataset, or LogContext logging methods
+- Add support for user-directed logging for C and Fortran clients without a Client or Dataset context
+- Additional error reporting for connections to and commands run against Redis databases
+- Improved error reporting capabilities for Fortran clients
+- Python error messages from SmartRedis contain more information
+- Added logging functionality to the SmartRedis library
+- A bug related to thread pool initialization was fixed.
+- This version adds new functionality in the form of support for Unix Domain Sockets.
+- Fortran client can now be optionally built with the rest of the library
+- Initial support for dataset conversions, specifically Xarray.
+
+Detailed Notes
+
+- Change documentation theme to sphinx_book_theme to match SmartSim documentation theme and fix Python API doc string errors (PR294_)
+- Added support for retrieval of names and types of tensors and metadata inside datasets (PR291_)
+- Added support for user-directed logging for Python clients via {Client, Dataset, LogContext}.{log_data, log_warning, log_error} methods (PR289_)
+- Added support for user-directed logging without a Client or Dataset context to C and Fortran clients via _string() methods (PR288_)
+- Added logging to capture transient errors that arise in the _run() and _connect() methods of the Redis and RedisCluster classes (PR287_)
+- Tweak direct testing of Redis and RedisCluster classes (PR286_)
+- Resolve a disparity in the construction of Python client and database classes (PR285_)
+- Fortran clients can now access error text and source location (PR284_)
+- Add exception location information from CPP code to Python exceptions (PR283_)
+- Added client activity and manual logging for developer use (PR281_)
+- Fix thread pool error (PR280_)
+- Update library linking instructions and update Fortran tester build process (PR277_)
+- Added `add_metadata_for_xarray` and `transform_to_xarray` methods in `DatasetConverter` class for initial support with Xarray (PR262_)
+- Change Dockerfile to use Ubuntu 20.04 LTS image (PR276_)
+- Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
+- A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
+
+.. _PR294: https://github.com/CrayLabs/SmartRedis/pull/294
+.. _PR291: https://github.com/CrayLabs/SmartRedis/pull/291
+.. _PR289: https://github.com/CrayLabs/SmartRedis/pull/289
+.. _PR288: https://github.com/CrayLabs/SmartRedis/pull/288
+.. _PR287: https://github.com/CrayLabs/SmartRedis/pull/287
+.. _PR286: https://github.com/CrayLabs/SmartRedis/pull/286
+.. _PR285: https://github.com/CrayLabs/SmartRedis/pull/285
+.. _PR284: https://github.com/CrayLabs/SmartRedis/pull/284
+.. _PR283: https://github.com/CrayLabs/SmartRedis/pull/283
+.. _PR281: https://github.com/CrayLabs/SmartRedis/pull/281
+.. _PR280: https://github.com/CrayLabs/SmartRedis/pull/280
+.. _PR277: https://github.com/CrayLabs/SmartRedis/pull/277
+.. _PR262: https://github.com/CrayLabs/SmartRedis/pull/262
+.. _PR276: https://github.com/CrayLabs/SmartRedis/pull/276
+.. _PR252: https://github.com/CrayLabs/SmartRedis/pull/252
+.. _PR245: https://github.com/CrayLabs/SmartRedis/pull/245
+
 0.3.1
 -----
 

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,8 @@
 
 #ifndef SMARTREDIS_TENSOR_TCC
 #define SMARTREDIS_TENSOR_TCC
+
+///@file
 
 // Tensor constructor
 template <class T>
@@ -446,4 +448,4 @@ inline size_t Tensor<T>::_c_index(const std::vector<size_t>& dims,
     return position;
 }
 
-#endif //SMARTREDIS_TENSOR_TCC
+#endif // SMARTREDIS_TENSOR_TCC

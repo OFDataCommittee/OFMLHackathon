@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,12 +35,12 @@ using namespace SmartRedis;
 
 namespace py = pybind11;
 
-PyClient::PyClient(bool cluster)
+PyClient::PyClient(bool cluster, const std::string& logger_name)
+    : PySRObject(logger_name)
 {
-//    throw SRRuntimeException("Test");
     _client = NULL;
     try {
-        _client = new Client(cluster);
+        _client = new Client(cluster, logger_name);
     }
     catch (Exception& e) {
         // exception is already prepared for caller

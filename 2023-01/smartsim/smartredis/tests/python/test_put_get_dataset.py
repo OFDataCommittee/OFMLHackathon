@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@ import numpy as np
 from smartredis import Client, Dataset
 
 
-def test_put_get_dataset(mock_data, use_cluster):
+def test_put_get_dataset(mock_data, use_cluster, context):
     """test sending and recieving a dataset with 2D tensors
     of every datatype
     """
@@ -43,7 +43,7 @@ def test_put_get_dataset(mock_data, use_cluster):
         key = f"tensor_{str(index)}"
         dataset.add_tensor(key, tensor)
 
-    client = Client(None, use_cluster)
+    client = Client(None, use_cluster, logger_name=context)
 
     assert not client.dataset_exists(
         "nonexistent-dataset"
@@ -64,7 +64,7 @@ def test_put_get_dataset(mock_data, use_cluster):
         )
 
 
-def test_augment_dataset(mock_data, use_cluster):
+def test_augment_dataset(mock_data, use_cluster, context):
     """Test sending, receiving, altering, and sending
     a Dataset.
     """
@@ -75,7 +75,7 @@ def test_augment_dataset(mock_data, use_cluster):
     dataset_name = "augment-dataset"
 
     # Initialize a client
-    client = Client(None, use_cluster)
+    client = Client(None, use_cluster, logger_name=context)
 
     # Create a dataset to put into the database
     dataset = Dataset(dataset_name)
@@ -126,7 +126,7 @@ def test_augment_dataset(mock_data, use_cluster):
         "Dataset returned did not return the correct additional tensor",
     )
 
-    # Check the accuracy of the metadat fields
+    # Check the accuracy of the metadata fields
     assert aug_dataset.get_meta_scalars(scalar_name).size == 1
     assert len(aug_dataset.get_meta_strings(string_name)) == 1
     assert aug_dataset.get_meta_scalars(scalar_name)[0] == scalar_field

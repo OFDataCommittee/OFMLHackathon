@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,8 +27,8 @@
  */
 
 
-#ifndef SMARTREDIS_ENUMS_H
-#define SMARTREDIS_ENUMS_H
+#ifndef SMARTREDIS_SR_ENUMS_H
+#define SMARTREDIS_SR_ENUMS_H
 
 ///@file
 
@@ -72,4 +72,15 @@ typedef enum {
     SRTensorTypeUint16  = 8  // 16-bit unsigned integer tensor type
 } SRTensorType;
 
-#endif // SMARTREDIS_ENUMS_H
+/*!
+*   \brief  Enumeration for logging levels
+*/
+typedef enum {
+    LLInvalid   = 0, // Invalid or uninitialized logging level
+    LLQuiet     = 1, // No logging at all
+    LLInfo      = 2, // Informational logging only
+    LLDebug     = 3, // Verbose logging for debugging purposes
+    LLDeveloper = 4  // Extra verbose logging for internal use
+} SRLoggingLevel;
+
+#endif // SMARTREDIS_SR_ENUMS_H

@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,18 +30,18 @@ import torch
 from smartredis import Client
 
 
-def test_set_model(mock_model, use_cluster):
+def test_set_model(mock_model, use_cluster, context):
     model = mock_model.create_torch_cnn()
-    c = Client(None, use_cluster)
+    c = Client(None, use_cluster, logger_name=context)
     c.set_model("simple_cnn", model, "TORCH", "CPU")
     returned_model = c.get_model("simple_cnn")
     assert model == returned_model
 
 
-def test_set_model_from_file(mock_model, use_cluster):
+def test_set_model_from_file(mock_model, use_cluster, context):
     try:
         mock_model.create_torch_cnn(filepath="./torch_cnn.pt")
-        c = Client(None, use_cluster)
+        c = Client(None, use_cluster, logger_name=context)
         c.set_model_from_file("file_cnn", "./torch_cnn.pt", "TORCH", "CPU")
         assert c.model_exists("file_cnn")
         returned_model = c.get_model("file_cnn")
@@ -54,10 +54,10 @@ def test_set_model_from_file(mock_model, use_cluster):
         os.remove("torch_cnn.pt")
 
 
-def test_torch_inference(mock_model, use_cluster):
+def test_torch_inference(mock_model, use_cluster, context):
     # get model and set into database
     model = mock_model.create_torch_cnn()
-    c = Client(None, use_cluster)
+    c = Client(None, use_cluster, logger_name=context)
     c.set_model("torch_cnn", model, "TORCH")
 
     # setup input tensor

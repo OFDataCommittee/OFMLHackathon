@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,11 +28,17 @@
 
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "compoundcommand.h"
+#include "logger.h"
+
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
 SCENARIO("Testing copy constructor and deep copy operator for CompoundCommand", "[CompoundCommand]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing copy constructor and deep copy operator for CompoundCommand" << std::endl;
+    std::string context("test_compoundcommand");
+    log_data(context, LLDebug, "***Beginning CompoundCommand testing***");
 
     GIVEN("A CompoundCommand object")
     {
@@ -131,4 +137,5 @@ SCENARIO("Testing copy constructor and deep copy operator for CompoundCommand", 
             }
         }
     }
+    log_data(context, LLDebug, "***End CompoundCommand testing***");
 }

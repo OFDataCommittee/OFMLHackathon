@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+! Copyright (c) 2021-2023, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,7 @@ program main
     recv_array_integer_64(i) = irand()
   enddo
 
-  result = client%initialize(use_cluster())
+  result = client%initialize(use_cluster(), "client_test_put_get_1D")
   if (result .ne. SRNoError) error stop
 
   result = client%put_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))

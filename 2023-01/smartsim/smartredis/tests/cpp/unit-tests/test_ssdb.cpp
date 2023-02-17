@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,13 @@
 
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "redis.h"
+#include "client.h"
+#include "address.h"
+#include "logger.h"
+#include "logcontext.h"
+#include "srobject.h"
+
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
@@ -35,11 +42,11 @@ using namespace SmartRedis;
 class TestSSDB : public Redis
 {
     public:
-        TestSSDB() : Redis() {}
+        TestSSDB(const SRObject* c) : Redis(c) {}
 
-        std::string get_ssdb()
+        SRAddress get_ssdb()
         {
-            return this->_get_ssdb();
+            return _get_ssdb();
         }
 };
 
@@ -54,16 +61,21 @@ void setenv_ssdb(const char* ssdb)
 
 SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Additional Testing for various SSDBs" << std::endl;
+    std::string context("test_ssdb");
+    log_data(context, LLDebug, "***Beginning SSDB testing***");
+    LogContext lc("test_ssdb");
 
     GIVEN("A TestSSDB object")
     {
         const char* old_ssdb = std::getenv("SSDB");
 
-    INFO("SSDB must be set to a valid host and "\
-         "port before running this test.");
-    REQUIRE(old_ssdb != NULL);
+        INFO("SSDB must be set to a valid host and "\
+            "port before running this test.");
+        REQUIRE(old_ssdb != NULL);
 
-        TestSSDB test_ssdb;
+        TestSSDB test_ssdb(&lc);
+        Client* c = NULL;
 
         THEN("SSDB environment variable must exist "
              "and contain valid characters")
@@ -78,10 +90,14 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
 
             // Valid SSDB. Ensure one of 127 or 128 is chosen
             setenv_ssdb("127,128");
-            std::string hp = test_ssdb.get_ssdb();
-            CHECK((hp == "tcp://127" || hp == "tcp://128"));
+            CHECK_THROWS_AS(test_ssdb.get_ssdb(), SmartRedis::RuntimeException);
+
+            // SSDB points to a unix domain socket and we're using clustered Redis
+            setenv_ssdb ("unix://127.0.0.1:6349");
+            CHECK_THROWS_AS(c = new Client(true, "test_ssdb"), SmartRedis::RuntimeException);
 
             setenv_ssdb(old_ssdb);
         }
     }
+    log_data(context, LLDebug, "***End SSDB testing***");
 }

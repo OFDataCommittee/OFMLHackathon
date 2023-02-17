@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@
 #include <cstring>
 #include <memory>
 #include "srexception.h"
+
+///@file
 
 namespace SmartRedis {
 
@@ -122,7 +124,6 @@ class SharedMemoryList {
 
 #include "sharedmemorylist.tcc"
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_SHAREDMEMORYLIST_H
-
+#endif // SMARTREDIS_SHAREDMEMORYLIST_H

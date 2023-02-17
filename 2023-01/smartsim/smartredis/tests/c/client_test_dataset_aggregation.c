@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -130,10 +130,13 @@ int main(int argc, char* argv[])
   char* dataset_name[] = {"agg_dataset_0", "agg_dataset_1", "agg_dataset_2",  "agg_dataset_2", "agg_dataset_3"};
   char* list_name = "my_aggregation";
   void** datasets = NULL;
+  const char* logger_name = "test_dataset_aggregation";
+  size_t cid_len = strlen(logger_name);
 
   // Initialize client
   void *client = NULL;
-  if (SRNoError != SmartRedisCClient(use_cluster(), &client) || NULL == client) {
+  if (SRNoError != SmartRedisCClient(use_cluster(), logger_name, cid_len, &client) || 
+      NULL == client) {
     printf("Failed to initialize client!\n");
     printf("Test passed: NO\n");
     return -1;

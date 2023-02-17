@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,3 +29,20 @@
 #define CATCH_CONFIG_MAIN
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "srexception.h"
+#include <ctime>
+
+std::time_t start_time;
+bool initialized = false;
+
+time_t get_start_time() {
+    if (initialized)
+        return start_time;
+    start_time = std::time(NULL);
+    initialized = true;
+    return start_time;
+}
+
+unsigned long get_time_offset() {
+    std::time_t now = std::time(NULL);
+    return (unsigned long)((unsigned long)now - (unsigned long)get_start_time());
+}

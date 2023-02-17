@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,12 +29,17 @@
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "addressanycommand.h"
 #include "redisserver.h"
+#include "logger.h"
+
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
 SCENARIO("Testing assignment operator for AddressAnyCommand", "[AddressAnyCommand]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing assignment operator for AddressAnyCommand" << std::endl;
+    std::string context("test_addressanycommand");
+    log_data(context, LLDebug, "***Beginning AddressAnyCommand testing***");
     GIVEN("An AddressAnyCommand object")
     {
         AddressAnyCommand cmd;
@@ -98,26 +103,29 @@ SCENARIO("Testing assignment operator for AddressAnyCommand", "[AddressAnyComman
             }
         }
     }
+    log_data(context, LLDebug, "***End AddressAnyCommand testing***");
 }
 
 SCENARIO("Testing AddressAnyCommand member variables", "[AddressAnyCommand]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing AddressAnyCommand member variables" << std::endl;
+    std::string context("test_addressanycommand");
+    log_data(context, LLDebug, "***Beginning AddressAnyCommand member testing***");
     GIVEN("An AddressAnyCommand object and a db node address and port")
     {
         AddressAnyCommand cmd;
-        std::string db_address = "127.0.0.1";
-        uint16_t db_port = 6379;
+        std::string db_address = "127.0.0.1:6379";
+        SRAddress address(db_address);
 
         WHEN("An address and port are set")
         {
-            cmd.set_exec_address_port(db_address, db_port);
+            cmd.set_exec_address(db_address);
 
             THEN("The command's address and port will be the same as those set")
             {
-                CHECK(cmd.get_address() == db_address);
-                CHECK(cmd.get_port() == db_port);
+                CHECK(cmd.get_address() == address);
             }
         }
     }
+    log_data(context, LLDebug, "***End AddressAnyCommand member testing***");
 }

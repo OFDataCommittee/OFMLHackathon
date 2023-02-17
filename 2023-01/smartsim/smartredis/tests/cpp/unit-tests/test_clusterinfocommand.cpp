@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,11 +28,18 @@
 
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "clusterinfocommand.h"
+#include "logger.h"
+
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
 SCENARIO("Parsing an empty string for cluster info")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Parsing an empty string for cluster info" << std::endl;
+    std::string context("test_clusterinfocommand");
+    log_data(context, LLDebug, "***Beginning ClusterInfoCommand testing***");
+
     GIVEN("A ClusterInfoCommand and an empty string")
     {
         ClusterInfoCommand cmd;
@@ -46,4 +53,5 @@ SCENARIO("Parsing an empty string for cluster info")
             }
         }
     }
+    log_data(context, LLDebug, "***End ClusterInfoCommand testing***");
 }

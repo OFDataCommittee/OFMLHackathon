@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,13 +31,13 @@
 
 #include "addressatcommand.h"
 
+///@file
+
 /*!
 *  \brief A nested map of reply data from a database response
 */
 using parsed_reply_nested_map = std::unordered_map<std::string,
                                 std::unordered_map<std::string, std::string>>;
-
-///@file
 
 namespace SmartRedis {
 
@@ -58,6 +58,6 @@ class DBInfoCommand : public AddressAtCommand
         static parsed_reply_nested_map parse_db_node_info(std::string info);
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //DBINFOCOMMAND
+#endif // SMARTREDIS_DBINFOCOMMAND_H

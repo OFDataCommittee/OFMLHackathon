@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "dataset.h"
+#ifndef SMARTREDIS_PYDATASET_H
+#define SMARTREDIS_PYDATASET_H
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
 #include <string>
+#include "dataset.h"
+#include "pysrobject.h"
 
 ///@file
 
@@ -38,13 +42,11 @@ namespace py = pybind11;
 
 namespace SmartRedis {
 
-class PyDataset;
-
 /*!
 *   \brief The PyDataset class is a wrapper around the
            C++ dataset abstraction class.
 */
-class PyDataset
+class PyDataset : public PySRObject
 {
     public:
 
@@ -68,7 +70,7 @@ class PyDataset
         /*!
         *   \brief PyDataset destructor
         */
-        ~PyDataset();
+        virtual ~PyDataset();
 
         /*!
         *   \brief Add a tensor to the PyDataset
@@ -130,6 +132,32 @@ class PyDataset
         py::list get_meta_strings(const std::string& name);
 
         /*!
+        *   \brief Retrieve the names of all tensors in the DataSet
+        *   \returns A vector of tensor names
+        */
+        py::list get_tensor_names();
+
+        /*!
+        *   \brief Retrieve the data type of a Tensor in the DataSet
+        *   \param name The name of the tensor
+        *   \returns The data type for the tensor
+        */
+        std::string get_tensor_type(const std::string& name);
+
+        /*!
+        *   \brief Retrieve the names of all metadata fields in the DataSet
+        *   \returns A vector of metadata field names
+        */
+        py::list get_metadata_field_names();
+
+        /*!
+        *   \brief Retrieve the data type of a metadata field in the DataSet
+        *   \param name The name of the metadata field
+        *   \returns The data type for the metadata field
+        */
+        std::string get_metadata_field_type(const std::string& name);
+
+        /*!
         *   \brief Get the name of the PyDataset
         *   \returns std::string of the PyDataset name
         */
@@ -147,4 +175,6 @@ class PyDataset
         DataSet* _dataset;
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
+
+#endif // SMARTREDIS_PYDATASET_H

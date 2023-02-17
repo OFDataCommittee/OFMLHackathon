@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "pysrobject.h"
 #include "pyclient.h"
+#include "pydataset.h"
+#include "pylogcontext.h"
 #include "srexception.h"
+#include "logger.h"
+//#include "srobject.h"
+//#include "logcontext.h"
 
 using namespace SmartRedis;
 namespace py = pybind11;
@@ -36,9 +42,20 @@ namespace py = pybind11;
 PYBIND11_MODULE(smartredisPy, m) {
     m.doc() = "smartredis client"; // optional module docstring
 
-    // Python client bindings
-    py::class_<PyClient>(m, "PyClient")
-        .def(py::init<bool>())
+    // Python SRObject class
+    py::class_<PySRObject>(m, "PySRObject")
+        .def(py::init<std::string&>())
+        .def("log_data", &PySRObject::log_data)
+        .def("log_warning", &PySRObject::log_warning)
+        .def("log_error", &PySRObject::log_error);
+
+    // Python LogContext class
+    py::class_<PyLogContext, PySRObject>(m, "PyLogContext")
+        .def(py::init<std::string&>());
+
+    // Python client class
+    py::class_<PyClient, PySRObject>(m, "PyClient")
+        .def(py::init<bool, const std::string&>())
         .def("put_tensor", &PyClient::put_tensor)
         .def("get_tensor", &PyClient::get_tensor)
         .def("delete_tensor", &PyClient::delete_tensor)
@@ -98,7 +115,7 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("get_dataset_list_range", &PyClient::get_dataset_list_range);
 
     // Python Dataset class
-    py::class_<PyDataset>(m, "PyDataset")
+    py::class_<PyDataset, PySRObject>(m, "PyDataset")
         .def(py::init<std::string&>())
         .def("add_tensor", &PyDataset::add_tensor)
         .def("get_tensor", &PyDataset::get_tensor)
@@ -106,7 +123,30 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("add_meta_string", &PyDataset::add_meta_string)
         .def("get_meta_scalars", &PyDataset::get_meta_scalars)
         .def("get_meta_strings", &PyDataset::get_meta_strings)
-        .def("get_name", &PyDataset::get_name);
+        .def("get_name", &PyDataset::get_name)
+        .def("get_metadata_field_names", &PyDataset::get_metadata_field_names)
+        .def("get_metadata_field_type", &PyDataset::get_metadata_field_type)
+        .def("get_tensor_type", &PyDataset::get_tensor_type)
+        .def("get_tensor_names", &PyDataset::get_tensor_names);
+
+    // Logging functions
+    m.def("cpp_log_data", py::overload_cast<const std::string&, SRLoggingLevel, const std::string&>(&log_data))
+     .def("cpp_log_data", py::overload_cast<const SRObject*, SRLoggingLevel, const std::string&>(&log_data))
+     .def("cpp_log_warning", py::overload_cast<const std::string&, SRLoggingLevel, const std::string&>(&log_warning))
+     .def("cpp_log_warning", py::overload_cast<const SRObject*, SRLoggingLevel, const std::string&>(&log_warning))
+     .def("cpp_log_error", py::overload_cast<const std::string&, SRLoggingLevel, const std::string&>(&log_error))
+     .def("cpp_log_error", py::overload_cast<const SRObject*, SRLoggingLevel, const std::string&>(&log_error));
+
+    // Logging levels
+    py::enum_<SRLoggingLevel>(m, "SRLoggingLevel")
+        .value("LLQuiet", LLQuiet)
+        .value("LLInfo", LLInfo)
+        .value("LLDebug", LLDebug)
+        .value("LLDeveloper", LLDeveloper)
+        .export_values();
+
+    // Error management routines
+    m.def("c_get_last_error_location", &SRGetLastErrorLocation);
 
     // Python exception classes
     static py::exception<SmartRedis::Exception>         exception_handler(m,          "RedisReplyError");
