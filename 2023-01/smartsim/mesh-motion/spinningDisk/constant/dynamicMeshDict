@@ -17,22 +17,22 @@ FoamFile
 
 dynamicFvMesh dynamicMotionSolverFvMesh;
 motionSolverLibs (fvMotionSolvers);
+/*
 motionSolver displacementSBRStress;    //velocityComponentLaplacian z;
     // diffusivity  uniform;
     // diffusivity  directional (1 200 0);
     // diffusivity  motionDirectional (1 1000 0);
     // diffusivity  file motionDiffusivity;
     diffusivity  quadratic inverseDistance 1(cylinder);
+*/
 
-/*
-solver            displacementLaplacian;
-displacementLaplacianCoeffs
+solver            displacementSmartSim;
+displacementSmartSimCoeffs
 {
     //diffusivity       inverseVolume (HULL); //inverseDistance (HULL);
     //diffusivity       inverseDistance (HULL);
     //diffusivity         bufferZone (HULL);
     diffusivity         inverseFaceDistance 1(cylinder);
 }
-*/
 
 // ************************************************************************* //
