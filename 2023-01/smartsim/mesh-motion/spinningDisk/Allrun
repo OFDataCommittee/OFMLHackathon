@@ -14,5 +14,4 @@ runApplication $(getApplication)
 #runApplication checkMesh -writeAllFields -latestTime
 runApplication checkMesh -writeAllFields 
 
-runApplication paraFoam 
 #------------------------------------------------------------------------------
