@@ -1,0 +1,77 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2206                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     moveDynamicMesh;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         5;
+
+deltaT          0.005;
+
+writeControl    adjustable;
+
+writeInterval   0.25;
+
+purgeWrite      0;
+
+writeFormat     binary;
+
+writePrecision  6;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable yes;
+
+adjustTimeStep  yes;
+
+maxCo           0.9;
+
+maxDeltaT       0.1;
+
+
+libs ("libsmartSimFunctionObject.so");
+
+functions
+{
+    smartSim 
+    {
+        type smartSimFunctionObject;
+        clusterMode off; 
+        fieldNames 
+        (
+            // epsilon   
+            // points  
+            pointDisplacement
+        ); 
+        
+        fieldDimensions 
+        (
+            // 1  
+            3 
+        ); 
+    }
+}
+
+// ************************************************************************* //

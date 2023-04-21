@@ -1,0 +1,20 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+restore0Dir
+
+runApplication surfaceFeatureEdges \
+    spinningBlockd.stl \
+    spinningBlockd.fms
+       
+runApplication tetMesh
+
+runApplication $(getApplication) -checkAMI
+
+#runApplication mirrorMesh -overwrite
+
+runApplication checkMesh -writeAllFields -latestTime
+#runApplication checkMesh -writeAllFields 
+#------------------------------------------------------------------------------
