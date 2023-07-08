@@ -33,7 +33,7 @@ Since we aim to provide all participants with close support during the hackathon
 
 - Bayesian Optimization in Computational Fluid Dynamics using [Ax](https://ax.dev/) and [OpenFOAM](https://www.openfoam.com/documentation/guides/latest/doc/). The goal of this example is to find optimal parameters of an OpenFOAM simulation that minimize some target function using Bayesian Optimization algorithms from Ax - Adaptive experimentation platform.
 
-- Learning and monitoring closed-loop flow control strategies with [drlFoam](https://github.com/OFDataCommittee/drlfoam); we'll apply deep reinforcement learning to new test cases and build a monitoring dashboard with [dash](https://dash.gallery/Portal/?_gl=1*niktbt*_ga*MTM2OTM4Mjc5OS4xNjY4MTcxNzYz*_ga_6G7EE0JNSC*MTY2ODE3MTc2Mi4xLjEuMTY2ODE3MTc2My4wLjAuMA..); to learn about closed-loop control with DRL, refer to [this article](https://arxiv.org/pdf/1906.10382.pdf)
+- Learning and monitoring closed-loop flow control strategies with [drlFoam](https://github.com/OFDataCommittee/drlfoam) and [Gym-PreCICE](https://github.com/gymprecice/gymprecice); we'll apply deep reinforcement learning to control the flow past a cylinder using jet actuation and Rayleigh-Bérnard convection by heating; to learn about closed-loop control with DRL, refer to [this article](https://arxiv.org/pdf/1906.10382.pdf); [this preprint](https://arxiv.org/abs/2304.02370) introduces DRL applied to Rayleigh-Bérnard convection; for an introduction to DRL for flow control, you may also find [this video](https://www.youtube.com/watch?v=q1AxT8grMdk&t=3897s) helpful
 
 ## Getting in touch
 
