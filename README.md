@@ -27,7 +27,7 @@ Since we aim to provide all participants with close support during the hackathon
 
 [Apply here](https://forms.gle/HTH8VtX44qhpwMoq9)
 
-## Projects for the 3nd hackathon Jan 23-25, 2023
+## Projects for the 3nd hackathon
 
 - Coupling OpenFOAM and machine learning libraries via [SmartSim](https://github.com/CrayLabs/SmartSim); the goal of this project is to perform online inference and data extraction during the simulation; the test case is based on [this work](https://github.com/AndreWeiner/sgs_model_test_transient); moreover, [this example](https://github.com/CrayLabs/smartsim-openFOAM) provides some guidance for the OpenFOAM-SmartSim coupling
 
