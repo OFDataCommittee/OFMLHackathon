@@ -15,26 +15,25 @@ A hackathon is an intensive get-together for creative problem solving in groups.
 
 The workshop is **fully virtual**. There is no geographical restriction for participants, but keep in mind that we cannot accommodate all time zones. The organizers' time zone is **CET**.
 
-## Time line
+## Next hackathon
 
-- **Nov 11, 2022**: start of the application process
-- **Dec 31, 2022**: end of the application process
-- **Jan 09, 2023**: feedback on the applications
-- **Jan 23-25, 2023**: 2nd hackathon
+- **Jul 23-25, 2023**: 3d hackathon
 
 A detailed schedule will be provided at the beginning of the hackathon. Note that you should reserve **three full days** for the hackathon.
 
 ## How can I participate?
 
-Since we aim to provide all participants with close support during the hackathon, the number of participants is limited to **20**. Applications are accepted until **Dec 31, 2022**. There are **no registration fees** or other costs. We can also provide compute resources thanks to AWS, so you do not need any specialized hardware. Admission is not guaranteed. Based on all applications, we will select the most suitable candidates.
+Since we aim to provide all participants with close support during the hackathon, the number of participants is limited to **20**. There are **no registration fees** or other costs. We can also provide compute resources thanks to AWS, so you do not need any specialized hardware. Admission is not guaranteed. Based on all applications, we will select the most suitable candidates.
 
 [Apply here](https://forms.gle/DkZCe4JHcExmXpdz9)
 
-## Projects for the 2nd hackathon Jan 23-25, 2023
+## Projects for the 3nd hackathon Jan 23-25, 2023
 
-- Combining OpenFOAM and physics-based machine learning with Nvidia [Modulus](https://developer.nvidia.com/modulus); refer to the Modulus [user guide](https://docs.nvidia.com/deeplearning/modulus/index.html) to prepare for this project
 - Coupling OpenFOAM and machine learning libraries via [SmartSim](https://github.com/CrayLabs/SmartSim); the goal of this project is to perform online inference and data extraction during the simulation; the test case is based on [this work](https://github.com/AndreWeiner/sgs_model_test_transient); moreover, [this example](https://github.com/CrayLabs/smartsim-openFOAM) provides some guidance for the OpenFOAM-SmartSim coupling
-- learning and monitoring closed-loop flow control strategies with [drlFoam](https://github.com/OFDataCommittee/drlfoam); we'll apply deep reinforcement learning to new test cases and build a monitoring dashboard with [dash](https://dash.gallery/Portal/?_gl=1*niktbt*_ga*MTM2OTM4Mjc5OS4xNjY4MTcxNzYz*_ga_6G7EE0JNSC*MTY2ODE3MTc2Mi4xLjEuMTY2ODE3MTc2My4wLjAuMA..); to learn about closed-loop control with DRL, refer to [this article](https://arxiv.org/pdf/1906.10382.pdf)
+
+- Bayesian Optimization in Computational Fluid Dynamics using [Ax](https://ax.dev/) and [OpenFOAM](https://www.openfoam.com/documentation/guides/latest/doc/). The goal of this example is to find optimal parameters of an OpenFOAM simulation that minimize some target function using Bayesian Optimization algorithms from Ax - Adaptive experimentation platform.
+
+- Learning and monitoring closed-loop flow control strategies with [drlFoam](https://github.com/OFDataCommittee/drlfoam); we'll apply deep reinforcement learning to new test cases and build a monitoring dashboard with [dash](https://dash.gallery/Portal/?_gl=1*niktbt*_ga*MTM2OTM4Mjc5OS4xNjY4MTcxNzYz*_ga_6G7EE0JNSC*MTY2ODE3MTc2Mi4xLjEuMTY2ODE3MTc2My4wLjAuMA..); to learn about closed-loop control with DRL, refer to [this article](https://arxiv.org/pdf/1906.10382.pdf)
 
 ## Getting in touch
 
