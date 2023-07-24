@@ -1,3 +1,0 @@
-fvMotionSolvers/displacement/smartsim/displacementSmartSimFvMotionSolver.C
-
-LIB = $(FOAM_USER_LIBBIN)/libfvSmartSimMotionSolvers
