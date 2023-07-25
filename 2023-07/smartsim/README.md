@@ -15,7 +15,7 @@ Compile the foamSmartSimMapFields application with
     ?> simpleFoam -case pitzDailyCoarse
 ```
 
-## Usage 
+## Run the Jupyter Notebook as a SmartSim Orchestrator 
 
 The foamSmartSimMapFields application includes client.h and links to the smartredis database library. 
 
