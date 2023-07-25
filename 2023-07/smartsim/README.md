@@ -38,4 +38,6 @@ The application requires following execution arguments
 
 These arguments are passed to the SmartSim Model in the SmartSim Jupyter Notebook. See the `foam-smartsim-map-fields.ipynb` for information about the next steps in the python smartredis client and smartsim orchestration, and `foamSmartSimMapFields.C` for the information about the next steps in the OpenFOAM client. 
 
+To run the case, run the `foam-smartsim-map-fields.ipynb` Jupyter notebook.
+
 
