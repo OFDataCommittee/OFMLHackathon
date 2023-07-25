@@ -1,11 +1,18 @@
 # OpenFOAM - ML Hackathon SmartSim Folder
 
-## Compilation
+## Compile the foamSmartSimMapFields application
 
 Compile the foamSmartSimMapFields application with 
 
 ```
     ?> ./Allwmake
+```
+
+## Run the pitzDailyCoarse case
+
+```
+    ?> blockMesh -case pitzDailyCoarse
+    ?> simpleFoam -case pitzDailyCoarse
 ```
 
 ## Usage 
