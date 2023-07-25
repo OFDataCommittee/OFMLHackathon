@@ -36,6 +36,8 @@ Description
 
 #include "fvCFD.H"
 #include "wordList.H"
+#include "timeSelector.H"
+#include "client.h"
 
 // TODO(TM): include smartredis header (see solver and function object example).
 
@@ -43,6 +45,9 @@ Description
 
 int main(int argc, char *argv[])
 {
+    // Selecting the time step for the input field.
+    timeSelector::addOptions();
+
     argList::addOption
     (
         "inputCase", 
@@ -63,6 +68,7 @@ int main(int argc, char *argv[])
         "field",
         "Name of the mapped field, e.g. p" 
     ); 
+
 
     #include "setRootCase.H"
     #include "createTimes.H"

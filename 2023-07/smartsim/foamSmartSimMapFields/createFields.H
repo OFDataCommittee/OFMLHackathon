@@ -40,15 +40,16 @@ tmp<volVectorField> inputVolVectorFieldTmp(nullptr);
 
 const word field = args.get<word>("field");
 
+// TODO(TM): hardcoded to select latest time from the input case, add options.
+instantList inputTimeDirs = timeSelector::select0(runTimeInput, args);
+const auto latestTime = inputTimeDirs[inputTimeDirs.size() - 1];
 IOobject fieldHeader
 (
     field, 
-    runTimeInput.timeName(),  
+    latestTime.name(), 
     runTimeInput,  
     IOobject::MUST_READ
 );
-
-Info << runTimeInput.timeName() << endl;
     
 // If the field file header corresponds to a cell-centered scalar field
 if (fieldHeader.typeHeaderOk<volScalarField>(true, true, false))
