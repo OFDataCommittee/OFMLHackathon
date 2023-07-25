@@ -1,5 +1,19 @@
 # OpenFOAM - ML Hackathon SmartSim Folder
 
+## Set the environment variables 
+
+The command
+
+```
+    ?> source configure_smartredis.sh
+```
+
+sets the env variables, sourcing should be done from the folder that contains `configure_smartredis.sh`.  Note that your smartredis folder may lie in another place than in $HOME in which you need to adapt configure_smartredis.sh before building the application. Before the client opens a connection in the smartredis database, the application can be compiled and executed as any other OpenFOAM application. 
+
+The foamSmartSimMapFields application includes client.h and links to the smartredis database library. 
+
+An OpenFOAM application/solver/functionObject/fvOption/meshMotionSolver/.... is always going to be a client of the SmartRedis database. To open the connection to the database the OpenFOAM client needs to include client.h from smartredis and link to the library. To do this we need to inform the wmake build system on where the include directory is of smartsim and where the dynamically linked library resides. We do this in in OpenFOAM by modifying [Make/options](https://github.com/OFDataCommittee/OFMLHackathon/blob/main/2023-07/smartsim/foamSmartSimMapFields/Make/options) and point OpenFOAM's `wmake` build system to appropriate INCLUDE (`-I`) and LINK (`-L`) folders defined by environmental variables FOAM_SMARTREDIS_* that are set in configure_smartredis.sh 
+
 ## Compile the foamSmartSimMapFields application
 
 Compile the foamSmartSimMapFields application with 
@@ -17,17 +31,7 @@ Compile the foamSmartSimMapFields application with
 
 ## Run the Jupyter Notebook as a SmartSim Orchestrator 
 
-The foamSmartSimMapFields application includes client.h and links to the smartredis database library. 
 
-An OpenFOAM application/solver/functionObject/fvOption/meshMotionSolver/.... is always going to be a client of the SmartRedis database. To open the connection to the database the OpenFOAM client needs to include client.h from smartredis and link to the library. To do this we need to inform the wmake build system on where the include directory is of smartsim and where the dynamically linked library resides. We do this in in OpenFOAM by modifying [Make/options](https://github.com/OFDataCommittee/OFMLHackathon/blob/main/2023-07/smartsim/foamSmartSimMapFields/Make/options) and point OpenFOAM's `wmake` build system to appropriate INCLUDE (`-I`) and LINK (`-L`) folders defined by environmental variables FOAM_SMARTREDIS_* that are set in configure_smartredis.sh 
-
-The command
-
-```
-    ?> source configure_smartredis.sh
-```
-
-sets the env variables, sourcing should be done from the folder that contains `configure_smartredis.sh`.  Note that your smartredis folder may lie in another place than in $HOME in which you need to adapt configure_smartredis.sh before building the application. Before the client opens a connection in the smartredis database, the application can be compiled and executed as any other OpenFOAM application. 
 
 As soon as the code is added to open a connection, a database must be created and running. If the OpenFOAM client does not create the database (e.g. if a Python client does it), then the application will hang. As soon as we start working with the dbase, we need to switch to a Jupyter Notebook, that will start/stop dbase and coordinate data exchange.
 
