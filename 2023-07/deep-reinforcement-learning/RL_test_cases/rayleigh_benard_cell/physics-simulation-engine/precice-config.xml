@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+
+<precice-configuration>
+
+  <log>
+    <sink type="stream" output="stdout"  filter= "%Severity% > debug" format="preCICE:%ColorizedSeverity% %Message%" enabled="true" />	
+  </log>
+
+  <solver-interface dimensions="2" >
+    <data:scalar name="Temperature" />
+    <data:scalar name="Heat-Flux" />
+
+    <mesh name="Fluid-Mesh">
+      <use-data name="Temperature" />
+      <use-data name="Heat-Flux" />
+    </mesh>
+
+    <mesh name="Controller-Mesh">
+      <use-data name="Temperature" />
+      <use-data name="Heat-Flux" />
+    </mesh>
+
+    <participant name="Fluid">
+      <use-mesh name="Fluid-Mesh" provide="yes"/>
+      <use-mesh name="Controller-Mesh" from="Controller"/>
+      <read-data  name="Temperature" mesh="Fluid-Mesh" />
+      <write-data  name="Heat-Flux" mesh="Fluid-Mesh" />
+      <mapping:nearest-neighbor direction="read"  from="Controller-Mesh" to="Fluid-Mesh" constraint="consistent" />
+      <mapping:nearest-neighbor direction="write"  from="Fluid-Mesh" to="Controller-Mesh" constraint="conservative" />
+    </participant>
+
+    <participant name="Controller">
+      <use-mesh name="Controller-Mesh" provide="yes"/>
+      <write-data name="Temperature" mesh="Controller-Mesh" />
+      <read-data name="Heat-Flux" mesh="Controller-Mesh" />
+    </participant>
+    
+    <m2n:sockets from="Controller" to="Fluid" exchange-directory=  />
+
+    <coupling-scheme:parallel-explicit>
+      <max-time value="300" />
+      <time-window-size value="0.05" valid-digits="8" />
+      <participants first="Controller" second="Fluid"/>
+      <exchange data="Heat-Flux" mesh="Controller-Mesh" from="Fluid" to="Controller" initialize="False"/>
+      <exchange data="Temperature" mesh="Controller-Mesh" from="Controller" to="Fluid" initialize="True"/>
+    </coupling-scheme:parallel-explicit>
+  </solver-interface>
+</precice-configuration>
+

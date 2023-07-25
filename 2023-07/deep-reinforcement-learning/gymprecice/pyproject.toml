@@ -1,0 +1,77 @@
+# Package ######################################################################
+
+[build-system]
+requires = ["setuptools >= 61.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gymprecice"
+version = "0.1.0"
+authors = [{ name = "Mosayeb Shams (lead developer)", email = "m.shams@hw.ac.uk" }, { name = "Ahmed H. Elsheikh (supervisor)", email = "a.elsheikh@hw.ac.uk" }]
+description = "A framework to designe Reinforcement Learning (RL) environments for Active Flow Control (AFC), as well as a  playground to train Deep Reinforcement Learning (DRL) algorithms for AFC applications."
+readme = "README.md"
+requires-python = ">= 3.7"
+
+license = { text = "MIT License" }
+keywords = ["Reinforcement Learning", "RL", "Deep Reinforcement Learning", "DRL", "AI", "Gymnasium", "OpenAI Gym", "preCICE", "Active Flow Control"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.urls]
+Homepage = "https://github.com/gymprecice"
+Repository = "https://github.com/gymprecice/gymprecice"
+"Bug Report" = "https://github.com/gymprecice/gymprecice/issues"
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+include = ["gymprecice", "gymprecice.*"]
+
+[tool.setuptools.package-data]
+gymprecice = []
+
+# Linters and Test tools #######################################################
+
+[tool.black]
+safe = true
+
+[tool.isort]
+atomic = true
+profile = "black"
+src_paths = ["gymprecice", "tests"]
+extra_standard_library = ["typing_extensions"]
+indent = 4
+lines_after_imports = 2
+multi_line_output = 3
+
+[tool.pyright]
+include = ["gymprecice/**", "tests/**"]
+exclude = ["**/__pycache__"]
+strict = []
+typeCheckingMode = "basic"
+pythonVersion = "3.7"
+pythonPlatform = "All"
+typeshedPath = "typeshed"
+enableTypeIgnoreComments = true
+
+# This is required as the CI pre-commit does not download the module (i.e. numpy, precice, gymprecice, xmltodict, pytest)
+# Therefore, we have to ignore missing imports
+reportMissingImports = "none"
+# Some modules are missing type stubs, which is an issue when running pyright locally
+reportMissingTypeStubs = false
+# For warning and error, will raise an error when
+reportInvalidTypeVarUse = "none"
+reportGeneralTypeIssues = "none"
+reportUntypedFunctionDecorator = "none"
+reportPrivateUsage = "warning"
+reportUnboundVariable = "warning"
