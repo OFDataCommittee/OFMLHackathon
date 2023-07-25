@@ -38,8 +38,6 @@ Description
 tmp<volScalarField> inputVolScalarFieldTmp(nullptr); 
 tmp<volVectorField> inputVolVectorFieldTmp(nullptr); 
 
-const word field = args.get<word>("field");
-
 // TODO(TM): hardcoded to select latest time from the input case, add options.
 instantList inputTimeDirs = timeSelector::select0(runTimeInput, args);
 const auto latestTime = inputTimeDirs[inputTimeDirs.size() - 1];

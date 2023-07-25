@@ -34,6 +34,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "error.H"
 #include "fvCFD.H"
 #include "wordList.H"
 #include "timeSelector.H"
@@ -73,23 +74,61 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTimes.H"
     #include "createMeshes.H"
+
+    const word field = args.get<word>("field");
+
     #include "createFields.H"
 
-    // TODO(TM): Initialize smartredis client (open channel to smartredis db).  
-    
-    const volVectorField& inputMeshCellCenters = inputMesh.C();
-    const volVectorField& outputMeshCellCenters = outputMesh.C();
-
-    SmartRedis::Client client(false);
+    SmartRedis::Client smartRedisClient(false);
 
     // If 'field' is a volScalarField 
     if (!inputVolScalarFieldTmp->empty())
     {
-        // Map the volScalarField using smartsim and smartredis
+        // Let python know the rank of the training data tensor (scalar, vector).
+        std::vector<int> tensor_rank {0};
+        smartRedisClient.put_tensor("input_field_rank",
+                                    (void*)tensor_rank.data(), 
+                                    std::vector<size_t>{1},
+                                    SRTensorTypeInt32, SRMemLayoutContiguous);
+                                    
+        // Create the cell centers DataSet
+        const auto mpiIndexStr = std::to_string(Pstream::myProcNo());
 
-        //- Put the input mesh cell centers in smartredis.
-        
+        auto inputCentersDatasetName = 
+            "input_centers_dataset_MPI_" + mpiIndexStr; 
+        SmartRedis::DataSet inputCentersDataset(inputCentersDatasetName);
+        // Create the boundary displacements DataSet
+        auto inputFieldDatasetName = 
+            "input_" + field + "_dataset_MPI_" + mpiIndexStr;
+        SmartRedis::DataSet inputFieldDataset(inputFieldDatasetName);
+
+        // Add the type name into the input field dataset metadata. 
+        inputFieldDataset.add_meta_string("type", "scalar");
+
+        //- Put the cell centers into the centers dataset 
+        // TODO(TM): double-chek mesh.nCells!
+        Pout << "Number of cells : " << inputMesh.nCells() << endl;
+        Info << "Writing cell centers to smartredis. " << endl;
+        inputCentersDataset.add_tensor("input_cells_MPI_" + mpiIndexStr,
+                                  (void*)inputMesh.C().cdata(), 
+                                  std::vector<size_t>{size_t(inputMesh.nCells()), 3},
+                                  SRTensorTypeDouble, SRMemLayoutContiguous);
+
+
         //- Put the input field in smartredis.
+        Info << "Writing field " << field << " to smartredis. " << endl;
+        inputFieldDataset.add_tensor("input_" + field + "_MPI_" + mpiIndexStr,
+                                     (void*)inputVolScalarFieldTmp->cdata(), 
+                                      std::vector<size_t>{size_t(inputMesh.nCells()), 1},
+                                      SRTensorTypeDouble, SRMemLayoutContiguous);
+
+        smartRedisClient.put_dataset(inputCentersDataset);
+        smartRedisClient.put_dataset(inputFieldDataset);
+        smartRedisClient.append_to_list("inputCentersDatasetList", 
+                                        inputCentersDataset);
+        smartRedisClient.append_to_list("inputFieldDatasetList", 
+                                         inputFieldDataset);
+
         
         //- (In the Jupyter Notebook - fetch the fields and train an ML model).
 
