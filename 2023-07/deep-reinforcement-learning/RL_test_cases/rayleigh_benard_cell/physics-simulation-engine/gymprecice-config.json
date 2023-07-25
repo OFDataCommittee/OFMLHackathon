@@ -1,0 +1,15 @@
+{
+    "environment": {
+        "name": "RBC"
+    },
+    "physics_simulation_engine": {
+        "solvers": ["fluid-openfoam"],
+        "prerun_script": "prerun.sh",
+        "reset_script": "reset.sh",
+        "run_script": "run.sh"
+    },
+    "controller": {
+        "read_from": {"floor": "Heat-Flux"},
+        "write_to": {"floor": "Temperature"}
+    }
+}
