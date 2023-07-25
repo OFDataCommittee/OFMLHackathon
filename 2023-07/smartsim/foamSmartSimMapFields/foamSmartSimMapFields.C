@@ -80,6 +80,8 @@ int main(int argc, char *argv[])
     const volVectorField& inputMeshCellCenters = inputMesh.C();
     const volVectorField& outputMeshCellCenters = outputMesh.C();
 
+    SmartRedis::Client client(false);
+
     // If 'field' is a volScalarField 
     if (!inputVolScalarFieldTmp->empty())
     {
