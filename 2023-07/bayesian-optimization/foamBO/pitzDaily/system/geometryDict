@@ -1,0 +1,39 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2112                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      geometryParameters;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Number of curve points to generate on the lower patch
+nCurvePnts 100;
+
+// Number of control points for the Bezier curve
+nCtrlPnts 8;
+
+// Domain length
+L 0.29;
+
+Ctrl1X 0.024;
+Ctrl1Y -0.1;
+Ctrl2X 0.074;
+Ctrl2Y 0.0;
+Ctrl3X 0.124;
+Ctrl3Y 0.01;
+Ctrl4X 0.174;
+Ctrl4Y 0.01;
+Ctrl5X 0.224;
+Ctrl5Y -0.01;
+Ctrl6X 0.265;
+Ctrl6Y 0.0;
+
+// ************************************************************************* //
