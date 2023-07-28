@@ -1,0 +1,5 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+
+foamCleanTutorials -self
+rm -rf 0 geometry/*
