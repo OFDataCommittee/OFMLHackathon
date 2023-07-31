@@ -1,0 +1,27 @@
+{
+    "description": "<p>The first usable state featuring running OpenFOAM cases locally as well as in SLURM-managed clusters</p>", 
+    "license": "other-open", 
+    "title": "FoamScience/OpenFOAM-Multi-Objective-Optimization: First working version", 
+    "version": "v0.1-alpha", 
+    "upload_type": "software", 
+    "publication_date": "2023-06-02", 
+    "creators": [
+        {
+            "affiliation": "TU Darmstadt", 
+            "name": "Mohammed Elwardi Fadeli"
+        }
+    ], 
+    "access_right": "open", 
+    "related_identifiers": [
+        {
+            "scheme": "url", 
+            "identifier": "https://github.com/FoamScience/OpenFOAM-Multi-Objective-Optimization/tree/v0.1-alpha", 
+            "relation": "isSupplementTo"
+        }, 
+        {
+            "scheme": "doi", 
+            "identifier": "10.5281/zenodo.7997393", 
+            "relation": "isVersionOf"
+        }
+    ]
+}
