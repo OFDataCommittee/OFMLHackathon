@@ -27,7 +27,7 @@ Since we aim to provide all participants with close support during the hackathon
 
 [Apply here](https://forms.gle/HTH8VtX44qhpwMoq9)
 
-## Projects for the 3d hackathon
+## Projects for the next hackathon
 
 - Building scalable Computational Fluid Dynamics + Machine Learning Workflows using [OpenFOAM](https://www.openfoam.com/) and [SmartSim](https://github.com/CrayLabs/SmartSim) 
 
