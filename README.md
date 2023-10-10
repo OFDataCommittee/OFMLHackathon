@@ -17,7 +17,7 @@ The workshop is **fully virtual**. There is no geographical restriction for part
 
 ## Next hackathon
 
-- **Jul 24-26, 2023**: 3d hackathon
+- **Nov 08-10, 2023**: 3d hackathon
 
 A detailed schedule will be provided at the beginning of the hackathon. Note that you should reserve **three full days** for the hackathon.
 
@@ -29,7 +29,9 @@ Since we aim to provide all participants with close support during the hackathon
 
 ## Projects for the 3d hackathon
 
-- Coupling OpenFOAM and machine learning libraries via [SmartSim](https://github.com/CrayLabs/SmartSim); the goal of this project is to perform online inference and data extraction during the simulation; the test case is based on [this work](https://github.com/AndreWeiner/sgs_model_test_transient); moreover, [this example](https://github.com/CrayLabs/smartsim-openFOAM) provides some guidance for the OpenFOAM-SmartSim coupling
+- Building scalable Computational Fluid Dynamics + Machine Learning Workflows using [OpenFOAM](https://www.openfoam.com/) and [SmartSim](https://github.com/CrayLabs/SmartSim) 
+
+- Streaming [Singular Value Decomposition](https://www.youtube.com/watch?v=gXbThCXjZFM&list=PLMrJAkhIeNNSVjnsviglFoY2nXildDCcv) and [Dynamic Mode Decomposition](https://www.youtube.com/watch?v=sQvrK8AGCAo&pp=ygUoc3RldmUgYnJ1bnRvbiBkeW5hbWljIG1vZGUgZGVjb21wb3NpdGlvbg%3D%3D) for Computational Fluid Dynamics using [OpenFOAM](https://www.openfoam.com/) and [SmartSim](https://github.com/CrayLabs/SmartSim)
 
 - Bayesian Optimization in Computational Fluid Dynamics using [Ax](https://ax.dev/) and [OpenFOAM](https://www.openfoam.com/documentation/guides/latest/doc/). The goal of this example is to find optimal parameters of an OpenFOAM simulation that minimize some target function using Bayesian Optimization algorithms from Ax - Adaptive experimentation platform.
 
