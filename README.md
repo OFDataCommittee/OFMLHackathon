@@ -17,7 +17,7 @@ The workshop is **fully virtual**. There is no geographical restriction for part
 
 ## Next hackathon
 
-- **Nov 08-10, 2023**: 4th hackathon
+- **Nov 08-10, 2023**
 
 A detailed schedule will be provided at the beginning of the hackathon. Note that you should reserve **three full days** for the hackathon.
 
