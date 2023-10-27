@@ -152,7 +152,7 @@ SCENARIO("Testing Dataset aggregation via our client", "[List]")
 
     GIVEN("A Client object and vector of DataSet objects")
     {
-        Client client(use_cluster(), "test_aggregation_list");
+        Client client("test_aggregation_list");
 
         std::vector<DataSet> datasets;
 

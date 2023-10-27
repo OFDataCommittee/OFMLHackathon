@@ -43,7 +43,7 @@ void run_mnist(const std::string& model_name,
 
     // Load the mnist image from a file using MPI rank 0
     if (rank == 0) {
-        std::string image_file = "../../../common/mnist_data/one.raw";
+        std::string image_file = "../../common/mnist_data/one.raw";
         std::ifstream fin(image_file, std::ios::binary);
         std::ostringstream ostream;
         ostream << fin.rdbuf();
@@ -104,8 +104,7 @@ int main(int argc, char* argv[]) {
     logger_name += std::to_string(rank);
 
     // Initialize a Client object
-    bool cluster_mode = true; // Set to false if not using a clustered database
-    SmartRedis::Client client(cluster_mode, logger_name);
+    SmartRedis::Client client(logger_name);
 
     // Set the model and script that will be used by all ranks
     // from MPI rank 0.
@@ -113,16 +112,14 @@ int main(int argc, char* argv[]) {
         // Build model key, file name, and then set model
         // from file using client API
         std::string model_key = "mnist_model";
-        std::string model_file = "../../../"\
-                                 "common/mnist_data/mnist_cnn.pt";
+        std::string model_file = "../../common/mnist_data/mnist_cnn.pt";
         client.set_model_from_file(model_key, model_file,
                                 "TORCH", "CPU", 20);
 
         // Build script key, file name, and then set script
         // from file using client API
         std::string script_key = "mnist_script";
-        std::string script_file = "../../../common/mnist_data/"
-                                "data_processing_script.txt";
+        std::string script_file = "../../common/mnist_data/data_processing_script.txt";
         client.set_script_from_file(script_key, "CPU", script_file);
 
         // Get model and script to illustrate client API

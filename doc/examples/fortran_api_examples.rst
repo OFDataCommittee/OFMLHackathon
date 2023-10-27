@@ -13,19 +13,19 @@ SmartRedis ``DataSet`` API is also provided.
 .. note::
 
     The Fortran API examples rely on the ``SSDB`` environment
-    variable being set to the address and port of the Redis database.
+    variable being set to the address and port of the backend database.
 
 .. note::
 
     The Fortran API examples are written
-    to connect to a Redis cluster database.  Update the
-    ``Client`` constructor call to connect to a non-cluster Redis instance.
+    to connect to a clustered backend database.  Update the
+    ``Client`` constructor call to connect to a non-cluster backend instance.
 
 Tensors
 =======
 
 The SmartRedis Fortran client is used to communicate between
-a Fortran client and the Redis database. In this example,
+a Fortran client and the backend database. In this example,
 the client will be used to send an array to the database
 and then unpack the data into another Fortran array.
 
@@ -107,9 +107,13 @@ into a different array.
 Datasets
 ========
 
-The following code snippet shows how to use the Fortran
-Client to store and retrieve dataset tensors and
-dataset metadata scalars.
+The Fortran ``Client`` API stores and retrieve datasets from the backend database. The Fortran
+``DataSet`` API can store and retrieve tensors and metadata from an in-memory ``DataSet`` object.
+To reiterate, the actual interaction with the backend database, 
+where a snapshot of the ``DataSet`` object is sent, is handled by the Client API.
+
+The code below shows how to store and retrieve tensors and metadata
+which belong to a ``DataSet``.
 
 .. literalinclude:: ../../examples/serial/fortran/smartredis_dataset.F90
   :linenos:
@@ -300,14 +304,14 @@ constructed by including a suffix based on MPI tasks.
 
 The subroutine, in place of an actual simulation, next
 generates an array of random numbers and puts this array
-into the Redis database.
+into the backend database.
 
 .. code-block:: Fortran
 
   call random_number(array)
   call client%put_tensor(in_key, array, shape(array))
 
-The Redis database can now be called to run preprocessing
+The backend database can now be called to run preprocessing
 scripts on these data.
 
 .. code-block:: Fortran

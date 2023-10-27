@@ -57,8 +57,7 @@ int main(int argc, char* argv[]) {
     logger_name += std::to_string(rank);
 
     // Initialize a SmartRedis client
-    bool cluster_mode = true; // Set to false if not using a clustered database
-    SmartRedis::Client client(cluster_mode, logger_name);
+    SmartRedis::Client client(logger_name);
 
     // Put the tensor in the database
     std::string key = "3d_tensor_" + std::to_string(rank);

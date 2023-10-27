@@ -27,10 +27,9 @@
 from .smartredisPy import PySRObject, SRLoggingLevel
 from .util import exception_handler, typecheck
 
-from .error import *
 
 class SRObject:
-    def __init__(self, context):
+    def __init__(self, context: str) -> None:
         """Initialize a SRObject object
 
         :param context: logging context
@@ -43,42 +42,8 @@ class SRObject:
         else:
             self._srobject = context
 
-    @staticmethod
-    def from_pybind(srobject):
-        """Initialize a SRObject object from
-        a PySRObject object
-
-        :param srobject: The pybind PySRObject object to use for construction
-        :type srobject: PySRObject
-        :return: The newly constructed¸ SRObject from the PySRObject
-        :rtype: SRObject
-        """
-        typecheck(srobject, "srobject", PySRObject)
-        new_srobject = SRObject(srobject._name)
-        new_srobject.set_data(srobject)
-        return new_srobject
-
     @exception_handler
-    def get_srobject(self):
-        """Return the PySRObject attribute
-
-        :return: The PySRObject attribute containing the srobject information
-        :rtype: PySRObject
-        """
-        return self._srobject
-
-    @exception_handler
-    def set_srobject(self, srobject):
-        """Set the PySRObject attribute
-
-        :param srobject: The PySRObject object
-        :type srobject: PySRObject
-        """
-        typecheck(srobject, "srobject", PySRObject)
-        self._srobject = srobject
-
-    @exception_handler
-    def log_data(self, level, data):
+    def log_data(self, level: SRLoggingLevel, data: str) -> None:
         """Conditionally log data if the logging level is high enough
 
         :param level: Minimum logging level for data to be logged
@@ -92,7 +57,7 @@ class SRObject:
         self._srobject.log_data(level, data)
 
     @exception_handler
-    def log_warning(self, level, data):
+    def log_warning(self, level: SRLoggingLevel, data: str) -> None:
         """Conditionally log warning data if the logging level is high enough
 
         :param level: Minimum logging level for data to be logged
@@ -106,7 +71,7 @@ class SRObject:
         self._srobject.log_warning(level, data)
 
     @exception_handler
-    def log_error(self, level, data):
+    def log_error(self, level: SRLoggingLevel, data: str) -> None:
         """Conditionally log error data if the logging level is high enough
 
         :param level: Minimum logging level for data to be logged

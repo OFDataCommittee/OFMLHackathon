@@ -30,6 +30,7 @@
 #include "dataset.h"
 #include "srexception.h"
 #include "logger.h"
+#include "utility.h"
 
 using namespace SmartRedis;
 
@@ -188,7 +189,7 @@ void DataSet::get_meta_strings(const std::string& name,
 }
 
 // Check if the DataSet has a field
-bool DataSet::has_field(const std::string& field_name)
+bool DataSet::has_field(const std::string& field_name) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -206,7 +207,7 @@ void DataSet::clear_field(const std::string& field_name)
 }
 
 // Retrieve the names of the tensors in the DataSet
-std::vector<std::string> DataSet::get_tensor_names()
+std::vector<std::string> DataSet::get_tensor_names() const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -240,7 +241,8 @@ void DataSet::get_tensor_names(
 // Get the strings in a metadata string field. Because standard C++
 // containers are used, memory management is handled by the returned
 // std::vector<std::string>.
-std::vector<std::string> DataSet::get_meta_strings(const std::string& name)
+std::vector<std::string> DataSet::get_meta_strings(
+    const std::string& name) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -249,7 +251,7 @@ std::vector<std::string> DataSet::get_meta_strings(const std::string& name)
 }
 
 // Get the Tensor type of the Tensor
-SRTensorType DataSet::get_tensor_type(const std::string& name)
+SRTensorType DataSet::get_tensor_type(const std::string& name) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -265,8 +267,26 @@ SRTensorType DataSet::get_tensor_type(const std::string& name)
     return tensor->type();
 }
 
+// Retrieve the dimensions of a Tensor in the DataSet
+const std::vector<size_t> DataSet::get_tensor_dims(
+    const std::string& name) const
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    // Get the tensor
+    auto tensor = _tensorpack.get_tensor(name);
+    if (tensor == NULL) {
+        throw SRKeyException(
+            "No tensor named " + name + " is in the dataset");
+    }
+
+    // Return its dimensions
+    return tensor->dims();
+}
+
 // Retrieve the names of all metadata fields in the DataSet
-std::vector<std::string> DataSet::get_metadata_field_names()
+std::vector<std::string> DataSet::get_metadata_field_names() const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -285,7 +305,8 @@ void DataSet::get_metadata_field_names(
 }
 
 // Retrieve the data type of a metadata field in the DataSet
-SRMetaDataType DataSet::get_metadata_field_type(const std::string& name)
+SRMetaDataType DataSet::get_metadata_field_type(
+    const std::string& name) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -367,3 +388,51 @@ TensorBase* DataSet::_get_tensorbase_obj(const std::string& name)
     _enforce_tensor_exists(name);
     return _tensorpack.get_tensor(name)->clone();
 }
+
+// Create a string representation of the DataSet
+std::string DataSet::to_string() const
+{
+    std::string result;
+    result = "DataSet (" + _lname + "):\n";
+
+    // Tensors
+    result += "Tensors:\n";
+    auto it = _tensorpack.tensor_cbegin();
+    int ntensors = 0;
+    for ( ; it != _tensorpack.tensor_cend(); ++it) {
+        ntensors++;
+        result += "  " + (*it)->name() + ":\n";
+        result += "    type: " + ::to_string((*it)->type()) + "\n";
+        auto dims = (*it)->dims();
+        result += "    dimensions: [";
+        size_t ndims = dims.size();
+        for (auto itdims = dims.cbegin(); itdims != dims.cend(); ++itdims) {
+            result += std::to_string(*itdims);
+            if (--ndims > 0)
+                result += ", ";
+        }
+        result += "]\n";
+        result += "    elements: " + std::to_string((*it)->num_values()) + "\n";
+    }
+    if (ntensors == 0) {
+        result += "  none\n";
+    }
+
+    // Metadata
+    result += "Metadata:\n";
+    auto mdnames = get_metadata_field_names();
+    int nmetadata = 0;
+    for (auto itmd = mdnames.cbegin(); itmd != mdnames.cend(); ++itmd) {
+        nmetadata++;
+        result += "  " + (*itmd) + ":\n";
+        result += "    type: "
+                + ::to_string(get_metadata_field_type(*itmd)) + "\n";
+    }
+    if (nmetadata == 0) {
+        result += "  none\n";
+    }
+
+    // Done
+    return result;
+}
+

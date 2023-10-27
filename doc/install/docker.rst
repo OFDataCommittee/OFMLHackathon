@@ -67,9 +67,8 @@ for a containerized application.
 
     # C++ containerized CMake file
 
-    project(DockerTester)
-
     cmake_minimum_required(VERSION 3.13)
+    project(DockerTester)
 
     set(CMAKE_CXX_STANDARD 17)
 
@@ -111,9 +110,8 @@ for a containerized application.
 
     # C containerized CMake file
 
-    project(DockerTester)
-
     cmake_minimum_required(VERSION 3.13)
+    project(DockerTester)
 
     set(CMAKE_CXX_STANDARD 17)
 
@@ -151,15 +149,14 @@ for a containerized application.
 
 **Fortran**
 
-In addition to the SmartRedis dynamic
-library installed in ``/usr/local/lib/``  and library
-header files installed in ``/usr/local/include/smartredis/``,
-the Fortran source files needed to compile a Fortran application
-with SmartRedis are installed in
-``/usr/local/src/SmartRedis/src/fortran/``.
+The SmartRedis and SmartRedis-Fortran dynamic
+library needed to compile a Fortran application
+with SmartRedis are installed in ``/usr/local/lib/``
+and the library header files are installed in
+``/usr/local/include/smartredis/``.
 
 An example CMake file that builds a Fortran application
-using the ``smartredis`` image can be found
+using the ``smartredis`` images can be found
 at ``./tests/docker/fortran/CMakeLists.txt``.
 This CMake file is also shown below along with an
 example Docker file that invokes the CMake files
@@ -169,33 +166,38 @@ for a containerized application.
 
     # Fortran containerized CMake file
 
-    project(DockerTester)
-
     cmake_minimum_required(VERSION 3.13)
+    project(DockerTesterFortran)
 
     enable_language(Fortran)
 
+    # Configure the build
     set(CMAKE_CXX_STANDARD 17)
-    set(CMAKE_C_STANDARD 99)
+    SET(CMAKE_C_STANDARD 99)
+    set(CMAKE_BUILD_TYPE Debug)
 
-    set(ftn_client_src
-        /usr/local/src/SmartRedis/src/fortran/fortran_c_interop.F90
-        /usr/local/src/SmartRedis/src/fortran/dataset.F90
-        /usr/local/src/SmartRedis/src/fortran/client.F90
+    # Locate dependencies
+    find_library(SR_LIB smartredis REQUIRED)
+    find_library(SR_FTN_LIB smartredis-fortran REQUIRED)
+    set(SMARTREDIS_LIBRARIES
+        ${SR_LIB}
+        ${SR_FTN_LIB}
     )
 
-    find_library(SR_LIB smartredis)
-
+    # Define include directories for header files
     include_directories(SYSTEM
         /usr/local/include/smartredis
     )
 
-    add_executable(docker_test
+    # Build the test
+    add_executable(docker_test_fortran
         test_docker.F90
-        ${ftn_client_src}
     )
+    set_target_properties(docker_test_fortran PROPERTIES
+        OUTPUT_NAME docker_test
+    )
+    target_link_libraries(docker_test_fortran ${SMARTREDIS_LIBRARIES} pthread)
 
-    target_link_libraries(docker_test ${SR_LIB} pthread)
 
 
 .. code-block:: docker
