@@ -168,7 +168,7 @@ class smartSimFunctionObject
     // Private Data
 
         //- Set to false if not using a clustered database 
-        bool clusterMode_;
+        //bool clusterMode_;
         
         //- List of field names to send-receive from SmartRedis
         wordList fieldNames_;
@@ -178,14 +178,14 @@ class smartSimFunctionObject
         //  dimension and 6 is a symmetric tensor field dimension.
         labelList fieldDimensions_;
         
-        //- SmartRedis Database Client
-        SmartRedis::Client client_;
-
 public:
 
     //- Runtime type information
     TypeName("smartSimFunctionObject");
 
+
+    //- SmartRedis Database Client
+    static SmartRedis::Client redisDB;
 
     // Constructors
 

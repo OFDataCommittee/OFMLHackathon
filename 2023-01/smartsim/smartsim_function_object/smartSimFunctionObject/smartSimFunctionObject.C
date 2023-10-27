@@ -45,6 +45,7 @@ namespace functionObjects
 {
     defineTypeNameAndDebug(smartSimFunctionObject, 0);
     addToRunTimeSelectionTable(functionObject, smartSimFunctionObject, dictionary);
+    SmartRedis::Client smartSimFunctionObject::redisDB(false, "default");
 }
 }
 
@@ -59,10 +60,10 @@ Foam::functionObjects::smartSimFunctionObject::smartSimFunctionObject
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    clusterMode_(dict.getOrDefault<bool>("clusterMode", true)),
+    //clusterMode_(dict.getOrDefault<bool>("clusterMode", true)),
     fieldNames_(dict.get<wordList>("fieldNames")),
-    fieldDimensions_(dict.get<labelList>("fieldDimensions")),
-    client_(clusterMode_)
+    fieldDimensions_(dict.get<labelList>("fieldDimensions"))//,
+    //client_(clusterMode_)
 {
     read(dict);
 }
@@ -117,7 +118,7 @@ bool Foam::functionObjects::smartSimFunctionObject::end()
             const volScalarField& sField = mesh_.lookupObject<volScalarField>(fieldNames_[fieldI]);
 
             // Send the cell-centered scalar field to SmartRedis
-            client_.put_tensor(sField.name(), (void*)sField.internalField().cdata(), dims,
+            redisDB.put_tensor(sField.name(), (void*)sField.internalField().cdata(), dims,
                                SRTensorTypeDouble, SRMemLayoutContiguous);
 
         } 
@@ -127,7 +128,7 @@ bool Foam::functionObjects::smartSimFunctionObject::end()
             const volVectorField& vField = mesh_.lookupObject<volVectorField>(fieldNames_[fieldI]);
 
             // Send the cell-centered scalar field to SmartRedis
-            client_.put_tensor(vField.name(), (void*)vField.internalField().cdata(), dims,
+            redisDB.put_tensor(vField.name(), (void*)vField.internalField().cdata(), dims,
                                SRTensorTypeDouble, SRMemLayoutContiguous);
         }
         else if (fieldDimensions_[fieldI] == 6) // TODO(TM): symmTensor field
