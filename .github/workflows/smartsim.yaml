@@ -1,0 +1,61 @@
+name: smartsim
+defaults:
+  run:
+    shell: bash -o pipefail -i {0}
+on:
+  push:
+    branches:
+      - main
+      - 'smartsim*'
+      - 'static_client'
+      - 'releases/**'
+  pull_request:
+    types: [opened, reopened]
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: 'Tmate debugging session'
+        required: false
+        default: false
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    container:
+      image: ghcr.io/foamscience/openfoam-smartsim:cpu
+      options: --user openfoam
+      env:
+        CATCH_TIMEOUT: 20
+        FOAM_FOAMUT: "/tmp/foamUT"
+        SSBD: "redis:6379"
+
+    services:
+      redis:
+        image: redislabs/redisai
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+        with:
+          detached: true
+
+      - name: Compile and Test
+        run: |
+          cd 2023-01/smartsim
+          source /usr/lib/openfoam/openfoam2212/etc/bashrc
+          mkdir -p $FOAM_USER_LIBBIN
+          ./Allwmake
+          git clone https://github.com/FoamScience/foamUT $FOAM_FOAMUT
+          sed -i 's/mpirun/mpirun --oversubscribe/g' $FOAM_FOAMUT/Alltest
+          ln -s "$PWD"/smartsim_function_object/smartSimFunctionObject "$FOAM_FOAMUT"/smartSimFunctionObject
+          ln -s "$PWD"/smartsim_function_object/tests "$FOAM_FOAMUT"/tests/smartSimFOTests
+          cd $FOAM_FOAMUT || exit 1
+          rm -rf tests/exampleTests
+          ./Alltest "$@"
+          if [ -f $FOAM_FOAMUT/tests/adaptiveFvMeshTests/log.wmake ]; then cat $FOAM_FOAMUT/tests/adaptiveFvMeshTests/log.wmake; fi 
