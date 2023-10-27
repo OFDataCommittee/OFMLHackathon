@@ -101,7 +101,7 @@ class SRObject
             return _lname;
         }
 
-    private:
+    protected:
 
         /*!
         *   \brief The name prefix log entries with

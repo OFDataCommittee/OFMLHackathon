@@ -44,15 +44,15 @@ module example_utils
 
   logical function use_cluster()
 
-    character(len=16) :: smartredis_test_cluster
+    character(len=16) :: server_type
 
-    call get_environment_variable('SMARTREDIS_TEST_CLUSTER', smartredis_test_cluster)
-    smartredis_test_cluster = to_lower(smartredis_test_cluster)
-    if (len_trim(smartredis_test_cluster)>0) then
-      select case (smartredis_test_cluster)
-        case ('true')
+    call get_environment_variable('SR_DB_TYPE', server_type)
+    server_type = to_lower(server_type)
+    if (len_trim(server_type)>0) then
+      select case (server_type)
+        case ('clustered')
           use_cluster = .true.
-        case ('false')
+        case ('standalone')
           use_cluster = .false.
         case default
           use_cluster = .false.

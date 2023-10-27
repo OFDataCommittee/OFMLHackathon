@@ -24,18 +24,17 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import os
+# Project definition for the SmartRedis-Examples project
+cmake_minimum_required(VERSION 3.13)
+project(SmartRedis-Examples)
 
-from smartredis import Client
+# Enable language support for the examples
+enable_language(C)
+enable_language(CXX)
+if (SR_FORTRAN)
+    enable_language(Fortran)
+endif()
 
-
-def test_address(use_cluster, context):
-    # get env var to set through client init
-    ssdb = os.environ["SSDB"]
-    del os.environ["SSDB"]
-
-    # client init should fail if SSDB not set
-    c = Client(address=ssdb, cluster=use_cluster, logger_name=context)
-
-    # check if SSDB was set anyway
-    assert os.environ["SSDB"] == ssdb
+# Bring in subdirectories
+add_subdirectory(parallel)
+add_subdirectory(serial)

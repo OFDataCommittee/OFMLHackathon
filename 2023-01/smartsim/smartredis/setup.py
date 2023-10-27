@@ -33,7 +33,6 @@ import multiprocessing as mp
 
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
-from distutils.version import LooseVersion
 
 # get number of processors
 NPROC = mp.cpu_count()
@@ -50,59 +49,72 @@ class CMakeBuild(build_ext):
         cmake_cmd = shutil.which("cmake")
         return cmake_cmd
 
+    @property
+    def make(self):
+        """Find and use installed cmake"""
+        make_cmd = shutil.which("make")
+        return make_cmd
+
     def run(self):
+        # Validate dependencies
+        check_prereq("cmake")
         check_prereq("make")
         check_prereq("gcc")
         check_prereq("g++")
 
+        # Set up parameters
+        source_directory = Path(__file__).parent.resolve()
         build_directory = Path(self.build_temp).resolve()
-        cmake_args = [
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(build_directory),
-            '-DPYTHON_EXECUTABLE=' + sys.executable
-        ]
-
         cfg = 'Debug' if self.debug else 'Release'
-        build_args = ['--config', cfg]
-        build_args += ['--', f'-j{str(NPROC)}']
-        self.build_args = build_args
 
-        cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-
-        # setup build environment
+        # Setup build environment
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
             env.get('CXXFLAGS', ''),
             self.distribution.get_version())
 
-        # make tmp dir
-        if not build_directory.is_dir():
-            os.makedirs(self.build_temp)
+        # Build dependencies
+        print('-'*10, 'Building third-party dependencies', '-'*40)
+        subprocess.check_call(
+            [self.make, "deps"],
+            cwd=source_directory,
+            shell=False
+        )
 
-        print('-'*10, 'Building C dependencies', '-'*40)
-        make_cmd = shutil.which("make")
-        setup_path = Path(os.path.abspath(os.path.dirname(__file__))).resolve()
+        # Run CMake config step
+        print('-'*10, 'Configuring build', '-'*40)
+        config_args = [
+            '-S.',
+            f'-B{str(build_directory)}',
+            '-DSR_BUILD=' + cfg,
+            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(build_directory),
+            '-DPYTHON_EXECUTABLE=' + sys.executable,
+            '-DSR_PYTHON=ON',
+        ]
+        subprocess.check_call(
+            [self.cmake] + config_args,
+            cwd=source_directory,
+            env=env
+        )
 
-        # build dependencies
-        subprocess.check_call([f"{make_cmd} deps"],
-                              cwd=setup_path,
-                              shell=True)
-
-        # run cmake prep step
-        print('-'*10, 'Running CMake prepare', '-'*40)
-        subprocess.check_call([self.cmake, setup_path] + cmake_args,
-                              cwd=build_directory,
-                              env=env)
-
-
-        print('-'*10, 'Building extensions', '-'*40)
-        cmake_cmd = [self.cmake, '--build', '.'] + self.build_args
-        subprocess.check_call(cmake_cmd,
-                              cwd=build_directory)
-
-        shutil.copytree(setup_path.joinpath("install"),
-                        build_directory.joinpath("install"))
+        # Run CMake build step
+        print('-'*10, 'Building library', '-'*40)
+        build_args = [
+            '--build',
+            str(build_directory),
+            '--',
+            f'-j{str(NPROC)}'
+        ]
+        subprocess.check_call(
+            [self.cmake] + build_args,
+            cwd=build_directory,
+            env=env
+        )
 
         # Move from build temp to final position
+        # (Note that we skip the CMake install step because
+        # we configured the library to be built directly into the
+        # build directory)
         for ext in self.extensions:
             self.move_output(ext)
 
@@ -116,22 +128,12 @@ class CMakeBuild(build_ext):
         self.copy_file(source_path, dest_path)
 
 # check that certain dependencies are installed
-# TODO: Check versions for compatible versions
 def check_prereq(command):
     try:
-        out = subprocess.check_output([command, '--version'])
+        _ = subprocess.check_output([command, '--version'])
     except OSError:
         raise RuntimeError(
             f"{command} must be installed to build SmartRedis")
-
-# update existing env var
-def update_env_var(var, new):
-    try:
-        value = os.environ[var]
-        value = ":".join((value, str(new)))
-        return value
-    except KeyError:
-        return new
 
 ext_modules = [
     CMakeExtension('smartredisPy'),

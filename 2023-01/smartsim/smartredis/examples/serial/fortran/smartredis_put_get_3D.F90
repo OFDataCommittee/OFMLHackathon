@@ -46,7 +46,7 @@ program main
   call random_number(send_array_real_64)
 
   ! Initialize a client
-  result = client%initialize(.true., "smartredis_put_get_3D") ! Change .false. to .true. if not using a clustered database
+  result = client%initialize("smartredis_put_get_3D")
   if (result .ne. SRNoError) error stop 'client%initialize failed'
 
   ! Send a tensor to the database via the client and verify that we can retrieve it

@@ -67,19 +67,19 @@ class MetadataField {
     *   \brief Retrieve the MetadataField name
     *   \returns MetadataField name
     */
-    std::string name();
+    std::string name() const;
 
     /*!
     *   \brief Retrieve the Metadatafield type
     *   \returns MetadataField type
     */
-    SRMetaDataType type();
+    SRMetaDataType type() const;
 
     /*!
     *   \brief Retrieve the number of values in the field
     *   \returns The number of values
     */
-    virtual size_t size() = 0;
+    virtual size_t size() const = 0;
 
     /*!
     *   \brief Clear the values in the field

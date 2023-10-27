@@ -35,16 +35,16 @@ program mnist_test
 #include "enum_fortran.inc"
 
   character(len=*), parameter :: model_key = "mnist_model"
-  character(len=*), parameter :: model_file = "../../cpp/mnist_data/mnist_cnn.pt"
+  character(len=*), parameter :: model_file = "../cpp/mnist_data/mnist_cnn.pt"
   character(len=*), parameter :: script_key = "mnist_script"
-  character(len=*), parameter :: script_file = "../../cpp/mnist_data/data_processing_script.txt"
+  character(len=*), parameter :: script_file = "../cpp/mnist_data/data_processing_script.txt"
 
   type(client_type) :: client
   integer :: err_code
   character(len=2) :: key_suffix
   integer :: result
 
-  result = client%initialize(use_cluster(), "client_test_mnist")
+  result = client%initialize("client_test_mnist")
   if (result .ne. SRNoError) error stop
 
   result = client%set_model_from_file(model_key, model_file, "TORCH", "CPU")
