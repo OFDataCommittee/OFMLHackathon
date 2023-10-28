@@ -5,10 +5,8 @@
 #include "fvCFD.H"
 #include "fvMesh.H"
 
-#include <csetjmp>
-#include <csignal>
-#include <cstdlib>
-#include <functional>
+#include "smartSimFunctionObject.H"
+#include "functionObjectList.H"
 
 using namespace Foam;
 extern Time* timePtr;
@@ -16,11 +14,30 @@ extern argList* argsPtr;
 
 TEST_CASE("Shared SmartRedis client", "[cavity][serial][parallel]")
 {
-    dictionary dict;
-    dict.set("type", "smartSimFunctionObject");
-    dict.set("fieldNames", wordList());
-    dict.set("fieldDimensions", labelList());
-    functionObjects::smartSimFunctionObject fo1("smartSimFo1", *timePtr, dict);
-    functionObjects::smartSimFunctionObject fo2("smartSimFo2", *timePtr, dict);
-    REQUIRE(&fo1.redisDB == &fo2.redisDB);
+    Time& runTime = *timePtr;
+    FatalError.dontThrowExceptions();
+    fvMesh mesh
+    (
+        IOobject
+        (
+            polyMesh::defaultRegion,
+            runTime.constant(),
+            runTime,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    );
+    dictionary dict0;
+    dict0.set("region", polyMesh::defaultRegion);
+    dict0.set("type", "smartSimFunctionObject");
+    dict0.set("fieldNames", wordList());
+    dict0.set("fieldDimensions", labelList());
+    dictionary dict1;
+    dict1.set("region", polyMesh::defaultRegion);
+    dict1.set("type", "smartSimFunctionObject");
+    dict1.set("fieldNames", wordList());
+    dict1.set("fieldDimensions", labelList());
+    functionObjects::smartSimFunctionObject o0("smartSim0", runTime, dict0);
+    functionObjects::smartSimFunctionObject o1("smartSim1", runTime, dict1);
+    REQUIRE(&(o0.redisDB) == &(o1.redisDB));
 }
