@@ -27,6 +27,7 @@ License
 
 #include "IOdictionary.H"
 #include "objectRegistry.H"
+#include "smartRedisAdapter.H"
 #include "smartSimFunctionObject.H"
 #include "Time.H"
 #include "fvMesh.H"
@@ -45,7 +46,6 @@ namespace functionObjects
 {
     defineTypeNameAndDebug(smartSimFunctionObject, 0);
     addToRunTimeSelectionTable(functionObject, smartSimFunctionObject, dictionary);
-    SmartRedis::Client smartSimFunctionObject::redisDB(false, "default");
 }
 }
 
@@ -60,10 +60,44 @@ Foam::functionObjects::smartSimFunctionObject::smartSimFunctionObject
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    //clusterMode_(dict.getOrDefault<bool>("clusterMode", true)),
+    clientName_(dict.getOrDefault<word>("clientName", "default")),
     fieldNames_(dict.get<wordList>("fieldNames")),
-    fieldDimensions_(dict.get<labelList>("fieldDimensions"))//,
-    //client_(clusterMode_)
+    fieldDimensions_(dict.get<labelList>("fieldDimensions")),
+    redisDB_(
+        runTime.foundObject<smartRedisAdapter>(clientName_)
+        ? &runTime.lookupObjectRef<smartRedisAdapter>(clientName_)
+        : new smartRedisAdapter
+            (
+                IOobject
+                (
+                    clientName_,
+                    runTime.timeName(),
+                    runTime,
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                dict
+            )
+    )
+    //redisDB_(
+    //    runTime.foundObject<smartRedisAdapter>(clientName_)
+    //    ? std::make_shared<smartRedisAdapter>(&runTime.lookupObjectRef<smartRedisAdapter>(clientName_))
+    //    : std::make_shared<smartRedisAdapter>
+    //    (
+    //        new smartRedisAdapter
+    //        (
+    //            IOobject
+    //            (
+    //                clientName_,
+    //                runTime.timeName(),
+    //                runTime,
+    //                IOobject::NO_READ,
+    //                IOobject::AUTO_WRITE
+    //            ),
+    //            dict
+    //        )
+    //    )
+    //)
 {
     read(dict);
 }
@@ -118,7 +152,7 @@ bool Foam::functionObjects::smartSimFunctionObject::end()
             const volScalarField& sField = mesh_.lookupObject<volScalarField>(fieldNames_[fieldI]);
 
             // Send the cell-centered scalar field to SmartRedis
-            redisDB.put_tensor(sField.name(), (void*)sField.internalField().cdata(), dims,
+            client().put_tensor(sField.name(), (void*)sField.internalField().cdata(), dims,
                                SRTensorTypeDouble, SRMemLayoutContiguous);
 
         } 
@@ -128,7 +162,7 @@ bool Foam::functionObjects::smartSimFunctionObject::end()
             const volVectorField& vField = mesh_.lookupObject<volVectorField>(fieldNames_[fieldI]);
 
             // Send the cell-centered scalar field to SmartRedis
-            redisDB.put_tensor(vField.name(), (void*)vField.internalField().cdata(), dims,
+            client().put_tensor(vField.name(), (void*)vField.internalField().cdata(), dims,
                                SRTensorTypeDouble, SRMemLayoutContiguous);
         }
         else if (fieldDimensions_[fieldI] == 6) // TODO(TM): symmTensor field

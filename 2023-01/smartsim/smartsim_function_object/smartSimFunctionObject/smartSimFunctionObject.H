@@ -148,7 +148,7 @@ SourceFiles
 #define smartSimFunctionObject_H
 
 #include "fvMeshFunctionObject.H"
-#include "client.h"
+#include "smartRedisAdapter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -167,9 +167,9 @@ class smartSimFunctionObject
 {
     // Private Data
 
-        //- Set to false if not using a clustered database 
-        //bool clusterMode_;
-        
+        //- Client name (for debug output)
+        word clientName_;
+
         //- List of field names to send-receive from SmartRedis
         wordList fieldNames_;
 
@@ -178,14 +178,15 @@ class smartSimFunctionObject
         //  dimension and 6 is a symmetric tensor field dimension.
         labelList fieldDimensions_;
         
+        //- The RedisAI database client
+        tmp<smartRedisAdapter> redisDB_;
+        //std::shared_ptr<smartRedisAdapter> redisDB_;
+
 public:
 
     //- Runtime type information
     TypeName("smartSimFunctionObject");
 
-
-    //- SmartRedis Database Client
-    static SmartRedis::Client redisDB;
 
     // Constructors
 
@@ -217,6 +218,8 @@ public:
         virtual bool end();
 
         virtual bool write();
+
+        SmartRedis::Client& client() { return redisDB_->client(); }
 };
 
 
