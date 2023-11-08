@@ -69,76 +69,42 @@ int main(int argc, char *argv[])
 
     SmartRedis::Client smartRedisClient(false);
 
-    //// If 'field' is a volScalarField 
-    //if (!inputVolScalarFieldTmp->empty())
-    //{
-        //// Let python know the rank of the training data tensor (scalar, vector).
-        //std::vector<int> tensor_rank {0};
-        //smartRedisClient.put_tensor("input_field_rank",
-                                    //(void*)tensor_rank.data(), 
-                                    //std::vector<size_t>{1},
-                                    //SRTensorTypeInt32, SRMemLayoutContiguous);
+    // If 'field' is a volScalarField 
+    if (!inputVolScalarFieldTmp->empty())
+    {
+        // Let python know the rank of the training data tensor (scalar, vector).
+        std::vector<int> tensor_rank {0};
+        smartRedisClient.put_tensor("input_field_rank",
+                                    (void*)tensor_rank.data(), 
+                                    std::vector<size_t>{1},
+                                    SRTensorTypeInt32, SRMemLayoutContiguous);
                                     
-        //// Create the cell centers DataSet
-        //const auto mpiIndexStr = std::to_string(Pstream::myProcNo());
+        // Create the cell centers DataSet
+        const auto mpiIndexStr = std::to_string(Pstream::myProcNo());
 
-        //auto inputCentersDatasetName = 
-            //"input_centers_dataset_MPI_" + mpiIndexStr; 
-        //SmartRedis::DataSet inputCentersDataset(inputCentersDatasetName);
-        //// Create the boundary displacements DataSet
-        //auto inputFieldDatasetName = 
-            //"input_" + field + "_dataset_MPI_" + mpiIndexStr;
-        //SmartRedis::DataSet inputFieldDataset(inputFieldDatasetName);
+        auto inputFieldDatasetName = 
+            "input_" + fieldName + "_dataset_MPI_" + mpiIndexStr;
+        SmartRedis::DataSet inputFieldDataset(inputFieldDatasetName);
 
-        //// Add the type name into the input field dataset metadata. 
-        //inputFieldDataset.add_meta_string("type", "scalar");
+        // Add the type name into the input field dataset metadata. 
+        inputFieldDataset.add_meta_string("type", "scalar");
 
-        ////- Put the cell centers into the centers dataset 
-        //// TODO(TM): double-chek mesh.nCells!
-        //Pout << "Number of cells : " << inputMesh.nCells() << endl;
-        //Info << "Writing cell centers to smartredis. " << endl;
-        //inputCentersDataset.add_tensor("input_cells_MPI_" + mpiIndexStr,
-                                  //(void*)inputMesh.C().cdata(), 
-                                  //std::vector<size_t>{size_t(inputMesh.nCells()), 3},
-                                  //SRTensorTypeDouble, SRMemLayoutContiguous);
+        //- Put the input field in smartredis.
+        Info << "Writing field " << fieldName << " to smartredis. " << endl;
+        inputFieldDataset.add_tensor("input_" + fieldName + "_MPI_" + mpiIndexStr,
+                                     (void*)inputVolScalarFieldTmp->cdata(), 
+                                      std::vector<size_t>{size_t(mesh.nCells()), 1},
+                                      SRTensorTypeDouble, SRMemLayoutContiguous);
 
-
-        ////- Put the input field in smartredis.
-        //Info << "Writing field " << field << " to smartredis. " << endl;
-        //inputFieldDataset.add_tensor("input_" + field + "_MPI_" + mpiIndexStr,
-                                     //(void*)inputVolScalarFieldTmp->cdata(), 
-                                      //std::vector<size_t>{size_t(inputMesh.nCells()), 1},
-                                      //SRTensorTypeDouble, SRMemLayoutContiguous);
-
-        //smartRedisClient.put_dataset(inputCentersDataset);
-        //smartRedisClient.put_dataset(inputFieldDataset);
-        //smartRedisClient.append_to_list("inputCentersDatasetList", 
-                                        //inputCentersDataset);
-        //smartRedisClient.append_to_list("inputFieldDatasetList", 
-                                         //inputFieldDataset);
-
-
-        //// Poll for the model in smartredis 
-        //bool model_found = smartRedisClient.poll_model("map_fields_model", 
-                                                        //10, 1000);
-        //if (!model_found)
-        //{
-            //FatalErrorInFunction 
-                //<< "map_fields_model not found in the smartredis database\n" 
-                //<< exit(FatalError);
-        //}
-//:
-
-    //}
-    //// If 'field' is a volVectorField 
-    //else if (!inputVolVectorFieldTmp->empty())
-    //{
-        //// TODO(TM): same as for the volScalarField only with different tensor dimensions.
-    //}
-    //else
-    //{
-        //// TODO(TM): FoamFatalError - field was not found. 
-    //}
+        smartRedisClient.put_dataset(inputFieldDataset);
+        smartRedisClient.append_to_list("inputFieldDatasetList", 
+                                         inputFieldDataset);
+    }
+    // If 'field' is a volVectorField 
+    else if (!inputVolVectorFieldTmp->empty())
+    {
+        // TODO(TM): same as for the volScalarField only with vector dimensions.
+    }
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     
