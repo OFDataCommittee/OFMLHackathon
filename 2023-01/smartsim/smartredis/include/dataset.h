@@ -44,7 +44,6 @@
 
 namespace SmartRedis {
 
-///@file
 /*!
 *   \brief The DataSet class aggregates tensors
 *          and metadata into a nested data structure
@@ -241,7 +240,8 @@ class DataSet : public SRObject
         *           metadata field name
         *   \throw SmartRedis::Exception if metadata retrieval fails
         */
-        std::vector<std::string> get_meta_strings(const std::string& name);
+        std::vector<std::string> get_meta_strings(
+            const std::string& name) const;
 
         /*!
         *   \brief Retrieve metadata string field values from the DataSet.
@@ -266,7 +266,7 @@ class DataSet : public SRObject
         *   \param field_name The name of the field to check
         *   \returns True iff the DataSet contains the field
         */
-        bool has_field(const std::string& field_name);
+        bool has_field(const std::string& field_name) const;
 
 
         /*!
@@ -297,7 +297,7 @@ class DataSet : public SRObject
         *   \returns The name of the tensors in the DataSet
         *   \throw SmartRedis::Exception if metadata retrieval fails
         */
-        std::vector<std::string> get_tensor_names();
+        std::vector<std::string> get_tensor_names() const;
 
         /*!
         *   \brief Retrieve tensor names from the DataSet.
@@ -318,13 +318,22 @@ class DataSet : public SRObject
         *   \returns The data type for the tensor
         *   \throw SmartRedis::Exception if tensor name retrieval fails
         */
-        SRTensorType get_tensor_type(const std::string& name);
+        SRTensorType get_tensor_type(const std::string& name) const;
+
+        /*!
+        *   \brief Retrieve the dimensions of a Tensor in the DataSet
+        *   \param name The name of the tensor
+        *   \returns A vector of the tensor's dimensions
+        *   \throw SmartRedis::Exception if tensor name retrieval fails
+        */
+        const std::vector<size_t> get_tensor_dims(
+            const std::string& name) const;
 
         /*!
         *   \brief Retrieve the names of all metadata fields in the DataSet
         *   \returns A vector of metadata field names
         */
-        std::vector<std::string> get_metadata_field_names();
+        std::vector<std::string> get_metadata_field_names() const;
 
         /*!
         *   \brief Retrieve metadata field names from the DataSet.
@@ -346,7 +355,13 @@ class DataSet : public SRObject
         *   \returns The data type for the metadata field
         *   \throw SmartRedis::Exception if metadata field name retrieval fails
         */
-        SRMetaDataType get_metadata_field_type(const std::string& name);
+        SRMetaDataType get_metadata_field_type(const std::string& name) const;
+
+        /*!
+        *   \brief Create a string representation of the DataSet
+        *   \returns A string containing DataSet details
+        */
+        std::string to_string() const;
 
         friend class Client;
         friend class PyDataset;
@@ -474,6 +489,19 @@ class DataSet : public SRObject
         TensorPack _tensor_memory;
 
 };
+
+/*!
+*   \brief Serialize a dataset
+*   \param stream The stream onto which to serialize the dataset
+*   \param dataset The dataset to serialize
+*   \returns The output stream, for chaining
+*/
+inline
+std::ostream& operator<<(std::ostream& stream, const DataSet& dataset)
+{
+    stream << dataset.to_string();
+    return stream;
+}
 
 } // namespace SmartRedis
 

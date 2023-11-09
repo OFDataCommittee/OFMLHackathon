@@ -24,17 +24,18 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from .smartredisPy import cpp_log_data, cpp_log_warning, cpp_log_error, SRLoggingLevel
+from .smartredisPy import SRLoggingLevel, cpp_log_data, cpp_log_error, cpp_log_warning
 from .util import exception_handler, typecheck
 
 # Logging levels
-#LLQuiet     = 1  # No logging at all
-#LLInfo      = 2  # Informational logging only
-#LLDebug     = 3  # Verbose logging for debugging purposes
-#LLDeveloper = 4  # Extra verbose logging for internal use
+# LLQuiet     = 1  # No logging at all
+# LLInfo      = 2  # Informational logging only
+# LLDebug     = 3  # Verbose logging for debugging purposes
+# LLDeveloper = 4  # Extra verbose logging for internal use
+
 
 @exception_handler
-def log_data(context, level, data):
+def log_data(context: str, level: SRLoggingLevel, data: str) -> None:
     """Log data to the SmartRedis logfile
 
     :param context: Logging context (string to prefix the log entry with)
@@ -50,8 +51,9 @@ def log_data(context, level, data):
     typecheck(data, "data", str)
     cpp_log_data(context, level, data)
 
+
 @exception_handler
-def log_warning(context, level, data):
+def log_warning(context: str, level: SRLoggingLevel, data: str) -> None:
     """Log a warning to the SmartRedis logfile
 
     :param context: Logging context (string to prefix the log entry with)
@@ -67,8 +69,9 @@ def log_warning(context, level, data):
     typecheck(data, "data", str)
     cpp_log_warning(context, level, data)
 
+
 @exception_handler
-def log_error(context, level, data):
+def log_error(context: str, level: SRLoggingLevel, data: str) -> None:
     """Log an error to the SmartRedis logfile
 
     :param context: Logging context (string to prefix the log entry with)
@@ -83,4 +86,3 @@ def log_error(context, level, data):
     typecheck(level, "level", SRLoggingLevel)
     typecheck(data, "data", str)
     cpp_log_error(context, level, data)
-

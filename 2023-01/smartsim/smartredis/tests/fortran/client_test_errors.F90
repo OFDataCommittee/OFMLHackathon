@@ -39,11 +39,11 @@ program main
   type(client_type) :: client
   integer :: result
 
-  result = client%initialize(use_cluster())
-  if (result .ne. SRNoError) error stop
+  result = client%initialize()
+  if (result .ne. SRNoError) error stop "Initialization failed"
 
   result =  client%rename_tensor("vanilla", "chocolate")
-  if (result .eq. SRNoError) error stop
+  if (result .eq. SRNoError) error stop "rename didn't fail"
 
   write(*,*) "Printing last error retrieved as string"
   write(*,*) get_last_error()

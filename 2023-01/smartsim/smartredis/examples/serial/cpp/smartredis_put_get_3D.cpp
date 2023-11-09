@@ -44,11 +44,10 @@ int main(int argc, char* argv[]) {
     size_t n_values = dim1 * dim2 * dim3;
     std::vector<double> input_tensor(n_values, 0);
     for(size_t i=0; i<n_values; i++)
-        input_tensor[i] = 2.0*rand()/RAND_MAX - 1.0;
+        input_tensor[i] = 2.0*rand()/(double)RAND_MAX - 1.0;
 
     // Initialize a SmartRedis client
-    bool cluster_mode = true; // Set to false if not using a clustered database
-    SmartRedis::Client client(cluster_mode, __FILE__);
+    SmartRedis::Client client(__FILE__);
 
     // Put the tensor in the database
     std::string key = "3d_tensor";

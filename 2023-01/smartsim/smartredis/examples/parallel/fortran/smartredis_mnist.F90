@@ -35,9 +35,9 @@ program mnist_example
 #include "enum_fortran.inc"
 
   character(len=*), parameter :: model_key = "mnist_model"
-  character(len=*), parameter :: model_file = "../../../common/mnist_data/mnist_cnn.pt"
+  character(len=*), parameter :: model_file = "../../common/mnist_data/mnist_cnn.pt"
   character(len=*), parameter :: script_key = "mnist_script"
-  character(len=*), parameter :: script_file = "../../../common/mnist_data/data_processing_script.txt"
+  character(len=*), parameter :: script_file = "../../common/mnist_data/data_processing_script.txt"
 
   type(client_type) :: client
   integer :: err_code, pe_id, result
@@ -51,7 +51,7 @@ program mnist_example
   write(key_suffix, "(A,I1.1)") "_",pe_id
 
   ! Initialize a client
-  result = client%initialize(.true., "smartredis_mnist") ! Change .false. to .true. if not using a clustered database
+  result = client%initialize("smartredis_mnist")
   if (result .ne. SRNoError) error stop 'client%initialize failed'
 
   ! Set up model and script for the computation

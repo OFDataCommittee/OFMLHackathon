@@ -32,64 +32,68 @@
 
 using namespace SmartRedis;
 
-// Create a new LogContext.
-// The user is responsible for deallocating the LogContext
-// via DeallocateeLogContext()
-extern "C"
-SRError SmartRedisCLogContext(
-  const char* context,
-  const size_t context_length,
-  void** new_logcontext)
+// Decorator to standardize exception handling in C LogContext API methods
+template <class T>
+auto c_logcontext_api(T&& logcontext_api_func, const char* name)
 {
-  SRError result = SRNoError;
-  try {
+  // we create a closure below
+  auto decorated = [name, logcontext_api_func
+    = std::forward<T>(logcontext_api_func)](auto&&... args)
+  {
+    SRError result = SRNoError;
+    try {
+      logcontext_api_func(std::forward<decltype(args)>(args)...);
+    }
+    catch (const Exception& e) {
+      SRSetLastError(e);
+      result = e.to_error_code();
+    }
+    catch (...) {
+      std::string msg(
+          "A non-standard exception was encountered while executing ");
+      msg += name;
+      SRSetLastError(SRInternalException(msg));
+      result = SRInternalError;
+    }
+    return result;
+  };
+  return decorated;
+}
+
+// Macro to invoke the decorator with a lambda function
+#define MAKE_LOGCONTEXT_API(stuff)\
+    c_logcontext_api([&] { stuff }, __func__)()
+
+
+// Create a new LogContext
+extern "C" SRError SmartRedisCLogContext(
+  const char* context, const size_t context_length, void** new_logcontext)
+{
+  return MAKE_LOGCONTEXT_API({
     // Sanity check params
     SR_CHECK_PARAMS(context != NULL && new_logcontext != NULL);
 
-    std::string context_str(context, context_length);
-    LogContext* logcontext = new LogContext(context_str);
-    *new_logcontext = reinterpret_cast<void*>(logcontext);
-  }
-  catch (const std::bad_alloc& e) {
-    *new_logcontext = NULL;
-    SRSetLastError(SRBadAllocException("logcontext allocation"));
-    result = SRBadAllocError;
-  }
-  catch (const Exception& e) {
-    *new_logcontext = NULL;
-    result = e.to_error_code();
-  }
-  catch (...) {
-    *new_logcontext = NULL;
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+    try {
+      std::string context_str(context, context_length);
+      *new_logcontext = NULL;
+      LogContext* logcontext = new LogContext(context_str);
+      *new_logcontext = reinterpret_cast<void*>(logcontext);
+    }
+    catch (const std::bad_alloc& e) {
+      SRSetLastError(SRBadAllocException("logcontext allocation"));
+    }
+  });
 }
 
 // Deallocate a LogContext
-extern "C"
-SRError DeallocateLogContext(void** logcontext)
+extern "C" SRError DeallocateLogContext(void** logcontext)
 {
-  SRError result = SRNoError;
-  try
-  {
+  return MAKE_LOGCONTEXT_API({
     // Sanity check params
     SR_CHECK_PARAMS(logcontext != NULL);
 
     LogContext* lc = reinterpret_cast<LogContext*>(*logcontext);
     delete lc;
     *logcontext = NULL;
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  });
 }

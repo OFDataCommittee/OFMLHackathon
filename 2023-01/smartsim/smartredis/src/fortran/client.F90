@@ -24,6 +24,15 @@
 ! OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+! Note the below macros are here to allow compilation with Nvidia drivers
+! While assumed size should be sufficient, this does not seem to work with
+! Intel and GNU (however those have support for assumed rank)
+#ifdef __NVCOMPILER
+#define DIM_RANK_SPEC dimension(*)
+#else
+#define DIM_RANK_SPEC dimension(..)
+#endif
+
 module smartredis_client
 
 use iso_c_binding, only : c_ptr, c_bool, c_null_ptr, c_char, c_int
@@ -33,7 +42,9 @@ use iso_c_binding, only : c_loc, c_f_pointer
 use, intrinsic :: iso_fortran_env, only: stderr => error_unit
 
 use smartredis_dataset, only : dataset_type
+use smartredis_configoptions, only : configoptions_type
 use fortran_c_interop, only : convert_char_array_to_c, enum_kind, C_MAX_STRING
+
 
 implicit none; private
 
@@ -47,6 +58,7 @@ implicit none; private
 #include "client/client_dataset_interfaces.inc"
 #include "client/ensemble_interfaces.inc"
 #include "client/aggregation_interfaces.inc"
+#include "errors/errors_interfaces.inc"
 
 public :: enum_kind !< The kind of integer equivalent to a C enum. According to C an Fortran
                     !! standards this should be c_int, but is renamed here to ensure that
@@ -58,12 +70,13 @@ public :: enum_kind !< The kind of integer equivalent to a C enum. According to 
 type, public :: client_type
   private
 
-  logical(kind=c_bool) :: cluster = .false.        !< True if a database cluster is being used
-  type(c_ptr)          :: client_ptr = c_null_ptr !< Pointer to the initialized SmartRedisClient
-  logical              :: is_initialized = .false.    !< True if client is initialized
+  type(c_ptr)          :: client_ptr = c_null_ptr  !< Pointer to the initialized SmartRedisClient
+  logical              :: is_initialized = .false. !< True if client is initialized
   contains
 
   ! Public procedures
+  !> Initializes a new instance of the SmartRedis client
+  generic :: initialize => initialize_client_deprecated, initialize_client_simple, initialize_client_cfgopts
   !> Puts a tensor into the database (overloaded)
   generic :: put_tensor => put_tensor_i8, put_tensor_i16, put_tensor_i32, put_tensor_i64, &
                            put_tensor_float, put_tensor_double
@@ -73,8 +86,6 @@ type, public :: client_type
 
   !> Decode a response code from an API function
   procedure :: SR_error_parser
-  !> Initializes a new instance of the SmartRedis client
-  procedure :: initialize => initialize_client
   !> Check if a SmartRedis client has been initialized
   procedure :: isinitialized
   !> Destructs a new instance of the SmartRedis client
@@ -152,6 +163,8 @@ type, public :: client_type
 
   !> If true, preprend the ensemble id for tensor-related keys
   procedure :: use_tensor_ensemble_prefix
+  !> If true, preprend the ensemble id for dataset-related keys
+  procedure :: use_dataset_ensemble_prefix
   !> If true, preprend the ensemble id for model-related keys
   procedure :: use_model_ensemble_prefix
   !> If true, preprend the ensemble id for dataset list-related keys
@@ -179,8 +192,15 @@ type, public :: client_type
   procedure :: get_datasets_from_list
   !> Retrieve vector of datasets from the list over a given range
   procedure :: get_datasets_from_list_range
+  !> Retrieve a string representation of the client
+  procedure :: to_string
+  !> Print a string representation of the client
+  procedure :: print_client
 
   ! Private procedures
+  procedure, private :: initialize_client_deprecated
+  procedure, private :: initialize_client_simple
+  procedure, private :: initialize_client_cfgopts
   procedure, private :: put_tensor_i8
   procedure, private :: put_tensor_i16
   procedure, private :: put_tensor_i32
@@ -234,10 +254,9 @@ function SR_error_parser(self, response_code) result(is_error)
 end function SR_error_parser
 
 !> Initializes a new instance of a SmartRedis client
-function initialize_client(self, cluster, logger_name)
-  integer(kind=enum_kind)                     :: initialize_client
-  class(client_type),         intent(inout)   :: self      !< Receives the initialized client
-  logical, optional,          intent(in   )   :: cluster   !< If true, client uses a database cluster (Default: .false.)
+function initialize_client_simple(self, logger_name)
+  integer(kind=enum_kind)                     :: initialize_client_simple
+  class(client_type),         intent(inout)   :: self        !< Receives the initialized client
   character(len=*), optional, intent(in   )   :: logger_name !< Identifier for the current client
 
   ! Local variables
@@ -251,11 +270,61 @@ function initialize_client(self, cluster, logger_name)
   endif
   logger_name_length = len_trim(c_logger_name)
 
-  if (present(cluster)) self%cluster = cluster
-  initialize_client = c_constructor(self%cluster, c_logger_name, logger_name_length, self%client_ptr)
-  self%is_initialized = initialize_client .eq. SRNoError
+  initialize_client_simple = c_simple_constructor( &
+    c_logger_name, logger_name_length, self%client_ptr)
+  self%is_initialized = initialize_client_simple .eq. SRNoError
   if (allocated(c_logger_name)) deallocate(c_logger_name)
-end function initialize_client
+end function initialize_client_simple
+
+!> Initializes a new instance of a SmartRedis client
+function initialize_client_cfgopts(self, cfgopts, logger_name)
+  integer(kind=enum_kind)                     :: initialize_client_cfgopts
+  class(client_type),         intent(inout)   :: self        !< Receives the initialized client
+  type(configoptions_type),   intent(in   )   :: cfgopts     !< Source for configuration settings
+  character(len=*), optional, intent(in   )   :: logger_name !< Identifier for the current client
+
+  ! Local variables
+  character(kind=c_char, len=:), allocatable :: c_logger_name
+  integer(kind=c_size_t) :: logger_name_length
+
+  if (present(logger_name)) then
+    c_logger_name = logger_name
+  else
+    c_logger_name = 'default'
+  endif
+  logger_name_length = len_trim(c_logger_name)
+
+  initialize_client_cfgopts = c_constructor( &
+    cfgopts%get_c_pointer(), c_logger_name, logger_name_length, self%client_ptr)
+  self%is_initialized = initialize_client_cfgopts .eq. SRNoError
+  if (allocated(c_logger_name)) deallocate(c_logger_name)
+end function initialize_client_cfgopts
+
+!> Initializes a new instance of a SmartRedis client (deprecated)
+function initialize_client_deprecated(self, cluster, logger_name)
+  integer(kind=enum_kind)                     :: initialize_client_deprecated
+  class(client_type),         intent(inout)   :: self        !< Receives the initialized client
+  logical,                    intent(in   )   :: cluster     !< If true, client uses a database cluster (Default: .false.)
+  character(len=*), optional, intent(in   )   :: logger_name !< Identifier for the current client
+
+  ! Local variables
+  character(kind=c_char, len=:), allocatable :: c_logger_name
+  integer(kind=c_size_t) :: logger_name_length
+  logical(kind=c_bool) :: c_cluster
+
+  if (present(logger_name)) then
+    c_logger_name = logger_name
+  else
+    c_logger_name = 'default'
+  endif
+  logger_name_length = len_trim(c_logger_name)
+  c_cluster = cluster
+
+  initialize_client_deprecated = c_deprecated_constructor( &
+    c_cluster, c_logger_name, logger_name_length, self%client_ptr)
+  self%is_initialized = initialize_client_deprecated .eq. SRNoError
+  if (allocated(c_logger_name)) deallocate(c_logger_name)
+end function initialize_client_deprecated
 
 !> Check whether the client has been initialized
 logical function isinitialized(this)
@@ -283,67 +352,75 @@ end function get_c_pointer
 function key_exists(self, key, exists)
   class(client_type),   intent(in)  :: self   !< The client
   character(len=*),     intent(in)  :: key    !< The key to check
-  logical(kind=c_bool), intent(out) :: exists !< Receives whether the key exists
+  logical,              intent(out) :: exists !< Receives whether the key exists
   integer(kind=enum_kind)           :: key_exists
 
   ! Local variables
   character(kind=c_char, len=len_trim(key)) :: c_key
   integer(kind=c_size_t) :: c_key_length
+  logical(kind=c_bool) :: c_exists
 
   c_key = trim(key)
   c_key_length = len_trim(key)
 
-  key_exists = key_exists_c(self%client_ptr, c_key, c_key_length, exists)
+  key_exists = key_exists_c(self%client_ptr, c_key, c_key_length, c_exists)
+  exists = c_exists
 end function key_exists
 
 !> Check if the specified model exists in the database
 function model_exists(self, model_name, exists) result(code)
   class(client_type),   intent(in)  :: self       !< The client
   character(len=*),     intent(in)  :: model_name !< The model to check
-  logical(kind=c_bool), intent(out) :: exists     !< Receives whether the model exists
+  logical,              intent(out) :: exists     !< Receives whether the model exists
   integer(kind=enum_kind)           :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(model_name)) :: c_model_name
   integer(kind=c_size_t) :: c_model_name_length
+  logical(kind=c_bool) :: c_exists
 
   c_model_name = trim(model_name)
   c_model_name_length = len_trim(model_name)
 
-  code = model_exists_c(self%client_ptr, c_model_name, c_model_name_length, exists)
+  code = model_exists_c(self%client_ptr, c_model_name, c_model_name_length, c_exists)
+  exists = c_exists
 end function model_exists
 
 !> Check if the specified tensor exists in the database
 function tensor_exists(self, tensor_name, exists) result(code)
   class(client_type),   intent(in)  :: self        !< The client
   character(len=*),     intent(in)  :: tensor_name !< The tensor to check
-  logical(kind=c_bool), intent(out) :: exists      !< Receives whether the model exists
+  logical,              intent(out) :: exists      !< Receives whether the model exists
   integer(kind=enum_kind)           :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(tensor_name)) :: c_tensor_name
   integer(kind=c_size_t) :: c_tensor_name_length
+  logical(kind=c_bool) :: c_exists
 
   c_tensor_name = trim(tensor_name)
   c_tensor_name_length = len_trim(tensor_name)
 
-  code = tensor_exists_c(self%client_ptr, c_tensor_name, c_tensor_name_length, exists)
+  code = tensor_exists_c(self%client_ptr, c_tensor_name, c_tensor_name_length, c_exists)
+  exists = c_exists
 end function tensor_exists
 
 !> Check if the specified dataset exists in the database
 function dataset_exists(this, dataset_name, exists) result(code)
   class(client_type),   intent(in)  :: this          !< The client
   character(len=*),     intent(in)  :: dataset_name  !< The dataset to check
-  logical(kind=c_bool), intent(out) :: exists        !< Receives whether the model exists
+  logical,              intent(out) :: exists        !< Receives whether the model exists
   integer(kind=enum_kind)           :: code
 
   character(kind=c_char, len=len_trim(dataset_name)) :: c_dataset_name
   integer(kind=c_size_t) :: c_dataset_name_length
+  logical(kind=c_bool) :: c_exists
 
   c_dataset_name = trim(dataset_name)
   c_dataset_name_length = len_trim(dataset_name)
 
-  code = dataset_exists_c(this%client_ptr, c_dataset_name, c_dataset_name_length, exists)
+  code = dataset_exists_c(this%client_ptr, c_dataset_name, c_dataset_name_length, c_exists)
+  exists = c_exists
 end function dataset_exists
 
 !> Repeatedly poll the database until the tensor exists or the number of tries is exceeded
@@ -352,20 +429,22 @@ function poll_tensor(self, tensor_name, poll_frequency_ms, num_tries, exists) re
   character(len=*),     intent(in)  :: tensor_name       !< name in the database to poll
   integer,              intent(in)  :: poll_frequency_ms !< Frequency at which to poll the database (ms)
   integer,              intent(in)  :: num_tries         !< Number of times to poll the database before failing
-  logical(kind=c_bool), intent(out) :: exists            !< Receives whether the tensor exists
+  logical,              intent(out) :: exists            !< Receives whether the tensor exists
   integer(kind=enum_kind)           :: code
 
   ! Local variables
   character(kind=c_char,len=len_trim(tensor_name)) :: c_tensor_name
   integer(kind=c_size_t) :: c_tensor_name_length
   integer(kind=c_int) :: c_poll_frequency, c_num_tries
+  logical(kind=c_bool) :: c_exists
 
   c_tensor_name = trim(tensor_name)
   c_tensor_name_length = len_trim(tensor_name)
   c_num_tries = num_tries
   c_poll_frequency = poll_frequency_ms
 
-  code = poll_tensor_c(self%client_ptr, c_tensor_name, c_tensor_name_length, c_poll_frequency, c_num_tries, exists)
+  code = poll_tensor_c(self%client_ptr, c_tensor_name, c_tensor_name_length, c_poll_frequency, c_num_tries, c_exists)
+  exists = c_exists
 end function poll_tensor
 
 !> Repeatedly poll the database until the dataset exists or the number of tries is exceeded
@@ -375,19 +454,21 @@ function poll_dataset(self, dataset_name, poll_frequency_ms, num_tries, exists)
   character(len=*),     intent(in)  :: dataset_name      !< Name in the database to poll
   integer,              intent(in)  :: poll_frequency_ms !< Frequency at which to poll the database (ms)
   integer,              intent(in)  :: num_tries         !< Number of times to poll the database before failing
-  logical(kind=c_bool), intent(out) :: exists            !< Receives whether the tensor exists
+  logical,              intent(out) :: exists            !< Receives whether the tensor exists
 
   ! Local variables
   character(kind=c_char,len=len_trim(dataset_name)) :: c_dataset_name
   integer(kind=c_size_t) :: c_dataset_name_length
   integer(kind=c_int) :: c_poll_frequency, c_num_tries
+  logical(kind=c_bool) :: c_exists
 
   c_dataset_name = trim(dataset_name)
   c_dataset_name_length = len_trim(dataset_name)
   c_num_tries = num_tries
   c_poll_frequency = poll_frequency_ms
 
-  poll_dataset = poll_dataset_c(self%client_ptr, c_dataset_name, c_dataset_name_length, c_poll_frequency, c_num_tries, exists)
+  poll_dataset = poll_dataset_c(self%client_ptr, c_dataset_name, c_dataset_name_length, c_poll_frequency, c_num_tries, c_exists)
+  exists = c_exists
 end function poll_dataset
 
 !> Repeatedly poll the database until the model exists or the number of tries is exceeded
@@ -396,20 +477,22 @@ function poll_model(self, model_name, poll_frequency_ms, num_tries, exists) resu
   character(len=*),     intent(in)  :: model_name        !< Name in the database to poll
   integer,              intent(in)  :: poll_frequency_ms !< Frequency at which to poll the database (ms)
   integer,              intent(in)  :: num_tries         !< Number of times to poll the database before failing
-  logical(kind=c_bool), intent(out) :: exists            !< Receives whether the model exists
+  logical,              intent(out) :: exists            !< Receives whether the model exists
   integer(kind=enum_kind)           :: code
 
   ! Local variables
   character(kind=c_char,len=len_trim(model_name)) :: c_model_name
   integer(kind=c_size_t) :: c_model_name_length
   integer(kind=c_int) :: c_poll_frequency, c_num_tries
+  logical(kind=c_bool) :: c_exists
 
   c_model_name = trim(model_name)
   c_model_name_length = len_trim(model_name)
   c_num_tries = num_tries
   c_poll_frequency = poll_frequency_ms
 
-  code = poll_model_c(self%client_ptr, c_model_name, c_model_name_length, c_poll_frequency, c_num_tries, exists)
+  code = poll_model_c(self%client_ptr, c_model_name, c_model_name_length, c_poll_frequency, c_num_tries, c_exists)
+  exists = c_exists
 end function poll_model
 
 !> Repeatedly poll the database until the key exists or the number of tries is exceeded
@@ -418,25 +501,27 @@ function poll_key(self, key, poll_frequency_ms, num_tries, exists) result(code)
   character(len=*),     intent(in)  :: key                !< Key in the database to poll
   integer,              intent(in)  :: poll_frequency_ms  !< Frequency at which to poll the database (ms)
   integer,              intent(in)  :: num_tries          !< Number of times to poll the database before failing
-  logical(kind=c_bool), intent(out) :: exists             !< Receives whether the key exists
+  logical,              intent(out) :: exists             !< Receives whether the key exists
   integer(kind=enum_kind)           :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(key)) :: c_key
   integer(kind=c_size_t) :: c_key_length
   integer(kind=c_int) :: c_poll_frequency, c_num_tries
+  logical(kind=c_bool) :: c_exists
 
   c_key = trim(key)
   c_key_length = len_trim(key)
   c_num_tries = num_tries
   c_poll_frequency = poll_frequency_ms
 
-  code = poll_key_c(self%client_ptr, c_key, c_key_length, c_poll_frequency, c_num_tries, exists)
+  code = poll_key_c(self%client_ptr, c_key, c_key_length, c_poll_frequency, c_num_tries, c_exists)
+  exists = c_exists
 end function poll_key
 
 !> Put a tensor whose Fortran type is the equivalent 'int8' C-type
 function put_tensor_i8(self, name, data, dims) result(code)
-  integer(kind=c_int8_t), dimension(..), target, intent(in) :: data !< Data to be sent
+  integer(kind=c_int8_t), DIM_RANK_SPEC, target, intent(in) :: data !< Data to be sent
   class(client_type),                    intent(in) :: self !< Fortran SmartRedis client
   character(len=*),                      intent(in) :: name !< The unique name used to store in the database
   integer, dimension(:),                 intent(in) :: dims !< The length of each dimension
@@ -452,7 +537,7 @@ end function put_tensor_i8
 
 !> Put a tensor whose Fortran type is the equivalent 'int16' C-type
 function put_tensor_i16(self, name, data, dims) result(code)
-  integer(kind=c_int16_t), dimension(..), target, intent(in) :: data !< Data to be sent
+  integer(kind=c_int16_t), DIM_RANK_SPEC, target, intent(in) :: data !< Data to be sent
   class(client_type),                    intent(in) :: self !< Fortran SmartRedis client
   character(len=*),                      intent(in) :: name !< The unique name used to store in the database
   integer, dimension(:),                 intent(in) :: dims !< The length of each dimension
@@ -468,7 +553,7 @@ end function put_tensor_i16
 
 !> Put a tensor whose Fortran type is the equivalent 'int32' C-type
 function put_tensor_i32(self, name, data, dims) result(code)
-  integer(kind=c_int32_t), dimension(..), target, intent(in) :: data !< Data to be sent
+  integer(kind=c_int32_t), DIM_RANK_SPEC, target, intent(in) :: data !< Data to be sent
   class(client_type),                    intent(in) :: self !< Fortran SmartRedis client
   character(len=*),                      intent(in) :: name !< The unique name used to store in the database
   integer, dimension(:),                 intent(in) :: dims !< The length of each dimension
@@ -484,7 +569,7 @@ end function put_tensor_i32
 
 !> Put a tensor whose Fortran type is the equivalent 'int64' C-type
 function put_tensor_i64(self, name, data, dims) result(code)
-  integer(kind=c_int64_t), dimension(..), target, intent(in) :: data !< Data to be sent
+  integer(kind=c_int64_t), DIM_RANK_SPEC, target, intent(in) :: data !< Data to be sent
   class(client_type),                    intent(in) :: self !< Fortran SmartRedis client
   character(len=*),                      intent(in) :: name !< The unique name used to store in the database
   integer, dimension(:),                 intent(in) :: dims !< The length of each dimension
@@ -500,7 +585,7 @@ end function put_tensor_i64
 
 !> Put a tensor whose Fortran type is the equivalent 'float' C-type
 function put_tensor_float(self, name, data, dims) result(code)
-  real(kind=c_float), dimension(..), target, intent(in) :: data !< Data to be sent
+  real(kind=c_float), DIM_RANK_SPEC, target, intent(in) :: data !< Data to be sent
   class(client_type),                    intent(in) :: self !< Fortran SmartRedis client
   character(len=*),                      intent(in) :: name !< The unique name used to store in the database
   integer, dimension(:),                 intent(in) :: dims !< The length of each dimension
@@ -516,7 +601,7 @@ end function put_tensor_float
 
 !> Put a tensor whose Fortran type is the equivalent 'double' C-type
 function put_tensor_double(self, name, data, dims) result(code)
-  real(kind=c_double), dimension(..), target, intent(in) :: data !< Data to be sent
+  real(kind=c_double), DIM_RANK_SPEC, target, intent(in) :: data !< Data to be sent
   class(client_type),                    intent(in) :: self !< Fortran SmartRedis client
   character(len=*),                      intent(in) :: name !< The unique name used to store in the database
   integer, dimension(:),                 intent(in) :: dims !< The length of each dimension
@@ -532,7 +617,7 @@ end function put_tensor_double
 
 !> Put a tensor whose Fortran type is the equivalent 'int8' C-type
 function unpack_tensor_i8(self, name, result, dims) result(code)
-  integer(kind=c_int8_t), dimension(..), target, intent(out) :: result !< Data to be sent
+  integer(kind=c_int8_t), DIM_RANK_SPEC, target, intent(out) :: result !< Data to be sent
   class(client_type),                   intent(in) :: self  !< Pointer to the initialized client
   character(len=*),                     intent(in) :: name  !< The name to use to place the tensor
   integer, dimension(:),                intent(in) :: dims  !< Length along each dimension of the tensor
@@ -548,7 +633,7 @@ end function unpack_tensor_i8
 
 !> Put a tensor whose Fortran type is the equivalent 'int16' C-type
 function unpack_tensor_i16(self, name, result, dims) result(code)
-  integer(kind=c_int16_t), dimension(..), target, intent(out) :: result !< Data to be sent
+  integer(kind=c_int16_t), DIM_RANK_SPEC, target, intent(out) :: result !< Data to be sent
   class(client_type),                   intent(in) :: self  !< Pointer to the initialized client
   character(len=*),                     intent(in) :: name  !< The name to use to place the tensor
   integer, dimension(:),                intent(in) :: dims  !< Length along each dimension of the tensor
@@ -564,7 +649,7 @@ end function unpack_tensor_i16
 
 !> Put a tensor whose Fortran type is the equivalent 'int32' C-type
 function unpack_tensor_i32(self, name, result, dims) result(code)
-  integer(kind=c_int32_t), dimension(..), target, intent(out) :: result !< Data to be sent
+  integer(kind=c_int32_t), DIM_RANK_SPEC, target, intent(out) :: result !< Data to be sent
   class(client_type),                   intent(in) :: self  !< Pointer to the initialized client
   character(len=*),                     intent(in) :: name  !< The name to use to place the tensor
   integer, dimension(:),                intent(in) :: dims  !< Length along each dimension of the tensor
@@ -580,7 +665,7 @@ end function unpack_tensor_i32
 
 !> Put a tensor whose Fortran type is the equivalent 'int64' C-type
 function unpack_tensor_i64(self, name, result, dims) result(code)
-  integer(kind=c_int64_t), dimension(..), target, intent(out) :: result !< Data to be sent
+  integer(kind=c_int64_t), DIM_RANK_SPEC, target, intent(out) :: result !< Data to be sent
   class(client_type),                   intent(in) :: self  !< Pointer to the initialized client
   character(len=*),                     intent(in) :: name  !< The name to use to place the tensor
   integer, dimension(:),                intent(in) :: dims  !< Length along each dimension of the tensor
@@ -596,7 +681,7 @@ end function unpack_tensor_i64
 
 !> Put a tensor whose Fortran type is the equivalent 'float' C-type
 function unpack_tensor_float(self, name, result, dims) result(code)
-  real(kind=c_float), dimension(..), target, intent(out) :: result !< Data to be sent
+  real(kind=c_float), DIM_RANK_SPEC, target, intent(out) :: result !< Data to be sent
   class(client_type),                   intent(in) :: self  !< Pointer to the initialized client
   character(len=*),                     intent(in) :: name  !< The name to use to place the tensor
   integer, dimension(:),                intent(in) :: dims  !< Length along each dimension of the tensor
@@ -612,7 +697,7 @@ end function unpack_tensor_float
 
 !> Put a tensor whose Fortran type is the equivalent 'double' C-type
 function unpack_tensor_double(self, name, result, dims) result(code)
-  real(kind=c_double), dimension(..), target, intent(out) :: result !< Data to be sent
+  real(kind=c_double), DIM_RANK_SPEC, target, intent(out) :: result !< Data to be sent
   class(client_type),                   intent(in) :: self  !< Pointer to the initialized client
   character(len=*),                     intent(in) :: name  !< The name to use to place the tensor
   integer, dimension(:),                intent(in) :: dims  !< Length along each dimension of the tensor
@@ -713,8 +798,8 @@ function get_model(self, name, model) result(code)
 end function get_model
 
 !> Load the machine learning model from a file and set the configuration
-function set_model_from_file(self, name, model_file, backend, device, batch_size, min_batch_size, tag, &
-    inputs, outputs) result(code)
+function set_model_from_file(self, name, model_file, backend, device, batch_size, min_batch_size, &
+    min_batch_timeout, tag, inputs, outputs) result(code)
   class(client_type),                       intent(in) :: self           !< An initialized SmartRedis client
   character(len=*),                         intent(in) :: name           !< The name to use to place the model
   character(len=*),                         intent(in) :: model_file     !< The file storing the model
@@ -722,6 +807,7 @@ function set_model_from_file(self, name, model_file, backend, device, batch_size
   character(len=*),                         intent(in) :: device         !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
   integer,                        optional, intent(in) :: batch_size     !< The batch size for model execution
   integer,                        optional, intent(in) :: min_batch_size !< The minimum batch size for model execution
+  integer,                        optional, intent(in) :: min_batch_timeout !< Max time (ms) to wait for min batch size
   character(len=*),               optional, intent(in) :: tag            !< A tag to attach to the model for
                                                                          !! information purposes
   character(len=*), dimension(:), optional, intent(in) :: inputs         !< One or more names of model input nodes (TF
@@ -742,7 +828,7 @@ function set_model_from_file(self, name, model_file, backend, device, batch_size
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
   integer(kind=c_size_t) :: name_length, model_file_length, backend_length, device_length, tag_length, n_inputs, &
                             n_outputs
-  integer(kind=c_int)    :: c_batch_size, c_min_batch_size
+  integer(kind=c_int)    :: c_batch_size, c_min_batch_size, c_min_batch_timeout
   type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
 
@@ -751,6 +837,8 @@ function set_model_from_file(self, name, model_file, backend, device, batch_size
   if (present(batch_size)) c_batch_size = batch_size
   c_min_batch_size = 0
   if (present(min_batch_size)) c_min_batch_size = min_batch_size
+  c_min_batch_timeout = 0
+  if (present(min_batch_timeout)) c_min_batch_timeout = min_batch_timeout
   if (present(tag)) then
     allocate(character(kind=c_char, len=len_trim(tag)) :: c_tag)
     c_tag = tag
@@ -795,8 +883,8 @@ function set_model_from_file(self, name, model_file, backend, device, batch_size
 
   code = set_model_from_file_c(self%client_ptr, c_name, name_length, c_model_file, model_file_length, &
                              c_backend, backend_length, c_device, device_length, c_batch_size, c_min_batch_size, &
-                             c_tag, tag_length, inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, &
-                             output_lengths_ptr, n_outputs)
+                             c_min_batch_timeout, c_tag, tag_length, inputs_ptr, input_lengths_ptr, n_inputs, &
+                             outputs_ptr, output_lengths_ptr, n_outputs)
   if (allocated(c_inputs))        deallocate(c_inputs)
   if (allocated(input_lengths))   deallocate(input_lengths)
   if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
@@ -807,7 +895,7 @@ end function set_model_from_file
 
 !> Load the machine learning model from a file and set the configuration for use in multi-GPU systems
 function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu, num_gpus, batch_size, min_batch_size, &
-                                      tag, inputs, outputs) result(code)
+                                      min_batch_timeout, tag, inputs, outputs) result(code)
   class(client_type),                       intent(in) :: self           !< An initialized SmartRedis client
   character(len=*),                         intent(in) :: name           !< The name to use to place the model
   character(len=*),                         intent(in) :: model_file     !< The file storing the model
@@ -816,6 +904,7 @@ function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu
   integer,                                  intent(in) :: num_gpus       !< The number of GPUs to use with the model
   integer,                        optional, intent(in) :: batch_size     !< The batch size for model execution
   integer,                        optional, intent(in) :: min_batch_size !< The minimum batch size for model execution
+  integer,                        optional, intent(in) :: min_batch_timeout !< Max time (ms) to wait for min batch size
   character(len=*),               optional, intent(in) :: tag            !< A tag to attach to the model for
                                                                          !! information purposes
   character(len=*), dimension(:), optional, intent(in) :: inputs         !< One or more names of model input nodes (TF
@@ -835,7 +924,7 @@ function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
   integer(kind=c_size_t) :: name_length, model_file_length, backend_length, tag_length, n_inputs, &
                             n_outputs
-  integer(kind=c_int)    :: c_batch_size, c_min_batch_size, c_first_gpu, c_num_gpus
+  integer(kind=c_int)    :: c_batch_size, c_min_batch_size, c_min_batch_timeout, c_first_gpu, c_num_gpus
   type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
 
@@ -844,6 +933,8 @@ function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu
   if (present(batch_size)) c_batch_size = batch_size
   c_min_batch_size = 0
   if (present(min_batch_size)) c_min_batch_size = min_batch_size
+  c_min_batch_timeout = 0
+  if (present(min_batch_timeout)) c_min_batch_timeout = min_batch_timeout
   if (present(tag)) then
     allocate(character(kind=c_char, len=len_trim(tag)) :: c_tag)
     c_tag = tag
@@ -889,8 +980,8 @@ function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu
 
   code = set_model_from_file_multigpu_c(self%client_ptr, c_name, name_length, c_model_file, model_file_length, &
                              c_backend, backend_length, c_first_gpu, c_num_gpus, c_batch_size, c_min_batch_size, &
-                             c_tag, tag_length, inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, &
-                             output_lengths_ptr, n_outputs)
+                             c_min_batch_timeout, c_tag, tag_length, inputs_ptr, input_lengths_ptr, n_inputs, &
+                             outputs_ptr, output_lengths_ptr, n_outputs)
 
   if (allocated(c_inputs))        deallocate(c_inputs)
   if (allocated(input_lengths))   deallocate(input_lengths)
@@ -901,8 +992,8 @@ function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu
 end function set_model_from_file_multigpu
 
 !> Establish a model to run
-function set_model(self, name, model, backend, device, batch_size, min_batch_size, tag, &
-    inputs, outputs) result(code)
+function set_model(self, name, model, backend, device, batch_size, min_batch_size, min_batch_timeout, &
+    tag, inputs, outputs) result(code)
   class(client_type),             intent(in) :: self           !< An initialized SmartRedis client
   character(len=*),               intent(in) :: name           !< The name to use to place the model
   character(len=*),               intent(in) :: model          !< The binary representation of the model
@@ -910,6 +1001,7 @@ function set_model(self, name, model, backend, device, batch_size, min_batch_siz
   character(len=*),               intent(in) :: device         !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
   integer,                        intent(in) :: batch_size     !< The batch size for model execution
   integer,                        intent(in) :: min_batch_size !< The minimum batch size for model execution
+  integer,                        intent(in) :: min_batch_timeout !< Max time (ms) to wait for min batch size
   character(len=*),               intent(in) :: tag            !< A tag to attach to the model for information purposes
   character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of model input nodes (TF models)
   character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of model output nodes (TF models)
@@ -927,7 +1019,7 @@ function set_model(self, name, model, backend, device, batch_size, min_batch_siz
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
   integer(kind=c_size_t) :: name_length, model_length, backend_length, device_length, tag_length, n_inputs, &
                             n_outputs
-  integer(kind=c_int)    :: c_batch_size, c_min_batch_size
+  integer(kind=c_int)    :: c_batch_size, c_min_batch_size, c_min_batch_timeout
   type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
 
@@ -951,12 +1043,13 @@ function set_model(self, name, model, backend, device, batch_size, min_batch_siz
                                 output_lengths_ptr, n_outputs)
   if (code /= SRNoError) return
 
-  ! Cast the batch sizes to C integers
+  ! Cast the batch params to C integers
   c_batch_size = batch_size
   c_min_batch_size = min_batch_size
+  c_min_batch_timeout = min_batch_timeout
 
   code = set_model_c(self%client_ptr, c_name, name_length, c_model, model_length, c_backend, backend_length, &
-                 c_device, device_length, batch_size, min_batch_size, c_tag, tag_length, &
+                 c_device, device_length, batch_size, min_batch_size, c_min_batch_timeout, c_tag, tag_length, &
                  inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, output_lengths_ptr, n_outputs)
 
   if (allocated(c_inputs))        deallocate(c_inputs)
@@ -968,8 +1061,8 @@ function set_model(self, name, model, backend, device, batch_size, min_batch_siz
 end function set_model
 
 !> Set a model from a byte string to run on a system with multiple GPUs
-function set_model_multigpu(self, name, model, backend, first_gpu, num_gpus, batch_size, min_batch_size, tag, &
-    inputs, outputs) result(code)
+function set_model_multigpu(self, name, model, backend, first_gpu, num_gpus, batch_size, min_batch_size, &
+    min_batch_timeout, tag, inputs, outputs) result(code)
   class(client_type),             intent(in) :: self           !< An initialized SmartRedis client
   character(len=*),               intent(in) :: name           !< The name to use to place the model
   character(len=*),               intent(in) :: model          !< The binary representation of the model
@@ -978,6 +1071,7 @@ function set_model_multigpu(self, name, model, backend, first_gpu, num_gpus, bat
   integer,                        intent(in) :: num_gpus       !< The number of GPUs to use with the model
   integer,                        intent(in) :: batch_size     !< The batch size for model execution
   integer,                        intent(in) :: min_batch_size !< The minimum batch size for model execution
+  integer,                        intent(in) :: min_batch_timeout !< Max time (ms) to wait for min batch size
   character(len=*),               intent(in) :: tag            !< A tag to attach to the model for information purposes
   character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of model input nodes (TF models)
   character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of model output nodes (TF models)
@@ -993,7 +1087,7 @@ function set_model_multigpu(self, name, model, backend, first_gpu, num_gpus, bat
 
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
   integer(kind=c_size_t) :: name_length, model_length, backend_length, tag_length, n_inputs, n_outputs
-  integer(kind=c_int)    :: c_batch_size, c_min_batch_size, c_first_gpu, c_num_gpus
+  integer(kind=c_int)    :: c_batch_size, c_min_batch_size, c_min_batch_timeout, c_first_gpu, c_num_gpus
   type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
 
@@ -1015,14 +1109,15 @@ function set_model_multigpu(self, name, model, backend, first_gpu, num_gpus, bat
                                  output_lengths_ptr, n_outputs)
   if (code /= SRNoError) return
 
-  ! Cast the batch sizes to C integers
+  ! Cast the batch params to C integers
   c_batch_size = batch_size
   c_min_batch_size = min_batch_size
+  c_min_batch_timeout = min_batch_timeout
   c_first_gpu = first_gpu
   c_num_gpus = num_gpus
 
   code = set_model_multigpu_c(self%client_ptr, c_name, name_length, c_model, model_length, c_backend, backend_length, &
-                 c_first_gpu, c_num_gpus, c_batch_size, c_min_batch_size, c_tag, tag_length, &
+                 c_first_gpu, c_num_gpus, c_batch_size, c_min_batch_size, c_min_batch_timeout, c_tag, tag_length, &
                  inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, output_lengths_ptr, n_outputs)
 
   if (allocated(c_inputs))        deallocate(c_inputs)
@@ -1540,10 +1635,10 @@ function use_model_ensemble_prefix(self, use_prefix) result(code)
 end function use_model_ensemble_prefix
 
 
-!> Set whether names of tensor and dataset entities should be prefixed (e.g. in an ensemble) to form database keys.
+!> Set whether names of tensor entities should be prefixed (e.g. in an ensemble) to form database keys.
 !! Prefixes will only be used if they were previously set through the environment variables SSKEYOUT and SSKEYIN.
 !! Keys of entities created before client function is called will not be affected. By default, the client prefixes
-!! tensor and dataset keys with the first prefix specified with the SSKEYIN and SSKEYOUT environment variables.
+!! tensor keys with the first prefix specified with the SSKEYIN and SSKEYOUT environment variables.
 function use_tensor_ensemble_prefix(self, use_prefix) result(code)
   class(client_type),   intent(in) :: self       !< An initialized SmartRedis client
   logical,              intent(in) :: use_prefix !< The prefix setting
@@ -1551,6 +1646,18 @@ function use_tensor_ensemble_prefix(self, use_prefix) result(code)
 
   code = use_tensor_ensemble_prefix_c(self%client_ptr, logical(use_prefix,kind=c_bool))
 end function use_tensor_ensemble_prefix
+
+!> Set whether names of dataset entities should be prefixed (e.g. in an ensemble) to form database keys.
+!! Prefixes will only be used if they were previously set through the environment variables SSKEYOUT and SSKEYIN.
+!! Keys of entities created before client function is called will not be affected. By default, the client prefixes
+!! dataset keys with the first prefix specified with the SSKEYIN and SSKEYOUT environment variables.
+function use_dataset_ensemble_prefix(self, use_prefix) result(code)
+  class(client_type),   intent(in) :: self       !< An initialized SmartRedis client
+  logical,              intent(in) :: use_prefix !< The prefix setting
+  integer(kind=enum_kind)          :: code
+
+  code = use_dataset_ensemble_prefix_c(self%client_ptr, logical(use_prefix,kind=c_bool))
+end function use_dataset_ensemble_prefix
 
 !> Control whether aggregation lists are prefixed
 function use_list_ensemble_prefix(self, use_prefix) result(code)
@@ -1659,13 +1766,14 @@ function poll_list_length(self, list_name, list_length, poll_frequency_ms, num_t
   integer,              intent(in   ) :: list_length        !< The desired length of the list
   integer,              intent(in   ) :: poll_frequency_ms  !< Frequency at which to poll the database (ms)
   integer,              intent(in   ) :: num_tries          !< Number of times to poll the database before failing
-  logical(kind=c_bool), intent(  out) :: poll_result        !< True if the list is the requested length, False if not after num_tries.
+  logical,              intent(  out) :: poll_result        !< True if the list is the requested length, False if not after num_tries.
   integer(kind=enum_kind)             :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(list_name)) :: list_name_c
   integer(kind=c_size_t) :: list_name_length
   integer(kind=c_int) :: c_poll_frequency, c_num_tries, c_list_length
+  logical(kind=c_bool) :: c_poll_result
 
   list_name_c = trim(list_name)
   list_name_length = len_trim(list_name)
@@ -1674,7 +1782,8 @@ function poll_list_length(self, list_name, list_length, poll_frequency_ms, num_t
   c_list_length = list_length
 
   code = poll_list_length_c(self%client_ptr, list_name_c, list_name_length, &
-                            c_list_length, c_poll_frequency, c_num_tries, poll_result)
+                            c_list_length, c_poll_frequency, c_num_tries, c_poll_result)
+  poll_result = c_poll_result
 end function poll_list_length
 
 !> Get the length of the aggregation list
@@ -1684,13 +1793,14 @@ function poll_list_length_gte(self, list_name, list_length, poll_frequency_ms, n
   integer,              intent(in   ) :: list_length        !< The desired length of the list
   integer,              intent(in   ) :: poll_frequency_ms  !< Frequency at which to poll the database (ms)
   integer,              intent(in   ) :: num_tries          !< Number of times to poll the database before failing
-  logical(kind=c_bool), intent(  out) :: poll_result        !< True if the list is the requested length, False if not after num_tries.
+  logical,              intent(  out) :: poll_result        !< True if the list is the requested length, False if not after num_tries.
   integer(kind=enum_kind)          :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(list_name)) :: list_name_c
   integer(kind=c_size_t) :: list_name_length
   integer(kind=c_int) :: c_poll_frequency, c_num_tries, c_list_length
+  logical(kind=c_bool) :: c_poll_result
 
   list_name_c = trim(list_name)
   list_name_length = len_trim(list_name)
@@ -1699,7 +1809,8 @@ function poll_list_length_gte(self, list_name, list_length, poll_frequency_ms, n
   c_list_length = list_length
 
   code = poll_list_length_gte_c(self%client_ptr, list_name_c, list_name_length, &
-                            c_list_length, c_poll_frequency, c_num_tries, poll_result)
+                            c_list_length, c_poll_frequency, c_num_tries, c_poll_result)
+  poll_result = c_poll_result
 end function poll_list_length_gte
 
 !> Get the length of the aggregation list
@@ -1709,13 +1820,14 @@ function poll_list_length_lte(self, list_name, list_length, poll_frequency_ms, n
   integer,              intent(in)  :: list_length        !< The desired length of the list
   integer,              intent(in)  :: poll_frequency_ms  !< Frequency at which to poll the database (ms)
   integer,              intent(in)  :: num_tries          !< Number of times to poll the database before failing
-  logical(kind=c_bool), intent(out) :: poll_result        !< True if the list is the requested length, False if not after num_tries.
+  logical,              intent(out) :: poll_result        !< True if the list is the requested length, False if not after num_tries.
   integer(kind=enum_kind)          :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(list_name)) :: list_name_c
   integer(kind=c_size_t) :: list_name_length
   integer(kind=c_int) :: c_poll_frequency, c_num_tries, c_list_length
+  logical(kind=c_bool) :: c_poll_result
 
   list_name_c = trim(list_name)
   list_name_length = len_trim(list_name)
@@ -1724,7 +1836,8 @@ function poll_list_length_lte(self, list_name, list_length, poll_frequency_ms, n
   c_list_length = list_length
 
   code = poll_list_length_lte_c(self%client_ptr, list_name_c, list_name_length, &
-                            c_list_length, c_poll_frequency, c_num_tries, poll_result)
+                            c_list_length, c_poll_frequency, c_num_tries, c_poll_result)
+  poll_result = c_poll_result
 end function poll_list_length_lte
 
 !> Get datasets from an aggregation list. Note that this will deallocate an existing list.
@@ -1815,6 +1928,45 @@ function get_datasets_from_list_range(self, list_name, start_index, end_index, d
   enddo
   deallocate(dataset_ptrs)
 end function get_datasets_from_list_range
+
+!> Retrieve a string representation of the client
+function to_string(self)
+  character(kind=c_char, len=:), allocatable :: to_string  !< Text version of client
+  class(client_type),   intent(in)           :: self       !< An initialized SmartRedis client
+
+  type(c_ptr)                                :: c_cli_str
+  integer(kind=c_size_t)                     :: c_cli_str_len
+
+  ! Get the string representation of the client from C
+  c_cli_str = client_to_string_c(self%client_ptr)
+  c_cli_str_len = c_strlen(c_cli_str)
+  to_string = make_str(c_cli_str, c_cli_str_len)
+end function to_string
+
+!> Convert a pointer view of a string to a Fortran string
+function make_str(strptr, str_len)
+  character(kind=c_char, len=:), allocatable :: make_str
+  type(c_ptr), intent(in), value             :: strptr
+  integer(kind=c_size_t)                     :: str_len
+
+  character(len=str_len, kind=c_char), pointer :: ptrview
+  call c_f_pointer(strptr, ptrview)
+  make_str = ptrview
+end function make_str
+
+!> Print a string representation of the client
+subroutine print_client(self, unit)
+  class(client_type), intent(in)  :: self !< An initialized SmartRedis client
+  integer, optional,  intent(in)  :: unit !< Unit to which to print the client
+
+  ! Determine which unit to write to
+  integer :: target_unit
+  target_unit = STDERR
+  if (present(unit)) target_unit = unit
+
+  ! Write the error to the target unit
+  write(target_unit,*) to_string(self)
+end subroutine print_client
 
 end module smartredis_client
 

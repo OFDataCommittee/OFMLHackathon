@@ -10,8 +10,8 @@ and to retrieve the correct information from the
 database.  In the following sections,
 these requirements will be described.
 
-Setting Redis Database Location
-===============================
+Setting Redis Database Location and Type
+========================================
 
 The C++, C, and Fortran clients retrieve
 the Redis database location from the
@@ -37,10 +37,22 @@ at three different addresses, each using port ``6379``:
 
     export SSDB="10.128.0.153:6379,10.128.0.154:6379,10.128.0.155:6379"
 
-The Python client relies on ``SSDB`` to determine database
-location.  However, the Python ``Client`` constructor also allows
-for the database location to be set as an input parameter. In
-this case, it sets SSDB from the input parameter.
+
+There are two types of Redis databases that can be used by the
+SmartRedis library. A ``Clustered`` database, such as the one in
+the previous example, is replicated across multiple shards.
+By way of comparison, a ``Standalone`` database only has a single
+shard that services all traffic; this is the form used when a
+colocated database or a standard deployment with a non-sharded
+database is requested.
+
+The ``SR_DB_TYPE`` environment variable informs the SmartRedis
+library which form is in use. Below is an example of setting
+``SR_DB_TYPE`` for a Redis cluster:
+
+.. code-block:: bash
+
+    export SR_DB_TYPE="Clustered"
 
 Logging Environment Variables
 =============================
@@ -69,7 +81,7 @@ though this can happen only if the variables to set up logging are in place. If
 this parameter is not set, a default logging level of ``INFO`` will be adopted.
 
 The runtime impact of log levels NONE or INFO should be minimal on
-client performance; however, seting the log level to DEBUG may cause some
+client performance; however, setting the log level to DEBUG may cause some
 degradation.
 
 Ensemble Environment Variables
@@ -129,15 +141,22 @@ The functions for changing this default behavior are:
 
     void use_tensor_ensemble_prefix(bool use_prefix);
 
+    void use_dataset_ensemble_prefix(bool use_prefix);
+
     void use_model_ensemble_prefix(bool use_prefix);
 
 
 .. note::
 
     The function ``Client.use_tensor_ensemble_prefix()`` controls
-    object prefixing for objects stored with ``Client.put_tensor()``
-    and all ``DataSet`` components added via ``DataSet.add_tensor()``,
-    ``DataSet.add_meta_scalar()``, and ``DataSet.add_meta_string()``.
+    object prefixing for objects stored with ``Client.put_tensor()``.
+
+.. note::
+
+    The function ``Client.use_dataset_ensemble_prefix()`` controls
+    object prefixing for``DataSet`` components added via
+    ``DataSet.add_tensor()``, ``DataSet.add_meta_scalar()``, and
+    ``DataSet.add_meta_string()``.
 
 .. note::
 

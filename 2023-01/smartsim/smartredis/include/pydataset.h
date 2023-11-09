@@ -145,6 +145,14 @@ class PyDataset : public PySRObject
         std::string get_tensor_type(const std::string& name);
 
         /*!
+        *   \brief Retrieve the dimensions of a Tensor in the DataSet
+        *   \param name The name of the tensor
+        *   \returns A list of the tensor's dimensions
+        *   \throw SmartRedis::Exception if tensor name retrieval fails
+        */
+        py::list get_tensor_dims(const std::string& name);
+
+        /*!
         *   \brief Retrieve the names of all metadata fields in the DataSet
         *   \returns A vector of metadata field names
         */
@@ -168,7 +176,13 @@ class PyDataset : public PySRObject
         *          SmartRedis::DataSet object
         *   \returns DataSet pointer within PyDataset
         */
-        DataSet* get();
+        DataSet* get() { return _dataset; }
+
+        /*!
+        *   \brief Create a string representation of the DataSet
+        *   \returns A string representation of the DataSet
+        */
+        std::string to_string();
 
     private:
 

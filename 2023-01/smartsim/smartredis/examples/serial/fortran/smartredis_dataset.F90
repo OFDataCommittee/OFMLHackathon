@@ -75,7 +75,7 @@ program main
   if (result .ne. SRNoError) error stop 'dataset%get_meta_scalars failed'
 
   ! Initialize a client
-  result = client%initialize(.true., "smartredis_dataset") ! Change .false. to .true. if not using a clustered database
+  result = client%initialize("smartredis_dataset")
   if (result .ne. SRNoError) error stop 'client%initialize failed'
 
   ! Send the dataset to the database via the client

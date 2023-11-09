@@ -38,7 +38,7 @@ program main
     real(kind=8), dimension(dim1) :: tensor
     real(kind=8), dimension(dim1) :: returned
 
-    result = client%initialize(.FALSE., "test_docker.F90")
+    result = client%initialize("test_docker.F90")
     if (result .ne. SRNoError) stop
 
     call random_number(tensor)
