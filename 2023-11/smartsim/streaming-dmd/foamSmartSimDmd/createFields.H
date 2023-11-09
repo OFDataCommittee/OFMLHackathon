@@ -41,6 +41,12 @@ tmp<volVectorField> inputVolVectorFieldTmp(nullptr);
 // Create a list of all time step folders from the case folder.
 instantList inputTimeDirs = timeSelector::select0(runTime, args);
 // TODO(TM): loop over all time steps in the application.
+// forAll(inputTimeDirs, timeIndex)
+// {
+//     const auto& time = inputTimeDirs[timeIndex];
+//     // Your code for each time step goes he
+// }
+
 // Select the last time step folder. 
 const auto latestTime = inputTimeDirs[inputTimeDirs.size() - 1];
 IOobject fieldHeader
