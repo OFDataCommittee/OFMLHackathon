@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
     else if (!inputVolVectorFieldTmp->empty())
     {
         // Let python know the rank of the training data tensor (scalar, vector).
-        std::vector<int> tensor_rank {1};
+        std::vector<int> tensor_rank {0};
         smartRedisClient.put_tensor("input_field_rank",
                                     (void*)tensor_rank.data(), 
                                     std::vector<size_t>{1},
