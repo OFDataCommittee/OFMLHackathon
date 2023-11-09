@@ -24,9 +24,10 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import pytest
 import inspect
 import os.path as osp
-
+from os import environ
 import numpy as np
 import torch
 from smartredis import Client
@@ -34,25 +35,27 @@ from smartredis import Client
 file_path = osp.dirname(osp.abspath(__file__))
 
 
-def test_set_get_function(use_cluster, context):
-    c = Client(None, use_cluster, logger_name=context)
+test_gpu = environ.get("SMARTREDIS_TEST_DEVICE","cpu").lower() == "gpu"
+
+def test_set_get_function(context):
+    c = Client(None, logger_name=context)
     c.set_function("test-set-function", one_to_one)
     script = c.get_script("test-set-function")
     sent_script = inspect.getsource(one_to_one)
     assert script == sent_script
 
 
-def test_set_get_script(use_cluster, context):
-    c = Client(None, use_cluster, logger_name=context)
+def test_set_get_script(context):
+    c = Client(None, logger_name=context)
     sent_script = read_script_from_file()
     c.set_script("test-set-script", sent_script)
     script = c.get_script("test-set-script")
     assert sent_script == script
 
 
-def test_set_script_from_file(use_cluster, context):
+def test_set_script_from_file(context):
     sent_script = read_script_from_file()
-    c = Client(None, use_cluster, logger_name=context)
+    c = Client(None, logger_name=context)
     c.set_script_from_file(
         "test-script-file", osp.join(file_path, "./data_processing_script.txt")
     )
@@ -63,22 +66,22 @@ def test_set_script_from_file(use_cluster, context):
     assert not c.model_exists("test-script-file")
 
 
-def test_run_script(use_cluster, context):
+def test_run_script_str(context):
     data = np.array([[1, 2, 3, 4, 5]])
 
-    c = Client(None, use_cluster, logger_name=context)
+    c = Client(None, logger_name=context)
     c.put_tensor("script-test-data", data)
     c.set_function("one-to-one", one_to_one)
-    c.run_script("one-to-one", "one_to_one", ["script-test-data"], ["script-test-out"])
+    c.run_script("one-to-one", "one_to_one", "script-test-data", "script-test-out")
     out = c.get_tensor("script-test-out")
     assert out == 5
 
 
-def test_run_script_multi(use_cluster, context):
+def test_run_script_list(context):
     data = np.array([[1, 2, 3, 4]])
     data_2 = np.array([[5, 6, 7, 8]])
 
-    c = Client(None, use_cluster, logger_name=context)
+    c = Client(None, logger_name=context)
     c.put_tensor("srpt-multi-out-data-1", data)
     c.put_tensor("srpt-multi-out-data-2", data_2)
     c.set_function("two-to-one", two_to_one)
@@ -87,6 +90,47 @@ def test_run_script_multi(use_cluster, context):
         "two_to_one",
         ["srpt-multi-out-data-1", "srpt-multi-out-data-2"],
         ["srpt-multi-out-output"],
+    )
+    out = c.get_tensor("srpt-multi-out-output")
+    expected = np.array([4, 8])
+    np.testing.assert_array_equal(
+        out, expected, "Returned array from script not equal to expected result"
+    )
+
+@pytest.mark.skipif(
+    not test_gpu,
+    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
+)
+def test_run_script_multigpu_str(use_cluster, context):
+    data = np.array([[1, 2, 3, 4, 5]])
+
+    c = Client(None, use_cluster, logger_name=context)
+    c.put_tensor("script-test-data", data)
+    c.set_function_multigpu("one-to-one", one_to_one, 0, 2)
+    c.run_script_multigpu("one-to-one", "one_to_one", "script-test-data", "script-test-out", 0, 0, 2)
+    out = c.get_tensor("script-test-out")
+    assert out == 5
+
+@pytest.mark.skipif(
+    not test_gpu,
+    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
+)
+def test_run_script_multigpu_list(use_cluster, context):
+    data = np.array([[1, 2, 3, 4]])
+    data_2 = np.array([[5, 6, 7, 8]])
+
+    c = Client(None, use_cluster, logger_name=context)
+    c.put_tensor("srpt-multi-out-data-1", data)
+    c.put_tensor("srpt-multi-out-data-2", data_2)
+    c.set_function_multigpu("two-to-one", two_to_one, 0, 2)
+    c.run_script_multigpu(
+        "two-to-one",
+        "two_to_one",
+        ["srpt-multi-out-data-1", "srpt-multi-out-data-2"],
+        ["srpt-multi-out-output"],
+        0,
+        0,
+        2
     )
     out = c.get_tensor("srpt-multi-out-output")
     expected = np.array([4, 8])

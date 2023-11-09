@@ -25,7 +25,8 @@
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 interface
-  function set_data_source_c( client, source_id, source_id_length ) bind(c, name="set_data_source")
+  function set_data_source_c( client, source_id, source_id_length ) &
+    bind(c, name="set_data_source")
     use iso_c_binding, only : c_ptr, c_char, c_bool, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: set_data_source_c
@@ -36,7 +37,8 @@ interface
 end interface
 
 interface
-  function use_model_ensemble_prefix_c( client, use_prefix) bind(c, name="use_model_ensemble_prefix")
+  function use_model_ensemble_prefix_c( client, use_prefix) &
+    bind(c, name="use_model_ensemble_prefix")
     use iso_c_binding, only : c_ptr, c_bool
     import :: enum_kind
     integer(kind=enum_kind)       :: use_model_ensemble_prefix_c
@@ -46,11 +48,23 @@ interface
 end interface
 
 interface
-  function use_tensor_ensemble_prefix_c( client, use_prefix) bind(c, name="use_tensor_ensemble_prefix")
+  function use_tensor_ensemble_prefix_c( client, use_prefix) &
+    bind(c, name="use_tensor_ensemble_prefix")
     use iso_c_binding, only : c_ptr, c_bool
     import :: enum_kind
     integer(kind=enum_kind)       :: use_tensor_ensemble_prefix_c
     type(c_ptr),            value :: client
     logical(kind=c_bool),   value :: use_prefix
   end function use_tensor_ensemble_prefix_c
+end interface
+
+interface
+  function use_dataset_ensemble_prefix_c( client, use_prefix) &
+    bind(c, name="use_dataset_ensemble_prefix")
+    use iso_c_binding, only : c_ptr, c_bool
+    import :: enum_kind
+    integer(kind=enum_kind)       :: use_dataset_ensemble_prefix_c
+    type(c_ptr),            value :: client
+    logical(kind=c_bool),   value :: use_prefix
+  end function use_dataset_ensemble_prefix_c
 end interface

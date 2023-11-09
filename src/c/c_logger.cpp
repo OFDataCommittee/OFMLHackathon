@@ -43,6 +43,38 @@
 
 using namespace SmartRedis;
 
+
+// Decorator to standardize exception handling in C Logger API methods
+template <class T>
+auto c_logger_api(T&& logger_api_func, const char* name)
+{
+  // we create a closure below
+  auto decorated = [name, logger_api_func
+    = std::forward<T>(logger_api_func)](auto&&... args)
+  {
+    try {
+      logger_api_func(std::forward<decltype(args)>(args)...);
+    }
+    catch (Exception& e) {
+      std::cout << "Logging failure: " << e.where()
+                << ": " << e.what() << std::endl;
+    }
+    catch (...) {
+      std::string msg(
+        "Internal error: A non-standard exception was encountered ");
+      msg += "while executing ";
+      msg += name;
+      std::cout << msg << std::endl;
+    }
+  };
+  return decorated;
+}
+
+// Macro to invoke the decorator with a lambda function
+#define MAKE_LOGGER_API(stuff)\
+    c_logger_api([&] { stuff }, __func__)()
+
+
 // Conditionally log data if the logging level is high enough
 // (exception-free variant)
 extern "C" void log_data_noexcept(
@@ -51,17 +83,13 @@ extern "C" void log_data_noexcept(
     const char* data,
     size_t data_len)
 {
-    try {
-        SR_CHECK_PARAMS(context != NULL && data != NULL);
-        const SRObject* temp_context =
-            reinterpret_cast<const SRObject*>(context);
-        std::string strData(data, data_len);
-        temp_context->log_data(level, strData);
-    }
-    catch (Exception& e) {
-        std::cout << "Logging failure: " << e.where()
-                  << ": " << e.what() << std::endl;
-    }
+  MAKE_LOGGER_API({
+    SR_CHECK_PARAMS(context != NULL && data != NULL);
+    const SRObject* temp_context =
+        reinterpret_cast<const SRObject*>(context);
+    std::string strData(data, data_len);
+    temp_context->log_data(level, strData);
+  });
 }
 
 // Conditionally log a warning if the logging level is high enough
@@ -72,17 +100,13 @@ extern "C" void log_warning_noexcept(
     const char* data,
     size_t data_len)
 {
-    try {
-        SR_CHECK_PARAMS(context != NULL && data != NULL);
-        const SRObject* temp_context =
-            reinterpret_cast<const SRObject*>(context);
-        std::string strData(data, data_len);
-        temp_context->log_warning(level, strData);
-    }
-    catch (Exception& e) {
-        std::cout << "Logging failure: " << e.where()
-                  << ": " << e.what() << std::endl;
-    }
+  MAKE_LOGGER_API({
+    SR_CHECK_PARAMS(context != NULL && data != NULL);
+    const SRObject* temp_context =
+        reinterpret_cast<const SRObject*>(context);
+    std::string strData(data, data_len);
+    temp_context->log_warning(level, strData);
+  });
 }
 
 // Conditionally log an error if the logging level is high enough
@@ -93,79 +117,59 @@ extern "C" void log_error_noexcept(
     const char* data,
     size_t data_len)
 {
-    try {
-        SR_CHECK_PARAMS(context != NULL && data != NULL);
-        const SRObject* temp_context =
-            reinterpret_cast<const SRObject*>(context);
-        std::string strData(data, data_len);
-        temp_context->log_error(level, strData);
-    }
-    catch (Exception& e) {
-        std::cout << "Logging failure: " << e.where()
-                  << ": " << e.what() << std::endl;
-    }
+  MAKE_LOGGER_API({
+    SR_CHECK_PARAMS(context != NULL && data != NULL);
+    const SRObject* temp_context =
+        reinterpret_cast<const SRObject*>(context);
+    std::string strData(data, data_len);
+    temp_context->log_error(level, strData);
+  });
 }
-
 
 // Conditionally log data if the logging level is high enough
 // (exception-free variant)
 extern "C" void log_data_noexcept_string(
-    const char* context,
-    size_t context_len,
+    const char* context, size_t context_len,
     SRLoggingLevel level,
     const char* data,
     size_t data_len)
 {
-    try {
-        SR_CHECK_PARAMS(context != NULL && data != NULL);
-        std::string temp_context(context, context_len);
-        std::string strData(data, data_len);
-        log_data(temp_context, level, strData);
-    }
-    catch (Exception& e) {
-        std::cout << "Logging failure: " << e.where()
-                  << ": " << e.what() << std::endl;
-    }
+  MAKE_LOGGER_API({
+    SR_CHECK_PARAMS(context != NULL && data != NULL);
+    std::string temp_context(context, context_len);
+    std::string strData(data, data_len);
+    log_data(temp_context, level, strData);
+  });
 }
 
 // Conditionally log a warning if the logging level is high enough
 // (exception-free variant)
 extern "C" void log_warning_noexcept_string(
-    const char* context,
-    size_t context_len,
+    const char* context, size_t context_len,
     SRLoggingLevel level,
     const char* data,
     size_t data_len)
 {
-    try {
-        SR_CHECK_PARAMS(context != NULL && data != NULL);
-        std::string temp_context(context, context_len);
-        std::string strData(data, data_len);
-        log_warning(temp_context, level, strData);
-    }
-    catch (Exception& e) {
-        std::cout << "Logging failure: " << e.where()
-                  << ": " << e.what() << std::endl;
-    }
+  MAKE_LOGGER_API({
+    SR_CHECK_PARAMS(context != NULL && data != NULL);
+    std::string temp_context(context, context_len);
+    std::string strData(data, data_len);
+    log_warning(temp_context, level, strData);
+  });
 }
 
 // Conditionally log an error if the logging level is high enough
 // (exception-free variant)
 extern "C" void log_error_noexcept_string(
-    const char* context,
-    size_t context_len,
+    const char* context, size_t context_len,
     SRLoggingLevel level,
     const char* data,
     size_t data_len)
 {
-    try {
-        SR_CHECK_PARAMS(context != NULL && data != NULL);
-        std::string temp_context(context, context_len);
-        std::string strData(data, data_len);
-        log_error(temp_context, level, strData);
-    }
-    catch (Exception& e) {
-        std::cout << "Logging failure: " << e.where()
-                  << ": " << e.what() << std::endl;
-    }
+  MAKE_LOGGER_API({
+    SR_CHECK_PARAMS(context != NULL && data != NULL);
+    std::string temp_context(context, context_len);
+    std::string strData(data, data_len);
+    log_error(temp_context, level, strData);
+  });
 }
