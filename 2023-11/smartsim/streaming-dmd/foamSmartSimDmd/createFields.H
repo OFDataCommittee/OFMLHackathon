@@ -41,6 +41,35 @@ tmp<volVectorField> inputVolVectorFieldTmp(nullptr);
 // Create a list of all time step folders from the case folder.
 instantList inputTimeDirs = timeSelector::select0(runTime, args);
 // TODO(TM): loop over all time steps in the application.
+forAll(inputTimeDirs, timeIndex)
+{
+    const auto& time = inputTimeDirs[timeIndex];
+    // Your code for each time step goes here
+
+    // If the field file header corresponds to a cell-centered scalar field
+    // if (fieldHeader.typeHeaderOk<volScalarField>(true, true, false))
+    // {
+    //     Info <<  "Reading input field " <<  fieldHeader.objectPath() << endl;
+    //     inputVolScalarFieldTmp = new volScalarField(fieldHeader, mesh);
+    // }
+    // // If the field file header corresponds to a cell-centered vector field
+    // else if (fieldHeader.typeHeaderOk<volVectorField>(true, true, false)) 
+    // {
+    //     Info <<  "Reading input field " <<  fieldHeader.objectPath() << endl;
+    //     inputVolVectorFieldTmp = new volVectorField(fieldHeader, mesh);
+    // }
+
+    // Your code for each time step goes here
+
+    // Delete the input field
+
+    // delete inputVolScalarFieldTmp;
+    // delete inputVolVectorFieldTmp;
+
+
+
+}
+
 // Select the last time step folder. 
 const auto latestTime = inputTimeDirs[inputTimeDirs.size() - 1];
 IOobject fieldHeader

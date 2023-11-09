@@ -39,6 +39,7 @@ Description
 #include "client.h"
 
 // TODO(TM): include smartredis header (see solver and function object example).
+// #include "smartredis.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -103,8 +104,37 @@ int main(int argc, char *argv[])
     // If 'field' is a volVectorField 
     else if (!inputVolVectorFieldTmp->empty())
     {
-        // TODO(TM): same as for the volScalarField only with vector dimensions.
+        // Let python know the rank of the training data tensor (scalar, vector).
+        std::vector<int> tensor_rank {1};
+        smartRedisClient.put_tensor("input_field_rank",
+                                    (void*)tensor_rank.data(), 
+                                    std::vector<size_t>{1},
+                                    SRTensorTypeInt32, SRMemLayoutContiguous);
+
+        // Create the cell centers DataSet
+        const auto mpiIndexStr = std::to_string(Pstream::myProcNo());
+
+        auto inputFieldDatasetName = 
+            "input_" + fieldName + "_dataset_MPI_" + mpiIndexStr;
+        SmartRedis::DataSet inputFieldDataset(inputFieldDatasetName);
+
+        // Add the type name into the input field dataset metadata.
+        inputFieldDataset.add_meta_string("type", "vector");
+
+        //- Put the input field in smartredis.
+        Info << "Writing field " << fieldName << " to smartredis. " << endl;
+        inputFieldDataset.add_tensor("input_" + fieldName + "_MPI_" + mpiIndexStr,
+                                     (void*)inputVolVectorFieldTmp->cdata(), 
+                                      std::vector<size_t>{size_t(mesh.nCells()), 3},
+                                      SRTensorTypeDouble, SRMemLayoutContiguous);
+
+        smartRedisClient.put_dataset(inputFieldDataset);
+        smartRedisClient.append_to_list("inputFieldDatasetList", 
+                                         inputFieldDataset);
     }
+
+        // TODO(TM): same as for the volScalarField only with vector dimensions.
+    //}
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     
