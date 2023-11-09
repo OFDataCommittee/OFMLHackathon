@@ -84,7 +84,7 @@ ${localCode}
 const Foam::fvMesh&
 Foam::${typeName}FunctionObject::mesh() const
 {
-    return refCast<const fvMesh>(obr_);
+    return this->mesh_;
 }
 
 

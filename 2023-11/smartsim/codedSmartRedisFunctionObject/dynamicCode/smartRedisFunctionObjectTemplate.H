@@ -35,6 +35,7 @@ SourceFiles
 #ifndef coded_functionObjectTemplate_H
 #define coded_functionObjectTemplate_H
 
+#include "fvMesh.H"
 #include "fvMeshFunctionObject.H"
 #include "dictionaryContent.H"
 #include "smartRedisAdapter.H"
@@ -148,13 +149,13 @@ public:
         template<class T>
         void sendField(const word& fieldName) {
             const T& sField = mesh().lookupObject<T>(fieldName);
-            std::vector<size_t> dims = {size_t(sField.size()), size_t(NComponents<T::cmptType>::value)};
+            std::vector<size_t> dims = {size_t(sField.size()), size_t(NComponents<typename T::cmptType>::value)};
             redisDB_->client().put_tensor
             (
                 sField.name(),
                 (void*)sField.internalField().cdata(),
                 dims,
-                SRTensorTypeDouble, SRMemLayoutContiguous);
+                SRTensorTypeDouble, SRMemLayoutContiguous
             );
         }
 };

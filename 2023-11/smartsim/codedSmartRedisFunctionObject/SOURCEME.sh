@@ -1,10 +1,13 @@
 #!/usr/bin/bash
 
+current_dir=$PWD
 export REPO_ROOT=$(git rev-parse --show-toplevel)
 export FOAM_SMARTREDIS="$REPO_ROOT/2023-01/smartsim/smartredis"
-cd $FOAM_SMARTREDIS
+cd "$REPO_ROOT" || exit 1
+git subtree pull --prefix 2023-01/smartsim/smartredis https://github.com/CrayLabs/SmartRedis develop --squash
+cd "$FOAM_SMARTREDIS"
 make lib
-cd -
+cd "$current_dir"
 if [ ! -d "$FOAM_SMARTREDIS" ]; then
     echo "$FOAM_SMARTREDIS does not exist, please source SOURCEME.sh from its folder"
 fi
