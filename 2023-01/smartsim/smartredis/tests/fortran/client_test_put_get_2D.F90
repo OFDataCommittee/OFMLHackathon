@@ -74,7 +74,7 @@ program main
     recv_array_integer_64(i,j) = irand()
   enddo; enddo
 
-  result = client%initialize(use_cluster(), "client_test_put_get_2D")
+  result = client%initialize("client_test_put_get_2D")
   if (result .ne. SRNoError) error stop
 
   result = client%put_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))

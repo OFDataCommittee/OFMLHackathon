@@ -133,7 +133,7 @@ class TensorPack
         *   \param name The name used to reference the tensor
         *   \returns A pointer to the TensorBase object
         */
-        TensorBase* get_tensor(const std::string& name);
+        TensorBase* get_tensor(const std::string& name) const;
 
         /*!
         *   \brief Return a pointer to the tensor data memory space
@@ -149,7 +149,7 @@ class TensorPack
         *   \returns True if the name corresponds to a tensor
         *            in the TensorPack, otherwise False.
         */
-        bool tensor_exists(const std::string& name);
+        bool tensor_exists(const std::string& name) const;
 
         /*!
         *   \brief Returns an iterator pointing to the

@@ -1,0 +1,13 @@
+// -*- C++ -*-
+
+nLines  10;
+start   (-0.0205 0.001  0.00001);
+end     (-0.0205 0.0251 0.00001);
+fields  (p k U);
+U       U;
+
+// Must be last entry
+#includeEtc "caseDicts/postProcessing/visualization/streamlines.cfg"
+
+
+// ************************************************************************* //

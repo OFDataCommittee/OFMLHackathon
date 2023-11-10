@@ -40,11 +40,15 @@ namespace DATASET_TEST_UTILS {
    field functionality is introduced to Client, this
    class can be removed.
 */
+class ConfigOptions;
 class DatasetTestClient : public SmartRedis::Client
 {
     public:
-        DatasetTestClient(bool cluster, const std::string& name)
-            : Client(cluster, name) {};
+        DatasetTestClient(const std::string& name)
+            : Client(name) {};
+
+        DatasetTestClient(ConfigOptions* cfgopts, const std::string& name)
+            : Client(cfgopts, name) {};
 
         bool hash_field_exists(const std::string& key,
                                const std::string& field) {

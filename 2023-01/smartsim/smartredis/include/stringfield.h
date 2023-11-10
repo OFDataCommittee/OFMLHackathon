@@ -117,7 +117,7 @@ class StringField : public MetadataField {
         *   \brief Retrieve the number of values in the field
         *   \returns The number of values
         */
-        virtual size_t size();
+        virtual size_t size() const;
 
         /*!
         *   \brief Clear the values in the field

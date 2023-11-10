@@ -24,15 +24,26 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from .error import *
+import typing as t
 from functools import wraps
+
+import numpy as np
+from .error import *  # pylint: disable=wildcard-import,unused-wildcard-import
+
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
 from .smartredisPy import c_get_last_error_location
-import numpy as np
+
+if t.TYPE_CHECKING:
+    # Type hint magic bits
+    from typing_extensions import ParamSpec
+
+    _PR = ParamSpec("_PR")
+    _RT = t.TypeVar("_RT")
+
 
 class Dtypes:
     @staticmethod
-    def tensor_from_numpy(array):
+    def tensor_from_numpy(array: np.ndarray) -> str:
         mapping = {
             "float64": "DOUBLE",
             "float32": "FLOAT",
@@ -49,7 +60,7 @@ class Dtypes:
         raise TypeError(f"Incompatible tensor type provided {dtype}")
 
     @staticmethod
-    def metadata_from_numpy(array):
+    def metadata_from_numpy(array: np.ndarray) -> str:
         mapping = {
             "float64": "DOUBLE",
             "float32": "FLOAT",
@@ -64,25 +75,28 @@ class Dtypes:
         raise TypeError(f"Incompatible metadata type provided {dtype}")
 
     @staticmethod
-    def from_string(type_name):
+    def from_string(type_name: str) -> t.Type:
         mapping = {
             "DOUBLE": np.double,
-            "FLOAT":  np.float64,
-            "UINT8":  np.uint8,
+            "FLOAT": np.float64,
+            "UINT8": np.uint8,
             "UINT16": np.uint16,
             "UINT32": np.uint32,
             "UINT64": np.uint64,
-            "INT8":   np.int8,
-            "INT16":  np.int16,
-            "INT32":  np.int32,
-            "INT64":  np.int64,
+            "INT8": np.int8,
+            "INT16": np.int16,
+            "INT32": np.int32,
+            "INT64": np.int64,
             "STRING": str,
         }
         if type_name in mapping:
             return mapping[type_name]
         raise TypeError(f"Unrecognized type name {type_name}")
 
-def init_default(default, init_value, expected_type=None):
+
+def init_default(
+    default: t.Any, init_value: t.Any, expected_type: t.Optional[t.Any] = None
+) -> t.Any:
     """Used for setting a mutable type to a default value.
 
     PEP standards forbid setting a default value to a mutable type
@@ -91,27 +105,42 @@ def init_default(default, init_value, expected_type=None):
     if init_value is None:
         return default
     if expected_type is not None and not isinstance(init_value, expected_type):
-        raise TypeError(f"Argument was of type {type(init_value)}, not {expected_type}")
+        msg = f"Argument was of type {type(init_value)}, not {expected_type}"
+        raise TypeError(msg)
     return init_value
 
-def exception_handler(func):
+
+def exception_handler(func: "t.Callable[_PR, _RT]") -> "t.Callable[_PR, _RT]":
     """Route exceptions raised in processing SmartRedis API calls to our
     Python wrappers
+
+    WARNING: using this decorator with a class' @staticmethod or with an
+    unbound function that takes a type as its first argument will fail
+    because that will make the decorator think it's working with a
+    @classmethod
 
     :param func: the API function to decorate with this wrapper
     :type func: function
     :raises RedisReplyError: if the wrapped function raised an exception
     """
+
     @wraps(func)
-    def smartredis_api_wrapper(*args, **kwargs):
+    def smartredis_api_wrapper(*args: "_PR.args", **kwargs: "_PR.kwargs") -> "_RT":
         try:
             return func(*args, **kwargs)
         # Catch RedisReplyErrors for additional processing (convert from
         # pyerror to our error module).
         # TypeErrors and ValueErrors we pass straight through
         except PybindRedisReplyError as cpp_error:
-            # query args[0] (i.e. 'self') for the class name
-            method_name = args[0].__class__.__name__ + "." + func.__name__
+            # get the class for the calling context.
+            # for a @classmethod, this will be args[0], but for
+            # a "normal" method, args[0] is a self pointer from
+            # which we can grab the __class__ attribute
+            src_class = args[0]
+            if not isinstance(src_class, type):
+                src_class = args[0].__class__
+            # Build the fully specified name of the calling context
+            method_name = src_class.__name__ + "." + func.__name__
             # Get our exception from the global symbol table.
             # The smartredis.error hierarchy exactly
             # parallels the one built via pybind to enable this
@@ -120,11 +149,15 @@ def exception_handler(func):
             if error_loc == "unavailable":
                 cpp_error_str = str(cpp_error)
             else:
-                cpp_error_str = f"File {error_loc}, in SmartRedis library\n{str(cpp_error)}"
+                cpp_error_str = (
+                    f"File {error_loc}, in SmartRedis library\n{str(cpp_error)}"
+                )
             raise globals()[exception_name](cpp_error_str, method_name) from None
+
     return smartredis_api_wrapper
 
-def typecheck(arg, name, _type):
+
+def typecheck(arg: t.Any, name: str, _type: t.Union[t.Tuple, type]) -> None:
     """Validate that an argument is of a given type
 
     :param arg: the variable to be type tested

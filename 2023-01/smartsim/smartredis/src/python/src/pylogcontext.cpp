@@ -35,12 +35,16 @@ using namespace SmartRedis;
 
 namespace py = pybind11;
 
-PyLogContext::PyLogContext(const std::string& context)
-    : PySRObject(context)
+// Decorator to standardize exception handling in PyBind LogContext API methods
+template <class T>
+auto pb_logcontext_api(T&& logcontext_api_func, const char* name)
 {
-    _logcontext = NULL;
+  // we create a closure below
+  auto decorated =
+  [name, logcontext_api_func = std::forward<T>(logcontext_api_func)](auto&&... args)
+  {
     try {
-        _logcontext = new LogContext(context);
+      return logcontext_api_func(std::forward<decltype(args)>(args)...);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -52,25 +56,43 @@ PyLogContext::PyLogContext(const std::string& context)
     }
     catch (...) {
         // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "during dataset construction.");
+        std::string msg(
+            "A non-standard exception was encountered while executing ");
+        msg += name;
+        throw SRInternalException(msg);
     }
+  };
+  return decorated;
+}
+
+// Macro to invoke the decorator with a lambda function
+#define MAKE_LOGCONTEXT_API(stuff)\
+    pb_logcontext_api([&] { stuff }, __func__)()
+
+
+
+PyLogContext::PyLogContext(const std::string& context)
+    : PySRObject(context)
+{
+    MAKE_LOGCONTEXT_API({
+        _logcontext = new LogContext(context);
+    });
 }
 
 PyLogContext::PyLogContext(LogContext* logcontext)
     : PySRObject(logcontext->get_context())
 {
-    _logcontext = logcontext;
+    MAKE_LOGCONTEXT_API({
+        _logcontext = logcontext;
+    });
 }
 
 PyLogContext::~PyLogContext()
 {
-    if (_logcontext != NULL) {
-        delete _logcontext;
-        _logcontext = NULL;
-    }
-}
-
-LogContext* PyLogContext::get() {
-    return _logcontext;
+    MAKE_LOGCONTEXT_API({
+        if (_logcontext != NULL) {
+            delete _logcontext;
+            _logcontext = NULL;
+        }
+    });
 }

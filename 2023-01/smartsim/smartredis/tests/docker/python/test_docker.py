@@ -29,7 +29,7 @@
 from smartredis import Client
 import numpy as np
 
-client = Client(None, False)
+client = Client(None)
 
 tensor = np.random.randint(-10, 10, size=(2,4))
 

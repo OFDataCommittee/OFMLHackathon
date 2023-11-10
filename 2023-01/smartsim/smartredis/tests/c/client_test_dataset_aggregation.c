@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 
   // Initialize client
   void *client = NULL;
-  if (SRNoError != SmartRedisCClient(use_cluster(), logger_name, cid_len, &client) || 
+  if (SRNoError != SimpleCreateClient(logger_name, cid_len, &client) ||
       NULL == client) {
     printf("Failed to initialize client!\n");
     printf("Test passed: NO\n");

@@ -32,12 +32,12 @@ RedisAI capabilities and include additional
 features for high performance computing (HPC) applications.
 SmartRedis provides clients in the following languages:
 
-| Language   | Version/Standard  |
-|------------|:-----------------:|
-| Python     |   3.7, 3.8, 3.9   |
-| C++        |   C++17           |
-| C          |   C99             |
-| Fortran    |   Fortran 2018    |
+| Language   | Version/Standard                               |
+|------------|:----------------------------------------------:|
+| Python     |   3.7, 3.8, 3.9, 3.10                          |
+| C++        |   C++17                                        |
+| C          |   C99                                          |
+| Fortran    |   Fortran 2018 (GNU/Intel), 2003 (PGI/Nvidia)  |
 
 SmartRedis is used in the [SmartSim library](https://github.com/CrayLabs/SmartSim).
 SmartSim makes it easier to use common Machine Learning (ML) libraries like
@@ -51,43 +51,48 @@ SmartSim in any Python, C++, C, or Fortran project.
 ## Using SmartRedis
 
 SmartRedis installation instructions are currently hosted as part of the
-[SmartSim library installation instructions](https://www.craylabs.org/docs/installation.html#smartredis)
+[SmartSim library installation instructions](https://www.craylabs.org/docs/installation_instructions/basic.html#smartredis)
 Additionally, detailed [API documents](https://www.craylabs.org/docs/api/smartredis_api.html) are also available as
 part of the SmartSim documentation.
 
 ## Dependencies
 
-SmartRedis utilizes the following libraries.
+SmartRedis utilizes the following libraries:
 
  - [NumPy](https://github.com/numpy/numpy)
- - [Hiredis](https://github.com/redis/hiredis) 1.0.0
- - [Redis-plus-plus](https://github.com/sewenew/redis-plus-plus)  1.2.3
+ - [Hiredis](https://github.com/redis/hiredis) 1.1.0
+ - [Redis-plus-plus](https://github.com/sewenew/redis-plus-plus) 1.3.5
 
 ## Publications
 
 The following are public presentations or publications using SmartRedis
 
  - [Collaboration with NCAR - CGD Seminar](https://www.youtube.com/watch?v=2e-5j427AS0)
- - [Using Machine Learning in HPC Simulations - paper (pre-print)](https://arxiv.org/abs/2104.09355)
+ - [Using Machine Learning in HPC Simulations - paper](https://www.sciencedirect.com/science/article/pii/S1877750322001065)
+ - [Relexi — A scalable open source reinforcement learning framework for high-performance computing - paper](https://www.sciencedirect.com/science/article/pii/S2665963822001063)
 
 ## Cite
 
-Please use the following citation when referencing SmartSim, SmartRedis, or any SmartSim related work.
+Please use the following citation when referencing SmartSim, SmartRedis, or any SmartSim related work:
 
-
-Partee et al., “Using Machine Learning at Scale in HPC Simulations with SmartSim:
-An Application to Ocean Climate Modeling,” arXiv:2104.09355, Apr. 2021,
-[Online]. Available: http://arxiv.org/abs/2104.09355.
+    Partee et al., "Using Machine Learning at scale in numerical simulations with SmartSim:
+    An application to ocean climate modeling",
+    Journal of Computational Science, Volume 62, 2022, 101707, ISSN 1877-7503.
+    Open Access: https://doi.org/10.1016/j.jocs.2022.101707.
 
 ### bibtex
 
-    ```latex
-    @misc{partee2021using,
-          title={Using Machine Learning at Scale in HPC Simulations with SmartSim: An Application to Ocean Climate Modeling},
-          author={Sam Partee and Matthew Ellis and Alessandro Rigazzi and Scott Bachman and Gustavo Marques and Andrew Shao and Benjamin Robbins},
-          year={2021},
-          eprint={2104.09355},
-          archivePrefix={arXiv},
-          primaryClass={cs.CE}
-    }
-    ```
+    @article{PARTEE2022101707,
+        title = {Using Machine Learning at scale in numerical simulations with SmartSim:
+        An application to ocean climate modeling},
+        journal = {Journal of Computational Science},
+        volume = {62},
+        pages = {101707},
+        year = {2022},
+        issn = {1877-7503},
+        doi = {https://doi.org/10.1016/j.jocs.2022.101707},
+        url = {https://www.sciencedirect.com/science/article/pii/S1877750322001065},
+        author = {Sam Partee and Matthew Ellis and Alessandro Rigazzi and Andrew E. Shao
+        and Scott Bachman and Gustavo Marques and Benjamin Robbins},
+        keywords = {Deep learning, Numerical simulation, Climate modeling, High performance computing, SmartSim},
+        }

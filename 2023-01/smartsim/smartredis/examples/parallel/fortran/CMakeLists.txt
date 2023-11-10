@@ -24,58 +24,114 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-project(FortranClientExamples)
-
+# Project definition for the SmartRedis-Examples-Parallel-Fortran project
 cmake_minimum_required(VERSION 3.13)
+project(SmartRedis-Examples-Parallel-Fortran)
 
+# Enable language support for the examples
 enable_language(Fortran)
+enable_language(CXX)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_BUILD_TYPE Debug)
+# Configure the build
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../..")
+include(smartredis_defs)
 
 # Assume by default that users should link against the install directory in this repository
 if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
   set(SMARTREDIS_INSTALL_PATH "../../../install/")
 endif()
 
-# Specify all pre-processor and library dependencies
+# Locate dependencies
+#  . MPI
 find_package(MPI REQUIRED)
 IF(NOT MPI_Fortran_FOUND)
 	message(FATAL_ERROR "Could not find Fortran MPI components")
 endif()
-find_library(SMARTREDIS_LIBRARY smartredis PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH REQUIRED)
-find_library(SMARTREDIS_FORTRAN_LIBRARY smartredis-fortran PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH REQUIRED)
-find_library(HIREDIS hiredis PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH REQUIRED)
-find_library(REDISPP redis++ PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH REQUIRED)
-set(SMARTREDIS_LIBRARIES
-	${SMARTREDIS_LIBRARY}
-	${SMARTREDIS_FORTRAN_LIBRARY}
-	${HIREDIS}
-	${REDISPP}
+#  . Main SmartRedis Library (C/C++ based)
+add_library(smartredis-main ${SMARTREDIS_LINK_MODE} IMPORTED)
+find_library(SR_LIB ${SMARTREDIS_LIB}
+    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
+    REQUIRED
+    ${SMARTREDIS_LINK_MODE}
 )
+set_target_properties(smartredis-main PROPERTIES
+    IMPORTED_LOCATION ${SR_LIB}
+)
+#  . SmartRedis Fortran Library (Fortran based)
+add_library(smartredis-fortran ${SMARTREDIS_LINK_MODE} IMPORTED)
+find_library(SR_FTN_LIB ${SMARTREDIS_FORTRAN_LIB}
+	PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
+	REQUIRED
+    ${SMARTREDIS_LINK_MODE}
+)
+set_target_properties(smartredis-fortran PROPERTIES
+    IMPORTED_LOCATION ${SR_FTN_LIB}
+)
+
+# Select libraries for build
+if (STATIC_BUILD)
+	# The CMake "preferred" approach only seems to work with the GNU
+	# compiler. We will streamline this in the future
+	if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+		# Mark that SmartRedis requires the C++ linker
+		set_target_properties(smartredis-main PROPERTIES
+			IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+		)
+		set_target_properties(smartredis-fortran PROPERTIES
+			IMPORTED_LINK_INTERFACE_LANGUAGES "FORTRAN"
+		)
+	else() # Tested with PGI, Intel
+		# For other compilers, don't set languages so that CMake will use the Fortran linker (default)
+
+		# Add the stdc++ linker flag
+		set(CMAKE_EXE_LINKER_FLAGS "-lstdc++ ${CMAKE_EXE_LINKER_FLAGS}")
+	endif()
+
+	# Static builds have an extra dependency on the Pthreads library
+	# The order of libraries here is crucial to get dependencies covered
+	find_package(Threads REQUIRED)
+	set(SMARTREDIS_LIBRARIES
+		smartredis-fortran
+		smartredis-main
+		Threads::Threads
+	)
+else()
+    # Shared builds only need the SmartRedis libraries
+    set(SMARTREDIS_LIBRARIES
+		smartredis-fortran
+		smartredis-main
+    )
+endif()
+
+# Define include directories for header files
 include_directories(SYSTEM
     /usr/local/include
     ${MPI_INCLUDE_PATH}
     ${SMARTREDIS_INSTALL_PATH}/include
 )
 
-# Define all the tests to be built
+# Stuff the example_utils into a library to enable building the examples in parallel
+add_library(example_utils STATIC example_utils.F90)
+
+# Define all the examples to be built
 list(APPEND EXECUTABLES
 	 smartredis_dataset
 	 smartredis_mnist
 	 smartredis_put_get_3D
 )
 
+# Build the examples
 foreach(EXECUTABLE ${EXECUTABLES})
-
-	add_executable(${EXECUTABLE}
+	add_executable(${EXECUTABLE}_fortran_parallel
 		${EXECUTABLE}.F90
-		example_utils.F90
 	)
-	target_link_libraries(${EXECUTABLE}
+	set_target_properties(${EXECUTABLE}_fortran_parallel PROPERTIES
+		OUTPUT_NAME ${EXECUTABLE}
+	)
+	target_link_libraries(${EXECUTABLE}_fortran_parallel
 		${SMARTREDIS_LIBRARIES}
 		MPI::MPI_Fortran
+		example_utils
 	)
 endforeach()
