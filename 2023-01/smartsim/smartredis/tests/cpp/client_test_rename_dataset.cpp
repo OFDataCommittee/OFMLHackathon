@@ -52,7 +52,7 @@ void rename_dataset(
     fill_array(t_send_3, dims[0], dims[1], dims[2]);
 
     //Create Client and DataSet
-    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster(), "client_test_rename_dataset");
+    DATASET_TEST_UTILS::DatasetTestClient client("client_test_rename_dataset");
     SmartRedis::DataSet sent_dataset(dataset_name);
 
     //Add metadata to the DataSet

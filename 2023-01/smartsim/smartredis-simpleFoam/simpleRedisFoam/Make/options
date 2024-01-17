@@ -7,8 +7,7 @@ EXE_INC = \
     -I$(LIB_SRC)/TurbulenceModels/incompressible/lnInclude \
     -I$(LIB_SRC)/transportModels \
     -I$(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel \
-    -I$(FOAM_SMARTREDIS_INCLUDE) \
-    -I$(FOAM_SMARTREDIS_DEP_INCLUDE)
+    -I$(SMARTREDIS_INCLUDE)
 
 EXE_LIBS = \
     -lfiniteVolume \
@@ -19,5 +18,5 @@ EXE_LIBS = \
     -lincompressibleTurbulenceModels \
     -lincompressibleTransportModels \
     -latmosphericModels \
-    -L$(FOAM_SMARTREDIS_LIB) -lhiredis -lredis++ \
-    -L$(FOAM_SMARTREDIS_BUILD_LIB) -lsmartredis
+    -L$(SMARTREDIS_LIB) -lhiredis -lredis++ \
+    -lsmartredis

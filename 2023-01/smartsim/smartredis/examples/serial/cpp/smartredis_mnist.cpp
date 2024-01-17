@@ -37,7 +37,7 @@ void run_mnist(const std::string& model_name,
     std::vector<float> img(n_values, 0);
 
     // Load the MNIST image from a file
-    std::string image_file = "../../../common/mnist_data/one.raw";
+    std::string image_file = "../../common/mnist_data/one.raw";
     std::ifstream fin(image_file, std::ios::binary);
     std::ostringstream ostream;
     ostream << fin.rdbuf();
@@ -74,25 +74,20 @@ void run_mnist(const std::string& model_name,
 
 int main(int argc, char* argv[]) {
 
-    // Initialize a client for setting the model and script.
-    // In general, Client objects should be reused, but for this
-    // small example, Client objects are not reused.
-    bool cluster_mode = true; // Set to false if not using a clustered database
-    SmartRedis::Client client(cluster_mode, __FILE__);
+    // Initialize a client for setting the model and script
+    SmartRedis::Client client(__FILE__);
 
     // Build model key, file name, and then set model
     // from file using client API
     std::string model_key = "mnist_model";
-    std::string model_file = "../../../"\
-                                "common/mnist_data/mnist_cnn.pt";
-    client.set_model_from_file(model_key, model_file,
-                            "TORCH", "CPU", 20);
+    std::string model_file = "../../common/mnist_data/mnist_cnn.pt";
+    client.set_model_from_file(
+        model_key, model_file, "TORCH", "CPU", 20);
 
     // Build script key, file name, and then set script
     // from file using client API
     std::string script_key = "mnist_script";
-    std::string script_file = "../../../common/mnist_data/"
-                            "data_processing_script.txt";
+    std::string script_file = "../../common/mnist_data/data_processing_script.txt";
     client.set_script_from_file(script_key, "CPU", script_file);
 
     // Get model and script to illustrate client API

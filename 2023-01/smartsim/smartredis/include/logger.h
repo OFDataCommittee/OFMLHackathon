@@ -253,6 +253,7 @@ class FunctionLogger {
     public:
         /*!
         *   \brief Logger constructor
+        *   \param context The context to which to log function behavior
         *   \param function_name The name of the function to track
         */
         FunctionLogger(const SRObject* context, const char* function_name)

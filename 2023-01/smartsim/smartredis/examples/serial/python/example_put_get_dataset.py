@@ -38,8 +38,7 @@ dataset.add_tensor("tensor_1", data_1)
 dataset.add_tensor("tensor_2", data_2)
 
 # Connect SmartRedis client to Redis database
-db_address = "127.0.0.1:6379"
-client = Client(address=db_address, cluster=True, logger_name="example_put_get_dataset.py")
+client = Client(logger_name="example_put_get_dataset.py")
 
 # Place the DataSet into the database
 client.put_dataset(dataset)

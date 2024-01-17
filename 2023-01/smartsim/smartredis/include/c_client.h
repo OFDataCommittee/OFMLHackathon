@@ -43,7 +43,51 @@ extern "C" {
 #endif
 
 /*!
+*   \brief C-client simple constructor that uses default environment variables
+*          to locate configuration settings
+*   \param logger_name Identifier for the current client
+*   \param logger_name_length Length in characters of the logger_name string
+*   \param new_client Receives the new client
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError SimpleCreateClient(
+    const char* logger_name,
+    const size_t logger_name_length,
+    void** new_client);
+
+/*!
+*   \brief C-client constructor that uses a ConfigOptions object
+*          to locate configuration settings
+*   \param config_options The ConfigOptions object to use
+*   \param logger_name Identifier for the current client
+*   \param logger_name_length Length in characters of the logger_name string
+*   \param new_client Receives the new client
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError CreateClient(
+    void* config_options,
+    const char* logger_name,
+    const size_t logger_name_length,
+    void** new_client);
+
+/*!
 *   \brief C-client constructor
+*   \param cluster Flag to indicate if a database cluster is being used
+*   \param logger_name Identifier for the current client
+*   \param logger_name_length Length in characters of the logger_name string
+*   \param new_client Receives the new client
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError SmartRedisCClient(
+    bool cluster,
+    const char* logger_name,
+    const size_t logger_name_length,
+    void **new_client);
+
+
+
+/*!
+*   \brief C-client constructor (deprecated)
 *   \param cluster Flag to indicate if a database cluster is being used
 *   \param logger_name Identifier for the current client
 *   \param logger_name_length Length in characters of the logger_name string
@@ -69,7 +113,7 @@ SRError DeleteCClient(void** c_client);
 *   \details The final dataset key under which the dataset is stored
 *            is generated from the name that was supplied when the
 *            dataset was created and may be prefixed. See
-*            use_tensor_ensemble_prefix() for more details.
+*            use_dataset_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
 *   \param dataset The DataSet object to send
 *   \return Returns SRNoError on success or an error code on failure
@@ -81,7 +125,7 @@ SRError put_dataset(void* c_client, void* dataset);
 *   \details The final dataset key used to locate the dataset
 *            may be formed by applying a prefix to the supplied
 *            name. See set_data_source() and
-*            use_tensor_ensemble_prefix() for more details.
+*            use_dataset_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
 *   \param name The name of the dataset object to fetch
 *   \param name_length The length of the name string,
@@ -99,7 +143,7 @@ SRError get_dataset(void* c_client,
 *   \details The old and new dataset keys used to
 *            find and relocate the dataset may be formed by applying
 *            prefixes to the supplied old_name and new_name.
-*            See set_data_source() and use_tensor_ensemble_prefix()
+*            See set_data_source() and use_dataset_ensemble_prefix()
 *            for more details.
 *   \param c_client The client object to use for communication
 *   \param old_name The current name key of the dataset object
@@ -121,7 +165,7 @@ SRError rename_dataset(void* c_client,
 *   \details The source and destination dataset keys used to
 *            locate and store the dataset may be formed by applying
 *            prefixes to the supplied src_name and dest_name.
-*            See set_data_source() and use_tensor_ensemble_prefix()
+*            See set_data_source() and use_dataset_ensemble_prefix()
 *            for more details.
 *   \param c_client The client object to use for communication
 *   \param src_name The source name of the dataset object
@@ -143,7 +187,7 @@ SRError copy_dataset(void* c_client,
 *   \details The dataset key used to locate the dataset to be deleted
 *            may be formed by applying a prefix to the supplied
 *            name. See set_data_source()
-*            and use_tensor_ensemble_prefix() for more details.
+*            and use_dataset_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
 *   \param name The name of the dataset object
 *   \param name_length The length of the name string,
@@ -323,7 +367,7 @@ bool _isTensorFlow(const char* backend);
 /*!
 *   \brief Check parameters for all parameters common to set_model methods
 *   \details Make sure that all pointers are not void and that the size
-*            of the inputs and outputs is not zero 
+*            of the inputs and outputs is not zero
 *   \param c_client The client object to use for communication
 *   \param name The name to associate with the model
 *   \param backend The name of the backend (TF, TFLITE, TORCH, ONNX)
@@ -372,6 +416,7 @@ void _check_params_set_model(void* c_client,
 *                        excluding null terminating character
 *   \param batch_size The batch size for model execution
 *   \param min_batch_size The minimum batch size for model execution
+*   \param min_batch_timeout Max time (ms) to wait for min batch size
 *   \param tag A tag to attach to the model for information purposes
 *   \param tag_length The length of the tag string,
 *                     excluding null terminating character
@@ -396,6 +441,7 @@ SRError set_model_from_file(void* c_client,
                             const size_t device_length,
                             const int batch_size,
                             const int min_batch_size,
+                            const int min_batch_timeout,
                             const char* tag,
                             const size_t tag_length,
                             const char** inputs,
@@ -428,6 +474,7 @@ SRError set_model_from_file(void* c_client,
 *   \param num_gpus the number of gpus to use with the model
 *   \param batch_size The batch size for model execution
 *   \param min_batch_size The minimum batch size for model execution
+*   \param min_batch_timeout Max time (ms) to wait for min batch size
 *   \param tag A tag to attach to the model for information purposes
 *   \param tag_length The length of the tag string,
 *                     excluding null terminating character
@@ -452,6 +499,7 @@ SRError set_model_from_file_multigpu(void* c_client,
                                      const int num_gpus,
                                      const int batch_size,
                                      const int min_batch_size,
+                                     const int min_batch_timeout,
                                      const char* tag,
                                      const size_t tag_length,
                                      const char** inputs,
@@ -486,6 +534,7 @@ SRError set_model_from_file_multigpu(void* c_client,
 *                        excluding null terminating character
 *   \param batch_size The batch size for model execution
 *   \param min_batch_size The minimum batch size for model execution
+*   \param min_batch_timeout Max time (ms) to wait for min batch size
 *   \param tag A tag to attach to the model for information purposes
 *   \param tag_length The length of the tag string,
 *                     excluding null terminating character
@@ -510,6 +559,7 @@ SRError set_model(void* c_client,
                   const size_t device_length,
                   const int batch_size,
                   const int min_batch_size,
+                  const int min_batch_timeout,
                   const char* tag,
                   const size_t tag_length,
                   const char** inputs,
@@ -518,7 +568,7 @@ SRError set_model(void* c_client,
                   const char** outputs,
                   const size_t* output_lengths,
                   const size_t n_outputs);
- 
+
  /*!
 *   \brief Set a model (from buffer) in the database for future execution
 *          in a multi-GPU system
@@ -542,6 +592,7 @@ SRError set_model(void* c_client,
 *   \param num_gpus The number of GPUs to use with the model
 *   \param batch_size The batch size for model execution
 *   \param min_batch_size The minimum batch size for model execution
+*   \param min_batch_timeout Max time (ms) to wait for min batch size
 *   \param tag A tag to attach to the model for information purposes
 *   \param tag_length The length of the tag string,
 *                     excluding null terminating character
@@ -566,6 +617,7 @@ SRError set_model_multigpu(void* c_client,
                   const int num_gpus,
                   const int batch_size,
                   const int min_batch_size,
+                  const int min_batch_timeout,
                   const char* tag,
                   const size_t tag_length,
                   const char** inputs,
@@ -635,12 +687,6 @@ SRError set_script_from_file(void* c_client,
 *   \param name The name to associate with the script
 *   \param name_length The length of the name string,
 *                      excluding null terminating character
-*   \param device The name of the device for execution. May be either
-*                 CPU or GPU. If multiple GPUs are present, a specific
-*                 GPU can be targeted by appending its zero-based
-*                 index, i.e. "GPU:1"
-*   \param device_length The length of the device name string,
-*                        excluding null terminating character
 *   \param script_file The source file for the script
 *   \param script_file_length The length of the script file name string,
 *                             excluding null terminating character
@@ -748,7 +794,6 @@ SRError get_script(void* c_client,
 *   \param output_lengths The length of each output name string,
 *                         excluding null terminating character
 *   \param n_outputs The number of outputs
-*   \return Returns SRNoError on success or an error code on failure
 */
 void _check_params_run_script(void* c_client,
                               const char* name,
@@ -999,7 +1044,7 @@ SRError delete_model(void* c_client,
 *   \param c_client The client object to use for communication
 *   \param name The name associated with the model
 *   \param name_length The length of the name string,
-*   \param first_cpu the first GPU (zero-based) to use with the model
+*   \param first_gpu the first GPU (zero-based) to use with the model
 *   \param num_gpus the number of gpus for which the model was stored
 *   \return Returns SRNoError on success or an error code on failure
 */
@@ -1032,7 +1077,7 @@ SRError delete_script(void* c_client,
 *   \param c_client The client object to use for communication
 *   \param name The name associated with the model
 *   \param name_length The length of the name string,
-*   \param first_cpu the first GPU (zero-based) to use with the model
+*   \param first_gpu the first GPU (zero-based) to use with the model
 *   \param num_gpus the number of gpus for which the model was stored
 *   \return Returns SRNoError on success or an error code on failure
 */
@@ -1104,7 +1149,7 @@ SRError model_exists(void* c_client,
 *   \details The dataset key used to check for dataset existence
 *            may be formed by applying a prefix to the supplied
 *            name. See set_data_source()
-*            and use_tensor_ensemble_prefix() for more details.
+*            and use_dataset_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
 *   \param name The name of the dataset that will be checked in the database.
 *               The full key corresponding to \p name will be formed
@@ -1200,7 +1245,7 @@ SRError poll_tensor(void* c_client,
 *   \details The dataset key used to check for dataset existence
 *            may be formed by applying a prefix to the supplied
 *            name. See set_data_source()
-*            and use_tensor_ensemble_prefix() for more details.
+*            and use_dataset_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
 *   \param name The name of the entity to be checked in the database.
 *               The full key associated to \p name will be formed according
@@ -1249,16 +1294,16 @@ SRError set_data_source(void* c_client,
                         const size_t source_id_length);
 
 /*!
-*   \brief Control whether tensor and dataset names are
-*          prefixed (e.g. in an ensemble) when forming database keys
+*   \brief Control whether tensor names are prefixed (e.g. in an
+*          ensemble) when forming database keys
 *   \details This function can be used to avoid key collisions in an
 *            ensemble by prepending the string value from the
-*            environment variable SSKEYIN to tensor and dataset names.
+*            environment variable SSKEYIN to tensor names.
 *            Prefixes will only be used if they were previously set through
 *            Keys for entities created before this function is called
 *            the environment variables SSKEYOUT and SSKEYIN.
 *            will not be retroactively prefixed.
-*            By default, the client prefixes tensor and dataset keys
+*            By default, the client prefixes tensor keys
 *            with the first prefix specified with the SSKEYIN
 *            and SSKEYOUT environment variables.
 *
@@ -1268,6 +1313,27 @@ SRError set_data_source(void* c_client,
 *   \return Returns SRNoError on success or an error code on failure
 */
 SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix);
+
+/*!
+*   \brief Control whether dataset names are prefixed (e.g. in an
+*          ensemble) when forming database keys
+*   \details This function can be used to avoid key collisions in an
+*            ensemble by prepending the string value from the
+*            environment variable SSKEYIN to tensor and dataset names.
+*            Prefixes will only be used if they were previously set through
+*            Keys for entities created before this function is called
+*            the environment variables SSKEYOUT and SSKEYIN.
+*            will not be retroactively prefixed.
+*            By default, the client prefixes dataset keys
+*            with the first prefix specified with the SSKEYIN
+*            and SSKEYOUT environment variables.
+*
+*   \param c_client The client object to use for communication
+*   \param use_prefix If true, all future operations on tensors and
+*                     datasets will use a prefix, if available.
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError use_dataset_ensemble_prefix(void* c_client, bool use_prefix);
 
 /*!
 *   \brief Control whether model and script names are
@@ -1301,9 +1367,9 @@ SRError use_model_ensemble_prefix(void* c_client, bool use_prefix);
 *            prefixed. By default, the client prefixes aggregation
 *            list keys with the first prefix specified with the SSKEYIN
 *            and SSKEYOUT environment variables.  Note that
-*            use_tensor_ensemble_prefix() controls prefixing
+*            use_dataset_ensemble_prefix() controls prefixing
 *            for the entities in the aggregation list, and
-*            use_tensor_ensemble_prefix() should be given the
+*            use_dataset_ensemble_prefix() should be given the
 *            same value that was used during the initial
 *            setting of the DataSet into the database.
 *   \param c_client The client object to use for communication
@@ -1372,17 +1438,17 @@ SRError copy_list(void* c_client,
 
 /*!
 *   \brief Rename an aggregation list
-*   \details The old and new aggregation list key used to find and
+*   \details The initial and target aggregation list key used to find and
 *            relocate the list may be formed by applying prefixes to
-*            the supplied old_name and new_name. See set_data_source()
+*            the supplied src_name and dest_name. See set_data_source()
 *            and use_list_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
-*   \param old_name The old list name
-*   \param src_name_length The size in characters of the old list name,
+*   \param src_name The initial list name
+*   \param src_name_length The size in characters of the initial list name,
 *                          including null terminator
-*   \param new_name The new list name
-*   \param new_name_length The size in characters of the new list name,
-*                          including null terminator
+*   \param dest_name The target list name
+*   \param dest_name_length The size in characters of the target list name,
+*                           including null terminator
 *   \return Returns SRNoError on success or an error code on failure
 */
 SRError rename_list(void* c_client,
@@ -1526,11 +1592,16 @@ SRError get_datasets_from_list(void* c_client, const char* list_name,
 *   \param num_datasets Receives the number of datasets returned
 *   \return Returns SRNoError on success or an error code on failure
 */
-SRError get_dataset_list_range(void* c_client, const char* list_name,
-                               const size_t list_name_length,
-                               const int start_index, const int end_index,
-                               void*** datasets, size_t* num_datasets);
-/*
+SRError get_dataset_list_range(
+    void* c_client,
+    const char* list_name,
+    const size_t list_name_length,
+    const int start_index,
+    const int end_index,
+    void*** datasets,
+    size_t* num_datasets);
+
+/*!
 *   \brief Get a range of datasets (by index) from an aggregation list and
            copy them into an already allocated vector of datasets. Note,
            while this method could be used by C clients, its primary
@@ -1559,13 +1630,23 @@ SRError get_dataset_list_range(void* c_client, const char* list_name,
 *                    starting at the end of the list. For example, -1 is
 *                    the last element of the list.
 *   \param datasets Receives an array of datasets included in the list
-*   \param num_datasets Receives the number of datasets returned
 *   \return Returns SRNoError on success or an error code on failure
 */
-SRError _get_dataset_list_range_allocated(void* c_client, const char* list_name,
-                                         const size_t list_name_length,
-                                         const int start_index, const int end_index,
-                                         void** datasets);
+SRError _get_dataset_list_range_allocated(
+    void* c_client,
+    const char* list_name,
+    const size_t list_name_length,
+    const int start_index,
+    const int end_index,
+    void** datasets);
+
+
+/*!
+*   \brief Retrieve a string representation of the client
+*   \param c_client The client object to use for communication
+*   \return A string with either the client representation or an error message
+*/
+const char* client_to_string(void* c_client);
 
 #ifdef __cplusplus
 }

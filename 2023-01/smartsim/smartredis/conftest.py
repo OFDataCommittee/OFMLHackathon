@@ -54,10 +54,6 @@ metadata_scalar_dtypes = [
 ]
 
 @pytest.fixture
-def use_cluster():
-    return os.getenv('SMARTREDIS_TEST_CLUSTER', "").lower() == 'true'
-
-@pytest.fixture
 def mock_data():
     return MockTestData
 
@@ -136,3 +132,24 @@ class MockTestModel:
             torch.jit.save(module, buffer)
             str_model = buffer.getvalue()
             return str_model
+
+# Add a build type option to pytest command lines
+def pytest_addoption(parser):
+    parser.addoption("--build", action="store", default="Release")
+    parser.addoption("--link", action="store", default="Shared")
+    parser.addoption("--sr_fortran", action="store", default="OFF")
+
+# Fixture to retrieve the build type setting
+@pytest.fixture(scope="session")
+def build(request):
+    return request.config.getoption("--build")
+
+# Fixture to retrieve the link type setting
+@pytest.fixture(scope="session")
+def link(request):
+    return request.config.getoption("--link")
+
+# Fixture to retrieve the Fortran enablement setting
+@pytest.fixture(scope="session")
+def sr_fortran(request):
+    return request.config.getoption("--sr_fortran")

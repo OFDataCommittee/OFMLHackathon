@@ -1,3 +1,4 @@
+smartRedisAdapter.C
 smartSimFunctionObject.C
 
 LIB = $(FOAM_USER_LIBBIN)/libsmartSimFunctionObject

@@ -94,7 +94,7 @@ void log_error_noexcept(
 *   \brief Conditionally log data if the logging level is high enough,
 *          using a string to provide a custom context
 *   \param context Null-terminated string containing the log context
-*   \param data_len Length in characters of the logging context
+*   \param context_len Length in characters of the logging context
 *   \param level Minimum logging level for data to be logged
 *   \param data Text of data to be logged
 *   \param data_len Length in characters of data to be logged
@@ -110,7 +110,7 @@ void log_data_noexcept_string(
 *   \brief Conditionally log a warning if the logging level is high enough,
 *          using a string to provide a custom context
 *   \param context Null-terminated string containing the log context
-*   \param data_len Length in characters of the logging context
+*   \param context_len Length in characters of the logging context
 *   \param level Minimum logging level for data to be logged
 *   \param data Text of data to be logged
 *   \param data_len Length in characters of data to be logged
@@ -126,7 +126,7 @@ void log_warning_noexcept_string(
 *   \brief Conditionally log an error if the logging level is high enough,
 *          using a string to provide a custom context
 *   \param context Null-terminated string containing the log context
-*   \param data_len Length in characters of the logging context
+*   \param context_len Length in characters of the logging context
 *   \param level Minimum logging level for data to be logged
 *   \param data Text of data to be logged
 *   \param data_len Length in characters of data to be logged

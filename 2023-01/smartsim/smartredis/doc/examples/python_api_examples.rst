@@ -18,13 +18,13 @@ SmartRedis ``DataSet`` API is also provided.
 .. note::
 
     The Python API examples are written
-    to connect to a Redis cluster database.  Update the
-    ``Client`` constructor call to connect to a Redis non-cluster database.
+    to connect to a clustered backend database.  Update the
+    ``Client`` constructor call to connect to a non-clustered backend database.
 
 Tensors
 =======
 The Python client has the ability to send and receive tensors from
-the Redis database.  The tensors are stored in the Redis database
+the backend database.  The tensors are stored in the backend database
 as RedisAI data structures.  Additionally, Python client API
 functions involving tensor data are compatible with Numpy arrays
 and do not require any other data types.
@@ -37,7 +37,10 @@ and do not require any other data types.
 Datasets
 ========
 
-The Python client can store and retrieve tensors and metadata in datasets.
+The Python ``Client`` API stores and retrieve datasets from the backend database. The Python
+``DataSet`` API can store and retrieve tensors and metadata from an in-memory ``DataSet`` object.
+To reiterate, the actual interaction with the backend database, 
+where a snapshot of the ``DataSet`` object is sent, is handled by the Client API.
 For further information about datasets, please refer to the :ref:`Dataset
 section of the Data Structures documentation page <data_structures_dataset>`.
 

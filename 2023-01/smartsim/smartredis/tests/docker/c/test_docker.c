@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
     size_t cid_len = strlen(logger_name);
 
     SRError return_code = SRNoError;
-    return_code = SmartRedisCClient(false, logger_name, cid_len, &client);
+    return_code = SimpleCreateClient(logger_name, cid_len, &client);
 
     if (return_code != SRNoError) {
         return -1;

@@ -35,12 +35,16 @@ using namespace SmartRedis;
 
 namespace py = pybind11;
 
-PyDataset::PyDataset(const std::string& name)
-    : PySRObject(name)
+// Decorator to standardize exception handling in PyBind DataSet API methods
+template <class T>
+auto pb_dataset_api(T&& dataset_api_func, const char* name)
 {
-    _dataset = NULL;
+  // we create a closure below
+  auto decorated =
+  [name, dataset_api_func = std::forward<T>(dataset_api_func)](auto&&... args)
+  {
     try {
-        _dataset = new DataSet(name);
+      return dataset_api_func(std::forward<decltype(args)>(args)...);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -52,32 +56,49 @@ PyDataset::PyDataset(const std::string& name)
     }
     catch (...) {
         // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "during dataset construction.");
+        std::string msg(
+            "A non-standard exception was encountered while executing ");
+        msg += name;
+        throw SRInternalException(msg);
     }
+  };
+  return decorated;
+}
+
+// Macro to invoke the decorator with a lambda function
+#define MAKE_DATASET_API(stuff)\
+    pb_dataset_api([&] { stuff }, __func__)()
+
+
+PyDataset::PyDataset(const std::string& name)
+    : PySRObject(name)
+{
+    MAKE_DATASET_API({
+        _dataset = new DataSet(name);
+    });
 }
 
 PyDataset::PyDataset(DataSet* dataset)
     : PySRObject(dataset->get_context())
 {
-    _dataset = dataset;
+    MAKE_DATASET_API({
+        _dataset = dataset;
+    });
 }
 
 PyDataset::~PyDataset()
 {
-    if (_dataset != NULL) {
-        delete _dataset;
-        _dataset = NULL;
-    }
-}
-
-DataSet* PyDataset::get() {
-    return _dataset;
+    MAKE_DATASET_API({
+        if (_dataset != NULL) {
+            delete _dataset;
+            _dataset = NULL;
+        }
+    });
 }
 
 void PyDataset::add_tensor(const std::string& name, py::array data, std::string& type)
 {
-    try {
+    MAKE_DATASET_API({
         auto buffer = data.request();
         void* ptr = buffer.ptr;
 
@@ -89,263 +110,161 @@ void PyDataset::add_tensor(const std::string& name, py::array data, std::string&
 
         SRTensorType ttype = TENSOR_TYPE_MAP.at(type);
         _dataset->add_tensor(name, ptr, dims, ttype, SRMemLayoutContiguous);
-    }
-    catch (Exception& e) {
-        // exception is already prepared for caller
-        throw;
-    }
-    catch (std::exception& e) {
-        // should never happen
-        throw SRInternalException(e.what());
-    }
-    catch (...) {
-        // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "while executing add_tensor.");
-    }
+    });
 }
 
 py::array PyDataset::get_tensor(const std::string& name)
 {
-    TensorBase* tensor = NULL;
-    try {
-        tensor = _dataset->_get_tensorbase_obj(name);
-    }
-    catch (Exception& e) {
-        // exception is already prepared for caller
-        throw;
-    }
-    catch (std::exception& e) {
-        // should never happen
-        throw SRInternalException(e.what());
-    }
-    catch (...) {
-        // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "while executing get_tensor.");
-    }
+    return MAKE_DATASET_API({
+        TensorBase* tensor = _dataset->_get_tensorbase_obj(name);
 
-    // Define py::capsule lambda function for destructor
-    py::capsule free_when_done((void*)tensor, [](void *tensor) {
-        delete reinterpret_cast<TensorBase*>(tensor);
+        // Define py::capsule lambda function for destructor
+        py::capsule free_when_done((void*)tensor, [](void *tensor) {
+            delete reinterpret_cast<TensorBase*>(tensor);
+        });
+
+        // detect data type
+        switch (tensor->type()) {
+            case SRTensorTypeDouble: {
+                double* data = reinterpret_cast<double*>(
+                    tensor->data_view(SRMemLayoutContiguous));
+                return py::array(tensor->dims(), data, free_when_done);
+            }
+            case SRTensorTypeFloat: {
+                float* data = reinterpret_cast<float*>(
+                    tensor->data_view(SRMemLayoutContiguous));
+                return py::array(tensor->dims(), data, free_when_done);
+            }
+            case SRTensorTypeInt64: {
+                int64_t* data = reinterpret_cast<int64_t*>(
+                    tensor->data_view(SRMemLayoutContiguous));
+                return py::array(tensor->dims(), data, free_when_done);
+            }
+            case SRTensorTypeInt32: {
+                int32_t* data = reinterpret_cast<int32_t*>(
+                    tensor->data_view(SRMemLayoutContiguous));
+                return py::array(tensor->dims(), data, free_when_done);
+            }
+            case SRTensorTypeInt16: {
+                int16_t* data = reinterpret_cast<int16_t*>(
+                    tensor->data_view(SRMemLayoutContiguous));
+                return py::array(tensor->dims(), data, free_when_done);
+            }
+            case SRTensorTypeInt8: {
+                int8_t* data = reinterpret_cast<int8_t*>(
+                    tensor->data_view(SRMemLayoutContiguous));
+                return py::array(tensor->dims(), data, free_when_done);
+            }
+            case SRTensorTypeUint16: {
+                uint16_t* data = reinterpret_cast<uint16_t*>(
+                    tensor->data_view(SRMemLayoutContiguous));
+                return py::array(tensor->dims(), data, free_when_done);
+            }
+            case SRTensorTypeUint8: {
+                uint8_t* data = reinterpret_cast<uint8_t*>(
+                    tensor->data_view(SRMemLayoutContiguous));
+                return py::array(tensor->dims(), data, free_when_done);
+            }
+            default :
+                throw SRRuntimeException("Could not infer type in "\
+                                         "PyDataSet::get_tensor().");
+        }
     });
-
-    // detect data type
-    switch (tensor->type()) {
-        case SRTensorTypeDouble: {
-            double* data = reinterpret_cast<double*>(
-                tensor->data_view(SRMemLayoutContiguous));
-            return py::array(tensor->dims(), data, free_when_done);
-        }
-        case SRTensorTypeFloat: {
-            float* data = reinterpret_cast<float*>(
-                tensor->data_view(SRMemLayoutContiguous));
-            return py::array(tensor->dims(), data, free_when_done);
-        }
-        case SRTensorTypeInt64: {
-            int64_t* data = reinterpret_cast<int64_t*>(
-                tensor->data_view(SRMemLayoutContiguous));
-            return py::array(tensor->dims(), data, free_when_done);
-        }
-        case SRTensorTypeInt32: {
-            int32_t* data = reinterpret_cast<int32_t*>(
-                tensor->data_view(SRMemLayoutContiguous));
-            return py::array(tensor->dims(), data, free_when_done);
-        }
-        case SRTensorTypeInt16: {
-            int16_t* data = reinterpret_cast<int16_t*>(
-                tensor->data_view(SRMemLayoutContiguous));
-            return py::array(tensor->dims(), data, free_when_done);
-        }
-        case SRTensorTypeInt8: {
-            int8_t* data = reinterpret_cast<int8_t*>(
-                tensor->data_view(SRMemLayoutContiguous));
-            return py::array(tensor->dims(), data, free_when_done);
-        }
-        case SRTensorTypeUint16: {
-            uint16_t* data = reinterpret_cast<uint16_t*>(
-                tensor->data_view(SRMemLayoutContiguous));
-            return py::array(tensor->dims(), data, free_when_done);
-        }
-        case SRTensorTypeUint8: {
-            uint8_t* data = reinterpret_cast<uint8_t*>(
-                tensor->data_view(SRMemLayoutContiguous));
-            return py::array(tensor->dims(), data, free_when_done);
-        }
-        default :
-            throw SRRuntimeException("Could not infer type in "\
-                                     "PyDataSet::get_tensor().");
-    }
 }
 
-void PyDataset::add_meta_scalar(const std::string& name, py::array data, std::string& type)
+void PyDataset::add_meta_scalar(
+    const std::string& name, py::array data, std::string& type)
 {
-    try {
+    MAKE_DATASET_API({
         auto buffer = data.request();
         void* ptr = buffer.ptr;
 
         SRMetaDataType ttype = METADATA_TYPE_MAP.at(type);
         _dataset->add_meta_scalar(name, ptr, ttype);
-    }
-    catch (Exception& e) {
-        // exception is already prepared for caller
-        throw;
-    }
-    catch (std::exception& e) {
-        // should never happen
-        throw SRInternalException(e.what());
-    }
-    catch (...) {
-        // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "while executing add_meta_scalar.");
-    }
+    });
 }
 
 void PyDataset::add_meta_string(const std::string& name, const std::string& data)
 {
-    try {
+    MAKE_DATASET_API({
         _dataset->add_meta_string(name, data);
-    }
-    catch (Exception& e) {
-        // exception is already prepared for caller
-        throw;
-    }
-    catch (std::exception& e) {
-        // should never happen
-        throw SRInternalException(e.what());
-    }
-    catch (...) {
-        // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "while executing add_meta_string.");
-    }
+    });
 }
 
 py::array PyDataset::get_meta_scalars(const std::string& name)
 {
-    SRMetaDataType type = SRMetadataTypeInvalid;
-    size_t length = 0;
-    void *ptr = NULL;
-    try {
-        _dataset->get_meta_scalars(name, ptr, length, type);
-    }
-    catch (Exception& e) {
-        // exception is already prepared for caller
-        throw;
-    }
-    catch (std::exception& e) {
-        // should never happen
-        throw SRInternalException(e.what());
-    }
-    catch (...) {
-        // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "while executing get_meta_scalars.");
-    }
+    return MAKE_DATASET_API({
+        SRMetaDataType type = SRMetadataTypeInvalid;
+        size_t length = 0;
+        void *ptr = NULL;
 
-    // detect data type
-    switch (type) {
-        case SRMetadataTypeDouble: {
-            double* data = reinterpret_cast<double*>(ptr);
-            return py::array(length, data, py::none());
+        _dataset->get_meta_scalars(name, ptr, length, type);
+
+        // detect data type
+        switch (type) {
+            case SRMetadataTypeDouble: {
+                double* data = reinterpret_cast<double*>(ptr);
+                return py::array(length, data, py::none());
+            }
+            case SRMetadataTypeFloat: {
+                float* data = reinterpret_cast<float*>(ptr);
+                return py::array(length, data, py::none());
+            }
+            case SRMetadataTypeInt32: {
+                int32_t* data = reinterpret_cast<int32_t*>(ptr);
+                return py::array(length, data, py::none());
+            }
+            case SRMetadataTypeInt64: {
+                int64_t* data = reinterpret_cast<int64_t*>(ptr);
+                return py::array(length, data, py::none());
+            }
+            case SRMetadataTypeUint32: {
+                uint32_t* data = reinterpret_cast<uint32_t*>(ptr);
+                return py::array(length, data, py::none());
+            }
+            case SRMetadataTypeUint64: {
+                uint64_t* data = reinterpret_cast<uint64_t*>(ptr);
+                return py::array(length, data, py::none());
+            }
+            case SRMetadataTypeString: {
+                throw SRRuntimeException("MetaData is of type string. "\
+                                         "Use get_meta_strings method.");
+            }
+            default :
+                throw SRRuntimeException("Could not infer type in "\
+                                         "PyDataSet::get_meta_scalars().");
         }
-        case SRMetadataTypeFloat: {
-            float* data = reinterpret_cast<float*>(ptr);
-            return py::array(length, data, py::none());
-        }
-        case SRMetadataTypeInt32: {
-            int32_t* data = reinterpret_cast<int32_t*>(ptr);
-            return py::array(length, data, py::none());
-        }
-        case SRMetadataTypeInt64: {
-            int64_t* data = reinterpret_cast<int64_t*>(ptr);
-            return py::array(length, data, py::none());
-        }
-        case SRMetadataTypeUint32: {
-            uint32_t* data = reinterpret_cast<uint32_t*>(ptr);
-            return py::array(length, data, py::none());
-        }
-        case SRMetadataTypeUint64: {
-            uint64_t* data = reinterpret_cast<uint64_t*>(ptr);
-            return py::array(length, data, py::none());
-        }
-        case SRMetadataTypeString: {
-            throw SRRuntimeException("MetaData is of type string. "\
-                                     "Use get_meta_strings method.");
-        }
-        default :
-            throw SRRuntimeException("Could not infer type");
-    }
+    });
 }
 
 std::string PyDataset::get_name()
 {
-    try {
+    return MAKE_DATASET_API({
         return _dataset->get_name();
-    }
-    catch (Exception& e) {
-        // exception is already prepared for caller
-        throw;
-    }
-    catch (std::exception& e) {
-        // should never happen
-        throw SRInternalException(e.what());
-    }
-    catch (...) {
-        // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "while executing get_name.");
-    }
+    });
 }
 
 py::list PyDataset::get_meta_strings(const std::string& name)
 {
-    try {
+    return MAKE_DATASET_API({
         // We return a copy
         return py::cast(_dataset->get_meta_strings(name));
-    }
-    catch (Exception& e) {
-        // exception is already prepared for caller
-        throw;
-    }
-    catch (std::exception& e) {
-        // should never happen
-        throw SRInternalException(e.what());
-    }
-    catch (...) {
-        // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "while executing get_meta_strings.");
-    }
+    });
 }
 
 // Retrieve the names of all tensors in the DataSet
 py::list PyDataset::get_tensor_names()
 {
-    try {
+    return MAKE_DATASET_API({
         // We return a copy
         return py::cast(_dataset->get_tensor_names());
-    }
-    catch (Exception& e) {
-        // exception is already prepared for caller
-        throw;
-    }
-    catch (std::exception& e) {
-        // should never happen
-        throw SRInternalException(e.what());
-    }
-    catch (...) {
-        // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "while executing get_tensor_names.");
-    }
+    });
 }
 
 // Retrieve the data type of a Tensor in the DataSet
 std::string PyDataset::get_tensor_type(const std::string& name)
 {
-    try {
+    return MAKE_DATASET_API({
         // get the type
         SRTensorType ttype = _dataset->get_tensor_type(name);
         switch (ttype) {
@@ -369,47 +288,31 @@ std::string PyDataset::get_tensor_type(const std::string& name)
                 throw SRRuntimeException("Unrecognized type in "\
                                          "PyDataSet::get_tensor_type().");
         }
-    }
-    catch (Exception& e) {
-        // exception is already prepared for caller
-        throw;
-    }
-    catch (std::exception& e) {
-        // should never happen
-        throw SRInternalException(e.what());
-    }
-    catch (...) {
-        // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "while executing get_tensor_type.");
-    }}
+    });
+}
+
+// Retrieve the dimensions of a Tensor in the DataSet
+py::list PyDataset::get_tensor_dims(const std::string& name)
+{
+    return MAKE_DATASET_API({
+        // We return a copy
+        return py::cast(_dataset->get_tensor_dims(name));
+    });
+}
 
 // Retrieve the names of all metadata fields in the DataSet
 py::list PyDataset::get_metadata_field_names()
 {
-    try {
+    return MAKE_DATASET_API({
         // We return a copy
         return py::cast(_dataset->get_metadata_field_names());
-    }
-    catch (Exception& e) {
-        // exception is already prepared for caller
-        throw;
-    }
-    catch (std::exception& e) {
-        // should never happen
-        throw SRInternalException(e.what());
-    }
-    catch (...) {
-        // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "while executing get_metadata_field_names.");
-    }
+    });
 }
 
 // Retrieve the data type of a metadata field in the DataSet
 std::string PyDataset::get_metadata_field_type(const std::string& name)
 {
-    try {
+    return MAKE_DATASET_API({
         // get the type
         auto mdtype = _dataset->get_metadata_field_type(name);
         for (auto it = METADATA_TYPE_MAP.begin();
@@ -419,21 +322,15 @@ std::string PyDataset::get_metadata_field_type(const std::string& name)
         }
         throw SRRuntimeException("Unrecognized type in "\
                                  "PyDataSet::get_metadata_field_type().");
-    }
-    catch (Exception& e) {
-        // exception is already prepared for caller
-        throw;
-    }
-    catch (std::exception& e) {
-        // should never happen
-        throw SRInternalException(e.what());
-    }
-    catch (...) {
-        // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "while executing get_metadata_field_type.");
-    }
+    });
+}
+
+// Create a string representation of the DataSet
+std::string PyDataset::to_string()
+{
+    return MAKE_DATASET_API({
+        return _dataset->to_string();
+    });
 }
 
 // EOF
-
