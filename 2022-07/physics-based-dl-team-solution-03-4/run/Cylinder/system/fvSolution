@@ -35,5 +35,14 @@ potentialFlow
     nNonOrthogonalCorrectors 3;
 }
 
+AI
+{
+    // Uncomment when parameterizing
+    // via the dictionary.
+    maxIterations 5000;
+    hiddenLayers (30 30 30 30 30);
+    optimizerStep 1e-04;
+}
+
 
 // ************************************************************************* //

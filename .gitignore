@@ -4,6 +4,8 @@ __pycache__
 .vscode
 dynamicCode
 linux64GccDPInt32Opt
+.editorconfig
+libtorch*
 
 # Compiled Object files
 *.slo
@@ -34,3 +36,7 @@ linux64GccDPInt32Opt
 *.exe
 *.out
 *.app
+
+# Data
+*.csv
+log.*
