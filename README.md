@@ -27,7 +27,9 @@ Since we aim to provide all participants with close support during the hackathon
 
 ## Projects for the next hackathon
 
-- Building scalable Computational Fluid Dynamics + Machine Learning Workflows using [OpenFOAM](https://www.openfoam.com/) and [SmartSim](https://github.com/CrayLabs/SmartSim) 
+- Building scalable Computational Fluid Dynamics + Machine Learning Workflows using [OpenFOAM](https://www.openfoam.com/) and [SmartSim](https://github.com/CrayLabs/SmartSim)
+
+- Integrating Physics-Informed Machine Learning Models into OpenFOAM.
 
 - Streaming [Singular Value Decomposition](https://www.youtube.com/watch?v=gXbThCXjZFM&list=PLMrJAkhIeNNSVjnsviglFoY2nXildDCcv) and [Dynamic Mode Decomposition](https://www.youtube.com/watch?v=sQvrK8AGCAo&pp=ygUoc3RldmUgYnJ1bnRvbiBkeW5hbWljIG1vZGUgZGVjb21wb3NpdGlvbg%3D%3D) for Computational Fluid Dynamics using [OpenFOAM](https://www.openfoam.com/) and [SmartSim](https://github.com/CrayLabs/SmartSim)
 
