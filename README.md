@@ -17,9 +17,7 @@ The workshop is **fully virtual**. There is no geographical restriction for part
 
 ## Next hackathon
 
-- **Nov 08-10, 2023**
-
-A detailed schedule will be provided at the beginning of the hackathon. Note that you should reserve **three full days** for the hackathon.
+A detailed schedule will be provided. Note that you should reserve **three full days** for the hackathon.
 
 ## How can I participate?
 
