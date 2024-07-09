@@ -30,8 +30,8 @@ import numpy as np
 from smartredis import Client, Dataset
 
 
-def test_put_get_dataset(mock_data, use_cluster, context):
-    """test sending and recieving a dataset with 2D tensors
+def test_put_get_dataset(mock_data, context):
+    """test sending and receiving a dataset with 2D tensors
     of every datatype
     """
 
@@ -43,7 +43,7 @@ def test_put_get_dataset(mock_data, use_cluster, context):
         key = f"tensor_{str(index)}"
         dataset.add_tensor(key, tensor)
 
-    client = Client(None, use_cluster, logger_name=context)
+    client = Client(None, logger_name=context)
 
     assert not client.dataset_exists(
         "nonexistent-dataset"
@@ -64,7 +64,7 @@ def test_put_get_dataset(mock_data, use_cluster, context):
         )
 
 
-def test_augment_dataset(mock_data, use_cluster, context):
+def test_augment_dataset(mock_data, context):
     """Test sending, receiving, altering, and sending
     a Dataset.
     """
@@ -75,7 +75,7 @@ def test_augment_dataset(mock_data, use_cluster, context):
     dataset_name = "augment-dataset"
 
     # Initialize a client
-    client = Client(None, use_cluster, logger_name=context)
+    client = Client(None, logger_name=context)
 
     # Create a dataset to put into the database
     dataset = Dataset(dataset_name)

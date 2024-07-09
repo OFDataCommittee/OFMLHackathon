@@ -181,7 +181,8 @@ class MetaData
         *   \param name The name of the string field to retrieve
         *   \returns A vector of the strings in the field
         */
-        std::vector<std::string> get_string_values(const std::string& name);
+        std::vector<std::string> get_string_values(
+            const std::string& name) const;
 
         /*!
         *   \brief  Get metadata string field using a c-style
@@ -214,7 +215,7 @@ class MetaData
         *   \returns Boolean indicating if the DataSet has
         *            the field.
         */
-        bool has_field(const std::string& field_name);
+        bool has_field(const std::string& field_name) const;
 
         /*!
         *   \brief This function clears all entries in a
@@ -238,14 +239,15 @@ class MetaData
         *   \param name The name of the field to check
         *   \throw KeyException if the name is not present
         */
-        SRMetaDataType get_field_type(const std::string& name);
+        SRMetaDataType get_field_type(const std::string& name) const;
 
         /*!
         *   \brief Retrieve a vector of metadata field names
         *   \param skip_internal Omit internal items (such as .tensor_names)
         *                        from the results
         */
-        std::vector<std::string> get_field_names(bool skip_internal = false);
+        std::vector<std::string> get_field_names(
+            bool skip_internal = false) const;
 
         /*!
         *   \brief  Get metadata field names using a c-style

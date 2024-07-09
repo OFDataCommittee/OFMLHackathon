@@ -38,7 +38,7 @@ void put_get_1D_array(
         SRTensorType type,
         std::string key_suffix="")
 {
-  SmartRedis::Client client(use_cluster(), "client_test_put_get_1D");
+  SmartRedis::Client client("client_test_put_get_1D");
 
   //Allocate and fill arrays
   T_send* array = (T_send*)malloc(dims[0]*sizeof(T_send));

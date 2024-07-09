@@ -1,0 +1,17 @@
+EXE_INC = -std=c++2a \
+    -Wno-old-style-cast \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(SMARTREDIS_INCLUDE) \
+    -I$(FOAM_FOAMUT)/smartSimFunctionObject/lnInclude \
+    -I$(FOAM_USER_LIBBIN)/catch2/include \
+    -I$(LIB_SRC)/Pstream/lnInclude
+    
+EXE_LIBS = \
+    -lfiniteVolume \
+    -lmeshTools \
+    -L$(FOAM_USER_LIBBIN) -L$(FOAM_LIBBIN)/$(FOAM_MPI) \
+    -L$(FOAM_USER_LIBBIN)/catch2/lib -l:libCatch2.a \
+    -lPstream \
+    -L$(SMARTREDIS_LIB) -lhiredis -lredis++ \
+    -lsmartredis -lsmartSimFunctionObject

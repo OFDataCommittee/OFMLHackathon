@@ -8,7 +8,7 @@ Quick instructions
 
 To run the tests, assuming that all requirements have been installed
 1. Activate your environment with SmartSim and SmartRedis installed
-2. Modify `SMARTREDIS_TEST_CLUSTER` (`True` or `False` and 
+2. Modify `SR_DB_TYPE` (`Clustered` or `Standalone`) and
    `SMARTREDIS_TEST_DEVICE` (`gpu` or `cpu`) as necessary in
    `setup_test_env.sh`.
 3. `source setup_test_env.sh`
