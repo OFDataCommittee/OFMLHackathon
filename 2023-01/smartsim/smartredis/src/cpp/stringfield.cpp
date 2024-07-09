@@ -66,7 +66,7 @@ void StringField::append(const std::string& value)
 }
 
 // Retrieve the number of values in the field
-size_t StringField::size()
+size_t StringField::size() const
 {
     return _vals.size();
 }

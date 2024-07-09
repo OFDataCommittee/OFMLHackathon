@@ -13,6 +13,7 @@
    installation
    testing
    runtime
+   advanced_topics
 
 .. toctree::
    :maxdepth: 2

@@ -24,35 +24,79 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-project(CClientExamples)
-
+# Project definition for the SmartRedis-Examples-Serial-C project
 cmake_minimum_required(VERSION 3.13)
+project(SmartRedis-Examples-Serial-C)
 
-set(CMAKE_BUILD_TYPE RELEASE)
+# Enable language support for the examples
+enable_language(C)
+enable_language(CXX)
+
+# Configure the build
 set(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../..")
+include(smartredis_defs)
 
-find_library(SR_LIB smartredis PATHS ../../../install/lib
-             NO_DEFAULT_PATH REQUIRED)
+# Assume by default that users should link against the
+# install directory in this repository
+if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
+  set(SMARTREDIS_INSTALL_PATH "../../../install/")
+endif()
 
+# Locate dependencies
+add_library(smartredis-main ${SMARTREDIS_LINK_MODE} IMPORTED)
+find_library(SR_LIB ${SMARTREDIS_LIB}
+    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
+    REQUIRED
+    ${SMARTREDIS_LINK_MODE}
+)
+set_target_properties(smartredis-main PROPERTIES
+    IMPORTED_LOCATION ${SR_LIB}
+)
+
+# Select libraries for build
+if (STATIC_BUILD)
+	# Mark that SmartRedis requires the C++ linker
+    set_target_properties(smartredis-main PROPERTIES
+        IMPORTED_LOCATION ${SR_LIB}
+		IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+	)
+
+    # Static builds have an extra dependency on the Pthreads library
+    find_package(Threads REQUIRED)
+    set(SMARTREDIS_LIBRARIES
+        smartredis-main
+        Threads::Threads
+    )
+else()
+    # Shared builds only need the SmartRedis library
+    set(SMARTREDIS_LIBRARIES
+        smartredis-main
+    )
+endif()
+
+# Define include directories for header files
 include_directories(SYSTEM
     /usr/local/include
-    ../../../install/include
+    ${SMARTREDIS_INSTALL_PATH}/include
 )
 
-add_executable(example_put_unpack_1D
-	example_put_unpack_1D.c
+# Define all the examples to be built
+list(APPEND EXECUTABLES
+    example_put_unpack_1D
+    example_put_get_3D
 )
 
-target_link_libraries(example_put_unpack_1D
-	${SR_LIB}
-)
-
-add_executable(example_put_get_3D
-        example_put_get_3D.c
-)
-
-target_link_libraries(example_put_get_3D
-        ${SR_LIB}
-)
-
+# Build the examples
+foreach(EXECUTABLE ${EXECUTABLES})
+    add_executable(${EXECUTABLE}_c_serial
+        ${EXECUTABLE}.c
+    )
+    set_target_properties(${EXECUTABLE}_c_serial PROPERTIES
+        OUTPUT_NAME ${EXECUTABLE}
+    )
+    target_link_libraries(${EXECUTABLE}_c_serial
+        ${SMARTREDIS_LIBRARIES}
+    )
+endforeach()

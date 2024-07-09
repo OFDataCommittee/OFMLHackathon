@@ -58,7 +58,7 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
             size_t tensor_size = dims.at(0) * dims.at(1) * dims.at(2);
             std::vector<double> tensor(tensor_size, 0);
             for (size_t i=0; i<tensor_size; i++)
-                tensor[i] = 2.0*rand()/RAND_MAX - 1.0;
+                tensor[i] = 2.0*rand()/(double)RAND_MAX - 1.0;
             void* data = tensor.data();
             tp.add_tensor(name, data, dims,
                           tensor_type,
@@ -160,7 +160,7 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
             size_t tensor_size = dims.at(0) * dims.at(1) * dims.at(2);
             std::vector<double> tensor(tensor_size, 0);
             for (size_t i=0; i<tensor_size; i++)
-                tensor[i] = 2.0*rand()/RAND_MAX - 1.0;
+                tensor[i] = 2.0*rand()/(double)RAND_MAX - 1.0;
             void* data = tensor.data();
 
             THEN("A runtime error is thrown")
@@ -182,7 +182,7 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
             size_t tensor_size = dims.at(0) * dims.at(1) * dims.at(2);
             std::vector<double> tensor(tensor_size, 0);
             for (size_t i=0; i<tensor_size; i++)
-                tensor[i] = 2.0*rand()/RAND_MAX - 1.0;
+                tensor[i] = 2.0*rand()/(double)RAND_MAX - 1.0;
             void* data = tensor.data();
 
             THEN("A runtime error is thrown")
@@ -202,7 +202,7 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
             std::vector<size_t> dims = {};
             std::vector<double> tensor(5, 0);
             for (size_t i=0; i<5; i++)
-                tensor[i] = 2.0*rand()/RAND_MAX - 1.0;
+                tensor[i] = 2.0*rand()/(double)RAND_MAX - 1.0;
             void* data = tensor.data();
 
             THEN("A runtime error is thrown")
@@ -223,7 +223,7 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
             std::vector<size_t> dims = {1, 0, 3};
             std::vector<double> tensor(5, 0);
             for (size_t i=0; i<5; i++)
-                tensor[i] = 2.0*rand()/RAND_MAX - 1.0;
+                tensor[i] = 2.0*rand()/(double)RAND_MAX - 1.0;
             void* data = tensor.data();
 
             THEN("A runtime error is thrown")

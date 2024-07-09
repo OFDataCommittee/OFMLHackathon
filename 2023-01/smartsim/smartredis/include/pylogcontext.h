@@ -76,7 +76,7 @@ class PyLogContext : public PySRObject
         *          SmartRedis::LogContext object
         *   \returns LogContext pointer within PyLogContext
         */
-        LogContext* get();
+        LogContext* get() { return _logcontext; }
 
     private:
 
