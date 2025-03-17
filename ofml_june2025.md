@@ -5,9 +5,9 @@
     <p><a href="https://www.dresden.de/de/tourismus/sehen/sehenswuerdigkeiten/top-ten.php">picture: ddpix.de (DML-BY)</a></p>
 </div>
 
-## TLTR
+## Overview
 
-The OpenFOAM [Data-driven modelling SIG](https://wiki.openfoam.com/Data_Driven_Modelling_Special_Interest_Group) organizes the first in-person OpenFOAM-ML hackathon! The hackathon is scheduled for **June 16-18, 2025**, at TU Dresden's [Institute of Fluid Mechanics](https://tu-dresden.de/ing/maschinenwesen/ism/psm/die-professur) (Dresden, Germany). The number of participants is limited to 15 ([apply here](#application)). The participation fee is **EUR 250**.
+The OpenFOAM [Data-driven modelling SIG](https://wiki.openfoam.com/Data_Driven_Modelling_Special_Interest_Group) organizes the first in-person OpenFOAM-ML hackathon! The hackathon is scheduled for **June 16-18, 2025**, at TU Dresden's [Institute of Fluid Mechanics](https://tu-dresden.de/ing/maschinenwesen/ism/psm/die-professur) (Dresden, Germany). The number of participants is limited to 15 ([apply here](#application) before **April 30, 2025**). The participation fee is **EUR 250**.
 
 ## Schedule
 
@@ -63,12 +63,12 @@ Since the event is in-person, all times are in CEST.
         </tr>
         <tr>
             <td>evening (optional)</td>
-            <td style="text-align: center;" colspan="3">joint dinner</td>
+            <td style="text-align: center;" colspan="3">joint dinner (self-paid)</td>
         </tr>
     </tbody>
 </table>
 
-The hackathon's core idea is that people with different backgrounds, e.g., from fluid dynamics, numerics, mathematics, or machine machine learning, put their heads together to rapidly build prototypes of OpenFOAM-ML workflows. Each participant brings his/her **own challenge project** to work on. These ideas will be presented and discussed in the **project introduction** session. Thereafter, participants with similar or overlapping interests team up, and we start coding for the next two days. On the final day, the teams put together a small presentation to **document and share the progress**. The basis for the **presentation and feedback** session can be Jupyter notebooks, code snippets, diagrams, or whatever participants worked out during the hacking sessions (no fancy slides needed).
+The hackathon's core idea is that people with different backgrounds, e.g., from fluid dynamics, numerics, mathematics, or machine learning, put their heads together to rapidly build prototypes of OpenFOAM-ML workflows. Each participant brings his/her **own challenge project** to work on. These ideas will be presented and discussed in the **project introduction** session. Thereafter, participants with similar or overlapping interests team up, and we start coding for the next two days. On the final day, the teams put together a small presentation to **document and share the progress**. The basis for the **presentation and feedback** session can be Jupyter notebooks, code snippets, diagrams, or whatever participants worked out during the hacking sessions (no fancy slides needed).
 
 ## Application
 
@@ -76,13 +76,14 @@ Before applying, please note the following:
 
 - since the event is in-person, the number of participants is limited to **15**
 - the participation fee is **EUR 250** and includes lunch and coffee breaks
-- the project idea must be publishable as open-source, it should not require access to proprietary data or information, to ensure that knowledge can be shared among participants and the OpenFOAM/ML community
+- this event is organized by the community for the community; anyone can apply (students, PhD students, postdocs, industry professionals); the only requirement is being enthusiastic about OpenFOAM and ML
+- the project idea must be publishable as open-source; it should not require access to proprietary data or information, to ensure that knowledge can be shared among participants and the OpenFOAM/ML community
 - we build minimal working prototypes, so you only need a laptop; no access to HPC resources is provided or needed
 - we encourage participants to prepare easy parts of their ideas before the event (simplified simulation setups, e.g., without proprietary geometries, low computational cost), such that we can tackle the tricky bits during the event
 
-If you would like to apply, please tell us a few sentences about your idea.
+If you would like to apply, please tell us a few sentences about your idea and yourself **before April 30, 2025**.
 
-[application form](https://forms.gle/6RDt6VkK8WpLSZ429)
+[apply here](https://forms.gle/6RDt6VkK8WpLSZ429)
 
 ## Accommodation
 
@@ -92,4 +93,9 @@ The institute of fluid mechanics is located on TU Dresden's main campus at about
 - [Premier Inn Dresden City](https://www.premierinn.com/de/de/hotels/deutschland/sachsen/dresden/dresden-city-zentrum.html)
 - [Intercity Hotel Dresden](https://hrewards.com/de/intercityhotel-dresden)
 
-Regardless of where you stay, the university is very well connected and can be reached easily by public transport in 5-10 min.
+Regardless of where you stay, the university is very well connected and can be reached easily by public transport.
+
+## Contact
+
+Questions? <a href="mailto:andre.weiner@tu-dresden.de,maric@mma.tu-darmstadt.de">Reach out to us!</a>
+
