@@ -7,7 +7,7 @@
 
 ## Overview
 
-The OpenFOAM [Data-driven modelling SIG](https://wiki.openfoam.com/Data_Driven_Modelling_Special_Interest_Group) organizes the first in-person OpenFOAM-ML hackathon! The hackathon is scheduled for **June 16-18, 2025**, at TU Dresden's [Institute of Fluid Mechanics](https://tu-dresden.de/ing/maschinenwesen/ism/psm/die-professur) (Dresden, Germany). The number of participants is limited to 15 ([apply here](#application) before **April 30, 2025**). The participation fee is **EUR 250**.
+The OpenFOAM [Data-driven modelling SIG](https://wiki.openfoam.com/Data_Driven_Modelling_Special_Interest_Group) organizes the first in-person OpenFOAM-ML hackathon! The hackathon is scheduled for **June 16-18, 2025**, at TU Dresden's [Institute of Fluid Mechanics](https://tu-dresden.de/ing/maschinenwesen/ism/psm/die-professur) (Dresden, Germany). The number of participants is limited to 15 ([apply here](#application) before ~~**April 30, 2025**~~ **May 14, 2025**). The participation fee is **EUR 250**.
 
 ## Schedule
 
@@ -81,7 +81,7 @@ Before applying, please note the following:
 - we build minimal working prototypes, so you only need a laptop; no access to HPC resources is provided or needed
 - we encourage participants to prepare easy parts of their ideas before the event (simplified simulation setups, e.g., without proprietary geometries, low computational cost), such that we can tackle the tricky bits during the event
 
-If you would like to apply, please tell us a few sentences about your idea and yourself **before April 30, 2025**.
+If you would like to apply, please tell us a few sentences about your idea and yourself ~~**before April 30, 2025**~~ **before May 14, 2025**.
 
 [apply here](https://forms.gle/6RDt6VkK8WpLSZ429)
 
