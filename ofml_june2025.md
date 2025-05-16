@@ -83,7 +83,7 @@ Before applying, please note the following:
 
 If you would like to apply, please tell us a few sentences about your idea and yourself ~~**before April 30, 2025**~~ **before May 14, 2025**.
 
-[apply here](https://forms.gle/6RDt6VkK8WpLSZ429)
+*registration closed*
 
 ## Accommodation
 
