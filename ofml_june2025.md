@@ -99,3 +99,10 @@ Regardless of where you stay, the university is very well connected and can be r
 
 Questions? <a href="mailto:andre.weiner@tu-dresden.de,maric@mma.tu-darmstadt.de">Reach out to us!</a>
 
+## Acknowledgement
+
+```
+OPENFOAM®  is a registered trade mark of OpenCFD Limited, producer and distributor of the OpenFOAM software via www.openfoam.com.
+
+This offering is not approved or endorsed by OpenCFD Limited, producer and distributor of the OpenFOAM software via www.openfoam.com, and owner of the OPENFOAM®  and OpenCFD®  trade marks.
+```
