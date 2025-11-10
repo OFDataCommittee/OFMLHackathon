@@ -34,7 +34,7 @@
 void put_dataset_no_tensors(std::string dataset_name)
 {
     //Create Client and DataSet
-    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster(), "client_test_dataset_no_tensors");
+    DATASET_TEST_UTILS::DatasetTestClient client("client_test_dataset_no_tensors");
     SmartRedis::DataSet sent_dataset(dataset_name);
 
     //Add metadata to the DataSet

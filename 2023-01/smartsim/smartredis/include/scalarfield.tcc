@@ -75,7 +75,7 @@ void ScalarField<T>::append(const void* value)
 
 // Retrieve the number of values in a scalar
 template <class T>
-size_t ScalarField<T>::size()
+size_t ScalarField<T>::size() const
 {
     return _vals.size();
 }

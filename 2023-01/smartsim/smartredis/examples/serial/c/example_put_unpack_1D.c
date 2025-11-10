@@ -44,11 +44,10 @@ int main(int argc, char* argv[]) {
   float* tensor = (float*)malloc(dims[0]*sizeof(float));
 
   for(size_t i=0; i<dims[0]; i++)
-    tensor[i] = ((float)rand())/RAND_MAX;
+    tensor[i] = ((float)rand())/(float)RAND_MAX;
 
   void* client = NULL;
-  bool cluster_mode = true; // Set to false if not using a clustered database
-  if (SRNoError != SmartRedisCClient(cluster_mode, logger_name, cid_len, &client)) {
+  if (SRNoError != SimpleCreateClient(logger_name, cid_len, &client)) {
     printf("Client initialization failed!\n");
     exit(-1);
   }

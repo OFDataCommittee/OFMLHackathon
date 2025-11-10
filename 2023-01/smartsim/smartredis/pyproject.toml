@@ -6,7 +6,8 @@ requires = ["setuptools>=42",
 build-backend = "setuptools.build_meta"
 
 [tool.black]
-target-version = ['py37', 'py38']
+line-length = 88
+target-version = ['py37', 'py38', 'py39', 'py310']
 exclude = '''
 (
   | \.egg
@@ -26,3 +27,29 @@ exclude = '''
 [tool.pytest.ini_options]
 log_cli = true
 log_cli_level = "debug"
+
+[tool.mypy]
+namespace_packages = true
+files = [
+  "src/python/module/smartredis/"
+]
+plugins = []
+ignore_errors=false
+
+# Strict fn defs
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+
+# Safety/Upgrading Mypy
+warn_unused_ignores = true
+# warn_redundant_casts = true # not a per-module setting?
+
+[[tool.mypy.overrides]]
+# Ignore packages that are not used or not typed
+module = [
+  "smartredis.smartredisPy",
+]
+ignore_missing_imports = true
+ignore_errors = true

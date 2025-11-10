@@ -56,6 +56,9 @@
 
 namespace SmartRedis {
 
+// class declarations
+class ConfigOptions;
+
 /*!
 *  \brief The database response to a command
 */
@@ -72,7 +75,35 @@ class Client : public SRObject
     public:
 
         /*!
+        *   \brief Simple Client constructor with default configuration:
+        *          environment variables, no suffix
+        *   \param logger_name Name to use for this client when logging
+        *   \throw SmartRedis::Exception if client connection or
+        *          object initialization fails
+        */
+        Client(const char* logger_name);
+
+        /*!
+        *   \brief Simple Client constructor with default configuration:
+        *          environment variables, no suffix
+        *   \param logger_name Name to use for this client when logging
+        *   \throw SmartRedis::Exception if client connection or
+        *          object initialization fails
+        */
+        Client(const std::string& logger_name = "default")
+            : Client(logger_name.c_str()) {}
+
+        /*!
         *   \brief Client constructor
+        *   \param cfgopts source from which to access runtime settings
+        *   \param logger_name Name to use for this client when logging
+        *   \throw SmartRedis::Exception if client connection or
+        *          object initialization fails
+        */
+        Client(ConfigOptions* cfgopts, const std::string& logger_name = "default");
+
+        /*!
+        *   \brief Client constructor (deprecated)
         *   \param cluster Flag for if a database cluster is being used
         *   \param logger_name Name to use for this client when logging
         *   \throw SmartRedis::Exception if client connection or
@@ -111,7 +142,7 @@ class Client : public SRObject
         *   \details The final dataset key under which the dataset is stored
         *            is generated from the name that was supplied when the
         *            dataset was created and may be prefixed. See
-        *            use_tensor_ensemble_prefix() for more details.
+        *            use_dataset_ensemble_prefix() for more details.
         *   \param dataset The DataSet object to send to the database
         *   \throw SmartRedis::Exception if put dataset command fails
         */
@@ -122,7 +153,7 @@ class Client : public SRObject
         *   \details The dataset key used to locate the dataset
         *            may be formed by applying a prefix to the supplied
         *            name. See set_data_source()
-        *            and use_tensor_ensemble_prefix() for more details.
+        *            and use_dataset_ensemble_prefix() for more details.
         *   \param name The name of the dataset to retrieve
         *   \returns DataSet object retrieved from the database
         *   \throw SmartRedis::Exception if get dataset command fails
@@ -135,7 +166,7 @@ class Client : public SRObject
         *   \details The old and new dataset keys used to find and relocate
         *            the dataset may be formed by applying prefixes to the
         *            supplied old_name and new_name. See set_data_source()
-        *            and use_tensor_ensemble_prefix() for more details.
+        *            and use_dataset_ensemble_prefix() for more details.
         *   \param old_name The original dataset key for the dataset
         *   \param new_name The new dataset key for the dataset
         *   \throw SmartRedis::Exception if dataset rename command fails
@@ -149,7 +180,7 @@ class Client : public SRObject
         *   \details The source and destination dataset keys used to
         *            locate and store the dataset may be formed by
         *            applying prefix to the supplied src_name and dest_name.
-        *            See set_data_source() and use_tensor_ensemble_prefix()
+        *            See set_data_source() and use_dataset_ensemble_prefix()
         *            for more details.
         *   \param src_name The source dataset key
         *   \param dest_name The destination dataset key
@@ -166,7 +197,7 @@ class Client : public SRObject
         *   \details The dataset key used to locate the dataset to be
         *            deleted may be formed by applying a prefix to the
         *            supplied name. See set_data_source()
-        *            and use_tensor_ensemble_prefix() for more details.
+        *            and use_dataset_ensemble_prefix() for more details.
         *   \param name The dataset key for the dataset to be deleted.
         *   \throw SmartRedis::Exception if delete dataset command fails
         */
@@ -344,6 +375,7 @@ class Client : public SRObject
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for information purposes
         *   \param inputs One or more names of model input nodes
         *                 (TF models only). For other models, provide an
@@ -359,6 +391,7 @@ class Client : public SRObject
                                  const std::string& device,
                                  int batch_size = 0,
                                  int min_batch_size = 0,
+                                 int min_batch_timeout = 0,
                                  const std::string& tag = "",
                                  const std::vector<std::string>& inputs
                                      = std::vector<std::string>(),
@@ -383,6 +416,7 @@ class Client : public SRObject
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -398,6 +432,7 @@ class Client : public SRObject
                                 int num_gpus,
                                 int batch_size = 0,
                                 int min_batch_size = 0,
+                                int min_batch_timeout = 0,
                                 const std::string& tag = "",
                                 const std::vector<std::string>& inputs
                                     = std::vector<std::string>(),
@@ -423,6 +458,7 @@ class Client : public SRObject
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for information purposes
         *   \param inputs One or more names of model input nodes
         *                 (TF models only). For other models, provide an
@@ -438,6 +474,7 @@ class Client : public SRObject
                        const std::string& device,
                        int batch_size = 0,
                        int min_batch_size = 0,
+                       int min_batch_timeout = 0,
                        const std::string& tag = "",
                        const std::vector<std::string>& inputs
                            = std::vector<std::string>(),
@@ -462,6 +499,7 @@ class Client : public SRObject
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -477,6 +515,7 @@ class Client : public SRObject
                                 int num_gpus,
                                 int batch_size = 0,
                                 int min_batch_size = 0,
+                                int min_batch_timeout = 0,
                                 const std::string& tag = "",
                                 const std::vector<std::string>& inputs
                                     = std::vector<std::string>(),
@@ -712,7 +751,7 @@ class Client : public SRObject
         *            The first_gpu and num_gpus parameters must match those used
         *            when the model was stored.
         *   \param name The name associated with the model
-        *   \param first_cpu the first GPU (zero-based) to use with the model
+        *   \param first_gpu the first GPU (zero-based) to use with the model
         *   \param num_gpus the number of gpus for which the model was stored
         *   \throw SmartRedis::Exception if model deletion fails
         */
@@ -739,7 +778,7 @@ class Client : public SRObject
         *            The first_gpu and num_gpus parameters must match those used
         *            when the script was stored.
         *   \param name The name associated with the script
-        *   \param first_cpu the first GPU (zero-based) to use with the script
+        *   \param first_gpu the first GPU (zero-based) to use with the script
         *   \param num_gpus the number of gpus for which the script was stored
         *   \throw SmartRedis::Exception if script deletion fails
         */
@@ -783,7 +822,7 @@ class Client : public SRObject
         *   \details The dataset key used to check for existence
         *            may be formed by applying a prefix to the supplied
         *            name. See set_data_source()
-        *            and use_tensor_ensemble_prefix() for more details.
+        *            and use_dataset_ensemble_prefix() for more details.
         *   \param name The dataset name to be checked in the database
         *   \returns Returns true if the dataset exists in the database
         *   \throw SmartRedis::Exception if dataset exists command fails
@@ -830,7 +869,7 @@ class Client : public SRObject
         *   \details The dataset key used to check for existence
         *            may be formed by applying a prefix to the supplied
         *            name. See set_data_source()
-        *            and use_tensor_ensemble_prefix() for more details.
+        *            and use_dataset_ensemble_prefix() for more details.
         *   \param name The dataset name to be checked in the database
         *   \param poll_frequency_ms The time delay between checks,
         *                            in milliseconds
@@ -886,25 +925,44 @@ class Client : public SRObject
         void set_data_source(std::string source_id);
 
         /*!
-        *   \brief Control whether names of tensor and dataset keys are
+        *   \brief Control whether names of tensor keys are
         *          prefixed (e.g. in an ensemble) when forming database keys.
         *   \details This function can be used to avoid key collisions in an
         *            ensemble by prepending the string value from the
-        *            environment variable SSKEYIN to tensor and dataset names.
+        *            environment variable SSKEYIN to tensor names.
         *            Prefixes will only be used if they were previously set
         *            through the environment variables SSKEYOUT and SSKEYIN.
         *            Keys of entities created before this function is called
         *            will not be retroactively prefixed.
-        *            By default, the client prefixes tensor and dataset keys
+        *            By default, the client prefixes tensor keys
         *            with the first prefix specified with the SSKEYIN
         *            and SSKEYOUT environment variables.
         *
-        *  \param use_prefix If set to true, all future operations
-        *                    on tensors and datasets will use
-        *                    a prefix, if available.
+        *  \param use_prefix If set to true, all future operations on tensors
+        *                    will use a prefix, if available.
         *  \throw SmartRedis::Exception for failed activation of tensor prefixing
         */
         void use_tensor_ensemble_prefix(bool use_prefix);
+
+        /*!
+        *   \brief Control whether names of dataset keys are
+        *          prefixed (e.g. in an ensemble) when forming database keys.
+        *   \details This function can be used to avoid key collisions in an
+        *            ensemble by prepending the string value from the
+        *            environment variable SSKEYIN to dataset names.
+        *            Prefixes will only be used if they were previously set
+        *            through the environment variables SSKEYOUT and SSKEYIN.
+        *            Keys of entities created before this function is called
+        *            will not be retroactively prefixed.
+        *            By default, the client prefixes dataset keys
+        *            with the first prefix specified with the SSKEYIN
+        *            and SSKEYOUT environment variables.
+        *
+        *  \param use_prefix If set to true, all future operations on datasets
+        *                    will use a prefix, if available.
+        *  \throw SmartRedis::Exception for failed activation of dataset prefixing
+        */
+        void use_dataset_ensemble_prefix(bool use_prefix);
 
         /*!
         *   \brief Control whether model and script keys are
@@ -938,9 +996,9 @@ class Client : public SRObject
         *            prefixed. By default, the client prefixes aggregation
         *            list keys with the first prefix specified with the SSKEYIN
         *            and SSKEYOUT environment variables.  Note that
-        *            use_tensor_ensemble_prefix() controls prefixing
+        *            use_dataset_ensemble_prefix() controls prefixing
         *            for the entities in the aggregation list, and
-        *            use_tensor_ensemble_prefix() should be given the
+        *            use_dataset_ensemble_prefix() should be given the
         *            same value that was used during the initial
         *            setting of the DataSet into the database.
         *  \param use_prefix If set to true, all future operations
@@ -1131,10 +1189,10 @@ class Client : public SRObject
         *   \brief Rename an aggregation list
         *   \details The old and new aggregation list key used to find and
         *            relocate the list may be formed by applying prefixes to
-        *            the supplied old_name and new_name. See set_data_source()
+        *            the supplied src_name and dest_name. See set_data_source()
         *            and use_list_ensemble_prefix() for more details.
-        *   \param old_name The old list name
-        *   \param new_name The new list name
+        *   \param src_name The initial list name
+        *   \param dest_name The target list name
         *   \throw SmartRedis::Exception if the command fails
         */
         void rename_list(const std::string& src_name,
@@ -1250,6 +1308,27 @@ class Client : public SRObject
                                                     const int start_index,
                                                     const int end_index);
 
+        /*!
+        *   \brief Reconfigure the chunking size that Redis uses for model
+        *          serialization, replication, and the model_get command.
+        *   \details This method triggers the AI.CONFIG method in the Redis
+        *            database to change the model chunking size.
+        *
+        *            NOTE: The default size of 511MB should be fine for most
+        *            applications, so it is expected to be very rare that a
+        *            client calls this method. It is not necessary to call
+        *            this method a model to be chunked.
+        *   \param chunk_size The new chunk size in bytes
+        *   \throw SmartRedis::Exception if the command fails.
+        */
+        void set_model_chunk_size(int chunk_size);
+
+        /*!
+        *   \brief Create a string representation of the client
+        *   \returns A string containing client details
+        */
+        std::string to_string() const;
+
     protected:
 
         /*!
@@ -1279,7 +1358,7 @@ class Client : public SRObject
         */
         inline CommandReply _run(AddressAtCommand& cmd)
         {
-            return this->_redis_server->run(cmd);
+            return _redis_server->run(cmd);
         }
 
         /*!
@@ -1289,7 +1368,7 @@ class Client : public SRObject
         */
         inline CommandReply _run(AddressAnyCommand& cmd)
         {
-            return this->_redis_server->run(cmd);
+            return _redis_server->run(cmd);
         }
 
         /*!
@@ -1299,7 +1378,7 @@ class Client : public SRObject
         */
         inline CommandReply _run(SingleKeyCommand& cmd)
         {
-            return this->_redis_server->run(cmd);
+            return _redis_server->run(cmd);
         }
 
         /*!
@@ -1309,7 +1388,7 @@ class Client : public SRObject
         */
         inline CommandReply _run(MultiKeyCommand& cmd)
         {
-            return this->_redis_server->run(cmd);
+            return _redis_server->run(cmd);
         }
 
         /*!
@@ -1319,7 +1398,7 @@ class Client : public SRObject
         */
         inline CommandReply _run(CompoundCommand& cmd)
         {
-            return this->_redis_server->run(cmd);
+            return _redis_server->run(cmd);
         }
 
         /*!
@@ -1329,14 +1408,14 @@ class Client : public SRObject
         */
         inline std::vector<CommandReply> _run(CommandList& cmd_list)
         {
-            return this->_redis_server->run(cmd_list);
+            return _redis_server->run(cmd_list);
         }
 
         /*!
         *  \brief Set the prefixes that are used for set and get methods
-        *         using SSKEYIN and SSKEYOUT environment variables.
+        *         using SSKEYIN and SSKEYOUT config settings
         */
-        void _set_prefixes_from_env();
+        void _get_prefix_settings();
 
         /*!
         *  \brief Get the key prefix for placement methods
@@ -1376,7 +1455,7 @@ class Client : public SRObject
         /*!
         *  \brief Execute the command to retrieve a subset of a DataSet
         *         aggregation list
-        *   \param name The name of the dataset aggregation list
+        *   \param list_name The name of the dataset aggregation list
         *   \param start_index The starting index of the range
         *                      (inclusive, starting at zero)
         *   \param end_index The ending index of the range
@@ -1390,20 +1469,21 @@ class Client : public SRObject
                                 const int start_index,
                                 const int end_index);
 
+
+        // Add a retrieved tensor to a dataset
         /*!
-        *  \brief Retrieve a tensor and add it to the dataset object
-        *  \param dataset The dataset which will be augmented with the
-        *                 retrieved tensor
-        *  \param name The name (not key) of the tensor to retrieve and add
+        *  \brief Add a tensor retrieved via get_tensor() to a dataset
+        *  \param dataset The dataset which will receive the tensor
+        *  \param name The name by which the tensor shall be added
         *              to the dataset
-        *  \param key The key (not name) of the tensor to retrieve and add
-        *             to the dataset
-        *   \throw SmartRedis::Exception if retrieval or addition
-        *          of tensor fails
+        *   \param tensor_data get_tensor command reply containing
+        *                      tensor data
+        *   \throw SmartRedis::Exception if addition of tensor fails
         */
-        inline void _get_and_add_dataset_tensor(DataSet& dataset,
-                                                const std::string& name,
-                                                const std::string& key);
+       inline void _add_dataset_tensor(
+            DataSet& dataset,
+            const std::string& name,
+            CommandReply tensor_data);
 
         /*!
         *   \brief Retrieve the tensor from the DataSet and return
@@ -1470,6 +1550,12 @@ class Client : public SRObject
 
         /*!
         * \brief Flag determining whether prefixes should be used
+        *        for dataset keys.
+        */
+        bool _use_dataset_prefix;
+
+        /*!
+        * \brief Flag determining whether prefixes should be used
         *        for model and script keys.
         */
         bool _use_model_prefix;
@@ -1479,6 +1565,11 @@ class Client : public SRObject
         *        for model and script keys.
         */
         bool _use_list_prefix;
+
+        /*!
+        * \brief Our configuration options, used to access runtime settings
+        */
+        ConfigOptions* _cfgopts;
 
         /*!
         * \brief Build full formatted key of a tensor, based on
@@ -1651,7 +1742,27 @@ class Client : public SRObject
                                int poll_frequency_ms, int num_tries,
                                std::function<bool(int,int)> comp_func);
 
+        /*!
+        *   \brief Initialize a connection to the back-end database
+        *   \throw SmartRedis::Exception if the connection fails
+        */
+       void _establish_server_connection();
+
 };
+
+/*!
+*   \brief Serialize a client
+*   \param stream The stream onto which to serialize the client
+*   \param client The client to serialize
+*   \returns The output stream, for chaining
+*/
+inline
+std::ostream& operator<<(std::ostream& stream, const Client& client)
+{
+    stream << client.to_string();
+    return stream;
+}
+
 
 } // namespace SmartRedis
 

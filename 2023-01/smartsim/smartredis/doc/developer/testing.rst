@@ -6,15 +6,8 @@ Testing Description
 Quick instructions
 ##################
 
-To run the tests, assuming that all requirements have been installed
-1. Activate your environment with SmartSim and SmartRedis installed
-2. Modify `SMARTREDIS_TEST_CLUSTER` (`True` or `False` and 
-   `SMARTREDIS_TEST_DEVICE` (`gpu` or `cpu`) as necessary in
-   `setup_test_env.sh`.
-3. `source setup_test_env.sh`
-4. `pushd utils/create_cluster; python local_cluster.py; popd`
-5. `export SSDB="127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381"`
-5. Run the desired tests (see `make help` for more details)
+To run the tests, simply execute the following command. Omit ``SR_PYTHON=On`` or ``SR_FORTRAN=On`` if you do not wish to test those languages:
+   ``make test SR_PYTHON=On SR_FORTRAN=On``
 
 ###################
 Unit Test Framework
@@ -32,6 +25,6 @@ file exists, then it is preferred that a new file (prefixed with *test_*) is cre
 In Summary
 ===========
 
-    - New unit tests should be placed in ``tests/cpp/unit-tests/``
-    - Testing files should be prefixed with *test_*
-    - It is preferred that new unit tests are in a new ``SCENARIO``
+- New unit tests should be placed in ``tests/cpp/unit-tests/``
+- Testing files should be prefixed with *test_*
+- It is preferred that new unit tests are in a new ``SCENARIO``

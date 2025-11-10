@@ -42,8 +42,7 @@ class Net(nn.Module):
         return self.conv(x)
 
 # Connect a SmartRedis client
-db_address = "127.0.0.1:6379"
-client = Client(address=db_address, cluster=True, logger_name="example_model_file_torch.py")
+client = Client(logger_name="example_model_file_torch.py")
 
 try:
     net = Net()

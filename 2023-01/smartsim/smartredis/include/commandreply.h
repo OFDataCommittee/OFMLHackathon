@@ -268,6 +268,14 @@ class CommandReply {
         std::string redis_reply_type();
 
         /*!
+        *   \brief Determine whether the response is an array
+        *   \returns true iff the response is of type REDIS_REPLY_ARRAY
+        */
+        bool is_array() {
+            return _reply->type == REDIS_REPLY_ARRAY;
+        }
+
+        /*!
         *   \brief Print the reply structure of the CommandReply
         */
         void print_reply_structure(std::string index_tracker="reply[0]");

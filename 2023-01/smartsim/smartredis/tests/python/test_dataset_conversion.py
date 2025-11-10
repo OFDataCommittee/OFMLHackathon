@@ -28,11 +28,11 @@ try:
     import xarray as xr
 except ImportError:
     xr = None
-_xarray_not_found = 'optional package xarray not available in environment'
+_xarray_not_found = "optional package xarray not available in environment"
 
 import numpy as np
 import pytest
-from smartredis import Dataset, Client
+from smartredis import Dataset
 from smartredis.dataset_utils import DatasetConverter
 from smartredis.error import *
 
@@ -54,11 +54,11 @@ data1d = np.random.random([10])
 if xr:
     # Create 1D reference Xarray for testing
     ds_1d = xr.DataArray(
-        name = "1ddata",
-        data = data1d,
-        dims = "x",
-        coords = (longitude_coord_1d,),
-        attrs = data_attributes_1d,
+        name="1ddata",
+        data=data1d,
+        dims="x",
+        coords=(longitude_coord_1d,),
+        attrs=data_attributes_1d,
     )
 
 # ----------Create reference 2D data for 2D tests ---------
@@ -83,11 +83,11 @@ data2d = np.random.random([10, 5])
 if xr:
     # Create 2D reference Xarray for testing
     ds_2d = xr.DataArray(
-        name = "2ddata",
-        data = data2d,
-        dims = ["x", "y"],
-        coords = (longitude_coord_2d, latitude_coord_2d),
-        attrs = data_attributes_2d,
+        name="2ddata",
+        data=data2d,
+        dims=["x", "y"],
+        coords=(longitude_coord_2d, latitude_coord_2d),
+        attrs=data_attributes_2d,
     )
 
 # ----helper methods -------
@@ -171,11 +171,23 @@ def assert_equality_2d(dataset):
     # Compare tensor data and metadata for coordinate data extracted from dataset after
     # add_metadata_for_xarray call to generated 2D coordinate data
     assert (dataset.get_tensor("x") == longitude_2d).all()
-    assert dataset.get_meta_strings("x_coord_units")[0] == longitude_coord_2d[2]["x_coord_units"]
-    assert dataset.get_meta_strings("x_coord_longname")[0] == longitude_coord_2d[2]["x_coord_longname"]
+    assert (
+        dataset.get_meta_strings("x_coord_units")[0]
+        == longitude_coord_2d[2]["x_coord_units"]
+    )
+    assert (
+        dataset.get_meta_strings("x_coord_longname")[0]
+        == longitude_coord_2d[2]["x_coord_longname"]
+    )
     assert (dataset.get_tensor("y") == latitude_2d).all()
-    assert dataset.get_meta_strings("y_coord_units")[0] == latitude_coord_2d[2]["y_coord_units"]
-    assert dataset.get_meta_strings("y_coord_longname")[0] == latitude_coord_2d[2]["y_coord_longname"]
+    assert (
+        dataset.get_meta_strings("y_coord_units")[0]
+        == latitude_coord_2d[2]["y_coord_units"]
+    )
+    assert (
+        dataset.get_meta_strings("y_coord_longname")[0]
+        == latitude_coord_2d[2]["y_coord_longname"]
+    )
 
 
 # -------- start of tests --------------
@@ -191,17 +203,17 @@ def test_add_metadata_for_xarray_1d():
     # Call method add_metadata_for_xarray on 1D dataset
     DatasetConverter.add_metadata_for_xarray(
         ds1,
-        data_names = ["1ddata"],
-        dim_names = ["dim_data_x"],
-        coord_names = ["x"],
-        attr_names = ["units", "longname", "convention"],
+        data_names=["1ddata"],
+        dim_names=["dim_data_x"],
+        coord_names=["x"],
+        attr_names=["units", "longname", "convention"],
     )
     # Call method add_metadata_for_xarray for longitude coordinate
     DatasetConverter.add_metadata_for_xarray(
         ds1,
-        data_names = ["x"],
-        dim_names = ["dim_data_x"],
-        attr_names = ["x_coord_units", "x_coord_longname"],
+        data_names=["x"],
+        dim_names=["dim_data_x"],
+        attr_names=["x_coord_units", "x_coord_longname"],
     )
     assert_equality_1d(ds1)
 
@@ -214,17 +226,17 @@ def test_string_single_variable_param_names_add_metadata_for_xarray_1d():
     # Call method add_metadata_for_xarray on 1D dataset
     DatasetConverter.add_metadata_for_xarray(
         ds1,
-        data_names = "1ddata",
-        dim_names= "dim_data_x",
-        coord_names = "x",
-        attr_names = ["units", "longname", "convention"],
+        data_names="1ddata",
+        dim_names="dim_data_x",
+        coord_names="x",
+        attr_names=["units", "longname", "convention"],
     )
     # Call method add_metadata_for_xarray for longitude coordinate
     DatasetConverter.add_metadata_for_xarray(
         ds1,
-        data_names = "x",
-        dim_names = "dim_data_x",
-        attr_names = ["x_coord_units", "x_coord_longname"],
+        data_names="x",
+        dim_names="dim_data_x",
+        attr_names=["x_coord_units", "x_coord_longname"],
     )
     assert_equality_1d(ds1)
 
@@ -244,34 +256,34 @@ def test_bad_type_add_metadata_for_xarray_1d():
     with pytest.raises(TypeError):
         DatasetConverter.add_metadata_for_xarray(
             ds1,
-            data_names = 1,
-            dim_names = dimname,
-            coord_names = coordname,
-            attr_names = attrname,
+            data_names=1,
+            dim_names=dimname,
+            coord_names=coordname,
+            attr_names=attrname,
         )
     with pytest.raises(TypeError):
         DatasetConverter.add_metadata_for_xarray(
             ds1,
-            data_names = dataname,
-            dim_names = 2,
-            coord_names = coordname,
-            attr_names = attrname,
+            data_names=dataname,
+            dim_names=2,
+            coord_names=coordname,
+            attr_names=attrname,
         )
     with pytest.raises(TypeError):
         DatasetConverter.add_metadata_for_xarray(
             ds1,
-            data_names = dataname,
-            dim_names = dimname,
-            coord_names = 3,
-            attr_names = attrname,
+            data_names=dataname,
+            dim_names=dimname,
+            coord_names=3,
+            attr_names=attrname,
         )
     with pytest.raises(TypeError):
         DatasetConverter.add_metadata_for_xarray(
             ds1,
-            data_names = dataname,
-            dim_names = dimname,
-            coord_names = coordname,
-            attr_names = [4, 5, 6],
+            data_names=dataname,
+            dim_names=dimname,
+            coord_names=coordname,
+            attr_names=[4, 5, 6],
         )
 
 
@@ -290,24 +302,24 @@ def test_add_metadata_for_xarray_2d():
     # Call add_metadata_for_xarray for 2D data
     DatasetConverter.add_metadata_for_xarray(
         ds2,
-        data_names = ["2ddata"],
-        dim_names = ["dim_data_x", "dim_data_y"],
-        coord_names = ["x", "y"],
-        attr_names = ["units", "longname", "convention"],
+        data_names=["2ddata"],
+        dim_names=["dim_data_x", "dim_data_y"],
+        coord_names=["x", "y"],
+        attr_names=["units", "longname", "convention"],
     )
     # Call add_metadata_for_xarray for longitude coordinate
     DatasetConverter.add_metadata_for_xarray(
         ds2,
-        data_names = ["x"],
-        dim_names = ["dim_data_x"],
-        attr_names = ["x_coord_units", "x_coord_longname"],
+        data_names=["x"],
+        dim_names=["dim_data_x"],
+        attr_names=["x_coord_units", "x_coord_longname"],
     )
     # Call add_metadata_for_xarray for latitude coordinate
     DatasetConverter.add_metadata_for_xarray(
         ds2,
-        data_names = ["y"],
-        dim_names = ["dim_data_y"],
-        attr_names = ["y_coord_units", "y_coord_longname"],
+        data_names=["y"],
+        dim_names=["dim_data_y"],
+        attr_names=["y_coord_units", "y_coord_longname"],
     )
     assert_equality_2d(ds2)
 
@@ -328,41 +340,41 @@ def test_bad_type_add_metadata_for_xarray_2d():
     with pytest.raises(TypeError):
         DatasetConverter.add_metadata_for_xarray(
             ds2,
-            data_names = 1,
-            dim_names = dimname,
-            coord_names = coordname,
-            attr_names = attrname,
+            data_names=1,
+            dim_names=dimname,
+            coord_names=coordname,
+            attr_names=attrname,
         )
     with pytest.raises(TypeError):
         DatasetConverter.add_metadata_for_xarray(
             ds2,
-            data_names = dataname,
-            dim_names = [1, 2],
-            coord_names = coordname,
-            attr_names = attrname,
+            data_names=dataname,
+            dim_names=[1, 2],
+            coord_names=coordname,
+            attr_names=attrname,
         )
     with pytest.raises(TypeError):
         DatasetConverter.add_metadata_for_xarray(
             ds2,
-            data_names = dataname,
-            dim_names = dimname,
-            coord_names = [3, 4],
-            attr_names = attrname,
+            data_names=dataname,
+            dim_names=dimname,
+            coord_names=[3, 4],
+            attr_names=attrname,
         )
     with pytest.raises(TypeError):
         DatasetConverter.add_metadata_for_xarray(
             ds2,
-            data_names = dataname,
-            dim_names = dimname,
-            coord_names = coordname,
-            attr_names = [5, 6, 7],
+            data_names=dataname,
+            dim_names=dimname,
+            coord_names=coordname,
+            attr_names=[5, 6, 7],
         )
 
 
 # ------- beginning of 1d transform_to_xarray tests-------
 
 
-@pytest.mark.skipif(not xr, reason = _xarray_not_found)
+@pytest.mark.skipif(not xr, reason=_xarray_not_found)
 def test_transform_to_xarray_1d():
     """Test transform_to_xarray method with correct 1d
     tensor data and assert equality
@@ -374,17 +386,17 @@ def test_transform_to_xarray_1d():
     # good data and prerequisite for transform_to_xarray
     DatasetConverter.add_metadata_for_xarray(
         ds1,
-        data_names = ["1ddata"],
-        dim_names = ["dim_data_x"],
-        coord_names = ["x"],
-        attr_names = ["units", "longname", "convention"],
+        data_names=["1ddata"],
+        dim_names=["dim_data_x"],
+        coord_names=["x"],
+        attr_names=["units", "longname", "convention"],
     )
     # Call method add_metadata_for_xarray for longitude coordinate
     DatasetConverter.add_metadata_for_xarray(
         ds1,
-        data_names = ["x"],
-        dim_names = ["dim_data_x"],
-        attr_names = ["x_coord_units", "x_coord_longname"],
+        data_names=["x"],
+        dim_names=["dim_data_x"],
+        attr_names=["x_coord_units", "x_coord_longname"],
     )
     # Compare generated Xarray from 1D data to initial Xarray
     d1_xarray_ret = DatasetConverter.transform_to_xarray(ds1)
@@ -392,7 +404,7 @@ def test_transform_to_xarray_1d():
     assert ds_1d.identical(d1_transformed)
 
 
-@pytest.mark.skipif(not xr, reason = _xarray_not_found)
+@pytest.mark.skipif(not xr, reason=_xarray_not_found)
 def test_bad_data_transform_to_xarray_1d():
     """Test transform_to_xarray method with incorrect 1d data"""
 
@@ -411,10 +423,10 @@ def test_bad_data_transform_to_xarray_1d():
     # Test incorrect data in data_names parameter
     DatasetConverter.add_metadata_for_xarray(
         ds1,
-        data_names = ["baddata"],
-        dim_names = dimname,
-        coord_names = coordname,
-        attr_names = attrname,
+        data_names=["baddata"],
+        dim_names=dimname,
+        coord_names=coordname,
+        attr_names=attrname,
     )
     # Call method add_metadata_for_xarray for x coordinate
     DatasetConverter.add_metadata_for_xarray(
@@ -426,10 +438,10 @@ def test_bad_data_transform_to_xarray_1d():
     # Test incorrect data in dim_names parameter
     DatasetConverter.add_metadata_for_xarray(
         ds1,
-        data_names = dataname,
-        dim_names = ["baddata1", "baddata2"],
-        coord_names = coordname,
-        attr_names = attrname,
+        data_names=dataname,
+        dim_names=["baddata1", "baddata2"],
+        coord_names=coordname,
+        attr_names=attrname,
     )
     # Call method add_metadata_for_xarray for x coordinate
     DatasetConverter.add_metadata_for_xarray(
@@ -441,10 +453,10 @@ def test_bad_data_transform_to_xarray_1d():
     # Test incorrect data in coord_names parameter
     DatasetConverter.add_metadata_for_xarray(
         ds1,
-        data_names = dataname,
-        dim_names = dimname,
-        coord_names = ["baddata"],
-        attr_names = attrname,
+        data_names=dataname,
+        dim_names=dimname,
+        coord_names=["baddata"],
+        attr_names=attrname,
     )
     # Call method add_metadata_for_xarray for x coordinate
     DatasetConverter.add_metadata_for_xarray(
@@ -456,10 +468,10 @@ def test_bad_data_transform_to_xarray_1d():
     # Test incorrect data in attr_names parameter
     DatasetConverter.add_metadata_for_xarray(
         ds1,
-        data_names = dataname,
-        dim_names = dimname,
-        coord_names = coordname,
-        attr_names = ["baddata1", "baddata2", "baddata3"],
+        data_names=dataname,
+        dim_names=dimname,
+        coord_names=coordname,
+        attr_names=["baddata1", "baddata2", "baddata3"],
     )
     # Call method add_metadata_for_xarray for x coordinate
     DatasetConverter.add_metadata_for_xarray(
@@ -472,7 +484,7 @@ def test_bad_data_transform_to_xarray_1d():
 # ------- beginning of 2d transform_to_xarray tests-------
 
 
-@pytest.mark.skipif(not xr, reason = _xarray_not_found)
+@pytest.mark.skipif(not xr, reason=_xarray_not_found)
 def test_transform_to_xarray_2d():
     """Test transform_to_xarray method with correct 2d
     tensor data and assert equality
@@ -486,24 +498,24 @@ def test_transform_to_xarray_2d():
     # Prerequisite for transform to xarray
     DatasetConverter.add_metadata_for_xarray(
         ds2,
-        data_names = ["2ddata"],
-        dim_names = ["dim_data_x", "dim_data_y"],
-        coord_names = ["x", "y"],
-        attr_names = ["units", "longname", "convention"],
+        data_names=["2ddata"],
+        dim_names=["dim_data_x", "dim_data_y"],
+        coord_names=["x", "y"],
+        attr_names=["units", "longname", "convention"],
     )
     # Call add_metadata_for_xarray for longitude coordinate
     DatasetConverter.add_metadata_for_xarray(
         ds2,
-        data_names = ["x"],
-        dim_names = ["dim_data_x"],
-        attr_names = ["x_coord_units", "x_coord_longname"],
+        data_names=["x"],
+        dim_names=["dim_data_x"],
+        attr_names=["x_coord_units", "x_coord_longname"],
     )
     # Call add_metadata_for_xarray for latitude coordinate
     DatasetConverter.add_metadata_for_xarray(
         ds2,
-        data_names = ["y"],
-        dim_names = ["dim_data_y"],
-        attr_names = ["y_coord_units", "y_coord_longname"],
+        data_names=["y"],
+        dim_names=["dim_data_y"],
+        attr_names=["y_coord_units", "y_coord_longname"],
     )
     # Compare generated Xarray to initial Xarray
     d2_xarray_ret = DatasetConverter.transform_to_xarray(ds2)
@@ -511,7 +523,7 @@ def test_transform_to_xarray_2d():
     assert ds_2d.identical(d2_transformed)
 
 
-@pytest.mark.skipif(not xr, reason = _xarray_not_found)
+@pytest.mark.skipif(not xr, reason=_xarray_not_found)
 def test_bad_data_transform_to_xarray_2d():
     """Test transform_to_xarray method with incorrect 2d data"""
 
@@ -535,10 +547,10 @@ def test_bad_data_transform_to_xarray_2d():
     # Test incorrect data in data_names parameter
     DatasetConverter.add_metadata_for_xarray(
         ds2,
-        data_names = ["baddata"],
-        dim_names = dimname,
-        coord_names = coordname,
-        attr_names = attrname,
+        data_names=["baddata"],
+        dim_names=dimname,
+        coord_names=coordname,
+        attr_names=attrname,
     )
     DatasetConverter.add_metadata_for_xarray(
         ds2, data_names=c1_dataname, dim_names=c1_dimname, attr_names=c1_attrname
@@ -552,10 +564,10 @@ def test_bad_data_transform_to_xarray_2d():
     # Test incorrect data in dim_names parameter
     DatasetConverter.add_metadata_for_xarray(
         ds2,
-        data_names = dataname,
-        dim_names = ["baddata1", "baddata2"],
-        coord_names = coordname,
-        attr_names = attrname,
+        data_names=dataname,
+        dim_names=["baddata1", "baddata2"],
+        coord_names=coordname,
+        attr_names=attrname,
     )
     DatasetConverter.add_metadata_for_xarray(
         ds2, data_names=c1_dataname, dim_names=c1_dimname, attr_names=c1_attrname
@@ -569,10 +581,10 @@ def test_bad_data_transform_to_xarray_2d():
     # Test incorrect data in coord_names parameter
     DatasetConverter.add_metadata_for_xarray(
         ds2,
-        data_names = dataname,
-        dim_names = dimname,
-        coord_names = ["baddata1", "baddata2"],
-        attr_names = attrname,
+        data_names=dataname,
+        dim_names=dimname,
+        coord_names=["baddata1", "baddata2"],
+        attr_names=attrname,
     )
     DatasetConverter.add_metadata_for_xarray(
         ds2, data_names=c1_dataname, dim_names=c1_dimname, attr_names=c1_attrname
@@ -586,10 +598,10 @@ def test_bad_data_transform_to_xarray_2d():
     # Test incorrect data in attr_names parameter
     DatasetConverter.add_metadata_for_xarray(
         ds2,
-        data_names = dataname,
-        dim_names = dimname,
-        coord_names = coordname,
-        attr_names = ["baddata1", "baddata2", "baddata3"],
+        data_names=dataname,
+        dim_names=dimname,
+        coord_names=coordname,
+        attr_names=["baddata1", "baddata2", "baddata3"],
     )
     DatasetConverter.add_metadata_for_xarray(
         ds2, data_names=c1_dataname, dim_names=c1_dimname, attr_names=c1_attrname
@@ -599,3 +611,25 @@ def test_bad_data_transform_to_xarray_2d():
     )
     with pytest.raises(RedisKeyError):
         d2_xarray_ret = DatasetConverter.transform_to_xarray(ds2)
+
+
+def test_raise_exception_if_xarray_not_found(monkeypatch):
+    """Test that a redis runtime error raised if xarray not found
+    and provide instruction on how to fix it
+    """
+    import sys
+    import smartredis.dataset_utils as _dsu
+
+    monkeypatch.setattr(sys, "path", [])
+    # `raising=False` in case xarray isn't actually installed
+    monkeypatch.delitem(sys.modules, "xarray", raising=False)
+    monkeypatch.setattr(_dsu, "xr", None)
+
+    @_dsu._requires_xarray
+    def _say_hello():
+        print("Hello World!")
+
+    with pytest.raises(RedisRuntimeError) as e:
+        _say_hello()
+
+    assert "smartredis[xarray]" in str(e)

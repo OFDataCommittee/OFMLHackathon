@@ -31,7 +31,7 @@ import pytest
 @pytest.mark.parametrize("log_level", [
     LLQuiet, LLInfo, LLDebug, LLDeveloper
 ])
-def test_logging_string(use_cluster, context, log_level):
+def test_logging_string(context, log_level):
     log_data(context, log_level, f"This is data logged from a string ({log_level.name})")
     log_warning(context, log_level, f"This is a warning logged from a string ({log_level.name})")
     log_error(context, log_level, f"This is an error logged from a string ({log_level.name})")
@@ -39,8 +39,8 @@ def test_logging_string(use_cluster, context, log_level):
 @pytest.mark.parametrize("log_level", [
     LLQuiet, LLInfo, LLDebug, LLDeveloper
 ])
-def test_logging_client(use_cluster, context, log_level):
-    c = Client(None, use_cluster, logger_name=context)
+def test_logging_client(context, log_level):
+    c = Client(None, logger_name=context)
     c.log_data(log_level, f"This is data logged from a client ({log_level.name})")
     c.log_warning(log_level, f"This is a warning logged from a client ({log_level.name})")
     c.log_error(log_level, f"This is an error logged from a client ({log_level.name})")

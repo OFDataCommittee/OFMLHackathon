@@ -26,13 +26,12 @@
 
 import pytest
 from os import path as osp
-import os
+from os import getcwd, environ
 from glob import glob
-from shutil import which
 from subprocess import Popen, PIPE, TimeoutExpired
 import time
 
-test_gpu = os.environ.get("SMARTREDIS_TEST_DEVICE","cpu").lower() == "gpu"
+test_gpu = environ.get("SMARTREDIS_TEST_DEVICE","cpu").lower() == "gpu"
 
 RANKS = 1
 TEST_PATH = osp.dirname(osp.abspath(__file__))
@@ -41,23 +40,30 @@ def get_test_names():
     """Obtain test names by globbing for client_test
     Add tests manually if necessary
     """
-    glob_path = osp.join(TEST_PATH, "build/client_test*")
+    glob_path = osp.join(TEST_PATH, "client_test*")
     test_names = glob(glob_path)
-    test_names = [(pytest.param(test, id=osp.basename(test)))
-                  for test in test_names if not "gpu" in test]
+    test_names = list(filter(lambda test: test.find('gpu') == -1, test_names))
+    test_names = [(pytest.param(test,
+                                id=osp.basename(test))) for test in test_names]
     return test_names
 
 
 @pytest.mark.parametrize("test", get_test_names())
-def test_fortran_client(test):
+def test_fortran_client(test, build, link):
     """This function actually runs the tests using the parameterization
     function provided in Pytest
 
     :param test: a path to a test to run
     :type test: str
     """
-    cmd = []
-    cmd.append(test)
+    # Build the path to the test executable from the source file name
+    # . keep only the last three parts of the path: (language, basename)
+    test = "/".join(test.split("/")[-2:])
+    # . drop the file extension
+    test = ".".join(test.split(".")[:-1])
+    # . prepend the path to the built test executable
+    test = f"{getcwd()}/build/{build}/tests/{link}/{test}"
+    cmd = [test]
     print(f"Running test: {osp.basename(test)}")
     print(f"Test command {' '.join(cmd)}")
     execute_cmd(cmd)
@@ -67,9 +73,8 @@ def execute_cmd(cmd_list):
     """Execute a command """
 
     # spawning the subprocess and connecting to its output
-    run_path = osp.join(TEST_PATH, "build/")
     proc = Popen(
-        cmd_list, stderr=PIPE, stdout=PIPE, stdin=PIPE, cwd=run_path)
+        cmd_list, stderr=PIPE, stdout=PIPE, stdin=PIPE, cwd=TEST_PATH)
     try:
         out, err = proc.communicate(timeout=120)
         if out:
@@ -104,7 +109,6 @@ def test_client_multigpu_mnist():
     Test setting and running a machine learning model via the Fortran client
     on an orchestrator with multiple GPUs
     """
-    
-    tester_path = osp.join(TEST_PATH, "build/client_test_mnist_multigpu")
+    tester_path = osp.join(TEST_PATH, "client_test_mnist_multigpu.F90")
     test_fortran_client(tester_path)
-    
+

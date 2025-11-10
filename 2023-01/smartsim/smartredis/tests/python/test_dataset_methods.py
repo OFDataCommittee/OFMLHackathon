@@ -27,6 +27,19 @@
 import numpy as np
 from smartredis import Dataset
 
+def test_serialize_dataset():
+    """Test serializing a dataset
+    """
+    dataset = Dataset("test-dataset")
+    data = np.uint8([2,4,8])
+    dataset.add_tensor("u8_tensor", data)
+    data = np.double([2.0,4.1,8.3, 5.6])
+    dataset.add_tensor("double_tensor", data)
+    dataset.add_meta_scalar("float2_scalar", float(3.1415926535))
+    dataset.add_meta_scalar("float_scalar", np.double(3.1415926535))
+    dataset.add_meta_string("metastring", "metavalue")
+    assert str(dataset) != repr(dataset)
+
 
 def test_add_get_tensor(mock_data):
     """Test adding and retrieving 1D tensors to
@@ -82,15 +95,20 @@ def test_add_get_strings(mock_data):
     data = mock_data.create_metadata_strings(10)
     add_get_strings(dataset, data)
 
+
 def test_dataset_inspection(context):
     d = Dataset(context)
-    data = np.uint8([2, 4, 6, 8])
+    data = np.uint8([[2, 4, 6, 8], [1, 3, 5, 7]])
     d.add_tensor("u8_tensor", data)
     data = np.int16([1, 1, 2, 3, 5, 8])
     d.add_tensor("i16_tensor", data)
     d.add_meta_string("metastring", "metavalue")
     d.add_meta_scalar("u32_scalar", np.uint32(42))
     d.add_meta_scalar("double_scalar", np.double(3.1415926535))
+    dims = d.get_tensor_dims("u8_tensor")
+    assert len(dims) == 2
+    assert dims[0] == 2
+    assert dims[1] == 4
 
     tensornames = d.get_tensor_names()
     assert 2 == len(tensornames)

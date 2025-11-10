@@ -52,7 +52,7 @@ void dataset_delete(
     fill_array(t_send_3, dims[0], dims[1], dims[2]);
 
     //Create Client and DataSets
-    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster(), "client_test_delete_dataset");
+    DATASET_TEST_UTILS::DatasetTestClient client("client_test_delete_dataset");
     SmartRedis::DataSet* dataset = new SmartRedis::DataSet(dataset_name);
 
     //Add tensors to the DataSet

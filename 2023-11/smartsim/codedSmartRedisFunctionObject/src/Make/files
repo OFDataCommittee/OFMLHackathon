@@ -1,0 +1,3 @@
+codedSmartRedisFunctionObject.C
+
+LIB = $(FOAM_USER_LIBBIN)/libcodedRedisFunctionObject

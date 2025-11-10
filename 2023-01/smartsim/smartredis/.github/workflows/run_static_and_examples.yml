@@ -1,0 +1,153 @@
+#
+# BSD 2-Clause License
+#
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this
+#    list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+name: run_static_and_examples
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+      - develop
+env:
+  HOMEBREW_NO_ANALYTICS: "ON" # Make Homebrew installation a little quicker
+  HOMEBREW_NO_AUTO_UPDATE: "ON"
+  HOMEBREW_NO_BOTTLE_SOURCE_FALLBACK: "ON"
+  HOMEBREW_NO_GITHUB_API: "ON"
+  HOMEBREW_NO_INSTALL_CLEANUP: "ON"
+  DEBIAN_FRONTEND: "noninteractive" # disable interactive apt installs
+
+jobs:
+
+  run_tests:
+    name: Run smartredis tests using ${{ matrix.os }}, Python ${{ matrix.py_v }}, RedisAI ${{ matrix.rai_v }}, and compiler ${{ matrix.compiler }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
+        compiler: [intel, 8, 9, 10, 11] # intel compiler, and versions of GNU compiler
+        rai_v: [1.2.7] # version(s) of RedisAI
+        py_v: ['3.7.x', '3.8.x', '3.9.x', '3.10.x'] # versions of Python
+    env:
+      FC: gfortran-${{ matrix.compiler }}
+      GCC_V: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
+
+    steps:
+      # download a copy of SmartRedis before running CI tests
+      - uses: actions/checkout@v3
+
+      # Setup python within the container
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.py_v }}
+
+      # Install compilers (Intel or GCC)
+      - name: Install GCC
+        if: "!contains( matrix.compiler, 'intel' )" # if using GNU compiler
+        run: |
+          sudo apt-get -y update &&
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test &&
+          sudo apt-get -y update &&
+          sudo apt-get -y install -y gcc-${GCC_V} gfortran-${GCC_V} g++-${GCC_V} &&
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_V} 100 \
+          --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V} \
+          --slave /usr/bin/g++ g++ /usr/bin/g++-${GCC_V} \
+          --slave /usr/bin/gcov gcov /usr/bin/gcov-${GCC_V} &&
+          echo "CC=gcc" >> $GITHUB_ENV &&
+          echo "CXX=g++" >> $GITHUB_ENV &&
+          echo "FC=gfortran" >> $GITHUB_ENV
+        # Note CC and CXX need to be set otherwise, some Ubuntu images default to
+        # a Debian-flavored compiler
+
+      - name: Install Intel compiler
+        if: "contains( matrix.compiler, 'intel' )" # if using intel compiler
+        run: |
+          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
+          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
+          rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
+          echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list &&
+          sudo apt-get update -y &&
+          sudo apt-get install -y intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
+          source /opt/intel/oneapi/setvars.sh &&
+          printenv >> $GITHUB_ENV &&
+          echo "CC=icx" >> $GITHUB_ENV &&
+          echo "CXX=icpx" >> $GITHUB_ENV &&
+          echo "FC=ifort" >> $GITHUB_ENV
+
+      # Install additional dependencies
+      - name: Install Cmake Linux
+        if: contains(matrix.os, 'ubuntu')
+        run: sudo apt-get -y install cmake
+
+      - name: Build SmartRedis python and install
+        run: python -m pip install -e .[dev,xarray]
+
+      - name: Build and install test dependencies
+        run: make lcov && make catch2
+
+      - name: Install docker, redis-server, and RedisAI
+        run: |
+          sudo apt-get -y update && sudo apt-get -y install curl gnupg lsb-release software-properties-common ca-certificates && \
+          # Add latest redis to apt sources
+          sudo echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list && \
+          sudo curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg && \
+          # Add latest docker to apt sources
+          sudo mkdir -m 0755 -p /etc/apt/keyrings &&
+          sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg &&
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+                $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null &&
+          # Install and update
+          sudo apt-get -y update && \
+          sudo apt-get -y install iputils-ping docker-ce docker-ce-cli containerd.io redis-tools=6:6.2.5-1rl1~focal1 redis-server=6:6.2.5-1rl1~focal1 &&
+          CONTAINER_NAME="redisai_$RANDOM" &&
+          sudo docker create --name $CONTAINER_NAME --rm redislabs/redisai:${{ matrix.rai_v }}-cpu-bionic && \
+          sudo mkdir -p /usr/lib/redis/modules/ &&
+          sudo docker cp $CONTAINER_NAME:/usr/lib/redis/modules/redisai.so /usr/lib/redis/modules &&
+          sudo docker cp $CONTAINER_NAME:/usr/lib/redis/modules/backends/ /usr/lib/redis/modules/ &&
+          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib" >> $GITHUB_ENV &&
+          echo "REDISAI_CPU_INSTALL_PATH=/usr/lib/redis/modules/" >> $GITHUB_ENV &&
+          echo "SR_CICD_EXECUTION=True" >> $GITHUB_ENV &&
+          echo "REDISAI_MODULES=/usr/lib/redis/modules/redisai.so \
+                TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so \
+                TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so" >> $GITHUB_ENV
+
+      # Run the examples
+      - name: Install MPI for parallel examples -- for GCC, we can just use the std install
+        if: contains(matrix.os, 'ubuntu') && !contains(matrix.compiler, 'intel')
+        run: sudo apt-get install -y mpich
+      - name: Test static build -- GNU compilers
+        if: "!contains( matrix.compiler, 'intel' )" # if using GNU compiler
+        run: make test-examples SR_FORTRAN=ON SR_PYTHON=ON \
+            SR_TEST_PORT=7000 SR_TEST_REDISAI_VER=v${{ matrix.rai_v }}
+      - name: Test static build -- intel compilers
+        if: contains(matrix.compiler, 'intel')
+        run: make build-example-serial SR_FORTRAN=ON

@@ -47,8 +47,7 @@ int main(int argc, char* argv[]) {
   dims[2] = 3;
 
   void* client = NULL;
-  bool cluster_mode = true; // Set to false if not using a clustered database
-  if (SRNoError != SmartRedisCClient(cluster_mode, logger_name, cid_len, &client)) {
+  if (SRNoError != SimpleCreateClient(logger_name, cid_len, &client)) {
     printf("Client initialization failed!\n");
     exit(-1);
   }
@@ -66,7 +65,7 @@ int main(int argc, char* argv[]) {
   for(size_t i=0; i<dims[0]; i++)
     for(size_t j=0; j<dims[1]; j++)
       for(size_t k=0; k<dims[2]; k++)
-        tensor[i][j][k] = ((double)rand())/RAND_MAX;
+        tensor[i][j][k] = ((double)rand())/(double)RAND_MAX;
 
   char key[] = "3D_tensor_example";
   size_t key_length = strlen(key);

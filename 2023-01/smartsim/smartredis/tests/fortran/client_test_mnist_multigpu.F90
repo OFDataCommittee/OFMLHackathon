@@ -35,9 +35,9 @@ program mnist_test
 #include "enum_fortran.inc"
 
   character(len=*), parameter :: model_key = "mnist_model"
-  character(len=*), parameter :: model_file = "../../cpp/mnist_data/mnist_cnn.pt"
+  character(len=*), parameter :: model_file = "../cpp/mnist_data/mnist_cnn.pt"
   character(len=*), parameter :: script_key = "mnist_script"
-  character(len=*), parameter :: script_file = "../../cpp/mnist_data/data_processing_script.txt"
+  character(len=*), parameter :: script_file = "../cpp/mnist_data/data_processing_script.txt"
   integer, parameter :: first_gpu = 0
   integer, parameter :: num_gpus = 1
   integer, parameter :: offset = 0
@@ -47,8 +47,7 @@ program mnist_test
   character(len=2) :: key_suffix
   integer :: sr_return_code
 
-  sr_return_code = client%initialize(use_cluster(), &
-    "client_test_mnist_multigpu")
+  sr_return_code = client%initialize("client_test_mnist_multigpu")
   if (sr_return_code .ne. SRNoError) error stop
 
   sr_return_code = client%set_model_from_file_multigpu(model_key, model_file, "TORCH", first_gpu, num_gpus)

@@ -36,11 +36,17 @@ using namespace SmartRedis;
 
 namespace py = pybind11;
 
-PySRObject::PySRObject(const std::string& context)
+
+// Decorator to standardize exception handling in PyBind SRObject API methods
+template <class T>
+auto pb_srobject_api(T&& srobject_api_func, const char* name)
 {
-    _srobject = NULL;
+  // we create a closure below
+  auto decorated =
+  [name, srobject_api_func = std::forward<T>(srobject_api_func)](auto&&... args)
+  {
     try {
-        _srobject = new SRObject(context);
+      return srobject_api_func(std::forward<decltype(args)>(args)...);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -52,87 +58,64 @@ PySRObject::PySRObject(const std::string& context)
     }
     catch (...) {
         // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "during dataset construction.");
+        std::string msg(
+            "A non-standard exception was encountered while executing ");
+        msg += name;
+        throw SRInternalException(msg);
     }
+  };
+  return decorated;
+}
+
+// Macro to invoke the decorator with a lambda function
+#define MAKE_SROBJECT_API(stuff)\
+    pb_srobject_api([&] { stuff }, __func__)()
+
+
+PySRObject::PySRObject(const std::string& context)
+{
+    MAKE_SROBJECT_API({
+        _srobject = new SRObject(context);
+    });
 }
 
 PySRObject::PySRObject(SRObject* srobject)
 {
-    _srobject = srobject;
+    MAKE_SROBJECT_API({
+        _srobject = srobject;
+    });
 }
 
 PySRObject::~PySRObject()
 {
-    if (_srobject != NULL) {
-        delete _srobject;
-        _srobject = NULL;
-    }
-}
-
-SRObject* PySRObject::get() {
-    return _srobject;
+    MAKE_SROBJECT_API({
+        if (_srobject != NULL) {
+            delete _srobject;
+            _srobject = NULL;
+        }
+    });
 }
 
 void PySRObject::log_data(
     SRLoggingLevel level, const std::string& data) const
 {
-    try {
+    MAKE_SROBJECT_API({
         _srobject->log_data(level, data);
-    }
-    catch (Exception& e) {
-        // exception is already prepared for caller
-        throw;
-    }
-    catch (std::exception& e) {
-        // should never happen
-        throw SRInternalException(e.what());
-    }
-    catch (...) {
-        // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "while executing log_data.");
-    }
+    });
 }
 
 void PySRObject::log_warning(
     SRLoggingLevel level, const std::string& data) const
 {
-    try {
+    MAKE_SROBJECT_API({
         _srobject->log_warning(level, data);
-    }
-    catch (Exception& e) {
-        // exception is already prepared for caller
-        throw;
-    }
-    catch (std::exception& e) {
-        // should never happen
-        throw SRInternalException(e.what());
-    }
-    catch (...) {
-        // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "while executing log_warning.");
-    }
+    });
 }
 
 void PySRObject::log_error(
     SRLoggingLevel level, const std::string& data) const
 {
-    try {
+    MAKE_SROBJECT_API({
         _srobject->log_error(level, data);
-    }
-    catch (Exception& e) {
-        // exception is already prepared for caller
-        throw;
-    }
-    catch (std::exception& e) {
-        // should never happen
-        throw SRInternalException(e.what());
-    }
-    catch (...) {
-        // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "while executing log_error.");
-    }
+    });
 }
