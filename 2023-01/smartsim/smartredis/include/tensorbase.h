@@ -151,13 +151,13 @@ class TensorBase{
         *   \brief Retrieve the name of the TensorBase
         *   \returns The name of the TensorBase
         */
-        std::string name();
+        std::string name() const;
 
         /*!
         *   \brief Retrieve the type of the TensorBase
         *   \returns The type of the TensorBase
         */
-        SRTensorType type();
+        SRTensorType type() const;
 
         /*!
         *   \brief Retrieve a string representation of
@@ -170,13 +170,13 @@ class TensorBase{
         *   \brief Retrieve the dimensions of the TensorBase
         *   \returns TensorBase dimensions
         */
-        std::vector<size_t> dims();
+        std::vector<size_t> dims() const;
 
         /*!
         *   \brief Retrieve number of values in the TensorBase
         *   \returns The number values in the TensorBase
         */
-        size_t num_values();
+        size_t num_values() const;
 
         /*!
         *   \brief Retrieve a pointer to the TensorBase data

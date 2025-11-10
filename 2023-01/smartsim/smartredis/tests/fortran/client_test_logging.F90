@@ -46,7 +46,7 @@ program main
 
   result = logcontext%initialize("client_test_logging (logcontext)")
   if (result .ne. SRNoError) error stop
-  result = client%initialize(use_cluster(), "client_test_logging (client)")
+  result = client%initialize("client_test_logging (client)")
   if (result .ne. SRNoError) error stop
   result = dataset%initialize("client_test_logging (dataset)")
   if (result .ne. SRNoError) error stop

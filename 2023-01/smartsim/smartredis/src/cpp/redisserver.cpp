@@ -27,27 +27,30 @@
  */
 
 #include <ctype.h>
+#include <sw/redis++/redis++.h>
 #include "redisserver.h"
 #include "srexception.h"
 #include "utility.h"
 #include "srobject.h"
+#include "configoptions.h"
 
 using namespace SmartRedis;
 
 // RedisServer constructor
-RedisServer::RedisServer(const SRObject* context)
-    : _context(context), _gen(_rd())
+RedisServer::RedisServer(ConfigOptions* cfgopts)
+    : _cfgopts(cfgopts), _context(cfgopts->_get_log_context()),
+      _gen(_rd())
 {
-    get_config_integer(_connection_timeout, _CONN_TIMEOUT_ENV_VAR,
-                         _DEFAULT_CONN_TIMEOUT);
-    get_config_integer(_connection_interval, _CONN_INTERVAL_ENV_VAR,
-                         _DEFAULT_CONN_INTERVAL);
-    get_config_integer(_command_timeout, _CMD_TIMEOUT_ENV_VAR,
-                         _DEFAULT_CMD_TIMEOUT);
-    get_config_integer(_command_interval, _CMD_INTERVAL_ENV_VAR,
-                         _DEFAULT_CMD_INTERVAL);
-    get_config_integer(_thread_count, _TP_THREAD_COUNT,
-                         _DEFAULT_THREAD_COUNT);
+    _connection_timeout = _cfgopts->_resolve_integer_option(
+        _CONN_TIMEOUT_ENV_VAR, _DEFAULT_CONN_TIMEOUT);
+    _connection_interval = _cfgopts->_resolve_integer_option(
+        _CONN_INTERVAL_ENV_VAR, _DEFAULT_CONN_INTERVAL);
+    _command_timeout = _cfgopts->_resolve_integer_option(
+        _CMD_TIMEOUT_ENV_VAR, _DEFAULT_CMD_TIMEOUT);
+    _command_interval = _cfgopts->_resolve_integer_option(
+        _CMD_INTERVAL_ENV_VAR, _DEFAULT_CMD_INTERVAL);
+    _thread_count = _cfgopts->_resolve_integer_option(
+        _TP_THREAD_COUNT, _DEFAULT_THREAD_COUNT);
 
     _check_runtime_variables();
 
@@ -58,6 +61,7 @@ RedisServer::RedisServer(const SRObject* context)
                          _command_interval + 1;
 
     _tp = new ThreadPool(_context, _thread_count);
+    _model_chunk_size = _UNKNOWN_MODEL_CHUNK_SIZE;
 }
 
 // RedisServer destructor
@@ -74,8 +78,7 @@ RedisServer::~RedisServer()
 SRAddress RedisServer::_get_ssdb()
 {
     // Retrieve the environment variable
-    std::string db_spec;
-    get_config_string(db_spec, "SSDB", "");
+    std::string db_spec = _cfgopts->_resolve_string_option("SSDB", "");
     if (db_spec.length() == 0)
         throw SRRuntimeException("The environment variable SSDB "\
                                  "must be set to use the client.");
@@ -101,16 +104,27 @@ SRAddress RedisServer::_get_ssdb()
         address_choices.push_back(addr_spec);
     }
 
+    std::string msg = "Found " + std::to_string(address_choices.size()) + " addresses:";
+    _cfgopts->_get_log_context()->log_data(LLDeveloper, msg);
+    for (size_t i = 0; i < address_choices.size(); i++) {
+        _cfgopts->_get_log_context()->log_data(
+            LLDeveloper, "\t" + address_choices[i].to_string());
+    }
+
     // Pick an entry from the list at random
     std::uniform_int_distribution<> distrib(0, address_choices.size() - 1);
-    return address_choices[distrib(_gen)];
+    auto choice = address_choices[distrib(_gen)];
+    _cfgopts->_get_log_context()->log_data(
+        LLDeveloper, "Picked: " + choice.to_string());
+    return choice;
 }
 
 // Check that the SSDB environment variable value does not have any errors
 void RedisServer::_check_ssdb_string(const std::string& env_str) {
+    std::string allowed_specials = ".:,/_-";
     for (size_t i = 0; i < env_str.size(); i++) {
         char c = env_str[i];
-        if (!isalnum(c) && c != '.' && c != ':' && c != ',' && c != '/') {
+        if (!isalnum(c) && (allowed_specials.find(c) == std::string::npos)) {
             throw SRRuntimeException("The provided SSDB value, " + env_str +
                                      " is invalid because of character " + c);
         }
@@ -153,4 +167,43 @@ inline void RedisServer::_check_runtime_variables()
                                    " must be less than "
                                    + std::to_string(INT_MAX / 1000));
     }
+}
+
+// Create a string representation of the Redis connection
+std::string RedisServer::to_string() const
+{
+    std::string result;
+
+    // Shards
+    result += "  Redis shards at:\n";
+    auto it = _address_node_map.begin();
+    for ( ; it != _address_node_map.end(); it++) {
+        result += "    " + it->first + "\n";
+    }
+
+    // Protocol
+    result += "  Protocol: ";
+    result += _is_domain_socket ? "Unix Domain Socket" : "TCP";
+    result += "\n";
+
+    // Parameters
+    result += "  Command parameters:\n";
+    result += "    Retry attempts: "
+           + std::to_string(_command_attempts) + "\n";
+    result += "    Retry interval (ms): "
+           + std::to_string(_command_interval) + "\n";
+    result += "    Attempt timeout (ms): "
+           + std::to_string(_command_timeout) + "\n";
+    result += "  Connection parameters:\n";
+    result += "    Retry attempts: "
+           + std::to_string(_connection_attempts) + "\n";
+    result += "    Retry interval (ms): "
+           + std::to_string(_connection_interval) + "\n";
+    result += "    Attempt timeout (ms): "
+           + std::to_string(_connection_timeout) + "\n";
+
+    // Threadpool
+    result += "  Threadpool: " + std::to_string(_thread_count) + " threads\n";
+
+    return result;
 }

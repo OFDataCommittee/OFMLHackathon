@@ -39,6 +39,7 @@
 #include "client.h"
 #include "pydataset.h"
 #include "pysrobject.h"
+#include "pyconfigoptions.h"
 
 ///@file
 
@@ -56,7 +57,24 @@ class PyClient : public PySRObject
     public:
 
         /*!
-        *   \brief PyClient constructor
+        *   \brief Simple constructor that uses default environment variables
+        *          to locate configuration settings
+        *   \param logger_name Identifier for the current client
+        */
+        PyClient(const std::string& logger_name);
+
+        /*!
+        *   \brief Constructor that uses a ConfigOptions object
+        *          to locate configuration settings
+        *   \param config_options The ConfigOptions object to use
+        *   \param logger_name Identifier for the current client
+        */
+        PyClient(
+            PyConfigOptions& config_options,
+            const std::string& logger_name);
+
+        /*!
+        *   \brief PyClient constructor (deprecated)
         *   \param cluster Flag to indicate if a database cluster
         *                  is being used
         *   \param logger_name Identifier for the current client
@@ -285,6 +303,7 @@ class PyClient : public PySRObject
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -299,6 +318,7 @@ class PyClient : public PySRObject
                         const std::string& device,
                         int batch_size = 0,
                         int min_batch_size = 0,
+                        int min_batch_timeout = 0,
                         const std::string& tag = "",
                         const std::vector<std::string>& inputs
                             = std::vector<std::string>(),
@@ -317,6 +337,7 @@ class PyClient : public PySRObject
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -332,6 +353,7 @@ class PyClient : public PySRObject
                                 int num_gpus,
                                 int batch_size = 0,
                                 int min_batch_size = 0,
+                                int min_batch_timeout = 0,
                                 const std::string& tag = "",
                                 const std::vector<std::string>& inputs
                                     = std::vector<std::string>(),
@@ -350,6 +372,7 @@ class PyClient : public PySRObject
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -364,6 +387,7 @@ class PyClient : public PySRObject
                                 const std::string& device,
                                 int batch_size = 0,
                                 int min_batch_size = 0,
+                                int min_batch_timeout = 0,
                                 const std::string& tag = "",
                                 const std::vector<std::string>& inputs
                                     = std::vector<std::string>(),
@@ -382,6 +406,7 @@ class PyClient : public PySRObject
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -397,6 +422,7 @@ class PyClient : public PySRObject
                                 int num_gpus,
                                 int batch_size = 0,
                                 int min_batch_size = 0,
+                                int min_batch_timeout = 0,
                                 const std::string& tag = "",
                                 const std::vector<std::string>& inputs
                                     = std::vector<std::string>(),
@@ -447,7 +473,7 @@ class PyClient : public PySRObject
         /*!
         *   \brief Remove a model from the database
         *   \param name The name associated with the model
-        *   \param first_cpu the first GPU (zero-based) to use with the model
+        *   \param first_gpu the first GPU (zero-based) to use with the model
         *   \param num_gpus the number of gpus for which the model was stored
         *   \throw RuntimeException for all client errors
         */
@@ -464,7 +490,7 @@ class PyClient : public PySRObject
         *   \brief Remove a script from the database that was stored
         *          for use with multiple GPUs
         *   \param name The name associated with the script
-        *   \param first_cpu the first GPU (zero-based) to use with the script
+        *   \param first_gpu the first GPU (zero-based) to use with the script
         *   \param num_gpus the number of gpus for which the script was stored
         *   \throw RuntimeException for all client errors
         */
@@ -618,9 +644,9 @@ class PyClient : public PySRObject
         *            prefixed. By default, the client prefixes aggregation
         *            list keys with the first prefix specified with the SSKEYIN
         *            and SSKEYOUT environment variables.  Note that
-        *            use_tensor_ensemble_prefix() controls prefixing
+        *            use_dataset_ensemble_prefix() controls prefixing
         *            for the entities in the aggregation list, and
-        *            use_tensor_ensemble_prefix() should be given the
+        *            use_dataset_ensemble_prefix() should be given the
         *            same value that was used during the initial
         *            setting of the DataSet into the database.
         *  \param use_prefix If set to true, all future operations
@@ -630,20 +656,34 @@ class PyClient : public PySRObject
         void use_list_ensemble_prefix(bool use_prefix);
 
         /*!
-        * \brief Set whether names of tensors or datasets should be
-        *        prefixed (e.g. in an ensemble) to form database keys.
+        * \brief Set whether names of tensors should be prefixed (e.g.
+        *        in an ensemble) to form database keys.
         *        Prefixes will only be used if they were previously set through
         *        the environment variables SSKEYOUT and SSKEYIN.
         *        Keys formed before this function is called will not be affected.
-        *        By default, the client prefixes tensor and dataset keys
-        *        with the first prefix specified with the SSKEYIN
-        *        and SSKEYOUT environment variables.
+        *        By default, the client prefixes tensor keys with the first
+        *        prefix specified with the SSKEYIN and SSKEYOUT environment
+        *        variables.
         *
-        * \param use_prefix If set to true, all future operations
-        *                   on tensors and datasets will add
-        *                   a prefix to the entity names, if available.
+        * \param use_prefix If set to true, all future operations on tensors will
+        *                   add a prefix to the entity names, if available.
         */
         void use_tensor_ensemble_prefix(bool use_prefix);
+
+        /*!
+        * \brief Set whether names of datasets should be prefixed (e.g.
+        *        in an ensemble) to form database keys.
+        *        Prefixes will only be used if they were previously set through
+        *        the environment variables SSKEYOUT and SSKEYIN.
+        *        Keys formed before this function is called will not be affected.
+        *        By default, the client prefixes tensor keys with the first
+        *        prefix specified with the SSKEYIN and SSKEYOUT environment
+        *        variables.
+        *
+        * \param use_prefix If set to true, all future operations on datasets will
+        *                   add a prefix to the entity names, if available.
+        */
+        void use_dataset_ensemble_prefix(bool use_prefix);
 
         /*!
         *   \brief Returns information about the given database nodes
@@ -790,12 +830,12 @@ class PyClient : public PySRObject
 
         /*!
         *   \brief Rename an aggregation list
-        *   \details The old and new aggregation list key used to find and
+        *   \details The initial and target aggregation list key used to find and
         *            relocate the list may be formed by applying prefixes to
-        *            the supplied old_name and new_name. See set_data_source()
+        *            the supplied src_name and dest_name. See set_data_source()
         *            and use_list_ensemble_prefix() for more details.
-        *   \param old_name The old list name
-        *   \param new_name The new list name
+        *   \param src_name The initial list name
+        *   \param dest_name The target list name
         *   \throw SmartRedis::Exception if the command fails
         */
         void rename_list(const std::string& src_name,
@@ -910,6 +950,28 @@ class PyClient : public PySRObject
         py::list get_dataset_list_range(const std::string& list_name,
                                         const int start_index,
                                         const int end_index);
+
+        /*!
+        *   \brief Reconfigure the chunking size that Redis uses for model
+        *          serialization, replication, and the model_get command.
+        *   \details This method triggers the AI.CONFIG method in the Redis
+        *            database to change the model chunking size.
+        *
+        *            NOTE: The default size of 511MB should be fine for most
+        *            applications, so it is expected to be very rare that a
+        *            client calls this method. It is not necessary to call
+        *            this method a model to be chunked.
+        *   \param chunk_size The new chunk size in bytes
+        *   \throw SmartRedis::Exception if the command fails.
+        */
+        void set_model_chunk_size(int chunk_size);
+
+        /*!
+        *   \brief Create a string representation of the Client
+        *   \returns A string representation of the Client
+        */
+        std::string to_string();
+
 
     private:
 

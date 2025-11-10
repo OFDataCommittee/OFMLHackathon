@@ -3,12 +3,10 @@ EXE_INC = \
     -Wno-old-style-cast \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
-    -I$(FOAM_SMARTREDIS_INCLUDE) \
-    -I$(FOAM_SMARTREDIS_DEP_INCLUDE)
+    -I$(SMARTREDIS_INCLUDE)
 
 LIB_LIBS = \
-    -L$(FOAM_SMARTREDIS_LIB) \
     -lfiniteVolume \
     -lmeshTools \
-    -L$(FOAM_SMARTREDIS_LIB) -lhiredis -lredis++ \
+    -L$(SMARTREDIS_LIB) -lhiredis -lredis++ \
     -lsmartredis

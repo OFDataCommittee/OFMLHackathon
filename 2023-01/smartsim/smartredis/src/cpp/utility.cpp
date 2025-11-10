@@ -27,6 +27,8 @@
  */
 
 #include <cstdlib>
+#include <cctype>
+#include <algorithm>
 #include <string>
 #include <cstring>
 #include <stdio.h>
@@ -37,21 +39,16 @@
 
 namespace SmartRedis {
 
-/*!
-*   \brief Initialize an integer from configuration, such as an
-*          environment variable
-*   \param value Receives the configuration value
-*   \param cfg_key The key to query for the configuration variable
-*   \param default_value Default if configuration key is not set
-*   \param suppress_warning Do not issue a warning if the variable
-*                           is not set
-*/
+// Initialize an integer from an environment variable
 void get_config_integer(int& value,
                         const std::string& cfg_key,
                         const int default_value,
-                        bool suppress_warning /*= false*/)
+                        int flags /* = 0 */)
 {
-    value = default_value;
+    bool suppress_warning = 0 != (flags & flag_suppress_warning);
+    bool keyerror_on_absent = 0 != (flags & throw_on_absent);
+
+    int result = default_value;
     std::string message = "Getting value for " + cfg_key;
     log_data("SmartRedis Library", LLDebug, message);
 
@@ -59,9 +56,15 @@ void get_config_integer(int& value,
     message = "Retrieved value \"";
     message += cfg_val == NULL ? "<NULL>" : cfg_val;
     message += "\"";
-    if (NULL == cfg_val)
+    if ((NULL == cfg_val) && !keyerror_on_absent)
         message += ". Using default value of " + std::to_string(default_value);
     log_data("SmartRedis Library", LLDebug, message);
+
+    if ((cfg_val == NULL) && keyerror_on_absent) {
+        std::string msg("No value found for key ");
+        msg += cfg_key;
+        throw SRKeyException(msg);
+    }
 
     if (cfg_val != NULL && std::strlen(cfg_val) > 0) {
         // Enforce that all characters are digits because std::stoi
@@ -75,7 +78,7 @@ void get_config_integer(int& value,
         }
 
         try {
-            value = std::stoi(cfg_val);
+            result = std::stoi(cfg_val);
         }
         catch (std::invalid_argument& e) {
             throw SRParameterException("The value of " + cfg_key + " could "\
@@ -101,25 +104,21 @@ void get_config_integer(int& value,
         );
     }
 
+    value = result;
     message = "Exiting with value \"" + std::to_string(value) + "\"";
     log_data("SmartRedis Library", LLDebug, message);
 }
 
-/*!
-*   \brief Initialize an string from configuration, such as an
-*          environment variable
-*   \param value Receives the configuration value
-*   \param cfg_key The key to query for the configuration variable
-*   \param default_value Default if configuration key is not set
-*   \param suppress_warning Do not issue a warning if the variable
-*                           is not set
-*/
+// Initialize a string from an environment variable
 void get_config_string(std::string& value,
                        const std::string& cfg_key,
                        const std::string& default_value,
-                       bool suppress_warning /*= false*/)
+                       int flags /* = 0 */)
 {
-    value = default_value;
+    bool suppress_warning = 0 != (flags & flag_suppress_warning);
+    bool keyerror_on_absent = 0 != (flags & throw_on_absent);
+
+    std::string result = default_value;
     std::string message = "Getting value for " + cfg_key;
     log_data("SmartRedis Library", LLDebug, message);
 
@@ -127,12 +126,18 @@ void get_config_string(std::string& value,
     message = "Retrieved value \"";
     message += cfg_val == NULL ? "<NULL>" : cfg_val;
     message += "\"";
-    if (NULL == cfg_val)
-        message += ". Using default value of \"" + default_value + "\"";
+    if ((NULL == cfg_val) && !keyerror_on_absent)
+        message += ". Using default value of " + default_value;
     log_data("SmartRedis Library", LLDebug, message);
 
+    if ((cfg_val == NULL) && keyerror_on_absent) {
+        std::string msg("No value found for key ");
+        msg += cfg_key;
+        throw SRKeyException(msg);
+    }
+
     if (cfg_val != NULL && std::strlen(cfg_val) > 0)
-        value = cfg_val;
+        result = cfg_val;
     else if (!suppress_warning) {
         log_warning(
             "SmartRedis Library",
@@ -141,8 +146,61 @@ void get_config_string(std::string& value,
         );
     }
 
+    value = result;
     message = "Exiting with value \"" + value + "\"";
     log_data("SmartRedis Library", LLDebug, message);
 }
 
-} // namespace SmartRedis {
+// Create a string representation of a tensor type
+std::string to_string(SRTensorType ttype)
+{
+    switch (ttype) {
+        case SRTensorTypeDouble:
+            return "double";
+        case SRTensorTypeFloat:
+            return "float";
+        case SRTensorTypeInt8:
+            return "8 bit signed integer";
+        case SRTensorTypeInt16:
+            return "16 bit signed integer";
+        case SRTensorTypeInt32:
+            return "32 bit signed integer";
+        case SRTensorTypeInt64:
+            return "64 bit signed integer";
+        case SRTensorTypeUint8:
+            return "8 bit unsigned integer";
+        case SRTensorTypeUint16:
+            return "16 bit unsigned integer";
+        case SRTensorTypeInvalid:
+            // Fall through
+        default:
+            return "Invalid tensor type";
+    }
+}
+
+// Create a string representation of a metadata field type
+std::string to_string(SRMetaDataType mdtype)
+{
+    switch (mdtype) {
+        case SRMetadataTypeDouble:
+            return "double";
+        case SRMetadataTypeFloat:
+            return "float";
+        case SRMetadataTypeInt32:
+            return "32 bit signed integer";
+        case SRMetadataTypeInt64:
+            return "64 bit signed integer";
+        case SRMetadataTypeUint32:
+            return "32 bit unsigned integer";
+        case SRMetadataTypeUint64:
+            return "64 bit unsigned integer";
+        case SRMetadataTypeString:
+            return "string";
+        case SRMetadataTypeInvalid:
+            // Fall through
+        default:
+            return "Invalid metadata type";
+    }
+}
+
+} // namespace SmartRedis

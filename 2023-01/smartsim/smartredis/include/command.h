@@ -53,8 +53,16 @@ class RedisServer;
 class Keyfield: public std::string
 {
     public:
-    Keyfield(std::string s) : _s(s) {};
-    std::string _s;
+        /*!
+        *   \brief Keyfield constructor
+        *   \param s The field name for this key field
+        */
+        Keyfield(std::string s) : _s(s) {};
+
+        /*!
+        *   \brief The name of this key field
+        */
+        std::string _s;
 };
 
 /*!
@@ -136,6 +144,21 @@ class Command
         */
         virtual Command& operator<<(const Keyfield& key) {
             add_field(key._s, true);
+            return *this;
+        }
+
+        /*!
+        *   \brief Add a vector of string_views to the command.
+        *   \details The string values are copied to the command.
+        *            To add a vector of keys, use the add_keys()
+        *            method.
+        *   \param fields The strings to add to the command
+        *   \returns The command object, for chaining.
+        */
+        virtual Command& operator<<(const std::vector<std::string_view>& fields) {
+            for (size_t i = 0; i < fields.size(); i++) {
+                add_field_ptr(fields[i]);
+            }
             return *this;
         }
 
@@ -286,24 +309,22 @@ class Command
         *          from a vector of strings.
         *   \details The string key field values are copied to the
         *            Command.
-        *   \param fields The key fields to add to the Command
-        *   \param is_key Boolean indicating if the all
-        *                 of the fields are Command keys
+        *   \param keyfields The key fields to add to the Command
         */
-        void add_keys(const std::vector<std::string>& fields);
+        void add_keys(const std::vector<std::string>& keyfields);
 
         /*!
         *   \brief Add key fields to the Command
         *          from a vector of type T
         *   \details The key field values are copied to the
-        *            Command.  The type T must be convertable
+        *            Command.  The type T must be convertible
         *            to a string via std::to_string.
         *   \tparam T Any type that can be converted
         *             to a string via std::to_string.
         *   \param keyfields The key fields to add to the Command
         */
         template <class T>
-        void add_keys(const std::vector<T>& fields);
+        void add_keys(const std::vector<T>& keyfields);
 
         /*!
         *   \brief Return true if the Command has keys
@@ -386,6 +407,8 @@ class Command
         *   \brief Replace a field in a command
         *   \param new_field The string to swap in
         *   \param pos The location to swap
+        *   \param is_key True IFF the field supplied in new_field
+        *                 is a key field
         */
         void set_field_at(std::string new_field,
                           size_t pos,

@@ -49,7 +49,7 @@ int put_unpack_1D_tensor(void* tensor, size_t* dims, size_t n_dims,
   void* client = NULL;
   const char* logger_name = "put_unpack_1D_tensor";
   size_t cid_len = strlen(logger_name);
-  if (SRNoError != SmartRedisCClient(use_cluster(), logger_name, cid_len, &client))
+  if (SRNoError != SimpleCreateClient(logger_name, cid_len, &client))
     return -1;
   char* prefix_str = "1D_tensor_test";
 
@@ -94,7 +94,7 @@ int put_unpack_1D_tensor_double(size_t* dims, size_t n_dims,
   double* result = (double*)malloc(dims[0]*sizeof(double));
 
   for(size_t i=0; i<dims[0]; i++)
-    tensor[i] = ((double)rand())/RAND_MAX;
+    tensor[i] = ((double)rand())/(double)RAND_MAX;
 
   int r_value = put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
                                      SRTensorTypeDouble, key_suffix, key_suffix_length);
@@ -121,7 +121,7 @@ int put_unpack_1D_tensor_float(size_t* dims, size_t n_dims,
   float* result = (float*)malloc(dims[0]*sizeof(float));
 
   for(size_t i=0; i<dims[0]; i++)
-    tensor[i] = ((float)rand())/RAND_MAX;
+    tensor[i] = ((float)rand())/(float)RAND_MAX;
 
   int r_value = put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
                                      SRTensorTypeFloat, key_suffix, key_suffix_length);
@@ -364,11 +364,6 @@ int main(int argc, char* argv[]) {
                       ui16_suffix, strlen(ui16_suffix));
 
   free(dims);
-  printf("%s","Test passed: ");
-  if(result==0)
-    printf("%s", "YES\n");
-  else
-    printf("%s", "NO\n");
-
+  printf("Test passed: %s\n", result == 0 ? "YES" : "NO");
   return result;
 }

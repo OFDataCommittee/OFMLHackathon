@@ -105,14 +105,12 @@ void check_dataset(SmartRedis::DataSet& dataset_1,
     //Check that the metadata values are correct for the metadata
     DATASET_TEST_UTILS::check_dataset_metadata(dataset_1);
     DATASET_TEST_UTILS::check_dataset_metadata(dataset_2);
-
-    return;
 }
 
 int main(int argc, char* argv[]) {
 
     // Create client for dataset and aggregation list actions
-    SmartRedis::Client client(use_cluster(), "client_test_dataset_aggregation");
+    SmartRedis::Client client("client_test_dataset_aggregation");
 
     // Set a fill function for dataset creation
     void (*fill_function)(double***, int, int, int) =

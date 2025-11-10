@@ -24,35 +24,74 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-try:
-    import xarray as xr
-except ImportError:
-    xr = None
+import functools
+import typing as t
+from itertools import permutations
+from typing import TYPE_CHECKING
 
 from .dataset import Dataset
-from .util import Dtypes, exception_handler, typecheck
-from itertools import permutations
-from .error import *
+from .error import RedisRuntimeError
+from .util import typecheck
+
+if TYPE_CHECKING:  # pragma: no cover
+    # Import optional deps for intellisense
+    import xarray as xr
+
+    # Type hint magic bits
+    from typing_extensions import ParamSpec
+
+    _PR = ParamSpec("_PR")
+    _RT = t.TypeVar("_RT")
+else:
+    # Leave optional deps as nullish
+    xr = None  # pylint: disable=invalid-name
+
+# ----helper decorators -----
+
+
+def _requires_xarray(fn: "t.Callable[_PR, _RT]") -> "t.Callable[_PR, _RT]":
+    @functools.wraps(fn)
+    def _import_xarray(*args: "_PR.args", **kwargs: "_PR.kwargs") -> "_RT":
+        global xr  # pylint: disable=global-statement,invalid-name
+        try:
+            import xarray as xr  # pylint: disable=import-outside-toplevel
+        except ImportError as e:
+            raise RedisRuntimeError(
+                "Optional package xarray must be installed; "
+                "Consider running `pip install smartredis[xarray]`"
+            ) from e
+        return fn(*args, **kwargs)
+
+    return _import_xarray
+
 
 # ----helper function -----
-def get_data(dataset, name, type):
-    return dataset.get_meta_strings(f"_xarray_{name}_{type}_names")[0].split(",")
 
 
-def typecheck_stringlist(names, strings_name, string_name):
+def get_data(dataset: Dataset, name: str, dtype: str) -> t.List[str]:
+    return dataset.get_meta_strings(f"_xarray_{name}_{dtype}_names")[0].split(",")
+
+
+def typecheck_stringlist(
+    names: t.List[str], strings_name: str, string_name: str
+) -> None:
     typecheck(names, strings_name, list)
     for name in names:
         typecheck(name, string_name, str)
         # Check if empty
         if string_name == "":
-            raise RedisRuntimeError
+            raise RedisRuntimeError("Empty string")
 
 
 class DatasetConverter:
     @staticmethod
     def add_metadata_for_xarray(
-        dataset, data_names, dim_names, coord_names=None, attr_names=None
-    ):
+        dataset: Dataset,
+        data_names: t.Union[t.List[str], str],
+        dim_names: t.Union[t.List[str], str],
+        coord_names: t.Optional[t.Union[t.List[str], str]] = None,
+        attr_names: t.Optional[t.Union[t.List[str], str]] = None,
+    ) -> None:
         """Extract metadata from a SmartRedis dataset and add it to
         dataformat specific fieldnames
 
@@ -68,13 +107,13 @@ class DatasetConverter:
         :type attr_names: list[str], optional
         """
 
-        if type(data_names) == str:
+        if isinstance(data_names, str):
             data_names = [data_names]
-        if type(dim_names) == str:
+        if isinstance(dim_names, str):
             dim_names = [dim_names]
-        if type(coord_names) == str:
+        if isinstance(coord_names, str):
             coord_names = [coord_names]
-        if type(attr_names) == str:
+        if isinstance(attr_names, str):
             attr_names = [attr_names]
 
         typecheck(dataset, "dataset", Dataset)
@@ -90,7 +129,7 @@ class DatasetConverter:
 
         for name in data_names:
             dataset.add_meta_string("_xarray_data_names", name)
-            for (arg, sarg) in zip(args, sargs):
+            for arg, sarg in zip(args, sargs):
                 if isinstance(arg, list):
                     values = []
                     for val in arg:
@@ -104,7 +143,8 @@ class DatasetConverter:
                         dataset.add_meta_string(f"_xarray_{name}_{sarg}", "null")
 
     @staticmethod
-    def transform_to_xarray(dataset):
+    @_requires_xarray
+    def transform_to_xarray(dataset: Dataset) -> t.Dict:
         """Transform a SmartRedis Dataset, with the appropriate metadata,
         to an Xarray Dataarray
 
@@ -116,10 +156,6 @@ class DatasetConverter:
         fieldnames and appropriately formatted metadata.
         rtype: dict
         """
-
-        if (not xr):
-            raise RedisRuntimeError("Optional package xarray must be installed")
-
         typecheck(dataset, "dataset", Dataset)
 
         coord_dict = {}
@@ -159,26 +195,30 @@ class DatasetConverter:
 
         ret_xarray = {}
         for variable_name in variable_names:
-            data_final = dataset.get_tensor(variable_name)
-            dims_final = []
             # Extract dimensions in correct form
-            for dim_field_name in get_data(dataset, variable_name, "dim"):
-                dims_final.append(dataset.get_meta_strings(dim_field_name)[0])
-            attrs_final = {}
+            dims_final = [
+                dataset.get_meta_strings(dim_field_name)[0]
+                for dim_field_name
+                in get_data(dataset, variable_name, "dim")
+            ]
+
             # Extract attributes in correct form
-            for attr_field_name in get_data(dataset, variable_name, "attr"):
-                fieldname = dataset.get_meta_strings(attr_field_name)[0]
-                attrs_final[attr_field_name] = fieldname
+            attrs_final = {
+                attr_field_name: dataset.get_meta_strings(attr_field_name)[0]
+                for attr_field_name
+                in get_data(dataset, variable_name, "attr")
+            }
+
             # Add coordinates to the correct data name
-            for name in coord_final.keys():
+            for name, value in coord_final.items():
                 if name == variable_name:
-                    coords_final = coord_final.get(name)
+                    coords_final = value
 
             # Construct a xr.DataArray using extracted dataset data,
             # append the dataarray to corresponding variable names
             ret_xarray[variable_name] = xr.DataArray(
                 name=variable_name,
-                data=data_final,
+                data=dataset.get_tensor(variable_name),
                 coords=coords_final,
                 dims=dims_final,
                 attrs=attrs_final,

@@ -29,45 +29,30 @@ import os
 import numpy as np
 import pytest
 from smartredis import Client
+from smartredis import ConfigOptions
 from smartredis.error import *
 
 
-def test_dbnode_info_command(use_cluster, context):
-    # get env var to set through client init
+def test_dbnode_info_command(context):
     ssdb = os.environ["SSDB"]
-    db_info_addr = [ssdb]
-    del os.environ["SSDB"]
-
-    client = Client(address=ssdb, cluster=use_cluster, logger_name=context)
-
-    info = client.get_db_node_info(db_info_addr)
-
+    addresses = ssdb.split(',')
+    client = Client(None, logger_name=context)
+    info = client.get_db_node_info(addresses)
     assert len(info) > 0
 
-
-def test_dbcluster_info_command(mock_model, use_cluster, context):
-    # get env var to set through client init
+def test_dbcluster_info_command(mock_model, context):
     ssdb = os.environ["SSDB"]
-    address = [ssdb]
-    del os.environ["SSDB"]
+    addresses = ssdb.split(',')
+    co = ConfigOptions().create_from_environment("")
+    client = Client(co, logger_name=context)
 
-    client = Client(address=ssdb, cluster=use_cluster, logger_name=context)
-
-    if use_cluster:
-        info = client.get_db_cluster_info(address)
+    if os.environ["SR_DB_TYPE"] == "Clustered":
+        info = client.get_db_cluster_info(addresses)
         assert len(info) > 0
     else:
         # cannot call get_db_cluster_info in non-cluster environment
         with pytest.raises(RedisReplyError):
-            client.get_db_cluster_info(address)
-
-    # get env var to set through client init
-    ssdb = os.environ["SSDB"]
-    address = [ssdb]
-    del os.environ["SSDB"]
-
-    # Init client
-    client = Client(address=ssdb, cluster=use_cluster, logger_name=context)
+            client.get_db_cluster_info(addresses)
 
     # Get a mock model
     model = mock_model.create_torch_cnn()
@@ -76,7 +61,7 @@ def test_dbcluster_info_command(mock_model, use_cluster, context):
     client.set_model("ai_info_cnn", model, "TORCH", "CPU")
 
     # Check with valid address and model key
-    ai_info = client.get_ai_info(address, "ai_info_cnn")
+    ai_info = client.get_ai_info(addresses, "ai_info_cnn")
     assert len(ai_info) != 0
 
     # Check that invalid address throws error
@@ -85,83 +70,63 @@ def test_dbcluster_info_command(mock_model, use_cluster, context):
 
     # Check that invalid model name throws error
     with pytest.raises(RedisRuntimeError):
-        client.get_ai_info(address, "bad_key")
+        client.get_ai_info(addresses, "bad_key")
 
-def test_flushdb_command(use_cluster, context):
+def test_flushdb_command(context):
     # from within the testing framework, there is no way
     # of knowing each db node that is being used, so skip
     # if on cluster
-    if use_cluster:
-        return
-    # get env var to set through client init
     ssdb = os.environ["SSDB"]
-    address = [ssdb]
-    del os.environ["SSDB"]
+    addresses = ssdb.split(',')
+    if os.environ["SR_DB_TYPE"] == "Clustered":
+        return
 
-    client = Client(address=ssdb, cluster=use_cluster, logger_name=context)
+    client = Client(None, logger_name=context)
 
     # add key to client via put_tensor
     tensor = np.array([1, 2])
     client.put_tensor("test_copy", tensor)
 
     assert client.tensor_exists("test_copy")
-    client.flush_db(address)
+    client.flush_db(addresses)
     assert not client.tensor_exists("test_copy")
 
 
-def test_config_set_get_command(use_cluster, context):
+def test_config_set_get_command(context):
     # get env var to set through client init
     ssdb = os.environ["SSDB"]
-
-    del os.environ["SSDB"]
-
-    client = Client(address=ssdb, cluster=use_cluster, logger_name=context)
+    client = Client(None, logger_name=context)
 
     value = "6000"
     client.config_set("lua-time-limit", value, ssdb)
-
     get_reply = client.config_get("lua-time-limit", ssdb)
     assert len(get_reply) > 0
     assert get_reply["lua-time-limit"] == value
 
 
-def test_config_set_command_DNE(use_cluster, context):
-    # get env var to set through client init
+def test_config_set_command_DNE(context):
     ssdb = os.environ["SSDB"]
-
-    del os.environ["SSDB"]
-
-    client = Client(address=ssdb, cluster=use_cluster, logger_name=context)
+    client = Client(None, logger_name=context)
 
     # The CONFIG parameter "config_param_DNE" is unsupported
     with pytest.raises(RedisReplyError):
         client.config_set("config_param_DNE", "10", ssdb)
 
 
-def test_config_get_command_DNE(use_cluster, context):
-    # get env var to set through client init
+def test_config_get_command_DNE(context):
     ssdb = os.environ["SSDB"]
-
-    del os.environ["SSDB"]
-
-    client = Client(address=ssdb, cluster=use_cluster, logger_name=context)
+    client = Client(None, logger_name=context)
 
     # CONFIG GET returns an empty dictionary if the config_param is unsupported
     get_reply = client.config_get("config_param_DNE", ssdb)
     assert get_reply == dict()
 
 
-def test_save_command(use_cluster, mock_data, context):
-    # get env var to set through client init
+def test_save_command(context):
     ssdb = os.environ["SSDB"]
-    if use_cluster:
-        addresses = ssdb.split(",")
-    else:
-        addresses = [ssdb]
-    del os.environ["SSDB"]
+    client = Client(None, logger_name=context)
 
-    # client init should fail if SSDB not set
-    client = Client(address=ssdb, cluster=use_cluster, logger_name=context)
+    addresses = ssdb.split(",")
 
     # for each address, check that the timestamp of the last SAVE increases after calling Client::save
     for address in addresses:

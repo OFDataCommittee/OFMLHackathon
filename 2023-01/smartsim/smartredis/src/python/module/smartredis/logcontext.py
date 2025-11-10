@@ -28,10 +28,9 @@ from .smartredisPy import PyLogContext
 from .srobject import SRObject
 from .util import exception_handler, typecheck
 
-from .error import *
 
 class LogContext(SRObject):
-    def __init__(self, context):
+    def __init__(self, context: str) -> None:
         """Initialize a LogContext object
 
         :param context: logging context
@@ -42,13 +41,12 @@ class LogContext(SRObject):
         self._name = context
 
     @property
-    def _logcontext(self):
-        """Alias _srobject to _logcontext
-        """
+    def _logcontext(self) -> PyLogContext:
+        """Alias _srobject to _logcontext"""
         return self._srobject
 
     @staticmethod
-    def from_pybind(logcontext):
+    def from_pybind(logcontext: PyLogContext) -> "LogContext":
         """Initialize a LogContext object from
         a PyLogContext object
 
@@ -60,12 +58,14 @@ class LogContext(SRObject):
         :rtype: LogContext
         """
         typecheck(logcontext, "logcontext", PyLogContext)
-        new_logcontext = LogContext(logcontext._name)
+        new_logcontext = LogContext(
+            logcontext._name  # pylint: disable=protected-access
+        )
         new_logcontext.set_context(logcontext)
         return new_logcontext
 
     @exception_handler
-    def get_context(self):
+    def get_context(self) -> PyLogContext:
         """Return the PyLogContext attribute
 
         :return: The PyLogContext attribute containing
@@ -75,7 +75,7 @@ class LogContext(SRObject):
         return self._logcontext
 
     @exception_handler
-    def set_context(self, logcontext):
+    def set_context(self, logcontext: PyLogContext) -> None:
         """Set the PyLogContext attribute
 
         :param logcontext: The PyLogContext object

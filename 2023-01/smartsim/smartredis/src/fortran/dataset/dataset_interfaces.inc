@@ -34,3 +34,11 @@ interface
     type(c_ptr)                   :: dataset !< Receives the constructed dataset
   end function dataset_constructor
 end interface
+
+interface
+  function dataset_to_string_c(client) bind(c, name="dataset_to_string")
+    use iso_c_binding, only : c_ptr, c_char
+    type(c_ptr)                   :: dataset_to_string_c
+    type(c_ptr), value            :: client
+  end function dataset_to_string_c
+end interface

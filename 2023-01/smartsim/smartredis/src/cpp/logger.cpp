@@ -59,7 +59,7 @@ void Logger::configure_logging()
     _initialized = true;
 
     // Get the logfile
-    get_config_string(_logfile, "SR_LOG_FILE", "", true);
+    get_config_string(_logfile, "SR_LOG_FILE", "", flag_suppress_warning);
     std::string requestedLogfile(_logfile);
     bool missingLogFile = _logfile.length() == 0;
 
@@ -77,7 +77,7 @@ void Logger::configure_logging()
 
     // Get the logging level
     std::string level;
-    get_config_string(level, "SR_LOG_LEVEL", "", true);
+    get_config_string(level, "SR_LOG_LEVEL", "", flag_suppress_warning);
     bool missingLogLevel = level.length() == 0;
     bool badLogLevel = false;
     if (level.length() > 0) {

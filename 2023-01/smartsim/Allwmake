@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+
+wmake smartsim_function_object/smartSimFunctionObject

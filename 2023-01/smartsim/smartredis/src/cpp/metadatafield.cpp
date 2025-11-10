@@ -38,13 +38,13 @@ MetadataField::MetadataField(const std::string& name, SRMetaDataType type)
 }
 
 // Retrieve the MetadataField name
-std::string MetadataField::name()
+std::string MetadataField::name() const
 {
     return _name;
 }
 
 // Retrieve the MetadataField name
-SRMetaDataType MetadataField::type()
+SRMetaDataType MetadataField::type() const
 {
     return _type;
 }

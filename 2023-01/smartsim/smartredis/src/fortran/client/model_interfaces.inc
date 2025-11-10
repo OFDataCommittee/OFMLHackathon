@@ -40,8 +40,9 @@ end interface
 
 interface
   function set_model_from_file_c( c_client, key, key_length, model_file, model_file_length,      &
-      backend, backend_length, device, device_length, batch_size, min_batch_size, tag, tag_length, &
-      inputs, input_lengths, n_inputs, outputs, output_lengths, n_outputs ) bind(c, name="set_model_from_file")
+      backend, backend_length, device, device_length, batch_size, min_batch_size, min_batch_timeout, &
+      tag, tag_length, inputs, input_lengths, n_inputs, outputs, output_lengths, n_outputs ) &
+      bind(c, name="set_model_from_file")
     use iso_c_binding, only : c_ptr, c_size_t, c_int, c_char
     import :: enum_kind
     integer(kind=enum_kind)                   :: set_model_from_file_c
@@ -59,6 +60,7 @@ interface
                                                                    !! null terminating character
     integer(kind=c_int),    value, intent(in) :: batch_size        !< The batch size for model execution
     integer(kind=c_int),    value, intent(in) :: min_batch_size    !< The minimum batch size for model execution
+    integer(kind=c_int),    value, intent(in) :: min_batch_timeout !< Max time (ms) to wait for min batch size
     character(kind=c_char),        intent(in) :: tag(*)            !< A tag to attach to the model for information
                                                                    !! purposes
     integer(kind=c_size_t), value, intent(in) :: tag_length        !< The length of the tag c-string, excluding null
@@ -77,8 +79,9 @@ end interface
 
 interface
   function set_model_from_file_multigpu_c( c_client, key, key_length, model_file, model_file_length,      &
-      backend, backend_length, first_gpu, num_gpus, batch_size, min_batch_size, tag, tag_length, &
-      inputs, input_lengths, n_inputs, outputs, output_lengths, n_outputs ) bind(c, name="set_model_from_file_multigpu")
+      backend, backend_length, first_gpu, num_gpus, batch_size, min_batch_size, min_batch_timeout, &
+      tag, tag_length, inputs, input_lengths, n_inputs, outputs, output_lengths, n_outputs) &
+      bind(c, name="set_model_from_file_multigpu")
     use iso_c_binding, only : c_ptr, c_size_t, c_int, c_char
     import :: enum_kind
     integer(kind=enum_kind)                   :: set_model_from_file_multigpu_c
@@ -96,6 +99,7 @@ interface
                                                                    !! null terminating character
     integer(kind=c_int),    value, intent(in) :: batch_size        !< The batch size for model execution
     integer(kind=c_int),    value, intent(in) :: min_batch_size    !< The minimum batch size for model execution
+    integer(kind=c_int),    value, intent(in) :: min_batch_timeout !< Max time (ms) to wait for min batch size
     character(kind=c_char),        intent(in) :: tag(*)            !< A tag to attach to the model for information
                                                                    !! purposes
     integer(kind=c_size_t), value, intent(in) :: tag_length        !< The length of the tag c-string, excluding null
@@ -114,8 +118,9 @@ end interface
 
 interface
   function set_model_c( c_client, key, key_length, model, model_length,      &
-      backend, backend_length, device, device_length, batch_size, min_batch_size, tag, tag_length, &
-      inputs, input_lengths, n_inputs, outputs, output_lengths, n_outputs ) bind(c, name="set_model")
+      backend, backend_length, device, device_length, batch_size, min_batch_size, min_batch_timeout, &
+      tag, tag_length, inputs, input_lengths, n_inputs, outputs, output_lengths, n_outputs) &
+      bind(c, name="set_model")
     use iso_c_binding, only : c_ptr, c_size_t, c_int, c_char
     import :: enum_kind
     integer(kind=enum_kind)                   :: set_model_c
@@ -133,6 +138,7 @@ interface
                                                                    !! null terminating character
     integer(kind=c_int),    value, intent(in) :: batch_size        !< The batch size for model execution
     integer(kind=c_int),    value, intent(in) :: min_batch_size    !< The minimum batch size for model execution
+    integer(kind=c_int),    value, intent(in) :: min_batch_timeout !< Max time (ms) to wait for min batch size
     character(kind=c_char),        intent(in) :: tag(*)            !< A tag to attach to the model for information
                                                                    !! purposes
     integer(kind=c_size_t), value, intent(in) :: tag_length        !< The length of the tag c-string, excluding null
@@ -151,8 +157,9 @@ end interface
 
 interface
   function set_model_multigpu_c( c_client, key, key_length, model, model_length,      &
-      backend, backend_length, first_gpu, num_gpus, batch_size, min_batch_size, tag, tag_length, &
-      inputs, input_lengths, n_inputs, outputs, output_lengths, n_outputs ) bind(c, name="set_model_multigpu")
+      backend, backend_length, first_gpu, num_gpus, batch_size, min_batch_size, min_batch_timeout, &
+      tag, tag_length, inputs, input_lengths, n_inputs, outputs, output_lengths, n_outputs) &
+      bind(c, name="set_model_multigpu")
     use iso_c_binding, only : c_ptr, c_size_t, c_int, c_char
     import :: enum_kind
     integer(kind=enum_kind)                   :: set_model_multigpu_c
@@ -170,6 +177,7 @@ interface
                                                                    !! null terminating character
     integer(kind=c_int),    value, intent(in) :: batch_size        !< The batch size for model execution
     integer(kind=c_int),    value, intent(in) :: min_batch_size    !< The minimum batch size for model execution
+    integer(kind=c_int),    value, intent(in) :: min_batch_timeout !< Max time (ms) to wait for min batch size
     character(kind=c_char),        intent(in) :: tag(*)            !< A tag to attach to the model for information
                                                                    !! purposes
     integer(kind=c_size_t), value, intent(in) :: tag_length        !< The length of the tag c-string, excluding null
