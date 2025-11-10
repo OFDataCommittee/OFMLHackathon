@@ -25,5 +25,5 @@ then
     unzip libtorch-cxx11-abi-shared-with-deps-1.7.1+cpu.zip
 fi
 
-wmake $WITH_BEAR all applications
+wmake $WITH_BEAR all application
 

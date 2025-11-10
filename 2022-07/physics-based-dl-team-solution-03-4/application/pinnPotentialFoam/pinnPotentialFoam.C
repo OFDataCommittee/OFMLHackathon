@@ -51,6 +51,7 @@ Description
 // libtorch-OpenFOAM data transfer
 #include "torchFunctions.C"
 #include "fileNameGenerator.H"
+#include "torchDifferentialOperators.C"
 
 using namespace Foam;
 using namespace torch::indexing;
@@ -179,10 +180,12 @@ int main(int argc, char *argv[])
         mesh.nCells(),
         torch::TensorOptions().dtype(at::kLong)
     );
+
+ 
     // - Randomly select 10 % of all cell centers for training.
     long int n_cells = int(0.1 * mesh.nCells());
     torch::Tensor training_indices = shuffled_indices.index({Slice(0, n_cells)});
-
+    
     // - Use 10% of random indices to select the training_data from Phi_tensor
     torch::Tensor O_training = O_tensor.index(training_indices);
     O_training.requires_grad_(true);
@@ -196,7 +199,6 @@ int main(int argc, char *argv[])
     torch::Tensor O_predict = torch::zeros_like(O_training);
     O_predict.requires_grad_(true);
     torch::Tensor mse = torch::zeros_like(O_training);
-
 
 
     size_t epoch = 1;
@@ -237,73 +239,75 @@ int main(int argc, char *argv[])
         );
         */
         
-        //grad(Ux) = gradient of scalar component Ux w.r.t (x,y,z)
-        auto Ux_predict_grad = torch::autograd::grad(
-           {O_predict.index({Slice(),0})},//N_{train} x 1
-           {cc_training}, // N_{train} x 3
-           {torch::ones_like(O_training.index({Slice(),0}))}, // N_{train} x 1
-           true,
-           true
-        );
+        // grad(Ux) = gradient of scalar component Ux w.r.t (x,y,z)
+        // auto Ux_predict_grad = torch::autograd::grad(
+        //    {O_predict.index({Slice(),0})},//N_{train} x 1
+        //    {cc_training}, // N_{train} x 3
+        //    {torch::ones_like(O_training.index({Slice(),0}))}, // N_{train} x 1
+        //    true,
+        //    true
+        // );
         
-        //grad(Uy) = gradient of scalar component Uy w.r.t (x,y,z)
-        auto Uy_predict_grad = torch::autograd::grad(
-           {O_predict.index({Slice(),1})},//N_{train} x 1
-           {cc_training}, // N_{train} x 3
-           {torch::ones_like(O_training.index({Slice(),1}))}, // N_{train} x 1
-           true,
-           true
-        );
+        // //grad(Uy) = gradient of scalar component Uy w.r.t (x,y,z)
+        // auto Uy_predict_grad = torch::autograd::grad(
+        //    {O_predict.index({Slice(),1})},//N_{train} x 1
+        //    {cc_training}, // N_{train} x 3
+        //    {torch::ones_like(O_training.index({Slice(),1}))}, // N_{train} x 1
+        //    true,
+        //    true
+        // );
                 
-        //grad(Uz) = gradient of scalar component Uz w.r.t (x,y,z)
-        auto Uz_predict_grad = torch::autograd::grad(
-           {O_predict.index({Slice(),2})},//N_{train} x 1
-           {cc_training}, // N_{train} x 3
-           {torch::ones_like(O_training.index({Slice(),2}))}, // N_{train} x 1
-           true,
-           true
-        );
+        // //grad(Uz) = gradient of scalar component Uz w.r.t (x,y,z)
+        // auto Uz_predict_grad = torch::autograd::grad(
+        //    {O_predict.index({Slice(),2})},//N_{train} x 1
+        //    {cc_training}, // N_{train} x 3
+        //    {torch::ones_like(O_training.index({Slice(),2}))}, // N_{train} x 1
+        //    true,
+        //    true
+        // );
         
-        auto divU = Ux_predict_grad[0].index({Slice(), 0}) + Uy_predict_grad[0].index({Slice(), 1}) + Uz_predict_grad[0].index({Slice(), 2});
+        const auto divU = Foam::AI::div(O_predict.index({Slice(),0}), O_predict.index({Slice(),1}), O_predict.index({Slice(),2}), cc_training);
+        // auto divU = Ux_predict_grad[0].index({Slice(), 0}) + Uy_predict_grad[0].index({Slice(), 1}) + Uz_predict_grad[0].index({Slice(), 2});
         
         
         // grad(Phi) = gradient of the scalar potenial Phi w.r. (x,y,z)
-        auto Phi_predict_grad = torch::autograd::grad(
-           {O_predict.index({Slice(),3})},//N_{train} x 1
-           {cc_training}, // N_{train} x 3
-           {torch::ones_like(O_training.index({Slice(),3}))}, // N_{train} x 1
-           true,
-           true
-        );
+        // auto Phi_predict_grad = torch::autograd::grad(
+        //    {O_predict.index({Slice(),3})},//N_{train} x 1
+        //    {cc_training}, // N_{train} x 3
+        //    {torch::ones_like(O_training.index({Slice(),3}))}, // N_{train} x 1
+        //    true,
+        //    true
+        // );
         
         
-        auto Phi_predict_grad_x_grad = torch::autograd::grad(
-           {Phi_predict_grad[0].index({Slice(),0})},//N_{train} x 1
-           {cc_training}, // N_{train} x 3
-           {torch::ones_like(Phi_predict_grad[0].index({Slice(),0}))}, // N_{train} x 1
-           true,
-           true
-        );
+        // auto Phi_predict_grad_x_grad = torch::autograd::grad(
+        //    {Phi_predict_grad[0].index({Slice(),0})},//N_{train} x 1
+        //    {cc_training}, // N_{train} x 3
+        //    {torch::ones_like(Phi_predict_grad[0].index({Slice(),0}))}, // N_{train} x 1
+        //    true,
+        //    true
+        // );
         
         
-         auto Phi_predict_grad_y_grad = torch::autograd::grad(
-           {Phi_predict_grad[0].index({Slice(),1})},//N_{train} x 1
-           {cc_training}, // N_{train} x 3
-           {torch::ones_like(Phi_predict_grad[0].index({Slice(),1}))}, // N_{train} x 1
-           true,
-           true
-        );
+        //  auto Phi_predict_grad_y_grad = torch::autograd::grad(
+        //    {Phi_predict_grad[0].index({Slice(),1})},//N_{train} x 1
+        //    {cc_training}, // N_{train} x 3
+        //    {torch::ones_like(Phi_predict_grad[0].index({Slice(),1}))}, // N_{train} x 1
+        //    true,
+        //    true
+        // );
         
-         auto Phi_predict_grad_z_grad = torch::autograd::grad(
-           {Phi_predict_grad[0].index({Slice(),2})},//N_{train} x 1
-           {cc_training}, // N_{train} x 3
-           {torch::ones_like(Phi_predict_grad[0].index({Slice(),2}))}, // N_{train} x 1
-           true,
-           true
-        );
+        //  auto Phi_predict_grad_z_grad = torch::autograd::grad(
+        //    {Phi_predict_grad[0].index({Slice(),2})},//N_{train} x 1
+        //    {cc_training}, // N_{train} x 3
+        //    {torch::ones_like(Phi_predict_grad[0].index({Slice(),2}))}, // N_{train} x 1
+        //    true,
+        //    true
+        // );
         
-        
-        auto laplacePhi = Phi_predict_grad_x_grad[0].index({Slice(), 0}) + Phi_predict_grad_y_grad[0].index({Slice(), 1}) + Phi_predict_grad_z_grad[0].index({Slice(), 2});
+        const auto laplacePhi = Foam::AI::laplacian(O_predict.index({Slice(),3}), cc_training);
+
+        // auto laplacePhi = Phi_predict_grad_x_grad[0].index({Slice(), 0}) + Phi_predict_grad_y_grad[0].index({Slice(), 1}) + Phi_predict_grad_z_grad[0].index({Slice(), 2});
         // Compute the data mse loss.
         
         // O = [ux, uy, uz, Phi], O_pred = [Ux_nn, Uy_nn, Uz_nn, Phi_nn], Mse_data = Sum(Ux - Ux_nn)^2 / N_mesh + Sum(Uy - Uy_nn)^2 / N_mesh + Sum(Uz - Uz_nn)^2 / N_mesh + Sum(Phi - Phi_nn)^2 / N_mesh
@@ -333,7 +337,7 @@ int main(int argc, char *argv[])
             << "U MSE = " << mse_grad.item<double>() << "\n"
             << "Training MSE = " << mse.item<double>() << "\n";
 
-        std::cout << at::size(Ux_predict_grad[0],0) << at::size(Uy_predict_grad[0],0) << at::size(Uz_predict_grad[0],0) << at::size(Phi_predict_grad[0],0) << "\n";
+        // std::cout << at::size(Ux_predict_grad[0],0) << at::size(Uy_predict_grad[0],0) << at::size(Uz_predict_grad[0],0) << at::size(Phi_predict_grad[0],0) << "\n";
         // Write the hiddenLayers_ network structure as a string-formatted python list.
         
         std::cout << at::size(divU,0) << "\n";
